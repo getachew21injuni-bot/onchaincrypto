@@ -33,7 +33,7 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
     <button data-page="profile">Profile / KYC</button>
     <button data-page="register" id="signin-nav">Sign in</button>
     <button data-page="register" class="register-nav">Register</button>
-    <button data-page="register" id="admin-login-link" class="secondary" title="Admin access requires the authorized administrator account">Admin login</button>
+    <button data-page="register" id="admin-login-link" class="secondary" title="Sign in with the administrator account">Admin login</button>
     <button data-page="support">Support</button>
   </nav>
   <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="secondary" id="refreshBtn">↻</button></div>
@@ -428,6 +428,7 @@ $("strategyAmount").addEventListener("input",calculateStrategy);$("strategyDurat
 // Firebase authentication handlers are initialized in the Firebase module below.
 document.querySelectorAll("#nav button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
 document.getElementById("signin-nav").addEventListener("click",()=>{showPage("register");document.getElementById("signInEmail").focus();});
+document.getElementById("admin-login-link").addEventListener("click",()=>{showPage("register");document.getElementById("signInEmail").focus();document.getElementById("registerMessage").textContent="Sign in with your authorized administrator account. Admin controls remain disabled until secure backend authorization is deployed.";});
 const supportSendButton = $("sendSupportEmail");
 if (supportSendButton) supportSendButton.addEventListener("click", () => {
   const topic = $("supportTopic").value;
