@@ -7,7 +7,7 @@
 <title>OnChainCrypto | Markets & Demo Trading</title>
 <style>
 :root{--bg:#0b0e11;--panel:#15191e;--panel2:#1e2329;--line:#2b3139;--text:#eaecef;--muted:#848e9c;--yellow:#f0b90b;--green:#0ecb81;--red:#f6465d;--blue:#4c8dff}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:7px;padding:10px 14px;font-weight:650}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--yellow);color:#111}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.buy{background:var(--green);color:#07140e}.sell{background:var(--red);color:white}.muted{color:var(--muted)}.green{color:var(--green)!important}.red{color:var(--red)!important}.yellow{color:var(--yellow)}.tiny{font-size:12px}.hidden{display:none!important}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:7px;padding:10px 14px;font-weight:650}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--yellow);color:#111}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.buy{background:var(--green);color:#07140e}.sell{background:var(--red);color:white}.muted{color:var(--muted)}.green{color:var(--green)!important}.red{color:var(--red)!important}.yellow{color:var(--yellow)}.tiny{font-size:12px}.hidden{display:none!important}#page-admin{display:none!important}.admin-nav{display:none!important}
 header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:25px;padding:0 24px;position:sticky;top:0;background:#0b0e11f2;backdrop-filter:blur(12px);z-index:5}.brand{font-size:19px;font-weight:800;white-space:nowrap}.brand b{color:var(--yellow)}nav{display:flex;gap:18px;align-items:center;flex:1}nav button{background:transparent;color:var(--muted);padding:8px 3px}nav button.active,nav button:hover{color:var(--yellow)}.header-right{display:flex;align-items:center;gap:9px}.status-dot{display:inline-block;width:7px;height:7px;background:var(--green);border-radius:50%;margin-right:6px}
 main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border:1px solid #5b4a12;color:#f5d879;border-radius:8px;padding:12px 14px;margin-bottom:22px}.page-title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}.page-title h1{font-size:25px;margin:0}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px}.card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px}.card{padding:17px}.card .label{color:var(--muted);font-size:13px}.card .big{font-size:23px;font-weight:750;margin:7px 0}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 18px 0}.section-head h2,.panel h2{font-size:17px;margin:0}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button{background:transparent;color:var(--muted);padding:7px 10px}.tabs button.active{color:var(--yellow);background:#2b2614}.panel{overflow:hidden;margin-bottom:20px}.search{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:10px 12px;color:var(--text);min-width:210px;outline:none}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:680px}th,td{text-align:right;padding:13px 18px;border-bottom:1px solid #242a31;white-space:nowrap}th{font-size:12px;color:var(--muted);font-weight:500}th:first-child,td:first-child{text-align:left}.asset{display:flex;align-items:center;gap:10px;text-align:left}.coin-icon{width:29px;height:29px;border-radius:50%;background:#262b33;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;overflow:hidden}.coin-icon img{width:100%;height:100%;object-fit:cover}.asset-name{font-weight:650}.asset-symbol{color:var(--muted);font-size:12px;margin-left:5px}.pair{font-weight:700}.row-click{cursor:pointer}.row-click:hover{background:#1d232a}.star{color:#59616d;font-size:18px;background:transparent;padding:0 5px}.star.on{color:var(--yellow)}.content-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,1fr);gap:20px}.market-pills{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px}.mini-card{background:var(--panel2);padding:14px;border-radius:9px;min-width:0}.mini-card h3{font-size:13px;margin:0 0 12px}.mini-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #30363d}.mini-row:last-child{border:0}.mini-left{display:flex;align-items:center;gap:8px;min-width:0}.mini-left img{width:22px;height:22px;border-radius:50%}.mini-left span{overflow:hidden;text-overflow:ellipsis}.mini-price{text-align:right}.trade-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:18px}.chart-area{padding:20px;min-height:290px}.chart-placeholder{height:190px;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(to bottom,transparent 0,transparent 46px,#252b32 47px),repeating-linear-gradient(to right,transparent 0,transparent 70px,#252b32 71px);border-bottom:1px solid var(--line);color:var(--muted);margin-top:15px}.form-panel{padding:18px}.form-panel label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}.field{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);padding:11px;border-radius:7px;outline:none}.field:focus,.search:focus{border-color:var(--yellow)}.two-buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.two-buttons button{width:100%}.full{width:100%;margin-top:12px}.list-row{display:flex;justify-content:space-between;gap:15px;padding:13px 0;border-bottom:1px solid var(--line)}.list-row:last-child{border:0}.empty{padding:26px;text-align:center;color:var(--muted)}.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.profile-item{padding:15px;background:var(--panel2);border-radius:8px}.profile-item strong{display:block;margin-bottom:4px}.tag{font-size:11px;padding:4px 7px;border-radius:5px;background:#332d17;color:#f5d879}.tag.green-tag{background:#12352a;color:var(--green)}footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid var(--line);font-size:12px}
 @media(max-width:900px){header{padding:0 14px;gap:12px}nav{gap:8px}nav button{font-size:12px}.cards{grid-template-columns:repeat(2,1fr)}.content-grid,.trade-layout{grid-template-columns:1fr}.market-pills{grid-template-columns:1fr}.header-right .optional{display:none}}
@@ -31,7 +31,6 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
     <button data-page="profile">Profile / KYC</button>
     <button data-page="register" class="register-nav">Register</button>
     <button data-page="support">Support</button>
-    <button data-page="admin" class="admin-nav">Admin Dashboard</button>
   </nav>
   <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Connecting</span></span><button class="secondary" id="refreshBtn">↻</button></div>
 </header>
@@ -113,16 +112,16 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
     <div class="content-grid"><section class="panel form-panel"><h2>Profile settings</h2><label for="displayName">Display name (local only)</label><input id="displayName" class="field" maxlength="50" placeholder="Your display name"><label for="displayCurrency">Display currency</label><select id="displayCurrency" class="field"><option value="USD">USD — US Dollar</option></select><button class="primary full" id="saveProfile">Save local settings</button><p id="profileMessage" class="muted tiny"></p></section><section class="panel form-panel"><h2>Identity verification (KYC)</h2><div class="list-row"><span class="muted">Verification status</span><span class="tag">Not connected</span></div><p>KYC must be handled by a qualified identity-verification provider through a secure backend. This demo does not request, upload or store identity documents.</p><button class="secondary full" disabled>KYC provider not configured</button><p class="muted tiny">Do not upload passports, ID cards, selfies or proof-of-address documents to this public website.</p></section></div>
   </section>
   <section id="page-register" class="hidden">
-    <div class="page-title"><div><h1>Create your OnChainCrypto account</h1><div class="muted">Registration is shown separately from the administrator dashboard.</div></div><span class="tag">FRONTEND PREVIEW</span></div>
+    <div class="page-title"><div><h1>Create your OnChainCrypto account</h1><div class="muted">Create your account with your full name and either an email address or a phone number.</div></div><span class="tag">FRONTEND PREVIEW</span></div>
     <div class="content-grid">
       <section class="panel form-panel">
         <h2>User registration</h2>
-        <p class="muted tiny">Create an account with Firebase Authentication. Email/password and Google sign-in are available; phone verification sends an SMS and may incur provider charges. This account does not enable real-money trading or secure online balances.</p>
+        <p class="muted tiny">Required: your full name and one contact method. Choose email/Gmail with a password, or verify your phone by SMS. SMS charges or limits may apply. This account does not enable real-money trading or secure online balances.</p>
         <div id="authStatus" class="notice">Checking sign-in status…</div>
         <form id="registerForm">
-          <h3>Create account with email</h3>
-          <label for="registerName">Display name</label><input id="registerName" class="field" maxlength="80" autocomplete="name" placeholder="Your name">
-          <label for="registerEmail">Email address</label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com">
+          <h3>Create account with email / Gmail</h3>
+          <label for="registerName">Full name <span class="yellow">(required)</span></label><input id="registerName" class="field" maxlength="80" autocomplete="name" required placeholder="Enter your full name">
+          <label for="registerEmail">Email address / Gmail <span class="yellow">(required for this option)</span></label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@gmail.com">
           <label for="registerPassword">Password</label><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="At least 8 characters">
           <button class="primary full" type="submit">Create account</button>
         </form>
@@ -133,11 +132,10 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
           <button class="secondary full" type="submit">Sign in</button>
           <button class="secondary full" id="resetPasswordBtn" type="button">Send password reset email</button>
         </form>
-        <button class="secondary full" id="googleSignInBtn" type="button">Continue with Google</button>
         <div class="divider"></div>
-        <h3>Register / sign in with phone</h3>
-        <p class="muted tiny">Enter the phone number in international format, including country code, e.g. +251…</p>
-        <label for="phoneNumber">Phone number</label><input id="phoneNumber" class="field" type="tel" autocomplete="tel" placeholder="+2519…">
+        <h3>Or register / sign in with phone</h3>
+        <p class="muted tiny">Your full name above is also required for phone registration. Enter your phone in international format with country code, for example +251…</p>
+        <label for="phoneNumber">Phone number <span class="yellow">(required for this option)</span></label><input id="phoneNumber" class="field" type="tel" autocomplete="tel" placeholder="+2519…">
         <div id="recaptcha-container" style="margin-top:12px"></div>
         <button class="secondary full" id="sendPhoneCodeBtn" type="button">Send SMS verification code</button>
         <label for="phoneCode">SMS verification code</label><input id="phoneCode" class="field" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter the code">
@@ -433,6 +431,7 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
   const email = document.getElementById("registerEmail").value.trim();
   const password = document.getElementById("registerPassword").value;
   const name = document.getElementById("registerName").value.trim();
+  if (name.length < 2) { msg("Enter your full name."); document.getElementById("registerName").focus(); return; }
   msg("Creating your account…");
   try {
     const credential = await createUserWithEmailAndPassword(auth, email, password);
@@ -462,14 +461,9 @@ document.getElementById("resetPasswordBtn").addEventListener("click", async () =
   catch (error) { msg(friendlyError(error)); }
 });
 
-document.getElementById("googleSignInBtn").addEventListener("click", async () => {
-  msg("Opening Google sign-in…");
-  try { await signInWithPopup(auth, new GoogleAuthProvider()); msg("Signed in with Google."); }
-  catch (error) { msg(friendlyError(error)); }
-});
-
 let recaptchaVerifier = null;
 let confirmationResult = null;
+let phoneRegistrationName = "";
 async function getRecaptcha() {
   if (recaptchaVerifier) return recaptchaVerifier;
   recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
@@ -481,8 +475,11 @@ async function getRecaptcha() {
   return recaptchaVerifier;
 }
 document.getElementById("sendPhoneCodeBtn").addEventListener("click", async () => {
+  const name = document.getElementById("registerName").value.trim();
   const phone = document.getElementById("phoneNumber").value.trim();
+  if (name.length < 2) { msg("Enter your full name first. It is required for phone registration."); document.getElementById("registerName").focus(); return; }
   if (!phone.startsWith("+")) { msg("Enter your phone number in international format, starting with + and country code."); return; }
+  phoneRegistrationName = name;
   msg("Preparing phone verification…");
   try {
     const verifier = await getRecaptcha();
@@ -497,8 +494,11 @@ document.getElementById("verifyPhoneCodeBtn").addEventListener("click", async ()
   const code = document.getElementById("phoneCode").value.trim();
   if (!confirmationResult) { msg("First click Send SMS verification code."); return; }
   if (!code) { msg("Enter the SMS verification code."); return; }
-  try { await confirmationResult.confirm(code); msg("Phone verified and signed in."); }
-  catch (error) { msg(friendlyError(error)); }
+  try {
+    const credential = await confirmationResult.confirm(code);
+    if (phoneRegistrationName && !credential.user.displayName) await updateProfile(credential.user, { displayName: phoneRegistrationName });
+    msg("Phone verified. You are signed in as " + (credential.user.displayName || phoneRegistrationName || credential.user.phoneNumber) + ".");
+  } catch (error) { msg(friendlyError(error)); }
 });
 document.getElementById("signOutBtn").addEventListener("click", async () => {
   try { await signOut(auth); msg("You have signed out."); }
