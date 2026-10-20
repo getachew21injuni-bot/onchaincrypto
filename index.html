@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b0e11">
-<title>OnChainCrypto | Markets & Trading</title>
+<title>OnChainCrypto | Crypto Markets</title>
 <style>
 :root{--bg:#0b0e11;--panel:#15191e;--panel2:#1e2329;--line:#2b3139;--text:#eaecef;--muted:#848e9c;--yellow:#f0b90b;--green:#0ecb81;--red:#f6465d;--blue:#4c8dff}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:7px;padding:10px 14px;font-weight:650}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--yellow);color:#111}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.buy{background:var(--green);color:#07140e}.sell{background:var(--red);color:white}.muted{color:var(--muted)}.green{color:var(--green)!important}.red{color:var(--red)!important}.yellow{color:var(--yellow)}.tiny{font-size:12px}.hidden{display:none!important}#page-admin{display:none!important}.admin-nav{display:none!important}
@@ -38,16 +38,14 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
 <main>
   <section id="page-markets">
     <section class="panel announcement" aria-label="OnChainCrypto announcements">
-      <div class="section-head"><h2>📣 OnChainCrypto Updates</h2><span class="tag">ANNOUNCEMENTS</span></div>
+      <div class="section-head"><h2>Market updates</h2><span class="tag">ONCHAINCRYPTO</span></div>
       <div class="notice-list">
         <div class="list-row"><div><strong>Welcome to OnChainCrypto</strong><div class="muted tiny">Explore crypto markets, compare coin pairs and build your market knowledge.</div></div><span class="tag">Welcome</span></div>
-        <div class="list-row"><div><strong>Investing involves risk</strong><div class="muted tiny">Crypto prices can change rapidly. Only invest what you can afford to lose; signals are informational, not guarantees.</div></div><span class="tag">Risk notice</span></div>
-        <div class="list-row"><div><strong>Deposit and withdrawal status</strong><div class="muted tiny">Real-money transfers are not enabled yet. Never send cryptocurrency until official network addresses and payment processing are securely verified.</div></div><span class="tag">Read first</span></div>
-      </div>
+                      </div>
     </section>
     <div class="page-title"><div><h1>Market Overview</h1><div class="muted">Explore crypto markets and discover market movers.</div></div><div class="muted tiny">Last update: <span id="lastUpdate">—</span></div></div>
     <div class="cards">
-      <div class="card"><div class="label">Demo wallet balance</div><div class="big" id="summaryBalance">$10,000.00</div><div class="muted tiny">Virtual USD · not real funds</div></div>
+      <div class="card"><div class="label">Paper trading balance</div><div class="big" id="summaryBalance">$10,000.00</div><div class="muted tiny">Paper trading funds</div></div>
       <div class="card"><div class="label">Assets tracked</div><div class="big" id="assetCount">—</div><div class="muted tiny">Public market data</div></div>
       <div class="card"><div class="label">Top gainer (24h)</div><div class="big green" id="topGainer">—</div><div class="muted tiny" id="topGainerChange">Waiting for data</div></div>
       <div class="card"><div class="label">Top loser (24h)</div><div class="big red" id="topLoser">—</div><div class="muted tiny" id="topLoserChange">Waiting for data</div></div>
@@ -72,18 +70,18 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
     </section>
   </section>
   <section id="page-trade" class="hidden">
-    <div class="page-title"><div><h1>Spot Trading Simulator</h1><div class="muted">Practice buy and sell orders using virtual USD.</div></div><span class="tag">DEMO ONLY</span></div>
+    <div class="page-title"><div><h1>Spot Trading</h1><div class="muted">Select a market, review the price and manage your order.</div></div><span class="tag">PAPER TRADING</span></div>
     <div class="trade-layout">
       <section class="panel"><div class="chart-area"><div class="page-title"><div><h2 id="tradePairTitle">BTC / USD</h2><div class="muted tiny">Indicative public price</div></div><div><div class="big" id="tradeCurrentPrice">$—</div><div id="tradeCurrentChange" class="muted">—</div></div></div><div class="chart-wrap"><div class="list-row"><strong>Live exchange chart</strong><span class="tag">TradingView</span></div><iframe id="tradingViewChart" class="tv-chart" title="Live cryptocurrency candlestick chart" loading="lazy" referrerpolicy="origin" allowfullscreen src="https://www.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCUSDT&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false"></iframe><p class="muted tiny">Chart availability depends on the selected pair and TradingView market coverage. This embed does not place orders.</p></div><div class="chart-wrap"><div class="muted tiny">7-day trend overview</div><canvas id="priceChart" height="220" aria-label="Recent cryptocurrency price chart"></canvas><div id="chartStatus" class="muted tiny">Loading recent price history…</div></div><div class="signal-box"><div class="section-head"><h3>Live market signal</h3><span class="tag">INDICATOR ONLY</span></div><div id="signalResult">Waiting for price history…</div><p class="muted tiny">Rule-based educational indicator from recent prices; not financial advice or a promise of returns.</p></div><div class="list-row"><span class="muted">Selected asset</span><strong id="tradeAssetName">Bitcoin</strong></div><div class="list-row"><span class="muted">Demo USD available</span><strong id="tradeAvailable">$10,000.00</strong></div></div></section>
-      <section class="panel form-panel"><h2>Place demo order</h2><label for="tradeAsset">Asset</label><select id="tradeAsset" class="field"></select><label for="tradeSide">Order side</label><select id="tradeSide" class="field"><option value="buy">Buy</option><option value="sell">Sell</option></select><label for="tradeUsd">Amount (USD)</label><input id="tradeUsd" class="field" type="number" min="1" step="1" placeholder="100"><div class="list-row"><span class="muted">Estimated quantity</span><strong id="estimatedQty">—</strong></div><div class="two-buttons"><button class="buy" id="buyBtn">Buy (Demo)</button><button class="sell" id="sellBtn">Sell (Demo)</button></div><p id="tradeMessage" class="muted tiny" aria-live="polite">Choose an asset and amount to preview an order.</p></section>
+      <section class="panel form-panel"><h2>Place order</h2><label for="tradeAsset">Asset</label><select id="tradeAsset" class="field"></select><label for="tradeSide">Order side</label><select id="tradeSide" class="field"><option value="buy">Buy</option><option value="sell">Sell</option></select><label for="tradeUsd">Amount (USD)</label><input id="tradeUsd" class="field" type="number" min="1" step="1" placeholder="100"><div class="list-row"><span class="muted">Estimated quantity</span><strong id="estimatedQty">—</strong></div><div class="two-buttons"><button class="buy" id="buyBtn">Buy</button><button class="sell" id="sellBtn">Sell</button></div><p id="tradeMessage" class="muted tiny" aria-live="polite">Choose an asset and amount to preview an order.</p></section>
     </div>
-    <section class="panel"><div class="section-head"><h2>Demo strategy levels</h2><span class="tag">HYPOTHETICAL ONLY</span></div>
+    <section class="panel"><div class="section-head"><h2>Return calculator</h2><span class="tag">ESTIMATE</span></div>
       <div class="form-panel">
-        <div class="notice">The percentages below are user-requested hypothetical scenarios, not promised or typical investment returns. Real crypto returns can be negative, and no profit is guaranteed. This calculator never takes deposits or places orders.</div>
+        <p class="muted tiny">Illustrative estimate only. Actual market returns can be negative.</p>
         <div class="content-grid">
           <div>
-            <label for="strategyAmount">Simulation amount (USD)</label><input id="strategyAmount" class="field" type="number" min="200" max="5000" step="50" value="200">
-            <label for="strategyDuration">Simulation duration (seconds)</label><select id="strategyDuration" class="field"><option value="30">30 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="120">120 seconds</option><option value="150">150 seconds</option><option value="180">180 seconds</option><option value="210">210 seconds</option><option value="240">240 seconds</option><option value="270">270 seconds</option><option value="300">300 seconds</option><option value="330">330 seconds</option><option value="360">360 seconds</option></select>
+            <label for="strategyAmount">Amount (USD)</label><input id="strategyAmount" class="field" type="number" min="200" max="5000" step="50" value="200">
+            <label for="strategyDuration">Time period</label><select id="strategyDuration" class="field"><option value="30">30 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="120">120 seconds</option><option value="150">150 seconds</option><option value="180">180 seconds</option><option value="210">210 seconds</option><option value="240">240 seconds</option><option value="270">270 seconds</option><option value="300">300 seconds</option><option value="330">330 seconds</option><option value="360">360 seconds</option></select>
             <button id="calculateStrategy" class="primary full" type="button">Calculate hypothetical scenario</button>
           </div>
           <div class="mini-card" aria-live="polite"><div class="muted tiny">Illustrative scenario only</div><div id="strategyRate" class="signal-value yellow">12%</div><div class="list-row"><span class="muted">Illustrative gain</span><strong id="strategyGain" class="green">$24.00</strong></div><div class="list-row"><span class="muted">Scenario total</span><strong id="strategyTotal">$224.00</strong></div><div class="list-row"><span class="muted">Duration</span><strong id="strategyDurationLabel">30 seconds</strong></div><div id="strategyNotice" class="muted tiny">This is arithmetic only, not a forecast.</div></div>
@@ -94,17 +92,17 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
     <section class="panel"><div class="section-head"><h2>Recent demo orders</h2></div><div id="tradeHistory" style="padding:0 18px"><div class="empty">No demo trades yet.</div></div></section>
   </section>
   <section id="page-wallet" class="hidden">
-    <div class="page-title"><div><h1>Wallet & Portfolio</h1><div class="muted">Local demo portfolio stored in this browser.</div></div><span class="tag">VIRTUAL FUNDS</span></div>
-    <div class="cards"><div class="card"><div class="label">Available demo USD</div><div class="big" id="walletBalance">$10,000.00</div></div><div class="card"><div class="label">Holdings market value</div><div class="big" id="holdingsValue">$0.00</div></div><div class="card"><div class="label">Portfolio total</div><div class="big" id="portfolioTotal">$10,000.00</div></div><div class="card"><div class="label">Demo transactions</div><div class="big" id="txCount">0</div></div></div>
+    <div class="page-title"><div><h1>Wallet & Portfolio</h1><div class="muted">Portfolio overview and transaction history.</div></div><span class="tag">PAPER TRADING</span></div>
+    <div class="cards"><div class="card"><div class="label">Available balance</div><div class="big" id="walletBalance">$10,000.00</div></div><div class="card"><div class="label">Holdings market value</div><div class="big" id="holdingsValue">$0.00</div></div><div class="card"><div class="label">Portfolio total</div><div class="big" id="portfolioTotal">$10,000.00</div></div><div class="card"><div class="label">Transactions</div><div class="big" id="txCount">0</div></div></div>
     <section class="panel"><div class="section-head"><h2>Your assets</h2><button class="secondary" id="exportCsv">Export history CSV</button></div><div class="table-wrap"><table><thead><tr><th>Asset</th><th>Quantity</th><th>Price</th><th>Value</th></tr></thead><tbody id="holdingsRows"><tr><td colspan="4" class="empty">No crypto holdings yet. Try a demo trade.</td></tr></tbody></table></div></section>
     <section class="panel"><div class="section-head"><h2>Transaction history</h2></div><div id="walletHistory" style="padding:0 18px"><div class="empty">No transactions yet.</div></div></section>
   </section>
   <section id="page-deposit" class="hidden">
-    <div class="page-title"><div><h1>Deposit</h1><div class="muted">Real deposits are not available in this prototype.</div></div><span class="tag">NOT CONNECTED</span></div>
+    <div class="page-title"><div><h1>Deposit</h1><div class="muted">Deposit methods</div></div><span class="tag">Setup required</span></div>
     <section class="panel form-panel"><h2>Deposit funds</h2><p>To accept real deposits, the platform needs an approved payment or exchange provider, a verified business account, server-side transaction verification, anti-fraud controls and secure reconciliation. No deposit address or payment instructions are generated here.</p><label>Payment method</label><select class="field" disabled><option>Provider integration required</option></select><label>Amount</label><input class="field" type="number" disabled placeholder="Unavailable until integration"><button class="primary full" disabled>Real deposit unavailable</button><p class="muted tiny">Do not send cryptocurrency or money to an address provided outside a verified production integration.</p></section>
   </section>
   <section id="page-withdraw" class="hidden">
-    <div class="page-title"><div><h1>Withdraw</h1><div class="muted">Real withdrawals are not available in this prototype.</div></div><span class="tag">NOT CONNECTED</span></div>
+    <div class="page-title"><div><h1>Withdraw</h1><div class="muted">Withdrawal methods</div></div><span class="tag">Setup required</span></div>
     <section class="panel form-panel"><h2>Withdraw funds</h2><p>Real withdrawals require authenticated accounts, secure backend authorization, provider-side balance checks, transaction screening, risk controls and audit logs. This page cannot send money or cryptocurrency.</p><label>Asset / network</label><select class="field" disabled><option>Provider integration required</option></select><label>Destination address</label><input class="field" disabled placeholder="Unavailable until secure integration"><label>Amount</label><input class="field" type="number" disabled placeholder="Unavailable until integration"><button class="primary full" disabled>Real withdrawal unavailable</button><p class="muted tiny">Never share seed phrases, private keys or one-time authentication codes.</p></section>
   </section>
   <section id="page-profile" class="hidden">
@@ -187,7 +185,7 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
   </section>
 
   <section id="page-support" class="hidden">
-    <div class="page-title"><div><h1>OnChainCrypto Support</h1><div class="muted">Help with registration, sign-in, verification emails and using the demo website.</div></div><span class="tag">HELP CENTER</span></div>
+    <div class="page-title"><div><h1>OnChainCrypto Support</h1><div class="muted">Help with registration, sign-in, account access and platform features.</div></div><span class="tag">HELP CENTER</span></div>
     <div class="notice"><strong>Support email:</strong> <a href="mailto:onchaincryptosupport@gmail.com" style="color:inherit;font-weight:800">onchaincryptosupport@gmail.com</a><br><span class="tiny">This is the planned support address. The mailbox must be created before it can receive messages.</span></div>
     <div class="content-grid">
       <section class="panel form-panel">
@@ -215,7 +213,7 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
     </div>
   </section>
 </main>
-<footer>OnChainCrypto · Public market data and simulated trading prototype · Not a bank, broker or cryptocurrency exchange. No real deposits, withdrawals, custody or orders are enabled.</footer>
+<footer>OnChainCrypto · Cryptocurrency market information and trading interface.</footer>
 <script>
 const COINS = [
 {id:"bitcoin",symbol:"BTC",name:"Bitcoin"},{id:"ethereum",symbol:"ETH",name:"Ethereum"},{id:"tether",symbol:"USDT",name:"Tether"},{id:"binancecoin",symbol:"BNB",name:"BNB"},{id:"solana",symbol:"SOL",name:"Solana"},{id:"ripple",symbol:"XRP",name:"XRP"},{id:"usd-coin",symbol:"USDC",name:"USDC"},{id:"dogecoin",symbol:"DOGE",name:"Dogecoin"},{id:"tron",symbol:"TRX",name:"TRON"},{id:"the-open-network",symbol:"TON",name:"Toncoin"},{id:"cardano",symbol:"ADA",name:"Cardano"},{id:"avalanche-2",symbol:"AVAX",name:"Avalanche"},{id:"shiba-inu",symbol:"SHIB",name:"Shiba Inu"},{id:"chainlink",symbol:"LINK",name:"Chainlink"},{id:"bitcoin-cash",symbol:"BCH",name:"Bitcoin Cash"},{id:"sui",symbol:"SUI",name:"Sui"},{id:"stellar",symbol:"XLM",name:"Stellar"},{id:"polkadot",symbol:"DOT",name:"Polkadot"},{id:"litecoin",symbol:"LTC",name:"Litecoin"},{id:"near",symbol:"NEAR",name:"NEAR Protocol"}
