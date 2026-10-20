@@ -116,14 +116,32 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
     <div class="content-grid">
       <section class="panel form-panel">
         <h2>User registration</h2>
-        <p class="muted tiny">This form demonstrates the registration flow. It does not create an online account until secure authentication and a database are connected. Do not enter a real password here.</p>
+        <p class="muted tiny">Create an account with Firebase Authentication. Email/password and Google sign-in are available; phone verification sends an SMS and may incur provider charges. This account does not enable real-money trading or secure online balances.</p>
+        <div id="authStatus" class="notice">Checking sign-in status…</div>
         <form id="registerForm">
-          <label for="registerName">Full name or display name</label><input id="registerName" class="field" maxlength="80" autocomplete="name" required placeholder="Your name">
+          <h3>Create account with email</h3>
+          <label for="registerName">Display name</label><input id="registerName" class="field" maxlength="80" autocomplete="name" placeholder="Your name">
           <label for="registerEmail">Email address</label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com">
-          <label for="registerPassword">Password (demo only)</label><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="At least 8 characters">
-          <label class="tiny"><input id="registerConsent" type="checkbox" required style="width:auto;margin-right:8px">I understand this is a demo and does not create a real account.</label>
-          <button class="primary full" type="submit">Preview registration</button>
+          <label for="registerPassword">Password</label><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="At least 8 characters">
+          <button class="primary full" type="submit">Create account</button>
         </form>
+        <form id="signInForm">
+          <h3 style="margin-top:22px">Already registered?</h3>
+          <label for="signInEmail">Email address</label><input id="signInEmail" class="field" type="email" autocomplete="username" required placeholder="you@example.com">
+          <label for="signInPassword">Password</label><input id="signInPassword" class="field" type="password" autocomplete="current-password" required placeholder="Your password">
+          <button class="secondary full" type="submit">Sign in</button>
+          <button class="secondary full" id="resetPasswordBtn" type="button">Send password reset email</button>
+        </form>
+        <button class="secondary full" id="googleSignInBtn" type="button">Continue with Google</button>
+        <div class="divider"></div>
+        <h3>Register / sign in with phone</h3>
+        <p class="muted tiny">Enter the phone number in international format, including country code, e.g. +251…</p>
+        <label for="phoneNumber">Phone number</label><input id="phoneNumber" class="field" type="tel" autocomplete="tel" placeholder="+2519…">
+        <div id="recaptcha-container" style="margin-top:12px"></div>
+        <button class="secondary full" id="sendPhoneCodeBtn" type="button">Send SMS verification code</button>
+        <label for="phoneCode">SMS verification code</label><input id="phoneCode" class="field" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter the code">
+        <button class="secondary full" id="verifyPhoneCodeBtn" type="button">Verify code and sign in</button>
+        <button class="secondary full hidden" id="signOutBtn" type="button">Sign out</button>
         <p id="registerMessage" class="muted tiny" aria-live="polite"></p>
       </section>
       <section class="panel form-panel">
@@ -320,7 +338,7 @@ function calculateStrategy(){
 }
 $("calculateStrategy").addEventListener("click",calculateStrategy);
 $("strategyAmount").addEventListener("input",calculateStrategy);$("strategyDuration").addEventListener("change",calculateStrategy);
-$("registerForm").addEventListener("submit",event=>{event.preventDefault();const name=$("registerName").value.trim(),email=$("registerEmail").value.trim();if(!$("registerConsent").checked){$("registerMessage").textContent="Please confirm you understand this is only a demo.";return} $("registerMessage").textContent="Demo registration form checked for "+name+" ("+email+"). No account was created and the password was not saved. Connect secure authentication and a database to enable real registration."; $("registerPassword").value="";});
+// Firebase authentication handlers are initialized in the Firebase module below.
 document.querySelectorAll("#nav button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
 document.querySelectorAll("#marketTabs button").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.filter;document.querySelectorAll("#marketTabs button").forEach(x=>x.classList.toggle("active",x===b));renderMarket()}));
 $("refreshSignalsBtn")?.addEventListener("click",loadMarket);
@@ -329,5 +347,139 @@ $("exportCsv").addEventListener("click",()=>{const rows=[["time","side","symbol"
 $("displayName").value=profile.name||"";$("displayCurrency").value=profile.currency||"USD";$("saveProfile").addEventListener("click",()=>{profile={name:$("displayName").value.trim(),currency:$("displayCurrency").value};localStorage.setItem("oc_profile",JSON.stringify(profile));$("profileMessage").textContent="Local settings saved in this browser only. No online account was created."});
 renderWallet();loadMarket();setInterval(loadMarket,120000);window.addEventListener("resize",()=>{if(historySeries.length&&!$("page-trade").classList.contains("hidden"))drawPriceChart()});
 </script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider,
+  signInWithPopup, onAuthStateChanged, signOut, RecaptchaVerifier,
+  signInWithPhoneNumber, updateProfile
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD4Z3QJwXUDmyxsuCLFbXLoISd1oIF0FR4M",
+  authDomain: "onchaincrypto-d976b.firebaseapp.com",
+  projectId: "onchaincrypto-d976b",
+  storageBucket: "onchaincrypto-d976b.firebasestorage.app",
+  messagingSenderId: "74771017244",
+  appId: "1:74771017244:web:97e8b7d49d5b0e602d79d9",
+  measurementId: "G-FS1EMZS5J9"
+};
+const auth = getAuth(initializeApp(firebaseConfig));
+const msg = (text) => { const el = document.getElementById("registerMessage"); if (el) el.textContent = text; };
+const friendlyError = (error) => {
+  const code = error?.code || "";
+  const messages = {
+    "auth/email-already-in-use": "That email already has an account. Try signing in.",
+    "auth/invalid-email": "Enter a valid email address.",
+    "auth/weak-password": "Choose a stronger password with at least 8 characters.",
+    "auth/invalid-credential": "Email/password is incorrect, or this account uses another sign-in method.",
+    "auth/user-not-found": "No account was found for that email.",
+    "auth/wrong-password": "Email/password is incorrect.",
+    "auth/popup-closed-by-user": "Google sign-in was closed before it finished.",
+    "auth/too-many-requests": "Too many attempts. Wait a while and try again.",
+    "auth/operation-not-allowed": "This sign-in method is not enabled in Firebase Authentication.",
+    "auth/unauthorized-domain": "This website hostname is not authorized in Firebase Authentication settings.",
+    "auth/invalid-phone-number": "Enter a phone number in international format, including + and country code.",
+    "auth/invalid-verification-code": "The SMS code is incorrect or expired.",
+    "auth/quota-exceeded": "Firebase SMS quota was reached. Check the SMS region policy and billing/limits.",
+    "auth/captcha-check-failed": "reCAPTCHA verification failed. Refresh the page and try again."
+  };
+  return messages[code] || (error?.message ? "Authentication error: " + error.message : "Something went wrong. Please try again.");
+};
+
+document.getElementById("registerForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const email = document.getElementById("registerEmail").value.trim();
+  const password = document.getElementById("registerPassword").value;
+  const name = document.getElementById("registerName").value.trim();
+  msg("Creating your account…");
+  try {
+    const credential = await createUserWithEmailAndPassword(auth, email, password);
+    if (name) await updateProfile(credential.user, { displayName: name });
+    await sendEmailVerification(credential.user);
+    msg("Account created. Check your email for a verification link before relying on the account.");
+    document.getElementById("registerPassword").value = "";
+  } catch (error) { msg(friendlyError(error)); }
+});
+
+document.getElementById("signInForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  msg("Signing in…");
+  try {
+    await signInWithEmailAndPassword(auth,
+      document.getElementById("signInEmail").value.trim(),
+      document.getElementById("signInPassword").value);
+    document.getElementById("signInPassword").value = "";
+    msg("Signed in successfully.");
+  } catch (error) { msg(friendlyError(error)); }
+});
+
+document.getElementById("resetPasswordBtn").addEventListener("click", async () => {
+  const email = document.getElementById("signInEmail").value.trim() || document.getElementById("registerEmail").value.trim();
+  if (!email) { msg("Enter your email in the sign-in or registration email field first."); return; }
+  try { await sendPasswordResetEmail(auth, email); msg("If the account exists, a password reset email has been sent."); }
+  catch (error) { msg(friendlyError(error)); }
+});
+
+document.getElementById("googleSignInBtn").addEventListener("click", async () => {
+  msg("Opening Google sign-in…");
+  try { await signInWithPopup(auth, new GoogleAuthProvider()); msg("Signed in with Google."); }
+  catch (error) { msg(friendlyError(error)); }
+});
+
+let recaptchaVerifier = null;
+let confirmationResult = null;
+async function getRecaptcha() {
+  if (recaptchaVerifier) return recaptchaVerifier;
+  recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+    size: "normal",
+    callback: () => {},
+    "expired-callback": () => { msg("reCAPTCHA expired. Please verify it again."); }
+  });
+  await recaptchaVerifier.render();
+  return recaptchaVerifier;
+}
+document.getElementById("sendPhoneCodeBtn").addEventListener("click", async () => {
+  const phone = document.getElementById("phoneNumber").value.trim();
+  if (!phone.startsWith("+")) { msg("Enter your phone number in international format, starting with + and country code."); return; }
+  msg("Preparing phone verification…");
+  try {
+    const verifier = await getRecaptcha();
+    confirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
+    msg("SMS sent. Enter the verification code received on your phone.");
+  } catch (error) {
+    msg(friendlyError(error));
+    if (recaptchaVerifier) { try { await recaptchaVerifier.clear(); } catch (_) {} recaptchaVerifier = null; }
+  }
+});
+document.getElementById("verifyPhoneCodeBtn").addEventListener("click", async () => {
+  const code = document.getElementById("phoneCode").value.trim();
+  if (!confirmationResult) { msg("First click Send SMS verification code."); return; }
+  if (!code) { msg("Enter the SMS verification code."); return; }
+  try { await confirmationResult.confirm(code); msg("Phone verified and signed in."); }
+  catch (error) { msg(friendlyError(error)); }
+});
+document.getElementById("signOutBtn").addEventListener("click", async () => {
+  try { await signOut(auth); msg("You have signed out."); }
+  catch (error) { msg(friendlyError(error)); }
+});
+onAuthStateChanged(auth, (user) => {
+  const status = document.getElementById("authStatus");
+  const signOutBtn = document.getElementById("signOutBtn");
+  if (user) {
+    const identity = user.displayName || user.email || user.phoneNumber || "Signed-in user";
+    status.textContent = "Signed in as " + identity + (user.email && !user.emailVerified ? " · Email not yet verified" : "");
+    signOutBtn.classList.remove("hidden");
+    const displayName = document.getElementById("displayName");
+    if (displayName && !displayName.value) displayName.value = user.displayName || "";
+  } else {
+    status.textContent = "Not signed in. Create an account or sign in below.";
+    signOutBtn.classList.add("hidden");
+  }
+});
+</script>
+
 </body>
 </html>
