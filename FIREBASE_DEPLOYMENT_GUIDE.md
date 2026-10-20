@@ -1,5 +1,7 @@
 # Finish deploying the OnChainCrypto Firebase backend
 
+> **Security first:** A Firebase service-account private key was exposed in a chat. Treat that key as compromised. Revoke/delete that exact key in Google Cloud IAM > Service Accounts > the service account > Keys before generating a replacement. Do not delete the service account itself. Never paste any key into chat or commit it to GitHub.
+
 The GitHub build check passing means the TypeScript compiles. It does **not** mean the Firebase backend has been deployed.
 
 ## One-time account setup (the account owner must do this)
