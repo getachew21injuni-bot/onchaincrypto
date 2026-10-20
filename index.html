@@ -280,15 +280,38 @@ function updateTradingViewChart(symbol){
 function renderMiniList(id,items,mode){$(id).innerHTML=items.length?items.map(c=>'<div class="mini-row"><div class="mini-left">'+coinIcon(c,22)+'<span>'+safe(c.symbol.toUpperCase())+'</span></div><div class="mini-price '+(mode==="change"?((c.price_change_percentage_24h||0)>=0?"green":"red"):"")+'">'+(mode==="change"?pct(c.price_change_percentage_24h):money(c.total_volume))+'</div></div>').join(""):'<div class="muted tiny">No data</div>'}
 async function loadMarket(){
  $("connection").textContent="Updating";$("apiStatus").textContent="Loading prices…";
+ const coinGeckoUrl="https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(COINS.map(c=>c.id).join(","))+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h";
  try{
- const ids=COINS.map(c=>c.id).join(",");
- const response=await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(ids)+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",{headers:{accept:"application/json"},signal:AbortSignal.timeout(12000)});
- if(!response.ok)throw new Error("Market provider returned "+response.status);
- const data=await response.json();if(!Array.isArray(data)||!data.length)throw new Error("No market data returned");
- market=data.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()}));
- $("connection").textContent="Live data";$("apiStatus").innerHTML='<span class="green">Connected</span>';$("lastUpdate").textContent=new Date().toLocaleTimeString();
- renderMarket();updateTradePreview();
- }catch(err){$("connection").textContent="Unavailable";$("apiStatus").innerHTML='<span class="red">Unavailable</span>';if(!market.length)$("marketRows").innerHTML='<tr><td colspan="5" class="empty">Could not load prices. Check your connection, try again later, or note that the public API may rate-limit requests.</td></tr>'; $("marketHint").textContent="Refresh later; provider may rate-limit"; }
+   let data=[];
+   try{
+     const response=await fetch(coinGeckoUrl,{headers:{accept:"application/json"},signal:AbortSignal.timeout(9000)});
+     if(!response.ok)throw new Error("CoinGecko returned "+response.status);
+     const result=await response.json();
+     if(!Array.isArray(result)||!result.length)throw new Error("CoinGecko returned no prices");
+     data=result.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()}));
+   }catch(primaryError){
+     $("apiStatus").textContent="Trying backup price feed…";
+     const pairs=COINS.filter(c=>c.symbol!=="USDT").map(c=>c.symbol+"USDT");
+     const backupUrl="https://api.binance.com/api/v3/ticker/24hr?symbols="+encodeURIComponent(JSON.stringify(pairs));
+     const backupResponse=await fetch(backupUrl,{headers:{accept:"application/json"},signal:AbortSignal.timeout(9000)});
+     if(!backupResponse.ok)throw new Error("Both public market feeds are unavailable");
+     const tickers=await backupResponse.json();
+     if(!Array.isArray(tickers)||!tickers.length)throw new Error("Backup feed returned no prices");
+     data=COINS.map(c=>{
+       if(c.symbol==="USDT")return {id:c.id,symbol:"USDT",name:c.name,current_price:1,price_change_percentage_24h:0,market_cap:null,total_volume:0};
+       const t=tickers.find(x=>x.symbol===c.symbol+"USDT");
+       return t?{id:c.id,symbol:c.symbol.toLowerCase(),name:c.name,current_price:Number(t.lastPrice),price_change_percentage_24h:Number(t.priceChangePercent),market_cap:null,total_volume:Number(t.quoteVolume),image:null}:null;
+     }).filter(Boolean);
+   }
+   market=data;
+   $("connection").textContent="Live data";$("apiStatus").innerHTML='<span class="green">Connected</span>'+(data.some(c=>c.market_cap==null)?' <span class="muted">· backup feed</span>':'');
+   $("lastUpdate").textContent=new Date().toLocaleTimeString();
+   renderMarket();updateTradePreview();
+ }catch(err){
+   $("connection").textContent="Unavailable";$("apiStatus").innerHTML='<span class="red">Price feed unavailable</span>';
+   if(!market.length)$("marketRows").innerHTML='<tr><td colspan="5" class="empty">Live prices could not be reached. Check your internet connection and press Refresh to try again.</td></tr>';
+   $("marketHint").textContent="Both public price feeds may be temporarily unavailable. Try Refresh again.";
+ }
 }
 let historySeries=[];
 async function loadPriceHistory(){
