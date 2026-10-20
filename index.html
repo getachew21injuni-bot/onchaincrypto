@@ -1,467 +1,143 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OnChainCrypto AI</title>
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0e11">
+<title>OnChainCrypto | Markets & Demo Trading</title>
 <style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: #0b1120;
-  color: #f1f5f9;
-  font-family: Arial, sans-serif;
-}
-
-header {
-  background: #111b2e;
-  padding: 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #263449;
-}
-
-.logo {
-  color: #42e8a4;
-  font-weight: bold;
-  font-size: 20px;
-}
-
-button {
-  background: #42e8a4;
-  color: #07111b;
-  border: none;
-  border-radius: 7px;
-  padding: 11px 16px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-main {
-  max-width: 1100px;
-  margin: auto;
-  padding: 20px;
-}
-
-h1 {
-  font-size: 27px;
-}
-
-.muted {
-  color: #9aabc2;
-}
-
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  margin: 22px 0;
-}
-
-.card, .panel {
-  background: #111b2e;
-  border: 1px solid #263449;
-  border-radius: 12px;
-  padding: 17px;
-}
-
-.value {
-  font-size: 21px;
-  font-weight: bold;
-  margin-top: 10px;
-}
-
-.green {
-  color: #42e8a4;
-}
-
-.red {
-  color: #ff7373;
-}
-
-.panel {
-  margin-bottom: 20px;
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 430px;
-}
-
-th, td {
-  padding: 13px 8px;
-  text-align: left;
-  border-bottom: 1px solid #263449;
-}
-
-th {
-  color: #9aabc2;
-}
-
-.coin {
-  cursor: pointer;
-}
-
-.coin:hover {
-  background: #1b2940;
-}
-
-input {
-  width: 100%;
-  padding: 12px;
-  margin: 8px 0;
-  background: #0b1120;
-  color: white;
-  border: 1px solid #34445b;
-  border-radius: 7px;
-}
-
-#message {
-  white-space: pre-wrap;
-  line-height: 1.6;
-}
-
-footer {
-  text-align: center;
-  padding: 25px;
-  color: #9aabc2;
-}
-
-.small {
-  font-size: 12px;
-}
-
+:root{--bg:#0b0e11;--panel:#15191e;--panel2:#1e2329;--line:#2b3139;--text:#eaecef;--muted:#848e9c;--yellow:#f0b90b;--green:#0ecb81;--red:#f6465d;--blue:#4c8dff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:7px;padding:10px 14px;font-weight:650}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--yellow);color:#111}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.buy{background:var(--green);color:#07140e}.sell{background:var(--red);color:white}.muted{color:var(--muted)}.green{color:var(--green)!important}.red{color:var(--red)!important}.yellow{color:var(--yellow)}.tiny{font-size:12px}.hidden{display:none!important}
+header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:25px;padding:0 24px;position:sticky;top:0;background:#0b0e11f2;backdrop-filter:blur(12px);z-index:5}.brand{font-size:19px;font-weight:800;white-space:nowrap}.brand b{color:var(--yellow)}nav{display:flex;gap:18px;align-items:center;flex:1}nav button{background:transparent;color:var(--muted);padding:8px 3px}nav button.active,nav button:hover{color:var(--yellow)}.header-right{display:flex;align-items:center;gap:9px}.status-dot{display:inline-block;width:7px;height:7px;background:var(--green);border-radius:50%;margin-right:6px}
+main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border:1px solid #5b4a12;color:#f5d879;border-radius:8px;padding:12px 14px;margin-bottom:22px}.page-title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}.page-title h1{font-size:25px;margin:0}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px}.card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px}.card{padding:17px}.card .label{color:var(--muted);font-size:13px}.card .big{font-size:23px;font-weight:750;margin:7px 0}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 18px 0}.section-head h2,.panel h2{font-size:17px;margin:0}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button{background:transparent;color:var(--muted);padding:7px 10px}.tabs button.active{color:var(--yellow);background:#2b2614}.panel{overflow:hidden;margin-bottom:20px}.search{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:10px 12px;color:var(--text);min-width:210px;outline:none}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:680px}th,td{text-align:right;padding:13px 18px;border-bottom:1px solid #242a31;white-space:nowrap}th{font-size:12px;color:var(--muted);font-weight:500}th:first-child,td:first-child{text-align:left}.asset{display:flex;align-items:center;gap:10px;text-align:left}.coin-icon{width:29px;height:29px;border-radius:50%;background:#262b33;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;overflow:hidden}.coin-icon img{width:100%;height:100%;object-fit:cover}.asset-name{font-weight:650}.asset-symbol{color:var(--muted);font-size:12px;margin-left:5px}.pair{font-weight:700}.row-click{cursor:pointer}.row-click:hover{background:#1d232a}.star{color:#59616d;font-size:18px;background:transparent;padding:0 5px}.star.on{color:var(--yellow)}.content-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,1fr);gap:20px}.market-pills{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px}.mini-card{background:var(--panel2);padding:14px;border-radius:9px;min-width:0}.mini-card h3{font-size:13px;margin:0 0 12px}.mini-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #30363d}.mini-row:last-child{border:0}.mini-left{display:flex;align-items:center;gap:8px;min-width:0}.mini-left img{width:22px;height:22px;border-radius:50%}.mini-left span{overflow:hidden;text-overflow:ellipsis}.mini-price{text-align:right}.trade-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:18px}.chart-area{padding:20px;min-height:290px}.chart-placeholder{height:190px;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(to bottom,transparent 0,transparent 46px,#252b32 47px),repeating-linear-gradient(to right,transparent 0,transparent 70px,#252b32 71px);border-bottom:1px solid var(--line);color:var(--muted);margin-top:15px}.form-panel{padding:18px}.form-panel label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}.field{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);padding:11px;border-radius:7px;outline:none}.field:focus,.search:focus{border-color:var(--yellow)}.two-buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.two-buttons button{width:100%}.full{width:100%;margin-top:12px}.list-row{display:flex;justify-content:space-between;gap:15px;padding:13px 0;border-bottom:1px solid var(--line)}.list-row:last-child{border:0}.empty{padding:26px;text-align:center;color:var(--muted)}.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.profile-item{padding:15px;background:var(--panel2);border-radius:8px}.profile-item strong{display:block;margin-bottom:4px}.tag{font-size:11px;padding:4px 7px;border-radius:5px;background:#332d17;color:#f5d879}.tag.green-tag{background:#12352a;color:var(--green)}footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid var(--line);font-size:12px}
+@media(max-width:900px){header{padding:0 14px;gap:12px}nav{gap:8px}nav button{font-size:12px}.cards{grid-template-columns:repeat(2,1fr)}.content-grid,.trade-layout{grid-template-columns:1fr}.market-pills{grid-template-columns:1fr}.header-right .optional{display:none}}
+@media(max-width:600px){header{height:auto;min-height:62px;flex-wrap:wrap;padding:12px}nav{order:3;flex-basis:100%;overflow:auto;justify-content:space-between}nav button{white-space:nowrap}main{padding:14px}.brand{font-size:17px}.cards{gap:8px}.card{padding:12px}.card .big{font-size:19px}.profile-grid{grid-template-columns:1fr}.search{min-width:140px;width:100%}.section-head{align-items:flex-start}.market-pills{padding:12px}}
 </style>
 </head>
-
 <body>
-
 <header>
-  <div class="logo">⚡ OnChainCrypto AI</div>
-  <button onclick="showLogin()">Login</button>
+  <div class="brand"><b>◆</b> OnChainCrypto</div>
+  <nav id="nav">
+    <button class="active" data-page="markets">Markets</button>
+    <button data-page="trade">Trade</button>
+    <button data-page="wallet">Wallet</button>
+    <button data-page="deposit">Deposit</button>
+    <button data-page="withdraw">Withdraw</button>
+    <button data-page="profile">Profile / KYC</button>
+  </nav>
+  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Connecting</span></span><button class="secondary" id="refreshBtn">↻</button></div>
 </header>
-
 <main>
-
-  <h1>Crypto Trading Dashboard</h1>
-  <p class="muted">
-    Explore cryptocurrency markets and AI-assisted analysis.
-  </p>
-
-  <div class="cards">
-
-    <div class="card">
-      <div class="muted">Demo Balance</div>
-      <div class="value" id="balance">$10,000.00</div>
+  <div class="notice"><strong>Demo environment:</strong> Market prices are public data when available. Trading uses virtual funds only. Deposits, withdrawals, identity verification and real-money orders are not connected. Never send funds to this demo.</div>
+  <section id="page-markets">
+    <div class="page-title"><div><h1>Market Overview</h1><div class="muted">Explore crypto markets and discover market movers.</div></div><div class="muted tiny">Last update: <span id="lastUpdate">—</span></div></div>
+    <div class="cards">
+      <div class="card"><div class="label">Demo wallet balance</div><div class="big" id="summaryBalance">$10,000.00</div><div class="muted tiny">Virtual USD · not real funds</div></div>
+      <div class="card"><div class="label">Assets tracked</div><div class="big" id="assetCount">—</div><div class="muted tiny">Public market data</div></div>
+      <div class="card"><div class="label">Top gainer (24h)</div><div class="big green" id="topGainer">—</div><div class="muted tiny" id="topGainerChange">Waiting for data</div></div>
+      <div class="card"><div class="label">Top loser (24h)</div><div class="big red" id="topLoser">—</div><div class="muted tiny" id="topLoserChange">Waiting for data</div></div>
     </div>
-
-    <div class="card">
-      <div class="muted">Market Status</div>
-      <div class="value green" id="marketStatus">
-        Connecting...
-      </div>
+    <div class="content-grid">
+      <section class="panel">
+        <div class="section-head"><h2>Markets</h2><input class="search" id="marketSearch" placeholder="Search coin or symbol…"></div>
+        <div class="section-head"><div class="tabs" id="marketTabs"><button class="active" data-filter="all">All</button><button data-filter="gainers">Gainers</button><button data-filter="losers">Losers</button><button data-filter="hot">Hot</button><button data-filter="watchlist">★ Watchlist</button></div><span class="muted tiny" id="marketHint">Public prices</span></div>
+        <div class="table-wrap"><table><thead><tr><th>Asset / Pair</th><th>Price (USD)</th><th>24h Change</th><th>Market Cap</th><th>Watch</th></tr></thead><tbody id="marketRows"><tr><td colspan="5" class="empty">Loading market data…</td></tr></tbody></table></div>
+        <div class="section-head"><span class="muted tiny">Data source: CoinGecko public API. Availability and rate limits may vary.</span><button class="secondary" id="retryBtn">Refresh prices</button></div>
+      </section>
+      <aside>
+        <section class="panel"><div class="section-head"><h2>🔥 Hot Coins</h2><span class="muted tiny">24h volume</span></div><div class="market-pills"><div class="mini-card"><h3>Top Gainers</h3><div id="gainersList" class="muted">Loading…</div></div><div class="mini-card"><h3>Top Losers</h3><div id="losersList" class="muted">Loading…</div></div><div class="mini-card"><h3>Hot by Volume</h3><div id="hotList" class="muted">Loading…</div></div></div></section>
+        <section class="panel"><div class="section-head"><h2>Market status</h2></div><div style="padding:18px"><div class="list-row"><span class="muted">Public market API</span><strong id="apiStatus">Connecting…</strong></div><div class="list-row"><span class="muted">Real exchange orders</span><span class="tag">Not connected</span></div><div class="list-row"><span class="muted">Deposits / withdrawals</span><span class="tag">Not connected</span></div><p class="muted tiny">Prices may be delayed, incomplete or unavailable. This site is not an exchange or a financial adviser.</p></div></section>
+      </aside>
     </div>
-
-    <div class="card">
-      <div class="muted">Trading Mode</div>
-      <div class="value">DEMO</div>
+  </section>
+  <section id="page-trade" class="hidden">
+    <div class="page-title"><div><h1>Spot Trading Simulator</h1><div class="muted">Practice buy and sell orders using virtual USD.</div></div><span class="tag">DEMO ONLY</span></div>
+    <div class="trade-layout">
+      <section class="panel"><div class="chart-area"><div class="page-title"><div><h2 id="tradePairTitle">BTC / USD</h2><div class="muted tiny">Indicative public price</div></div><div><div class="big" id="tradeCurrentPrice">$—</div><div id="tradeCurrentChange" class="muted">—</div></div></div><div class="chart-placeholder">Price chart integration not connected yet</div><div class="list-row"><span class="muted">Selected asset</span><strong id="tradeAssetName">Bitcoin</strong></div><div class="list-row"><span class="muted">Demo USD available</span><strong id="tradeAvailable">$10,000.00</strong></div></div></section>
+      <section class="panel form-panel"><h2>Place demo order</h2><label for="tradeAsset">Asset</label><select id="tradeAsset" class="field"></select><label for="tradeSide">Order side</label><select id="tradeSide" class="field"><option value="buy">Buy</option><option value="sell">Sell</option></select><label for="tradeUsd">Amount (USD)</label><input id="tradeUsd" class="field" type="number" min="1" step="1" placeholder="100"><div class="list-row"><span class="muted">Estimated quantity</span><strong id="estimatedQty">—</strong></div><div class="two-buttons"><button class="buy" id="buyBtn">Buy (Demo)</button><button class="sell" id="sellBtn">Sell (Demo)</button></div><p id="tradeMessage" class="muted tiny" aria-live="polite">Choose an asset and amount to preview an order.</p></section>
     </div>
-
-  </div>
-
-  <section class="panel">
-    <h2>📊 Cryptocurrency Markets</h2>
-    <p class="muted small">
-      Select a coin to view its current market information.
-    </p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Asset</th>
-          <th>Price (USD)</th>
-          <th>24h Change</th>
-        </tr>
-      </thead>
-
-      <tbody id="coinList">
-        <tr>
-          <td colspan="3">Loading market prices...</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p id="selectedCoin" class="muted">
-      Select a cryptocurrency above.
-    </p>
+    <section class="panel"><div class="section-head"><h2>Recent demo orders</h2></div><div id="tradeHistory" style="padding:0 18px"><div class="empty">No demo trades yet.</div></div></section>
   </section>
-
-  <section class="panel">
-    <h2>🤖 AI Trading Assistant</h2>
-
-    <p class="muted">
-      Ask questions about cryptocurrency trading.
-    </p>
-
-    <input
-      id="question"
-      placeholder="Example: Explain Bitcoin market trends"
-    >
-
-    <button onclick="askAI()">Ask AI</button>
-
-    <p id="message">
-      Your AI assistant will be connected in a later step.
-    </p>
+  <section id="page-wallet" class="hidden">
+    <div class="page-title"><div><h1>Wallet & Portfolio</h1><div class="muted">Local demo portfolio stored in this browser.</div></div><span class="tag">VIRTUAL FUNDS</span></div>
+    <div class="cards"><div class="card"><div class="label">Available demo USD</div><div class="big" id="walletBalance">$10,000.00</div></div><div class="card"><div class="label">Holdings market value</div><div class="big" id="holdingsValue">$0.00</div></div><div class="card"><div class="label">Portfolio total</div><div class="big" id="portfolioTotal">$10,000.00</div></div><div class="card"><div class="label">Demo transactions</div><div class="big" id="txCount">0</div></div></div>
+    <section class="panel"><div class="section-head"><h2>Your assets</h2><button class="secondary" id="exportCsv">Export history CSV</button></div><div class="table-wrap"><table><thead><tr><th>Asset</th><th>Quantity</th><th>Price</th><th>Value</th></tr></thead><tbody id="holdingsRows"><tr><td colspan="4" class="empty">No crypto holdings yet. Try a demo trade.</td></tr></tbody></table></div></section>
+    <section class="panel"><div class="section-head"><h2>Transaction history</h2></div><div id="walletHistory" style="padding:0 18px"><div class="empty">No transactions yet.</div></div></section>
   </section>
-
-  <section class="panel">
-    <h2>💹 Demo Trading</h2>
-
-    <p class="muted">
-      Practice with virtual funds. No real money is used.
-    </p>
-
-    <label>Selected cryptocurrency</label>
-
-    <input id="tradeCoin" value="BTC" readonly>
-
-    <label>Amount in USD</label>
-
-    <input
-      id="tradeAmount"
-      type="number"
-      min="1"
-      placeholder="100"
-    >
-
-    <button onclick="trade('BUY')">Buy</button>
-    <button
-      onclick="trade('SELL')"
-      style="background:#ff7373;margin-left:5px"
-    >
-      Sell
-    </button>
-
-    <p id="tradeMessage" class="muted"></p>
+  <section id="page-deposit" class="hidden">
+    <div class="page-title"><div><h1>Deposit</h1><div class="muted">Real deposits are not available in this prototype.</div></div><span class="tag">NOT CONNECTED</span></div>
+    <section class="panel form-panel"><h2>Deposit funds</h2><p>To accept real deposits, the platform needs an approved payment or exchange provider, a verified business account, server-side transaction verification, anti-fraud controls and secure reconciliation. No deposit address or payment instructions are generated here.</p><label>Payment method</label><select class="field" disabled><option>Provider integration required</option></select><label>Amount</label><input class="field" type="number" disabled placeholder="Unavailable until integration"><button class="primary full" disabled>Real deposit unavailable</button><p class="muted tiny">Do not send cryptocurrency or money to an address provided outside a verified production integration.</p></section>
   </section>
-
-  <section class="panel">
-    <h2>📡 AI Trading Signals</h2>
-    <p class="muted">
-      Market data and signal generation will be connected in a later step.
-      Signals are not guarantees of future prices.
-    </p>
-    <div id="signals">Waiting for market data...</div>
+  <section id="page-withdraw" class="hidden">
+    <div class="page-title"><div><h1>Withdraw</h1><div class="muted">Real withdrawals are not available in this prototype.</div></div><span class="tag">NOT CONNECTED</span></div>
+    <section class="panel form-panel"><h2>Withdraw funds</h2><p>Real withdrawals require authenticated accounts, secure backend authorization, provider-side balance checks, transaction screening, risk controls and audit logs. This page cannot send money or cryptocurrency.</p><label>Asset / network</label><select class="field" disabled><option>Provider integration required</option></select><label>Destination address</label><input class="field" disabled placeholder="Unavailable until secure integration"><label>Amount</label><input class="field" type="number" disabled placeholder="Unavailable until integration"><button class="primary full" disabled>Real withdrawal unavailable</button><p class="muted tiny">Never share seed phrases, private keys or one-time authentication codes.</p></section>
   </section>
-
+  <section id="page-profile" class="hidden">
+    <div class="page-title"><div><h1>Profile & Verification</h1><div class="muted">Prototype settings; no secure account service is connected.</div></div><span class="tag">GUEST PROFILE</span></div>
+    <div class="content-grid"><section class="panel form-panel"><h2>Profile settings</h2><label for="displayName">Display name (local only)</label><input id="displayName" class="field" maxlength="50" placeholder="Your display name"><label for="displayCurrency">Display currency</label><select id="displayCurrency" class="field"><option value="USD">USD — US Dollar</option></select><button class="primary full" id="saveProfile">Save local settings</button><p id="profileMessage" class="muted tiny"></p></section><section class="panel form-panel"><h2>Identity verification (KYC)</h2><div class="list-row"><span class="muted">Verification status</span><span class="tag">Not connected</span></div><p>KYC must be handled by a qualified identity-verification provider through a secure backend. This demo does not request, upload or store identity documents.</p><button class="secondary full" disabled>KYC provider not configured</button><p class="muted tiny">Do not upload passports, ID cards, selfies or proof-of-address documents to this public website.</p></section></div>
+  </section>
 </main>
-
-<footer>
-  OnChainCrypto AI · Cryptocurrency market information
-  <br><br>
-  Demo trading only. No real orders are executed.
-</footer>
-
+<footer>OnChainCrypto · Public market data and simulated trading prototype · Not a bank, broker or cryptocurrency exchange. No real deposits, withdrawals, custody or orders are enabled.</footer>
 <script>
-const API =
-  "https://api.coingecko.com/api/v3/coins/markets";
-
 const COINS = [
-  "bitcoin",
-  "ethereum",
-  "ripple",
-  "solana",
-  "binancecoin",
-  "dogecoin",
-  "cardano",
-  "tron",
-  "avalanche-2",
-  "chainlink",
-  "polkadot",
-  "litecoin",
-  "bitcoin-cash",
-  "stellar",
-  "sui"
+{id:"bitcoin",symbol:"BTC",name:"Bitcoin"},{id:"ethereum",symbol:"ETH",name:"Ethereum"},{id:"tether",symbol:"USDT",name:"Tether"},{id:"binancecoin",symbol:"BNB",name:"BNB"},{id:"solana",symbol:"SOL",name:"Solana"},{id:"ripple",symbol:"XRP",name:"XRP"},{id:"usd-coin",symbol:"USDC",name:"USDC"},{id:"dogecoin",symbol:"DOGE",name:"Dogecoin"},{id:"tron",symbol:"TRX",name:"TRON"},{id:"the-open-network",symbol:"TON",name:"Toncoin"},{id:"cardano",symbol:"ADA",name:"Cardano"},{id:"avalanche-2",symbol:"AVAX",name:"Avalanche"},{id:"shiba-inu",symbol:"SHIB",name:"Shiba Inu"},{id:"chainlink",symbol:"LINK",name:"Chainlink"},{id:"bitcoin-cash",symbol:"BCH",name:"Bitcoin Cash"},{id:"sui",symbol:"SUI",name:"Sui"},{id:"stellar",symbol:"XLM",name:"Stellar"},{id:"polkadot",symbol:"DOT",name:"Polkadot"},{id:"litecoin",symbol:"LTC",name:"Litecoin"},{id:"near",symbol:"NEAR",name:"NEAR Protocol"}
 ];
-
-let market = [];
-let balance = 10000;
-let holdings = {};
-
-async function loadMarket() {
-  const list = document.getElementById("coinList");
-
-  try {
-    const url =
-      API +
-      "?vs_currency=usd&ids=" +
-      COINS.join(",") +
-      "&order=market_cap_desc&per_page=100&page=1";
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error("Market provider unavailable");
-    }
-
-    market = await response.json();
-
-    if (!market.length) {
-      throw new Error("No market data returned");
-    }
-
-    list.innerHTML = "";
-
-    market.forEach(coin => {
-      const row = document.createElement("tr");
-
-      row.className = "coin";
-
-      const name = document.createElement("td");
-      name.textContent =
-        coin.name + " (" + coin.symbol.toUpperCase() + ")";
-
-      const price = document.createElement("td");
-      price.textContent =
-        "$" + Number(coin.current_price).toLocaleString(
-          "en-US",
-          { maximumFractionDigits: 6 }
-        );
-
-      const change = document.createElement("td");
-      const changeValue = Number(
-        coin.price_change_percentage_24h || 0
-      );
-
-      change.textContent = changeValue.toFixed(2) + "%";
-      change.className =
-        changeValue >= 0 ? "green" : "red";
-
-      row.append(name, price, change);
-
-      row.addEventListener("click", () => {
-        document.getElementById("selectedCoin").textContent =
-          coin.name + " price: $" + coin.current_price;
-
-        document.getElementById("tradeCoin").value =
-          coin.symbol.toUpperCase();
-      });
-
-      list.appendChild(row);
-    });
-
-    document.getElementById("marketStatus").textContent =
-      "Connected";
-
-    document.getElementById("signals").textContent =
-      "Market data loaded. AI signal generation is not connected yet.";
-
-  } catch (error) {
-    list.innerHTML =
-      '<tr><td colspan="3">Market prices could not load. ' +
-      'Check your internet connection or try again later.</td></tr>';
-
-    document.getElementById("marketStatus").textContent =
-      "Unavailable";
-  }
+const $=id=>document.getElementById(id);
+const money=n=>Number.isFinite(Number(n))?"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:Number(n)<1?6:2}):"—";
+const pct=n=>((Number(n)||0)>=0?"+":"")+(Number(n)||0).toFixed(2)+"%";
+const safe=(s)=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let market=[], filter="all", selected="BTC", watchlist=new Set(JSON.parse(localStorage.getItem("oc_watchlist")||"[]"));
+let state=JSON.parse(localStorage.getItem("oc_demo_state")||"null")||{balance:10000,holdings:{},history:[]};
+let profile=JSON.parse(localStorage.getItem("oc_profile")||'{"name":"","currency":"USD"}');
+function saveState(){localStorage.setItem("oc_demo_state",JSON.stringify(state))}
+function priceFor(symbol){return market.find(c=>c.symbol.toUpperCase()===symbol.toUpperCase())}
+function coinIcon(c,size=29){return c?.image?'<span class="coin-icon"><img alt="" loading="lazy" src="'+safe(c.image)+'"></span>':'<span class="coin-icon">'+safe((c?.symbol||"?").slice(0,3).toUpperCase())+'</span>'}
+function coinAsset(c){return '<div class="asset">'+coinIcon(c)+'<div><span class="asset-name">'+safe(c.name)+'</span><span class="asset-symbol">'+safe(c.symbol.toUpperCase())+'</span></div></div>'}
+function renderMarket(){
+ let list=[...market];
+ if(filter==="gainers")list=list.filter(c=>(c.price_change_percentage_24h||0)>0).sort((a,b)=>b.price_change_percentage_24h-a.price_change_percentage_24h);
+ if(filter==="losers")list=list.filter(c=>(c.price_change_percentage_24h||0)<0).sort((a,b)=>a.price_change_percentage_24h-b.price_change_percentage_24h);
+ if(filter==="hot")list.sort((a,b)=>(b.total_volume||0)-(a.total_volume||0));
+ if(filter==="watchlist")list=list.filter(c=>watchlist.has(c.symbol.toUpperCase()));
+ const q=$("marketSearch").value.trim().toLowerCase();
+ if(q)list=list.filter(c=>c.name.toLowerCase().includes(q)||c.symbol.toLowerCase().includes(q));
+ $("marketRows").innerHTML=list.length?list.map(c=>'<tr class="row-click" data-symbol="'+safe(c.symbol.toUpperCase())+'"><td>'+coinAsset(c)+'<div class="muted tiny" style="margin-left:39px">'+safe(c.symbol.toUpperCase())+'/USDT</div></td><td>'+money(c.current_price)+'</td><td class="'+((c.price_change_percentage_24h||0)>=0?"green":"red")+'">'+pct(c.price_change_percentage_24h)+'</td><td>'+money(c.market_cap)+'</td><td><button class="star '+(watchlist.has(c.symbol.toUpperCase())?"on":"")+'" data-star="'+safe(c.symbol.toUpperCase())+'" aria-label="Toggle watchlist">★</button></td></tr>').join(""):'<tr><td colspan="5" class="empty">No matching assets. Refresh prices or change the filter.</td></tr>';
+ document.querySelectorAll("[data-star]").forEach(b=>b.addEventListener("click",e=>{e.stopPropagation();const s=b.dataset.star;watchlist.has(s)?watchlist.delete(s):watchlist.add(s);localStorage.setItem("oc_watchlist",JSON.stringify([...watchlist]));renderMarket()}));
+ document.querySelectorAll("#marketRows tr[data-symbol]").forEach(row=>row.addEventListener("click",e=>{if(e.target.closest("[data-star]"))return;selected=row.dataset.symbol;$("tradeAsset").value=selected;updateTradePreview();showPage("trade")}));
+ renderMiniList("gainersList",[...market].sort((a,b)=>(b.price_change_percentage_24h||0)-(a.price_change_percentage_24h||0)).slice(0,3),"change");
+ renderMiniList("losersList",[...market].sort((a,b)=>(a.price_change_percentage_24h||0)-(b.price_change_percentage_24h||0)).slice(0,3),"change");
+ renderMiniList("hotList",[...market].sort((a,b)=>(b.total_volume||0)-(a.total_volume||0)).slice(0,3),"volume");
+ const up=[...market].sort((a,b)=>(b.price_change_percentage_24h||0)-(a.price_change_percentage_24h||0))[0];
+ const down=[...market].sort((a,b)=>(a.price_change_percentage_24h||0)-(b.price_change_percentage_24h||0))[0];
+ $("topGainer").textContent=up?up.symbol.toUpperCase():"—";$("topGainerChange").textContent=up?pct(up.price_change_percentage_24h):"Waiting for data";
+ $("topLoser").textContent=down?down.symbol.toUpperCase():"—";$("topLoserChange").textContent=down?pct(down.price_change_percentage_24h):"Waiting for data";
+ $("assetCount").textContent=String(market.length);renderTradeSelect();renderWallet();
 }
-
-function trade(side) {
-  const symbol =
-    document.getElementById("tradeCoin").value.toUpperCase();
-
-  const amount = Number(
-    document.getElementById("tradeAmount").value
-  );
-
-  const coin = market.find(
-    item => item.symbol.toUpperCase() === symbol
-  );
-
-  const output = document.getElementById("tradeMessage");
-
-  if (!coin) {
-    output.textContent =
-      "Please select a cryptocurrency after prices load.";
-    return;
-  }
-
-  if (!Number.isFinite(amount) || amount <= 0) {
-    output.textContent = "Enter a valid amount.";
-    return;
-  }
-
-  const quantity = amount / coin.current_price;
-
-  holdings[symbol] = holdings[symbol] || 0;
-
-  if (side === "BUY") {
-    if (amount > balance) {
-      output.textContent = "Insufficient demo balance.";
-      return;
-    }
-
-    balance -= amount;
-    holdings[symbol] += quantity;
-
-  } else {
-    if (quantity > holdings[symbol]) {
-      output.textContent =
-        "Insufficient demo holdings to sell this amount.";
-      return;
-    }
-
-    holdings[symbol] -= quantity;
-    balance += amount;
-  }
-
-  document.getElementById("balance").textContent =
-    "$" + balance.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-
-  output.textContent =
-    side + " simulated successfully: " +
-    quantity.toFixed(8) + " " + symbol +
-    " for $" + amount.toFixed(2) +
-    ". This trade is stored only in this browser session.";
+function renderMiniList(id,items,mode){$(id).innerHTML=items.length?items.map(c=>'<div class="mini-row"><div class="mini-left">'+coinIcon(c,22)+'<span>'+safe(c.symbol.toUpperCase())+'</span></div><div class="mini-price '+(mode==="change"?((c.price_change_percentage_24h||0)>=0?"green":"red"):"")+'">'+(mode==="change"?pct(c.price_change_percentage_24h):money(c.total_volume))+'</div></div>').join(""):'<div class="muted tiny">No data</div>'}
+async function loadMarket(){
+ $("connection").textContent="Loading";$("apiStatus").textContent="Connecting…";
+ try{
+ const ids=COINS.map(c=>c.id).join(",");
+ const response=await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(ids)+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",{headers:{accept:"application/json"}});
+ if(!response.ok)throw new Error("Market provider returned "+response.status);
+ const data=await response.json();if(!Array.isArray(data)||!data.length)throw new Error("No market data returned");
+ market=data.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()}));
+ $("connection").textContent="Live data";$("apiStatus").innerHTML='<span class="green">Connected</span>';$("lastUpdate").textContent=new Date().toLocaleTimeString();
+ renderMarket();updateTradePreview();
+ }catch(err){$("connection").textContent="Unavailable";$("apiStatus").innerHTML='<span class="red">Unavailable</span>';if(!market.length)$("marketRows").innerHTML='<tr><td colspan="5" class="empty">Could not load prices. Check your connection, try again later, or note that the public API may rate-limit requests.</td></tr>'; $("marketHint").textContent="Refresh later; provider may rate-limit"; }
 }
-
-function showLogin() {
-  alert(
-    "Secure account registration and login will be added in a later step."
-  );
-}
-
-function askAI() {
-  const question =
-    document.getElementById("question").value.trim();
-
-  const message = document.getElementById("message");
-
-  if (!question) {
-    message.textContent = "Please enter a question.";
-    return;
-  }
-
-  message.textContent =
-    "The AI service is not connected yet. " +
-    "We will connect the real AI assistant through a secure backend.";
-}
-
-loadMarket();
-
-setInterval(loadMarket, 60000);
+function renderTradeSelect(){const old=$("tradeAsset").value||selected;$("tradeAsset").innerHTML=market.map(c=>'<option value="'+safe(c.symbol)+'">'+safe(c.symbol+' — '+c.name)+'</option>').join("");if(market.some(c=>c.symbol===old))$("tradeAsset").value=old;else if(market.some(c=>c.symbol===selected))$("tradeAsset").value=selected;updateTradePreview()}
+function updateTradePreview(){const sym=$("tradeAsset").value||selected;const c=priceFor(sym);$("tradePairTitle").textContent=sym+"/USDT";$("tradeAssetName").textContent=c?.name||sym;$("tradeCurrentPrice").textContent=c?money(c.current_price):"—";$("tradeCurrentChange").textContent=c?pct(c.price_change_percentage_24h):"Waiting for market data";$("tradeCurrentChange").className=(c?.price_change_percentage_24h||0)>=0?"green":"red";$("tradeAvailable").textContent=money(state.balance);const amount=Number($("tradeUsd").value);$("estimatedQty").textContent=c&&amount>0?(amount/c.current_price).toFixed(8)+" "+sym:"—"}
+function doTrade(side){const sym=$("tradeAsset").value,c=priceFor(sym),amount=Number($("tradeUsd").value);if(!c){$("tradeMessage").textContent="Market price unavailable. Refresh prices first.";return}if(!Number.isFinite(amount)||amount<=0){$("tradeMessage").textContent="Enter a valid amount greater than zero.";return}const qty=amount/c.current_price;state.holdings[sym]=Number(state.holdings[sym]||0);if(side==="buy"){if(amount>state.balance){$("tradeMessage").textContent="Insufficient virtual USD balance.";return}state.balance-=amount;state.holdings[sym]+=qty}else{if(qty>state.holdings[sym]){$("tradeMessage").textContent="Not enough demo "+sym+" holdings to sell this amount.";return}state.holdings[sym]-=qty;state.balance+=amount}state.history.unshift({side,symbol:sym,amount,qty,price:c.current_price,time:new Date().toISOString(),demo:true});saveState();renderWallet();updateTradePreview();$("tradeMessage").textContent="Demo "+side.toUpperCase()+" completed using virtual funds only. No real order was placed.";renderTradeHistory()}
+function renderTradeHistory(){const rows=state.history.slice(0,10);$("tradeHistory").innerHTML=rows.length?rows.map(t=>'<div class="list-row"><div><strong class="'+(t.side==="buy"?"green":"red")+'">'+t.side.toUpperCase()+' '+safe(t.symbol)+'</strong><div class="muted tiny">'+new Date(t.time).toLocaleString()+'</div></div><div style="text-align:right"><strong>'+money(t.amount)+'</strong><div class="muted tiny">'+Number(t.qty).toFixed(8)+' @ '+money(t.price)+'</div></div></div>').join(""):'<div class="empty">No demo trades yet.</div>'}
+function renderWallet(){const value=Object.entries(state.holdings).reduce((sum,[sym,qty])=>sum+(Number(qty)||0)*(priceFor(sym)?.current_price||0),0);$("summaryBalance").textContent=money(state.balance);$("walletBalance").textContent=money(state.balance);$("holdingsValue").textContent=money(value);$("portfolioTotal").textContent=money(state.balance+value);$("txCount").textContent=String(state.history.length);const rows=Object.entries(state.holdings).filter(([s,q])=>Number(q)>0.0000000001);$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym};return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+'</td><td>'+money(c.current_price)+'</td><td>'+money(Number(qty)*(c.current_price||0))+'</td></tr>'}).join(""):'<tr><td colspan="4" class="empty">No crypto holdings yet. Try a demo trade.</td></tr>';$("walletHistory").innerHTML=state.history.length?state.history.map(t=>'<div class="list-row"><div><strong class="'+(t.side==="buy"?"green":"red")+'">'+t.side.toUpperCase()+' '+safe(t.symbol)+'</strong><div class="muted tiny">'+new Date(t.time).toLocaleString()+' · DEMO</div></div><div style="text-align:right"><strong>'+money(t.amount)+'</strong><div class="muted tiny">'+Number(t.qty).toFixed(8)+' coins</div></div></div>').join(""):'<div class="empty">No transactions yet.</div>';renderTradeHistory()}
+function showPage(page){document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));window.scrollTo({top:0,behavior:"smooth"});if(page==="wallet")renderWallet();if(page==="trade")updateTradePreview()}
+document.querySelectorAll("#nav button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+document.querySelectorAll("#marketTabs button").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.filter;document.querySelectorAll("#marketTabs button").forEach(x=>x.classList.toggle("active",x===b));renderMarket()}));
+$("marketSearch").addEventListener("input",renderMarket);$("refreshBtn").addEventListener("click",loadMarket);$("retryBtn").addEventListener("click",loadMarket);$("tradeAsset").addEventListener("change",()=>{selected=$("tradeAsset").value;updateTradePreview()});$("tradeUsd").addEventListener("input",updateTradePreview);$("buyBtn").addEventListener("click",()=>doTrade("buy"));$("sellBtn").addEventListener("click",()=>doTrade("sell"));
+$("exportCsv").addEventListener("click",()=>{const rows=[["time","side","symbol","amount_usd","quantity","price_usd","demo"],...state.history.map(t=>[t.time,t.side,t.symbol,t.amount,t.qty,t.price,"true"])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="onchaincrypto-demo-history.csv";a.click();URL.revokeObjectURL(a.href)});
+$("displayName").value=profile.name||"";$("displayCurrency").value=profile.currency||"USD";$("saveProfile").addEventListener("click",()=>{profile={name:$("displayName").value.trim(),currency:$("displayCurrency").value};localStorage.setItem("oc_profile",JSON.stringify(profile));$("profileMessage").textContent="Local settings saved in this browser only. No online account was created."});
+renderWallet();loadMarket();setInterval(loadMarket,120000);
 </script>
-
 </body>
 </html>
