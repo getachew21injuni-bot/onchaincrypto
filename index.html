@@ -204,6 +204,29 @@ function renderMarket(){
  $("topLoser").textContent=down?down.symbol.toUpperCase():"—";$("topLoserChange").textContent=down?pct(down.price_change_percentage_24h):"Waiting for data";
  $("assetCount").textContent=String(market.length);renderTradeSelect();renderWallet();
 }
+function renderSignalScanner(){
+ const body=$("signalRows");if(!body)return;
+ if(!market.length){body.innerHTML='<tr><td colspan="5" class="empty">Waiting for public market data. Try refreshing in a moment.</td></tr>';return}
+ const rows=[...market].sort((a,b)=>(b.total_volume||0)-(a.total_volume||0));
+ body.innerHTML=rows.map(c=>{
+  const change=Number(c.price_change_percentage_24h||0),volume=Number(c.total_volume||0);
+  let label="NEUTRAL",cls="signal-flat",reason="Mixed / limited momentum";
+  if(change>=2){label="BULLISH MOMENTUM";cls="signal-bull";reason="Positive 24h move"}
+  else if(change<=-2){label="BEARISH MOMENTUM";cls="signal-bear";reason="Negative 24h move"}
+  else if(change>0.25){label="MILDLY BULLISH";cls="signal-bull";reason="Slight positive move"}
+  else if(change< -0.25){label="MILDLY BEARISH";cls="signal-bear";reason="Slight negative move"}
+  return '<tr class="row-click signal-row" data-signal-symbol="'+safe(c.symbol.toUpperCase())+'"><td>'+coinAsset(c)+'<div class="muted tiny" style="margin-left:39px">'+safe(c.symbol.toUpperCase())+'/USDT</div></td><td>'+money(c.current_price)+'</td><td class="'+(change>=0?'green':'red')+'">'+pct(change)+'</td><td><span class="signal-chip '+cls+'"><span class="signal-dot"></span>'+label+'</span><div class="muted tiny" style="margin-top:4px">'+reason+'</div></td><td>'+money(volume)+'</td></tr>'
+ }).join("");
+ body.querySelectorAll("[data-signal-symbol]").forEach(row=>row.addEventListener("click",()=>{
+  selected=row.dataset.signalSymbol;$("tradeAsset").value=selected;updateTradePreview();showPage("trade");loadPriceHistory();updateTradingViewChart(selected)
+ }));
+}
+function updateTradingViewChart(symbol){
+ const frame=$("tradingViewChart");if(!frame)return;
+ const sym=String(symbol||"BTC").toUpperCase();
+ const pair=(sym==="USDT"||sym==="USDC")?"BTCUSDT":sym+"USDT";
+ frame.src="https://www.tradingview.com/widgetembed/?symbol="+encodeURIComponent("BINANCE:"+pair)+"&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false";
+}
 function renderMiniList(id,items,mode){$(id).innerHTML=items.length?items.map(c=>'<div class="mini-row"><div class="mini-left">'+coinIcon(c,22)+'<span>'+safe(c.symbol.toUpperCase())+'</span></div><div class="mini-price '+(mode==="change"?((c.price_change_percentage_24h||0)>=0?"green":"red"):"")+'">'+(mode==="change"?pct(c.price_change_percentage_24h):money(c.total_volume))+'</div></div>').join(""):'<div class="muted tiny">No data</div>'}
 async function loadMarket(){
  $("connection").textContent="Loading";$("apiStatus").textContent="Connecting…";
