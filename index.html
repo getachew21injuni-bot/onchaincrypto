@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OnChainCrypto AI</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #0b1120;
+  color: #f1f5f9;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  background: #111b2e;
+  padding: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #263449;
+}
+
+.logo {
+  color: #42e8a4;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+button {
+  background: #42e8a4;
+  color: #07111b;
+  border: none;
+  border-radius: 7px;
+  padding: 11px 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+main {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 27px;
+}
+
+.muted {
+  color: #9aabc2;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.card, .panel {
+  background: #111b2e;
+  border: 1px solid #263449;
+  border-radius: 12px;
+  padding: 17px;
+}
+
+.value {
+  font-size: 21px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.green {
+  color: #42e8a4;
+}
+
+.red {
+  color: #ff7373;
+}
+
+.panel {
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 430px;
+}
+
+th, td {
+  padding: 13px 8px;
+  text-align: left;
+  border-bottom: 1px solid #263449;
+}
+
+th {
+  color: #9aabc2;
+}
+
+.coin {
+  cursor: pointer;
+}
+
+.coin:hover {
+  background: #1b2940;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  background: #0b1120;
+  color: white;
+  border: 1px solid #34445b;
+  border-radius: 7px;
+}
+
+#message {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+footer {
+  text-align: center;
+  padding: 25px;
+  color: #9aabc2;
+}
+
+.small {
+  font-size: 12px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">⚡ OnChainCrypto AI</div>
+  <button onclick="showLogin()">Login</button>
+</header>
+
+<main>
+
+  <h1>Crypto Trading Dashboard</h1>
+  <p class="muted">
+    Explore cryptocurrency markets and AI-assisted analysis.
+  </p>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="muted">Demo Balance</div>
+      <div class="value" id="balance">$10,000.00</div>
+    </div>
+
+    <div class="card">
+      <div class="muted">Market Status</div>
+      <div class="value green" id="marketStatus">
+        Connecting...
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="muted">Trading Mode</div>
+      <div class="value">DEMO</div>
+    </div>
+
+  </div>
+
+  <section class="panel">
+    <h2>📊 Cryptocurrency Markets</h2>
+    <p class="muted small">
+      Select a coin to view its current market information.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Asset</th>
+          <th>Price (USD)</th>
+          <th>24h Change</th>
+        </tr>
+      </thead>
+
+      <tbody id="coinList">
+        <tr>
+          <td colspan="3">Loading market prices...</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p id="selectedCoin" class="muted">
+      Select a cryptocurrency above.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2>🤖 AI Trading Assistant</h2>
+
+    <p class="muted">
+      Ask questions about cryptocurrency trading.
+    </p>
+
+    <input
+      id="question"
+      placeholder="Example: Explain Bitcoin market trends"
+    >
+
+    <button onclick="askAI()">Ask AI</button>
+
+    <p id="message">
+      Your AI assistant will be connected in a later step.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2>💹 Demo Trading</h2>
+
+    <p class="muted">
+      Practice with virtual funds. No real money is used.
+    </p>
+
+    <label>Selected cryptocurrency</label>
+
+    <input id="tradeCoin" value="BTC" readonly>
+
+    <label>Amount in USD</label>
+
+    <input
+      id="tradeAmount"
+      type="number"
+      min="1"
+      placeholder="100"
+    >
+
+    <button onclick="trade('BUY')">Buy</button>
+    <button
+      onclick="trade('SELL')"
+      style="background:#ff7373;margin-left:5px"
+    >
+      Sell
+    </button>
+
+    <p id="tradeMessage" class="muted"></p>
+  </section>
+
+  <section class="panel">
+    <h2>📡 AI Trading Signals</h2>
+    <p class="muted">
+      Market data and signal generation will be connected in a later step.
+      Signals are not guarantees of future prices.
+    </p>
+    <div id="signals">Waiting for market data...</div>
+  </section>
+
+</main>
+
+<footer>
+  OnChainCrypto AI · Cryptocurrency market information
+  <br><br>
+  Demo trading only. No real orders are executed.
+</footer>
+
+<script>
+const API =
+  "https://api.coingecko.com/api/v3/coins/markets";
+
+const COINS = [
+  "bitcoin",
+  "ethereum",
+  "ripple",
+  "solana",
+  "binancecoin",
+  "dogecoin",
+  "cardano",
+  "tron",
+  "avalanche-2",
+  "chainlink",
+  "polkadot",
+  "litecoin",
+  "bitcoin-cash",
+  "stellar",
+  "sui"
+];
+
+let market = [];
+let balance = 10000;
+let holdings = {};
+
+async function loadMarket() {
+  const list = document.getElementById("coinList");
+
+  try {
+    const url =
+      API +
+      "?vs_currency=usd&ids=" +
+      COINS.join(",") +
+      "&order=market_cap_desc&per_page=100&page=1";
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error("Market provider unavailable");
+    }
+
+    market = await response.json();
+
+    if (!market.length) {
+      throw new Error("No market data returned");
+    }
+
+    list.innerHTML = "";
+
+    market.forEach(coin => {
+      const row = document.createElement("tr");
+
+      row.className = "coin";
+
+      const name = document.createElement("td");
+      name.textContent =
+        coin.name + " (" + coin.symbol.toUpperCase() + ")";
+
+      const price = document.createElement("td");
+      price.textContent =
+        "$" + Number(coin.current_price).toLocaleString(
+          "en-US",
+          { maximumFractionDigits: 6 }
+        );
+
+      const change = document.createElement("td");
+      const changeValue = Number(
+        coin.price_change_percentage_24h || 0
+      );
+
+      change.textContent = changeValue.toFixed(2) + "%";
+      change.className =
+        changeValue >= 0 ? "green" : "red";
+
+      row.append(name, price, change);
+
+      row.addEventListener("click", () => {
+        document.getElementById("selectedCoin").textContent =
+          coin.name + " price: $" + coin.current_price;
+
+        document.getElementById("tradeCoin").value =
+          coin.symbol.toUpperCase();
+      });
+
+      list.appendChild(row);
+    });
+
+    document.getElementById("marketStatus").textContent =
+      "Connected";
+
+    document.getElementById("signals").textContent =
+      "Market data loaded. AI signal generation is not connected yet.";
+
+  } catch (error) {
+    list.innerHTML =
+      '<tr><td colspan="3">Market prices could not load. ' +
+      'Check your internet connection or try again later.</td></tr>';
+
+    document.getElementById("marketStatus").textContent =
+      "Unavailable";
+  }
+}
+
+function trade(side) {
+  const symbol =
+    document.getElementById("tradeCoin").value.toUpperCase();
+
+  const amount = Number(
+    document.getElementById("tradeAmount").value
+  );
+
+  const coin = market.find(
+    item => item.symbol.toUpperCase() === symbol
+  );
+
+  const output = document.getElementById("tradeMessage");
+
+  if (!coin) {
+    output.textContent =
+      "Please select a cryptocurrency after prices load.";
+    return;
+  }
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    output.textContent = "Enter a valid amount.";
+    return;
+  }
+
+  const quantity = amount / coin.current_price;
+
+  holdings[symbol] = holdings[symbol] || 0;
+
+  if (side === "BUY") {
+    if (amount > balance) {
+      output.textContent = "Insufficient demo balance.";
+      return;
+    }
+
+    balance -= amount;
+    holdings[symbol] += quantity;
+
+  } else {
+    if (quantity > holdings[symbol]) {
+      output.textContent =
+        "Insufficient demo holdings to sell this amount.";
+      return;
+    }
+
+    holdings[symbol] -= quantity;
+    balance += amount;
+  }
+
+  document.getElementById("balance").textContent =
+    "$" + balance.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+  output.textContent =
+    side + " simulated successfully: " +
+    quantity.toFixed(8) + " " + symbol +
+    " for $" + amount.toFixed(2) +
+    ". This trade is stored only in this browser session.";
+}
+
+function showLogin() {
+  alert(
+    "Secure account registration and login will be added in a later step."
+  );
+}
+
+function askAI() {
+  const question =
+    document.getElementById("question").value.trim();
+
+  const message = document.getElementById("message");
+
+  if (!question) {
+    message.textContent = "Please enter a question.";
+    return;
+  }
+
+  message.textContent =
+    "The AI service is not connected yet. " +
+    "We will connect the real AI assistant through a secure backend.";
+}
+
+loadMarket();
+
+setInterval(loadMarket, 60000);
+</script>
+
+</body>
+</html>
