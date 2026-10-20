@@ -34,7 +34,7 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
     <button data-page="register" class="register-nav">Register</button>
     <button data-page="support">Support</button>
   </nav>
-  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Connecting</span></span><button class="secondary" id="refreshBtn">↻</button></div>
+  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="secondary" id="refreshBtn">↻</button></div>
 </header>
 <main>
   <section id="page-markets">
@@ -60,7 +60,7 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
       </section>
       <aside>
         <section class="panel"><div class="section-head"><h2>🔥 Hot Coins</h2><span class="muted tiny">24h volume</span></div><div class="market-pills"><div class="mini-card"><h3>Top Gainers</h3><div id="gainersList" class="muted">Loading…</div></div><div class="mini-card"><h3>Top Losers</h3><div id="losersList" class="muted">Loading…</div></div><div class="mini-card"><h3>Hot by Volume</h3><div id="hotList" class="muted">Loading…</div></div></div></section>
-        <section class="panel"><div class="section-head"><h2>Market status</h2></div><div style="padding:18px"><div class="list-row"><span class="muted">Public market API</span><strong id="apiStatus">Connecting…</strong></div><div class="list-row"><span class="muted">Real exchange orders</span><span class="tag">Not connected</span></div><div class="list-row"><span class="muted">Deposits / withdrawals</span><span class="tag">Not connected</span></div><p class="muted tiny">Prices may be delayed, incomplete or unavailable. This site is not an exchange or a financial adviser.</p></div></section>
+        <section class="panel"><div class="section-head"><h2>Market status</h2></div><div style="padding:18px"><div class="list-row"><span class="muted">Public market API</span><strong id="apiStatus">Waiting for prices</strong></div><div class="list-row"><span class="muted">Real exchange orders</span><span class="tag">Not connected</span></div><div class="list-row"><span class="muted">Deposits / withdrawals</span><span class="tag">Not connected</span></div><p class="muted tiny">Prices may be delayed, incomplete or unavailable. This site is not an exchange or a financial adviser.</p></div></section>
       </aside>
     </div>
     <section class="panel signal-scanner">
@@ -279,10 +279,10 @@ function updateTradingViewChart(symbol){
 }
 function renderMiniList(id,items,mode){$(id).innerHTML=items.length?items.map(c=>'<div class="mini-row"><div class="mini-left">'+coinIcon(c,22)+'<span>'+safe(c.symbol.toUpperCase())+'</span></div><div class="mini-price '+(mode==="change"?((c.price_change_percentage_24h||0)>=0?"green":"red"):"")+'">'+(mode==="change"?pct(c.price_change_percentage_24h):money(c.total_volume))+'</div></div>').join(""):'<div class="muted tiny">No data</div>'}
 async function loadMarket(){
- $("connection").textContent="Loading";$("apiStatus").textContent="Connecting…";
+ $("connection").textContent="Updating";$("apiStatus").textContent="Loading prices…";
  try{
  const ids=COINS.map(c=>c.id).join(",");
- const response=await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(ids)+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",{headers:{accept:"application/json"}});
+ const response=await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(ids)+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",{headers:{accept:"application/json"},signal:AbortSignal.timeout(12000)});
  if(!response.ok)throw new Error("Market provider returned "+response.status);
  const data=await response.json();if(!Array.isArray(data)||!data.length)throw new Error("No market data returned");
  market=data.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()}));
