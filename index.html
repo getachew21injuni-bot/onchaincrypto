@@ -77,18 +77,37 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
       <section class="panel"><div class="chart-area"><div class="page-title"><div><h2 id="tradePairTitle">BTC / USD</h2><div class="muted tiny">Indicative public price</div></div><div><div class="big" id="tradeCurrentPrice">$—</div><div id="tradeCurrentChange" class="muted">—</div></div></div><div class="chart-wrap"><div class="list-row"><strong>Live exchange chart</strong><span class="tag">TradingView</span></div><iframe id="tradingViewChart" class="tv-chart" title="Live cryptocurrency candlestick chart" loading="lazy" referrerpolicy="origin" allowfullscreen src="https://www.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCUSDT&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false"></iframe><p class="muted tiny">Chart availability depends on the selected pair and TradingView market coverage. This embed does not place orders.</p></div><div class="chart-wrap"><div class="muted tiny">7-day trend overview</div><canvas id="priceChart" height="220" aria-label="Recent cryptocurrency price chart"></canvas><div id="chartStatus" class="muted tiny">Loading recent price history…</div></div><div class="signal-box"><div class="section-head"><h3>Live market signal</h3><span class="tag">INDICATOR ONLY</span></div><div id="signalResult">Waiting for price history…</div><p class="muted tiny">Rule-based educational indicator from recent prices; not financial advice or a promise of returns.</p></div><div class="list-row"><span class="muted">Selected asset</span><strong id="tradeAssetName">Bitcoin</strong></div><div class="list-row"><span class="muted">Demo USD available</span><strong id="tradeAvailable">$10,000.00</strong></div></div></section>
       <section class="panel form-panel"><h2>Place order</h2><label for="tradeAsset">Asset</label><select id="tradeAsset" class="field"></select><label for="tradeSide">Order side</label><select id="tradeSide" class="field"><option value="buy">Buy</option><option value="sell">Sell</option></select><label for="tradeUsd">Amount (USD)</label><input id="tradeUsd" class="field" type="number" min="1" step="1" placeholder="100"><div class="list-row"><span class="muted">Estimated quantity</span><strong id="estimatedQty">—</strong></div><div class="two-buttons"><button class="buy" id="buyBtn">Buy</button><button class="sell" id="sellBtn">Sell</button></div><p id="tradeMessage" class="muted tiny" aria-live="polite">Choose an asset and amount to preview an order.</p></section>
     </div>
-    <section class="panel"><div class="section-head"><h2>Return calculator</h2><span class="tag">ESTIMATE</span></div>
+    <section class="panel"><div class="section-head"><h2>Investment Plan & Estimated Income</h2><span class="tag">SIMULATOR</span></div>
       <div class="form-panel">
-        <p class="muted tiny">Illustrative estimate only. Actual market returns can be negative.</p>
+        <p class="muted tiny">Choose a plan, enter a scenario amount, and select an expiry. These percentages are illustrative inputs for a calculator only—not promised or guaranteed returns. This tool does not invest funds or create a real order.</p>
         <div class="content-grid">
           <div>
-            <label for="strategyAmount">Amount (USD)</label><input id="strategyAmount" class="field" type="number" min="200" max="5000" step="50" value="200">
-            <label for="strategyDuration">Time period</label><select id="strategyDuration" class="field"><option value="30">30 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="120">120 seconds</option><option value="150">150 seconds</option><option value="180">180 seconds</option><option value="210">210 seconds</option><option value="240">240 seconds</option><option value="270">270 seconds</option><option value="300">300 seconds</option><option value="330">330 seconds</option><option value="360">360 seconds</option></select>
-            <button id="calculateStrategy" class="primary full" type="button">Calculate hypothetical scenario</button>
+            <label for="strategyPlan">Select investment plan</label>
+            <select id="strategyPlan" class="field">
+              <option value="12">Plan 1 · $100–$5,000 · 12%</option>
+              <option value="15">Plan 2 · $5,000–$10,000 · 15%</option>
+              <option value="18">Plan 3 · $10,000–$25,000 · 18%</option>
+              <option value="21">Plan 4 · $25,000–$50,000 · 21%</option>
+              <option value="24">Plan 5 · $50,000–$100,000 · 24%</option>
+              <option value="27">Plan 6 · $100,000–$1,000,000 · 27%</option>
+            </select>
+            <label for="strategyAmount">Scenario amount (USD)</label><input id="strategyAmount" class="field" type="number" min="100" max="1000000" step="100" value="1000">
+            <label for="strategyDuration">Select expiration time</label>
+            <select id="strategyDuration" class="field">
+              <option value="30">30 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="120">120 seconds</option><option value="180">180 seconds</option><option value="270">270 seconds</option><option value="360">360 seconds</option>
+            </select>
+            <button id="calculateStrategy" class="primary full" type="button">Calculate estimated income</button>
           </div>
-          <div class="mini-card" aria-live="polite"><div class="muted tiny">Illustrative scenario only</div><div id="strategyRate" class="signal-value yellow">12%</div><div class="list-row"><span class="muted">Illustrative gain</span><strong id="strategyGain" class="green">$24.00</strong></div><div class="list-row"><span class="muted">Scenario total</span><strong id="strategyTotal">$224.00</strong></div><div class="list-row"><span class="muted">Duration</span><strong id="strategyDurationLabel">30 seconds</strong></div><div id="strategyNotice" class="muted tiny">This is arithmetic only, not a forecast.</div></div>
+          <div class="mini-card" aria-live="polite"><div class="muted tiny">Illustrative estimate</div><div id="strategyRate" class="signal-value yellow">12% scenario</div><div class="list-row"><span class="muted">Estimated income</span><strong id="strategyGain" class="green">$120.00</strong></div><div class="list-row"><span class="muted">Scenario total</span><strong id="strategyTotal">$1,120.00</strong></div><div class="list-row"><span class="muted">Expiration</span><strong id="strategyDurationLabel">30 seconds</strong></div><div id="strategyNotice" class="muted tiny">Illustrative arithmetic only. Actual outcomes may be negative.</div></div>
         </div>
-        <div class="cards" style="margin-top:16px"><div class="card"><div class="label">Level 1 · $200–$999.99</div><div class="big yellow">12% scenario</div><div class="muted tiny">Illustrative only; not guaranteed</div></div><div class="card"><div class="label">Level 2 · $1,000–$5,000</div><div class="big yellow">15% scenario</div><div class="muted tiny">Illustrative only; not guaranteed</div></div></div>
+        <div class="cards" style="margin-top:16px">
+          <div class="card"><div class="label">Plan 1 · $100–$5,000</div><div class="big yellow">12%</div></div>
+          <div class="card"><div class="label">Plan 2 · $5,000–$10,000</div><div class="big yellow">15%</div></div>
+          <div class="card"><div class="label">Plan 3 · $10,000–$25,000</div><div class="big yellow">18%</div></div>
+          <div class="card"><div class="label">Plan 4 · $25,000–$50,000</div><div class="big yellow">21%</div></div>
+          <div class="card"><div class="label">Plan 5 · $50,000–$100,000</div><div class="big yellow">24%</div></div>
+          <div class="card"><div class="label">Plan 6 · $100,000–$1,000,000</div><div class="big yellow">27%</div></div>
+        </div>
       </div>
     </section>
     <section class="panel"><div class="section-head"><h2>Recent demo orders</h2></div><div id="tradeHistory" style="padding:0 18px"><div class="empty">No demo trades yet.</div></div></section>
@@ -391,14 +410,21 @@ function renderTradeOutcomes(){
 function renderWallet(){const value=Object.entries(state.holdings).reduce((sum,[sym,qty])=>sum+(Number(qty)||0)*(priceFor(sym)?.current_price||0),0);$("summaryBalance").textContent=usdtMoney(state.balance);$("walletBalance").textContent=usdtMoney(state.balance);$("holdingsValue").textContent=usdtMoney(value);$("portfolioTotal").textContent=usdtMoney(state.balance+value);$("txCount").textContent=String(state.history.length);const rows=Object.entries(state.holdings).filter(([s,q])=>Number(q)>0.0000000001);$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym};return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+'</td><td>'+usdtMoney(c.current_price)+'</td><td>'+usdtMoney(Number(qty)*(c.current_price||0))+'</td></tr>'}).join(""):'<tr><td colspan="4" class="empty">No crypto holdings yet. Try a demo trade.</td></tr>';$("walletHistory").innerHTML=state.history.length?state.history.map(t=>'<div class="list-row"><div><strong class="'+(t.side==="buy"?"green":"red")+'">'+t.side.toUpperCase()+' '+safe(t.symbol)+'</strong><div class="muted tiny">'+new Date(t.time).toLocaleString()+' · DEMO</div></div><div style="text-align:right"><strong>'+usdtMoney(t.amount)+'</strong><div class="muted tiny">'+Number(t.qty).toFixed(8)+' coins</div></div></div>').join(""):'<div class="empty">No transactions yet.</div>';renderTradeHistory();renderWalletCoinList();renderPnl()}
 function showPage(page){document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));window.scrollTo({top:0,behavior:"smooth"});if(page==="wallet")renderWallet();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerName").focus()}
 function calculateStrategy(){
- const amount=Number($("strategyAmount").value),duration=Number($("strategyDuration").value);
- if(!Number.isFinite(amount)||amount<200||amount>5000){$("strategyNotice").textContent="Enter an amount from $200 to $5,000.";return}
- const rate=amount<1000?12:15,gain=amount*rate/100;
+ const amount=Number($("strategyAmount").value),duration=Number($("strategyDuration").value),rate=Number($("strategyPlan").value);
+ const ranges={12:[100,5000],15:[5000,10000],18:[10000,25000],21:[25000,50000],24:[50000,100000],27:[100000,1000000]};
+ const range=ranges[rate];
+ if(!Number.isFinite(amount)||!range||amount<range[0]||amount>range[1]){
+   $("strategyNotice").textContent="For this plan, enter an amount between "+money(range?.[0]||100)+" and "+money(range?.[1]||1000000)+".";
+   $("strategyGain").textContent="—";$("strategyTotal").textContent="—";$("strategyRate").textContent=rate+"% scenario";$("strategyDurationLabel").textContent=duration+" seconds";return;
+ }
+ const gain=amount*rate/100;
  $("strategyRate").textContent=rate+"% scenario";$("strategyGain").textContent=money(gain);$("strategyTotal").textContent=money(amount+gain);$("strategyDurationLabel").textContent=duration+" seconds";
- $("strategyNotice").textContent="Hypothetical arithmetic only: "+rate+"% of "+money(amount)+". Duration does not make this return likely or guaranteed.";
+ $("strategyNotice").textContent="Illustrative calculation only: "+rate+"% of "+money(amount)+". The selected duration does not mean this return will occur; actual outcomes may be negative.";
 }
 $("calculateStrategy").addEventListener("click",calculateStrategy);
+$("strategyPlan").addEventListener("change",calculateStrategy);
 $("strategyAmount").addEventListener("input",calculateStrategy);$("strategyDuration").addEventListener("change",calculateStrategy);
+
 // Firebase authentication handlers are initialized in the Firebase module below.
 document.querySelectorAll("#nav button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
 document.getElementById("signin-nav").addEventListener("click",()=>{showPage("register");document.getElementById("signInEmail").focus();});
