@@ -30,6 +30,7 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
     <button data-page="withdraw">Withdraw</button>
     <button data-page="profile">Profile / KYC</button>
     <button data-page="register" class="register-nav">Register</button>
+    <button data-page="support">Support</button>
     <button data-page="admin" class="admin-nav">Admin Dashboard</button>
   </nav>
   <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Connecting</span></span><button class="secondary" id="refreshBtn">↻</button></div>
@@ -181,6 +182,35 @@ main{max-width:1440px;margin:auto;padding:24px}.notice{background:#2a2411;border
         <div class="divider"></div>
         <h3>Admin checklist before launch</h3>
         <ul class="muted"><li>Secure server-side admin login and role permissions</li><li>Database and audited transaction ledger</li><li>Deposit monitoring and confirmations per blockchain</li><li>Withdrawal review, fraud controls and limits</li><li>Legal, compliance, custody and security review</li></ul>
+      </section>
+    </div>
+  </section>
+
+  <section id="page-support" class="hidden">
+    <div class="page-title"><div><h1>OnChainCrypto Support</h1><div class="muted">Help with registration, sign-in, verification emails and using the demo website.</div></div><span class="tag">HELP CENTER</span></div>
+    <div class="notice"><strong>Support email:</strong> <a href="mailto:onchaincryptosupport@gmail.com" style="color:inherit;font-weight:800">onchaincryptosupport@gmail.com</a><br><span class="tiny">This is the planned support address. The mailbox must be created before it can receive messages.</span></div>
+    <div class="content-grid">
+      <section class="panel form-panel">
+        <h2>Contact support by email</h2>
+        <p class="muted">Choose the button below to open your email app with a pre-filled support request. Review the message and send it from your own email account.</p>
+        <label for="supportTopic">What do you need help with?</label>
+        <select id="supportTopic" class="field">
+          <option>Account registration</option><option>Sign-in problem</option><option>Email verification link</option><option>Password reset</option><option>Website issue</option><option>Other question</option>
+        </select>
+        <label for="supportSubject">Subject</label>
+        <input id="supportSubject" class="field" maxlength="120" placeholder="Briefly describe the problem">
+        <label for="supportDetails">Message</label>
+        <textarea id="supportDetails" class="field" rows="5" maxlength="3000" placeholder="Describe what happened. Do not include your password, verification code, private key or recovery phrase."></textarea>
+        <button class="primary full" id="sendSupportEmail" type="button">Open email to Support</button>
+        <p id="supportMessage" class="muted tiny" aria-live="polite">Your email app will open; the website does not send or store support messages.</p>
+        <a class="secondary full" href="mailto:onchaincryptosupport@gmail.com?subject=OnChainCrypto%20Support" style="display:block;text-align:center;text-decoration:none;margin-top:10px">Email support directly</a>
+      </section>
+      <section class="panel form-panel">
+        <h2>Frequently asked questions</h2>
+        <div class="list-row"><div><strong>I did not receive a verification email.</strong><div class="muted tiny">Check Spam, Junk and All Mail, then search for “Firebase” or “Verify your email”. Make sure you entered the correct address.</div></div></div>
+        <div class="list-row"><div><strong>I cannot sign in.</strong><div class="muted tiny">Check your email and password, or use “Send password reset email” on the Register page.</div></div></div>
+        <div class="list-row"><div><strong>Can I deposit or withdraw real crypto?</strong><div class="muted tiny">No. This website is currently a prototype. Real deposits, withdrawals, custody and live trading are not enabled. Do not send funds to this demo.</div></div></div>
+        <div class="list-row"><div><strong>What information should I send?</strong><div class="muted tiny">Describe the issue and include the page or error message. Never send passwords, SMS codes, private keys, seed phrases or identity documents by email.</div></div></div>
       </section>
     </div>
   </section>
@@ -340,6 +370,15 @@ $("calculateStrategy").addEventListener("click",calculateStrategy);
 $("strategyAmount").addEventListener("input",calculateStrategy);$("strategyDuration").addEventListener("change",calculateStrategy);
 // Firebase authentication handlers are initialized in the Firebase module below.
 document.querySelectorAll("#nav button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+const supportSendButton = $("sendSupportEmail");
+if (supportSendButton) supportSendButton.addEventListener("click", () => {
+  const topic = $("supportTopic").value;
+  const subject = $("supportSubject").value.trim() || "Support request: " + topic;
+  const details = $("supportDetails").value.trim();
+  const body = "Topic: " + topic + "\n\n" + (details || "Please help me with this issue.") + "\n\nPlease do not reply with requests for passwords, verification codes, private keys or recovery phrases.";
+  $("supportMessage").textContent = "Opening your email app. Review the draft and press Send there. This website has not sent the email itself.";
+  window.location.href = "mailto:onchaincryptosupport@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+});
 document.querySelectorAll("#marketTabs button").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.filter;document.querySelectorAll("#marketTabs button").forEach(x=>x.classList.toggle("active",x===b));renderMarket()}));
 $("refreshSignalsBtn")?.addEventListener("click",loadMarket);
 $("marketSearch").addEventListener("input",renderMarket);$("refreshBtn").addEventListener("click",loadMarket);$("retryBtn").addEventListener("click",loadMarket);$("tradeAsset").addEventListener("change",()=>{selected=$("tradeAsset").value;updateTradePreview();updateTradingViewChart(selected);if(!$("page-trade").classList.contains("hidden"))loadPriceHistory()});$("tradeUsd").addEventListener("input",updateTradePreview);$("buyBtn").addEventListener("click",()=>doTrade("buy"));$("sellBtn").addEventListener("click",()=>doTrade("sell"));
