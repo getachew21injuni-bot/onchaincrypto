@@ -45,8 +45,7 @@ header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:
     <button data-page="deposit">Deposit</button>
     <button data-page="withdraw">Withdraw</button>
     <button data-page="profile">Profile / KYC</button>
-    <button data-page="register" id="signin-nav">Sign in</button>
-    <button data-page="register" id="admin-login-link" class="secondary" title="Sign in with the administrator account">Admin login</button>
+    <button data-page="register" id="register-nav" class="register-nav">Register</button>
     <button data-page="support">Support</button>
   </nav>
   <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open profile, notifications and verification menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile settings</strong><small>Account and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Account and security updates</small></span><span class="menu-count">1</span></button><button type="button" data-menu-page="profile" data-menu-kyc="true" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>KYC verification</strong><small>Identity verification status</small></span></button></div></div></div>
@@ -747,7 +746,7 @@ onAuthStateChanged(auth, (user) => {
   remember?.addEventListener('change',()=>{try{if(remember.checked&&email)localStorage.setItem('onchaincryptoRememberEmail',email.value);else localStorage.removeItem('onchaincryptoRememberEmail');}catch(_){}});
   email?.addEventListener('change',()=>{try{if(remember?.checked)localStorage.setItem('onchaincryptoRememberEmail',email.value);}catch(_){}});
   signIn.addEventListener('submit',()=>{try{if(remember?.checked&&email)localStorage.setItem('onchaincryptoRememberEmail',email.value);else localStorage.removeItem('onchaincryptoRememberEmail');}catch(_){}});
-  setMode('signin');
+  setMode('register');
 })();
 </script>
 
