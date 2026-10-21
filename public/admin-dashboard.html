@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OnChainCrypto | Admin Dashboard</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0e11;--panel:#15191e;--line:#2b3139;--text:#eaecef;--muted:#848e9c;--yellow:#f0b90b;--green:#0ecb81;--red:#f6465d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Arial,sans-serif}header{padding:18px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}header b{color:var(--yellow)}main{max-width:1200px;margin:auto;padding:24px}.muted{color:var(--muted)}.warning{background:#302611;border:1px solid #6d5414;color:#f5d879;padding:14px;border-radius:9px;margin:16px 0}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}.card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:17px}.big{font-size:24px;font-weight:750;margin-top:7px}.layout{display:grid;grid-template-columns:220px 1fr;gap:18px}.side button{display:block;width:100%;text-align:left;margin:3px 0;background:transparent;color:var(--text);border:1px solid transparent;padding:11px;border-radius:7px;cursor:pointer}.side button.active,.side button:hover{border-color:var(--line);background:#242a31;color:var(--yellow)}button,input,select,textarea{font:inherit}button{cursor:pointer;border-radius:7px;padding:9px 12px;border:1px solid var(--line);background:#242a31;color:var(--text)}button.primary{background:var(--yellow);color:#111;border:0;font-weight:700}button:disabled{opacity:.45;cursor:not-allowed}input,select,textarea{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:7px;margin:5px 0 12px}label{display:block;color:var(--muted);font-size:12px}.section{display:none}.section.active{display:block}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.status{display:inline-block;border-radius:5px;padding:3px 7px;background:#302611;color:#f5d879;font-size:11px}.notice{padding:12px;background:#101a25;border:1px solid #263b52;border-radius:8px;margin:12px 0}#authBox{max-width:440px;margin:40px auto}.hide{display:none!important}footer{margin-top:24px;color:var(--muted);font-size:12px}@media(max-width:760px){main{padding:14px}.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.row{grid-template-columns:1fr}header{padding:14px}}
+</style>
+</head>
+<body>
+<header><div><b>◆</b> OnChainCrypto <span class="muted">/ Admin</span></div><div><span id="authState" class="muted">Checking access…</span> <button id="signOut" class="hide">Sign out</button></div></header>
+<main>
+<div class="warning"><strong>Safety lock:</strong> This admin page does not accept real deposits, approve money transfers, or credit account balances. Do not publish wallet addresses or accept funds until the server-side admin role, transaction verification, and security review are complete. QR codes are not proof of payment.</div>
+<section id="authBox" class="panel">
+<h2>Administrator sign-in</h2><p class="muted">Sign in with your Firebase account. Access is granted only if Firebase has assigned the server-verified custom claim <code>admin: true</code>.</p>
+<label>Email</label><input id="email" type="email" autocomplete="username" placeholder="Administrator email">
+<label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Password">
+<button id="login" class="primary">Sign in securely</button><p id="authMessage" class="muted" role="status"></p>
+</section>
+<div id="dashboard" class="hide">
+<div class="grid">
+<div class="card"><div class="muted">Users</div><div class="big" id="userCount">—</div></div>
+<div class="card"><div class="muted">Pending deposits</div><div class="big">Locked</div></div>
+<div class="card"><div class="muted">Documents awaiting review</div><div class="big">Locked</div></div>
+<div class="card"><div class="muted">Real-money trading</div><div class="big" style="color:var(--red)">OFF</div></div>
+</div>
+<div class="layout">
+<aside class="side">
+<button class="active" data-tab="overview">Overview</button><button data-tab="coins">Coin settings</button><button data-tab="deposits">Deposit requests</button><button data-tab="documents">Document review</button><button data-tab="trading">Trading controls</button><button data-tab="audit">Security & audit</button>
+</aside>
+<div>
+<section id="overview" class="panel section active"><h2>Admin overview</h2><p class="muted">This area is available only to an authenticated account with the Firebase admin custom claim.</p><div class="notice" id="overviewMessage">The secure admin backend is not yet connected. No financial action is available.</div><p>Next backend requirements: server-verified admin permissions, private document storage, audit logs, payment-provider or blockchain confirmation, rate limits, and alerting.</p></section>
+<section id="coins" class="panel section"><h2>Coin deposit settings</h2><p class="muted">Configure a coin/network only after a secure backend and wallet custody process have been deployed.</p><div class="row"><div><label>Coin symbol</label><input disabled placeholder="e.g. BTC"></div><div><label>Network (must match exactly)</label><input disabled placeholder="e.g. Bitcoin"></div></div><label>Official deposit address</label><input disabled placeholder="Address not enabled"><label>QR code</label><div class="notice">QR generation is disabled until the address has been verified. Never use a sample address for customer deposits.</div><button disabled>Save address</button></section>
+<section id="deposits" class="panel section"><h2>Deposit requests</h2><p>Real deposit approvals are disabled. A request must be checked against the correct blockchain, network, confirmations, amount, and destination address before it can affect any balance.</p><div class="notice">No live deposit queue is connected.</div><button disabled>Approve</button> <button disabled>Reject</button></section>
+<section id="documents" class="panel section"><h2>Identity document review</h2><p>Document review requires authenticated server-side access, private file storage, retention limits, and an audit trail.</p><div class="notice">No document files are loaded on this page. Uploads and approvals are not connected.</div><button disabled>Approve document</button> <button disabled>Reject document</button></section>
+<section id="trading" class="panel section"><h2>Trading controls</h2><label>Mode</label><select disabled><option>Demo trading only</option><option>Real-money trading — disabled</option></select><div class="notice">Real-money trading cannot be enabled here. Demo balances and demo orders must remain clearly labeled as simulated.</div><button disabled>Save settings</button></section>
+<section id="audit" class="panel section"><h2>Security & audit</h2><ul><li>Only server-assigned Firebase admin claims grant access.</li><li>Every administrative change should be written to an immutable audit trail.</li><li>Never store passwords, private keys, seed phrases, or service-account JSON in the website.</li><li>Revoke the service-account key previously exposed in chat before deploying the backend.</li></ul></section>
+</div></div>
+</div>
+<footer>OnChainCrypto admin interface · secure backend setup required before financial operations.</footer>
+</main>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+const app=initializeApp({apiKey:"AIzaSyD4Z3QJwXUDmyxsuCLFbXLoISd1oIF0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"});
+const auth=getAuth(app),$=id=>document.getElementById(id);
+$("login").addEventListener("click",async()=>{ $("authMessage").textContent="Signing in…";try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);$("password").value="";}catch(e){$("authMessage").textContent="Sign-in failed. Check your credentials and Firebase Authentication settings."; }});
+$("signOut").addEventListener("click",()=>signOut(auth));
+onAuthStateChanged(auth,async user=>{if(!user){$("authState").textContent="Not signed in";$("authBox").classList.remove("hide");$("dashboard").classList.add("hide");$("signOut").classList.add("hide");return;}try{const token=await user.getIdTokenResult(true);if(token.claims.admin!==true){$("authState").textContent="Access denied";$("authMessage").textContent="This account is signed in but is not an administrator. An authorized project owner must assign the admin custom claim securely.";await signOut(auth);return;}$("authState").textContent="Admin verified";$("authBox").classList.add("hide");$("dashboard").classList.remove("hide");$("signOut").classList.remove("hide");}catch(e){$("authState").textContent="Access check failed";await signOut(auth);}});
+document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".section").forEach(x=>x.classList.toggle("active",x.id===b.dataset.tab));}));
+</script>
+</body></html>
