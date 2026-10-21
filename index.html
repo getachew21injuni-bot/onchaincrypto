@@ -100,7 +100,8 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
       <div class="section-head"><h2>📡 All-Coin Live Momentum Signals</h2><span class="tag">PUBLIC MARKET DATA</span></div>
       <div class="scanner-intro">Signals refresh when market prices update. They use each coin's reported 24-hour price change and trading volume as a simple momentum screen, not predictive AI or guaranteed buy/sell advice. Click a row to open its chart.</div>
       <div class="signal-table-wrap"><table><thead><tr><th>Coin / Pair</th><th>Live Price</th><th>24h Move</th><th>Market Signal</th><th>Volume (24h)</th></tr></thead><tbody id="signalRows"><tr><td colspan="5" class="empty">Waiting for public market data…</td></tr></tbody></table></div>
-      <div class="section-head"><span class="muted tiny">Signals are informational only. Public API data can be delayed or rate-limited.</span><button class="secondary" id="refreshSignalsBtn">Refresh signals</button></div>
+      <div class="section-head"><span id="signalCountLabel" class="muted tiny">Showing up to 5 coin pairs</span><div class="two-buttons"><button class="secondary" id="signalMoreLessBtn" type="button">More +5</button><button class="secondary" id="refreshSignalsBtn">Refresh signals</button></div></div>
+      <p class="muted tiny">Signals are informational only. Public API data can be delayed or rate-limited.</p>
     </section>
   </section>
   <section id="page-trade" class="hidden">
@@ -537,10 +538,15 @@ function renderMarket(){
  $("topLoser").textContent=down?down.symbol.toUpperCase():"—";$("topLoserChange").textContent=down?pct(down.price_change_percentage_24h):"Waiting for data";
  $("assetCount").textContent=String(market.length);renderTradeSelect();renderWallet();
 }
+let signalVisibleCount=5;
 function renderSignalScanner(){
  const body=$("signalRows");if(!body)return;
+ const allRows=[...market].sort((a,b)=>(b.total_volume||0)-(a.total_volume||0));
+ const countLabel=$("signalCountLabel"),moreLess=$("signalMoreLessBtn");
+ if(countLabel)countLabel.textContent="Showing "+Math.min(signalVisibleCount,allRows.length)+" of "+allRows.length+" coin pairs";
+ if(moreLess){moreLess.disabled=allRows.length<=5;moreLess.textContent=signalVisibleCount>=allRows.length?"Less":"More +5";}
  if(!market.length){body.innerHTML='<tr><td colspan="5" class="empty">Waiting for public market data. Try refreshing in a moment.</td></tr>';return}
- const rows=[...market].sort((a,b)=>(b.total_volume||0)-(a.total_volume||0));
+ const rows=allRows.slice(0,signalVisibleCount);
  body.innerHTML=rows.map(c=>{
   const change=Number(c.price_change_percentage_24h||0),volume=Number(c.total_volume||0);
   let label="NEUTRAL",cls="signal-flat",reason="Mixed / limited momentum";
@@ -554,6 +560,12 @@ function renderSignalScanner(){
   selected=row.dataset.signalSymbol;$("tradeAsset").value=selected;updateTradePreview();showPage("trade");loadPriceHistory();updateTradingViewChart(selected)
  }));
 }
+document.addEventListener("click",function(event){
+ const button=event.target.closest("#signalMoreLessBtn");if(!button)return;
+ const total=market.length;
+ signalVisibleCount=signalVisibleCount>=total?5:Math.min(signalVisibleCount+5,total);
+ renderSignalScanner();
+});
 function updateTradingViewChart(symbol){
  const frame=$("tradingViewChart");if(!frame)return;
  const sym=String(symbol||"BTC").toUpperCase();
