@@ -181,9 +181,9 @@ onAuthStateChanged(auth,async user=>{
  byId("adminWorkspace").classList.add("locked");byId("adminAuthGate").classList.remove("hidden");byId("adminSignOut").classList.add("hidden");
  if(!user){byId("authState").textContent="Admin sign-in required";return;}
  try{
-  const token=await user.getIdTokenResult(true);
-  if(token.claims.admin!==true){byId("authState").textContent="Access denied";byId("adminAuthMessage").textContent="This account is signed in but is not an administrator. The dashboard remains locked.";await signOut(auth);return;}
-  byId("authState").textContent="Admin verified";byId("adminAuthGate").classList.add("hidden");byId("adminWorkspace").classList.remove("locked");byId("adminSignOut").classList.remove("hidden");
+  const adminEmail="getachew21.INJ.UNI@gmail.com".toLowerCase();
+  if((user.email||"").toLowerCase()!==adminEmail){byId("authState").textContent="Access denied";byId("adminAuthMessage").textContent="This account is not the designated administrator. Sign in with getachew21.INJ.UNI@gmail.com.";await signOut(auth);return;}
+  byId("authState").textContent="Admin email recognized";byId("adminAuthGate").classList.add("hidden");byId("adminWorkspace").classList.remove("locked");byId("adminSignOut").classList.remove("hidden");
  }catch(error){byId("authState").textContent="Access check failed";byId("adminAuthMessage").textContent="Could not verify administrator permissions. Access remains locked.";await signOut(auth);}
 });
 </script>
