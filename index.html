@@ -884,8 +884,9 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
 });
 
 document.getElementById("resetPasswordBtn").addEventListener("click", async () => {
-  const email = document.getElementById("signInEmail").value.trim() || document.getElementById("registerEmail").value.trim();
-  if (!email) { msg("Enter your email in the sign-in or registration email field first."); return; }
+  const identifier = document.getElementById("signInEmail").value.trim();
+  const email = (identifier.includes("@") ? identifier : document.getElementById("registerEmail").value.trim()).trim();
+  if (!email) { msg("Password recovery needs the real email address used for this account. Phone-only accounts cannot receive password reset emails."); return; }
   try { await sendPasswordResetEmail(auth, email); msg("If the account exists, a password reset email has been sent."); }
   catch (error) { msg(friendlyError(error)); }
 });
