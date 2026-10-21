@@ -110,6 +110,20 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
       <section class="panel"><div class="chart-area"><div class="page-title"><div><h2 id="tradePairTitle">BTC / USD</h2><div class="muted tiny">Indicative public price</div></div><div><div class="big" id="tradeCurrentPrice">$—</div><div id="tradeCurrentChange" class="muted">—</div></div></div><div class="chart-wrap"><iframe id="tradingViewChart" class="tv-chart" title="TradingView cryptocurrency candlestick chart" loading="lazy" referrerpolicy="origin" allowfullscreen src="https://www.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCUSDT&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false"></iframe><p class="muted tiny">Chart availability depends on the selected pair and TradingView market coverage. This embed does not place orders.</p></div><div class="chart-wrap" id="trendOverviewWrap" style="display:none"><div class="muted tiny">7-day trend overview</div><canvas id="priceChart" height="220" aria-label="Recent cryptocurrency price chart"></canvas><div id="chartStatus" class="muted tiny">Loading recent price history…</div></div><div class="signal-box"><div class="section-head"><h3>Live market signal</h3><span class="tag">INDICATOR ONLY</span></div><div id="signalResult">Waiting for price history…</div><p class="muted tiny">Rule-based educational indicator from recent prices; not financial advice or a promise of returns.</p></div><div class="list-row"><span class="muted">Selected asset</span><strong id="tradeAssetName">Bitcoin</strong></div><div class="list-row"><span class="muted">Demo USD available</span><strong id="tradeAvailable">$10,000.00</strong></div></div></section>
       <section class="panel form-panel"><h2>Place order</h2><label for="tradeAsset">Asset</label><select id="tradeAsset" class="field"></select><label for="tradeSide">Order side</label><select id="tradeSide" class="field"><option value="buy">Buy</option><option value="sell">Sell</option></select><label for="tradeUsd">Amount (USD)</label><input id="tradeUsd" class="field" type="number" min="1" step="1" placeholder="100"><div class="list-row"><span class="muted">Estimated quantity</span><strong id="estimatedQty">—</strong></div><div class="two-buttons"><button class="buy" id="buyBtn">Buy</button><button class="sell" id="sellBtn">Sell</button></div><p id="tradeMessage" class="muted tiny" aria-live="polite">Choose an asset and amount to preview an order.</p></section>
     </div>
+    <section class="panel" id="timedPaperTrade"><div class="section-head"><div><h2>Timed Trading Practice</h2><div class="muted tiny">Choose whether the selected coin moves up or down before the timer ends.</div></div><span class="tag">PAPER ONLY</span></div>
+      <div class="form-panel">
+        <div class="cards">
+          <div class="card"><div class="label">Trading pair</div><div class="big" id="timedPair">BTC / USDT</div><div class="muted tiny">Uses the selected coin above</div></div>
+          <div class="card"><div class="label">Entry price</div><div class="big" id="timedEntryPrice">—</div><div class="muted tiny">Public market price</div></div>
+          <div class="card"><div class="label">Time remaining</div><div class="big yellow" id="timedCountdown">00:30</div><div class="muted tiny">Countdown to expiry</div></div>
+        </div>
+        <label for="timedStake">Practice amount (virtual USD)</label><input id="timedStake" class="field" type="number" min="1" step="1" value="100">
+        <label for="timedDuration">Expiration time</label><select id="timedDuration" class="field"><option value="30">30 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="120">120 seconds</option><option value="180">180 seconds</option><option value="270">270 seconds</option><option value="360">360 seconds</option></select>
+        <div class="two-buttons"><button type="button" class="buy" id="timedUpBtn">↗ Price goes UP</button><button type="button" class="sell" id="timedDownBtn">↘ Price goes DOWN</button></div>
+        <p id="timedResult" class="muted tiny" aria-live="polite">Choose UP or DOWN to start a timed practice trade.</p>
+        <p class="muted tiny">Educational simulation only. A win means the sampled public price moved in your chosen direction at expiry; a tie is not a win. No funds are deposited, paid out, or guaranteed.</p>
+      </div>
+    </section>
     <section class="panel"><div class="section-head"><h2>Investment Plan & Estimated Income</h2><span class="tag">SIMULATOR</span></div>
       <div class="form-panel">
         <p class="muted tiny">Choose a plan, enter a scenario amount, and select an expiry. These percentages are illustrative inputs for a calculator only—not promised or guaranteed returns. This tool does not invest funds or create a real order.</p>
@@ -713,6 +727,40 @@ function calculateStrategy(){
 $("calculateStrategy").addEventListener("click",calculateStrategy);
 $("strategyPlan").addEventListener("change",calculateStrategy);
 $("strategyAmount").addEventListener("input",calculateStrategy);$("strategyDuration").addEventListener("change",calculateStrategy);
+let timedPaper=null,timedTimer=null;
+function timedFormat(seconds){const n=Math.max(0,Math.ceil(seconds));return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0")}
+function startTimedPaper(direction){
+ if(timedPaper){$("timedResult").textContent="A timed practice trade is already running. Wait for it to expire.";return}
+ const sym=$("tradeAsset").value||selected,c=priceFor(sym),stake=Number($("timedStake").value),duration=Number($("timedDuration").value);
+ if(!c||!Number.isFinite(Number(c.current_price))||Number(c.current_price)<=0){$("timedResult").textContent="Market price unavailable. Refresh market data and try again.";return}
+ if(!Number.isFinite(stake)||stake<1){$("timedResult").textContent="Enter a virtual practice amount of at least $1.";return}
+ const started=Date.now();timedPaper={symbol:sym,direction,stake,duration,entry:Number(c.current_price),ends:started+duration*1000};
+ $("timedPair").textContent=sym+" / USDT";$("timedEntryPrice").textContent=money(timedPaper.entry);$("timedCountdown").textContent=timedFormat(duration);
+ $("timedResult").textContent="Trade running: "+direction.toUpperCase()+" "+sym+". Waiting for expiry…";
+ $("timedUpBtn").disabled=true;$("timedDownBtn").disabled=true;
+ timedTimer=setInterval(async()=>{
+  if(!timedPaper)return;
+  const remaining=Math.max(0,Math.ceil((timedPaper.ends-Date.now())/1000));$("timedCountdown").textContent=timedFormat(remaining);
+  if(Date.now()<timedPaper.ends)return;
+  clearInterval(timedTimer);timedTimer=null;
+  const finished={...timedPaper};timedPaper=null;
+  $("timedResult").textContent="Checking latest public price…";
+  await loadMarket();
+  const finalCoin=priceFor(finished.symbol),finalPrice=Number(finalCoin?.current_price)||0;
+  $("timedUpBtn").disabled=false;$("timedDownBtn").disabled=false;
+  if(!finalPrice){$("timedResult").textContent="Could not confirm an expiry price. No win/loss result recorded; try again when prices are available.";return}
+  $("timedCountdown").textContent="00:00";
+  const moved=finalPrice-finished.entry;
+  if(Math.abs(moved)<Math.max(finished.entry*1e-8,1e-12)){$("timedResult").textContent="Trade expired: no clear price movement. Result: TIE.";return}
+  const won=finished.direction==="up"?moved>0:moved<0;
+  $("timedEntryPrice").textContent=money(finished.entry);
+  $("timedResult").textContent=won?"🎉 Congratulations! You won this paper-trading round.":"Trade expired — you lost this paper-trading round.";
+  $("timedResult").className="tiny "+(won?"green":"red");
+  $("timedResult").textContent+=" Entry: "+money(finished.entry)+" · Expiry: "+money(finalPrice)+". Virtual practice only; no payout or real order.";
+ },1000);
+}
+$("timedUpBtn").addEventListener("click",()=>startTimedPaper("up"));
+$("timedDownBtn").addEventListener("click",()=>startTimedPaper("down"));
 
 // Firebase authentication handlers are initialized in the Firebase module below.
 const supportedCoins=[["Bitcoin","BTC","₿"],["Ethereum","ETH","Ξ"],["BNB","BNB","◆"],["XRP","XRP","X"],["Solana","SOL","◎"],["Tether","USDT","₮"],["USD Coin","USDC","$"],["TRON","TRX","T"],["Dogecoin","DOGE","Ð"],["Cardano","ADA","₳"],["Polygon","POL","⬡"],["Litecoin","LTC","Ł"],["Avalanche","AVAX","▲"],["Chainlink","LINK","⬡"],["Toncoin","TON","◉"],["Stellar","XLM","✦"],["Bitcoin Cash","BCH","Ƀ"],["Shiba Inu","SHIB","🐕"],["Polkadot","DOT","●"],["Ethereum Classic","ETC","Ξ"]];
