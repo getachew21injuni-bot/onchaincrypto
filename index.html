@@ -46,7 +46,6 @@ header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:
     <button data-page="withdraw">Withdraw</button>
     <button data-page="profile">Profile / KYC</button>
     <button data-page="register" id="signin-nav">Sign in</button>
-    <button data-page="register" class="register-nav">Register</button>
     <button data-page="register" id="admin-login-link" class="secondary" title="Sign in with the administrator account">Admin login</button>
     <button data-page="support">Support</button>
   </nav>
@@ -740,6 +739,7 @@ onAuthStateChanged(auth, (user) => {
     if(sub)sub.textContent=creating?'Set up your account to continue.':'Access your crypto dashboard securely.';
   }
   document.getElementById('showRegisterBtn')?.addEventListener('click',()=>setMode('register'));
+  document.getElementById('signin-nav')?.addEventListener('click',()=>{setMode('signin');document.getElementById('signInEmail')?.focus();});
   document.getElementById('showSignInBtn')?.addEventListener('click',()=>setMode('signin'));
   document.getElementById('showSignInPassword')?.addEventListener('change',e=>{const p=document.getElementById('signInPassword');if(p)p.type=e.target.checked?'text':'password';});
   const remember=document.getElementById('rememberMe'), email=document.getElementById('signInEmail');
