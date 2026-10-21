@@ -18,6 +18,19 @@ header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:
 @media(max-width:760px){.notice-list{padding:0 8px 10px}.notice-list .list-row{align-items:flex-start}.chart-wrap{padding:4px}}
 
 .signal-scanner{margin-top:20px}.signal-table-wrap{overflow-x:auto}.signal-chip{display:inline-flex;align-items:center;gap:6px;border-radius:5px;padding:4px 8px;font-size:11px;font-weight:800;white-space:nowrap}.signal-bull{background:#0ecb8120;color:#0ecb81;border:1px solid #0ecb8150}.signal-bear{background:#f6465d20;color:#f6465d;border:1px solid #f6465d50}.signal-flat{background:#f0b90b18;color:#f0b90b;border:1px solid #f0b90b45}.signal-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor}.tv-chart{width:100%;height:520px;border:0;border-radius:8px;background:#0b0e11}.scanner-intro{padding:12px 18px;color:var(--muted);font-size:12px}.pair-link{color:var(--text);font-weight:750}
+
+.auth-welcome{max-width:780px;margin:18px auto 22px;text-align:center;padding:28px 20px 22px;border:1px solid #253c4b;border-radius:18px;background:radial-gradient(ellipse at top,#173448 0%,#101820 58%,#0b0e11 100%);box-shadow:0 16px 45px #0004}
+.auth-boom{font-size:38px;line-height:1.2;margin-bottom:8px;filter:drop-shadow(0 0 14px #18d7a455)}
+.auth-brand{font-size:13px;letter-spacing:4px;font-weight:900;color:#dce7ef}.auth-brand span{color:var(--green,#21d6a2);margin-left:5px}
+.auth-welcome h1{font-size:clamp(24px,4vw,36px);margin:12px 0 7px;letter-spacing:-.7px}.auth-welcome p{margin:0;color:#b7c7d4}
+.auth-trust{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:18px}.auth-trust span{font-size:12px;color:#d4e5ed;border:1px solid #294657;border-radius:999px;padding:6px 10px;background:#12232d}
+.auth-main-panel{max-width:560px;width:100%;margin:0 auto}.auth-main-panel>h2,.auth-main-panel #authModeIntro h2{font-size:23px;margin:0 0 6px}.auth-main-panel #authModeIntro p{margin:0 0 14px}
+.auth-options{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:10px 0 16px}.auth-check{display:flex;align-items:center;gap:7px;font-size:13px;color:#c8d4df;cursor:pointer}.auth-check input{accent-color:#1fd6a2}
+.auth-submit{font-weight:800;letter-spacing:.2px;min-height:46px}.auth-google-btn{margin-top:12px;min-height:43px}
+.auth-switch{text-align:center;color:#aebdca;font-size:13px;margin:18px 0 2px}.auth-switch button{border:0;background:none;color:var(--green,#21d6a2);font-weight:800;cursor:pointer;padding:4px 6px}
+.auth-phone-details{margin-top:16px;border-top:1px solid var(--line,#263449);padding-top:12px}.auth-phone-details summary{cursor:pointer;color:#b7c7d4;font-size:13px}.auth-phone-details[open] summary{margin-bottom:14px}
+@media(max-width:600px){.auth-welcome{margin:8px 0 16px;padding:24px 12px}.auth-trust{gap:6px}.auth-trust span{font-size:11px}.auth-options{align-items:flex-start}}
+
 </style>
 <!-- Refresh deployment check: 2026-10-20T19:44Z -->
 </head>
@@ -200,30 +213,39 @@ header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:
     <section class="panel settings-group"><div class="settings-heading"><span class="settings-icon kyc-symbol">✓</span><div><h2>Identity verification (KYC)</h2><p class="muted tiny">Identity verification status.</p></div></div><div class="settings-item"><div><strong>Verification status</strong><p class="muted tiny">A qualified KYC provider and secure backend are required.</p></div><span class="tag">Not connected</span></div><p class="muted tiny">Do not upload passports, ID cards, selfies or proof-of-address documents to this public website.</p></section>
   </section>
   <section id="page-register" class="hidden">
-    <div class="page-title"><div><h1>Create your OnChainCrypto account</h1><div class="muted">Create your account with your full name and either an email address or a phone number.</div></div><span class="tag">FRONTEND PREVIEW</span></div>
+    <div class="auth-welcome">
+      <div class="auth-boom" aria-hidden="true">💥</div>
+      <div class="auth-brand">ONCHAIN<span>CRYPTO</span></div>
+      <h1 id="authHeading">Welcome to OnChainCrypto</h1>
+      <p id="authSubheading">Access your crypto dashboard securely.</p>
+      <div class="auth-trust"><span>⚡ Simple access</span><span>♧ Account protection</span><span>✓ Personal account</span></div>
+    </div>
     <div class="content-grid">
-      <section class="panel form-panel">
-        <h2>User registration</h2>
+      <section class="panel form-panel auth-main-panel">
+        <div id="authModeIntro"><h2>Sign in to your account</h2><p class="muted tiny">Enter your email and password to continue.</p></div>
         <p class="muted tiny">Required: your full name and one contact method. Choose email/Gmail with a password, or verify your phone by SMS. SMS charges or limits may apply. This account does not enable real-money trading or secure online balances.</p>
         <div id="authStatus" class="notice">Checking sign-in status…</div>
-        <form id="registerForm">
-          <h3>Create account with email / Gmail</h3>
+        <form id="registerForm" class="auth-register-form hidden" aria-label="Create account">
+          <h3>Create your account</h3>
           <label for="registerName">Full name <span class="yellow">(required)</span></label><input id="registerName" class="field" maxlength="80" autocomplete="name" required placeholder="Enter your full name">
           <label for="registerEmail">Email address / Gmail <span class="yellow">(required for this option)</span></label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@gmail.com">
           <label for="registerPassword">Password</label><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="At least 8 characters">
-          <button class="primary full" type="submit">Create account</button>
+          <button class="primary full" type="submit">⚡ Create account</button>
         </form>
-        <button class="secondary full" id="googleSignInBtn" type="button">Continue with Google</button>
-        <p class="muted tiny">For Google registration, enter your full name above first.</p>
-        <form id="signInForm">
-          <h3 style="margin-top:22px">Already registered?</h3>
+        <button class="secondary full auth-google-btn" id="googleSignInBtn" type="button"><span aria-hidden="true">🌐</span> Continue with Google</button>
+        <p class="muted tiny auth-google-hint">For Google registration, enter your full name above first.</p>
+        <form id="signInForm" class="auth-signin-form">
+          <h3 style="margin-top:12px">Sign in</h3>
           <label for="signInEmail">Email address</label><input id="signInEmail" class="field" type="email" autocomplete="username" required placeholder="you@example.com">
-          <label for="signInPassword">Password</label><input id="signInPassword" class="field" type="password" autocomplete="current-password" required placeholder="Your password">
-          <button class="secondary full" type="submit">Sign in</button>
-          <button class="secondary full" id="resetPasswordBtn" type="button">Send password reset email</button>
+          <label for="signInPassword">Password</label><input id="signInPassword" class="field" type="password" autocomplete="current-password" required placeholder="Enter your password">
+          <div class="auth-options"><label class="auth-check"><input type="checkbox" id="rememberMe"> Remember me</label><label class="auth-check"><input type="checkbox" id="showSignInPassword"> Show password</label></div>
+          <button class="primary full auth-submit" type="submit">⚡ Sign In Securely</button>
+          <button class="secondary full" id="resetPasswordBtn" type="button">Forgot password?</button>
+          <p class="auth-switch" id="authSwitchText">Don’t have an account? <button type="button" id="showRegisterBtn">Register</button></p>
         </form>
-        <div class="divider"></div>
-        <h3>Or register / sign in with phone</h3>
+        <div class="divider auth-phone-divider"></div>
+        <details class="auth-phone-details"><summary>Use phone number instead</summary>
+        <h3>Register / sign in with phone</h3>
         <p class="muted tiny">Your full name above is also required for phone registration. Enter your phone in international format with country code, for example +251…</p>
         <label for="phoneNumber">Phone number <span class="yellow">(required for this option)</span></label><input id="phoneNumber" class="field" type="tel" autocomplete="tel" placeholder="+2519…">
         <div id="recaptcha-container" style="margin-top:12px"></div>
@@ -232,6 +254,8 @@ header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:
         <button class="secondary full" id="verifyPhoneCodeBtn" type="button">Verify code and sign in</button>
         <button class="secondary full hidden" id="signOutBtn" type="button">Sign out</button>
         <p id="registerMessage" class="muted tiny" aria-live="polite"></p>
+        </details>
+        <p class="auth-switch auth-register-switch hidden" id="registerSwitchText">Already have an account? <button type="button" id="showSignInBtn">Sign in</button></p>
       </section>
       <section class="panel form-panel">
         <h2>What real registration requires</h2>
@@ -688,6 +712,39 @@ onAuthStateChanged(auth, (user) => {
     signOutBtn.classList.add("hidden");
   }
 });
+</script>
+
+
+<script>
+(function(){
+  const signIn=document.getElementById('signInForm'), register=document.getElementById('registerForm');
+  const intro=document.getElementById('authModeIntro'), heading=document.getElementById('authHeading'), sub=document.getElementById('authSubheading');
+  const google=document.getElementById('googleSignInBtn'), googleHint=document.querySelector('.auth-google-hint');
+  const registerSwitch=document.getElementById('registerSwitchText'), switchText=document.getElementById('authSwitchText');
+  if(!signIn||!register)return;
+  function setMode(mode){
+    const creating=mode==='register';
+    signIn.classList.toggle('hidden',creating); register.classList.toggle('hidden',!creating);
+    signIn.querySelectorAll('input').forEach(el=>el.disabled=creating);
+    register.querySelectorAll('input').forEach(el=>el.disabled=!creating);
+    if(google)google.classList.toggle('hidden',creating);
+    if(googleHint)googleHint.classList.toggle('hidden',creating);
+    if(switchText)switchText.classList.toggle('hidden',creating);
+    if(registerSwitch)registerSwitch.classList.toggle('hidden',!creating);
+    if(intro)intro.innerHTML=creating?'<h2>Create your account</h2><p class="muted tiny">Join OnChainCrypto with your name and email.</p>':'<h2>Sign in to your account</h2><p class="muted tiny">Enter your email and password to continue.</p>';
+    if(heading)heading.textContent=creating?'Create your OnChainCrypto account':'Welcome to OnChainCrypto';
+    if(sub)sub.textContent=creating?'Set up your account to continue.':'Access your crypto dashboard securely.';
+  }
+  document.getElementById('showRegisterBtn')?.addEventListener('click',()=>setMode('register'));
+  document.getElementById('showSignInBtn')?.addEventListener('click',()=>setMode('signin'));
+  document.getElementById('showSignInPassword')?.addEventListener('change',e=>{const p=document.getElementById('signInPassword');if(p)p.type=e.target.checked?'text':'password';});
+  const remember=document.getElementById('rememberMe'), email=document.getElementById('signInEmail');
+  try{if(remember&&email){const saved=localStorage.getItem('onchaincryptoRememberEmail');if(saved){remember.checked=true;email.value=saved;}}}catch(_){}
+  remember?.addEventListener('change',()=>{try{if(remember.checked&&email)localStorage.setItem('onchaincryptoRememberEmail',email.value);else localStorage.removeItem('onchaincryptoRememberEmail');}catch(_){}});
+  email?.addEventListener('change',()=>{try{if(remember?.checked)localStorage.setItem('onchaincryptoRememberEmail',email.value);}catch(_){}});
+  signIn.addEventListener('submit',()=>{try{if(remember?.checked&&email)localStorage.setItem('onchaincryptoRememberEmail',email.value);else localStorage.removeItem('onchaincryptoRememberEmail');}catch(_){}});
+  setMode('signin');
+})();
 </script>
 
 </body>
