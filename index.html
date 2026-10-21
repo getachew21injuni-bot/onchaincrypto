@@ -200,6 +200,17 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
           <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#f6465d" aria-hidden="true">⊗</span>Request account deletion</strong><p class="muted tiny">Open a support request to discuss account deletion.</p></div><button class="secondary" id="requestDeleteAccountBtn">Request deletion</button></div><p id="privacyMessage" class="muted tiny"></p>
         </div>
       </details>
+      <details class="panel profile-menu-section" id="profileFinancialSection">
+        <summary><span class="profile-menu-icon" style="color:#00d7a0;background:rgba(0,215,160,.09)">⇵</span><span class="profile-menu-copy"><strong>Financial</strong><small>Deposit, withdrawals, transfers and activity</small></span><span class="profile-menu-chevron">⌄</span></summary>
+        <div class="profile-menu-content">
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#00d7a0" aria-hidden="true">⇩</span>Deposit</strong><p class="muted tiny">Review available asset and network options in your wallet.</p></div><button type="button" class="secondary" data-go="deposit">Open deposit</button></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#ff8a24" aria-hidden="true">⇧</span>Withdraw</strong><p class="muted tiny">Review the withdrawal interface and supported asset options.</p></div><button type="button" class="secondary" data-go="withdraw">Open withdrawal</button></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#a78bfa" aria-hidden="true">⇄</span>Transfer</strong><p class="muted tiny">Open the transfer tool available in the wallet.</p></div><button type="button" class="secondary" data-go="transfer">Open transfer</button></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#22d3ee" aria-hidden="true">⟳</span>Convert</strong><p class="muted tiny">Open the asset conversion interface.</p></div><button type="button" class="secondary" data-go="convert">Open convert</button></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#f0b90b" aria-hidden="true">◷</span>Transaction history</strong><p class="muted tiny">Review activity available in your wallet on this device.</p></div><button type="button" class="secondary" data-go="wallet">Open wallet</button></div>
+          <div class="panel about-section"><h3 class="feature-heading">Financial account information</h3><p class="muted tiny">This website currently provides a simulated paper-trading experience. Real-money deposits, withdrawals, transfers, exchange execution and custody are not connected. Do not send cryptocurrency to an address shown by an unverified interface.</p></div>
+        </div>
+      </details>
       <details class="panel profile-menu-section" id="profileSettingsSection">
         <summary><span class="profile-menu-icon settings-symbol">⚙</span><span class="profile-menu-copy"><strong>Settings</strong><small>Preference and security</small></span><span class="profile-menu-chevron">⌄</span></summary>
         <div class="profile-menu-content">
