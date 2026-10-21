@@ -143,7 +143,7 @@ document.getElementById('moreBtn').addEventListener('click',()=>showView('Settin
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-const app=initializeApp({apiKey:"AIzaSyD4Z3QJwXUDmyxsuCLFbXLoISd1oIF0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"});
+const app=initializeApp({apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"});
 const auth=getAuth(app),byId=id=>document.getElementById(id);
 byId("adminSignIn").addEventListener("click",async()=>{
  const email=byId("adminEmail").value.trim(),password=byId("adminPassword").value;
