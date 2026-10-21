@@ -49,9 +49,8 @@ header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:
     <button data-page="withdraw">Withdraw</button>
     <button data-page="profile">Profile</button>
     <button data-page="register" id="register-nav" class="register-nav">Register</button>
-    <button data-page="support">Support</button>
   </nav>
-  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open profile, notifications and verification menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">⚙</span><span><strong>Settings</strong><small>Account, security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Account and security updates</small></span></button><button type="button" data-menu-page="profile" data-menu-kyc="true" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>KYC verification</strong><small>Identity verification status</small></span></button><div class="menu-divider"></div><div class="menu-section-label">SUPPORT CENTER</div><div class="menu-support-intro">Get help with your account, trading and more.</div><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Support Center</strong><small>Help and support resources</small></span></button><button type="button" data-menu-action="ticket" role="menuitem"><span class="menu-symbol ticket-symbol">✉</span><span><strong>New ticket</strong><small>Tell us what you need help with</small></span></button><button type="button" data-menu-action="faq" role="menuitem"><span class="menu-symbol faq-symbol">?</span><span><strong>FAQ</strong><small>Answers to common questions</small></span></button><button type="button" data-menu-action="guide" role="menuitem"><span class="menu-symbol guide-symbol">☷</span><span><strong>Guide</strong><small>How to use OnChainCrypto</small></span></button><button type="button" data-menu-action="contact" role="menuitem"><span class="menu-symbol contact-symbol">✉</span><span><strong>Contact</strong><small>Email support</small></span></button></div></div></div>
+  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open profile, notifications and verification menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">⚙</span><span><strong>Settings</strong><small>Account, security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Account and security updates</small></span></button><button type="button" data-menu-page="profile" data-menu-kyc="true" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>KYC verification</strong><small>Identity verification status</small></span></button></div></div></div>
 </header>
 <main>
   <section id="page-markets">
@@ -211,17 +210,16 @@ header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:
           <div class="settings-item"><div><strong>All notifications</strong><p class="muted tiny">Master preference for notification options on this device.</p></div><label class="switch-label"><input type="checkbox" id="prefAllNotifications" checked><span>On</span></label></div>
           <p id="notificationPrefsMessage" class="muted tiny"></p>
           <div class="settings-item"><div><strong>Identity verification (KYC)</strong><p class="muted tiny">Identity verification provider is not connected yet.</p></div><span class="tag">Not connected</span></div>
+          <div class="settings-item"><div><strong>Support Center</strong><p class="muted tiny">Open FAQs, guides, contact options and support requests.</p></div><button type="button" class="secondary" id="settingsSupportBtn">Open support</button></div>
           <p class="muted tiny">Do not upload identity documents to this public website until a verified KYC provider and secure backend are configured.</p>
         </div>
       </details>
-      <button type="button" class="panel profile-menu-link" id="profileSupportBtn"><span class="profile-menu-icon support-symbol">☏</span><span class="profile-menu-copy"><strong>Support</strong><small>Help and resources</small></span><span class="profile-menu-chevron">›</span></button>
       <details class="panel profile-menu-section">
         <summary><span class="profile-menu-icon notification-symbol">ⓘ</span><span class="profile-menu-copy"><strong>About</strong><small>Platform information</small></span><span class="profile-menu-chevron">⌄</span></summary>
         <div class="profile-menu-content">
           <div class="settings-item"><div><strong>OnChainCrypto</strong><p class="muted tiny">Crypto market information and paper-trading interface.</p></div><span class="tag">Website</span></div>
           <div class="settings-item"><div><strong>Market data</strong><p class="muted tiny">Public market data may be delayed or unavailable.</p></div><span class="tag">Public data</span></div>
           <div class="settings-item"><div><strong>Trading and wallet services</strong><p class="muted tiny">Live exchange execution, custody and real-money wallet services are not connected on this website.</p></div><span class="tag">Not connected</span></div>
-          <div class="settings-item"><div><strong>Contact support</strong><p class="muted tiny">Email the support team.</p></div><a class="secondary" href="mailto:onchaincryptosupport@gmail.com">Email support</a></div>
         </div>
       </details>
       <button type="button" class="panel profile-menu-link profile-logout" id="profileLogoutBtn"><span class="profile-menu-icon">↪</span><span class="profile-menu-copy"><strong>Logout</strong><small>Sign out your account</small></span><span class="profile-menu-chevron">›</span></button>
@@ -298,8 +296,8 @@ header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:
       <section class="panel form-panel">
         <h2>Deposit instructions preview</h2>
         <p class="muted tiny">Only enter a public receiving address that you control. The QR is a convenience display, not proof that payments can be detected or credited.</p>
-        <label for="depositNetwork">Network / asset</label><select id="depositNetwork" class="field"><option value="BTC">Bitcoin (BTC)</option><option value="ETH">Ethereum (ETH)</option><option value="USDT-ERC20">USDT — Ethereum (ERC-20)</option><option value="USDT-TRC20">USDT — TRON (TRC-20)</option><option value="TRX">TRON (TRX)</option><option value="SOL">Solana (SOL)</option></select>
-        <label for="depositAddress">Public deposit address</label><input id="depositAddress" class="field" autocomplete="off" placeholder="Paste your verified public receiving address">
+        <label for="adminDepositNetwork">Network / asset</label><select id="adminDepositNetwork" class="field"><option value="BTC">Bitcoin (BTC)</option><option value="ETH">Ethereum (ETH)</option><option value="USDT-ERC20">USDT — Ethereum (ERC-20)</option><option value="USDT-TRC20">USDT — TRON (TRC-20)</option><option value="TRX">TRON (TRX)</option><option value="SOL">Solana (SOL)</option></select>
+        <label for="adminDepositAddress">Public deposit address</label><input id="adminDepositAddress" class="field" autocomplete="off" placeholder="Paste your verified public receiving address">
         <button id="saveDepositPreview">Save preview settings</button>
         <div id="depositQrArea" class="qr-area"><p class="muted tiny">Enter an address to preview its QR code.</p></div>
         <p id="adminSaveMessage" class="muted tiny"></p>
@@ -526,7 +524,7 @@ function showAdminDashboard(){
  $("adminMarketStatus").textContent=market.length?"Connected":"Unavailable";
  $("adminTxCount").textContent=String(state.history.length);
  const saved=JSON.parse(localStorage.getItem("oc_deposit_preview")||"{}");
- if(!$("depositAddress").value){$("depositAddress").value=saved.address||"";$("depositNetwork").value=saved.network||"BTC";if(saved.address)renderDepositQr(saved.address,saved.network||"BTC")}
+ if(!$("adminDepositAddress").value){$("adminDepositAddress").value=saved.address||"";$("adminDepositNetwork").value=saved.network||"BTC";if(saved.address)renderDepositQr(saved.address,saved.network||"BTC")}
  const ann=JSON.parse(localStorage.getItem("oc_announcement_preview")||"{}");
  if(ann.title)$("announcementTitle").value=ann.title;if(ann.text)$("announcementText").value=ann.text;
 }
@@ -539,7 +537,7 @@ function renderDepositQr(address,network){
  const warn=document.createElement("p");warn.className="muted tiny";warn.textContent="Preview only. Verify network and address independently; no payment monitoring or account crediting is active.";area.appendChild(warn);
 }
 $("saveDepositPreview").addEventListener("click",()=>{
- const address=$("depositAddress").value.trim(),network=$("depositNetwork").value;
+ const address=$("adminDepositAddress").value.trim(),network=$("adminDepositNetwork").value;
  if(!address){$("adminSaveMessage").textContent="Enter a public receiving address first.";return}
  localStorage.setItem("oc_deposit_preview",JSON.stringify({address,network}));
  renderDepositQr(address,network);$("adminSaveMessage").textContent="Saved in this browser only. It is not published or connected to deposit processing.";
@@ -642,7 +640,7 @@ try{notificationPrefs={...notificationPrefs,...JSON.parse(localStorage.getItem("
 const prefMap={prefNotifications:"notifications",prefEmailAlerts:"emailAlerts",prefAllNotifications:"allNotifications"};
 preferenceIds.forEach(id=>{const input=$(id);input.checked=!!notificationPrefs[prefMap[id]];const label=input.closest(".switch-label")?.querySelector("span");if(label)label.textContent=input.checked?"On":"Off";input.addEventListener("change",()=>{notificationPrefs[prefMap[id]]=input.checked;if(id==="prefAllNotifications"&&!input.checked){$("prefNotifications").checked=false;$("prefEmailAlerts").checked=false;notificationPrefs.notifications=false;notificationPrefs.emailAlerts=false}else if(id==="prefAllNotifications"&&input.checked){notificationPrefs.allNotifications=true}if(id!=="prefAllNotifications"&&input.checked){$("prefAllNotifications").checked=true;notificationPrefs.allNotifications=true}preferenceIds.forEach(otherId=>{const other=$(otherId);const otherLabel=other.closest(".switch-label")?.querySelector("span");if(otherLabel)otherLabel.textContent=other.checked?"On":"Off"});localStorage.setItem("oc_notification_preferences",JSON.stringify(notificationPrefs));$("notificationPrefsMessage").textContent="Preference saved on this device only. Email and push delivery are not configured."})});
 
-  document.getElementById("profileSupportBtn")?.addEventListener("click",()=>showPage("support"));
+  document.getElementById("settingsSupportBtn")?.addEventListener("click",()=>showPage("support"));
   document.getElementById("profileLogoutBtn")?.addEventListener("click",()=>{const signOutButton=document.getElementById("signOutBtn");if(signOutButton){signOutButton.click();}else{showPage("register");const message=document.getElementById("registerMessage");if(message)message.textContent="Open Sign out from the account sign-in panel if you are signed in.";}});
 document.querySelectorAll("[data-profile-page]").forEach(btn=>btn.addEventListener("click",()=>showPage(btn.dataset.profilePage)));
 $("accountStatusBtn").addEventListener("click",()=>{showPage("register");$("authStatus")?.scrollIntoView({behavior:"smooth",block:"center"})});
