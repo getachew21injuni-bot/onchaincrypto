@@ -858,7 +858,8 @@ const friendlyError = (error) => {
     "auth/web-storage-unsupported": "Your browser blocks required storage. Enable site data and try again.",
     "auth/unauthorized-domain": "This website hostname is not authorized in Firebase Authentication settings."
   };
-  return messages[code] || (error?.message ? "Authentication error: " + error.message : "Something went wrong. Please try again.");
+  const explanation = messages[code] || (error?.message ? "Authentication error: " + error.message : "Something went wrong. Please try again.");
+  return explanation + (code ? " (Firebase code: " + code + ")" : "");
 };
 
 function normalizedPhone(value) {
