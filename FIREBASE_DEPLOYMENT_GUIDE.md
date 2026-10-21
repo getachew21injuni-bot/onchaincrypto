@@ -26,3 +26,25 @@ The GitHub build check passing means the TypeScript compiles. It does **not** me
 - The public website still uses demo-only balances/trades. Do not accept real deposits, promise withdrawals, or represent demo trading as real trading.
 - This starter is not a production cryptocurrency exchange. A real exchange needs a secure ledger, transaction reconciliation, withdrawal approvals and monitoring, key management, abuse controls, legal/compliance review, and independent security testing.
 - Never put private keys, seed phrases, exchange API secrets, passwords, or service-account JSON in website code or ordinary Git files.
+
+
+## Assign the first admin safely (project owner only)
+
+Do this only from a trusted computer or Google Cloud Shell signed in as a project owner/admin. Do not paste credentials into chat or commit any credential file.
+
+1. Revoke the previously exposed service-account private key in Google Cloud IAM > Service Accounts > that service account > Keys, if you have not already done so.
+2. Install Node.js 20 and the Firebase CLI. In a terminal at the repository root, run:
+   ```bash
+   npm install --prefix functions
+   gcloud auth application-default login
+   gcloud config set project onchaincrypto-d976b
+   ```
+   The signed-in Google account needs permission to administer Firebase Authentication custom claims. Do not create or download a service-account JSON key for this step.
+3. Run the script with the exact Firebase Auth UID copied from Authentication > Users:
+   ```bash
+   node functions/scripts/set-admin-claim.cjs YOUR_COPIED_UID
+   ```
+   Replace `YOUR_COPIED_UID` with your UID in the terminal command only. Do not commit the UID into a source file.
+4. If successful, sign out of OnChainCrypto, sign in again, and reload the admin page. If it still denies access, check the browser console and confirm the deployed site is using the same Firebase project.
+
+This script grants `admin: true` to the specified Firebase user using existing Application Default Credentials and preserves other custom claims. It does not deploy Cloud Functions or make demo trades, deposits, or withdrawals real. The project owner must review and deploy the backend separately.
