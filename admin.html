@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<title>OnChainCrypto | Admin Dashboard</title>
+<style>
+:root{color-scheme:dark;--bg:#080d16;--panel:#101827;--panel2:#121c2e;--line:#263348;--text:#f3f6fc;--muted:#8d9bb2;--blue:#4c8dff;--cyan:#2be7bd;--purple:#a855f7;--red:#ef4444;--green:#34d399;--gold:#fbbf24}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif}button{font:inherit;cursor:pointer;color:inherit}.topbar{height:70px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 22px;background:#0b1322;position:sticky;top:0;z-index:5}.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}.logo{width:38px;height:38px;border-radius:13px;background:linear-gradient(145deg,#2f80ff,#6d45e8);display:grid;place-items:center;font-size:21px;box-shadow:0 0 24px #387cff40}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:1.5px}.top-actions{margin-left:auto;display:flex;gap:8px}.icon-btn{border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:9px 12px}.layout{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:calc(100vh - 70px)}aside{background:#101827;border-right:1px solid var(--line);padding:20px 14px}.admin-profile{display:flex;align-items:center;gap:12px;padding:4px 8px 24px;border-bottom:1px solid var(--line);margin-bottom:18px}.avatar{width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,#3887ff,#7651e9);display:grid;place-items:center;font-size:22px;font-weight:800}.admin-profile strong{display:block;font-size:16px}.admin-profile small{color:#73aaff;letter-spacing:1.4px;font-size:10px}.nav{display:grid;gap:7px}.nav button{width:100%;border:1px solid transparent;background:transparent;color:#9ca9bd;border-radius:13px;text-align:left;padding:13px 12px;display:flex;align-items:center;gap:13px}.nav button .ico{width:24px;text-align:center;font-size:18px}.nav button.active,.nav button:hover{color:white;background:#111c30;border-color:#203452;box-shadow:inset 3px 0 var(--blue)}.pill{margin-left:auto;border-radius:20px;background:var(--purple);color:white;padding:3px 9px;font-size:11px}.main{padding:24px;max-width:1500px;width:100%;margin:auto}.heading{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:23px}.heading h1{font-size:26px;margin:0 0 4px}.heading p{margin:0;color:var(--muted)}.status{font-size:12px;color:var(--cyan);border:1px solid #1b594d;background:#0b2826;border-radius:30px;padding:7px 11px;white-space:nowrap}.section-title{font-size:17px;margin:0 0 14px}.quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:26px}.quick{min-height:154px;border:1px solid var(--line);border-radius:24px;background:var(--panel);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:15px;transition:.2s}.quick:hover{transform:translateY(-2px);border-color:#426da8}.quick .qicon{width:72px;height:72px;border-radius:25px;background:#172945;color:#68aaff;display:grid;place-items:center;font-size:29px}.quick:nth-child(3) .qicon{background:#301c31;color:#fb7185}.quick:nth-child(4) .qicon{background:#241f3e;color:#b197ff}.quick:nth-child(5) .qicon{background:#332b1d;color:var(--gold)}.quick span:last-child{font-size:18px}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.stat{padding:24px;border:1px solid var(--line);border-radius:23px;background:var(--panel);min-height:160px;position:relative}.stat .label{color:#9ba8bc;font-size:15px}.stat .value{font-size:36px;font-weight:800;margin:13px 0 8px}.stat .trend{color:var(--green)}.stat .sicon{position:absolute;right:24px;top:25px;font-size:31px;color:#4b8cff}.content-panel{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.panel-head h2{font-size:17px;margin:0}.muted{color:var(--muted)}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:520px}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-weight:600}.tag{display:inline-block;border-radius:30px;padding:4px 9px;background:#12372e;color:#6ee7b7;font-size:11px}.empty{padding:25px 5px;color:var(--muted);text-align:center}.mobile-menu{display:none}.notice{color:#c5d2e6;font-size:12px;margin-top:22px;padding:13px 15px;border:1px solid #263348;border-radius:13px;background:#0d1524}.bottomnav{display:none}.hidden{display:none!important}
+@media(min-width:900px){.quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.topbar{height:62px;padding:0 14px}.mobile-menu{display:inline-block}.brand{font-size:14px}.brand small{font-size:9px}.top-actions .hide-mobile{display:none}.layout{display:block}aside{position:fixed;z-index:10;left:0;top:62px;bottom:0;width:min(82vw,300px);overflow:auto;transform:translateX(-105%);transition:transform .2s;box-shadow:20px 0 50px #0008}aside.open{transform:translateX(0)}.main{padding:20px 14px 100px}.heading h1{font-size:23px}.heading p{font-size:13px}.status{font-size:10px}.quick-grid{gap:12px}.quick{min-height:140px;border-radius:22px}.quick .qicon{width:62px;height:62px;border-radius:22px}.quick span:last-child{font-size:16px}.stats{grid-template-columns:1fr}.stat{min-height:145px;padding:21px}.stat .value{font-size:32px}.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:6;display:flex;justify-content:space-around;align-items:center;height:70px;background:#101827f2;border-top:1px solid var(--line);backdrop-filter:blur(12px)}.bottomnav button{border:0;background:none;color:#8e9bb0;display:grid;gap:3px;justify-items:center;font-size:10px}.bottomnav .center{width:58px;height:58px;margin-top:-27px;border-radius:50%;background:linear-gradient(145deg,#3f82ff,#6748e9);border:6px solid #101827;box-shadow:0 0 0 2px #355a9e;font-size:23px;color:white}.content-panel{padding:15px}.notice{margin-bottom:10px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+<button class="icon-btn mobile-menu" id="menuToggle" aria-label="Open menu">☰</button>
+<div class="brand"><div class="logo">◉</div><div>OnChainCrypto<small>ADMIN CONTROL CENTER</small></div></div>
+<div class="top-actions"><button class="icon-btn" id="refreshBtn">↻ Refresh</button><button class="icon-btn hide-mobile" id="notifyBtn">♧ Notifications <b style="color:#ef4444">10</b></button><button class="icon-btn" id="moreBtn">⋮</button></div>
+</header>
+<div class="layout">
+<aside id="sidebar">
+<div class="admin-profile"><div class="avatar">O</div><div><strong>OnChain Admin</strong><small>ADMIN DASHBOARD</small></div></div>
+<nav class="nav" id="sideNav">
+<button class="active" data-view="Dashboard"><span class="ico">◉</span>Dashboard</button>
+<button data-view="Users"><span class="ico">♟</span>Users <span class="pill">KYC</span></button>
+<button data-view="Login History"><span class="ico">◴</span>Login History</button>
+<button data-view="Notifications"><span class="ico">♧</span>Notification <span class="pill" style="background:#dc303c">10</span></button>
+<button data-view="KYC"><span class="ico">▣</span>KYC <span class="pill">2</span></button>
+<button data-view="Email"><span class="ico">✉</span>Email</button>
+<button data-view="Analytics"><span class="ico">◔</span>Analytics</button>
+<button data-view="Deposits"><span class="ico">↓</span>Deposits</button>
+<button data-view="Withdrawals"><span class="ico">↑</span>Withdrawals</button>
+<button data-view="Addresses"><span class="ico">▰</span>Addresses</button>
+<button data-view="Trades"><span class="ico">⇄</span>Trades</button>
+<button data-view="Assets"><span class="ico">◉</span>Assets</button>
+<button data-view="Settings"><span class="ico">⚙</span>Settings</button>
+</nav>
+</aside>
+<main class="main">
+<div class="heading"><div><h1 id="pageTitle">Dashboard Overview</h1><p id="pageSubtitle">Welcome to your OnChainCrypto administration panel.</p></div><span class="status">● Panel ready</span></div>
+<section id="dashboardView">
+<h2 class="section-title">Quick Actions</h2>
+<div class="quick-grid">
+<button class="quick" data-view="Users"><span class="qicon">♟</span><span>Users</span></button>
+<button class="quick" data-view="Deposits"><span class="qicon">↓</span><span>Deposit</span></button>
+<button class="quick" data-view="Withdrawals"><span class="qicon">↑</span><span>Withdraw</span></button>
+<button class="quick" data-view="Transfers"><span class="qicon">⇄</span><span>Transfer</span></button>
+<button class="quick" data-view="History"><span class="qicon">◴</span><span>History</span></button>
+</div>
+<div class="stats">
+<div class="stat"><span class="label">Total Users</span><span class="sicon">♟</span><div class="value">—</div><div class="trend">● Connect admin data to show live totals</div></div>
+<div class="stat"><span class="label">Total Assets (USDT)</span><span class="sicon" style="color:#34d399">◈</span><div class="value">—</div><div class="muted">No live financial data connected</div></div>
+<div class="stat"><span class="label">Pending KYC</span><span class="sicon" style="color:#b197ff">▣</span><div class="value">—</div><div class="muted">Review requests in the KYC section</div></div>
+<div class="stat"><span class="label">Deposit Requests</span><span class="sicon" style="color:#68aaff">↓</span><div class="value">—</div><div class="muted">Admin data connection required</div></div>
+<div class="stat"><span class="label">Withdrawal Requests</span><span class="sicon" style="color:#fb7185">↑</span><div class="value">—</div><div class="muted">Admin data connection required</div></div>
+<div class="stat"><span class="label">Platform Activity</span><span class="sicon" style="color:#fbbf24">◴</span><div class="value">Ready</div><div class="muted">Panel navigation is active</div></div>
+</div>
+<div class="notice">Security note: this is the admin dashboard interface preview. Live user records, KYC documents, deposits, withdrawals and account controls are not connected yet. Do not use it as a secure production admin system until server-side admin authentication and permissions are configured.</div>
+</section>
+<section id="detailView" class="content-panel hidden"><div class="panel-head"><h2 id="detailTitle">Section</h2><span class="muted">Admin workspace</span></div><div id="detailBody" class="empty">This section is ready for a secure backend connection. No live records are displayed.</div></section>
+</main>
+</div>
+<nav class="bottomnav"><button data-view="Users"><span>♟</span>Users</button><button data-view="Support"><span>☏</span>Support</button><button class="center" data-view="Dashboard" aria-label="Dashboard">◉</button><button data-view="Email"><span>✉</span>Email</button><button data-view="Analytics"><span>◔</span>Stats</button></nav>
+<script>
+const sidebar=document.getElementById('sidebar'),dashboard=document.getElementById('dashboardView'),detail=document.getElementById('detailView');
+const descriptions={
+'Users':'Manage registered accounts after a secure user database is connected.',
+'Login History':'Review sign-in events through a server-side audit log.',
+'Notifications':'Create and review platform notices after notification services are connected.',
+'KYC':'Review identity-verification submissions securely. Do not upload identity documents to this preview.',
+'Email':'Prepare account announcements after a verified email service is configured.',
+'Analytics':'View user and platform analytics after data access is configured.',
+'Deposits':'Review deposit requests. This preview does not accept or verify payments.',
+'Withdrawals':'Review withdrawal requests. This preview cannot send funds.',
+'Addresses':'Manage deposit address records only after secure wallet infrastructure is configured.',
+'Trades':'Review order history after a trusted trading backend is connected.',
+'Assets':'View asset accounting after secure ledger integration.',
+'Transfers':'Review transfer requests after server-side authorization is implemented.',
+'History':'View platform event history after the audit-log backend is connected.',
+'Settings':'Admin settings and access controls must be enforced by the server, not only this page.',
+'Support':'Support inbox integration can be added here.'
+};
+function showView(view){const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your OnChainCrypto administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;document.getElementById('detailBody').textContent=descriptions[view]||'This section is ready for a secure backend connection. No live records are displayed.';document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+document.getElementById('menuToggle').addEventListener('click',()=>sidebar.classList.toggle('open'));
+document.getElementById('refreshBtn').addEventListener('click',()=>{const b=document.getElementById('refreshBtn');b.textContent='✓ Refreshed';setTimeout(()=>b.textContent='↻ Refresh',1200);});
+document.getElementById('notifyBtn').addEventListener('click',()=>showView('Notifications'));
+document.getElementById('moreBtn').addEventListener('click',()=>showView('Settings'));
+</script>
+</body>
+</html>
