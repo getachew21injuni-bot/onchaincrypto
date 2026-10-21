@@ -36,7 +36,7 @@ header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:
 .auth-phone-details{margin-top:16px;border-top:1px solid var(--line,#263449);padding-top:12px}.auth-phone-details summary{cursor:pointer;color:#b7c7d4;font-size:13px}.auth-phone-details[open] summary{margin-bottom:14px}
 @media(max-width:600px){.auth-welcome{margin:8px 0 16px;padding:24px 12px}.auth-trust{gap:6px}.auth-trust span{font-size:11px}.auth-options{align-items:flex-start}}
 
-</style>
+.feature-label{display:inline-flex;align-items:center;gap:9px}.feature-symbol{display:inline-flex;align-items:center;justify-content:center;flex:0 0 28px;width:28px;height:28px;border-radius:8px;color:var(--feature-color,var(--yellow));background:color-mix(in srgb,var(--feature-color,var(--yellow)) 14%,transparent);font-size:16px;font-weight:800;line-height:1}.feature-heading{display:flex;align-items:center;gap:10px}.about-section .settings-item{align-items:center}.about-section .settings-item strong{line-height:1.4}</style>
 <!-- Refresh deployment check: 2026-10-20T19:44Z -->
 </head>
 <body>
@@ -161,33 +161,32 @@ header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:
     <div class="page-title"><div><h1>⇄ Convert</h1><div class="muted">Choose assets to preview a conversion.</div></div><span class="tag">Preview</span></div>
     <section class="panel form-panel"><label for="convertFrom">From</label><select id="convertFrom" class="field"><option>USDT</option><option>BTC</option><option>ETH</option><option>BNB</option><option>XRP</option></select><label for="convertTo">To</label><select id="convertTo" class="field"><option>BTC</option><option>ETH</option><option>BNB</option><option>XRP</option><option>USDT</option></select><label for="convertAmount">Amount</label><input id="convertAmount" class="field" type="number" min="0" step="any" placeholder="Enter amount"><p class="muted tiny">Conversion quotes and execution require a connected exchange/provider. No conversion is executed here.</p><button class="primary full" type="button" disabled>Convert unavailable until provider is connected</button></section>
   </section>
-  <section id="page-notifications" class="hidden"><div class="page-title"><div><h1>♢ Notifications</h1><div class="muted">Account and security updates for your OnChainCrypto account.</div></div><span class="tag">NOTIFICATIONS</span></div><section class="panel form-panel"><div class="list-row"><div class="asset"><span class="menu-symbol notification-symbol">♢</span><div><strong>Account security</strong><div class="muted tiny">Sign in to check your account status and email verification.</div></div></div><span class="tag">Action may be needed</span></div><div class="list-row"><div class="asset"><span class="menu-symbol kyc-symbol">✓</span><div><strong>KYC verification</strong><div class="muted tiny">Identity verification is not available until a secure KYC provider is connected.</div></div></div><span class="tag">Not connected</span></div><div class="list-row"><div class="asset"><span class="menu-symbol profile-symbol">ⓘ</span><div><strong>Platform status</strong><div class="muted tiny">Wallet balances and trading actions are not connected to a live exchange backend.</div></div></div><span class="tag">Information</span></div><p class="muted tiny">These are informational status messages, not push notifications. Real-time alerts require a configured backend and notification service.</p></section></section>
-  <section id="page-profile" class="hidden">
+  <section id="page-notifications" class="hidden"><div class="page-title"><div><h1>♢ Notifications</h1><div class="muted">Account and security updates for your OnChainCrypto account.</div></div><span class="tag">NOTIFICATIONS</span></div><section class="panel form-panel"><div class="list-row"><div class="asset"><span class="menu-symbol notification-symbol">♢</span><div><strong>Account security</strong><div class="muted tiny">Sign in to check your account status and email verification.</div></div></div><span class="tag">Action may be needed</span></div><div class="list-row"><div class="asset"><span class="menu-symbol kyc-symbol">✓</span><div><strong>KYC verification</strong><div class="muted tiny">Identity verification is not available until a secure KYC provider is connected.</div></div></d  <section id="page-profile" class="hidden">
     <div class="page-title"><div><h1>Profile</h1><div class="muted">Manage account and preference.</div></div><span class="tag">ACCOUNT CENTER</span></div>
     <div class="profile-menu-list">
       <details class="panel profile-menu-section">
         <summary><span class="profile-menu-icon profile-symbol">♙</span><span class="profile-menu-copy"><strong>Account</strong><small>Manage your profile</small></span><span class="profile-menu-chevron">⌄</span></summary>
         <div class="profile-menu-content">
-          <div class="settings-item"><div><strong>Display name</strong><p class="muted tiny">Edit the name shown in your profile on this device.</p></div><div class="settings-control"><input id="displayName" class="field" maxlength="50" placeholder="Your display name" aria-label="Display name"></div></div>
-          <div class="settings-item"><div><strong>Display currency</strong><p class="muted tiny">Choose the currency used for display.</p></div><div class="settings-control"><select id="displayCurrency" class="field" aria-label="Display currency"><option value="USD">USD — US Dollar</option></select></div></div>
-          <div class="settings-item"><div><strong>Account status</strong><p class="muted tiny">Check your sign-in and email-verification status.</p></div><button class="secondary" id="accountStatusBtn">View status</button></div>
-          <div class="settings-item"><div><strong>Security information</strong><p class="muted tiny">Tips for keeping your account secure.</p></div><button class="secondary" id="securityInfoBtn">Security help</button></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#8ab4ff" aria-hidden="true">♙</span>Display name</strong><p class="muted tiny">Edit the name shown in your profile on this device.</p></div><div class="settings-control"><input id="displayName" class="field" maxlength="50" placeholder="Your display name" aria-label="Display name"></div></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#f0b90b" aria-hidden="true">▣</span>Display currency</strong><p class="muted tiny">Choose the currency used for display.</p></div><div class="settings-control"><select id="displayCurrency" class="field" aria-label="Display currency"><option value="USD">USD — US Dollar</option></select></div></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#0ecb81" aria-hidden="true">✓</span>Account status</strong><p class="muted tiny">Check your sign-in and email-verification status.</p></div><button class="secondary" id="accountStatusBtn">View status</button></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#22d3ee" aria-hidden="true">⛨</span>Security information</strong><p class="muted tiny">Tips for keeping your account secure.</p></div><button class="secondary" id="securityInfoBtn">Security help</button></div>
           <button class="primary full" id="saveProfile">Save profile preferences</button><p id="profileMessage" class="muted tiny"></p>
-          <div class="settings-item"><div><strong>Export data</strong><p class="muted tiny">Download browser-local data available on this device.</p></div><button class="secondary" id="exportUserDataBtn">Export data</button></div>
-          <div class="settings-item"><div><strong>Request account deletion</strong><p class="muted tiny">Open a support request to discuss account deletion.</p></div><button class="secondary" id="requestDeleteAccountBtn">Request deletion</button></div><p id="privacyMessage" class="muted tiny"></p>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#a78bfa" aria-hidden="true">↓</span>Export data</strong><p class="muted tiny">Download browser-local data available on this device.</p></div><button class="secondary" id="exportUserDataBtn">Export data</button></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#f6465d" aria-hidden="true">⊗</span>Request account deletion</strong><p class="muted tiny">Open a support request to discuss account deletion.</p></div><button class="secondary" id="requestDeleteAccountBtn">Request deletion</button></div><p id="privacyMessage" class="muted tiny"></p>
         </div>
       </details>
       <details class="panel profile-menu-section">
         <summary><span class="profile-menu-icon kyc-symbol">⚙</span><span class="profile-menu-copy"><strong>Settings</strong><small>Preference and security</small></span><span class="profile-menu-chevron">⌄</span></summary>
         <div class="profile-menu-content">
-          <div class="settings-item"><div><strong>Reset password</strong><p class="muted tiny">Start password reset for your registered email.</p></div><button class="secondary" id="changePasswordBtn">Reset password</button></div>
-          <div class="settings-item"><div><strong>Session management</strong><p class="muted tiny">Sign out of this browser session.</p></div><button class="secondary" id="manageSessionBtn">Manage session</button></div>
-          <div class="settings-item"><div><strong>Notifications</strong><p class="muted tiny">Saved on this device only; push delivery is not connected.</p></div><label class="switch-label"><input type="checkbox" id="prefNotifications" checked><span>On</span></label></div>
-          <div class="settings-item"><div><strong>Email alerts</strong><p class="muted tiny">Local preference only; email alerts are not connected.</p></div><label class="switch-label"><input type="checkbox" id="prefEmailAlerts"><span>Off</span></label></div>
-          <div class="settings-item"><div><strong>All notifications</strong><p class="muted tiny">Master preference for notification options on this device.</p></div><label class="switch-label"><input type="checkbox" id="prefAllNotifications" checked><span>On</span></label></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#f0b90b" aria-hidden="true">⚿</span>Reset password</strong><p class="muted tiny">Start password reset for your registered email.</p></div><button class="secondary" id="changePasswordBtn">Reset password</button></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#22d3ee" aria-hidden="true">▣</span>Session management</strong><p class="muted tiny">Sign out of this browser session.</p></div><button class="secondary" id="manageSessionBtn">Manage session</button></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#c4b5fd" aria-hidden="true">♢</span>Notifications</strong><p class="muted tiny">Saved on this device only; push delivery is not connected.</p></div><label class="switch-label"><input type="checkbox" id="prefNotifications" checked><span>On</span></label></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#a78bfa" aria-hidden="true">✉</span>Email alerts</strong><p class="muted tiny">Local preference only; email alerts are not connected.</p></div><label class="switch-label"><input type="checkbox" id="prefEmailAlerts"><span>Off</span></label></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#c4b5fd" aria-hidden="true">♢</span>All notifications</strong><p class="muted tiny">Master preference for notification options on this device.</p></div><label class="switch-label"><input type="checkbox" id="prefAllNotifications" checked><span>On</span></label></div>
           <p id="notificationPrefsMessage" class="muted tiny"></p>
-          <div class="settings-item"><div><strong>Identity verification (KYC)</strong><p class="muted tiny">Identity verification (KYC) is not active yet. A verified KYC provider and secure backend must be connected before identity checks or document uploads can be accepted.</p></div><span class="tag">Not connected</span></div>
-          <div class="settings-item"><div><strong>Support Center</strong><p class="muted tiny">Open FAQs, guides, contact options and support requests.</p></div><button type="button" class="secondary" id="settingsSupportBtn">Open support</button></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#0ecb81" aria-hidden="true">⛨</span>Identity verification (KYC)</strong><p class="muted tiny">Identity verification (KYC) is not active yet. A verified KYC provider and secure backend must be connected before identity checks or document uploads can be accepted.</p></div><span class="tag">Not connected</span></div>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#8ab4ff" aria-hidden="true">✚</span>Support Center</strong><p class="muted tiny">Open FAQs, guides, contact options and support requests.</p></div><button type="button" class="secondary" id="settingsSupportBtn">Open support</button></div>
           <p class="muted tiny">Do not upload identity documents to this public website until a verified KYC provider and secure backend are configured.</p>
         </div>
       </details>
@@ -201,59 +200,67 @@ header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:
             <p class="muted">A digital-asset information and paper-trading experience designed to make market tools easier to explore, understand and use.</p>
           </div>
           <div class="panel about-section">
-            <h3>Our Mission</h3>
+            <h3 class="feature-heading"><span class="feature-symbol" style="--feature-color:#f0b90b" aria-hidden="true">✦</span>Our Mission</h3>
             <p>Our mission is to make digital-asset market information and trading education more accessible. We aim to develop clear, useful tools that help individuals understand market activity and explore trading workflows responsibly.</p>
           </div>
           <div class="panel about-section">
-            <h3>Our Vision</h3>
+            <h3 class="feature-heading"><span class="feature-symbol" style="--feature-color:#8ab4ff" aria-hidden="true">◉</span>Our Vision</h3>
             <p>Our vision is to build a trusted, accessible digital-asset platform that serves a global community through thoughtful design, transparent communication and continuous technical improvement.</p>
           </div>
           <div class="panel about-section">
-            <h3>Our Core Values</h3>
-            <div class="settings-item"><div><strong>Security first</strong><p class="muted tiny">Prioritizing responsible handling of accounts and data as the platform develops.</p></div></div>
-            <div class="settings-item"><div><strong>Transparency</strong><p class="muted tiny">Communicating platform capabilities and limitations clearly.</p></div></div>
-            <div class="settings-item"><div><strong>Innovation</strong><p class="muted tiny">Improving the experience through useful tools and considered technology.</p></div></div>
-            <div class="settings-item"><div><strong>Community</strong><p class="muted tiny">Building an inclusive environment for people learning about digital assets.</p></div></div>
+            <h3 class="feature-heading"><span class="feature-symbol" style="--feature-color:#a78bfa" aria-hidden="true">♧</span>Our Core Values</h3>
+            <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#0ecb81" aria-hidden="true">⛨</span>Security first</strong><p class="muted tiny">Prioritizing responsible handling of accounts and data as the platform develops.</p></div></div>
+            <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#22d3ee" aria-hidden="true">◉</span>Transparency</strong><p class="muted tiny">Communicating platform capabilities and limitations clearly.</p></div></div>
+            <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#f0b90b" aria-hidden="true">✦</span>Innovation</strong><p class="muted tiny">Improving the experience through useful tools and considered technology.</p></div></div>
+            <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#a78bfa" aria-hidden="true">♧</span>Community</strong><p class="muted tiny">Building an inclusive environment for people learning about digital assets.</p></div></div>
           </div>
           <div class="panel about-section">
-            <h3>Platform Features</h3>
-            <div class="settings-item"><div><strong>Market insights</strong><p class="muted tiny">Explore public cryptocurrency market information. Data availability and timing depend on the external source.</p></div></div>
-            <div class="settings-item"><div><strong>Interactive charts</strong><p class="muted tiny">Review market movements using the charting tools available on the website.</p></div></div>
-            <div class="settings-item"><div><strong>Paper trading</strong><p class="muted tiny">Explore a simulated trading interface without executing real exchange orders.</p></div></div>
-            <div class="settings-item"><div><strong>Account access</strong><p class="muted tiny">Use the available account sign-in options and review account settings.</p></div></div>
-            <div class="settings-item"><div><strong>Mobile-friendly experience</strong><p class="muted tiny">Access the website from compatible desktop and mobile browsers.</p></div></div>
+            <h3 class="feature-heading"><span class="feature-symbol" style="--feature-color:#0ecb81" aria-hidden="true">▥</span>Platform Features</h3>
+            <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#0ecb81" aria-hidden="true">▥</span>Market insights</strong><p class="muted tiny">Explore public cryptocurrency market information. Data availability and timing depend on the external source.</p></div></div>
+            <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#22d3ee" aria-hidden="true">▤</span>Interactive charts</strong><p class="muted tiny">Review market movements using the charting tools available on the website.</p></div></div>
+            <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#f0b90b" aria-hidden="true">▥</span>Paper trading</strong><p class="muted tiny">Explore a simulated trading interface without executing real exchange orders.</p></div></div>
+            <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#8ab4ff" aria-hidden="true">♙</span>Account access</strong><p class="muted tiny">Use the available account sign-in options and review account settings.</p></div></div>
+            <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#a78bfa" aria-hidden="true">▯</span>Mobile-friendly experience</strong><p class="muted tiny">Access the website from compatible desktop and mobile browsers.</p></div></div>
           </div>
           <div class="panel about-section">
-            <h3>Development Roadmap</h3>
+            <h3 class="feature-heading"><span class="feature-symbol" style="--feature-color:#22d3ee" aria-hidden="true">↗</span>Development Roadmap</h3>
             <p>Potential future improvements include expanded analytics, additional asset information, enhanced account controls and integrations with verified service providers. Features such as perpetual contracts, leverage, multi-exchange liquidity, automated execution and real-money wallet services are not currently confirmed as available.</p>
           </div>
           <div class="panel about-section">
-            <h3>Security and Compliance</h3>
+            <h3 class="feature-heading"><span class="feature-symbol" style="--feature-color:#0ecb81" aria-hidden="true">⛨</span>Security and Compliance</h3>
             <p>We take account security and clear communication seriously. Security certifications, regulatory approvals, cold-storage arrangements, multi-signature custody and continuous monitoring should only be represented as active after they have been independently verified and implemented. This website does not currently provide connected exchange execution or real-money custody.</p>
           </div>
           <div class="panel about-section">
-            <h3>Platform Status</h3>
-            <div class="settings-item"><div><strong>Market data</strong><p class="muted tiny">Public-source market information; availability may vary.</p></div><span class="tag">External data</span></div>
-            <div class="settings-item"><div><strong>Trading</strong><p class="muted tiny">Paper-trading interface only; live exchange execution is not connected.</p></div><span class="tag">Simulated</span></div>
-            <div class="settings-item"><div><strong>Deposits, withdrawals and custody</strong><p class="muted tiny">Real-money processing and asset custody are not active on this website.</p></div><span class="tag">Unavailable</span></div>
-            <div class="settings-item"><div><strong>Partnerships and certifications</strong><p class="muted tiny">No third-party partnership or certification is claimed here without verified authorization.</p></div><span class="tag">Not verified</span></div>
+            <h3 class="feature-heading"><span class="feature-symbol" style="--feature-color:#f0b90b" aria-hidden="true">◉</span>Platform Status</h3>
+            <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#0ecb81" aria-hidden="true">↗</span>Market data</strong><p class="muted tiny">Public-source market information; availability may vary.</p></div><span class="tag">External data</span></div>
+            <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#f0b90b" aria-hidden="true">↗</span>Trading</strong><p class="muted tiny">Paper-trading interface only; live exchange execution is not connected.</p></div><span class="tag">Simulated</span></div>
+            <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#22d3ee" aria-hidden="true">▣</span>Deposits, withdrawals and custody</strong><p class="muted tiny">Real-money processing and asset custody are not active on this website.</p></div><span class="tag">Unavailable</span></div>
+            <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#a78bfa" aria-hidden="true">✓</span>Partnerships and certifications</strong><p class="muted tiny">No third-party partnership or certification is claimed here without verified authorization.</p></div><span class="tag">Not verified</span></div>
           </div>
           <div class="panel about-section">
-            <h3>Our Journey</h3>
+            <h3 class="feature-heading"><span class="feature-symbol" style="--feature-color:#8ab4ff" aria-hidden="true">➜</span>Our Journey</h3>
             <p>OnChainCrypto is being developed iteratively, with a focus on accessible market information, account experience and a clearer platform interface. We will publish verified milestones as they are completed.</p>
           </div>
           <div class="panel about-section">
-            <h3>Leadership and Operations</h3>
+            <h3 class="feature-heading"><span class="feature-symbol" style="--feature-color:#a78bfa" aria-hidden="true">♙</span>Leadership and Operations</h3>
             <p>Official leadership biographies and operational locations will be published when confirmed. We do not list unverified individuals or imply global offices that have not been established.</p>
           </div>
           <div class="panel about-section">
-            <h3>Get in Touch</h3>
+            <h3 class="feature-heading"><span class="feature-symbol" style="--feature-color:#22d3ee" aria-hidden="true">✉</span>Get in Touch</h3>
             <p>For questions or assistance, contact our support team by email.</p>
             <p><a class="secondary" href="mailto:onchaincryptosupport@gmail.com">Email support: onchaincryptosupport@gmail.com</a></p>
             <p class="muted tiny">Response times may vary. 24/7 support availability has not been confirmed.</p>
           </div>
           <div class="panel about-section">
-            <h3>Follow OnChainCrypto</h3>
+            <h3 class="feature-heading"><span class="feature-symbol" style="--feature-color:#f0b90b" aria-hidden="true">◎</span>Follow OnChainCrypto</h3>
+            <p class="muted">Official Telegram, X (Twitter), YouTube and LinkedIn links will be added here after the accounts are verified.</p>
+          </div>
+        </div>
+      </details>
+      <button type="button" class="panel profile-menu-link profile-logout" id="profileLogoutBtn"><span class="profile-menu-icon">↪</span><span class="profile-menu-copy"><strong>Logout</strong><small>Sign out your account</small></span><span class="profile-menu-chevron">›</span></button>
+    </div>
+  </section>
+ChainCrypto</h3>
             <p class="muted">Official Telegram, X (Twitter), YouTube and LinkedIn links will be added here after the accounts are verified.</p>
           </div>
         </div>
