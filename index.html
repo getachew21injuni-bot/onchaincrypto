@@ -332,7 +332,7 @@ ChainCrypto</h3>
     <div class="content-grid">
       <section class="panel form-panel auth-main-panel">
         <div id="authModeIntro"><h2>Sign in to your account</h2><p class="muted tiny">Enter your email and password to continue.</p></div>
-        <p class="muted tiny">Register with email and verify the link sent to your inbox, or use your phone number and confirm the SMS code. Firebase secures sign-in. This account does not enable real-money trading or secure online balances.</p>
+        <p class="muted tiny">Register with email and password without an email-verification step, or use the phone panel to confirm an SMS code. This uses Firebase Authentication only; Firestore and Cloud Functions are not required for sign-in. Real-money trading and online balances are not enabled.</p>
         <div id="authStatus" class="notice">Checking sign-in status…</div>
         <p id="registerMessage" class="muted tiny" aria-live="polite"></p>
         <form id="registerForm" class="auth-register-form hidden" aria-label="Create account">
@@ -341,7 +341,7 @@ ChainCrypto</h3>
           <label for="registerFirstName">First name <span class="yellow">(required)</span></label><input id="registerFirstName" class="field" maxlength="50" autocomplete="given-name" required placeholder="Enter your first name">
           <label for="registerLastName">Last name <span class="yellow">(required)</span></label><input id="registerLastName" class="field" maxlength="50" autocomplete="family-name" required placeholder="Enter your last name">
           <label for="registerEmail">Email address <span class="yellow">(required for email registration)</span></label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com">
-          <p class="muted tiny">A verification link will be sent to this email. To register using SMS instead, use the phone registration panel below.</p>
+          <p class="muted tiny">No email-verification link is required. To register using a phone number instead, use the SMS panel below.</p>
           <label for="registerPassword">Password <span class="yellow">(required)</span></label><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="Create a password (8+ characters)">
           <label for="referralCode">Referral code <span class="muted tiny">(optional)</span></label><input id="referralCode" class="field" maxlength="40" autocomplete="off" placeholder="Enter referral code if you have one">
           <button class="primary full" type="submit">⚡ Create account</button>
@@ -880,14 +880,12 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
   const name = (firstName + " " + lastName).trim();
   if (!firstName || !lastName) { msg("Enter your first and last name."); return; }
   if (!email) { msg("Enter an email address, or use the phone SMS registration panel."); return; }
-  msg("Creating your account and sending a verification email…");
+  msg("Creating your account…");
   try {
     const credential = await createUserWithEmailAndPassword(auth, email, password);
     if (name) await updateProfile(credential.user, { displayName: name });
-    await sendEmailVerification(credential.user);
-    await signOut(auth);
     document.getElementById("registerPassword").value = "";
-    msg("Account created. Open the verification link sent to " + email + ", then return here and sign in. Check spam/junk if needed.");
+    msg("Account created successfully. You are now signed in.");
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -913,14 +911,8 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
     const credential = await signInWithEmailAndPassword(auth,
       document.getElementById("signInEmail").value.trim().toLowerCase(),
       document.getElementById("signInPassword").value);
-    await reload(credential.user);
-    if (!credential.user.emailVerified) {
-      await signOut(auth);
-      msg("Please verify your email first. Open the link sent to your inbox, then sign in again.");
-      return;
-    }
     document.getElementById("signInPassword").value = "";
-    msg("Email verified. Signed in successfully.");
+    msg("Signed in successfully.");
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -1009,7 +1001,7 @@ onAuthStateChanged(auth, (user) => {
     if(googleHint)googleHint.classList.toggle('hidden',creating);
     if(switchText)switchText.classList.toggle('hidden',creating);
     if(registerSwitch)registerSwitch.classList.toggle('hidden',!creating);
-    if(intro)intro.innerHTML=creating?'<h2>Create your account</h2><p class="muted tiny">Join with your name and either email or phone.</p>':'<h2>Sign in to your account</h2><p class="muted tiny">Enter your email or phone number and password.</p>';
+    if(intro)intro.innerHTML=creating?'<h2>Create your account</h2><p class="muted tiny">Join with your name and either email or phone.</p>':'<h2>Sign in to your account</h2><p class="muted tiny">Enter your email and password. For phone sign-in, use the SMS verification panel.</p>';
     if(heading)heading.textContent=creating?'Create your OnChainCrypto account':'Welcome to OnChainCrypto';
     if(sub)sub.textContent=creating?'Set up your account to continue.':'Access your crypto dashboard securely.';
   }
