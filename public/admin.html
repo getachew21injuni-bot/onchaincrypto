@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<title>OnChainCrypto | Admin Dashboard</title>
+<style>
+:root{color-scheme:dark;--bg:#080d16;--panel:#101827;--panel2:#121c2e;--line:#263348;--text:#f3f6fc;--muted:#8d9bb2;--blue:#4c8dff;--cyan:#2be7bd;--purple:#a855f7;--red:#ef4444;--green:#34d399;--gold:#fbbf24}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif}button{font:inherit;cursor:pointer;color:inherit}.topbar{height:70px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 22px;background:#0b1322;position:sticky;top:0;z-index:5}.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}.logo{width:38px;height:38px;border-radius:13px;background:linear-gradient(145deg,#2f80ff,#6d45e8);display:grid;place-items:center;font-size:21px;box-shadow:0 0 24px #387cff40}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:1.5px}.top-actions{margin-left:auto;display:flex;gap:8px}.icon-btn{border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:9px 12px}.layout{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:calc(100vh - 70px)}aside{background:#101827;border-right:1px solid var(--line);padding:20px 14px}.admin-profile{display:flex;align-items:center;gap:12px;padding:4px 8px 24px;border-bottom:1px solid var(--line);margin-bottom:18px}.avatar{width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,#3887ff,#7651e9);display:grid;place-items:center;font-size:22px;font-weight:800}.admin-profile strong{display:block;font-size:16px}.admin-profile small{color:#73aaff;letter-spacing:1.4px;font-size:10px}.nav{display:grid;gap:7px}.nav button{width:100%;border:1px solid transparent;background:transparent;color:#9ca9bd;border-radius:13px;text-align:left;padding:13px 12px;display:flex;align-items:center;gap:13px}.nav button .ico{width:24px;text-align:center;font-size:18px}.nav button.active,.nav button:hover{color:white;background:#111c30;border-color:#203452;box-shadow:inset 3px 0 var(--blue)}.pill{margin-left:auto;border-radius:20px;background:var(--purple);color:white;padding:3px 9px;font-size:11px}.main{padding:24px;max-width:1500px;width:100%;margin:auto}.heading{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:23px}.heading h1{font-size:26px;margin:0 0 4px}.heading p{margin:0;color:var(--muted)}.status{font-size:12px;color:var(--cyan);border:1px solid #1b594d;background:#0b2826;border-radius:30px;padding:7px 11px;white-space:nowrap}.section-title{font-size:17px;margin:0 0 14px}.quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:26px}.quick{min-height:154px;border:1px solid var(--line);border-radius:24px;background:var(--panel);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:15px;transition:.2s}.quick:hover{transform:translateY(-2px);border-color:#426da8}.quick .qicon{width:72px;height:72px;border-radius:25px;background:#172945;color:#68aaff;display:grid;place-items:center;font-size:29px}.quick:nth-child(3) .qicon{background:#301c31;color:#fb7185}.quick:nth-child(4) .qicon{background:#241f3e;color:#b197ff}.quick:nth-child(5) .qicon{background:#332b1d;color:var(--gold)}.quick span:last-child{font-size:18px}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.stat{padding:24px;border:1px solid var(--line);border-radius:23px;background:var(--panel);min-height:160px;position:relative}.stat .label{color:#9ba8bc;font-size:15px}.stat .value{font-size:36px;font-weight:800;margin:13px 0 8px}.stat .trend{color:var(--green)}.stat .sicon{position:absolute;right:24px;top:25px;font-size:31px;color:#4b8cff}.content-panel{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.panel-head h2{font-size:17px;margin:0}.muted{color:var(--muted)}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:520px}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-weight:600}.tag{display:inline-block;border-radius:30px;padding:4px 9px;background:#12372e;color:#6ee7b7;font-size:11px}.empty{padding:25px 5px;color:var(--muted);text-align:center}.mobile-menu{display:none}.notice{color:#c5d2e6;font-size:12px;margin-top:22px;padding:13px 15px;border:1px solid #263348;border-radius:13px;background:#0d1524}.bottomnav{display:none}.hidden{display:none!important}.layout.locked{display:none!important}.auth-gate{max-width:480px;margin:48px auto;padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 70px #0005}.auth-gate h1{margin-top:0}.auth-gate label{display:block;color:var(--muted);font-size:13px;margin:14px 0 6px}.auth-gate input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#080d16;color:var(--text)}.auth-gate .primary{margin-top:16px}.auth-gate p{color:var(--muted);font-size:13px}.auth-error{color:#fca5a5!important;min-height:20px}
+@media(min-width:900px){.quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.topbar{height:62px;padding:0 14px}.mobile-menu{display:inline-block}.brand{font-size:14px}.brand small{font-size:9px}.top-actions .hide-mobile{display:none}.layout{display:block}aside{position:fixed;z-index:10;left:0;top:62px;bottom:0;width:min(82vw,300px);overflow:auto;transform:translateX(-105%);transition:transform .2s;box-shadow:20px 0 50px #0008}aside.open{transform:translateX(0)}.main{padding:20px 14px 100px}.heading h1{font-size:23px}.heading p{font-size:13px}.status{font-size:10px}.quick-grid{gap:12px}.quick{min-height:140px;border-radius:22px}.quick .qicon{width:62px;height:62px;border-radius:22px}.quick span:last-child{font-size:16px}.stats{grid-template-columns:1fr}.stat{min-height:145px;padding:21px}.stat .value{font-size:32px}.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:6;display:flex;justify-content:space-around;align-items:center;height:70px;background:#101827f2;border-top:1px solid var(--line);backdrop-filter:blur(12px)}.bottomnav button{border:0;background:none;color:#8e9bb0;display:grid;gap:3px;justify-items:center;font-size:10px}.bottomnav .center{width:58px;height:58px;margin-top:-27px;border-radius:50%;background:linear-gradient(145deg,#3f82ff,#6748e9);border:6px solid #101827;box-shadow:0 0 0 2px #355a9e;font-size:23px;color:white}.content-panel{padding:15px}.notice{margin-bottom:10px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+<button class="icon-btn mobile-menu" id="menuToggle" aria-label="Open menu">☰</button>
+<div class="brand"><div class="logo">◉</div><div>OnChainCrypto<small>ADMIN CONTROL CENTER</small></div></div>
+<div class="top-actions"><span id="authState" class="muted" style="font-size:12px">Admin sign-in required</span><button class="icon-btn hidden" id="adminSignOut">Sign out</button><a class="icon-btn" href="./" style="text-decoration:none">↗ Platform</a><button class="icon-btn" id="refreshBtn">↻ Refresh</button><button class="icon-btn hide-mobile" id="notifyBtn">♧ Notifications <b style="color:#34d399">0</b></button><button class="icon-btn" id="moreBtn">⋮</button></div>
+</header>
+<section id="adminAuthGate" class="auth-gate">
+<h1>Administrator sign-in</h1><p>Only accounts with a server-assigned Firebase <code>admin: true</code> claim can open the admin workspace.</p>
+<label for="adminEmail">Email</label><input id="adminEmail" type="email" autocomplete="username" placeholder="Administrator email">
+<label for="adminPassword">Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Password">
+<button class="icon-btn" id="adminSignIn" style="background:#2459a8;border-color:#3978d8">Sign in securely</button>\n<button class="icon-btn" id="adminResetPassword" type="button" style="margin-top:10px;width:100%">Forgot password? Send reset email</button><p id="adminAuthMessage" class="auth-error" role="status" aria-live="polite"></p>
+<p>Do not share passwords, one-time codes, private keys, or service-account files. If your account is not authorized, ask the project owner to assign admin access securely.</p>
+</section>
+<div class="layout locked" id="adminWorkspace">
+<aside id="sidebar">
+<div class="admin-profile"><div class="avatar">O</div><div><strong>OnChain Admin</strong><small>ADMIN DASHBOARD</small></div></div>
+<nav class="nav" id="sideNav">
+<button class="active" data-view="Dashboard"><span class="ico">◉</span>Dashboard</button>
+<button data-view="Users"><span class="ico">♟</span>Users <span class="pill">0</span></button>
+<button data-view="Login History"><span class="ico">◴</span>Login History</button>
+<button data-view="Notifications"><span class="ico">♧</span>Notification <span class="pill" style="background:#1d6b53">0</span></button>
+<button data-view="KYC"><span class="ico">▣</span>KYC <span class="pill">0</span></button>
+<button data-view="Email"><span class="ico">✉</span>Email</button>
+<button data-view="Analytics"><span class="ico">◔</span>Analytics</button>
+<button data-view="Deposits"><span class="ico">↓</span>Deposits</button>
+<button data-view="Withdrawals"><span class="ico">↑</span>Withdrawals</button>
+<button data-view="Addresses"><span class="ico">▰</span>Addresses</button>
+<button data-view="Trades"><span class="ico">⇄</span>Trades</button>
+<button data-view="Trade Controls"><span class="ico">⚖</span>Trade Controls</button>
+<button data-view="Assets"><span class="ico">◉</span>Assets</button>
+<button data-view="Settings"><span class="ico">⚙</span>Settings</button>
+</nav>
+</aside>
+<main class="main">
+<div class="heading"><div><h1 id="pageTitle">Dashboard Overview</h1><p id="pageSubtitle">Welcome to your OnChainCrypto administration panel.</p></div><span class="status">● Panel ready</span></div>
+<section id="dashboardView">
+<h2 class="section-title">Quick Actions</h2>
+<div class="quick-grid">
+<button class="quick" data-view="Users"><span class="qicon">♟</span><span>Users</span></button>
+<button class="quick" data-view="Deposits"><span class="qicon">↓</span><span>Deposit</span></button>
+<button class="quick" data-view="Withdrawals"><span class="qicon">↑</span><span>Withdraw</span></button>
+<button class="quick" data-view="Transfers"><span class="qicon">⇄</span><span>Transfer</span></button>
+<button class="quick" data-view="History"><span class="qicon">◴</span><span>History</span></button>
+</div>
+<div class="stats">
+<div class="stat"><span class="label">Total Users</span><span class="sicon">♟</span><div class="value">0</div><div class="trend">● Waiting for secure admin data</div></div>
+<div class="stat"><span class="label">Total Assets (USDT)</span><span class="sicon" style="color:#34d399">◈</span><div class="value">—</div><div class="muted">No live financial data connected</div></div>
+<div class="stat"><span class="label">Pending KYC</span><span class="sicon" style="color:#b197ff">▣</span><div class="value">0</div><div class="muted">No pending count connected yet</div></div>
+<div class="stat"><span class="label">Deposit Requests</span><span class="sicon" style="color:#68aaff">↓</span><div class="value">—</div><div class="muted">Admin data connection required</div></div>
+<div class="stat"><span class="label">Withdrawal Requests</span><span class="sicon" style="color:#fb7185">↑</span><div class="value">—</div><div class="muted">Admin data connection required</div></div>
+<div class="stat"><span class="label">Platform Activity</span><span class="sicon" style="color:#fbbf24">◴</span><div class="value">Ready</div><div class="muted">Panel navigation is active</div></div>
+</div>
+<div class="notice">Security note: this is the admin dashboard interface preview. Live user records, KYC documents, deposits, withdrawals and account controls are not connected yet. Do not use it as a secure production admin system until server-side admin authentication and permissions are configured.</div>
+</section>
+<section id="detailView" class="content-panel hidden"><div class="panel-head"><h2 id="detailTitle">Section</h2><span class="muted">Admin workspace</span></div><div id="detailBody" class="empty">This section is ready for a secure backend connection. No live records are displayed.</div></section>
+</main>
+</div>
+<nav class="bottomnav"><button data-view="Users"><span>♟</span>Users</button><button data-view="Support"><span>☏</span>Support</button><button class="center" data-view="Dashboard" aria-label="Dashboard">◉</button><button data-view="Email"><span>✉</span>Email</button><button data-view="Analytics"><span>◔</span>Stats</button></nav>
+<script>
+const sidebar=document.getElementById('sidebar'),dashboard=document.getElementById('dashboardView'),detail=document.getElementById('detailView');
+const descriptions={
+'Users':'Manage registered accounts after a secure user database is connected.',
+'Login History':'Review sign-in events through a server-side audit log.',
+'Notifications':'Create and review platform notices after notification services are connected.',
+'KYC':'Review identity-verification submissions securely. Do not upload identity documents to this preview.',
+'Email':'Prepare account announcements after a verified email service is configured.',
+'Analytics':'View user and platform analytics after data access is configured.',
+'Deposits':'Review deposit requests. This preview does not accept or verify payments.',
+'Withdrawals':'Review withdrawal requests. This preview cannot send funds.',
+'Addresses':'Manage deposit address records only after secure wallet infrastructure is configured.',
+'Trades':'Review order history after a trusted trading backend is connected.',
+'Trade Controls':'Configure transparent paper-trading take-profit and stop-loss thresholds for testing. These settings are local to this browser and do not control user trades.',
+'Assets':'View asset accounting after secure ledger integration.',
+'Transfers':'Review transfer requests after server-side authorization is implemented.',
+'History':'View platform event history after the audit-log backend is connected.',
+'Settings':'Admin settings and access controls must be enforced by the server, not only this page.',
+'Support':'Support inbox integration can be added here.'
+};
+function renderTradeControls(){
+ const key='onchaincrypto_demo_trade_controls';
+ let saved={};
+ try{saved=JSON.parse(localStorage.getItem(key)||'{}')||{};}catch(e){saved={};}
+ const demoUsers=Array.isArray(saved.demoUsers)&&saved.demoUsers.length?saved.demoUsers:['Demo account A','Demo account B','Demo account C'];
+ const demoCoins=['BTC/USDT','ETH/USDT','BNB/USDT','SOL/USDT','XRP/USDT'];
+ document.getElementById('detailBody').innerHTML=`
+ <div id="tradeControlsPanel" style="display:grid;gap:16px;max-width:900px">
+  <div style="border:1px solid #27647a;background:linear-gradient(135deg,#12263d,#143a4c);border-radius:20px;padding:22px;box-shadow:0 16px 45px #0003">
+   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div><h3 style="margin:0 0 5px;font-size:21px">⇄ Trade Settings</h3><p class="muted" style="margin:0">Configure transparent outcomes for local paper-trading tests</p></div><span style="border:1px solid #a87826;background:#35270f;color:#fbbf24;padding:5px 9px;border-radius:20px;font-size:11px">DEMO ONLY</span></div>
+   <div style="height:1px;background:#ffffff20;margin:20px 0"></div>
+   <label style="display:grid;gap:8px;font-weight:700">♟ SELECT DEMO USER
+    <select id="demoUserSelect" style="width:100%;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#25495a;color:white">
+     ${demoUsers.map(u=>'<option value="'+String(u).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')+'">'+String(u).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</option>').join('')}
+    </select>
+   </label>
+   <div style="height:1px;background:#ffffff20;margin:20px 0"></div>
+   <h4 style="margin:0 0 12px">⚙ TRADE CONFIGURATION</h4>
+   <label style="display:block;font-weight:700;margin-bottom:8px">Test outcome</label>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+    <label style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #2d9c84;background:#0e6656;border-radius:12px;padding:12px"><input type="radio" name="demoOutcome" value="win" ${saved.outcome!=='loss'?'checked':''}> ↗ Simulate win</label>
+    <label style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #87515a;background:#40262f;border-radius:12px;padding:12px"><input type="radio" name="demoOutcome" value="loss" ${saved.outcome==='loss'?'checked':''}> ↘ Simulate loss</label>
+   </div>
+   <label style="display:block;font-weight:700;margin-bottom:8px" for="demoOutcomePercent">Test percentage</label>
+   <div style="display:flex;align-items:center;gap:10px"><input id="demoOutcomePercent" type="number" min="0.1" max="100" step="0.1" value="${saved.percent??10}" style="flex:1;min-width:0;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#25495a;color:white"><strong>%</strong></div>
+   <p class="muted" style="margin:8px 0 16px">This sets a test scenario for the selected demo account across the demo coin list below. It does not change real user trades, account balances, or live exchange outcomes.</p>
+   <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">${demoCoins.map(c=>'<span style="border:1px solid #416577;background:#193448;padding:7px 10px;border-radius:20px;font-size:12px">'+c+'</span>').join('')}</div>
+   <button id="applyDemoOutcome" class="icon-btn" style="width:100%;padding:14px;background:linear-gradient(90deg,#24b8d2,#20d9dc);border:0;color:#062b3a;font-weight:800">▣ Apply to Demo Coins</button>
+   <p id="demoTradeControlMessage" class="muted" role="status" aria-live="polite" style="margin-bottom:0">Settings are stored in this browser only. No real user list is connected.</p>
+  </div>
+  <div class="content-panel" style="margin-top:0"><h3 style="margin-top:0">Production status</h3><p class="muted">The current repository has no secure server endpoint for reading registered users or applying risk settings. This panel therefore uses demo profiles only. A production take-profit/stop-loss system should use objective market prices, transparent rules, server-side authorization and an auditable risk engine—not forced outcomes for individual customers.</p></div>
+ </div>`;
+ document.getElementById('applyDemoOutcome').addEventListener('click',()=>{
+  const user=document.getElementById('demoUserSelect').value;
+  const percent=Number(document.getElementById('demoOutcomePercent').value);
+  const outcome=document.querySelector('input[name="demoOutcome"]:checked')?.value||'win';
+  const msg=document.getElementById('demoTradeControlMessage');
+  if(!Number.isFinite(percent)||percent<0.1||percent>100){msg.textContent='Enter a test percentage between 0.1 and 100.';return;}
+  const next={...saved,demoUsers,outcome,percent,selectedDemoUser:user,updatedAt:new Date().toISOString(),mode:'local-paper-trading-test',coins:demoCoins};
+  localStorage.setItem(key,JSON.stringify(next));
+  msg.textContent='Saved '+outcome.toUpperCase()+' test scenario ('+percent+'%) for '+user+' across '+demoCoins.length+' demo pairs in this browser only.';
+ });
+}
+
+const moduleKey='onchaincrypto_admin_demo_v1';
+const moduleNames=['Users','Login History','Notifications','KYC','Email','Analytics','Deposits','Withdrawals','Addresses','Trades','Transfers','History','Assets','Settings','Support'];
+const seedRecords={
+ 'Users':[{title:'Demo user A',owner:'demo-a@example.test',amount:'0',status:'Active'},{title:'Demo user B',owner:'demo-b@example.test',amount:'0',status:'Pending'}],
+ 'Login History':[{title:'Demo sign-in event',owner:'demo-a@example.test',amount:'—',status:'Recorded'}],
+ 'Notifications':[{title:'Welcome to OnChainCrypto demo',owner:'All demo users',amount:'—',status:'Draft'}],
+ 'KYC':[{title:'Demo review item (no documents)',owner:'Demo user B',amount:'—',status:'Pending'}],
+ 'Email':[{title:'Demo announcement draft',owner:'Admin',amount:'—',status:'Draft'}],
+ 'Deposits':[{title:'Demo deposit request',owner:'Demo user A',amount:'100 USDT',status:'Pending'}],
+ 'Withdrawals':[{title:'Demo withdrawal request',owner:'Demo user B',amount:'25 USDT',status:'Pending'}],
+ 'Addresses':[{title:'Demo address record',owner:'BTC',amount:'—',status:'Unassigned'}],
+ 'Trades':[{title:'BTC/USDT paper trade',owner:'Demo user A',amount:'50 USDT',status:'Open'}],
+ 'Transfers':[{title:'Demo internal transfer',owner:'Demo user A → Demo user B',amount:'10 USDT',status:'Pending'}],
+ 'History':[{title:'Demo platform event',owner:'System',amount:'—',status:'Recorded'}],
+ 'Assets':[{title:'USDT demo ledger entry',owner:'Demo ledger',amount:'1,000 USDT',status:'Demo only'}],
+ 'Settings':[{title:'Demo mode',owner:'This browser only',amount:'—',status:'Enabled'}],
+ 'Support':[{title:'Demo support request',owner:'Demo user A',amount:'—',status:'Open'}]
+};
+function loadAdminData(){try{return JSON.parse(localStorage.getItem(moduleKey)||'{}')||{};}catch(e){return {};}}
+function saveAdminData(data){localStorage.setItem(moduleKey,JSON.stringify(data));}
+function esc(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function getRecords(view){const data=loadAdminData();return Array.isArray(data[view])?data[view]:(seedRecords[view]||[]).map((x,i)=>({...x,id:view.toLowerCase().replace(/[^a-z]/g,'')+'-'+i,createdAt:new Date().toISOString()}));}
+function renderModule(view){
+ const body=document.getElementById('detailBody');
+ if(view==='Analytics'){
+  const data=loadAdminData();const counts=moduleNames.reduce((o,n)=>(o[n]=getRecords(n).length,o),{});
+  body.innerHTML='<div class="content-panel" style="margin:0"><h3>Demo analytics</h3><p class="muted">Counts below are local demo records, not live platform statistics.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">'+moduleNames.filter(n=>!['Analytics','Settings'].includes(n)).map(n=>'<div style="padding:15px;border:1px solid #ffffff20;border-radius:14px"><div class="muted">'+esc(n)+'</div><strong style="font-size:25px">'+counts[n]+'</strong></div>').join('')+'</div></div>';
+  return;
+ }
+ if(!moduleNames.includes(view)){body.textContent=descriptions[view]||'Choose a section from the menu.';return;}
+ const rows=getRecords(view);
+ const actionsAllowed=!['Login History','History','Analytics'].includes(view);
+ body.innerHTML='<div style="display:grid;gap:16px"><div style="padding:16px;border:1px solid #8b6b2d;background:#302710;border-radius:14px;color:#f6d98a"><strong>DEMO / LOCAL STORAGE ONLY</strong><div style="font-size:13px;margin-top:5px">These are sample records saved only in this browser. They are not real accounts, verified payments, emails, identity checks, wallet addresses, or live trades.</div></div>'+
+ (actionsAllowed?'<form id="moduleAddForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;padding:16px;border:1px solid #ffffff20;border-radius:14px"><input name="title" required maxlength="100" placeholder="'+(view==='Email'?'Email subject':view==='Notifications'?'Notification title':'Record title')+'" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><input name="owner" maxlength="100" placeholder="User / recipient / category" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><input name="amount" maxlength="40" placeholder="Amount (optional)" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><button class="icon-btn" type="submit" style="background:#176b73;color:white">＋ Add demo record</button></form>':'')+
+ '<div style="overflow:auto;border:1px solid #ffffff20;border-radius:14px"><table style="width:100%;border-collapse:collapse;min-width:600px"><thead><tr style="text-align:left;background:#102333"><th style="padding:12px">Record</th><th style="padding:12px">Owner / details</th><th style="padding:12px">Amount</th><th style="padding:12px">Status</th><th style="padding:12px">Actions</th></tr></thead><tbody>'+
+ (rows.length?rows.map((r,i)=>'<tr style="border-top:1px solid #ffffff16"><td style="padding:12px">'+esc(r.title)+'</td><td style="padding:12px">'+esc(r.owner||'—')+'</td><td style="padding:12px">'+esc(r.amount||'—')+'</td><td style="padding:12px"><span style="border:1px solid #ffffff25;padding:4px 8px;border-radius:14px">'+esc(r.status||'New')+'</span></td><td style="padding:12px;white-space:nowrap">'+(actionsAllowed?'<button type="button" data-record-action="status" data-record-index="'+i+'" class="icon-btn">Change status</button> <button type="button" data-record-action="delete" data-record-index="'+i+'" class="icon-btn">Delete</button>':'<span class="muted">Read only</span>')+'</td></tr>').join(''):'<tr><td colspan="5" style="padding:20px">No records yet. Add a demo record above.</td></tr>')+
+ '</tbody></table></div><p id="moduleMessage" class="muted" role="status" aria-live="polite"></p><button type="button" id="exportDemoRecords" class="icon-btn">Export visible records as CSV</button></div>';
+ const form=document.getElementById('moduleAddForm');
+ if(form)form.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(form);const data=loadAdminData();data[view]=getRecords(view);data[view].push({id:'record-'+Date.now(),title:String(fd.get('title')||'').trim(),owner:String(fd.get('owner')||'').trim(),amount:String(fd.get('amount')||'').trim(),status:view==='Email'?'Draft':view==='Notifications'?'Draft':view==='KYC'?'Pending':'New',createdAt:new Date().toISOString()});saveAdminData(data);renderModule(view);document.getElementById('moduleMessage').textContent='Demo record saved in this browser.';});
+ body.querySelectorAll('[data-record-action]').forEach(btn=>btn.addEventListener('click',()=>{const data=loadAdminData();data[view]=getRecords(view);const i=Number(btn.dataset.recordIndex);if(!data[view][i])return;if(btn.dataset.recordAction==='delete'){data[view].splice(i,1);}else{const cycle=['New','Pending','In review','Approved (demo)','Rejected (demo)','Completed (demo)'];const current=data[view][i].status||'New';data[view][i].status=cycle[(cycle.indexOf(current)+1+cycle.length)%cycle.length];}saveAdminData(data);renderModule(view);const msg=document.getElementById('moduleMessage');if(msg)msg.textContent='Demo record updated locally. No real transaction or account was changed.';}));
+ document.getElementById('exportDemoRecords').addEventListener('click',()=>{const csv=[['Record','Owner','Amount','Status'],...getRecords(view).map(r=>[r.title,r.owner,r.amount,r.status])].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=view.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-demo.csv';a.click();URL.revokeObjectURL(url);});
+}
+function showView(view){const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your OnChainCrypto administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent='';if(view==='Trade Controls')renderTradeControls();else if(!isHome)renderModule(view);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+document.getElementById('menuToggle').addEventListener('click',()=>sidebar.classList.toggle('open'));
+document.getElementById('refreshBtn').addEventListener('click',()=>{const active=document.querySelector('[data-view].active')?.dataset.view||'Dashboard';showView(active);const b=document.getElementById('refreshBtn');b.textContent='✓ Refreshed';setTimeout(()=>b.textContent='↻ Refresh',1200);});
+document.getElementById('notifyBtn').addEventListener('click',()=>showView('Notifications'));
+document.getElementById('moreBtn').addEventListener('click',()=>showView('Settings'));
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+const app=initializeApp({apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"});
+const auth=getAuth(app),byId=id=>document.getElementById(id);
+byId("adminSignIn").addEventListener("click",async()=>{
+ const email=byId("adminEmail").value.trim(),password=byId("adminPassword").value;
+ byId("adminAuthMessage").textContent="Checking your account…";byId("adminSignIn").disabled=true;
+ try{await signInWithEmailAndPassword(auth,email,password);byId("adminPassword").value="";}
+ catch(error){
+  const messages={
+   "auth/invalid-credential":"Email or password is incorrect. Use Forgot password below if needed.",
+   "auth/wrong-password":"Password is incorrect. Use Forgot password below to reset it.",
+   "auth/user-not-found":"No account found for this email. Check Authentication → Users in Firebase Console.",
+   "auth/invalid-email":"Enter a valid email address.",
+   "auth/too-many-requests":"Too many attempts. Wait a while before trying again.",
+   "auth/network-request-failed":"Network error. Check your internet connection and try again.",
+   "auth/operation-not-allowed":"Email/Password sign-in is disabled. Enable it in Firebase Console → Authentication → Sign-in method.",
+   "auth/unauthorized-domain":"This website domain is not authorized. Add getachew21injuni-bot.github.io under Firebase Authentication → Settings → Authorized domains."
+  };
+  byId("adminAuthMessage").textContent=messages[error.code]||("Sign-in failed ("+(error.code||"unknown-error")+"). Check Firebase Authentication settings.");
+ }
+ finally{byId("adminSignIn").disabled=false;}
+});
+byId("adminResetPassword").addEventListener("click",async()=>{
+ const email=byId("adminEmail").value.trim();
+ if(!email){byId("adminAuthMessage").textContent="Enter your account email first.";return;}
+ byId("adminAuthMessage").textContent="Sending password reset email…";
+ try{
+  await sendPasswordResetEmail(auth,email);
+  byId("adminAuthMessage").textContent="If this email is registered, a password reset email has been sent. Check inbox and spam.";
+ }catch(error){
+  const messages={"auth/invalid-email":"Enter a valid email address.","auth/user-not-found":"No account found for this email.","auth/unauthorized-continue-uri":"Firebase password-reset URL configuration needs attention."};
+  byId("adminAuthMessage").textContent=messages[error.code]||("Could not send reset email ("+(error.code||"unknown-error")+").");
+ }
+});
+byId("adminSignOut").addEventListener("click",()=>signOut(auth));
+onAuthStateChanged(auth,async user=>{
+ byId("adminWorkspace").classList.add("locked");byId("adminAuthGate").classList.remove("hidden");byId("adminSignOut").classList.add("hidden");
+ if(!user){byId("authState").textContent="Admin sign-in required";return;}
+ try{
+  const adminEmail="getachew21.INJ.UNI@gmail.com".toLowerCase();
+  if((user.email||"").toLowerCase()!==adminEmail){byId("authState").textContent="Access denied";byId("adminAuthMessage").textContent="This account is not the designated administrator. Sign in with getachew21.INJ.UNI@gmail.com.";await signOut(auth);return;}
+  byId("authState").textContent="Admin email recognized";byId("adminAuthGate").classList.add("hidden");byId("adminWorkspace").classList.remove("locked");byId("adminSignOut").classList.remove("hidden");
+ }catch(error){byId("authState").textContent="Access check failed";byId("adminAuthMessage").textContent="Could not verify administrator permissions. Access remains locked.";await signOut(auth);}
+});
+</script>
+</body>
+</html>
