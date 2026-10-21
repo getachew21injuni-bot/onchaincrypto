@@ -91,27 +91,47 @@ const descriptions={
 'Support':'Support inbox integration can be added here.'
 };
 function renderTradeControls(){
- const saved=JSON.parse(localStorage.getItem('onchaincrypto_demo_trade_controls')||'{}');
+ const key='onchaincrypto_demo_trade_controls';
+ let saved={};
+ try{saved=JSON.parse(localStorage.getItem(key)||'{}')||{};}catch(e){saved={};}
+ const demoUsers=Array.isArray(saved.demoUsers)&&saved.demoUsers.length?saved.demoUsers:['Demo account A','Demo account B','Demo account C'];
+ const demoCoins=['BTC/USDT','ETH/USDT','BNB/USDT','SOL/USDT','XRP/USDT'];
  document.getElementById('detailBody').innerHTML=`
- <div id="tradeControlsPanel" style="display:grid;gap:16px">
- <div class="notice" style="margin-top:0;border-color:#70551a;background:#241d0c"><strong style="color:#fbbf24">Paper-trading demo only</strong><br>These are local testing preferences. They do not change another user's trade outcome, do not connect to a live exchange, and are not a production risk engine.</div>
- <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
- <label style="display:grid;gap:8px;color:var(--muted)">Take-profit threshold (%)<input id="demoTakeProfit" type="number" min="0.1" max="1000" step="0.1" value="${saved.takeProfit??5}" style="padding:12px;border:1px solid var(--line);border-radius:10px;background:#080d16;color:var(--text);width:100%"></label>
- <label style="display:grid;gap:8px;color:var(--muted)">Stop-loss threshold (%)<input id="demoStopLoss" type="number" min="0.1" max="100" step="0.1" value="${saved.stopLoss??3}" style="padding:12px;border:1px solid var(--line);border-radius:10px;background:#080d16;color:var(--text);width:100%"></label>
- <label style="display:grid;gap:8px;color:var(--muted)">Paper trading status<select id="demoTradeStatus" style="padding:12px;border:1px solid var(--line);border-radius:10px;background:#080d16;color:var(--text);width:100%"><option value="enabled" ${(saved.status||'enabled')==='enabled'?'selected':''}>Enabled (simulation)</option><option value="paused" ${saved.status==='paused'?'selected':''}>Paused (simulation)</option></select></label>
- </div>
- <div style="display:flex;gap:10px;flex-wrap:wrap"><button id="saveDemoTradeControls" class="icon-btn" style="background:#153c32;border-color:#23664f">Save demo settings</button><button id="resetDemoTradeControls" class="icon-btn">Reset defaults</button></div>
- <p id="demoTradeControlMessage" class="muted" role="status" aria-live="polite">Settings are stored only in this browser.</p>
- <div class="content-panel" style="margin-top:0"><h3 style="margin-top:0">How these controls should work in production</h3><p class="muted">A real take-profit or stop-loss system must be enforced by a trusted server-side trading engine, with clear user disclosure, audit logs, authorization, and exchange integration. Do not secretly force profitable or losing outcomes.</p></div>
+ <div id="tradeControlsPanel" style="display:grid;gap:16px;max-width:900px">
+  <div style="border:1px solid #27647a;background:linear-gradient(135deg,#12263d,#143a4c);border-radius:20px;padding:22px;box-shadow:0 16px 45px #0003">
+   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div><h3 style="margin:0 0 5px;font-size:21px">⇄ Trade Settings</h3><p class="muted" style="margin:0">Configure transparent outcomes for local paper-trading tests</p></div><span style="border:1px solid #a87826;background:#35270f;color:#fbbf24;padding:5px 9px;border-radius:20px;font-size:11px">DEMO ONLY</span></div>
+   <div style="height:1px;background:#ffffff20;margin:20px 0"></div>
+   <label style="display:grid;gap:8px;font-weight:700">♟ SELECT DEMO USER
+    <select id="demoUserSelect" style="width:100%;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#25495a;color:white">
+     ${demoUsers.map(u=>'<option value="'+String(u).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')+'">'+String(u).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</option>').join('')}
+    </select>
+   </label>
+   <div style="height:1px;background:#ffffff20;margin:20px 0"></div>
+   <h4 style="margin:0 0 12px">⚙ TRADE CONFIGURATION</h4>
+   <label style="display:block;font-weight:700;margin-bottom:8px">Test outcome</label>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+    <label style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #2d9c84;background:#0e6656;border-radius:12px;padding:12px"><input type="radio" name="demoOutcome" value="win" ${saved.outcome!=='loss'?'checked':''}> ↗ Simulate win</label>
+    <label style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #87515a;background:#40262f;border-radius:12px;padding:12px"><input type="radio" name="demoOutcome" value="loss" ${saved.outcome==='loss'?'checked':''}> ↘ Simulate loss</label>
+   </div>
+   <label style="display:block;font-weight:700;margin-bottom:8px" for="demoOutcomePercent">Test percentage</label>
+   <div style="display:flex;align-items:center;gap:10px"><input id="demoOutcomePercent" type="number" min="0.1" max="100" step="0.1" value="${saved.percent??10}" style="flex:1;min-width:0;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#25495a;color:white"><strong>%</strong></div>
+   <p class="muted" style="margin:8px 0 16px">This sets a test scenario for the selected demo account across the demo coin list below. It does not change real user trades, account balances, or live exchange outcomes.</p>
+   <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">${demoCoins.map(c=>'<span style="border:1px solid #416577;background:#193448;padding:7px 10px;border-radius:20px;font-size:12px">'+c+'</span>').join('')}</div>
+   <button id="applyDemoOutcome" class="icon-btn" style="width:100%;padding:14px;background:linear-gradient(90deg,#24b8d2,#20d9dc);border:0;color:#062b3a;font-weight:800">▣ Apply to Demo Coins</button>
+   <p id="demoTradeControlMessage" class="muted" role="status" aria-live="polite" style="margin-bottom:0">Settings are stored in this browser only. No real user list is connected.</p>
+  </div>
+  <div class="content-panel" style="margin-top:0"><h3 style="margin-top:0">Production status</h3><p class="muted">The current repository has no secure server endpoint for reading registered users or applying risk settings. This panel therefore uses demo profiles only. A production take-profit/stop-loss system should use objective market prices, transparent rules, server-side authorization and an auditable risk engine—not forced outcomes for individual customers.</p></div>
  </div>`;
- document.getElementById('saveDemoTradeControls').addEventListener('click',()=>{
-  const takeProfit=Number(document.getElementById('demoTakeProfit').value),stopLoss=Number(document.getElementById('demoStopLoss').value),status=document.getElementById('demoTradeStatus').value;
+ document.getElementById('applyDemoOutcome').addEventListener('click',()=>{
+  const user=document.getElementById('demoUserSelect').value;
+  const percent=Number(document.getElementById('demoOutcomePercent').value);
+  const outcome=document.querySelector('input[name="demoOutcome"]:checked')?.value||'win';
   const msg=document.getElementById('demoTradeControlMessage');
-  if(!Number.isFinite(takeProfit)||takeProfit<0.1||takeProfit>1000||!Number.isFinite(stopLoss)||stopLoss<0.1||stopLoss>100){msg.textContent='Enter a take-profit between 0.1 and 1000%, and a stop-loss between 0.1 and 100%.';return;}
-  localStorage.setItem('onchaincrypto_demo_trade_controls',JSON.stringify({takeProfit,stopLoss,status,updatedAt:new Date().toISOString()}));
-  msg.textContent='Saved locally for this browser. These settings are not connected to live or user trades.';
+  if(!Number.isFinite(percent)||percent<0.1||percent>100){msg.textContent='Enter a test percentage between 0.1 and 100.';return;}
+  const next={...saved,demoUsers,outcome,percent,selectedDemoUser:user,updatedAt:new Date().toISOString(),mode:'local-paper-trading-test',coins:demoCoins};
+  localStorage.setItem(key,JSON.stringify(next));
+  msg.textContent='Saved '+outcome.toUpperCase()+' test scenario ('+percent+'%) for '+user+' across '+demoCoins.length+' demo pairs in this browser only.';
  });
- document.getElementById('resetDemoTradeControls').addEventListener('click',()=>{localStorage.removeItem('onchaincrypto_demo_trade_controls');renderTradeControls();});
 }
 function showView(view){const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your OnChainCrypto administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent=descriptions[view]||'This section is ready for a secure backend connection. No live records are displayed.';if(view==='Trade Controls')renderTradeControls();document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
@@ -119,6 +139,7 @@ document.getElementById('menuToggle').addEventListener('click',()=>sidebar.class
 document.getElementById('refreshBtn').addEventListener('click',()=>{const b=document.getElementById('refreshBtn');b.textContent='✓ Refreshed';setTimeout(()=>b.textContent='↻ Refresh',1200);});
 document.getElementById('notifyBtn').addEventListener('click',()=>showView('Notifications'));
 document.getElementById('moreBtn').addEventListener('click',()=>showView('Settings'));
+</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
@@ -141,7 +162,6 @@ onAuthStateChanged(auth,async user=>{
   byId("authState").textContent="Admin verified";byId("adminAuthGate").classList.add("hidden");byId("adminWorkspace").classList.remove("locked");byId("adminSignOut").classList.remove("hidden");
  }catch(error){byId("authState").textContent="Access check failed";byId("adminAuthMessage").textContent="Could not verify administrator permissions. Access remains locked.";await signOut(auth);}
 });
-</script>
 </script>
 </body>
 </html>
