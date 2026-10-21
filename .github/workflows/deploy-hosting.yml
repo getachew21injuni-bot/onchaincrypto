@@ -41,7 +41,7 @@ jobs:
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
 
       - name: Deploy static website to Firebase Hosting
-        run: firebase deploy --project onchaincrypto-d976b --only hosting,auth --non-interactive
+        run: firebase deploy --project onchaincrypto-d976b --only hosting --non-interactive
 
       - name: Remove temporary credentials
         if: always()
