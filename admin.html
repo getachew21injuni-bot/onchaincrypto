@@ -22,7 +22,7 @@
 <h1>Administrator sign-in</h1><p>Only accounts with a server-assigned Firebase <code>admin: true</code> claim can open the admin workspace.</p>
 <label for="adminEmail">Email</label><input id="adminEmail" type="email" autocomplete="username" placeholder="Administrator email">
 <label for="adminPassword">Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Password">
-<button class="icon-btn" id="adminSignIn" style="background:#2459a8;border-color:#3978d8">Sign in securely</button><p id="adminAuthMessage" class="auth-error" role="status" aria-live="polite"></p>
+<button class="icon-btn" id="adminSignIn" style="background:#2459a8;border-color:#3978d8">Sign in securely</button>\n<button class="icon-btn" id="adminResetPassword" type="button" style="margin-top:10px;width:100%">Forgot password? Send reset email</button><p id="adminAuthMessage" class="auth-error" role="status" aria-live="polite"></p>
 <p>Do not share passwords, one-time codes, private keys, or service-account files. If your account is not authorized, ask the project owner to assign admin access securely.</p>
 </section>
 <div class="layout locked" id="adminWorkspace">
@@ -142,15 +142,39 @@ document.getElementById('moreBtn').addEventListener('click',()=>showView('Settin
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 const app=initializeApp({apiKey:"AIzaSyD4Z3QJwXUDmyxsuCLFbXLoISd1oIF0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"});
 const auth=getAuth(app),byId=id=>document.getElementById(id);
 byId("adminSignIn").addEventListener("click",async()=>{
  const email=byId("adminEmail").value.trim(),password=byId("adminPassword").value;
  byId("adminAuthMessage").textContent="Checking your account…";byId("adminSignIn").disabled=true;
  try{await signInWithEmailAndPassword(auth,email,password);byId("adminPassword").value="";}
- catch(error){byId("adminAuthMessage").textContent="Sign-in failed. Check the email/password and Firebase Authentication settings.";}
+ catch(error){
+  const messages={
+   "auth/invalid-credential":"Email or password is incorrect. Use Forgot password below if needed.",
+   "auth/wrong-password":"Password is incorrect. Use Forgot password below to reset it.",
+   "auth/user-not-found":"No account found for this email. Check Authentication → Users in Firebase Console.",
+   "auth/invalid-email":"Enter a valid email address.",
+   "auth/too-many-requests":"Too many attempts. Wait a while before trying again.",
+   "auth/network-request-failed":"Network error. Check your internet connection and try again.",
+   "auth/operation-not-allowed":"Email/Password sign-in is disabled. Enable it in Firebase Console → Authentication → Sign-in method.",
+   "auth/unauthorized-domain":"This website domain is not authorized. Add getachew21injuni-bot.github.io under Firebase Authentication → Settings → Authorized domains."
+  };
+  byId("adminAuthMessage").textContent=messages[error.code]||("Sign-in failed ("+(error.code||"unknown-error")+"). Check Firebase Authentication settings.");
+ }
  finally{byId("adminSignIn").disabled=false;}
+});
+byId("adminResetPassword").addEventListener("click",async()=>{
+ const email=byId("adminEmail").value.trim();
+ if(!email){byId("adminAuthMessage").textContent="Enter your account email first.";return;}
+ byId("adminAuthMessage").textContent="Sending password reset email…";
+ try{
+  await sendPasswordResetEmail(auth,email);
+  byId("adminAuthMessage").textContent="If this email is registered, a password reset email has been sent. Check inbox and spam.";
+ }catch(error){
+  const messages={"auth/invalid-email":"Enter a valid email address.","auth/user-not-found":"No account found for this email.","auth/unauthorized-continue-uri":"Firebase password-reset URL configuration needs attention."};
+  byId("adminAuthMessage").textContent=messages[error.code]||("Could not send reset email ("+(error.code||"unknown-error")+").");
+ }
 });
 byId("adminSignOut").addEventListener("click",()=>signOut(auth));
 onAuthStateChanged(auth,async user=>{
