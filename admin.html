@@ -33,6 +33,7 @@
 <button data-view="Withdrawals"><span class="ico">↑</span>Withdrawals</button>
 <button data-view="Addresses"><span class="ico">▰</span>Addresses</button>
 <button data-view="Trades"><span class="ico">⇄</span>Trades</button>
+<button data-view="Trade Controls"><span class="ico">⚖</span>Trade Controls</button>
 <button data-view="Assets"><span class="ico">◉</span>Assets</button>
 <button data-view="Settings"><span class="ico">⚙</span>Settings</button>
 </nav>
@@ -75,13 +76,37 @@ const descriptions={
 'Withdrawals':'Review withdrawal requests. This preview cannot send funds.',
 'Addresses':'Manage deposit address records only after secure wallet infrastructure is configured.',
 'Trades':'Review order history after a trusted trading backend is connected.',
+'Trade Controls':'Configure transparent paper-trading take-profit and stop-loss thresholds for testing. These settings are local to this browser and do not control user trades.',
 'Assets':'View asset accounting after secure ledger integration.',
 'Transfers':'Review transfer requests after server-side authorization is implemented.',
 'History':'View platform event history after the audit-log backend is connected.',
 'Settings':'Admin settings and access controls must be enforced by the server, not only this page.',
 'Support':'Support inbox integration can be added here.'
 };
-function showView(view){const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your OnChainCrypto administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;document.getElementById('detailBody').textContent=descriptions[view]||'This section is ready for a secure backend connection. No live records are displayed.';document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
+function renderTradeControls(){
+ const saved=JSON.parse(localStorage.getItem('onchaincrypto_demo_trade_controls')||'{}');
+ document.getElementById('detailBody').innerHTML=`
+ <div id="tradeControlsPanel" style="display:grid;gap:16px">
+ <div class="notice" style="margin-top:0;border-color:#70551a;background:#241d0c"><strong style="color:#fbbf24">Paper-trading demo only</strong><br>These are local testing preferences. They do not change another user's trade outcome, do not connect to a live exchange, and are not a production risk engine.</div>
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
+ <label style="display:grid;gap:8px;color:var(--muted)">Take-profit threshold (%)<input id="demoTakeProfit" type="number" min="0.1" max="1000" step="0.1" value="${saved.takeProfit??5}" style="padding:12px;border:1px solid var(--line);border-radius:10px;background:#080d16;color:var(--text);width:100%"></label>
+ <label style="display:grid;gap:8px;color:var(--muted)">Stop-loss threshold (%)<input id="demoStopLoss" type="number" min="0.1" max="100" step="0.1" value="${saved.stopLoss??3}" style="padding:12px;border:1px solid var(--line);border-radius:10px;background:#080d16;color:var(--text);width:100%"></label>
+ <label style="display:grid;gap:8px;color:var(--muted)">Paper trading status<select id="demoTradeStatus" style="padding:12px;border:1px solid var(--line);border-radius:10px;background:#080d16;color:var(--text);width:100%"><option value="enabled" ${(saved.status||'enabled')==='enabled'?'selected':''}>Enabled (simulation)</option><option value="paused" ${saved.status==='paused'?'selected':''}>Paused (simulation)</option></select></label>
+ </div>
+ <div style="display:flex;gap:10px;flex-wrap:wrap"><button id="saveDemoTradeControls" class="icon-btn" style="background:#153c32;border-color:#23664f">Save demo settings</button><button id="resetDemoTradeControls" class="icon-btn">Reset defaults</button></div>
+ <p id="demoTradeControlMessage" class="muted" role="status" aria-live="polite">Settings are stored only in this browser.</p>
+ <div class="content-panel" style="margin-top:0"><h3 style="margin-top:0">How these controls should work in production</h3><p class="muted">A real take-profit or stop-loss system must be enforced by a trusted server-side trading engine, with clear user disclosure, audit logs, authorization, and exchange integration. Do not secretly force profitable or losing outcomes.</p></div>
+ </div>`;
+ document.getElementById('saveDemoTradeControls').addEventListener('click',()=>{
+  const takeProfit=Number(document.getElementById('demoTakeProfit').value),stopLoss=Number(document.getElementById('demoStopLoss').value),status=document.getElementById('demoTradeStatus').value;
+  const msg=document.getElementById('demoTradeControlMessage');
+  if(!Number.isFinite(takeProfit)||takeProfit<0.1||takeProfit>1000||!Number.isFinite(stopLoss)||stopLoss<0.1||stopLoss>100){msg.textContent='Enter a take-profit between 0.1 and 1000%, and a stop-loss between 0.1 and 100%.';return;}
+  localStorage.setItem('onchaincrypto_demo_trade_controls',JSON.stringify({takeProfit,stopLoss,status,updatedAt:new Date().toISOString()}));
+  msg.textContent='Saved locally for this browser. These settings are not connected to live or user trades.';
+ });
+ document.getElementById('resetDemoTradeControls').addEventListener('click',()=>{localStorage.removeItem('onchaincrypto_demo_trade_controls');renderTradeControls();});
+}
+function showView(view){const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your OnChainCrypto administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent=descriptions[view]||'This section is ready for a secure backend connection. No live records are displayed.';if(view==='Trade Controls')renderTradeControls();document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
 document.getElementById('menuToggle').addEventListener('click',()=>sidebar.classList.toggle('open'));
 document.getElementById('refreshBtn').addEventListener('click',()=>{const b=document.getElementById('refreshBtn');b.textContent='✓ Refreshed';setTimeout(()=>b.textContent='↻ Refresh',1200);});
