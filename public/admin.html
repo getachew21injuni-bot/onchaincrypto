@@ -19,7 +19,7 @@
 <div class="top-actions"><span id="authState" class="muted" style="font-size:12px">Admin sign-in required</span><button class="icon-btn hidden" id="adminSignOut">Sign out</button><a class="icon-btn" href="./" style="text-decoration:none">↗ Platform</a><button class="icon-btn" id="refreshBtn">↻ Refresh</button><button class="icon-btn hide-mobile" id="notifyBtn">♧ Notifications <b style="color:#34d399">0</b></button><button class="icon-btn" id="moreBtn">⋮</button></div>
 </header>
 <section id="adminAuthGate" class="auth-gate">
-<h1>Administrator sign-in</h1><p>Only accounts with a server-assigned Firebase <code>admin: true</code> claim can open the admin workspace.</p>
+<h1>Administrator sign-in</h1><p>Sign in with the designated administrator account. Live user and KYC data require a verified administrator email and Firestore rules.</p>
 <label for="adminEmail">Email</label><input id="adminEmail" type="email" autocomplete="username" placeholder="Administrator email">
 <label for="adminPassword">Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Password">
 <button class="icon-btn" id="adminSignIn" style="background:#2459a8;border-color:#3978d8">Sign in securely</button>\n<button class="icon-btn" id="adminResetPassword" type="button" style="margin-top:10px;width:100%">Forgot password? Send reset email</button><p id="adminAuthMessage" class="auth-error" role="status" aria-live="polite"></p>
@@ -156,8 +156,25 @@ function loadAdminData(){try{return JSON.parse(localStorage.getItem(moduleKey)||
 function saveAdminData(data){localStorage.setItem(moduleKey,JSON.stringify(data));}
 function esc(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function getRecords(view){const data=loadAdminData();return Array.isArray(data[view])?data[view]:(seedRecords[view]||[]).map((x,i)=>({...x,id:view.toLowerCase().replace(/[^a-z]/g,'')+'-'+i,createdAt:new Date().toISOString()}));}
+async function renderLiveCollection(view){
+ const body=document.getElementById('detailBody');
+ const collectionName=view==='Users'?'users':'kycSubmissions';
+ body.innerHTML='<div class="content-panel" style="margin:0"><p class="muted">Loading live Firebase '+(view==='Users'?'user profiles':'KYC submissions')+'…</p></div>';
+ try{
+  const result=await getDocs(query(collection(db,collectionName),limit(100)));
+  const rows=result.docs.map(d=>({id:d.id,...d.data()}));
+  if(view==='Users'){
+   body.innerHTML='<div style="display:grid;gap:14px"><div class="content-panel" style="margin:0"><h3 style="margin:0 0 5px">Live registered profiles</h3><p class="muted">Loaded from Firebase Firestore. Showing up to 100 profiles.</p><strong>'+rows.length+' profile record(s)</strong></div><div style="overflow:auto;border:1px solid #ffffff20;border-radius:14px"><table style="width:100%;border-collapse:collapse;min-width:620px"><thead><tr style="text-align:left;background:#102333"><th style="padding:12px">Name</th><th style="padding:12px">Email</th><th style="padding:12px">Country</th><th style="padding:12px">Firebase UID</th></tr></thead><tbody>'+(rows.length?rows.map(r=>'<tr style="border-top:1px solid #ffffff16"><td style="padding:12px">'+esc(r.displayName||[r.firstName,r.lastName].filter(Boolean).join(' ')||'—')+'</td><td style="padding:12px">'+esc(r.email||'—')+'</td><td style="padding:12px">'+esc(r.country||'—')+'</td><td style="padding:12px;max-width:190px;overflow-wrap:anywhere">'+esc(r.uid||r.id)+'</td></tr>').join(''):'<tr><td colspan="4" style="padding:20px">No saved profiles found. New accounts appear here after saving their profile.</td></tr>')+'</tbody></table></div></div>';
+  }else{
+   body.innerHTML='<div style="display:grid;gap:14px"><div class="content-panel" style="margin:0"><h3 style="margin:0 0 5px">Live KYC submissions</h3><p class="muted">Identity submissions from Firebase. Viewing a submission does not approve or verify identity.</p><strong>'+rows.length+' submission(s)</strong></div><div style="overflow:auto;border:1px solid #ffffff20;border-radius:14px"><table style="width:100%;border-collapse:collapse;min-width:650px"><thead><tr style="text-align:left;background:#102333"><th style="padding:12px">Legal name</th><th style="padding:12px">Email</th><th style="padding:12px">Country</th><th style="padding:12px">Document type</th><th style="padding:12px">Status</th><th style="padding:12px">Submitted</th></tr></thead><tbody>'+(rows.length?rows.map(r=>'<tr style="border-top:1px solid #ffffff16"><td style="padding:12px">'+esc(r.legalName||'—')+'</td><td style="padding:12px">'+esc(r.email||'—')+'</td><td style="padding:12px">'+esc(r.country||'—')+'</td><td style="padding:12px">'+esc(r.documentType||'—')+'</td><td style="padding:12px">'+esc(r.status||'pending')+'</td><td style="padding:12px">'+esc(r.submittedAt&&typeof r.submittedAt.toDate==='function'?r.submittedAt.toDate().toLocaleDateString():'—')+'</td></tr>').join(''):'<tr><td colspan="6" style="padding:20px">No KYC submissions found.</td></tr>')+'</tbody></table></div></div>';
+  }
+ }catch(error){
+  body.innerHTML='<div style="padding:16px;border:1px solid #8b6b2d;background:#302710;border-radius:14px;color:#f6d98a"><strong>Could not load live '+(view==='Users'?'profiles':'KYC submissions')+'.</strong><p style="margin:8px 0 0">Firebase denied the request or Firestore is unavailable ('+esc(error.code||'unknown error')+'). Confirm you are signed in with the verified administrator account and that the updated Firestore rules have deployed.</p></div>';
+ }
+}
 function renderModule(view){
  const body=document.getElementById('detailBody');
+ if(view==='Users'||view==='KYC'){renderLiveCollection(view);return;}
  if(view==='Analytics'){
   const data=loadAdminData();const counts=moduleNames.reduce((o,n)=>(o[n]=getRecords(n).length,o),{});
   body.innerHTML='<div class="content-panel" style="margin:0"><h3>Demo analytics</h3><p class="muted">Counts below are local demo records, not live platform statistics.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">'+moduleNames.filter(n=>!['Analytics','Settings'].includes(n)).map(n=>'<div style="padding:15px;border:1px solid #ffffff20;border-radius:14px"><div class="muted">'+esc(n)+'</div><strong style="font-size:25px">'+counts[n]+'</strong></div>').join('')+'</div></div>';
@@ -186,8 +203,9 @@ document.getElementById('moreBtn').addEventListener('click',()=>showView('Settin
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, query, limit } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"});
-const auth=getAuth(app),byId=id=>document.getElementById(id);
+const auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
 byId("adminSignIn").addEventListener("click",async()=>{
  const email=byId("adminEmail").value.trim(),password=byId("adminPassword").value;
  byId("adminAuthMessage").textContent="Checking your account…";byId("adminSignIn").disabled=true;
@@ -225,7 +243,7 @@ onAuthStateChanged(auth,async user=>{
  if(!user){byId("authState").textContent="Admin sign-in required";return;}
  try{
   const adminEmail="getachew21.INJ.UNI@gmail.com".toLowerCase();
-  if((user.email||"").toLowerCase()!==adminEmail){byId("authState").textContent="Access denied";byId("adminAuthMessage").textContent="This account is not the designated administrator. Sign in with getachew21.INJ.UNI@gmail.com.";await signOut(auth);return;}
+  if((user.email||"").toLowerCase()!==adminEmail){byId("authState").textContent="Access denied";byId("adminAuthMessage").textContent="This account is not the designated administrator. Sign in with getachew21.INJ.UNI@gmail.com.";await signOut(auth);return;} if(!user.emailVerified){byId("authState").textContent="Verify admin email";byId("adminAuthMessage").textContent="Verify the administrator email address before viewing live user or KYC records, then sign in again.";return;}
   byId("authState").textContent="Admin email recognized";byId("adminAuthGate").classList.add("hidden");byId("adminWorkspace").classList.remove("locked");byId("adminSignOut").classList.remove("hidden");
  }catch(error){byId("authState").textContent="Access check failed";byId("adminAuthMessage").textContent="Could not verify administrator permissions. Access remains locked.";await signOut(auth);}
 });
