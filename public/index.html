@@ -929,8 +929,8 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
     if (status) status.textContent = "Signed in as " + (credential.user.displayName || credential.user.email || credential.user.phoneNumber || "user") + ". You can continue to the platform.";
     msg("Signed in successfully. Opening the platform…");
     if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
-  loadCloudProfile(user);
-    if (typeof showPage === "function") showPage("markets");
+    await loadCloudProfile(credential.user);
+    if (typeof showPage === "function") showPage("profile");
   } catch (error) { msg(friendlyError(error)); }
 });
 
