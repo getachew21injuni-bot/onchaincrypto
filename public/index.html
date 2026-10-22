@@ -999,7 +999,7 @@ async function loadCloudProfile(user) {
     const data=snap.exists()?snap.data():{};
     const kycSnap=await getDoc(doc(db,"kycSubmissions",user.uid));
     const kycData=kycSnap.exists()?kycSnap.data():{};
-    const nameParts=String(data.displayName||user.displayName||"").trim().split(/\\s+/).filter(Boolean);
+    const nameParts=String(data.displayName||user.displayName||"").trim().split(/\s+/).filter(Boolean);
     const fields={profileFirstName:data.firstName||(nameParts.shift()||""),profileLastName:data.lastName||(nameParts.join(" ")),profileCountry:data.country||"",profileDob:data.dateOfBirth||"",kycLegalName:kycData.legalName||"",kycCountry:kycData.country||"",kycDocumentType:kycData.documentType||"",kycDocumentNumber:kycData.documentNumber||""};
     Object.entries(fields).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.value=value});
     const status=kycData.status||"not_submitted";
