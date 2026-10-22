@@ -721,10 +721,39 @@ async function loadMarket(){
    $("lastUpdate").textContent=new Date().toLocaleTimeString();
    renderMarket();renderHomeCoinResults();renderPerpMarkets();selectPerpPair(perpSelectedSymbol);renderPerpPositions();updateTradePreview();
  }catch(err){
-   $("connection").textContent="Unavailable";
-   $("apiStatus").innerHTML='<span class="red">CoinGecko unavailable</span>';
-   if(!market.length)$("marketRows").innerHTML='<tr><td colspan="5" class="empty">Live prices are temporarily unavailable. Check your connection and press Refresh to try again.</td></tr>';
-   $("marketHint").textContent="Live prices are temporarily unavailable. Check your connection or wait for the provider rate limit to clear. No Binance connection is configured.";
+   // Fall back to Binance public 24-hour ticker if CoinGecko is blocked or rate-limited.
+   try{
+     let tickerData=null,tickerError=null;
+     for(const endpoint of ["https://api.binance.com/api/v3/ticker/24hr","https://api1.binance.com/api/v3/ticker/24hr"]){
+       try{
+         const response=await fetch(endpoint,{headers:{accept:"application/json"},signal:AbortSignal.timeout(12000)});
+         if(!response.ok)throw new Error("Public ticker returned "+response.status);
+         const data=await response.json();
+         if(!Array.isArray(data)||!data.length)throw new Error("Public ticker returned no data");
+         tickerData=data;break;
+       }catch(e){tickerError=e}
+     }
+     if(!tickerData)throw tickerError||new Error("All public ticker sources failed");
+     const byPair=new Map(tickerData.map(t=>[String(t.symbol||""),t]));
+     market=COINS.map(c=>{
+       if(c.symbol==="USDT")return {id:c.id,symbol:c.symbol,name:c.name,current_price:1,price_change_percentage_24h:0,total_volume:0,market_cap:0};
+       const t=byPair.get(c.symbol+"USDT");if(!t)return null;
+       const p=Number(t.lastPrice),change=Number(t.priceChangePercent),volume=Number(t.volume);
+       if(!Number.isFinite(p)||p<=0)return null;
+       return {id:c.id,symbol:c.symbol,name:c.name,current_price:p,price_change_percentage_24h:Number.isFinite(change)?change:0,total_volume:Number.isFinite(volume)?volume*p:0,market_cap:0};
+     }).filter(Boolean);
+     if(!market.length)throw new Error("No matching public ticker pairs found");
+     $("connection").textContent="Live data";
+     $("apiStatus").innerHTML='<span class="green">Connected · Binance public data</span>';
+     $("lastUpdate").textContent=new Date().toLocaleTimeString();
+     $("marketHint").textContent="Public Binance spot ticker fallback · market-cap data is not supplied by this fallback.";
+     renderMarket();renderHomeCoinResults();renderPerpMarkets();selectPerpPair(perpSelectedSymbol);renderPerpPositions();updateTradePreview();
+   }catch(fallbackError){
+     $("connection").textContent="Unavailable";
+     $("apiStatus").innerHTML='<span class="red">Public market data unavailable</span>';
+     if(!market.length)$("marketRows").innerHTML='<tr><td colspan="6" class="empty">Live public prices could not be loaded from the available providers. Check your connection and press Refresh to try again.</td></tr>';
+     $("marketHint").textContent="Both public market-data sources failed or are unreachable. No API key or paid Firebase plan is required for these public endpoints.";
+   }
  } finally {
    marketRequestInProgress=false;
    refreshButtons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.originalText||"Refresh";delete b.dataset.originalText});
