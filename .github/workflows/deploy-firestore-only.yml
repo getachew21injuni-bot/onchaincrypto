@@ -6,6 +6,9 @@ on:
     branches:
       - main
     paths:
+      - "firestore.rules"
+      - "firestore.indexes.json"
+      - "firebase.json"
       - ".github/workflows/deploy-firestore-only.yml"
 
 permissions:
