@@ -40,10 +40,10 @@ jobs:
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
 
-      - name: Deploy Firestore rules and indexes only
+      - name: Deploy Firestore security rules only
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
-        run: firebase deploy --project onchaincrypto-d976b --only firestore:rules,firestore:indexes --non-interactive
+        run: firebase deploy --project onchaincrypto-d976b --only firestore:rules --non-interactive
 
       - name: Remove temporary credentials
         if: always()
