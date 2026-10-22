@@ -1120,7 +1120,7 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
 (function(){
  const $=id=>document.getElementById(id);
  const read=()=>{try{return JSON.parse(localStorage.getItem("oc_demo_state")||"null")||{balance:10000,holdings:{},history:[]}}catch(e){return {balance:10000,holdings:{},history:[]}}};
- const write=s=>localStorage.setItem("oc_demo_state",JSON.stringify(s));
+ const write=s=>{localStorage.setItem("oc_demo_state",JSON.stringify(s));try{if(typeof state!=="undefined"){state.balance=Number(s.balance||0);state.holdings=s.holdings||{};state.history=s.history||[];}if(typeof renderWallet==="function")renderWallet();if(typeof renderPnl==="function")renderPnl();}catch(e){}};
  const activity=(title,details)=>{let a=[];try{a=JSON.parse(localStorage.getItem("oc_activity_history")||"[]")}catch(e){}a.unshift({id:Date.now()+"-demo",type:"activity",title,details,status:"Demo only",time:new Date().toISOString()});localStorage.setItem("oc_activity_history",JSON.stringify(a.slice(0,1000)))};
  const amount=id=>Number($(id)?.value||0);
  const note=(id,t)=>{if($(id))$(id).textContent=t};
