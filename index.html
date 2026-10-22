@@ -885,7 +885,11 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
     const credential = await createUserWithEmailAndPassword(auth, email, password);
     if (name) await updateProfile(credential.user, { displayName: name });
     document.getElementById("registerPassword").value = "";
-    msg("Account created successfully. You are now signed in.");
+    window.onchaincryptoCurrentUser = credential.user;
+    const status = document.getElementById("authStatus");
+    if (status) status.textContent = "Account created successfully. Signed in as " + (credential.user.displayName || credential.user.email || "user") + ". You can continue to the platform.";
+    msg("Account created successfully. You are now signed in. You can continue to the platform.");
+    if (typeof showPage === "function") showPage("markets");
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -912,7 +916,12 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
       document.getElementById("signInEmail").value.trim().toLowerCase(),
       document.getElementById("signInPassword").value);
     document.getElementById("signInPassword").value = "";
-    msg("Signed in successfully.");
+    window.onchaincryptoCurrentUser = credential.user;
+    const status = document.getElementById("authStatus");
+    if (status) status.textContent = "Signed in as " + (credential.user.displayName || credential.user.email || credential.user.phoneNumber || "user") + ". You can continue to the platform.";
+    msg("Signed in successfully. Opening the platform…");
+    if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
+    if (typeof showPage === "function") showPage("markets");
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -969,19 +978,35 @@ document.getElementById("signOutBtn").addEventListener("click", async () => {
   catch (error) { msg(friendlyError(error)); }
 });
 onAuthStateChanged(auth, (user) => {
+  window.onchaincryptoCurrentUser = user || null;
   const status = document.getElementById("authStatus");
   const signOutBtn = document.getElementById("signOutBtn");
+  const identity = user ? (user.displayName || user.email || user.phoneNumber || "Signed-in user") : "";
+  if (status) {
+    status.textContent = user
+      ? "Signed in as " + identity + (user.email && !user.emailVerified ? " · Email not yet verified" : "") + ". You can continue to the platform."
+      : "Not signed in. Create an account or sign in below.";
+    status.classList.toggle("notice", !user);
+  }
+  if (signOutBtn) signOutBtn.classList.toggle("hidden", !user);
+  const displayName = document.getElementById("displayName");
+  if (user && displayName && !displayName.value) displayName.value = user.displayName || "";
+  if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
+  const profileStatus = document.getElementById("profileAccountStatusText");
+  const profileBadge = document.getElementById("profileAccountStatusBadge");
+  if (profileStatus) profileStatus.textContent = user ? (user.email && !user.emailVerified ? "Active · Email not verified" : "Active · Signed in") : "Guest · Not signed in";
+  if (profileBadge) profileBadge.textContent = user ? "Signed in" : "Guest";
   if (user) {
-    const identity = user.displayName || user.email || user.phoneNumber || "Signed-in user";
-    status.textContent = "Signed in as " + identity + (user.email && !user.emailVerified ? " · Email not yet verified" : "");
-    signOutBtn.classList.remove("hidden");
-    const displayName = document.getElementById("displayName");
-    if (displayName && !displayName.value) displayName.value = user.displayName || "";
-  } else {
-    status.textContent = "Not signed in. Create an account or sign in below.";
-    signOutBtn.classList.add("hidden");
+    const message = document.getElementById("registerMessage");
+    if (message && !message.textContent.trim()) message.textContent = "Your account is signed in. You can continue to the platform.";
   }
 });
+setTimeout(() => {
+  const status = document.getElementById("authStatus");
+  if (status && status.textContent.includes("Checking sign-in status")) {
+    status.textContent = "Authentication is taking too long to initialize. Refresh this page and check your internet connection and Firebase authorized domains.";
+  }
+}, 8000);
 </script>
 
 
