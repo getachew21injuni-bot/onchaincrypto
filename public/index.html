@@ -1025,7 +1025,7 @@ async function saveCloudPersonalDetails(){
     const msgEl=document.getElementById("profileMessage");if(msgEl)msgEl.textContent="Account profile saved.";
   }catch(error){document.getElementById("personalDetailsMessage").textContent="Could not save profile. Firestore may not be enabled or its rules may not allow your account yet. ("+(error?.code||"error")+")";}
 }
-async function submitCloudKyc(){
+async async function submitCloudKyc(){
   const user=auth.currentUser;if(!user){document.getElementById("kycMessage").textContent="Please sign in first.";return;}
   const legalName=document.getElementById("kycLegalName").value.trim(),country=document.getElementById("kycCountry").value.trim(),documentType=document.getElementById("kycDocumentType").value,documentNumber=document.getElementById("kycDocumentNumber").value.trim();
   if(!legalName||!country||!documentType||!documentNumber){document.getElementById("kycMessage").textContent="Complete all fields before submitting.";return;}
