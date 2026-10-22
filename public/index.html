@@ -145,6 +145,17 @@ main{max-width:1500px;padding:clamp(14px,2.4vw,32px)}
 }
 @media(prefers-reduced-motion:reduce){button,.quick-action{transition:none!important}.quick-action:hover{transform:none!important}}
 </style>
+
+<style id="onchaincrypto-invite-friends">
+#inviteFriendsModal{position:fixed;inset:0;z-index:10000;background:rgba(3,8,18,.78);display:flex;align-items:center;justify-content:center;padding:18px}
+#inviteFriendsModal[hidden]{display:none}
+.invite-dialog{width:min(100%,520px);background:var(--panel,#15191e);color:var(--text,#eaecef);border:1px solid var(--line,#2b3139);border-radius:18px;padding:22px;box-shadow:0 24px 80px #0009}
+.invite-dialog h2{margin:0 0 8px;font-size:24px}.invite-dialog p{line-height:1.55}
+.invite-link-row{display:flex;gap:8px;margin:16px 0}.invite-link-row input{min-width:0;flex:1;background:var(--panel2,#1e2329);color:var(--text,#eaecef);border:1px solid var(--line,#2b3139);border-radius:9px;padding:12px}
+.invite-actions{display:flex;gap:10px;flex-wrap:wrap}.invite-note{font-size:12px;color:var(--muted,#848e9c)}
+@media(max-width:480px){.invite-dialog{padding:17px}.invite-link-row{flex-direction:column}.invite-link-row button{width:100%}}
+</style>
+
 </head>
 <body>
 <header>
@@ -156,7 +167,7 @@ main{max-width:1500px;padding:clamp(14px,2.4vw,32px)}
     <button data-page="register" id="register-nav" class="register-nav">Register</button>
     <button data-page="register" id="signin-nav" class="signin-nav">Login</button>
   </nav>
-  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open profile, notifications and verification menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" data-menu-account="true" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and preferences</small></span></button><button type="button" data-menu-page="profile" data-menu-settings="true" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security, preferences and support</small></span></button><button type="button" data-menu-page="profile" data-menu-notifications="true" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Account and security updates</small></span></button><button type="button" data-menu-page="profile" data-menu-kyc="true" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>KYC verification</strong><small>Identity verification status</small></span></button><button type="button" data-menu-action="guide" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About OnChainCrypto</strong><small>Platform information and feature guide</small></span></button><button type="button" data-menu-action="faq" role="menuitem"><span class="menu-symbol" style="color:#a78bfa">?</span><span><strong>Help &amp; FAQ</strong><small>Answers, support and safety information</small></span></button></div></div></div>
+  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open profile, notifications and verification menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" data-menu-account="true" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and preferences</small></span></button><button type="button" data-menu-page="profile" data-menu-settings="true" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security, preferences and support</small></span></button><button type="button" data-menu-page="profile" data-menu-notifications="true" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Account and security updates</small></span></button><button type="button" data-menu-page="profile" data-menu-kyc="true" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>KYC verification</strong><small>Identity verification status</small></span></button><button type="button" data-menu-action="invite" role="menuitem"><span class="menu-symbol" style="color:#0ecb81">↗</span><span><strong>Invite Friends</strong><small>Share your personal invite link</small></span></button><button type="button" data-menu-action="guide" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About OnChainCrypto</strong><small>Platform information and feature guide</small></span></button><button type="button" data-menu-action="faq" role="menuitem"><span class="menu-symbol" style="color:#a78bfa">?</span><span><strong>Help &amp; FAQ</strong><small>Answers, support and safety information</small></span></button></div></div></div>
 </header>
 <main>
   <section id="page-markets">
@@ -1245,5 +1256,65 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
  $("demoConvertSubmit")?.addEventListener("click",()=>{const n=amount("convertAmount"),from=$("convertFrom")?.value,to=$("convertTo")?.value;if(!Number.isFinite(n)||n<=0){note("demoConvertMessage","Enter an amount greater than zero.");return}if(from===to){note("demoConvertMessage","Choose two different assets.");return}const s=read();if(from==="USDT"&&n>Number(s.balance||0)){note("demoConvertMessage","Insufficient demo USDT balance.");return}activity("Demo conversion preview",n+" "+from+" → "+n+" "+to+" at simulated 1:1 rate; no real conversion.");note("demoConvertMessage","Preview recorded: "+n+" "+from+" → "+n+" "+to+" at demo 1:1 rate. Balances were not converted.");});
 })();
 </script>
+
+<div id="inviteFriendsModal" hidden role="dialog" aria-modal="true" aria-labelledby="inviteFriendsTitle">
+ <div class="invite-dialog">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+   <h2 id="inviteFriendsTitle">Invite friends</h2>
+   <button type="button" class="secondary" id="closeInviteFriends" aria-label="Close invite friends">✕</button>
+  </div>
+  <p>Share OnChainCrypto with friends so they can explore public crypto market prices and platform tools.</p>
+  <label for="inviteFriendsLink">Your personal invite link</label>
+  <div class="invite-link-row"><input id="inviteFriendsLink" type="text" readonly value="" aria-describedby="inviteFriendsStatus"><button type="button" class="primary" id="copyInviteFriendsLink">Copy link</button></div>
+  <div class="invite-actions"><button type="button" class="secondary" id="shareInviteFriendsLink">Share invite</button><button type="button" class="secondary" id="closeInviteFriendsBottom">Close</button></div>
+  <p id="inviteFriendsStatus" role="status" aria-live="polite" class="invite-note">Sign in to create a link associated with your account.</p>
+  <p class="invite-note">Referral attribution and rewards are not activated yet. This link does not promise bonuses or payments.</p>
+ </div>
+</div>
+<script id="onchaincrypto-invite-friends-script">
+(function(){
+ const modal=document.getElementById("inviteFriendsModal");
+ const linkInput=document.getElementById("inviteFriendsLink");
+ const status=document.getElementById("inviteFriendsStatus");
+ const openBtn=document.querySelector('[data-menu-action="invite"]');
+ const closeBtns=[document.getElementById("closeInviteFriends"),document.getElementById("closeInviteFriendsBottom")];
+ function makeInviteLink(){
+  const user=window.onchaincryptoCurrentUser;
+  if(!user||!user.uid){
+   linkInput.value="";
+   status.textContent="Please sign in first. Your personal invite link is available after your account is signed in.";
+   return "";
+  }
+  const url=new URL(window.location.href);
+  url.searchParams.set("ref",user.uid);
+  linkInput.value=url.toString();
+  status.textContent="Invite link ready to copy or share.";
+  return url.toString();
+ }
+ function openModal(){
+  if(!modal)return;
+  makeInviteLink();
+  modal.hidden=false;
+  document.getElementById("closeInviteFriends")?.focus();
+ }
+ function closeModal(){if(modal)modal.hidden=true;if(openBtn)openBtn.focus()}
+ openBtn?.addEventListener("click",function(){document.getElementById("moreMenu")?.classList.add("hidden");openModal()});
+ closeBtns.forEach(b=>b?.addEventListener("click",closeModal));
+ modal?.addEventListener("click",e=>{if(e.target===modal)closeModal()});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal&&!modal.hidden)closeModal()});
+ document.getElementById("copyInviteFriendsLink")?.addEventListener("click",async function(){
+  const link=makeInviteLink();if(!link)return;
+  try{await navigator.clipboard.writeText(link);status.textContent="Invite link copied. Send it to your friends."}
+  catch(e){linkInput.focus();linkInput.select();status.textContent="Select the link above and copy it using Ctrl+C (or your device's Copy option)."}
+ });
+ document.getElementById("shareInviteFriendsLink")?.addEventListener("click",async function(){
+  const link=makeInviteLink();if(!link)return;
+  if(navigator.share){try{await navigator.share({title:"Join me on OnChainCrypto",text:"Explore crypto market prices and platform tools on OnChainCrypto.",url:link});status.textContent="Share dialog opened."}catch(e){if(e&&e.name!=="AbortError")status.textContent="Sharing was not completed. You can copy the link instead."}}
+  else{try{await navigator.clipboard.writeText(link);status.textContent="Sharing is not available in this browser, so the invite link was copied instead."}catch(e){linkInput.focus();linkInput.select();status.textContent="Select the link above and copy it using Ctrl+C (or your device's Copy option)."}}
+ });
+ window.addEventListener("onchaincrypto-auth-ready",makeInviteLink);
+})();
+</script>
+
 </body>
 </html>
