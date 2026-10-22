@@ -895,7 +895,7 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
     const status = document.getElementById("authStatus");
     if (status) status.textContent = "Account created successfully. Signed in as " + (credential.user.displayName || credential.user.email || "user") + ". You can continue to the platform.";
     msg("Account created successfully. You are now signed in. You can continue to the platform.");
-    if (typeof showPage === "function") showPage("markets");
+    if (typeof showPage === "function") showPage("profile");
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -907,6 +907,8 @@ document.getElementById("googleSignInBtn").addEventListener("click", async () =>
     const credential = await signInWithPopup(auth, new GoogleAuthProvider());
     await updateProfile(credential.user, { displayName: name });
     msg("Google sign-in successful. Your account name is " + name + ".");
+    window.onchaincryptoCurrentUser=credential.user;
+    if (typeof showPage === "function") showPage("profile");
   } catch (error) {
     if (error?.code === "auth/operation-not-allowed") msg("Google sign-in is disabled in Firebase. Enable Google under Firebase Console → Authentication → Sign-in method.");
     else if (error?.code === "auth/unauthorized-domain") msg("Google sign-in blocked: add getachew21injuni-bot.github.io under Firebase Console → Authentication → Settings → Authorized domains.");
@@ -975,6 +977,8 @@ document.getElementById("verifyPhoneCodeBtn").addEventListener("click", async ()
     const name = (first + " " + last).trim();
     if (name && !credential.user.displayName) await updateProfile(credential.user, { displayName: name });
     msg("Phone number verified. You are signed in as " + (credential.user.displayName || credential.user.phoneNumber || "user") + ".");
+    window.onchaincryptoCurrentUser=credential.user;
+    if (typeof showPage === "function") showPage("profile");
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -993,9 +997,11 @@ async function loadCloudProfile(user) {
   try {
     const snap=await getDoc(doc(db,"users",user.uid));
     const data=snap.exists()?snap.data():{};
-    const fields={profileFirstName:data.firstName||"",profileLastName:data.lastName||"",profileCountry:data.country||"",profileDob:data.dateOfBirth||"",kycLegalName:data.kyc?.legalName||"",kycCountry:data.kyc?.country||"",kycDocumentType:data.kyc?.documentType||"",kycDocumentNumber:data.kyc?.documentNumber||""};
+    const kycSnap=await getDoc(doc(db,"kycSubmissions",user.uid));
+    const kycData=kycSnap.exists()?kycSnap.data():{};
+    const fields={profileFirstName:data.firstName||"",profileLastName:data.lastName||"",profileCountry:data.country||"",profileDob:data.dateOfBirth||"",kycLegalName:kycData.legalName||"",kycCountry:kycData.country||"",kycDocumentType:kycData.documentType||"",kycDocumentNumber:kycData.documentNumber||""};
     Object.entries(fields).forEach(([id,value])=>{const el=document.getElementById(id);if(el && !el.value)el.value=value});
-    const status=data.kyc?.status||"not_submitted";
+    const status=kycData.status||"not_submitted";
     const badge=document.getElementById("kycStatusBadge");
     if(badge)badge.textContent=({not_submitted:"Not submitted",pending:"Pending review",approved:"Approved",rejected:"Rejected"})[status]||"Not submitted";
     const message=document.getElementById("kycMessage");
@@ -1025,7 +1031,7 @@ async function submitCloudKyc(){
   if(!confirm("Submit these identity details for KYC review? This form does not upload an ID image or independently verify identity."))return;
   const btn=document.getElementById("submitKycBtn");btn.disabled=true;document.getElementById("kycMessage").textContent="Submitting securely…";
   try{
-    await setDoc(doc(db,"users",user.uid),{uid:user.uid,email:user.email||null,kyc:{legalName,country,documentType,documentNumber,status:"pending",submittedAt:serverTimestamp(),updatedAt:serverTimestamp()}},{merge:true});
+    await setDoc(doc(db,"kycSubmissions",user.uid),{uid:user.uid,email:user.email||null,legalName,country,documentType,documentNumber,status:"pending",submittedAt:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true});
     document.getElementById("kycStatusBadge").textContent="Pending review";
     document.getElementById("kycMessage").textContent="Your KYC details were saved to your account with status Pending review. This is not identity approval; an authorized reviewer must verify them.";
   }catch(error){document.getElementById("kycMessage").textContent="Submission failed. Firestore may not be enabled or its security rules may block this account. ("+(error?.code||"error")+")";}
