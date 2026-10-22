@@ -54,6 +54,97 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 
 .perp-searchbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:16px}.perp-searchbar .search{flex:1;min-width:220px}.perp-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,.8fr);gap:16px}.perp-order{padding:18px}.perp-order label{display:block;color:var(--muted);font-size:12px;margin:14px 0 6px}.perp-order input,.perp-order select{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:11px}.perp-direction{display:grid;grid-template-columns:1fr 1fr;gap:8px}.perp-direction .selected-long{background:var(--green);color:#04170e}.perp-direction .selected-short{background:var(--red);color:white}.perp-pair-button{background:transparent;color:var(--text);padding:0;text-align:left}.perp-stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:16px}.perp-stat{background:var(--panel2);border-radius:8px;padding:12px}.perp-stat small{display:block;color:var(--muted);font-size:11px}.perp-stat strong{display:block;font-size:16px;margin-top:5px}.perp-market-table,.perp-position-table{min-width:700px}@media(max-width:850px){.perp-layout{grid-template-columns:1fr}.perp-stat-grid{grid-template-columns:1fr 1fr}}</style>
 <!-- Refresh deployment check: 2026-10-20T19:44Z -->
+
+<style id="onchaincrypto-homepage-polish">
+/* Homepage-only visual refresh; existing IDs, scripts and Firebase logic are unchanged. */
+:root{--bg:#070d16;--panel:#0e1725;--panel2:#142236;--line:#26394f;--text:#eef6ff;--muted:#91a4bc;--yellow:#f6c453;--green:#35dfae;--red:#ff7185;--blue:#52b8ff}
+body{background:radial-gradient(ellipse at 50% -18%,#15314a 0,transparent 42%),var(--bg);color:var(--text)}
+header{background:rgba(5,13,24,.91);border-bottom:1px solid #203b56;box-shadow:0 8px 28px #0002;backdrop-filter:blur(18px)}
+.brand{color:#f3f9ff;text-shadow:none}
+.brand b{background:linear-gradient(135deg,#48f1d0,#4aa9ff);box-shadow:0 0 24px #26c8ff35}
+nav button{transition:color .18s,background .18s}
+nav button.active{color:#67e9ff}
+button{transition:transform .16s ease,border-color .16s ease,filter .16s ease}
+button:hover{filter:brightness(1.07)}
+button:active{transform:translateY(1px)}
+main{max-width:1500px;padding:clamp(14px,2.4vw,32px)}
+#page-markets .home-welcome-oval{margin:4px 0 30px;border-radius:26px;border-color:#245577;background:radial-gradient(ellipse at 82% 30%,#16466a 0,#102a41 34%,#0b1726 72%,#0a1220 100%);box-shadow:0 24px 70px #0004,inset 0 1px #ffffff0c}
+#page-markets .home-welcome-oval:before{border-color:#4bd9ff20}
+#page-markets .home-welcome-oval:after{border-color:#4bd9ff18}
+#page-markets .home-welcome-inner{min-height:340px;padding:clamp(28px,4.6vw,62px);gap:28px}
+#page-markets .home-eyebrow{letter-spacing:1.7px;color:#79e8ff}
+#page-markets .home-welcome-copy h1{font-size:clamp(31px,4vw,54px);letter-spacing:-1.8px}
+#page-markets .home-welcome-copy>p{font-size:clamp(14px,1.2vw,16px);color:#c0d1e3;max-width:620px}
+#page-markets .home-promo-pills span{border-color:#2c526d;background:#10283c;color:#dff8ff}
+#page-markets .home-welcome-actions button{border-radius:11px;min-height:45px}
+#page-markets .home-welcome-actions .primary{background:linear-gradient(135deg,#64f0d0,#42baff);color:#07131e;box-shadow:0 8px 22px #26bfff22}
+#page-markets .home-welcome-actions .secondary{background:#11253a;border-color:#34526d;color:#e7f5ff}
+#page-markets .home-welcome-note{color:#a1b4c9;font-size:11px}
+#page-markets .page-title{margin:8px 0 18px;align-items:flex-end}
+#page-markets .page-title h1{font-size:clamp(22px,2.5vw,29px);letter-spacing:-.6px}
+#page-markets > .cards{gap:14px;margin-bottom:22px}
+#page-markets > .cards .card{position:relative;overflow:hidden;min-height:126px;padding:19px;border-radius:16px;border-color:#263b53;background:linear-gradient(145deg,#132337,#0d1726 80%);box-shadow:0 10px 28px #00015}
+#page-markets > .cards .card:after{content:"";position:absolute;right:-28px;top:-36px;width:95px;height:95px;border:1px solid #67d9ff12;border-radius:50%;box-shadow:0 0 0 14px #67d9ff05;pointer-events:none}
+#page-markets > .cards .card .label{color:#9eb4cc;font-size:12px}
+#page-markets > .cards .card .big{font-size:clamp(21px,2.2vw,28px);letter-spacing:-.5px;margin:12px 0 7px}
+#page-markets .panel{border-color:#26394f;border-radius:16px;background:linear-gradient(145deg,#101c2c,#0d1623);box-shadow:0 14px 36px #0002}
+#page-markets .section-head{padding:20px 20px 0}
+#page-markets .section-head h2{font-size:17px;letter-spacing:-.2px}
+#page-markets .quick-action-grid{padding:17px 20px 6px;gap:12px}
+#page-markets .quick-action{min-height:132px;border-radius:14px;padding:17px;background:linear-gradient(145deg,#132a40,#0c1727);border-color:#29445f;box-shadow:inset 0 1px #ffffff08}
+#page-markets .quick-action:hover{transform:translateY(-3px);border-color:var(--action-color,#50dfff);box-shadow:0 12px 28px #0003}
+#page-markets .quick-action .action-icon{width:42px;height:42px;border-radius:13px;background:color-mix(in srgb,var(--action-color,#50dfff) 16%,#101d2d);border:1px solid color-mix(in srgb,var(--action-color,#50dfff) 32%,transparent)}
+#page-markets .quick-action strong{font-size:14px}
+#page-markets .quick-action small{color:#a9bfd6;line-height:1.45}
+#page-markets .market-list-controls{border-color:#22364c}
+#page-markets .search{background:#091321;border-color:#2b415a;border-radius:10px}
+#page-markets .search:focus,#page-markets .field:focus{border-color:#4ccfff;box-shadow:0 0 0 3px #4ccfff15}
+#page-markets .tabs button{border-radius:8px}
+#page-markets .tabs button.active{background:#153247;color:#76eaff}
+#page-markets table th{background:#101c2b;color:#9fb2c8}
+#page-markets table td,#page-markets table th{border-bottom-color:#203247}
+#page-markets .row-click:hover{background:#142438}
+#page-markets .coin-picker{border-radius:10px}
+#page-markets .tag{border-radius:999px}
+@media(max-width:900px){
+  #page-markets .home-welcome-inner{grid-template-columns:minmax(0,1.2fr) minmax(180px,.8fr);padding:28px;gap:12px}
+  #page-markets .home-welcome-art{transform:scale(.9)}
+  #page-markets > .cards .card{padding:16px}
+}
+@media(max-width:700px){
+  header{height:auto;min-height:64px;display:flex;flex-wrap:wrap;gap:10px;padding:10px 12px}
+  header .brand{grid-column:auto;justify-self:start;flex:1;min-width:0}
+  header .header-right{grid-column:auto;grid-row:auto;margin-left:auto}
+  header #nav{display:flex;order:3;flex:0 0 100%;width:100%;overflow-x:auto;justify-content:flex-start;gap:7px;padding:5px 0 1px;scrollbar-width:thin}
+  header #nav button{flex:0 0 auto;white-space:nowrap;padding:8px 10px;font-size:12px}
+  main{padding:14px}
+  #page-markets .home-welcome-oval{border-radius:21px;margin-bottom:22px}
+  #page-markets .home-welcome-inner{grid-template-columns:1fr;padding:26px 21px;gap:0}
+  #page-markets .home-welcome-copy h1{font-size:clamp(29px,8vw,40px)}
+  #page-markets .home-welcome-art{min-height:175px;transform:none}
+  #page-markets .home-welcome-actions{display:grid;grid-template-columns:1fr}
+  #page-markets .home-welcome-actions button{width:100%;border-radius:10px}
+  #page-markets .page-title{align-items:flex-start}
+  #page-markets > .cards{gap:10px}
+  #page-markets > .cards .card{min-height:112px;padding:14px;border-radius:13px}
+  #page-markets > .cards .card .big{font-size:21px}
+  #page-markets .section-head{padding:16px 14px 0}
+  #page-markets .quick-action-grid{padding:14px 14px 4px;gap:9px}
+  #page-markets .quick-action{min-height:122px;padding:13px;border-radius:12px}
+  #page-markets .market-list-controls{padding:12px 14px}
+  #page-markets table{min-width:620px}
+}
+@media(max-width:390px){
+  #page-markets .home-welcome-inner{padding:22px 16px}
+  #page-markets .home-promo-pills{gap:6px}
+  #page-markets .home-promo-pills span{font-size:10px}
+  #page-markets > .cards{grid-template-columns:1fr 1fr}
+  #page-markets > .cards .card .big{font-size:19px}
+  #page-markets .quick-action-grid{gap:8px}
+  #page-markets .quick-action{min-height:116px}
+}
+@media(prefers-reduced-motion:reduce){button,.quick-action{transition:none!important}.quick-action:hover{transform:none!important}}
+</style>
 </head>
 <body>
 <header>
