@@ -1084,5 +1084,19 @@ $("marketShowLess")?.addEventListener("click",()=>{window.marketRowsExpanded=5;r
 $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q=$("browserSearchInput")?.value.trim();if(!q)return;window.open("https://www.google.com/search?q="+encodeURIComponent(q),"_blank","noopener,noreferrer")});
 </script>
 
+
+<style id="oc-live-support-widget-style">
+#ocLiveSupport{position:fixed;right:18px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:9998;display:flex;align-items:center;gap:10px;text-decoration:none;font-family:inherit}
+#ocLiveSupport .oc-support-label{background:#0b1b2d;color:#eaf6ff;border:1px solid #29435f;border-radius:14px;padding:10px 13px;font-size:13px;font-weight:750;box-shadow:0 8px 24px #0005}
+#ocLiveSupport .oc-support-icon{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;color:white;background:linear-gradient(145deg,#229ed9,#0878d1);border:2px solid #78d8ff;box-shadow:0 8px 28px #008dff55;font-size:28px;line-height:1;transition:transform .15s}
+#ocLiveSupport:hover .oc-support-icon{transform:translateY(-2px) scale(1.04)}
+#ocLiveSupport:focus-visible{outline:3px solid #8be5ff;outline-offset:4px;border-radius:18px}
+@media(max-width:520px){#ocLiveSupport{right:13px;bottom:calc(90px + env(safe-area-inset-bottom,0px));gap:7px}#ocLiveSupport .oc-support-label{font-size:12px;padding:9px 10px}#ocLiveSupport .oc-support-icon{width:54px;height:54px;font-size:26px}}
+</style>
+<a id="ocLiveSupport" href="https://t.me/OnChainCrypto_OfficialBot" target="_blank" rel="noopener noreferrer" aria-label="Open OnChainCrypto support bot on Telegram" title="Chat with OnChainCrypto support bot">
+ <span class="oc-support-label">Support bot</span>
+ <span class="oc-support-icon" aria-hidden="true">☏</span>
+</a>
+
 </body>
 </html>
