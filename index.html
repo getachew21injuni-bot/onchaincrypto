@@ -61,7 +61,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
   <nav id="nav">
     <button class="active" data-page="home">Home</button>
     <button data-page="markets">Markets</button>
-    <button data-page="trade">Trade</button><button type="button" id="goldTradeNav" data-page="trade">Gold Trade</button>
+    <button data-page="trade">Trade</button>
     <button data-page="wallet">Wallet</button>
     
     <button data-page="register" id="register-nav" class="register-nav">Register</button>
@@ -968,7 +968,7 @@ $("marketSearch").addEventListener("input",renderMarket);$("refreshBtn").addEven
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   if(!list.length){host.innerHTML='<table><thead><tr><th>Coin / Pair</th><th>Price (USD)</th><th>24h Change</th><th>Action</th></tr></thead><tbody><tr><td colspan="4" class="empty">Waiting for public market prices…</td></tr></tbody></table>';return;}
   host.innerHTML='<table><thead><tr><th>Coin / Pair</th><th>Price (USD)</th><th>24h Change</th><th>Action</th></tr></thead><tbody>'+list.slice(0,8).map(c=>{const sym=String(c.symbol||"").toUpperCase(),chg=Number(c.price_change_percentage_24h||0);return '<tr><td><strong>'+esc(sym)+'</strong><div class="muted tiny">'+esc(c.name||sym)+'</div></td><td>
-if(goldTradeNav)goldTradeNav.addEventListener("click",()=>{setTimeout(()=>{const sel=$("tradeAsset");if(sel){sel.value="PAXG";if(sel.value!=="PAXG"){const opt=document.createElement("option");opt.value="PAXG";opt.textContent="PAXG · PAX Gold";sel.appendChild(opt);sel.value="PAXG";}sel.dispatchEvent(new Event("change",{bubbles:true}));}const title=$("tradePairTitle");if(title)title.textContent="PAXG / USDT · Gold-backed token";const asset=$("tradeAssetName");if(asset)asset.textContent="PAX Gold (gold-backed token)";const chart=$("tradingViewChart");if(chart)chart.src="https://www.tradingview.com/widgetembed/?symbol=BINANCE%3APAXGUSDT&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false";},80);});
+if().addEventListener("click",()=>{setTimeout(()=>{const sel=$("tradeAsset");if(sel){sel.value="PAXG";if(sel.value!=="PAXG"){const opt=document.createElement("option");opt.value="PAXG";opt.textContent="PAXG";sel.appendChild(opt);sel.value="PAXG";}sel.dispatchEvent(new Event("change",{bubbles:true}));}const title=$("tradePairTitle");if(title)title.textContent="PAXG / USDT · Gold-backed token";const asset=$("tradeAssetName");if(asset)asset.textContent="PAX Gold (gold-backed token)";const chart=$("tradingViewChart");if(chart)chart.src="https://www.tradingview.com/widgetembed/?symbol=BINANCE%3APAXGUSDT&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false";},80);});
 
 updateQuickEstimate();
 $("historyFilter")?.addEventListener("change",renderActivityHistory);
