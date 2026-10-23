@@ -716,6 +716,8 @@ async function loadMarket(){
    const data=await response.json();
    if(!Array.isArray(data)||!data.length)throw new Error("CoinGecko returned no prices");
    market=data.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()}));
+   window.market=market;
+   try{localStorage.setItem("oc_market_cache",JSON.stringify({time:Date.now(),data:market}))}catch(_){ }
    $("connection").textContent="Live data";
    $("apiStatus").innerHTML='<span class="green">Connected · CoinGecko</span>';
    $("lastUpdate").textContent=new Date().toLocaleTimeString();
@@ -733,26 +735,38 @@ async function loadMarket(){
          tickerData=data;break;
        }catch(e){tickerError=e}
      }
-     if(!tickerData)throw tickerError||new Error("All public ticker sources failed");
+     if(!tickerData){
+       // Third public source: CoinCap. This often works when CoinGecko is rate-limited and Binance is region-blocked.
+       const response=await fetch("https://api.coincap.io/v2/assets?limit=100",{headers:{accept:"application/json"},signal:AbortSignal.timeout(12000)});
+       if(!response.ok)throw tickerError||new Error("Public market sources unavailable");
+       const payload=await response.json();
+       if(!Array.isArray(payload?.data)||!payload.data.length)throw new Error("CoinCap returned no assets");
+       const bySymbol=new Map(payload.data.map(c=>[String(c.symbol||"").toUpperCase(),c]));
+       market=COINS.map(c=>{const t=bySymbol.get(c.symbol);if(!t)return null;const p=Number(t.priceUsd),change=Number(t.changePercent24Hr),volume=Number(t.volumeUsd24Hr),cap=Number(t.marketCapUsd);if(!Number.isFinite(p)||p<=0)return null;return {id:c.id,symbol:c.symbol,name:c.name,current_price:p,price_change_percentage_24h:Number.isFinite(change)?change:0,total_volume:Number.isFinite(volume)?volume:0,market_cap:Number.isFinite(cap)?cap:0,image:""};}).filter(Boolean);
+       if(!market.length)throw new Error("No tracked assets in CoinCap response");
+       window.market=market;try{localStorage.setItem("oc_market_cache",JSON.stringify({time:Date.now(),data:market}))}catch(_){ }
+       $("connection").textContent="Live data";$("apiStatus").innerHTML='<span class="green">Connected · CoinCap public data</span>';$("lastUpdate").textContent=new Date().toLocaleTimeString();$("marketHint").textContent="Public CoinCap market-data fallback · price and 24h movement are informational.";
+       renderMarket();renderHomeCoinResults();renderPerpMarkets();selectPerpPair(perpSelectedSymbol);renderPerpPositions();updateTradePreview();return;
+     }
      const byPair=new Map(tickerData.map(t=>[String(t.symbol||""),t]));
      market=COINS.map(c=>{
        if(c.symbol==="USDT")return {id:c.id,symbol:c.symbol,name:c.name,current_price:1,price_change_percentage_24h:0,total_volume:0,market_cap:0};
        const t=byPair.get(c.symbol+"USDT");if(!t)return null;
-       const p=Number(t.lastPrice),change=Number(t.priceChangePercent),volume=Number(t.volume);
+       const p=Number(t.lastPrice),change=Number(t.priceChangePercent),volume=Number(t.quoteVolume||t.volume);
        if(!Number.isFinite(p)||p<=0)return null;
-       return {id:c.id,symbol:c.symbol,name:c.name,current_price:p,price_change_percentage_24h:Number.isFinite(change)?change:0,total_volume:Number.isFinite(volume)?volume*p:0,market_cap:0};
+       return {id:c.id,symbol:c.symbol,name:c.name,current_price:p,price_change_percentage_24h:Number.isFinite(change)?change:0,total_volume:Number.isFinite(volume)?volume:0,market_cap:0,image:""};
      }).filter(Boolean);
      if(!market.length)throw new Error("No matching public ticker pairs found");
      $("connection").textContent="Live data";
      $("apiStatus").innerHTML='<span class="green">Connected · Binance public data</span>';
+     window.market=market;try{localStorage.setItem("oc_market_cache",JSON.stringify({time:Date.now(),data:market}))}catch(_){ }
      $("lastUpdate").textContent=new Date().toLocaleTimeString();
      $("marketHint").textContent="Public Binance spot ticker fallback · market-cap data is not supplied by this fallback.";
      renderMarket();renderHomeCoinResults();renderPerpMarkets();selectPerpPair(perpSelectedSymbol);renderPerpPositions();updateTradePreview();
    }catch(fallbackError){
-     $("connection").textContent="Unavailable";
-     $("apiStatus").innerHTML='<span class="red">Public market data unavailable</span>';
-     if(!market.length)$("marketRows").innerHTML='<tr><td colspan="6" class="empty">Live public prices could not be loaded from the available providers. Check your connection and press Refresh to try again.</td></tr>';
-     $("marketHint").textContent="Both public market-data sources failed or are unreachable. No API key or paid Firebase plan is required for these public endpoints.";
+     let cached=null;try{cached=JSON.parse(localStorage.getItem("oc_market_cache")||"null")}catch(_){ }
+     if(!market.length&&Array.isArray(cached?.data)&&cached.data.length){market=cached.data;window.market=market;renderMarket();renderHomeCoinResults();renderPerpMarkets();selectPerpPair(perpSelectedSymbol);renderPerpPositions();updateTradePreview();$("connection").textContent="Cached data";$("apiStatus").innerHTML='<span class="muted">Showing saved prices · refresh later</span>';$("lastUpdate").textContent="Saved "+new Date(cached.time||Date.now()).toLocaleTimeString();$("marketHint").textContent="Public feeds are temporarily unavailable. These saved prices may be stale; refresh to retry."}
+     else{$("connection").textContent="Unavailable";$("apiStatus").innerHTML='<span class="red">Public market data unavailable</span>';if(!$("marketRows")){}else if(!market.length)$("marketRows").innerHTML='<tr><td colspan="6" class="empty">Live public prices could not be loaded. Check your connection and press Refresh to try again.</td></tr>';$("marketHint").textContent="CoinGecko, Binance and CoinCap could not be reached. Public feeds can be temporarily rate-limited or blocked by the network."}
    }
  } finally {
    marketRequestInProgress=false;
