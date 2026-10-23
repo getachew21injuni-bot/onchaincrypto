@@ -1497,7 +1497,6 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
       if($("asideTradePair")&&pair)$("asideTradePair").textContent=pair.textContent;
       if($("asideTradePrice")&&price)$("asideTradePrice").textContent=price.textContent;
       if($("asideTradeChange")&&change)$("asideTradeChange").textContent=change.textContent;
-      const liveQuote=price?price.textContent.trim:"";
       const quoteText=price?price.textContent.trim():"$—";
       if($("asideBuyQuote"))$("asideBuyQuote").textContent=quoteText;
       if($("asideSellQuote"))$("asideSellQuote").textContent=quoteText;
