@@ -647,7 +647,7 @@ function restoreCachedMarket(){
  try{
   const saved=JSON.parse(localStorage.getItem("oc_market_cache")||"null");
   if(Array.isArray(saved?.data)&&saved.data.length){
-   market=saved.data;
+   market=saved.data;window.market=market;
    $("connection").textContent="Cached data";
    $("apiStatus").textContent="Showing saved prices";
    if(saved.time)$("lastUpdate").textContent=new Date(saved.time).toLocaleTimeString()+" (saved)";
@@ -687,7 +687,7 @@ async function loadMarket(){
     if(!data.length)throw new Error("No prices returned by fallback provider");
     provider="Binance public market data";
    }
-   market=data;
+   market=data;window.market=market;
    const now=Date.now();
    try{localStorage.setItem("oc_market_cache",JSON.stringify({time:now,data:market}))}catch(e){}
    $("connection").textContent="Live data";
