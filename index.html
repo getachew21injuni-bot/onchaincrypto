@@ -74,41 +74,6 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 
 
 <div class="page-title"><div><h1>Market Overview</h1><div class="muted">Explore crypto markets and discover market movers.</div></div>
-<style id="market-discovery-style">
-.market-discovery{background:#f0f0f0;color:#141821;border-radius:22px;padding:16px;margin:0 0 18px;font-family:inherit}
-.market-discovery *{box-sizing:border-box}
-.market-discovery .md-search{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e4e5eb;border-radius:14px;padding:12px 14px;margin-bottom:16px}
-.market-discovery .md-search input{background:transparent!important;color:#151821!important;border:0!important;box-shadow:none!important;outline:none;width:100%;padding:0!important}
-.market-discovery .md-tabs{display:flex;gap:22px;overflow-x:auto;white-space:nowrap;margin:0 -2px 16px;padding-bottom:8px}
-.market-discovery .md-tabs button{background:transparent;border:0;color:#5f636d;padding:8px 2px;font-weight:650;position:relative}
-.market-discovery .md-tabs button.active{color:#111827}
-.market-discovery .md-tabs button.active:after{content:"";position:absolute;bottom:-3px;left:30%;right:30%;height:3px;background:#eacb31;border-radius:4px}
-.market-discovery .md-card{background:#fff;border-radius:18px;padding:16px;margin-bottom:14px;color:#17191f}
-.market-discovery .md-card h3{font-size:1.08rem;margin:0 0 16px}
-.market-discovery .md-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:13px 0;border-top:1px solid #f0f0f2}
-.market-discovery .md-coin{display:flex;align-items:center;gap:10px;min-width:0}
-.market-discovery .md-icon{width:40px;height:40px;border-radius:50%;background:#eef1f6;display:grid;place-items:center;font-weight:800;flex-shrink:0}
-.market-discovery .md-name{font-weight:700}
-.market-discovery .md-sub{font-size:.88rem;color:#747985;margin-top:3px}
-.market-discovery .md-change{font-size:.88rem;font-weight:700;text-align:right;padding:7px 8px;border-radius:10px}
-.market-discovery .md-up{color:#168653;background:#e9f8ef}
-.market-discovery .md-down{color:#d64a59;background:#fff0f1}
-.market-discovery .md-muted{color:#737985;font-size:.88rem}
-.market-discovery .md-chips{display:flex;gap:9px;overflow:auto}
-.market-discovery .md-chip{background:#f3f4f7;border-radius:12px;padding:10px 12px;min-width:130px}
-.market-discovery .md-chip strong{display:block;margin-bottom:5px}
-.market-discovery .md-chip span{font-size:.85rem;color:#687080}
-.market-discovery .md-tracker-note{font-size:.82rem;color:#727783;line-height:1.4;margin-top:12px}
-@media(min-width:760px){.market-discovery{padding:22px}.market-discovery .md-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.market-discovery .md-card{margin-bottom:0}}
-</style>
-<section class="market-discovery" id="marketDiscovery">
- <div class="md-search"><span aria-hidden="true">⌕</span><input id="discoverySearch" placeholder="Search coins and trends" autocomplete="off" aria-label="Search coins and trends"><span aria-hidden="true">•••</span></div>
- <div class="md-tabs" id="discoveryTabs"><button class="active" data-discovery-tab="you">For You</button><button data-discovery-tab="favorites">Favorites</button><button data-discovery-tab="crypto">Crypto</button><button data-discovery-tab="tradfi">TradFi</button><button data-discovery-tab="alpha">Alpha</button></div>
- <div class="md-grid">
-  <section class="md-card"><h3>Smart Tracker · Market Movers</h3><div class="md-muted" id="discoveryTrackerStatus">Waiting for public market prices…</div><div id="discoveryTrackerRows"></div><p class="md-tracker-note">Movers are calculated from available public 24-hour price changes. This is market information, not personalized investment advice.</p></section>
-  <section class="md-card"><h3>Market Categories</h3><div class="md-chips"><div class="md-chip"><strong>Crypto</strong><span>Live public coin prices</span></div><div class="md-chip"><strong>TradFi</strong><span>Traditional markets · provider needed</span></div><div class="md-chip"><strong>Gold</strong><span>PAXG token market data when available</span></div><div class="md-chip"><strong>Indices</strong><span>Index feed not connected</span></div></div><p class="md-tracker-note">TradFi, indices and gold spot prices need a compatible market-data provider. PAXG is a gold-backed token, not the spot gold price itself.</p></section>
- </div>
-</section>
 <div class="muted tiny">Last update: <span id="lastUpdate">—</span></div></div>
 <style id="market-discovery-style">
 .market-discovery{background:#f0f0f0;color:#141821;border-radius:22px;padding:16px;margin:0 0 18px;font-family:inherit}
