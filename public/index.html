@@ -357,10 +357,72 @@ main{max-width:1500px;padding:clamp(14px,2.4vw,32px)}
           <div class="about-hero panel">
             <h2 class="feature-heading"><strong>OnChainCrypto</strong></h2>
             <p class="muted"><strong>Institutional Crypto Intelligence Platform</strong></p>
+            <p class="muted">A platform concept for exploring digital-asset markets, market information and account tools.</p>
           </div>
-          <div class="panel about-section">
-            <h3><strong>Our Mission</strong></h3>
-            <p class="muted">OnChainCrypto is dedicated to democratizing institutional-grade trading infrastructure for digital assets. We provide real-time trading signals, deep liquidity markets, and a next-generation execution engine built for modern digital assets and institutional-grade trading.</p>
+          <div class="panel about-search-panel">
+            <label for="aboutSearchInput"><strong>Search About</strong></label>
+            <input id="aboutSearchInput" class="search" type="search" placeholder="Search mission, features, security…" autocomplete="off">
+            <p id="aboutSearchStatus" class="muted" aria-live="polite">Search topics or open a section below.</p>
+          </div>
+          <div class="about-accordion-list" id="aboutAccordionList">
+            <details class="panel about-section" data-about-item>
+              <summary><strong>Our Mission</strong></summary>
+              <p class="muted">OnChainCrypto aims to make digital-asset market information and trading tools easier to access. The long-term goal is to develop institutional-inspired infrastructure for modern digital assets.</p>
+            </details>
+            <details class="panel about-section" data-about-item>
+              <summary><strong>Our Vision</strong></summary>
+              <p class="muted">To build a trusted digital-asset platform where individuals and institutions can access useful technology, clear information and fair, transparent markets.</p>
+            </details>
+            <details class="panel about-section" data-about-item>
+              <summary><strong>Core Values</strong></summary>
+              <ul class="about-list">
+                <li><strong>Security First:</strong> Put account and data protection first.</li>
+                <li><strong>Transparency:</strong> Explain platform status and limitations clearly.</li>
+                <li><strong>Innovation:</strong> Improve tools and the user experience responsibly.</li>
+                <li><strong>Community:</strong> Build an inclusive, helpful digital-asset community.</li>
+              </ul>
+            </details>
+            <details class="panel about-section" data-about-item>
+              <summary><strong>Platform Features</strong></summary>
+              <ul class="about-list">
+                <li><strong>Market information:</strong> Public cryptocurrency prices when providers are available.</li>
+                <li><strong>Market tools:</strong> Asset lists, charts and market analytics where implemented.</li>
+                <li><strong>Mobile-ready interface:</strong> Designed for desktop and mobile screens.</li>
+                <li><strong>Multi-asset vision:</strong> Crypto, metals and stocks are a future-facing goal; availability is not guaranteed.</li>
+                <li><strong>Support:</strong> Use the separate Help &amp; FAQ section for support options.</li>
+                <li><strong>Advanced trading:</strong> Perpetual contracts, leverage and sub-millisecond execution are not represented as active services.</li>
+              </ul>
+            </details>
+            <details class="panel about-section" data-about-item>
+              <summary><strong>Platform Statistics</strong></summary>
+              <p class="muted">Figures such as $4B+ daily trading volume, 99.99% uptime, 1M+ registered users and service in 200+ countries have not been verified. They are not presented as current OnChainCrypto statistics.</p>
+            </details>
+            <details class="panel about-section" data-about-item>
+              <summary><strong>Our Journey</strong></summary>
+              <ul class="about-list">
+                <li><strong>2020:</strong> Proposed founding milestone; verify before publishing as history.</li>
+                <li><strong>2022:</strong> Proposed expansion milestone; not independently verified.</li>
+                <li><strong>2023:</strong> Proposed growth milestone; not independently verified.</li>
+                <li><strong>2024:</strong> Proposed advanced-trading milestone; not independently verified.</li>
+              </ul>
+            </details>
+            <details class="panel about-section" data-about-item>
+              <summary><strong>Leadership Team</strong></summary>
+              <p class="muted">John Doe, Jane Smith, Mike Ross, Anna Lee, David Wilson and Sarah Chen were supplied as names for this section, but their roles and association with OnChainCrypto have not been verified. Confirm these details before presenting them as the actual leadership team.</p>
+            </details>
+            <details class="panel about-section" data-about-item>
+              <summary><strong>Security &amp; Compliance</strong></summary>
+              <p class="muted">Security is an important design goal. Cold storage, multi-signature custody, military-grade encryption, ISO 27001 certification and global regulatory compliance are not confirmed for this website. Do not send funds or sensitive identity documents; secure custody and KYC services are not enabled here.</p>
+            </details>
+            <details class="panel about-section" data-about-item>
+              <summary><strong>Get in Touch</strong></summary>
+              <ul class="about-list">
+                <li><strong>Email:</strong> Use the verified email shown in Help &amp; FAQ when available.</li>
+                <li><strong>Operations:</strong> Online platform interface.</li>
+                <li><strong>Availability:</strong> Help options may be available at any time; response times are not guaranteed.</li>
+              </ul>
+              <p class="muted">Quick Support and support links are located in Help &amp; FAQ, not in About.</p>
+            </details>
           </div>
         </div>
       </details>
@@ -956,6 +1018,27 @@ function renderPerpPositions(){const b=$("perpPositionRows");if(!b)return;b.inne
 document.addEventListener("input",e=>{if(e.target?.id==="perpPairSearch")renderPerpMarkets();if(["perpMargin","perpLeverage"].includes(e.target?.id))updatePerpPreview()});document.addEventListener("click",e=>{if(e.target.closest("[data-perp-refresh]"))loadMarket()});
 
 renderWallet();loadMarket();setInterval(loadMarket,120000);window.addEventListener("resize",()=>{if(historySeries.length&&!$("page-trade").classList.contains("hidden"))drawPriceChart()});
+
+  // About page: search only within the About accordion sections.
+  (function(){
+    const input=document.getElementById("aboutSearchInput");
+    const list=document.getElementById("aboutAccordionList");
+    const status=document.getElementById("aboutSearchStatus");
+    if(!input||!list||!status)return;
+    const items=Array.from(list.querySelectorAll("[data-about-item]"));
+    input.addEventListener("input",function(){
+      const query=input.value.trim().toLowerCase();
+      let visible=0;
+      items.forEach(function(item){
+        const match=!query||item.textContent.toLowerCase().includes(query);
+        item.hidden=!match;
+        if(match)visible++;
+        if(query&&match)item.open=true;
+        if(!query)item.open=false;
+      });
+      status.textContent=query?(visible+" section"+(visible===1?"":"s")+" found"):"Search topics or open a section below.";
+    });
+  })();
 </script>
 
 <script type="module">
