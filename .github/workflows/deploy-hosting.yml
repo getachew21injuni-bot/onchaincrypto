@@ -1,14 +1,9 @@
-name: Deploy Firebase Hosting
+name: Deploy Firebase Hosting (manual)
 
+# Automatic Hosting deployment is handled by hosting-only.yml.
+# Keep this workflow manual to avoid two workflows deploying the same site on every push.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - "public/**"
-      - "firebase.json"
-      - ".github/workflows/deploy-hosting.yml"
 
 permissions:
   contents: read
