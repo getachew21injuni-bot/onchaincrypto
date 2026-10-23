@@ -726,9 +726,16 @@ document.addEventListener("click",function(event){
 });
 function updateTradingViewChart(symbol){
  const frame=$("tradingViewChart");if(!frame)return;
- const sym=String(symbol||"BTC").toUpperCase();
- const pair=(sym==="USDT"||sym==="USDC")?"BTCUSDT":sym+"USDT";
- frame.src="https://www.tradingview.com/widgetembed/?symbol="+encodeURIComponent("BINANCE:"+pair)+"&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false";
+ const sym=String(symbol||"BTC").trim().toUpperCase().replace(/[^A-Z0-9]/g,"");
+ // The selected asset may already be a trading pair (for example BTCUSDT).
+ // Do not append USDT twice; TradingView then reports an unknown symbol.
+ let pair;
+ if(!sym||sym==="USDT"||sym==="USDC")pair="BTCUSDT";
+ else if(/USDT$/.test(sym))pair=sym;
+ else if(/USDC$/.test(sym))pair=sym;
+ else pair=sym+"USDT";
+ const chartSymbol="BINANCE:"+pair;
+ frame.src="https://www.tradingview.com/widgetembed/?symbol="+encodeURIComponent(chartSymbol)+"&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false";
 }
 function renderMiniList(id,items,mode){$(id).innerHTML=items.length?items.map(c=>'<div class="mini-row"><div class="mini-left">'+coinIcon(c,22)+'<span>'+safe(c.symbol.toUpperCase())+'</span></div><div class="mini-price '+(mode==="change"?((c.price_change_percentage_24h||0)>=0?"green":"red"):"")+'">'+(mode==="change"?pct(c.price_change_percentage_24h):money(c.total_volume))+'</div></div>').join(""):'<div class="muted tiny">No data</div>'}
 let marketRequestInProgress=false;
@@ -1026,7 +1033,7 @@ function renderPerpMarkets(){
  if(less)less.style.display=(!q&&expanded>5)?"inline-flex":"none";
  document.querySelectorAll("[data-perp-symbol]").forEach(r=>r.addEventListener("click",()=>selectPerpPair(r.dataset.perpSymbol)));
 }
-function selectPerpPair(sym){perpSelectedSymbol=String(sym||"BTC").toUpperCase();if($("perpSelectedPair"))$("perpSelectedPair").textContent=perpPair(perpSelectedSymbol);const c=priceFor(perpSelectedSymbol);if($("perpSelectedPrice"))$("perpSelectedPrice").textContent=c?money(c.current_price):"—";const chartSymbol=perpSelectedSymbol.replace(/[^A-Z0-9]/g,"");const chart=$("perpTradingViewChart");if(chart&&/^[A-Z0-9]{2,15}$/.test(chartSymbol)){chart.src="https://www.tradingview.com/widgetembed/?symbol=BINANCE%3A"+encodeURIComponent(chartSymbol)+"&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false";if($("perpChartTitle"))$("perpChartTitle").textContent=perpPair(perpSelectedSymbol)+" market chart"}updatePerpPreview();renderPerpPositions()}
+function selectPerpPair(sym){perpSelectedSymbol=String(sym||"BTCUSDT").toUpperCase();if($("perpSelectedPair"))$("perpSelectedPair").textContent=perpPair(perpSelectedSymbol);const c=priceFor(perpSelectedSymbol);if($("perpSelectedPrice"))$("perpSelectedPrice").textContent=c?money(c.current_price):"—";let chartSymbol=perpSelectedSymbol.replace(/[^A-Z0-9]/g,"");if(!chartSymbol||chartSymbol==="USDT"||chartSymbol==="USDC")chartSymbol="BTCUSDT";else if(!/USDT$|USDC$/.test(chartSymbol))chartSymbol+="USDT";const chart=$("perpTradingViewChart");if(chart){chart.src="https://www.tradingview.com/widgetembed/?symbol="+encodeURIComponent("BINANCE:"+chartSymbol)+"&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false";if($("perpChartTitle"))$("perpChartTitle").textContent=perpPair(perpSelectedSymbol)+" market chart"}updatePerpPreview();renderPerpPositions()}
 function openPerpPosition(){const c=priceFor(perpSelectedSymbol),margin=Number($("perpMargin")?.value||0),leverage=Number($("perpLeverage")?.value||1);if(!c||!Number(c.current_price)){$("perpOrderMessage").textContent="Market price unavailable. Refresh prices and try again.";return}if(!Number.isFinite(margin)||margin<=0||margin>1000000){$("perpOrderMessage").textContent="Enter demo margin greater than 0 and at most 1,000,000 USDT.";return}perpPositions.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),symbol:perpSelectedSymbol,side:perpDirection,leverage,margin,entry:Number(c.current_price)});localStorage.setItem("oc_perp_positions",JSON.stringify(perpPositions));renderPerpPositions();$("perpOrderMessage").textContent="Demo "+perpDirection.toUpperCase()+" opened at "+money(c.current_price)+". No real order was sent."}
 function closePerpPosition(id){perpPositions=perpPositions.filter(p=>p.id!==id);localStorage.setItem("oc_perp_positions",JSON.stringify(perpPositions));renderPerpPositions()}
 function renderPerpPositions(){const b=$("perpPositionRows");if(!b)return;b.innerHTML=perpPositions.length?perpPositions.map(p=>{const c=priceFor(p.symbol),price=Number(c?.current_price||p.entry),pnl=(price-p.entry)*(p.side==="long"?1:-1)*(p.margin*p.leverage/p.entry);return '<tr><td><strong>'+safe(perpPair(p.symbol))+'</strong></td><td class="'+(p.side==="long"?"green":"red")+'">'+safe(p.side.toUpperCase())+' / '+p.leverage+'×</td><td>'+money(p.entry)+'</td><td>'+money(price)+'</td><td>'+money(p.margin)+'</td><td class="'+(pnl>=0?"green":"red")+'">'+(pnl>=0?"+":"")+money(pnl)+'</td><td><button class="secondary" type="button" data-perp-close="'+safe(p.id)+'">Close</button></td></tr>'}).join(""):'<tr><td colspan="7" class="empty">No open demo positions. Use the order panel to practise.</td></tr>';b.querySelectorAll("[data-perp-close]").forEach(x=>x.addEventListener("click",()=>closePerpPosition(x.dataset.perpClose)))}
