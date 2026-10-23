@@ -745,13 +745,13 @@ async function loadMarket(){
  const refreshButtons=[$("refreshBtn"),$("retryBtn"),$("refreshSignalsBtn")].filter(Boolean);
  refreshButtons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent="Refreshing…"});
  $("connection").textContent="Updating";$("apiStatus").textContent="Loading prices…";$("marketHint").textContent="Refreshing public market prices…";
- const url="https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(COINS.map(c=>c.id).join(","))+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h";
+ const url="https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h";
  try{
    const response=await fetch(url,{headers:{accept:"application/json"},signal:AbortSignal.timeout(15000)});
    if(!response.ok)throw new Error("CoinGecko returned "+response.status);
    const data=await response.json();
    if(!Array.isArray(data)||!data.length)throw new Error("CoinGecko returned no prices");
-   market=data.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()}));
+   market=data.filter(c=>c&&c.symbol&&Number(c.current_price)>0).map(c=>({...c,symbol:String(c.symbol).toUpperCase()}));
    window.market=market;
    try{localStorage.setItem("oc_market_cache",JSON.stringify({time:Date.now(),data:market}))}catch(_){ }
    $("connection").textContent="Live data";
