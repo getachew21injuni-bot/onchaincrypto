@@ -1195,7 +1195,7 @@ document.getElementById("googleSignInBtn").addEventListener("click", async () =>
     if (name && !credential.user.displayName) await updateProfile(credential.user, { displayName: name });
     window.onchaincryptoCurrentUser=credential.user;
     try {
-      const parts = String(credential.user.displayName || name || "").trim().split(/\\s+/).filter(Boolean);
+      const parts = String(credential.user.displayName || name || "").trim().split(/\s+/).filter(Boolean);
       const existing = await getDoc(doc(db, "users", credential.user.uid));
       if (!existing.exists()) {
         await setDoc(doc(db, "users", credential.user.uid), {
@@ -1287,7 +1287,7 @@ document.getElementById("verifyPhoneCodeBtn").addEventListener("click", async ()
     if (name && !credential.user.displayName) await updateProfile(credential.user, { displayName: name });
     window.onchaincryptoCurrentUser=credential.user;
     try {
-      const parts = String(credential.user.displayName || name || "").trim().split(/\\s+/).filter(Boolean);
+      const parts = String(credential.user.displayName || name || "").trim().split(/\s+/).filter(Boolean);
       const existing = await getDoc(doc(db, "users", credential.user.uid));
       if (!existing.exists()) {
         await setDoc(doc(db, "users", credential.user.uid), {
