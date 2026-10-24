@@ -1177,12 +1177,23 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
     const status = document.getElementById("authStatus");
     if (status) status.textContent = "Account created successfully. Signed in as " + (credential.user.displayName || credential.user.email || "user") + ". Your Account/Profile page is opening.";
     msg(profileSaved
-      ? "Registration successful. Your account is signed in and your profile has been created. Complete your details on the Account page."
-      : "Your login was created successfully, but the cloud profile could not be saved. You are signed in; check Firestore database setup and rules if profile details do not persist.");
-    await loadCloudProfile(credential.user);
-    await loadCloudPersonalDetails(credential.user);
-    if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
+      ? "Registration successful. Your account is signed in. Opening your profile now…"
+      : "Your login was created, but the cloud profile could not be saved. Opening your profile; Firestore may need setup.");
+    // Open the account immediately; slow Firestore requests must not trap the user on a loading screen.
     if (typeof showPage === "function") showPage("profile");
+    if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
+    const waitLimit = (promise, ms) => Promise.race([promise, new Promise(resolve => setTimeout(resolve, ms))]);
+    try {
+      await waitLimit(loadCloudProfile(credential.user), 5000);
+      await waitLimit(loadCloudPersonalDetails(credential.user), 5000);
+      if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
+      msg(profileSaved
+        ? "Registration successful. Your profile is open. Check or complete your account details below."
+        : "Your profile is open, but saving to the cloud failed. Check Firestore setup and rules.");
+    } catch (profileError) {
+      console.warn("Profile loading timed out or failed:", profileError?.code || profileError);
+      msg("Your account is signed in and the profile page is open. Cloud details are taking too long to load; check your internet connection and Firestore setup.");
+    }
   } catch (error) { msg(friendlyError(error)); }
 });
 
