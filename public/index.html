@@ -756,9 +756,19 @@ async function loadMarket(){
  const refreshButtons=[$("refreshBtn"),$("retryBtn"),$("refreshSignalsBtn")].filter(Boolean);
  refreshButtons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent="Refreshing…"});
  $("connection").textContent="Updating";$("apiStatus").textContent="Loading prices…";$("marketHint").textContent="Refreshing public market prices…";
+ // Show the last saved market snapshot immediately while public feeds refresh.
+ let savedMarketSnapshot=null;
+ try{savedMarketSnapshot=JSON.parse(localStorage.getItem("oc_market_cache")||"null")}catch(_){}
+ if(!market.length&&Array.isArray(savedMarketSnapshot?.data)&&savedMarketSnapshot.data.length){
+   market=savedMarketSnapshot.data;window.market=market;
+   renderMarket();renderHomeCoinResults();renderPerpMarkets();selectPerpPair(perpSelectedSymbol);renderPerpPositions();updateTradePreview();
+   $("connection").textContent="Saved prices";
+   $("apiStatus").innerHTML='<span class="muted">Refreshing live feed · showing saved prices</span>';
+   $("lastUpdate").textContent="Saved "+new Date(savedMarketSnapshot.time||Date.now()).toLocaleTimeString();
+ }
  const url="https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h";
  try{
-   const response=await fetch(url,{headers:{accept:"application/json"},signal:AbortSignal.timeout(15000)});
+   const response=await fetch(url,{headers:{accept:"application/json"},signal:AbortSignal.timeout(8000)});
    if(!response.ok)throw new Error("CoinGecko returned "+response.status);
    const data=await response.json();
    if(!Array.isArray(data)||!data.length)throw new Error("CoinGecko returned no prices");
@@ -775,7 +785,7 @@ async function loadMarket(){
      let tickerData=null,tickerError=null;
      for(const endpoint of ["https://api.binance.com/api/v3/ticker/24hr","https://api1.binance.com/api/v3/ticker/24hr"]){
        try{
-         const response=await fetch(endpoint,{headers:{accept:"application/json"},signal:AbortSignal.timeout(12000)});
+         const response=await fetch(endpoint,{headers:{accept:"application/json"},signal:AbortSignal.timeout(6000)});
          if(!response.ok)throw new Error("Public ticker returned "+response.status);
          const data=await response.json();
          if(!Array.isArray(data)||!data.length)throw new Error("Public ticker returned no data");
@@ -813,7 +823,7 @@ async function loadMarket(){
    }catch(fallbackError){
      let cached=null;try{cached=JSON.parse(localStorage.getItem("oc_market_cache")||"null")}catch(_){ }
      if(!market.length&&Array.isArray(cached?.data)&&cached.data.length){market=cached.data;window.market=market;renderMarket();renderHomeCoinResults();renderPerpMarkets();selectPerpPair(perpSelectedSymbol);renderPerpPositions();updateTradePreview();$("connection").textContent="Cached data";$("apiStatus").innerHTML='<span class="muted">Showing saved prices · refresh later</span>';$("lastUpdate").textContent="Saved "+new Date(cached.time||Date.now()).toLocaleTimeString();$("marketHint").textContent="Public feeds are temporarily unavailable. These saved prices may be stale; refresh to retry."}
-     else{$("connection").textContent="Unavailable";$("apiStatus").innerHTML='<span class="red">Public market data unavailable</span>';if(!$("marketRows")){}else if(!market.length)$("marketRows").innerHTML='<tr><td colspan="6" class="empty">Live public prices could not be loaded. Check your connection and press Refresh to try again.</td></tr>';$("marketHint").textContent="CoinGecko, Binance and CoinCap could not be reached. Public feeds can be temporarily rate-limited or blocked by the network."}
+     else{$("connection").textContent="Unavailable";$("apiStatus").innerHTML='<span class="red">Public market data unavailable</span>';if(!$("marketRows")){}else if(!market.length)$("marketRows").innerHTML='<tr><td colspan="6" class="empty">Live public prices could not be loaded. Check your connection and press Refresh to try again.</td></tr>';if(!$("signalRows")){}else if(!market.length)$("signalRows").innerHTML='<tr><td colspan="5" class="empty">Market feed unavailable. Check your connection and press Refresh to retry.</td></tr>';$("marketHint").textContent="CoinGecko, Binance and CoinCap could not be reached. Public feeds may be temporarily rate-limited or blocked by the network."}
    }
  } finally {
    marketRequestInProgress=false;
