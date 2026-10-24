@@ -1192,9 +1192,31 @@ document.getElementById("googleSignInBtn").addEventListener("click", async () =>
   msg("Opening Google sign-in…");
   try {
     const credential = await signInWithPopup(auth, new GoogleAuthProvider());
-    await updateProfile(credential.user, { displayName: name });
-    msg("Google sign-in successful. Your account name is " + name + ".");
+    if (name && !credential.user.displayName) await updateProfile(credential.user, { displayName: name });
     window.onchaincryptoCurrentUser=credential.user;
+    try {
+      const parts = String(credential.user.displayName || name || "").trim().split(/\\s+/).filter(Boolean);
+      const existing = await getDoc(doc(db, "users", credential.user.uid));
+      if (!existing.exists()) {
+        await setDoc(doc(db, "users", credential.user.uid), {
+          uid: credential.user.uid,
+          email: credential.user.email || null,
+          phoneNumber: credential.user.phoneNumber || null,
+          firstName: parts.shift() || "",
+          lastName: parts.join(" "),
+          displayName: credential.user.displayName || name || "",
+          country: "",
+          dateOfBirth: "",
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+    } catch (profileError) {
+      console.warn("Google sign-in succeeded, but cloud profile could not be saved:", profileError?.code || profileError);
+    }
+    await loadCloudProfile(credential.user);
+    await loadCloudPersonalDetails(credential.user);
+    if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
+    msg("Google sign-in successful. Your Account/Profile page is opening.");
     if (typeof showPage === "function") showPage("profile");
   } catch (error) {
     if (error?.code === "auth/operation-not-allowed") msg("Google sign-in is disabled in Firebase. Enable Google under Firebase Console → Authentication → Sign-in method.");
