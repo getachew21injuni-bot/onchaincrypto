@@ -787,26 +787,28 @@ async function loadMarket(){
  const finish=()=>{marketRequestInProgress=false;refreshButtons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.originalText||"Refresh";delete b.dataset.originalText})};
  try{
    let data=null,provider="";
-   const url="https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(COINS.map(c=>c.id).join(","))+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h";
+   // Prefer Binance's public ticker feed so Markets can list every available USDT trading pair.
    try{
-    const response=await fetch(url,{headers:{accept:"application/json"},signal:AbortSignal.timeout(12000)});
-    if(!response.ok)throw new Error("CoinGecko HTTP "+response.status);
+    const response=await fetch("https://api.binance.com/api/v3/ticker/24hr",{signal:AbortSignal.timeout(15000)});
+    if(!response.ok)throw new Error("Binance HTTP "+response.status);
+    const tickers=await response.json();
+    if(!Array.isArray(tickers))throw new Error("Invalid Binance market response");
+    const knownBySymbol=new Map(COINS.map(c=>[c.symbol.toUpperCase(),c]));
+    data=tickers.filter(t=>typeof t.symbol==="string"&&t.symbol.endsWith("USDT")&&t.symbol.length>4&&Number.isFinite(Number(t.lastPrice)))
+     .map(t=>{
+      const base=t.symbol.slice(0,-4).toUpperCase(),known=knownBySymbol.get(base);
+      return {id:known?.id||base.toLowerCase(),name:known?.name||base,symbol:base.toLowerCase(),current_price:Number(t.lastPrice),price_change_percentage_24h:Number(t.priceChangePercent)||0,total_volume:Number(t.quoteVolume)||0,market_cap:null,market_cap_rank:null,image:"",pair:t.symbol,quote:"USDT"};
+     }).sort((a,b)=>(b.total_volume||0)-(a.total_volume||0));
+    if(!data.length)throw new Error("No USDT pairs returned by Binance");
+    provider="Binance · USDT pairs";
+   }catch(primaryError){
+    const url="https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=24h";
+    const response=await fetch(url,{headers:{accept:"application/json"},signal:AbortSignal.timeout(15000)});
+    if(!response.ok)throw new Error("Public market providers unavailable");
     const result=await response.json();
     if(!Array.isArray(result)||!result.length)throw new Error("No CoinGecko prices");
-    data=result.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()}));provider="CoinGecko";
-   }catch(primaryError){
-    const response=await fetch("https://api.binance.com/api/v3/ticker/24hr",{signal:AbortSignal.timeout(12000)});
-    if(!response.ok)throw new Error("Market providers unavailable");
-    const tickers=await response.json();
-    if(!Array.isArray(tickers))throw new Error("Invalid fallback market response");
-    const byPair=new Map(tickers.map(t=>[t.symbol,t]));
-    data=COINS.map(c=>{
-     const t=byPair.get(c.symbol+"USDT");
-     if(!t)return null;
-     return {id:c.id,name:c.name,symbol:c.symbol.toLowerCase(),current_price:Number(t.lastPrice),price_change_percentage_24h:Number(t.priceChangePercent),total_volume:Number(t.quoteVolume),market_cap:null,market_cap_rank:null,image:""};
-    }).filter(c=>c&&Number.isFinite(c.current_price));
-    if(!data.length)throw new Error("No prices returned by fallback provider");
-    provider="Binance public market data";
+    data=result.map(c=>({...c,symbol:(c.symbol||"").toUpperCase(),pair:(c.symbol||"").toUpperCase()+"USDT",quote:"USDT"}));
+    provider="CoinGecko · top 250 assets";
    }
    market=data;window.market=market;
    const now=Date.now();
