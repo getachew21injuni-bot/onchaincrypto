@@ -967,7 +967,12 @@ $("marketSearch").addEventListener("input",renderMarket);$("refreshBtn").addEven
   const host=document.getElementById("homeActivePairs");if(!host)return;
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   if(!list.length){host.innerHTML='<table><thead><tr><th>Coin / Pair</th><th>Price (USD)</th><th>24h Change</th><th>Action</th></tr></thead><tbody><tr><td colspan="4" class="empty">Waiting for public market prices…</td></tr></tbody></table>';return;}
-  host.innerHTML='<table><thead><tr><th>Coin / Pair</th><th>Price (USD)</th><th>24h Change</th><th>Action</th></tr></thead><tbody>'+list.slice(0,8).map(c=>{const sym=String(c.symbol||"").toUpperCase(),chg=Number(c.price_change_percentage_24h||0);return '<tr><td><strong>'+esc(sym)+'</strong><div class="muted tiny">'+esc(c.name||sym)+'</div></td><td>
+  host.innerHTML='<table><thead><tr><th>Coin / Pair</th><th>Price (USD)</th><th>24h Change</th><th>Action</th></tr></thead><tbody>'+list.slice(0,8).map(c=>{const sym=String(c.symbol||"").toUpperCase(),chg=Number(c.price_change_percentage_24h||0);return '<tr><td><strong>'+esc(sym)+'</strong><div class="muted tiny">'+esc(c.name||sym)+'</div></td><td>'+money(c.current_price)+'</td><td class="'+(chg>=0?'green':'red')+'">'+(chg>=0?'+':'')+chg.toFixed(2)+'%</td><td><button type="button" class="secondary small" data-home-trade="'+esc(sym)+'">Trade</button></td></tr>'}).join('')+'</tbody></table>';
+ };
+ renderHomePairs();
+ setInterval(renderHomePairs,5000);
+ document.addEventListener("click",e=>{const btn=e.target.closest("[data-home-trade]");if(!btn)return;selected=btn.dataset.homeTrade;const asset=$("tradeAsset");if(asset)asset.value=selected;showPage("trade");updateTradePreview();updateTradingViewChart(selected)});
+})();
 updateQuickEstimate();
 $("historyFilter")?.addEventListener("change",renderActivityHistory);
 $("exportCsv").addEventListener("click",()=>{const rows=[["time","category","title","details","status"],...state.history.map(t=>[t.time,"trade",(t.side||"").toUpperCase()+" "+t.symbol,money(t.amount)+" · "+t.qty+" coins @ "+t.price,"Paper trade"]),...readActivity().map(x=>[x.time,x.type,x.title,x.details,x.status])];const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="onchaincrypto-activity-history.csv";a.click();URL.revokeObjectURL(a.href)});
