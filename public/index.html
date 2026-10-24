@@ -1157,9 +1157,31 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
     if (name) await updateProfile(credential.user, { displayName: name });
     document.getElementById("registerPassword").value = "";
     window.onchaincryptoCurrentUser = credential.user;
+    let profileSaved = true;
+    try {
+      await setDoc(doc(db, "users", credential.user.uid), {
+        uid: credential.user.uid,
+        email: credential.user.email || email,
+        phoneNumber: credential.user.phoneNumber || null,
+        firstName,
+        lastName,
+        displayName: name,
+        country: "",
+        dateOfBirth: "",
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (profileError) {
+      profileSaved = false;
+      console.warn("Account created, but the cloud profile could not be saved:", profileError?.code || profileError);
+    }
     const status = document.getElementById("authStatus");
-    if (status) status.textContent = "Account created successfully. Signed in as " + (credential.user.displayName || credential.user.email || "user") + ". You can continue to the platform.";
-    msg("Account created successfully. You are now signed in. You can continue to the platform.");
+    if (status) status.textContent = "Account created successfully. Signed in as " + (credential.user.displayName || credential.user.email || "user") + ". Your Account/Profile page is opening.";
+    msg(profileSaved
+      ? "Registration successful. Your account is signed in and your profile has been created. Complete your details on the Account page."
+      : "Your login was created successfully, but the cloud profile could not be saved. You are signed in; check Firestore database setup and rules if profile details do not persist.");
+    await loadCloudProfile(credential.user);
+    await loadCloudPersonalDetails(credential.user);
+    if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
     if (typeof showPage === "function") showPage("profile");
   } catch (error) { msg(friendlyError(error)); }
 });
@@ -1241,8 +1263,30 @@ document.getElementById("verifyPhoneCodeBtn").addEventListener("click", async ()
     const last = document.getElementById("phoneLastName").value.trim();
     const name = (first + " " + last).trim();
     if (name && !credential.user.displayName) await updateProfile(credential.user, { displayName: name });
-    msg("Phone number verified. You are signed in as " + (credential.user.displayName || credential.user.phoneNumber || "user") + ".");
     window.onchaincryptoCurrentUser=credential.user;
+    try {
+      const parts = String(credential.user.displayName || name || "").trim().split(/\\s+/).filter(Boolean);
+      const existing = await getDoc(doc(db, "users", credential.user.uid));
+      if (!existing.exists()) {
+        await setDoc(doc(db, "users", credential.user.uid), {
+          uid: credential.user.uid,
+          email: credential.user.email || null,
+          phoneNumber: credential.user.phoneNumber || null,
+          firstName: parts.shift() || "",
+          lastName: parts.join(" "),
+          displayName: credential.user.displayName || name || "",
+          country: "",
+          dateOfBirth: "",
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+    } catch (profileError) {
+      console.warn("Phone account created, but cloud profile could not be saved:", profileError?.code || profileError);
+    }
+    await loadCloudProfile(credential.user);
+    await loadCloudPersonalDetails(credential.user);
+    if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
+    msg("Phone sign-in successful. Your Account/Profile page is opening.");
     if (typeof showPage === "function") showPage("profile");
   } catch (error) { msg(friendlyError(error)); }
 });
