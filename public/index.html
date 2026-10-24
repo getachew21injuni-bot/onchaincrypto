@@ -1084,7 +1084,7 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
     const status = document.getElementById("authStatus");
     if (status) status.textContent = "Account created successfully. Signed in as " + (credential.user.displayName || credential.user.email || "user") + ". You can continue to the platform.";
     msg("Account created successfully. You are now signed in. You can continue to the platform.");
-    if (typeof showPage === "function") showPage("markets");
+    if (typeof showPage === "function") showPage("profile");
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -1096,6 +1096,7 @@ document.getElementById("googleSignInBtn").addEventListener("click", async () =>
     const credential = await signInWithPopup(auth, new GoogleAuthProvider());
     await updateProfile(credential.user, { displayName: name });
     msg("Google sign-in successful. Your account name is " + name + ".");
+    if (typeof showPage === "function") showPage("profile");
   } catch (error) {
     if (error?.code === "auth/operation-not-allowed") msg("Google sign-in is disabled in Firebase. Enable Google under Firebase Console → Authentication → Sign-in method.");
     else if (error?.code === "auth/unauthorized-domain") msg("Google sign-in blocked: add getachew21injuni-bot.github.io under Firebase Console → Authentication → Settings → Authorized domains.");
@@ -1163,6 +1164,7 @@ document.getElementById("verifyPhoneCodeBtn").addEventListener("click", async ()
     const name = (first + " " + last).trim();
     if (name && !credential.user.displayName) await updateProfile(credential.user, { displayName: name });
     msg("Phone number verified. You are signed in as " + (credential.user.displayName || credential.user.phoneNumber || "user") + ".");
+    if (typeof showPage === "function") showPage("profile");
   } catch (error) { msg(friendlyError(error)); }
 });
 
