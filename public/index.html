@@ -1117,7 +1117,7 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
     if (status) status.textContent = "Signed in as " + (credential.user.displayName || credential.user.email || credential.user.phoneNumber || "user") + ". You can continue to the platform.";
     msg("Signed in successfully. Opening the platform…");
     if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
-    if (typeof showPage === "function") showPage("markets");
+    if (typeof showPage === "function") showPage("profile");
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -1234,8 +1234,10 @@ setTimeout(() => {
     if(sub)sub.textContent=creating?'Set up your account to continue.':'Access your crypto dashboard securely.';
   }
   document.getElementById('showRegisterBtn')?.addEventListener('click',()=>setMode('register'));
+  document.getElementById('registerLoginBtn')?.addEventListener('click',()=>{setMode('signin');document.getElementById('signInEmail')?.focus();});
   document.getElementById('signin-nav')?.addEventListener('click',()=>{setMode('signin');document.getElementById('signInEmail')?.focus();});
   document.getElementById('showSignInBtn')?.addEventListener('click',()=>setMode('signin'));
+  document.getElementById('registerSwitchText')?.querySelector('button')?.addEventListener('click',()=>setMode('signin'));
   document.getElementById('showSignInPassword')?.addEventListener('change',e=>{const p=document.getElementById('signInPassword');if(p)p.type=e.target.checked?'text':'password';});
   const remember=document.getElementById('rememberMe'), email=document.getElementById('signInEmail');
   try{if(remember&&email){const saved=localStorage.getItem('onchaincryptoRememberEmail');if(saved){remember.checked=true;email.value=saved;}}}catch(_){}
