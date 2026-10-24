@@ -321,11 +321,25 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
             <div class="settings-item"><div><strong>Email / phone</strong><p class="muted tiny">The contact method attached to your account.</p></div><strong id="accountIdentityContact">Not signed in</strong></div>
             <div class="settings-item"><div><strong>Account ID</strong><p class="muted tiny">Your unique Firebase account identifier.</p></div><code id="accountIdentityUid" style="overflow-wrap:anywhere;max-width:55%">—</code></div>
           </div>
-          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#8ab4ff" aria-hidden="true">♙</span>Display name</strong><p class="muted tiny">Edit the name shown in your profile on this device.</p></div><div class="settings-control"><input id="displayName" class="field" maxlength="50" placeholder="Your display name" aria-label="Display name"></div></div>
-          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#f0b90b" aria-hidden="true">▣</span>Display currency</strong><p class="muted tiny">Choose the currency used for display.</p></div><div class="settings-control"><select id="displayCurrency" class="field" aria-label="Display currency"><option value="USD">USD — US Dollar</option></select></div></div>
+          <div class="panel about-section" id="personalProfileForm" style="padding:16px;margin-top:14px">
+            <h3 class="feature-heading">My Profile · Personal information</h3>
+            <p class="muted tiny">Edit your details. Name updates are saved to your sign-in account; other profile details are saved in this browser for this account.</p>
+            <div class="content-grid">
+              <div><label for="profileFirstName">First name</label><input id="profileFirstName" class="field" maxlength="50" autocomplete="given-name" placeholder="First name"></div>
+              <div><label for="profileLastName">Last name</label><input id="profileLastName" class="field" maxlength="50" autocomplete="family-name" placeholder="Last name"></div>
+              <div><label for="profileEmail">Email address</label><input id="profileEmail" class="field" type="email" autocomplete="email" readonly aria-describedby="profileEmailHint"><p id="profileEmailHint" class="muted tiny">Email is managed by your sign-in provider.</p></div>
+              <div><label for="profilePhone">Phone number</label><input id="profilePhone" class="field" type="tel" autocomplete="tel" placeholder="+country code and number"></div>
+              <div><label for="profileCountry">Country</label><input id="profileCountry" class="field" autocomplete="country-name" placeholder="Country"></div>
+              <div><label for="profileAddress">Address</label><input id="profileAddress" class="field" autocomplete="street-address" placeholder="Address (optional)"></div>
+            </div>
+            <label for="displayName">Display name</label><input id="displayName" class="field" maxlength="100" placeholder="Your display name" aria-label="Display name">
+            <label for="displayCurrency">Display currency</label><select id="displayCurrency" class="field" aria-label="Display currency"><option value="USD">USD — US Dollar</option></select>
+            <button class="primary full" id="saveProfile" type="button" style="margin-top:12px">Save profile</button><p id="profileMessage" class="muted tiny" aria-live="polite"></p>
+          </div>
+          <!-- Display currency is included with the personal profile form above. -->
           <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#0ecb81" aria-hidden="true">✓</span>Account status</strong><p class="muted tiny">Check your sign-in and email-verification status.</p></div><button class="secondary" id="accountStatusBtn">View status</button></div>
           <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#22d3ee" aria-hidden="true">⛨</span>Security information</strong><p class="muted tiny">Tips for keeping your account secure.</p></div><button class="secondary" id="securityInfoBtn">Security help</button></div>
-<div class="panel about-section" id="profileAccountInformation"><h3 class="feature-heading">Account Information</h3><div class="settings-item"><div><strong>Account Status</strong><p class="muted tiny">Current account sign-in status.</p></div><span class="tag" id="profileAccountStatusBadge">Checking</span></div><div class="settings-item"><div><strong>Status</strong><p class="muted tiny">Account and email verification status.</p></div><strong id="profileAccountStatusText">Checking…</strong></div><div class="settings-item"><div><strong>Member Since</strong><p class="muted tiny">Date your account was created.</p></div><strong id="profileMemberSince">Available after sign-in</strong></div></div><div class="panel about-section"><h3 class="feature-heading">Security Information</h3><div class="settings-item"><div><strong>Account security</strong><p class="muted tiny">Keep your password private and review your sign-in settings.</p></div><button class="secondary" type="button" id="profileSecurityDetailsBtn">Security help</button></div></div><div class="panel about-section"><h3 class="feature-heading">Financial Information</h3><div class="settings-item"><div><strong>Deposits</strong><p class="muted tiny">Review coin and network options.</p></div><button class="secondary" type="button" data-profile-financial="deposit">Open deposits</button></div><div class="settings-item"><div><strong>Withdrawals</strong><p class="muted tiny">Review withdrawal coin and network options.</p></div><button class="secondary" type="button" data-profile-financial="withdraw">Open withdrawals</button></div><p class="muted tiny">Real-money deposit and withdrawal processing is not enabled yet.</p></div>          <button class="primary full" id="saveProfile">Save profile preferences</button><p id="profileMessage" class="muted tiny"></p>
+<div class="panel about-section" id="profileAccountInformation"><h3 class="feature-heading">Account Information</h3><div class="settings-item"><div><strong>Account Status</strong><p class="muted tiny">Current account sign-in status.</p></div><span class="tag" id="profileAccountStatusBadge">Checking</span></div><div class="settings-item"><div><strong>Status</strong><p class="muted tiny">Account and email verification status.</p></div><strong id="profileAccountStatusText">Checking…</strong></div><div class="settings-item"><div><strong>Member Since</strong><p class="muted tiny">Date your account was created.</p></div><strong id="profileMemberSince">Available after sign-in</strong></div></div><div class="panel about-section"><h3 class="feature-heading">Security Information</h3><div class="settings-item"><div><strong>Account security</strong><p class="muted tiny">Keep your password private and review your sign-in settings.</p></div><button class="secondary" type="button" id="profileSecurityDetailsBtn">Security help</button></div></div><div class="panel about-section"><h3 class="feature-heading">Financial Information</h3><div class="settings-item"><div><strong>Deposits</strong><p class="muted tiny">Review coin and network options.</p></div><button class="secondary" type="button" data-profile-financial="deposit">Open deposits</button></div><div class="settings-item"><div><strong>Withdrawals</strong><p class="muted tiny">Review withdrawal coin and network options.</p></div><button class="secondary" type="button" data-profile-financial="withdraw">Open withdrawals</button></div><p class="muted tiny">Real-money deposit and withdrawal processing is not enabled yet.</p></div>          <p class="muted tiny">Profile details are shown for the currently signed-in account.</p>
           <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#a78bfa" aria-hidden="true">↓</span>Export data</strong><p class="muted tiny">Download browser-local data available on this device.</p></div><button class="secondary" id="exportUserDataBtn">Export data</button></div>
           <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#f6465d" aria-hidden="true">⊗</span>Request account deletion</strong><p class="muted tiny">Open a support request to discuss account deletion.</p></div><button class="secondary" id="requestDeleteAccountBtn">Request deletion</button></div><p id="privacyMessage" class="muted tiny"></p>
         </div>
@@ -982,7 +996,34 @@ $("marketSearch").addEventListener("input",renderMarket);$("refreshBtn").addEven
 updateQuickEstimate();
 $("historyFilter")?.addEventListener("change",renderActivityHistory);
 $("exportCsv").addEventListener("click",()=>{const rows=[["time","category","title","details","status"],...state.history.map(t=>[t.time,"trade",(t.side||"").toUpperCase()+" "+t.symbol,money(t.amount)+" · "+t.qty+" coins @ "+t.price,"Paper trade"]),...readActivity().map(x=>[x.time,x.type,x.title,x.details,x.status])];const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="onchaincrypto-activity-history.csv";a.click();URL.revokeObjectURL(a.href)});
-$("displayName").value=profile.name||"";$("displayCurrency").value=profile.currency||"USD";$("saveProfile").addEventListener("click",async()=>{profile={name:$("displayName").value.trim(),currency:$("displayCurrency").value};localStorage.setItem("oc_profile",JSON.stringify(profile));try{if(profile.name&&window.onchaincryptoUpdateProfileName){await window.onchaincryptoUpdateProfileName(profile.name);$("profileMessage").textContent="Your account name was saved to your OnChainCrypto sign-in, and preferences were saved on this device."}else if(profile.name){$("profileMessage").textContent="Preferences saved on this device. Sign in to save your account name online."}else{$("profileMessage").textContent="Preferences saved on this device."}}catch(e){$("profileMessage").textContent="Preferences saved on this device, but the online account name could not be updated. Please sign in again and retry."}});
+function profileStorageKey(user){return "oc_profile_"+(user&&user.uid?user.uid:"guest")}
+function loadPersonalProfile(user){
+ let saved={};try{saved=JSON.parse(localStorage.getItem(profileStorageKey(user))||"{}")}catch(_){}
+ const full=(user?.displayName||"").trim().split(/\s+/);const first=full.shift()||"",last=full.join(" ");
+ $("profileFirstName").value=saved.firstName??first;
+ $("profileLastName").value=saved.lastName??last;
+ $("profileEmail").value=user?.email||"";
+ $("profilePhone").value=saved.phone||user?.phoneNumber||"";
+ $("profileCountry").value=saved.country||"";
+ $("profileAddress").value=saved.address||"";
+ $("displayName").value=saved.name||user?.displayName||[saved.firstName||first,saved.lastName||last].filter(Boolean).join(" ");
+ $("displayCurrency").value=saved.currency||"USD";
+}
+loadPersonalProfile(window.onchaincryptoCurrentUser||null);
+$("saveProfile").addEventListener("click",async()=>{
+ const user=window.onchaincryptoCurrentUser||null;
+ if(!user){$("profileMessage").textContent="Please sign in before saving your profile.";return}
+ const firstName=$("profileFirstName").value.trim(),lastName=$("profileLastName").value.trim();
+ const name=$("displayName").value.trim()||[firstName,lastName].filter(Boolean).join(" ");
+ if(!firstName||!lastName){$("profileMessage").textContent="Enter your first and last name.";return}
+ const saved={firstName,lastName,phone:$("profilePhone").value.trim(),country:$("profileCountry").value.trim(),address:$("profileAddress").value.trim(),name,currency:$("displayCurrency").value};
+ try{
+   localStorage.setItem(profileStorageKey(user),JSON.stringify(saved));
+   if(name&&window.onchaincryptoUpdateProfileName)await window.onchaincryptoUpdateProfileName(name);
+   $("profileMessage").textContent="Profile saved for this account. Your display name is updated in Firebase; other personal details are stored in this browser only.";
+   const identityName=$("accountIdentityName");if(identityName)identityName.textContent=name;
+ }catch(e){$("profileMessage").textContent="Could not save profile details. Check browser storage and try again."}
+});
 const preferenceIds=["prefNotifications","prefEmailAlerts","prefAllNotifications"];
 let notificationPrefs={notifications:true,emailAlerts:false,allNotifications:true};
 try{notificationPrefs={...notificationPrefs,...JSON.parse(localStorage.getItem("oc_notification_preferences")||"{}")}}catch(_){}
@@ -1193,7 +1234,8 @@ onAuthStateChanged(auth, (user) => {
   }
   if (signOutBtn) signOutBtn.classList.toggle("hidden", !user);
   const displayName = document.getElementById("displayName");
-  if (user && displayName && !displayName.value) displayName.value = user.displayName || "";
+  if (user) loadPersonalProfile(user);
+  else { loadPersonalProfile(null); }
   if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
   const profileStatus = document.getElementById("profileAccountStatusText");
   const profileBadge = document.getElementById("profileAccountStatusBadge");
