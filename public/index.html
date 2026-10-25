@@ -132,6 +132,23 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
  #page-trade.trade-terminal .trade-orderbook .book-scroll{max-height:350px}
  #page-trade.trade-terminal #timedPaperTrade #timedUpBtn,#page-trade.trade-terminal #timedPaperTrade #timedDownBtn{min-height:68px;font-size:17px}
 }
+
+/* Place the market signal graph beside the main chart on wide screens */
+@media(min-width:901px){
+ #page-trade.trade-terminal .chart-area{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(250px,.8fr);gap:12px;align-items:start}
+ #page-trade.trade-terminal .terminal-market-picker{grid-column:1/-1;margin-bottom:0}
+ #page-trade.trade-terminal .chart-area>.page-title{grid-column:1/-1;margin:0}
+ #page-trade.trade-terminal .chart-area>.chart-wrap:not(#trendOverviewWrap){grid-column:1;grid-row:3}
+ #page-trade.trade-terminal .chart-area>#trendOverviewWrap{display:block!important;grid-column:2;grid-row:3;margin:0;min-width:0}
+ #page-trade.trade-terminal .chart-area>#trendOverviewWrap canvas{width:100%;max-width:100%}
+ #page-trade.trade-terminal .chart-area>.signal-box{grid-column:2;grid-row:4;margin:0}
+ #page-trade.trade-terminal .chart-area>.list-row{grid-column:1/-1}
+}
+@media(max-width:900px){
+ #page-trade.trade-terminal .chart-area{display:block}
+ #page-trade.trade-terminal .chart-area>#trendOverviewWrap{display:block!important;margin-top:12px}
+ #page-trade.trade-terminal .chart-area>.signal-box{margin-top:12px}
+}
 </style>
 <!-- Refresh deployment check: 2026-10-20T19:44Z -->
 
