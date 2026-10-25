@@ -181,6 +181,29 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 #page-trade.trade-terminal #timedPaperTrade #timedBalanceChangeDetail,
 #page-trade.trade-terminal #timedPaperTrade #timedBalanceAfterDetail{font-weight:900;color:#fff}
 #page-trade.trade-terminal #timedPaperTrade #timedBalanceChangeDetail{font-size:16px}
+
+/* Screenshot-matched trading terminal layout */
+#page-trade.trade-terminal{max-width:1680px;margin:0 auto;padding:10px 18px 100px}
+#page-trade.trade-terminal .trade-layout{display:grid!important;grid-template-columns:minmax(0,2fr) minmax(320px,1fr);gap:24px;align-items:start}
+#page-trade.trade-terminal .trade-layout>.panel{min-width:0}
+#page-trade.trade-terminal .trade-layout>.panel>.chart-area{padding:0}
+#page-trade.trade-terminal .terminal-market-picker{margin-bottom:10px}
+#page-trade.trade-terminal .chart-wrap{margin-top:10px}
+#page-trade.trade-terminal .tv-chart{height:500px;min-height:420px}
+#page-trade.trade-terminal .terminal-side-column{display:flex;flex-direction:column;gap:18px;min-width:0}
+#page-trade.trade-terminal .trade-price-card{margin:0;text-align:center;padding:20px 16px;background:#0f1422;border:1px solid #242b3a;border-radius:16px}
+#page-trade.trade-terminal .trade-price-card .price-big{font-size:clamp(28px,3vw,48px);font-weight:850;line-height:1.25;color:#f6465d;margin:6px 0}
+#page-trade.trade-terminal .terminal-side-column .trade-orderbook{display:block!important;margin:0;padding:18px;background:#0f1422;border:1px solid #242b3a;border-radius:16px;min-width:0}
+#page-trade.trade-terminal .trade-orderbook h3{color:#eaecef!important}
+#page-trade.trade-terminal .trade-orderbook .book-scroll{max-height:350px;overflow:auto}
+#page-trade.trade-terminal .terminal-side-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:18px;background:#0f1422;border:1px solid #242b3a;border-radius:16px}
+#page-trade.trade-terminal .terminal-side-actions button{min-height:66px;font-size:16px;font-weight:800}
+#page-trade.trade-terminal .terminal-side-actions .buy{background:#0ecb81;color:#fff}
+#page-trade.trade-terminal .terminal-side-actions .sell{background:#f6465d;color:#fff}
+#page-trade.trade-terminal #timedPaperTrade{margin-top:22px}
+#page-trade.trade-terminal #trendOverviewWrap{display:none!important}
+@media(max-width:900px){#page-trade.trade-terminal{padding:8px 10px 100px}#page-trade.trade-terminal .trade-layout{grid-template-columns:minmax(0,1fr);gap:14px}#page-trade.trade-terminal .tv-chart{height:420px;min-height:360px}#page-trade.trade-terminal .terminal-side-column{grid-row:2}#page-trade.trade-terminal .trade-orderbook .book-scroll{max-height:280px}}
+
 </style>
 <!-- Refresh deployment check: 2026-10-20T19:44Z -->
 
@@ -1602,5 +1625,40 @@ if(board){const obs=new MutationObserver(()=>{if(getComputedStyle(board).display
 const result=document.getElementById("timedResult");if(result){const obs2=new MutationObserver(()=>{if(/completed|win|lose|loss|tie/i.test(result.textContent||""))showCloseSummary();});obs2.observe(result,{childList:true,subtree:true,characterData:true});}
 })();
 </script>
+
+<script>
+/* Arrange the existing market widgets into a responsive chart + right-side terminal. */
+(function(){
+ function arrangeTradeTerminal(){
+  const page=document.getElementById('page-trade');
+  const layout=page&&page.querySelector('.trade-layout');
+  const panel=layout&&layout.querySelector(':scope > .panel');
+  const chartArea=panel&&panel.querySelector('.chart-area');
+  const price=page&&page.querySelector('.trade-price-card');
+  const book=page&&page.querySelector('.trade-orderbook');
+  if(!page||!layout||!panel||!chartArea||!price||!book||page.querySelector('.terminal-side-column'))return;
+  const side=document.createElement('aside');side.className='terminal-side-column';side.setAttribute('aria-label','Market price, order book and trade actions');
+  const actions=document.createElement('div');actions.className='terminal-side-actions';
+  const buy=document.createElement('button');buy.type='button';buy.className='buy';buy.textContent='BUY LONG';
+  const sell=document.createElement('button');sell.type='button';sell.className='sell';sell.textContent='SELL SHORT';
+  function choose(direction){
+   const dirBtn=document.getElementById(direction==='up'?'timedUpBtn':'timedDownBtn');
+   if(dirBtn)dirBtn.click();
+   const confirm=document.getElementById('timedConfirmBtn');
+   if(confirm&&!confirm.disabled)confirm.click();
+   else {
+    const form=document.getElementById('timedPaperTrade');
+    if(form)form.scrollIntoView({behavior:'smooth',block:'center'});
+   }
+  }
+  buy.addEventListener('click',()=>choose('up'));sell.addEventListener('click',()=>choose('down'));
+  actions.append(buy,sell);side.append(price,book,actions);layout.append(side);
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',arrangeTradeTerminal);else arrangeTradeTerminal();
+ const navObserver=new MutationObserver(()=>arrangeTradeTerminal());
+ navObserver.observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
 </body>
 </html>
