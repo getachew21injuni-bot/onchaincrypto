@@ -1397,11 +1397,29 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
   try {
     const credential = await createUserWithEmailAndPassword(auth, email, password);
     if (name) await updateProfile(credential.user, { displayName: name });
-    document.getElementById("registerPassword").value = "";
     window.onchaincryptoCurrentUser = credential.user;
+    // Save the initial profile against this Firebase UID so the new account
+    // opens with its own name and details on this browser.
+    try {
+      localStorage.setItem("oc_profile_" + credential.user.uid, JSON.stringify({
+        firstName, lastName, name, phone: "", country: "", address: "", currency: "USD",
+        referralCode: document.getElementById("referralCode")?.value.trim() || ""
+      }));
+    } catch (_) {}
+    document.getElementById("registerPassword").value = "";
     const status = document.getElementById("authStatus");
-    if (status) status.textContent = "Account created successfully. Signed in as " + (credential.user.displayName || credential.user.email || "user") + ". You can continue to the platform.";
-    msg("Account created successfully. You are now signed in. You can continue to the platform.");
+    if (status) status.textContent = "Account created successfully. Signed in as " + (credential.user.displayName || credential.user.email || "user") + ". Your account page is opening.";
+    msg("Account created successfully. Your personal account is ready.");
+    const accountSection = document.getElementById("profileAccountSection");
+    if (accountSection) accountSection.open = true;
+    const identityName = document.getElementById("accountIdentityName");
+    const identityContact = document.getElementById("accountIdentityContact");
+    const identityUid = document.getElementById("accountIdentityUid");
+    if (identityName) identityName.textContent = credential.user.displayName || name || "OnChainCrypto member";
+    if (identityContact) identityContact.textContent = credential.user.email || credential.user.phoneNumber || "No email or phone attached";
+    if (identityUid) identityUid.textContent = credential.user.uid;
+    if (typeof loadPersonalProfile === "function") loadPersonalProfile(credential.user);
+    if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
     if (typeof showPage === "function") showPage("profile");
   } catch (error) { msg(friendlyError(error)); }
 });
