@@ -88,7 +88,7 @@ const descriptions={
 'Transfers':'Review transfer requests after server-side authorization is implemented.',
 'History':'View platform event history after the audit-log backend is connected.',
 'Settings':'Admin settings and access controls must be enforced by the server, not only this page.',
-'Support':'Support inbox integration can be added here.'
+'Support':'Chat directly with customers and manage support conversations.'
 };
 function renderTradeControls(){
  const key='onchaincrypto_demo_trade_controls';
@@ -160,6 +160,7 @@ function renderLiveCollection(view){if(window.adminGetLiveCollection)window.admi
 
 function renderModule(view){
  const body=document.getElementById('detailBody');
+ if(view==='Support'&&window.renderSupportInbox){window.renderSupportInbox();return;}
  if(view==='Users'||view==='KYC'){renderLiveCollection(view);return;}
  if(view==='Analytics'){
   const data=loadAdminData();const counts=moduleNames.reduce((o,n)=>(o[n]=getRecords(n).length,o),{});
@@ -273,5 +274,6 @@ onAuthStateChanged(auth,async user=>{
  }catch(error){byId("authState").textContent="Access check failed";byId("adminAuthMessage").textContent="Could not verify administrator permissions. Access remains locked.";await signOut(auth);}
 });
 </script>
+<script type="module" src="./support-admin.js"></script>
 </body>
 </html>

@@ -40,6 +40,24 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Private customer-support conversations.
+    match /supportTickets/{ticketId} {
+      allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.status == 'open'
+        && request.resource.data.keys().hasOnly(['ownerUid','customerEmail','customerName','subject','status','createdAt','updatedAt','lastMessage'])
+        && request.resource.data.subject is string && request.resource.data.subject.size() > 0 && request.resource.data.subject.size() <= 100;
+      allow get, list: if isAdmin() || (signedIn() && resource.data.ownerUid == request.auth.uid);
+      allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt','lastMessage']) && request.resource.data.status in ['open','in_progress','resolved'];
+      allow delete: if false;
+      match /messages/{messageId} {
+        function ticketOwner() { return signedIn() && get(/databases/$(database)/documents/supportTickets/$(ticketId)).data.ownerUid == request.auth.uid; }
+        allow read: if isAdmin() || ticketOwner();
+        allow create: if (isAdmin() && request.resource.data.senderUid == request.auth.uid && request.resource.data.senderRole == 'admin')
+          || (ticketOwner() && request.resource.data.senderUid == request.auth.uid && request.resource.data.senderRole == 'customer');
+        allow update, delete: if false;
+      }
+    }
+
     // All other collections remain closed by default.
     match /{document=**} {
       allow read, write: if false;
