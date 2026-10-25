@@ -95,6 +95,23 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 .terminal-pair-choice .pair-label{overflow:hidden;text-overflow:ellipsis;font-size:13px}
 #page-trade.trade-terminal .chart-area>.page-title{display:none}
 @media(max-width:900px){.terminal-pair-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-height:330px}.terminal-pair-choice{padding:8px 6px}.terminal-pair-toggle{min-height:58px;font-size:16px}}
+
+/* User settings page preference cards */
+.settings-preference-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.settings-pref-card{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;padding:16px 18px;background:#17171c;border:1px solid #2b2b32;border-radius:14px}
+.settings-pref-card strong{display:inline-block;font-size:15px;margin-right:8px}.settings-pref-card p{margin:6px 0 0;line-height:1.45}
+.pref-state{display:inline-block;vertical-align:middle;padding:4px 10px;border-radius:18px;background:#153b2a;color:#0ecb81;font-size:11px;font-weight:800}
+.pref-state.off{background:#292a30;color:#8b909b}
+.toggle-switch{position:relative;display:inline-block;flex-shrink:0;width:60px;height:36px}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-switch>span{position:absolute;inset:0;border-radius:24px;background:#272830;cursor:pointer;transition:.2s}
+.toggle-switch>span:before{content:"";position:absolute;width:26px;height:26px;left:5px;top:5px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 5px #0004}
+.toggle-switch input:checked+span{background:linear-gradient(110deg,#8657f7,#477dff)}
+.toggle-switch input:checked+span:before{transform:translateX(24px)}
+.toggle-switch input:focus-visible+span{outline:2px solid #4c8dff;outline-offset:3px}
+.settings-pref-action{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;margin-top:10px;background:#17171c;border:1px solid #2b2b32;border-radius:14px}
+.settings-pref-action p{margin:5px 0 0}.settings-pref-action.danger{border-color:#4b282d}.settings-pref-action.danger strong{color:#ff555e}
+@media(max-width:680px){.settings-preference-grid{grid-template-columns:1fr}.settings-pref-card{padding:14px}.settings-pref-action{align-items:flex-start;flex-direction:column}.settings-pref-action button{width:100%}}
 </style>
 <!-- Refresh deployment check: 2026-10-20T19:44Z -->
 
@@ -442,6 +459,36 @@ table{color:#eaf4ff!important;border-color:#123651!important}th{background:#0a20
           <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#f0b90b" aria-hidden="true">⚿</span>Reset password</strong><p class="muted tiny">Start password reset for your registered email.</p></div><button class="secondary" id="changePasswordBtn">Reset password</button></div>
           <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#22d3ee" aria-hidden="true">▣</span>Session management</strong><p class="muted tiny">Sign out of this browser session.</p></div><button class="secondary" id="manageSessionBtn">Manage session</button></div>
           
+
+          <div class="settings-group" style="padding:0;margin:18px 0 0">
+            <div class="settings-heading"><span class="settings-icon" style="color:#4285ff;background:#1b2b48">♢</span><div><h2>Notifications</h2><p class="muted tiny">Choose which alerts you want to see on this device.</p></div></div>
+            <div class="settings-preference-grid">
+              <div class="settings-pref-card"><div><strong>Push Notifications</strong><span class="pref-state" data-state-for="prefPush">ON</span><p class="muted tiny">Browser push notifications</p></div><label class="toggle-switch"><input type="checkbox" id="prefPush" checked><span></span></label></div>
+              <div class="settings-pref-card"><div><strong>Email Alerts</strong><span class="pref-state" data-state-for="prefEmail">ON</span><p class="muted tiny">Email alerts for account activities</p></div><label class="toggle-switch"><input type="checkbox" id="prefEmail" checked><span></span></label></div>
+              <div class="settings-pref-card"><div><strong>In-App Notifications</strong><span class="pref-state" data-state-for="prefInApp">ON</span><p class="muted tiny">Notifications inside the platform</p></div><label class="toggle-switch"><input type="checkbox" id="prefInApp" checked><span></span></label></div>
+              <div class="settings-pref-card"><div><strong>Desktop Notifications</strong><span class="pref-state" data-state-for="prefDesktop">ON</span><p class="muted tiny">Browser desktop notifications</p></div><label class="toggle-switch"><input type="checkbox" id="prefDesktop" checked><span></span></label></div>
+              <div class="settings-pref-card"><div><strong>Email Notifications</strong><span class="pref-state" data-state-for="prefEmailGeneral">ON</span><p class="muted tiny">General email notifications</p></div><label class="toggle-switch"><input type="checkbox" id="prefEmailGeneral" checked><span></span></label></div>
+              <div class="settings-pref-card"><div><strong>Weekly Newsletter</strong><span class="pref-state" data-state-for="prefNewsletter">ON</span><p class="muted tiny">Weekly platform updates</p></div><label class="toggle-switch"><input type="checkbox" id="prefNewsletter" checked><span></span></label></div>
+            </div>
+          </div>
+          <div class="settings-group" style="padding:0;margin:22px 0 0">
+            <div class="settings-heading"><span class="settings-icon" style="color:#4285ff;background:#1b2b48">♙</span><div><h2>Security Alerts</h2><p class="muted tiny">Set local preferences for important account activity.</p></div></div>
+            <div class="settings-preference-grid">
+              <div class="settings-pref-card"><div><strong>Security Alerts</strong><span class="pref-state" data-state-for="prefSecurity">ON</span><p class="muted tiny">Suspicious activity alerts</p></div><label class="toggle-switch"><input type="checkbox" id="prefSecurity" checked><span></span></label></div>
+              <div class="settings-pref-card"><div><strong>Login Alerts</strong><span class="pref-state" data-state-for="prefLogin">ON</span><p class="muted tiny">New login alerts</p></div><label class="toggle-switch"><input type="checkbox" id="prefLogin" checked><span></span></label></div>
+              <div class="settings-pref-card"><div><strong>Transaction Alerts</strong><span class="pref-state" data-state-for="prefTransaction">ON</span><p class="muted tiny">Trade and transaction activity</p></div><label class="toggle-switch"><input type="checkbox" id="prefTransaction" checked><span></span></label></div>
+              <div class="settings-pref-card"><div><strong>Price Alerts</strong><span class="pref-state" data-state-for="prefPrice">ON</span><p class="muted tiny">Market price movement alerts</p></div><label class="toggle-switch"><input type="checkbox" id="prefPrice" checked><span></span></label></div>
+              <div class="settings-pref-card"><div><strong>Wallet Activity</strong><span class="pref-state" data-state-for="prefWallet">ON</span><p class="muted tiny">Wallet activity notifications</p></div><label class="toggle-switch"><input type="checkbox" id="prefWallet" checked><span></span></label></div>
+              <div class="settings-pref-card"><div><strong>Marketing Emails</strong><span class="pref-state" data-state-for="prefMarketing">OFF</span><p class="muted tiny">Promotional offers and updates</p></div><label class="toggle-switch"><input type="checkbox" id="prefMarketing"><span></span></label></div>
+            </div>
+          </div>
+          <div class="settings-group" style="padding:0;margin:22px 0 0">
+            <div class="settings-heading"><span class="settings-icon" style="color:#4285ff;background:#1b2b48">▣</span><div><h2>Data &amp; Privacy</h2><p class="muted tiny">Review or export your account details.</p></div></div>
+            <div class="settings-pref-action"><div><strong>Export Data</strong><p class="muted tiny">Download account information and preferences as a JSON file.</p></div><button type="button" class="secondary" id="exportUserSettingsData">Export ↓</button></div>
+            <div class="settings-pref-action danger"><div><strong>Delete Account</strong><p class="muted tiny">Request permanent account deletion. You will be asked to confirm and re-authenticate if required.</p></div><button type="button" class="secondary" id="requestDeleteUserAccount">Delete ›</button></div>
+            <p id="settingsPrivacyStatus" class="muted tiny" aria-live="polite"></p>
+          </div>
+          <p class="muted tiny" style="margin-top:16px">Notification switches save preferences in this browser only. Push delivery, automated emails, and security alert delivery are not connected yet. Account deletion is not automatic; use the secure confirmation flow.</p>
           <p class="muted tiny">Do not upload identity documents to this public website until a verified KYC provider and secure backend are configured.</p>
         </div>
       </details>
@@ -1462,6 +1509,18 @@ document.addEventListener("click",e=>{if(!e.target.closest(".terminal-market-pic
 const observer=new MutationObserver(()=>{const o=assetSelect.selectedOptions[0];if(o){document.getElementById("terminalSelectedPair").textContent=(o.textContent||o.value).replace(/\s+/g,"");const s=symbolFromOption(o);document.getElementById("terminalSelectedIcon").textContent=icons[s]||s.slice(0,3);document.getElementById("terminalSelectedIcon").style.background=colors[s]||"#25344d";}if(!dropdown.hidden)render();});
 observer.observe(assetSelect,{childList:true,subtree:true});assetSelect.addEventListener("change",()=>{if(assetSelect.selectedOptions[0]){const o=assetSelect.selectedOptions[0],s=symbolFromOption(o);document.getElementById("terminalSelectedPair").textContent=(o.textContent||o.value).replace(/\s+/g,"");document.getElementById("terminalSelectedIcon").textContent=icons[s]||s.slice(0,3);document.getElementById("terminalSelectedIcon").style.background=colors[s]||"#25344d";}});
 setTimeout(()=>{const o=assetSelect.selectedOptions[0];if(o){const s=symbolFromOption(o);document.getElementById("terminalSelectedPair").textContent=(o.textContent||o.value).replace(/\s+/g,"");document.getElementById("terminalSelectedIcon").textContent=icons[s]||s.slice(0,3);document.getElementById("terminalSelectedIcon").style.background=colors[s]||"#25344d";}},800);
+})();
+</script>
+
+<script>
+(function(){
+const ids=["prefPush","prefEmail","prefInApp","prefDesktop","prefEmailGeneral","prefNewsletter","prefSecurity","prefLogin","prefTransaction","prefPrice","prefWallet","prefMarketing"];
+function prefKey(id){const uid=window.firebase?.auth?.().currentUser?.uid||"guest";return "oc_settings_"+uid+"_"+id}
+function setState(id,save){const input=document.getElementById(id),badge=document.querySelector('[data-state-for="'+id+'"]');if(!input)return;if(save)localStorage.setItem(prefKey(id),input.checked?"1":"0");if(badge){badge.textContent=input.checked?"ON":"OFF";badge.classList.toggle("off",!input.checked)}}
+ids.forEach(id=>{const el=document.getElementById(id);if(!el)return;const saved=localStorage.getItem(prefKey(id));if(saved!==null)el.checked=saved==="1";setState(id,false);el.addEventListener("change",()=>setState(id,true))});
+const exportBtn=document.getElementById("exportUserSettingsData"),status=document.getElementById("settingsPrivacyStatus");
+if(exportBtn)exportBtn.addEventListener("click",()=>{const data={exportedAt:new Date().toISOString(),account:{email:window.firebase?.auth?.().currentUser?.email||null,uid:window.firebase?.auth?.().currentUser?.uid||null},notificationPreferences:{}};ids.forEach(id=>data.notificationPreferences[id]=!!document.getElementById(id)?.checked);const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="onchaincrypto-account-settings.json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);if(status)status.textContent="Settings export downloaded. This export contains settings and available sign-in identity only.";});
+const del=document.getElementById("requestDeleteUserAccount");if(del)del.addEventListener("click",async()=>{const auth=window.firebase?.auth?.();const user=auth?.currentUser;if(!user){if(status)status.textContent="Please sign in first to manage your account.";return}const confirmText=prompt("Account deletion is permanent. Type DELETE to continue. This website will not remove your account until you confirm through Firebase re-authentication.");if(confirmText!=="DELETE"){if(status)status.textContent="Account deletion cancelled.";return}if(!confirm("Continue to Firebase account deletion? You may need to sign in again. This cannot be undone."))return;try{await user.delete();if(status)status.textContent="Your sign-in account was deleted."; }catch(e){if(status)status.textContent=e?.code==="auth/requires-recent-login"?"For your security, sign out, sign in again, then retry account deletion.":("Could not delete account: "+(e?.message||"Please contact support."));}});
 })();
 </script>
 </body>
