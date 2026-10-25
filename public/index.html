@@ -204,6 +204,37 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 #page-trade.trade-terminal #trendOverviewWrap{display:none!important}
 @media(max-width:900px){#page-trade.trade-terminal{padding:8px 10px 100px}#page-trade.trade-terminal .trade-layout{grid-template-columns:minmax(0,1fr);gap:14px}#page-trade.trade-terminal .tv-chart{height:420px;min-height:360px}#page-trade.trade-terminal .terminal-side-column{grid-row:2}#page-trade.trade-terminal .trade-orderbook .book-scroll{max-height:280px}}
 
+
+/* Distinct coin icon colors for expanded deposit/withdraw pickers */
+.coin-icon.coin-BTC,.coin-choice[data-coin="BTC"] .coin-icon{background:#f7931a;color:#fff}
+.coin-icon.coin-ETH,.coin-choice[data-coin="ETH"] .coin-icon{background:#627eea;color:#fff}
+.coin-icon.coin-BNB,.coin-choice[data-coin="BNB"] .coin-icon{background:#f3ba2f;color:#111}
+.coin-icon.coin-XRP,.coin-choice[data-coin="XRP"] .coin-icon{background:#252a32;color:#fff}
+.coin-icon.coin-SOL,.coin-choice[data-coin="SOL"] .coin-icon{background:linear-gradient(135deg,#9945ff,#14f195);color:#fff}
+.coin-icon.coin-USDT,.coin-choice[data-coin="USDT"] .coin-icon{background:#26a17b;color:#fff}
+.coin-icon.coin-USDC,.coin-choice[data-coin="USDC"] .coin-icon{background:#2775ca;color:#fff}
+.coin-icon.coin-TRX,.coin-choice[data-coin="TRX"] .coin-icon{background:#ef0027;color:#fff}
+.coin-icon.coin-DOGE,.coin-choice[data-coin="DOGE"] .coin-icon{background:#c2a633;color:#111}
+.coin-icon.coin-ADA,.coin-choice[data-coin="ADA"] .coin-icon{background:#0033ad;color:#fff}
+.coin-icon.coin-POL,.coin-choice[data-coin="POL"] .coin-icon{background:#8247e5;color:#fff}
+.coin-icon.coin-LTC,.coin-choice[data-coin="LTC"] .coin-icon{background:#345d9d;color:#fff}
+.coin-icon.coin-AVAX,.coin-choice[data-coin="AVAX"] .coin-icon{background:#e84142;color:#fff}
+.coin-icon.coin-LINK,.coin-choice[data-coin="LINK"] .coin-icon{background:#2a5ada;color:#fff}
+.coin-icon.coin-SHIB,.coin-choice[data-coin="SHIB"] .coin-icon{background:#f00500;color:#fff}
+.coin-icon.coin-DOT,.coin-choice[data-coin="DOT"] .coin-icon{background:#e6007a;color:#fff}
+.coin-icon.coin-HBAR,.coin-choice[data-coin="HBAR"] .coin-icon{background:#222;color:#fff}
+.coin-icon.coin-NEAR,.coin-choice[data-coin="NEAR"] .coin-icon{background:#00c08b;color:#07131a}
+.coin-icon.coin-ATOM,.coin-choice[data-coin="ATOM"] .coin-icon{background:#2e3148;color:#fff}
+.coin-icon.coin-ARB,.coin-choice[data-coin="ARB"] .coin-icon{background:#28a0f0;color:#fff}
+.coin-icon.coin-OP,.coin-choice[data-coin="OP"] .coin-icon{background:#ff0420;color:#fff}
+.coin-icon.coin-APT,.coin-choice[data-coin="APT"] .coin-icon{background:#3edbb3;color:#07131a}
+.coin-icon.coin-SUI,.coin-choice[data-coin="SUI"] .coin-icon{background:#6fbcf0;color:#07131a}
+.coin-icon.coin-UNI,.coin-choice[data-coin="UNI"] .coin-icon{background:#ff007a;color:#fff}
+.coin-icon.coin-PEPE,.coin-choice[data-coin="PEPE"] .coin-icon{background:#4caf50;color:#fff}
+.coin-icon.coin-BONK,.coin-choice[data-coin="BONK"] .coin-icon{background:#f58220;color:#fff}
+.coin-icon.coin-PAXG,.coin-choice[data-coin="PAXG"] .coin-icon{background:#d4af37;color:#111}
+.coin-choice .coin-icon{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;font-weight:900;font-size:17px;flex-shrink:0}
+
 </style>
 <!-- Refresh deployment check: 2026-10-20T19:44Z -->
 
@@ -1156,7 +1187,7 @@ $("timedStake").addEventListener("input",updateQuickEstimate);
 
 
 // Firebase authentication handlers are initialized in the Firebase module below.
-const supportedCoins=[["Bitcoin","BTC","₿"],["Ethereum","ETH","Ξ"],["BNB","BNB","◆"],["XRP","XRP","X"],["Solana","SOL","◎"],["Tether","USDT","₮"],["USD Coin","USDC","$"],["TRON","TRX","T"],["Dogecoin","DOGE","Ð"],["Cardano","ADA","₳"],["Polygon","POL","⬡"],["Litecoin","LTC","Ł"],["Avalanche","AVAX","▲"],["Chainlink","LINK","⬡"],["Toncoin","TON","◉"],["Stellar","XLM","✦"],["Bitcoin Cash","BCH","Ƀ"],["Shiba Inu","SHIB","🐕"],["Polkadot","DOT","●"],["Ethereum Classic","ETC","Ξ"]];
+const supportedCoins=[["Bitcoin","BTC","₿"],["Ethereum","ETH","Ξ"],["BNB","BNB","◆"],["XRP","XRP","X"],["Solana","SOL","◎"],["Tether","USDT","₮"],["USD Coin","USDC","$"],["TRON","TRX","T"],["Dogecoin","DOGE","Ð"],["Cardano","ADA","₳"],["Polygon","POL","⬡"],["Litecoin","LTC","Ł"],["Avalanche","AVAX","▲"],["Chainlink","LINK","⬡"],["Toncoin","TON","◉"],["Stellar","XLM","✦"],["Bitcoin Cash","BCH","Ƀ"],["Shiba Inu","SHIB","🐕"],["Polkadot","DOT","●"],["Ethereum Classic","ETC","Ξ"],["Hedera","HBAR","ℏ"],["NEAR Protocol","NEAR","Ⓝ"],["Internet Computer","ICP","∞"],["Cosmos","ATOM","⚛"],["Filecoin","FIL","⨎"],["Arbitrum","ARB","◆"],["Optimism","OP","🔴"],["Aptos","APT","A"],["Sui","SUI","💧"],["Injective","INJ","♾"],["Render","RENDER","✦"],["Uniswap","UNI","🦄"],["Aave","AAVE","👻"],["Maker","MKR","M"],["VeChain","VET","V"],["Algorand","ALGO","A"],["The Sandbox","SAND","▧"],["Decentraland","MANA","M"],["EOS","EOS","Ξ"],["Tezos","XTZ","ꜩ"],["Monero","XMR","ɱ"],["Zcash","ZEC","ⓩ"],["Dash","DASH","Đ"],["Kusama","KSM","K"],["THORChain","RUNE","ᚱ"],["PAX Gold","PAXG","Au"],["PancakeSwap","CAKE","🥞"],["Fantom","FTM","F"],["Pepe","PEPE","🐸"],["Bonk","BONK","🐶"],["Flare","FLR","✦"],["Sei","SEI","S"],["Jupiter","JUP","J"],["Immutable","IMX","I"],["Stacks","STX","▰"],["Kava","KAVA","K"],["Chiliz","CHZ","C"],["Curve DAO","CRV","C"]];
 let selectedDepositCoin="BTC",selectedWithdrawCoin="BTC";
 const coinPickerExpanded={deposit:6,withdraw:6};
 function drawCoinPicker(kind,query=""){const list=$(kind+"CoinList");if(!list)return;const selected=kind==="deposit"?selectedDepositCoin:selectedWithdrawCoin;const q=query.trim().toLowerCase();const filtered=supportedCoins.filter(c=>c[0].toLowerCase().includes(q)||c[1].toLowerCase().includes(q));const limit=coinPickerExpanded[kind]||6;const visible=filtered.slice(0,limit);list.innerHTML=visible.map(c=>'<button type="button" class="coin-choice '+(c[1]===selected?'selected':'')+'" data-coin="'+safe(c[1])+'"><span class="coin-icon">'+c[2]+'</span><span><strong>'+safe(c[0])+'</strong><small>'+safe(c[1])+'</small></span></button>').join("")||'<div class="empty">No matching coins.</div>';const count=$(kind+"CoinCount"),less=$(kind+"CoinLess"),more=$(kind+"CoinMore");if(count)count.textContent="Showing "+visible.length+" of "+filtered.length+" coins";if(less)less.disabled=limit<=6;if(more)more.disabled=visible.length>=filtered.length;list.querySelectorAll("[data-coin]").forEach(b=>b.addEventListener("click",()=>{if(kind==="deposit"){selectedDepositCoin=b.dataset.coin;updateSelectedCoin("deposit");drawCoinPicker("deposit", $("depositCoinSearch").value)}else{selectedWithdrawCoin=b.dataset.coin;updateSelectedCoin("withdraw");drawCoinPicker("withdraw", $("withdrawCoinSearch").value)}}))}
