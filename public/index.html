@@ -306,6 +306,43 @@ main{position:relative}
 @media(prefers-reduced-motion:no-preference){#page-home .quick-action{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}#page-home .quick-action:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(0,132,255,.13)}}
 </style>
 
+
+<style id="onchaincrypto-reference-dashboard-v2">
+/* Reference-inspired dashboard polish. Presentation only; trading/auth logic unchanged. */
+:root{--bg:#020a17;--panel:#04172a;--panel2:#07213a;--line:#123958;--text:#edf7ff;--muted:#8eafd0;--yellow:#f6c945;--green:#05d99a;--red:#ff4d79;--blue:#168cff}
+body{background-color:#020a17!important;background-image:radial-gradient(ellipse at 54% 0%,rgba(0,104,255,.18),transparent 43%),radial-gradient(ellipse at 100% 38%,rgba(0,219,255,.08),transparent 34%),linear-gradient(160deg,#020a17,#041328 55%,#020814)!important}
+header{backdrop-filter:blur(16px);border-bottom-color:rgba(26,148,255,.25)!important}
+nav,.sidebar,.side-nav{background:rgba(2,13,29,.94)}
+button,.quick-action,.card,.panel{transition:border-color .18s ease,box-shadow .18s ease}
+#page-home .page-title{min-height:196px;border-radius:25px;padding:25px 28px;margin-bottom:16px;border:1px solid rgba(29,179,255,.42);background:radial-gradient(ellipse at 74% 58%,rgba(0,204,255,.22),transparent 25%),radial-gradient(ellipse at 90% 15%,rgba(29,93,255,.25),transparent 33%),linear-gradient(110deg,#06162d 0%,#06294a 48%,#10194a 100%);box-shadow:inset 0 1px rgba(255,255,255,.08),0 16px 45px rgba(0,0,0,.23)}
+#page-home .page-title:before{width:205px;height:205px;right:13%;top:-8px;border:1px solid rgba(27,215,255,.55);box-shadow:0 0 22px rgba(0,180,255,.18),0 0 0 12px rgba(0,170,255,.07),0 0 0 28px rgba(0,170,255,.045),inset 0 0 35px rgba(0,180,255,.14)}
+#page-home .page-title:after{content:"₿   ◈   Ξ   ◎";right:4%;top:53%;font-size:clamp(23px,3vw,42px);letter-spacing:5px;color:#7de9ff;text-shadow:0 0 18px rgba(0,189,255,.72);opacity:.9}
+#page-home .page-title h1{font-size:clamp(26px,3.2vw,39px);font-weight:850;line-height:1.12}
+#page-home .page-title h1:after{content:"TRADE  •  INVEST  •  GROW YOUR FUTURE";font-size:10px;letter-spacing:2px;color:#71e9db;margin-top:13px}
+#page-home .page-title>div{max-width:66%}
+#page-home .cards{gap:12px}
+#page-home .cards .card{border:1px solid rgba(24,143,214,.28);background:linear-gradient(145deg,rgba(5,29,52,.96),rgba(3,17,34,.98));border-radius:15px}
+#page-home .panel{border:1px solid rgba(24,143,214,.3);background:linear-gradient(145deg,rgba(3,23,43,.97),rgba(2,15,30,.98));border-radius:16px}
+#page-home .quick-action-grid{gap:10px}
+#page-home .quick-action{min-height:76px;border-radius:13px;border:1px solid color-mix(in srgb,var(--action-color,#168cff) 55%,#123958);background:linear-gradient(145deg,color-mix(in srgb,var(--action-color,#168cff) 17%,#07172c),#041225);box-shadow:inset 0 1px rgba(255,255,255,.05)}
+#page-home .quick-action strong{color:#f4f9ff}
+#page-home .quick-action small{color:#a7c2dc}
+#page-home .quick-action .action-icon{border-radius:50%;background:var(--action-color,#168cff);color:#fff;box-shadow:0 0 17px color-mix(in srgb,var(--action-color,#168cff) 40%,transparent)}
+#page-home .quick-action:hover{border-color:var(--action-color,#168cff);box-shadow:0 8px 25px rgba(0,132,255,.12)}
+#page-home .section-head h2{color:#f0f8ff}
+#page-home table thead th{color:#8eb6d8}
+#page-home .tag{border-color:rgba(32,205,255,.35);background:rgba(0,159,255,.09);color:#7fe7ff}
+@media(max-width:700px){
+ #page-home .page-title{min-height:185px;padding:21px 17px;border-radius:19px}
+ #page-home .page-title>div{max-width:100%}
+ #page-home .page-title:before{width:125px;height:125px;right:-16px;top:10px;opacity:.65}
+ #page-home .page-title:after{right:4%;top:27%;font-size:21px;letter-spacing:2px;opacity:.45}
+ #page-home .page-title h1{font-size:26px;max-width:90%}
+ #page-home .page-title h1:after{font-size:8px;letter-spacing:1px}
+ #page-home .quick-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+
 </head>
 <body>
 <header>
