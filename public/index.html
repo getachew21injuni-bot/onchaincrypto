@@ -1687,14 +1687,21 @@ const result=document.getElementById("timedResult");if(result){const obs2=new Mu
   const buy=document.createElement('button');buy.type='button';buy.className='buy';buy.textContent='BUY LONG';
   const sell=document.createElement('button');sell.type='button';sell.className='sell';sell.textContent='SELL SHORT';
   function choose(direction){
+   const form=document.getElementById('timedPaperTrade');
    const dirBtn=document.getElementById(direction==='up'?'timedUpBtn':'timedDownBtn');
-   if(dirBtn)dirBtn.click();
+   const amount=document.getElementById('timedStake');
    const confirm=document.getElementById('timedConfirmBtn');
-   if(confirm&&!confirm.disabled)confirm.click();
-   else {
-    const form=document.getElementById('timedPaperTrade');
-    if(form)form.scrollIntoView({behavior:'smooth',block:'center'});
+   // Selecting Buy/Sell must never place a trade; the user must enter an amount and explicitly confirm.
+   if(dirBtn)dirBtn.click();
+   if(form)form.scrollIntoView({behavior:'smooth',block:'center'});
+   if(amount){
+    amount.focus({preventScroll:true});
+    amount.setAttribute('aria-describedby','tradeAmountInstruction');
+    let note=document.getElementById('tradeAmountInstruction');
+    if(!note){note=document.createElement('p');note.id='tradeAmountInstruction';note.className='notice';note.setAttribute('role','status');amount.insertAdjacentElement('afterend',note);}
+    note.textContent='Direction selected: '+(direction==='up'?'BUY LONG':'SELL SHORT')+'. Enter your USDT amount, review the estimate, then press Confirm trade. No trade has been placed yet.';
    }
+   if(confirm)confirm.textContent='Confirm '+(direction==='up'?'BUY':'SELL')+' trade';
   }
   buy.addEventListener('click',()=>choose('up'));sell.addEventListener('click',()=>choose('down'));
   actions.append(buy,sell);side.append(price,book,actions);layout.append(side);
