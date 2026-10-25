@@ -1,0 +1,26 @@
+name: Deploy OnChainCrypto to Firebase
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Authenticate with Firebase service account
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ONCHAINCRYPTO_D976B }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools
+      - name: Deploy Hosting and Firestore rules
+        run: firebase deploy --only hosting,firestore:rules --project onchaincrypto-d976b --non-interactive
