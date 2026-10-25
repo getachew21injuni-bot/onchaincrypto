@@ -112,6 +112,26 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 .settings-pref-action{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;margin-top:10px;background:#17171c;border:1px solid #2b2b32;border-radius:14px}
 .settings-pref-action p{margin:5px 0 0}.settings-pref-action.danger{border-color:#4b282d}.settings-pref-action.danger strong{color:#ff555e}
 @media(max-width:680px){.settings-preference-grid{grid-template-columns:1fr}.settings-pref-card{padding:14px}.settings-pref-action{align-items:flex-start;flex-direction:column}.settings-pref-action button{width:100%}}
+
+/* Compact mobile trading widgets matching the supplied reference */
+@media(max-width:900px){
+ #page-trade.trade-terminal{grid-template-columns:minmax(0,1fr);gap:12px;padding:12px}
+ #page-trade.trade-terminal>.page-title{grid-column:1;grid-row:1}
+ #page-trade.trade-terminal .trade-layout{grid-column:1;grid-row:2}
+ #page-trade.trade-terminal .trade-price-card{grid-column:1;grid-row:3;padding:18px 16px}
+ #page-trade.trade-terminal .trade-orderbook{grid-column:1;grid-row:4;padding:16px}
+ #page-trade.trade-terminal #timedPaperTrade{grid-column:1;grid-row:5;padding:16px}
+ #page-trade.trade-terminal .trade-orderbook .book-scroll{max-height:350px}
+ #page-trade.trade-terminal .trade-orderbook td{padding:8px 10px}
+ #page-trade.trade-terminal .trade-price-card .price-big{font-size:clamp(34px,8vw,48px)}
+ #page-trade.trade-terminal #timedPaperTrade .two-buttons{grid-template-columns:1fr 1fr;gap:10px}
+}
+@media(max-width:600px){
+ #page-trade.trade-terminal{padding:10px;gap:12px}
+ #page-trade.trade-terminal .trade-price-card,#page-trade.trade-terminal .trade-orderbook,#page-trade.trade-terminal #timedPaperTrade{border-radius:16px}
+ #page-trade.trade-terminal .trade-orderbook .book-scroll{max-height:350px}
+ #page-trade.trade-terminal #timedPaperTrade #timedUpBtn,#page-trade.trade-terminal #timedPaperTrade #timedDownBtn{min-height:68px;font-size:17px}
+}
 </style>
 <!-- Refresh deployment check: 2026-10-20T19:44Z -->
 
