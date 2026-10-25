@@ -1514,6 +1514,11 @@ onAuthStateChanged(auth, (user) => {
   if (user) loadPersonalProfile(user);
   else { loadPersonalProfile(null); }
   if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
+  if (user) {
+    const accountSection = document.getElementById("profileAccountSection");
+    if (accountSection) accountSection.open = true;
+    if (typeof showPage === "function") showPage("profile");
+  }
   const profileStatus = document.getElementById("profileAccountStatusText");
   const profileBadge = document.getElementById("profileAccountStatusBadge");
   if (profileStatus) profileStatus.textContent = user ? (user.email && !user.emailVerified ? "Active · Email not verified" : "Active · Signed in") : "Guest · Not signed in";
