@@ -1701,29 +1701,33 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  function setup(){
   const page=document.getElementById('page-trade');
   const chart=document.getElementById('tradingViewChart');
-  if(!page||!chart||document.getElementById('ocTradePairList'))return;
-  const panel=document.createElement('section');panel.className='panel oc-pair-list-panel';panel.id='ocTradePairList';
-  panel.innerHTML='<div class="oc-pair-list-head"><button class="oc-pair-list-toggle" type="button" aria-expanded="false"><strong class="oc-current-pair">BTC / USDT</strong><span class="oc-chevron" aria-hidden="true">⌄</span></button></div><div class="oc-pair-list-items"></div>';
-  const grid=panel.querySelector('.oc-pair-list-items');
+  const label=page&&Array.from(page.querySelectorAll('.muted.tiny')).find(el=>el.textContent.trim()==='Indicative public price');
+  if(!page||!chart||!label||label.dataset.pairPickerReady)return;
+  label.dataset.pairPickerReady='1';
+  const wrap=document.createElement('div');wrap.className='oc-indicative-picker';
+  const toggle=document.createElement('button');toggle.type='button';toggle.className='oc-indicative-toggle';toggle.setAttribute('aria-expanded','false');
+  toggle.innerHTML='<span>Indicative public price</span><strong class="oc-current-pair">BTC / USDT</strong><span class="oc-chevron" aria-hidden="true">⌄</span>';
+  const list=document.createElement('div');list.className='oc-indicative-list';
   pairs.forEach(([symbol,name])=>{
    const btn=document.createElement('button');btn.type='button';btn.dataset.symbol=symbol;btn.setAttribute('aria-pressed',symbol===activeSymbol?'true':'false');
    btn.innerHTML='<strong>'+symbol.replace('USDT',' / USDT')+'</strong><small>'+name+'</small>';
    btn.addEventListener('click',()=>{
     activeSymbol=symbol;
-    const title=document.getElementById('tradePairTitle');if(title)title.textContent=symbol.replace('USDT',' / USDT');const current=panel.querySelector('.oc-current-pair');if(current)current.textContent=symbol.replace('USDT',' / USDT');
+    const pairText=symbol.replace('USDT',' / USDT');
+    const current=toggle.querySelector('.oc-current-pair');if(current)current.textContent=pairText;
+    const title=document.getElementById('tradePairTitle');if(title)title.textContent=pairText;
     const orderPair=document.getElementById('orderBookPair');if(orderPair)orderPair.textContent=symbol.replace('USDT','/USDT');
     const select=document.getElementById('tradeAsset');
     if(select){const opt=Array.from(select.options).find(o=>(o.value||'').toUpperCase().replace('/','').replace('-','')===symbol || (o.textContent||'').toUpperCase().replace(/[^A-Z0-9]/g,'')===symbol);if(opt){select.value=opt.value;select.dispatchEvent(new Event('change',{bubbles:true}));}}
     try{const url=new URL(chart.src);url.searchParams.set('symbol','BINANCE:'+symbol);chart.src=url.toString();}catch(e){}
-    grid.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.symbol===symbol?'true':'false'));
+    list.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.symbol===symbol?'true':'false'));
+    wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');
    });
-   grid.appendChild(btn);
+   list.appendChild(btn);
   });
-  panel.querySelector('.oc-pair-list-toggle').addEventListener('click',e=>{
-   const open=panel.classList.toggle('is-open');e.currentTarget.setAttribute('aria-expanded',open?'true':'false');
-  });
-  const chartWrap=chart.closest('.chart-wrap');
-  if(chartWrap)chartWrap.insertAdjacentElement('afterbegin',panel);
+  toggle.addEventListener('click',()=>{const open=wrap.classList.toggle('is-open');toggle.setAttribute('aria-expanded',open?'true':'false');});
+  wrap.append(toggle,list);
+  label.replaceWith(wrap);
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
 })();
@@ -2265,4 +2269,19 @@ td,th{overflow-wrap:anywhere}
  #page-home .quick-action-grid .quick-action{padding:12px;min-height:104px}
  #page-home .quick-action-grid .quick-action .action-icon{width:38px;height:38px}
 }
+</style>
+
+<style id="oc-indicative-price-coin-picker">
+#page-trade .oc-indicative-picker{position:relative;display:inline-flex;vertical-align:middle;z-index:25;max-width:100%;font-size:12px}
+#page-trade .oc-indicative-toggle{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;text-align:left;border:1px solid #24617a;border-radius:10px;padding:7px 10px;background:#071b28;color:#d6eaf4;cursor:pointer;font:inherit}
+#page-trade .oc-indicative-toggle strong{color:#00e5a0;font-weight:900}
+#page-trade .oc-indicative-toggle .oc-chevron{color:#00e5a0;font-size:15px}
+#page-trade .oc-indicative-list{display:none;position:absolute;left:0;top:calc(100% + 7px);width:min(360px,calc(100vw - 48px));max-height:310px;overflow:auto;padding:7px;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;background:#06131f;border:1px solid #24617a;border-radius:12px;box-shadow:0 16px 40px #000b}
+#page-trade .oc-indicative-picker.is-open .oc-indicative-list{display:grid}
+#page-trade .oc-indicative-list button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;padding:9px;border:1px solid #18374a;border-radius:8px;background:#0a2030;color:#edf8ff;text-align:left;cursor:pointer}
+#page-trade .oc-indicative-list button[aria-pressed="true"]{border-color:#00d9a0;background:#07312b}
+#page-trade .oc-indicative-list button strong{font-size:11px;font-weight:900;overflow-wrap:anywhere}
+#page-trade .oc-indicative-list button small{font-size:10px;color:#9ab6c7}
+#page-trade .chart-wrap #ocTradePairList{display:none!important}
+@media(max-width:480px){#page-trade .oc-indicative-toggle{gap:5px;padding:6px 8px}#page-trade .oc-indicative-list{max-height:260px}}
 </style>
