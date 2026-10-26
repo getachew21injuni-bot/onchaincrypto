@@ -2270,7 +2270,8 @@ td,th{overflow-wrap:anywhere}
  if(!panel){
   panel=document.createElement('section');panel.id='ocInvestmentPlanPicker';panel.className='hidden';
   panel.innerHTML='<h3>Select investment plan</h3><div class="oc-plan-options">'+plans.map(p=>'<button type="button" class="oc-plan-option" data-plan-rate="'+p.rate+'" aria-pressed="false"><strong>'+p.min.toLocaleString()+'–'+p.max.toLocaleString()+' USDT</strong><span>'+p.rate+'% · '+p.duration+' seconds</span></button>').join('')+'</div><p class="oc-plan-status" id="ocInvestmentPlanStatus" aria-live="polite"></p>';
-  card.insertAdjacentElement('afterend',panel);
+  const directionRow=up.closest('.two-buttons');
+  if(directionRow)directionRow.insertAdjacentElement('afterend',panel);else card.insertAdjacentElement('afterend',panel);
  }
  function activePlan(){const n=Number(stake.value||0);return plans.find((p,i)=>n>=p.min&&(n<p.max||(i===plans.length-1&&n<=p.max)))||null}
  function refresh(){
