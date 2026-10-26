@@ -464,7 +464,7 @@ ChainCrypto</h3>
           <p class="muted tiny">Join the OnChainCrypto institutional trading platform.</p>
           <label for="registerFirstName">First name <span class="yellow">(required)</span></label><input id="registerFirstName" class="field" maxlength="50" autocomplete="given-name" required placeholder="Enter your first name">
           <label for="registerLastName">Last name <span class="yellow">(required)</span></label><input id="registerLastName" class="field" maxlength="50" autocomplete="family-name" required placeholder="Enter your last name">
-          <label for="registerEmail">Email address <span class="yellow">(required for email registration)</span></label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com">
+          <label for="registerContactMethod">Registration contact</label><div class="oc-contact-row"><select id="registerContactMethod" class="field" aria-label="Choose email or phone"><option value="email">✉ Email</option><option value="phone">☎ Phone</option></select><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com"></div>
           <p class="muted tiny">No email-verification link is required. To register using a phone number instead, use the SMS panel below.</p>
           <label for="registerPassword">Password <span class="yellow">(required)</span></label><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="Create a password (8+ characters)">
           <label for="referralCode">Referral code <span class="muted tiny">(optional)</span></label><input id="referralCode" class="field" maxlength="40" autocomplete="off" placeholder="Enter referral code if you have one">
@@ -486,10 +486,10 @@ ChainCrypto</h3>
         <details class="auth-phone-details">
           <summary>Register or sign in with phone (SMS verification)</summary>
           <h3>Phone registration / login</h3>
-          <p class="muted tiny">Enter your phone number in international format, including + and country code. Firebase will send an SMS code. New numbers create an account; existing numbers sign in.</p>
+          <p class="muted tiny">Enter your phone number in international format, including + and country code. Example: +47 is Norway; +44 is the United Kingdom. Use your own real country code. Firebase will send an SMS code. New numbers create an account; existing numbers sign in.</p>
           <label for="phoneFirstName">First name <span class="muted tiny">(for new accounts)</span></label><input id="phoneFirstName" class="field" maxlength="50" autocomplete="given-name" placeholder="First name">
           <label for="phoneLastName">Last name <span class="muted tiny">(for new accounts)</span></label><input id="phoneLastName" class="field" maxlength="50" autocomplete="family-name" placeholder="Last name">
-          <label for="phoneNumber">Phone number</label><input id="phoneNumber" class="field" type="tel" autocomplete="tel" placeholder="+2519…">
+          <label for="phoneNumber">Phone number</label><input id="phoneNumber" class="field" type="tel" autocomplete="tel" placeholder="+47 123 45 678">
           <div id="recaptcha-container" style="margin-top:12px"></div>
           <button class="secondary full" id="sendPhoneCodeBtn" type="button">Send SMS verification code</button>
           <label for="phoneCode">SMS verification code</label><input id="phoneCode" class="field" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter the code">
@@ -1290,33 +1290,7 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
 
 <script type="module" src="./support-chat.js"></script>
 
-<style id="oc-screenshot-trade-layout">
-#page-trade #timedPaperTrade{border-radius:18px;overflow:hidden}
-#page-trade #timedPaperTrade>.section-head{padding:12px 14px 0}
-#page-trade #timedPaperTrade>.section-head .muted{display:none}
-#page-trade #timedPaperTrade .form-panel{padding:12px}
-#page-trade #timedPaperTrade .form-panel>label{margin:9px 0 5px;font-size:13px}
-.oc-invest-label{font-weight:750;color:var(--muted);margin:13px 0 8px;font-size:13px}
-.oc-invest-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
-.oc-invest-grid button,.oc-duration-grid button{background:#141d31;color:#f1f5f9;border:1px solid #293449;border-radius:11px;min-width:0;padding:10px 5px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;line-height:1.25}
-.oc-invest-grid button strong{color:#16d9a0;font-size:14px}
-.oc-invest-grid button.active,.oc-duration-grid button.active{border:2px solid #f5cf35;background:#292a25;box-shadow:0 0 0 1px #f5cf3520}
-.oc-duration-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
-.oc-duration-grid button{padding:9px 4px;font-weight:750}
-#page-trade #timedPaperTrade .content-grid{display:block}
-#page-trade #timedPaperTrade .cards{gap:7px}
-#page-trade #timedPaperTrade .card{padding:9px}
-#page-trade #timedPaperTrade .card .big{font-size:16px}
-#page-trade #timedPaperTrade .card .label{font-size:11px}
-#page-trade #timedPaperTrade .chart-wrap,#page-trade #timedPaperTrade .mini-card{display:none!important}
-#page-trade #timedPaperTrade .two-buttons{gap:8px;margin-top:10px}
-#page-trade #timedPaperTrade #timedUpBtn,#page-trade #timedPaperTrade #timedDownBtn{min-height:44px}
-#page-trade #timedPaperTrade #timedConfirmBtn,#page-trade #timedPaperTrade #timedCancelBtn{min-height:42px}
-#page-trade #timedResultBoard[style*="display: block"]{position:fixed;z-index:10020;inset:12px 10px 82px;overflow:auto;margin:0!important;max-height:calc(100dvh - 100px);box-shadow:0 20px 70px #000b;border:2px solid #f5cf35;border-radius:20px;padding:16px!important}
-#page-trade #timedResultBoard .oc-result-close{position:sticky;bottom:0;width:100%;margin-top:16px;background:#f5cf35;color:#151515;font-weight:800;padding:13px}
-@media(min-width:701px){.oc-invest-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:700px){#page-trade .page-title h1{font-size:20px}#page-trade .page-title{margin-bottom:10px}#page-trade .chart-area{display:none}#page-trade #timedPaperTrade{margin-bottom:12px}#page-trade #timedPaperTrade>.section-head{padding:10px 12px 0}#page-trade #timedPaperTrade .form-panel{padding:10px}#page-trade #timedPaperTrade .field{padding:10px}#page-trade #timedPaperTrade .cards{grid-template-columns:repeat(2,minmax(0,1fr))}#page-trade #timedPaperTrade .two-buttons button{padding:10px 6px;font-size:13px}#page-trade #timedPaperTrade .form-panel>p{display:none!important}}
-</style>
+
 <script id="oc-screenshot-trade-controls">
 (function(){
  const amount=document.getElementById('timedStake'),plan=document.getElementById('timedPlan'),duration=document.getElementById('timedDuration');
@@ -1337,6 +1311,37 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
  const board=document.getElementById('timedResultBoard');
  if(board&&!board.querySelector('.oc-result-close')){const c=document.createElement('button');c.type='button';c.className='oc-result-close';c.textContent='Close Trade';c.addEventListener('click',()=>{board.style.display='none';document.getElementById('timedPaperTrade')?.scrollIntoView({behavior:'smooth',block:'start'});});board.appendChild(c);}
  refresh();
+})();
+</script>
+<style id="oc-contact-method-inline">
+.oc-contact-row{display:grid;grid-template-columns:112px minmax(0,1fr);gap:7px;align-items:center}
+.oc-contact-row select.field{width:100%;padding:11px 7px;font-size:13px}
+.oc-contact-row input.field{min-width:0}
+.oc-contact-row.phone-mode #registerEmail{display:none}
+@media(max-width:390px){.oc-contact-row{grid-template-columns:100px minmax(0,1fr)}}
+</style>
+<script id="oc-contact-method-inline-script">
+(function(){
+ const mode=document.getElementById('registerContactMethod'),email=document.getElementById('registerEmail'),details=document.querySelector('.auth-phone-details'),row=email?.closest('.oc-contact-row'),password=document.getElementById('registerPassword'),referral=document.getElementById('referralCode'),create=document.querySelector('#registerForm button[type="submit"]');
+ if(!mode||!email||!details||!row)return;
+ function setMode(){
+  const phone=mode.value==='phone';
+  row.classList.toggle('phone-mode',phone);
+  email.required=!phone;
+  email.disabled=phone;
+  details.open=phone;
+  details.style.display=phone?'block':'none';
+  if(password){password.required=!phone;password.disabled=phone;const label=document.querySelector('label[for="registerPassword"]');if(label)label.style.display=phone?'none':'';password.style.display=phone?'none':''}
+  if(referral){referral.disabled=phone;const label=document.querySelector('label[for="referralCode"]');if(label)label.style.display=phone?'none':'';referral.style.display=phone?'none':''}
+  if(create)create.style.display=phone?'none':'';
+  const hint=email.closest('.oc-contact-row')?.nextElementSibling;
+  if(hint&&hint.tagName==='P')hint.style.display=phone?'none':'';
+  details.querySelector('summary').textContent=phone?'☎ Phone selected — enter number and verify by SMS':'Register or sign in with phone (SMS verification)';
+ }
+ mode.addEventListener('change',setMode);
+ document.getElementById('showRegisterBtn')?.addEventListener('click',()=>{mode.value='email';setMode()});
+ document.getElementById('registerLoginBtn')?.addEventListener('click',()=>{mode.value='email';setMode()});
+ setMode();
 })();
 </script>
 </body>
