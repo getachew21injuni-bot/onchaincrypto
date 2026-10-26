@@ -1195,6 +1195,9 @@ document.getElementById("signOutBtn").addEventListener("click", async () => {
 });
 onAuthStateChanged(auth, (user) => {
   window.onchaincryptoCurrentUser = user || null;
+   if (typeof window.ocRefreshReferral === "function") window.ocRefreshReferral(user || null);
+   if (user) { window.showPage?.(window.ocPendingPage || "home"); window.ocPendingPage = null; }
+   else { window.showPage?.("register"); document.getElementById("showRegisterBtn")?.click(); }
   const status = document.getElementById("authStatus");
   const signOutBtn = document.getElementById("signOutBtn");
   const identity = user ? (user.displayName || user.email || user.phoneNumber || "Signed-in user") : "";
