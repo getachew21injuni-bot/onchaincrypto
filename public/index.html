@@ -1237,13 +1237,19 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
 });
 
 document.getElementById("googleSignInBtn").addEventListener("click", async () => {
-  const name = (document.getElementById("registerFirstName").value.trim() + " " + document.getElementById("registerLastName").value.trim()).trim();
-  if (document.getElementById("registerFirstName").value.trim().length < 1 || document.getElementById("registerLastName").value.trim().length < 1) { msg("Enter your first and last name above before continuing with Google."); document.getElementById("registerFirstName").focus(); return; }
+  const first = document.getElementById("registerFirstName").value.trim();
+  const last = document.getElementById("registerLastName").value.trim();
+  const name = (first + " " + last).trim();
   msg("Opening Google sign-in…");
   try {
     const credential = await signInWithPopup(auth, new GoogleAuthProvider());
-    await updateProfile(credential.user, { displayName: name });
-    msg("Google sign-in successful. Your account name is " + name + ".");
+    // Google already provides a display name; only replace it when the user supplied one.
+    if (name) await updateProfile(credential.user, { displayName: name });
+    const identity = (name || credential.user.displayName || credential.user.email || "user");
+    msg("Google sign-in successful. Signed in as " + identity + ".");
+    const status = document.getElementById("authStatus");
+    if (status) status.textContent = "Signed in as " + identity + ". You can continue to the platform.";
+    if (typeof window.showPage === "function") window.showPage("markets");
   } catch (error) {
     if (error?.code === "auth/operation-not-allowed") msg("Google sign-in is disabled in Firebase. Enable Google under Firebase Console → Authentication → Sign-in method.");
     else if (error?.code === "auth/unauthorized-domain") msg("Google sign-in blocked: add getachew21injuni-bot.github.io under Firebase Console → Authentication → Settings → Authorized domains.");
