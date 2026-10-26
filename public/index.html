@@ -2313,7 +2313,8 @@ td,th{overflow-wrap:anywhere}
  if(!panel){
   panel=document.createElement('section');panel.id='ocInvestmentPlanPicker';panel.className='hidden';
   panel.innerHTML='<h3>Select investment plan</h3><div class="oc-plan-options">'+plans.map(p=>'<button type="button" class="oc-plan-option" data-plan-rate="'+p.rate+'" aria-pressed="false"><strong>'+p.min.toLocaleString()+'–'+p.max.toLocaleString()+' USDT</strong><span>'+p.rate+'% · '+p.duration+' seconds</span></button>').join('')+'</div><p class="oc-plan-status" id="ocInvestmentPlanStatus" aria-live="polite"></p>';
-  card.insertAdjacentElement('afterend',panel);
+  const directionRow=up.closest('.two-buttons');
+  if(directionRow)directionRow.insertAdjacentElement('afterend',panel);else card.insertAdjacentElement('afterend',panel);
  }
  function activePlan(){const n=Number(stake.value||0);return plans.find((p,i)=>n>=p.min&&(n<p.max||(i===plans.length-1&&n<=p.max)))||null}
  function refresh(){
@@ -2664,18 +2665,25 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
 <script id="oc-orderbook-open-trade-plan">
 (function(){
  if(window.__ocOrderbookOpenTradePlan)return;window.__ocOrderbookOpenTradePlan=true;
+ // Keep the Quick Trade form inside the actual Trade page. It was nested under Home,
+ // so switching to Trade hid the form and made the user appear to return to Signals.
+ const form=document.getElementById('timedPaperTrade');
+ const tradeLayout=document.querySelector('#page-trade .trade-layout');
+ if(form&&tradeLayout&&!tradeLayout.contains(form))tradeLayout.appendChild(form);
  document.addEventListener('click',function(e){
   const btn=e.target.closest('[data-oc-book-direction]');if(!btn)return;
+  e.preventDefault();e.stopPropagation();
   const direction=btn.dataset.ocBookDirection;
-  if(typeof window.showPage==='function')window.showPage('trade');
-  const form=document.getElementById('timedPaperTrade');
+  const tradeForm=document.getElementById('timedPaperTrade');
   const directionButton=document.getElementById(direction==='buy'?'timedUpBtn':'timedDownBtn');
-  if(!form||!directionButton)return;
-  form.classList.remove('hidden');directionButton.click();
+  if(!tradeForm||!directionButton)return;
+  if(typeof window.showPage==='function')window.showPage('trade');
+  tradeForm.classList.remove('hidden');
+  directionButton.click();
   window.setTimeout(function(){
    const plans=document.getElementById('ocInvestmentPlanPicker');
-   (plans&&!plans.classList.contains('hidden')?plans:form).scrollIntoView({behavior:'smooth',block:'center'});
-  },120);
+   (plans&&!plans.classList.contains('hidden')?plans:tradeForm).scrollIntoView({behavior:'smooth',block:'center'});
+  },180);
  });
 })();
 </script>
