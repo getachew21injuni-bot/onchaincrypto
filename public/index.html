@@ -795,7 +795,12 @@ function renderSignalScanner(){
   return '<tr class="row-click signal-row" data-signal-symbol="'+safe(c.symbol.toUpperCase())+'"><td>'+coinAsset(c)+'<div class="muted tiny" style="margin-left:39px">'+safe(c.symbol.toUpperCase())+'/USDT</div></td><td>'+money(c.current_price)+'</td><td class="'+(change>=0?'green':'red')+'">'+pct(change)+'</td><td><span class="signal-chip '+cls+'"><span class="signal-dot"></span>'+label+'</span><div class="muted tiny" style="margin-top:4px">'+reason+'</div></td><td>'+money(volume)+'</td></tr>'
  }).join("");
  body.querySelectorAll("[data-signal-symbol]").forEach(row=>row.addEventListener("click",()=>{
-  selected=row.dataset.signalSymbol;$("tradeAsset").value=selected;updateTradePreview();showPage("trade");loadPriceHistory();updateTradingViewChart(selected)
+  selected=row.dataset.signalSymbol;
+  const asset=$("tradeAsset");if(asset){asset.value=selected;asset.dispatchEvent(new Event("change",{bubbles:true}));}
+  const title=$("tradePairTitle");if(title)title.innerHTML=(selected==="XAU"?"XAU / USD":selected+" / USDT")+' <span aria-hidden="true">▾</span>';
+  const name=$("tradeAssetName");if(name)name.textContent=selected==="XAU"?"Gold (XAU)":(priceFor(selected)?.name||selected);
+  const timed=$("timedPair");if(timed)timed.textContent=selected==="XAU"?"XAU / USD":selected+" / USDT";
+  showPage("trade");loadPriceHistory();updateTradingViewChart(selected);
  }));
 }
 document.addEventListener("click",function(event){
@@ -807,8 +812,12 @@ document.addEventListener("click",function(event){
 function updateTradingViewChart(symbol){
  const frame=$("tradingViewChart");if(!frame)return;
  const sym=String(symbol||"BTC").toUpperCase();
- const pair=(sym==="USDT"||sym==="USDC")?"BTCUSDT":sym+"USDT";
- frame.src="https://www.tradingview.com/widgetembed/?symbol="+encodeURIComponent("BINANCE:"+pair)+"&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false";
+ /* Gold uses a real spot-gold chart, not a crypto ticker symbol. */
+ const tvSymbol=sym==="XAU"?"OANDA:XAUUSD":"BINANCE:"+((sym==="USDT"||sym==="USDC")?"BTCUSDT":sym+"USDT");
+ frame.src="https://www.tradingview.com/widgetembed/?symbol="+encodeURIComponent(tvSymbol)+"&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false";
+ const title=$("tradePairTitle");if(title)title.innerHTML=(sym==="XAU"?"XAU / USD":" "+sym+" / USDT")+" <span aria-hidden=\"true\">▾</span>";
+ const name=$("tradeAssetName");if(name)name.textContent=sym==="XAU"?"Gold (XAU)":(priceFor(sym)?.name||sym);
+ const timed=$("timedPair");if(timed)timed.textContent=sym==="XAU"?"XAU / USD":sym+" / USDT";
 }
 function renderTradePairOptions(query=""){
  const host=$("tradePairOptions");if(!host)return;
@@ -1892,9 +1901,11 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     if(btn.hasAttribute('data-gold-trade')){
       const asset=document.getElementById('tradeAsset');
       if(asset){asset.value='XAU';asset.dispatchEvent(new Event('change',{bubbles:true}));}
-      const title=document.getElementById('tradePairTitle');if(title)title.textContent='XAU / USDT';
-      const pair=document.getElementById('orderBookPair');if(pair)pair.textContent='XAU/USDT';
+      if(typeof updateTradingViewChart==='function')updateTradingViewChart('XAU');
+      const title=document.getElementById('tradePairTitle');if(title)title.innerHTML='XAU / USD <span aria-hidden="true">▾</span>';
+      const pair=document.getElementById('orderBookPair');if(pair)pair.textContent='XAU/USD';
       const name=document.getElementById('tradeAssetName');if(name)name.textContent='Gold (XAU)';
+      const timed=document.getElementById('timedPair');if(timed)timed.textContent='XAU / USD';
       const result=document.getElementById('signalResult');
       if(result)result.innerHTML='<div class="signal-value signal-neutral">GOLD (XAU) SELECTED</div><div class="muted tiny" style="margin-top:6px">Gold market data and momentum are shown when a valid XAU/USDT public quote is available.</div>';
     }
