@@ -70,7 +70,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 </header>
 <main>
   <section id="page-home" class="hidden">
- <div class="page-title"><div><h1>OnChainCrypto</h1><div class="muted">Your crypto dashboard, quick actions and active coin pairs.</div></div><button class="secondary" type="button" data-go="markets">Explore Markets ↗</button></div>
+ <div class="page-title"><div><h1>OnChainCrypto</h1></div><button class="secondary" type="button" data-go="markets">Explore Markets ↗</button></div>
  <div class="cards">
   <div class="card"><div class="label">Practice balance</div><div class="big" id="homeSummaryBalance">$10,000.00</div><div class="muted tiny">Simulated practice funds</div></div>
   <div class="card"><div class="label">Active coins</div><div class="big" id="homeActiveCoinCount">—</div><div class="muted tiny">Public market prices</div></div>
@@ -102,7 +102,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
   <section id="page-markets">
 
 
-<div class="page-title"><div><h1>Market Overview</h1><div class="muted">Explore crypto markets and discover market movers.</div></div>
+<div class="page-title"><div><h1>Market Overview</h1></div>
 <div class="muted tiny">Last update: <span id="lastUpdate">—</span></div></div>
 
     <div class="cards">
@@ -112,7 +112,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
       <div class="card"><div class="label">Top loser (24h)</div><div class="big red" id="topLoser">—</div><div class="muted tiny" id="topLoserChange">Waiting for data</div></div>
     </div>
     <section class="panel" style="margin-bottom:18px">
-      <div class="section-head"><div><h2>Quick Actions</h2><div class="muted tiny">Open your wallet tools or find a coin from the home page.</div></div><span class="tag">ACCOUNT TOOLS</span></div>
+      <div class="section-head"><div><h2>Quick Actions</h2></div><span class="tag">ACCOUNT TOOLS</span></div>
       <div class="quick-action-grid">
         <button class="quick-action" style="--action-color:#00d7a0" type="button" data-go="deposit"><span class="action-icon">⇩</span><strong>Deposit Funds</strong><small>Add funds to your account</small></button>
         <button class="quick-action" style="--action-color:#ff8a24" type="button" data-go="withdraw"><span class="action-icon">⇧</span><strong>Withdraw</strong><small>Send funds to your wallet</small></button>
@@ -127,7 +127,6 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
       <label for="homeCoinSearch" style="display:block;margin-top:16px">Search coins</label>
       <input class="search" id="homeCoinSearch" placeholder="Search Bitcoin, Ethereum, BTC…" autocomplete="off" style="width:100%;max-width:none">
       <div id="homeCoinResults" class="coin-picker" role="listbox" aria-label="Search results for coins on the home page"><div class="empty">Public coin list will appear when market data loads.</div></div><div class="market-list-controls"><span class="muted tiny" id="homeCoinCount">Showing top 5 coins</span><div><button class="secondary" type="button" id="homeCoinLess" disabled>Less</button> <button class="primary" type="button" id="homeCoinMore">More +5</button></div></div>
-      <p class="muted tiny">Deposit addresses and real withdrawals are not enabled until a secure wallet backend is connected. Never send funds to an unverified address.</p>
     </section>
     <section class="panel" id="marketRecentActivity" hidden aria-hidden="true" style="display:none!important" style="margin-bottom:18px"><div class="section-head"><div><h2>Recent Activity</h2><div class="muted tiny">Recent paper trades and account actions on this device</div></div><select id="marketActivityFilter" class="field" style="max-width:155px"><option value="all">All activity</option><option value="trade">Trades</option><option value="deposit">Deposits</option><option value="withdraw">Withdrawals</option><option value="activity">Other actions</option></select></div><div id="marketActivityRows"><div class="empty">Your recent activity will appear here.</div></div><p class="muted tiny">Activity is saved in this browser only. Deposits and withdrawals are not processed by this demo website.</p></section><div class="content-grid">
       <section class="panel">
@@ -507,14 +506,6 @@ ChainCrypto</h3>
           <label for="phoneCode">SMS verification code</label><input id="phoneCode" class="field" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter the code">
           <button class="secondary full" id="verifyPhoneCodeBtn" type="button">Verify code and continue</button>
         </details>
-      </section>
-      <section class="panel form-panel">
-        <h2>What real registration requires</h2>
-        <div class="list-row"><span>Secure account login</span><span class="tag">Backend needed</span></div>
-        <div class="list-row"><span>Email verification and password reset</span><span class="tag">Backend needed</span></div>
-        <div class="list-row"><span>Private user data and permissions</span><span class="tag">Database needed</span></div>
-        <div class="list-row"><span>Identity checks, where legally required</span><span class="tag">Provider needed</span></div>
-        <p class="muted tiny">Never store passwords or identity documents in browser storage or a public GitHub repository.</p>
       </section>
     </div>
   </section>
