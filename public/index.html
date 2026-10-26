@@ -66,6 +66,44 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 #page-home .quick-action[data-gold-trade="true"]{--action-color:#f5bd42!important;border-color:rgba(245,189,66,.48)!important;background:linear-gradient(145deg,rgba(245,189,66,.14),#081321)!important}
 #page-home .quick-action[data-gold-trade="true"] .action-icon{background:rgba(245,189,66,.16)!important;color:#ffd36a!important}
 </style>
+<style id="oc-invest-hero-style">
+#page-home .oc-invest-hero{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(280px,.95fr);align-items:center;min-height:330px;margin:0 0 20px;padding:30px clamp(18px,3vw,38px);overflow:hidden;border:1px solid #1a4664;border-radius:24px;background:radial-gradient(ellipse at 78% 38%,#10395a 0%,#081d32 38%,#050d19 76%);box-shadow:0 18px 48px #0005}
+#page-home .oc-invest-hero:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.18;background-image:linear-gradient(#4ebfff14 1px,transparent 1px),linear-gradient(90deg,#4ebfff14 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(90deg,transparent,#000)}
+#page-home .oc-hero-copy{position:relative;z-index:3;max-width:520px}
+#page-home .oc-hero-pill{display:inline-flex;align-items:center;gap:9px;padding:8px 13px;border:1px solid #f0b90b66;border-radius:999px;background:#f0b90b12;color:#f6c94c;font-size:11px;font-weight:800;letter-spacing:1.25px}
+#page-home .oc-pulse-dot{width:7px;height:7px;border-radius:50%;background:#12d6a0;box-shadow:0 0 12px #12d6a0}
+#page-home .oc-hero-copy h2{margin:18px 0 10px;color:#f6f9ff;font-size:clamp(30px,3.6vw,48px);line-height:1.08;letter-spacing:-1.4px}
+#page-home .oc-hero-copy h2 span{color:#f0b90b}
+#page-home .oc-hero-copy p{max-width:410px;margin:0;color:#b8c9dc;font-size:15px;line-height:1.65}
+#page-home .oc-hero-terms{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:17px;color:#e7f2ff;font-size:11px;font-weight:800;letter-spacing:1.4px}
+#page-home .oc-hero-terms span{animation:ocTermGlow 4s ease-in-out infinite}
+#page-home .oc-hero-terms span:nth-of-type(2){animation-delay:.6s}#page-home .oc-hero-terms span:nth-of-type(3){animation-delay:1.2s}#page-home .oc-hero-terms span:nth-of-type(4){animation-delay:1.8s}
+#page-home .oc-hero-terms i{font-style:normal;color:#f0b90b}
+#page-home .oc-hero-cta{display:inline-flex;align-items:center;gap:18px;margin-top:21px;padding:12px 18px;border:0;border-radius:12px;background:linear-gradient(120deg,#f8d65b,#f0b90b);color:#10151b;font-weight:800;cursor:pointer;box-shadow:0 8px 24px #f0b90b25}
+#page-home .oc-hero-cta span{font-size:19px}
+#page-home .oc-hero-note{margin-top:13px;color:#8199b2;font-size:11px}#page-home .oc-hero-note b{padding:0 5px;color:#f0b90b}
+#page-home .oc-hero-art{position:relative;min-height:280px;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#page-home .oc-hero-person{position:absolute;z-index:2;width:min(94%,330px);height:auto;bottom:-14px;right:6%;filter:drop-shadow(0 15px 30px #00bfff22)}
+#page-home .oc-orbit{position:absolute;left:17%;top:8%;width:270px;height:270px;border:1px solid #1c8cc544;border-radius:50%;transform:rotate(-24deg)}
+#page-home .oc-orbit-two{width:220px;height:310px;left:25%;top:-1%;border-color:#f0b90b42;transform:rotate(36deg)}
+#page-home .oc-hero-chart{position:absolute;inset:20% 0 10% 12%;display:flex;align-items:flex-end;justify-content:space-evenly;gap:7px;opacity:.45}
+#page-home .oc-hero-chart span{width:7%;border-radius:5px 5px 0 0;background:linear-gradient(#00e5a0,#007eab);box-shadow:0 0 16px #00d5a022}
+#page-home .oc-coin{position:absolute;z-index:3;display:grid;place-items:center;border-radius:50%;font-weight:900;border:2px solid #fff8;box-shadow:0 8px 22px #0007,inset -5px -7px 12px #0004;animation:ocCoinFloat 5s ease-in-out infinite}
+#page-home .oc-coin-btc{top:12%;left:14%;width:56px;height:56px;background:linear-gradient(135deg,#ffe47c,#e89b00);color:#fff;font-size:33px}
+#page-home .oc-coin-eth{top:51%;left:4%;width:42px;height:42px;background:linear-gradient(135deg,#94b9ff,#4266dc);color:#fff;font-size:24px;animation-delay:-1.5s}
+#page-home .oc-coin-usdt{top:25%;right:8%;width:39px;height:39px;background:linear-gradient(135deg,#5bf0c1,#009c7c);color:#fff;font-size:24px;animation-delay:-2.7s}
+#page-home .oc-profit-chip{position:absolute;z-index:4;right:0;top:10%;padding:12px 14px;border:1px solid #00d6ad66;border-radius:13px;background:#041a25e8;box-shadow:0 8px 30px #0005;transform:rotate(3deg)}
+#page-home .oc-profit-chip span{display:block;color:#86a7bb;font-size:9px;letter-spacing:1px}
+#page-home .oc-profit-chip strong{display:block;margin-top:5px;color:#28e3ac;font-size:12px}
+#page-home .oc-floating-term{position:absolute;z-index:4;padding:7px 10px;border:1px solid #5c9ec34d;border-radius:8px;background:#07192ad9;color:#c4e8ff;font-size:9px;font-weight:800;letter-spacing:1px;animation:ocTermDrift 6s ease-in-out infinite}
+#page-home .oc-term-one{left:2%;top:76%}#page-home .oc-term-two{right:8%;top:65%;animation-delay:-2s}#page-home .oc-term-three{left:31%;top:7%;animation-delay:-4s}
+@keyframes ocTermGlow{0%,100%{opacity:.65;text-shadow:none}50%{opacity:1;text-shadow:0 0 13px #00d5ff88}}
+@keyframes ocCoinFloat{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-12px) rotate(5deg)}}
+@keyframes ocTermDrift{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@media(max-width:720px){#page-home .oc-invest-hero{grid-template-columns:minmax(0,1fr);padding:23px 18px 10px;min-height:0;border-radius:18px}#page-home .oc-hero-copy h2{font-size:clamp(29px,8vw,39px);letter-spacing:-.8px}#page-home .oc-hero-copy p{font-size:14px}#page-home .oc-hero-art{min-height:235px;margin-top:6px}#page-home .oc-hero-person{width:min(78%,270px);right:12%;bottom:-10px}#page-home .oc-orbit{left:20%;width:220px;height:220px}#page-home .oc-orbit-two{left:27%;width:185px;height:255px}#page-home .oc-hero-chart{inset:20% 2% 10% 15%}#page-home .oc-coin-btc{left:9%;top:12%;width:46px;height:46px;font-size:27px}#page-home .oc-coin-eth{left:5%;top:55%;width:36px;height:36px;font-size:20px}#page-home .oc-coin-usdt{right:7%;top:23%;width:34px;height:34px;font-size:20px}#page-home .oc-profit-chip{right:0;top:4%;padding:9px 10px}#page-home .oc-profit-chip strong{font-size:10px}#page-home .oc-term-one{top:78%}#page-home .oc-term-two{right:2%;top:69%}#page-home .oc-term-three{left:35%;top:3%}}
+@media(max-width:380px){#page-home .oc-hero-art{min-height:205px}#page-home .oc-hero-terms{gap:7px;font-size:10px}#page-home .oc-profit-chip{max-width:150px}#page-home .oc-hero-person{width:80%;right:8%}}
+@media(prefers-reduced-motion:reduce){#page-home .oc-hero-terms span,#page-home .oc-coin,#page-home .oc-floating-term{animation:none!important}}
+</style>
 </head>
 <body>
 <header>
@@ -83,6 +121,44 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 <main>
   <section id="page-home" class="hidden">
  <div class="page-title"><div><h1>OnChainCrypto</h1></div><button class="secondary" type="button" data-go="markets">Explore Markets ↗</button></div>
+  
+ <section class="oc-invest-hero" aria-label="Welcome to OnChainCrypto">
+  <div class="oc-hero-copy">
+   <div class="oc-hero-pill"><span class="oc-pulse-dot"></span> ONCHAINCRYPTO INVESTMENT</div>
+   <h2>Make Your Next Move <span>Count.</span></h2>
+   <p>Explore crypto markets, follow the trends, and build your trading knowledge.</p>
+   <div class="oc-hero-terms" aria-label="Investment terms">
+    <span>INVEST</span><i>•</i><span>TRADE</span><i>•</i><span>GROW</span><i>•</i><span>DISCOVER</span>
+   </div>
+   <button class="oc-hero-cta" type="button" data-go="markets">Explore Markets <span aria-hidden="true">↗</span></button>
+   <div class="oc-hero-note">Public market insights <b>·</b> Simulated trading</div>
+  </div>
+  <div class="oc-hero-art" aria-hidden="true">
+   <div class="oc-orbit oc-orbit-one"></div><div class="oc-orbit oc-orbit-two"></div>
+   <div class="oc-hero-chart"><span style="height:22%"></span><span style="height:36%"></span><span style="height:29%"></span><span style="height:52%"></span><span style="height:43%"></span><span style="height:68%"></span><span style="height:61%"></span><span style="height:88%"></span></div>
+   <div class="oc-coin oc-coin-btc">₿</div><div class="oc-coin oc-coin-eth">◆</div><div class="oc-coin oc-coin-usdt">₮</div>
+   <div class="oc-profit-chip"><span>MARKET MOMENTUM</span><strong>↗ Explore opportunities</strong></div>
+   <svg class="oc-hero-person" viewBox="0 0 340 340" role="img" aria-label="Illustration of a person celebrating crypto gains">
+    <defs><linearGradient id="ocJacket" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#167fba"/><stop offset="1" stop-color="#102846"/></linearGradient><linearGradient id="ocSkin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b9774e"/><stop offset="1" stop-color="#754027"/></linearGradient></defs>
+    <ellipse cx="174" cy="312" rx="112" ry="15" fill="#00d5ff" opacity=".15"/>
+    <path d="M80 300 Q86 218 130 204 L206 202 Q255 223 268 300Z" fill="url(#ocJacket)" stroke="#39c8ff" stroke-opacity=".6" stroke-width="2"/>
+    <path d="M128 208 L166 255 L205 207 L219 300 L114 300Z" fill="#071728"/>
+    <path d="M142 171 L143 215 L173 240 L204 213 L200 168Z" fill="url(#ocSkin)"/>
+    <path d="M118 98 Q120 48 175 47 Q231 51 229 111 L218 159 Q204 187 173 187 Q139 183 124 151Z" fill="url(#ocSkin)"/>
+    <path d="M117 115 Q96 65 139 39 Q183 15 220 48 Q246 71 226 113 L216 85 Q186 75 165 58 Q149 83 123 88Z" fill="#171b25"/>
+    <path d="M134 116 Q145 108 156 116 M187 116 Q199 108 211 115" fill="none" stroke="#251811" stroke-width="5" stroke-linecap="round"/>
+    <path d="M158 145 Q178 159 198 141" fill="none" stroke="#4b211a" stroke-width="5" stroke-linecap="round"/>
+    <path d="M111 222 Q75 194 70 152 L91 143 Q112 176 143 187 L151 218Z" fill="url(#ocJacket)"/>
+    <path d="M224 220 Q246 176 246 146 L265 148 Q276 196 250 241Z" fill="url(#ocJacket)"/>
+    <path d="M67 154 Q49 145 54 127 Q58 112 74 118 L92 133 Q99 146 86 156Z" fill="url(#ocSkin)"/>
+    <path d="M247 148 Q243 132 253 123 Q267 117 275 132 L269 153Z" fill="url(#ocSkin)"/>
+    <rect x="248" y="155" width="25" height="42" rx="5" transform="rotate(10 248 155)" fill="#0b0e14" stroke="#57d8ff" stroke-width="2"/>
+    <circle cx="261" cy="189" r="2" fill="#57d8ff"/>
+   </svg>
+   <div class="oc-floating-term oc-term-one">SMARTER TRADES</div><div class="oc-floating-term oc-term-two">STAY CURIOUS</div><div class="oc-floating-term oc-term-three">MARKET INSIGHT</div>
+  </div>
+ </section>
+
  <div class="cards">
   <div class="card"><div class="label">Practice balance</div><div class="big" id="homeSummaryBalance">$10,000.00</div><div class="muted tiny">Simulated practice funds</div></div>
   <div class="card"><div class="label">Active coins</div><div class="big" id="homeActiveCoinCount">—</div><div class="muted tiny">Public market prices</div></div>
