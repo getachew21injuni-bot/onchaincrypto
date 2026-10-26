@@ -1724,3 +1724,81 @@ td,th{overflow-wrap:anywhere}
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
 </style>
+
+
+<script id="oc-invite-referral-and-auth-gate">
+(function(){
+  const $ = id => document.getElementById(id);
+  const params = new URLSearchParams(window.location.search);
+  const incomingReferral = (params.get('ref') || params.get('referral') || '').trim().replace(/[^a-z0-9_-]/gi,'').slice(0,40);
+  if (incomingReferral) {
+    try { sessionStorage.setItem('oc_incoming_referral', incomingReferral); } catch(e) {}
+  }
+  function applyReferral(){
+    const input = $('referralCode');
+    if (!input || input.dataset.ocReferralTouched === 'yes') return;
+    let code = incomingReferral;
+    try { code = code || sessionStorage.getItem('oc_incoming_referral') || ''; } catch(e) {}
+    if (code && !input.value) input.value = code;
+    input.addEventListener('input', () => { input.dataset.ocReferralTouched = 'yes'; }, {once:true});
+  }
+  function referralCodeFor(user){
+    const raw = String(user && (user.uid || user.email || user.phoneNumber) || 'guest').replace(/[^a-z0-9]/gi,'').toUpperCase();
+    return 'OC' + raw.slice(-10);
+  }
+  function buildInvitePanel(user){
+    const profile = $('page-profile');
+    if (!profile) return;
+    let panel = $('ocInviteReferralPanel');
+    if (!panel) {
+      panel = document.createElement('section');
+      panel.id = 'ocInviteReferralPanel';
+      panel.className = 'panel form-panel';
+      panel.style.cssText = 'margin:16px 0;padding:18px;border:1px solid #2c6b8b;background:linear-gradient(145deg,#0b2036,#071321);border-radius:14px';
+      panel.innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#103d48;color:#42e8ff;font-size:24px">↗</span><div><h2 style="margin:0;font-size:19px">Invite & Referral</h2><p class="muted tiny" style="margin:3px 0 0">Share your personal invite link with friends.</p></div></div><label for="ocInviteLink">Your invite link</label><input id="ocInviteLink" class="field" readonly aria-label="Your personal invite link"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="primary" id="ocCopyInvite">Copy invite link</button><button type="button" class="secondary" id="ocShareInvite">Share invite</button></div><p class="muted tiny" id="ocInviteStatus" aria-live="polite" style="margin:10px 0 0"></p><p class="muted tiny" style="margin:8px 0 0">Referral codes are used to prefill the signup form. Referral tracking or rewards are not activated unless a secure backend is added.</p>';
+      const logout = profile.querySelector('#profileLogoutBtn');
+      if (logout && logout.parentNode) logout.parentNode.insertBefore(panel, logout);
+      else profile.appendChild(panel);
+      $('ocCopyInvite').addEventListener('click', async function(){
+        const field=$('ocInviteLink'), status=$('ocInviteStatus');
+        try { await navigator.clipboard.writeText(field.value); status.textContent='Invite link copied.'; }
+        catch(e) { field.focus(); field.select(); try { document.execCommand('copy'); status.textContent='Invite link copied.'; } catch(_) { status.textContent='Select and copy the link above.'; } }
+      });
+      $('ocShareInvite').addEventListener('click', async function(){
+        const data={title:'Join OnChainCrypto',text:'Create your OnChainCrypto account using my invite link:',url:$('ocInviteLink').value};
+        const status=$('ocInviteStatus');
+        if(navigator.share){try{await navigator.share(data);status.textContent='Invite shared.';}catch(e){if(e.name!=='AbortError')status.textContent='Sharing was cancelled or unavailable.';}}
+        else {try{await navigator.clipboard.writeText(data.url);status.textContent='Sharing is unavailable here, so the invite link was copied.';}catch(e){status.textContent='Copy the invite link above and send it to your friends.';}}
+      });
+    }
+    const signedIn = !!user;
+    const code = signedIn ? referralCodeFor(user) : '';
+    const link = new URL(window.location.pathname, window.location.origin);
+    if (code) link.searchParams.set('ref',code);
+    const field = $('ocInviteLink');
+    if (field) field.value = signedIn ? link.href : 'Sign in to create your personal invite link';
+    panel.classList.toggle('hidden', !signedIn);
+  }
+  window.ocRefreshReferral = buildInvitePanel;
+  const originalShowPage = window.showPage;
+  if (typeof originalShowPage === 'function') {
+    window.showPage = function(page){
+      if (page !== 'register' && !window.onchaincryptoCurrentUser) {
+        window.ocPendingPage = page;
+        applyReferral();
+        originalShowPage('register');
+        $('showRegisterBtn')?.click();
+        return;
+      }
+      return originalShowPage(page);
+    };
+  }
+  applyReferral();
+  if (typeof window.showPage === 'function' && !window.onchaincryptoCurrentUser) {
+    window.showPage('register');
+    $('showRegisterBtn')?.click();
+  }
+  document.addEventListener('DOMContentLoaded', applyReferral);
+  setInterval(applyReferral, 700);
+})();
+</script>
