@@ -637,13 +637,13 @@ let market=[], filter="all", selected="BTC", watchlist=new Set(JSON.parse(localS
 let state=JSON.parse(localStorage.getItem("oc_demo_state")||"null")||{balance:0,holdings:{},history:[]};
 let profile=JSON.parse(localStorage.getItem("oc_profile")||'{"name":"","currency":"USD"}');
 function saveState(){localStorage.setItem("oc_demo_state",JSON.stringify(state))}
-// One-time $10,000 virtual demo-credit grant per browser profile; never real funds.
-if(localStorage.getItem("oc_demo_credit_10000_v1")!=="granted"){
- state.balance=Math.max(0,Number(state.balance)||0)+10000;
- saveState();
- try{const activity=JSON.parse(localStorage.getItem("oc_activity_history")||"[]");activity.unshift({id:"demo-credit-10000-"+Date.now(),type:"activity",title:"$10,000 Demo Credit",details:"One-time virtual trading balance credit; no real money.",status:"Credited",time:new Date().toISOString()});localStorage.setItem("oc_activity_history",JSON.stringify(activity.slice(0,1000)))}catch(e){}
- localStorage.setItem("oc_demo_credit_10000_v1","granted");
+// Remove the earlier automatic $10,000 demo grant for browsers that already received it.
+if(localStorage.getItem("oc_demo_credit_10000_v1")==="granted"){
+ state.balance=Math.max(0,(Number(state.balance)||0)-10000);saveState();
+ try{const activity=JSON.parse(localStorage.getItem("oc_activity_history")||"[]");localStorage.setItem("oc_activity_history",JSON.stringify(activity.filter(a=>a.id&&!String(a.id).startsWith("demo-credit-10000-")&&a.title!=="$10,000 Demo Credit").slice(0,1000)))}catch(e){}
+ localStorage.removeItem("oc_demo_credit_10000_v1");
 }
+// Demo balance is not automatically credited; each user starts with zero unless explicitly granted.
 function readActivity(){try{return JSON.parse(localStorage.getItem("oc_activity_history")||"[]")}catch(e){return []}}
 function recordActivity(type,title,details,status="Recorded"){const items=readActivity();items.unshift({id:Date.now()+"-"+Math.random().toString(36).slice(2,7),type,title,details,status,time:new Date().toISOString()});localStorage.setItem("oc_activity_history",JSON.stringify(items.slice(0,1000)));renderActivityHistory()}
 function renderActivityHistory(){const el=$("walletHistory");if(!el)return;const filter=$("historyFilter")?.value||"all";const trades=state.history.map(t=>({type:"trade",title:(t.side||"trade").toUpperCase()+" "+String(t.symbol||""),details:money(t.amount)+" · "+Number(t.qty||0).toFixed(8)+" coins @ "+money(t.price),status:"Paper trade",time:t.time||new Date().toISOString()}));const all=[...trades,...readActivity()].sort((a,b)=>new Date(b.time)-new Date(a.time));const rows=all.filter(x=>filter==="all"||x.type===filter||((filter==="activity")&&x.type==="activity"));el.innerHTML=rows.length?rows.map(x=>'<div class="list-row"><div><strong>'+safe(x.title||x.type)+'</strong><div class="muted tiny">'+new Date(x.time).toLocaleString()+' · '+safe(x.status||"Recorded")+'</div><div class="muted tiny">'+safe(x.details||"") +'</div></div><span class="tag">'+safe((x.type||"activity").toUpperCase())+'</span></div>').join(""):'<div class="empty">No '+(filter==="all"?"activity":safe(filter)+" activity")+' recorded yet.</div>'}
