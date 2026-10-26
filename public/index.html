@@ -467,7 +467,7 @@ ChainCrypto</h3>
     <div class="content-grid">
       <section class="panel form-panel auth-main-panel">
         <div id="authModeIntro"><h2>Sign in to your account</h2><p class="muted tiny">Enter your email and password to continue.</p></div>
-        <div id="registrationMethodOptions" class="hidden" style="display:flex;gap:10px;flex-wrap:wrap;margin:14px 0"><button type="button" class="secondary" id="chooseEmailRegistration">Register with Email</button><button type="button" class="secondary" id="choosePhoneRegistration">Register with Phone</button></div>
+        
         <p class="muted tiny">Register with email and password without an email-verification step, or use the phone panel to confirm an SMS code. This uses Firebase Authentication only; Firestore and Cloud Functions are not required for sign-in. Real-money trading and online balances are not enabled.</p>
         <div id="authStatus" class="notice">Checking sign-in status…</div>
         <p id="registerMessage" class="muted tiny" aria-live="polite"></p>
@@ -476,7 +476,7 @@ ChainCrypto</h3>
           <p class="muted tiny">Join the OnChainCrypto institutional trading platform.</p>
           <label for="registerFirstName">First name <span class="yellow">(required)</span></label><input id="registerFirstName" class="field" maxlength="50" autocomplete="given-name" required placeholder="Enter your first name">
           <label for="registerLastName">Last name <span class="yellow">(required)</span></label><input id="registerLastName" class="field" maxlength="50" autocomplete="family-name" required placeholder="Enter your last name">
-          <label for="registerEmail">Email address <span class="yellow">(required for email registration)</span></label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com">
+          <label for="registerEmail">Email address</label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com"><div class="oc-register-contact-choice"><label for="registerContactMethod">Register using</label><select id="registerContactMethod" class="field" aria-label="Choose email or phone"><option value="email">✉ Email</option><option value="phone">☎ Phone</option></select></div>
           <p class="muted tiny">No email-verification link is required. To register using a phone number instead, use the SMS panel below.</p>
           <label for="registerPassword">Password <span class="yellow">(required)</span></label><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="Create a password (8+ characters)">
           <label for="referralCode">Referral code <span class="muted tiny">(optional)</span></label><input id="referralCode" class="field" maxlength="40" autocomplete="off" placeholder="Enter referral code if you have one">
@@ -1211,7 +1211,7 @@ setTimeout(() => {
   const intro=document.getElementById('authModeIntro'), heading=document.getElementById('authHeading'), sub=document.getElementById('authSubheading');
   const google=document.getElementById('googleSignInBtn'), googleHint=document.querySelector('.auth-google-hint');
   const methodOptions=document.getElementById("registrationMethodOptions"), phonePanel=document.getElementById("phoneRegistrationPanel");
-  function setRegistrationMethod(method){const phone=method==="phone";if(methodOptions)methodOptions.classList.remove("hidden");register.classList.toggle("hidden",phone);if(phonePanel){phonePanel.classList.toggle("hidden",!phone);phonePanel.open=phone;}register.querySelectorAll("input").forEach(el=>{el.disabled=phone;});if(phonePanel)phonePanel.querySelectorAll("input").forEach(el=>{el.disabled=!phone;});}
+  function setRegistrationMethod(method){const phone=method==="phone";register.classList.toggle("oc-phone-mode",phone);register.classList.remove("hidden");const contact=document.getElementById("registerContactMethod");if(contact)contact.value=phone?"phone":"email";const email=document.getElementById("registerEmail");if(email){email.required=!phone;email.disabled=phone;}register.querySelectorAll("input").forEach(el=>{if(el.id!=="registerEmail")el.disabled=phone;});if(phonePanel){phonePanel.classList.toggle("hidden",!phone);phonePanel.open=phone;phonePanel.querySelectorAll("input").forEach(el=>{el.disabled=!phone;});}}
   const registerSwitch=document.getElementById('registerSwitchText'), switchText=document.getElementById('authSwitchText');
   if(!signIn||!register)return;
   function setMode(mode){
@@ -1231,8 +1231,8 @@ setTimeout(() => {
     if(sub)sub.textContent=creating?'Set up your account to continue.':'Access your crypto dashboard securely.';
   }
   document.getElementById('showRegisterBtn')?.addEventListener('click',()=>setMode('register'));
-  document.getElementById("chooseEmailRegistration")?.addEventListener("click",()=>setRegistrationMethod("email"));
-  document.getElementById("choosePhoneRegistration")?.addEventListener("click",()=>setRegistrationMethod("phone"));
+  document.getElementById("registerContactMethod")?.addEventListener("change",e=>setRegistrationMethod(e.target.value));
+  
   document.getElementById('signin-nav')?.addEventListener('click',()=>{setMode('signin');document.getElementById('signInEmail')?.focus();});
   document.getElementById('showSignInBtn')?.addEventListener('click',()=>setMode('signin'));
   document.getElementById('showSignInPassword')?.addEventListener('change',e=>{const p=document.getElementById('signInPassword');if(p)p.type=e.target.checked?'text':'password';});
@@ -1429,3 +1429,35 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+
+<style id="oc-register-contact-choice-style">
+.oc-register-contact-choice{margin:10px 0 14px;display:grid;gap:6px}
+.oc-register-contact-choice label{font-size:13px;color:var(--muted)}
+.oc-register-contact-choice select{width:100%;min-height:44px}
+#registerForm.oc-phone-mode>*:not(.oc-register-contact-choice){display:none!important}
+#registerForm.oc-phone-mode .oc-register-contact-choice{display:grid!important}
+@media(max-width:560px){.oc-register-contact-choice select{min-height:46px}}
+</style>
+<script id="oc-register-contact-choice-script">
+(function(){
+ const form=document.getElementById('registerForm');
+ const selector=document.getElementById('registerContactMethod');
+ const email=document.getElementById('registerEmail');
+ const panel=document.getElementById('phoneRegistrationPanel');
+ if(!form||!selector||!email||!panel)return;
+ function sync(){
+   const phone=selector.value==='phone';
+   form.classList.toggle('oc-phone-mode',phone);
+   email.required=!phone;
+   email.disabled=phone;
+   panel.classList.toggle('hidden',!phone);
+   panel.open=phone;
+   panel.querySelectorAll('input').forEach(el=>el.disabled=!phone);
+   form.querySelectorAll('input').forEach(el=>{if(el!==email)el.disabled=phone;});
+ }
+ selector.addEventListener('change',sync);
+ document.getElementById('showRegisterBtn')?.addEventListener('click',()=>{selector.value='email';sync();});
+ document.getElementById('registerLoginBtn')?.addEventListener('click',()=>{selector.value='email';sync();});
+ sync();
+})();
+</script>
