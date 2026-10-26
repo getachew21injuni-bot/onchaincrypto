@@ -2480,3 +2480,30 @@ main:has(> #page-withdraw:not(.hidden)) #levelMessage {
   display: none !important;
 }
 </style>
+
+
+<style id="oc-hide-trade-level-on-nontrade-pages">
+/* Trading-level UI must never appear in Register, Wallet, Deposit, or Withdraw. */
+main:has(> #page-register:not(.hidden)) #quickAutoLevel,
+main:has(> #page-register:not(.hidden)) #quickAutoRange,
+main:has(> #page-register:not(.hidden)) .level-grid,
+main:has(> #page-register:not(.hidden)) .level-card,
+main:has(> #page-register:not(.hidden)) .oc-workspace-levels,
+main:has(> #page-wallet:not(.hidden)) #quickAutoLevel,
+main:has(> #page-wallet:not(.hidden)) #quickAutoRange,
+main:has(> #page-wallet:not(.hidden)) .level-grid,
+main:has(> #page-wallet:not(.hidden)) .level-card,
+main:has(> #page-wallet:not(.hidden)) .oc-workspace-levels,
+main:has(> #page-deposit:not(.hidden)) #quickAutoLevel,
+main:has(> #page-deposit:not(.hidden)) #quickAutoRange,
+main:has(> #page-deposit:not(.hidden)) .level-grid,
+main:has(> #page-deposit:not(.hidden)) .level-card,
+main:has(> #page-deposit:not(.hidden)) .oc-workspace-levels,
+main:has(> #page-withdraw:not(.hidden)) #quickAutoLevel,
+main:has(> #page-withdraw:not(.hidden)) #quickAutoRange,
+main:has(> #page-withdraw:not(.hidden)) .level-grid,
+main:has(> #page-withdraw:not(.hidden)) .level-card,
+main:has(> #page-withdraw:not(.hidden)) .oc-workspace-levels {
+  display: none !important;
+}
+</style>
