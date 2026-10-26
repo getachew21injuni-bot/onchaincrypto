@@ -55,6 +55,11 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 
 
 .trade-pair-picker{position:relative;min-width:210px}.trade-pair-trigger{display:inline-flex;align-items:center;gap:10px;background:transparent;color:var(--text);padding:0;margin:0 0 4px;font-size:21px;font-weight:800;letter-spacing:-.3px;border-radius:6px}.trade-pair-trigger:hover,.trade-pair-trigger[aria-expanded="true"]{color:var(--yellow)}.trade-pair-trigger span{font-size:15px;color:var(--yellow)}.trade-pair-menu{position:absolute;z-index:30;top:calc(100% + 9px);left:0;width:min(340px,calc(100vw - 48px));padding:12px;background:#09182a;border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 44px #0009}.trade-pair-search-label{display:block;margin:0 0 7px;color:var(--muted);font-size:12px}.trade-pair-search{width:100%;min-width:0;margin-bottom:9px}.trade-pair-options{max-height:310px;overflow:auto;display:flex;flex-direction:column;gap:4px}.trade-pair-option{width:100%;display:flex;align-items:center;gap:10px;text-align:left;padding:9px;background:transparent;color:var(--text);border:1px solid transparent;border-radius:8px}.trade-pair-option:hover,.trade-pair-option.selected{background:var(--panel2);border-color:var(--yellow)}.trade-pair-option .trade-pair-option-name{display:flex;flex:1;min-width:0;flex-direction:column}.trade-pair-option small{color:var(--muted);font-size:11px;font-weight:400}.trade-pair-option .trade-pair-price{font-size:12px;font-weight:700}.trade-pair-empty{padding:12px;color:var(--muted);font-size:12px}@media(max-width:600px){.trade-pair-trigger{font-size:19px}.trade-pair-menu{width:min(320px,calc(100vw - 36px))}}
+
+/* Compact spacing between the selected trading pair and chart */
+#page-trade .chart-area{padding:12px;}
+#page-trade .chart-area > .page-title{margin-bottom:4px;}
+#page-trade .chart-area > .chart-wrap{margin-top:4px;}
 </style>
 <!-- Refresh deployment check: 2026-10-20T19:44Z -->
 <style id="oc-home-quick-actions-colors">
