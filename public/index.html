@@ -1983,6 +1983,19 @@ main:has(> #page-browser:not(.hidden)) #quickAutoRange {
   display: none !important;
 }
 </style>
+
+<!-- Simplify technical provider/status messaging without removing privacy controls or important account disclosures -->
+<style id="oc-hide-technical-status-noise">
+/* Hide technical connection/provider details from the normal customer interface. */
+.header-right > .optional:has(#connection),
+#page-markets section.panel:has(#apiStatus),
+#page-markets .section-head:has(#retryBtn) > span,
+#page-markets #lastUpdate,
+#page-markets .page-title .muted:has(#lastUpdate) {
+  display: none !important;
+}
+/* Keep the account privacy/security controls and meaningful financial safety notices available. */
+</style>
 </body>
 </html>
 
