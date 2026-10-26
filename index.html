@@ -2495,3 +2495,13 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
     display: none !important;
   }
 </style>
+
+<!-- Hide the unwanted Recent demo orders and Trading levels sections from the customer-facing pages -->
+<style id="oc-hide-demo-orders-and-trading-levels">
+  section:has(#tradeHistory),
+  section:has(.level-grid),
+  #tradeHistory,
+  .level-grid {
+    display: none !important;
+  }
+</style>
