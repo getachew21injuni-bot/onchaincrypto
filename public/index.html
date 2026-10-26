@@ -2457,3 +2457,26 @@ main:has(> #page-withdraw:not(.hidden)) #timedPaperTrade {
 }
 #page-wallet .wallet-action:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 </style>
+
+
+<style id="oc-clean-nontrade-pages">
+/* Keep trading controls and performance panels off Register, Wallet, Deposit and Withdraw. */
+main:has(> #page-register:not(.hidden)) #timedPaperTrade,
+main:has(> #page-register:not(.hidden)) .performance-panel,
+main:has(> #page-register:not(.hidden)) .oc-workspace-levels,
+main:has(> #page-register:not(.hidden)) #levelMessage,
+main:has(> #page-wallet:not(.hidden)) #timedPaperTrade,
+main:has(> #page-wallet:not(.hidden)) .performance-panel,
+main:has(> #page-wallet:not(.hidden)) .oc-workspace-levels,
+main:has(> #page-wallet:not(.hidden)) #levelMessage,
+main:has(> #page-deposit:not(.hidden)) #timedPaperTrade,
+main:has(> #page-deposit:not(.hidden)) .performance-panel,
+main:has(> #page-deposit:not(.hidden)) .oc-workspace-levels,
+main:has(> #page-deposit:not(.hidden)) #levelMessage,
+main:has(> #page-withdraw:not(.hidden)) #timedPaperTrade,
+main:has(> #page-withdraw:not(.hidden)) .performance-panel,
+main:has(> #page-withdraw:not(.hidden)) .oc-workspace-levels,
+main:has(> #page-withdraw:not(.hidden)) #levelMessage {
+  display: none !important;
+}
+</style>
