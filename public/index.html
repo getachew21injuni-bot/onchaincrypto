@@ -321,6 +321,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
     <section class="panel" id="liveOrderBookPanel">
       <div class="section-head"><div><h2>Order Book</h2><div class="muted tiny"><span id="orderBookPair">BTC/USDT</span> · refreshed with public market price</div></div><span class="tag" id="orderBookStatus">WAITING</span></div>
       <div class="table-wrap"><table><thead><tr><th>PRICE (USDT approx.)</th><th>QTY (indicative)</th><th>Side</th></tr></thead><tbody id="liveOrderBookRows"><tr><td colspan="3" class="empty">Waiting for public market data…</td></tr></tbody></table></div>
+      <div class="oc-orderbook-actions" aria-label="Trade direction"><button type="button" class="buy" data-oc-book-direction="buy">↗ Buy</button><button type="button" class="sell" data-oc-book-direction="sell">↘ Sell</button></div>
       <p class="muted tiny">Public market feeds provide prices, not exchange order-by-order depth here. These are indicative levels calculated around the current price—not live executable orders.</p>
     </section>
     <section class="panel" id="timedPaperTrade"><div class="section-head"><div><h2>Quick Trade</h2><div class="muted tiny">One simple trade form. Choose a coin, amount, duration, then Buy or Sell.</div></div><span class="tag">PAPER TRADING</span></div>
@@ -2651,3 +2652,30 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
     display: none !important;
   }
 </style>
+
+
+<style id="oc-orderbook-buy-sell-actions">
+#liveOrderBookPanel .oc-orderbook-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 4px}
+#liveOrderBookPanel .oc-orderbook-actions button{min-height:44px;border:0;border-radius:9px;font-weight:850;font-size:15px;cursor:pointer}
+#liveOrderBookPanel .oc-orderbook-actions .buy{background:#16d9a0;color:#041c17}
+#liveOrderBookPanel .oc-orderbook-actions .sell{background:#ff5573;color:#fff}
+#liveOrderBookPanel .oc-orderbook-actions button:focus-visible{outline:2px solid #eaf6ff;outline-offset:2px}
+</style>
+<script id="oc-orderbook-open-trade-plan">
+(function(){
+ if(window.__ocOrderbookOpenTradePlan)return;window.__ocOrderbookOpenTradePlan=true;
+ document.addEventListener('click',function(e){
+  const btn=e.target.closest('[data-oc-book-direction]');if(!btn)return;
+  const direction=btn.dataset.ocBookDirection;
+  if(typeof window.showPage==='function')window.showPage('trade');
+  const form=document.getElementById('timedPaperTrade');
+  const directionButton=document.getElementById(direction==='buy'?'timedUpBtn':'timedDownBtn');
+  if(!form||!directionButton)return;
+  form.classList.remove('hidden');directionButton.click();
+  window.setTimeout(function(){
+   const plans=document.getElementById('ocInvestmentPlanPicker');
+   (plans&&!plans.classList.contains('hidden')?plans:form).scrollIntoView({behavior:'smooth',block:'center'});
+  },120);
+ });
+})();
+</script>
