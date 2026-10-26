@@ -1756,22 +1756,23 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <style id="oc-active-pairs-bold-style">
+/* Keep active trading pairs at a normal, compact card size. */
 #page-home #homeActivePairs{overflow:visible}
-#page-home #homeActivePairs .oc-active-pair-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:4px 0}
-#page-home #homeActivePairs .oc-active-pair{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 10px;align-items:center;min-width:0;padding:15px;border:1px solid #245269;border-radius:15px;background:linear-gradient(145deg,#0a2030,#06111d 75%);text-align:left;color:#f4fbff;cursor:pointer;box-shadow:inset 0 1px #ffffff0a;transition:transform .18s,border-color .18s}
+#page-home #homeActivePairs .oc-active-pair-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:4px 0}
+#page-home #homeActivePairs .oc-active-pair{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px;align-items:center;min-width:0;padding:10px;border:1px solid #245269;border-radius:12px;background:linear-gradient(145deg,#0a2030,#06111d 75%);text-align:left;color:#f4fbff;cursor:pointer;box-shadow:inset 0 1px #ffffff0a;transition:transform .18s,border-color .18s}
 #page-home #homeActivePairs .oc-active-pair:hover{transform:translateY(-2px);border-color:#00d9a0}
-#page-home #homeActivePairs .oc-active-pair .coin-icon{grid-row:1 / span 2;width:42px;height:42px;font-size:14px}
+#page-home #homeActivePairs .oc-active-pair .coin-icon{grid-row:1 / span 2;width:28px;height:28px;font-size:12px}
 #page-home #homeActivePairs .oc-active-pair .coin-icon img{width:100%;height:100%;object-fit:contain}
 #page-home #homeActivePairs .oc-active-pair .coin-icon{display:grid;place-items:center;overflow:hidden;background:transparent;border:0;box-shadow:none}
 #page-home #homeActivePairs .oc-active-pair .coin-icon img{display:block;filter:none!important;mix-blend-mode:normal;opacity:1;background:transparent;border-radius:50%}
-#page-home #homeActivePairs .oc-pair-name{font-size:14px;font-weight:900;letter-spacing:.25px;overflow-wrap:anywhere}
-#page-home #homeActivePairs .oc-pair-price{font-size:14px;font-weight:850;font-variant-numeric:tabular-nums}
-#page-home #homeActivePairs .oc-pair-bottom{grid-column:1 / -1;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:3px}
-#page-home #homeActivePairs .oc-pair-change{font-size:15px;font-weight:900;font-variant-numeric:tabular-nums}
-#page-home #homeActivePairs .oc-pair-spark{width:86px;height:27px;flex-shrink:0;overflow:visible}
-#page-home #homeActivePairs .oc-pair-signal{grid-column:1 / -1;font-size:10px;font-weight:900;letter-spacing:.8px}
-@media(max-width:760px){#page-home #homeActivePairs .oc-active-pair-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#page-home #homeActivePairs .oc-active-pair{padding:11px}#page-home #homeActivePairs .oc-active-pair .coin-icon{width:34px;height:34px}}
-@media(max-width:360px){#page-home #homeActivePairs .oc-pair-spark{width:62px}}
+#page-home #homeActivePairs .oc-pair-name{font-size:12px;font-weight:800;letter-spacing:.1px;overflow-wrap:anywhere}
+#page-home #homeActivePairs .oc-pair-price{font-size:12px;font-weight:750;font-variant-numeric:tabular-nums}
+#page-home #homeActivePairs .oc-pair-bottom{grid-column:1 / -1;display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:2px}
+#page-home #homeActivePairs .oc-pair-change{font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+#page-home #homeActivePairs .oc-pair-spark{width:64px;height:20px;flex-shrink:0;overflow:visible}
+#page-home #homeActivePairs .oc-pair-signal{grid-column:1 / -1;font-size:9px;font-weight:800;letter-spacing:.4px}
+@media(max-width:760px){#page-home #homeActivePairs .oc-active-pair-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#page-home #homeActivePairs .oc-active-pair{padding:9px}#page-home #homeActivePairs .oc-active-pair .coin-icon{width:26px;height:26px}}
+@media(max-width:360px){#page-home #homeActivePairs .oc-pair-spark{width:52px}}
 </style>
 <script id="oc-active-pairs-bold-script">
 (function(){
