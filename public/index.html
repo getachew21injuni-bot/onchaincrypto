@@ -116,7 +116,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 </head>
 <body>
 <header>
-  <div class="brand"><div class="auth-logo-mark header-logo-mark" aria-hidden="true"><svg viewBox="0 0 120 120" role="img"><defs><linearGradient id="authLogoGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#42e8ff"/><stop offset="1" stop-color="#3678ff"/></linearGradient></defs><circle cx="60" cy="60" r="51" fill="#071522" stroke="url(#authLogoGradient)" stroke-width="3"/><path d="M73 35a29 29 0 1 0 0 50" fill="none" stroke="url(#authLogoGradient)" stroke-width="10" stroke-linecap="round"/><path d="M87 43a21 21 0 1 0 0 34" fill="none" stroke="#42e8ff" stroke-width="8" stroke-linecap="round"/><path d="M45 60h29" stroke="#e8fbff" stroke-width="5" stroke-linecap="round"/><circle cx="88" cy="31" r="5" fill="#42e8ff"/></svg></div> <span>OnChainCrypto</span></div>
+  <div class="brand"><div class="auth-logo-mark header-logo-mark" aria-hidden="true"><svg viewBox="0 0 120 120" role="img"><defs><linearGradient id="headerLogoGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#42e8ff"/><stop offset="1" stop-color="#3678ff"/></linearGradient></defs><circle cx="60" cy="60" r="51" fill="#071522" stroke="url(#headerLogoGradient)" stroke-width="3"/><path d="M73 35a29 29 0 1 0 0 50" fill="none" stroke="url(#headerLogoGradient)" stroke-width="10" stroke-linecap="round"/><path d="M87 43a21 21 0 1 0 0 34" fill="none" stroke="#42e8ff" stroke-width="8" stroke-linecap="round"/><path d="M45 60h29" stroke="#e8fbff" stroke-width="5" stroke-linecap="round"/><circle cx="88" cy="31" r="5" fill="#42e8ff"/></svg></div> <span>OnChainCrypto</span></div>
   <nav id="nav">
     <button class="active" data-page="home">Home</button>
     <button data-page="markets">Markets</button>
@@ -346,7 +346,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
     </section>
     <section class="panel wallet-assets-panel"><div class="section-head wallet-assets-heading"><div><h2>Your Assets</h2><p class="muted tiny">Your simulated balances at a glance</p></div><label class="wallet-hide-small"><input type="checkbox" id="hideSmallBalances"> Hide small balances</label></div><div class="table-wrap"><table><thead><tr><th>Asset</th><th>Amount owned</th><th>Value (USDT)</th></tr></thead><tbody id="holdingsRows"><tr><td colspan="3" class="empty">No crypto holdings yet. Place a paper trade to see your assets here.</td></tr></tbody></table></div></section>
     <section class="panel" id="walletActivityHistory" style="margin-top:18px"><div class="section-head"><div><h2>Activity History</h2><div class="muted tiny">Your recent account actions and paper trades</div></div><select id="historyFilter" class="field" style="max-width:155px"><option value="all">All activity</option><option value="trade">Trades</option><option value="deposit">Deposits</option><option value="withdraw">Withdrawals</option><option value="activity">Other actions</option></select></div><div id="walletHistory"><div class="empty">Your activity history will appear here.</div></div><p class="muted tiny">History is saved in this browser. It does not mean real funds moved.</p></section>
-<section class="panel" id="marketActivityHistory" hidden aria-hidden="true" style="display:none!important" style="margin-bottom:18px"><div class="section-head"><div><h2>Market Activity History</h2><div class="muted tiny">Recent public market-price updates on this device</div></div><button type="button" class="btn btn-secondary" id="clearMarketActivity" style="width:auto;padding:8px 12px">Clear</button></div><div id="marketActivityRows"><div class="empty">Waiting for market data…</div></div><p class="muted tiny" style="margin-top:12px">This records market price observations, not your deposits, withdrawals, or completed trades. History is stored locally in this browser.</p></section>
+<section class="panel" id="marketActivityHistory" hidden aria-hidden="true" style="display:none!important" style="margin-bottom:18px"><div class="section-head"><div><h2>Market Activity History</h2><div class="muted tiny">Recent public market-price updates on this device</div></div><button type="button" class="btn btn-secondary" id="clearMarketActivity" style="width:auto;padding:8px 12px">Clear</button></div><div id="marketPriceActivityRows"><div class="empty">Waiting for market data…</div></div><p class="muted tiny" style="margin-top:12px">This records market price observations, not your deposits, withdrawals, or completed trades. History is stored locally in this browser.</p></section>
 <script id="market-activity-history-script">
 (function(){
  const KEY="oc_market_activity_history_v1";
@@ -354,7 +354,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
  const safe=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  function read(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){return []}}
  function render(){
-  const el=document.getElementById("marketActivityRows");if(!el)return;
+  const el=document.getElementById("marketPriceActivityRows");if(!el)return;
   const items=read();
   el.innerHTML=items.length?items.slice(0,20).map(x=>'<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border,#263548)"><div style="min-width:0"><strong>'+safe(x.symbol)+' · '+safe(x.name)+'</strong><div class="muted tiny">'+safe(new Date(x.time).toLocaleString())+'</div></div><div style="text-align:right;white-space:nowrap"><strong>'+fmt(x.price)+'</strong><div class="'+(Number(x.change)>=0?"positive":"negative")+' tiny">'+(Number(x.change)>=0?"+":"")+Number(x.change||0).toFixed(2)+'% (24h)</div></div></div>').join(""):'<div class="empty">No market observations recorded yet. This list fills when public market prices load.</div>';
  }
@@ -532,14 +532,6 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
           </div>
           <div class="panel about-section">
             <h3 class="feature-heading"><span class="feature-symbol" style="--feature-color:#f0b90b" aria-hidden="true">◎</span>Follow OnChainCrypto</h3>
-            <p class="muted">Official Telegram, X (Twitter), YouTube and LinkedIn links will be added here after the accounts are verified.</p>
-          </div>
-        </div>
-      </details>
-      <button type="button" class="panel profile-menu-link profile-logout" id="profileLogoutBtn"><span class="profile-menu-icon">↪</span><span class="profile-menu-copy"><strong>Logout</strong><small>Sign out your account</small></span><span class="profile-menu-chevron">›</span></button>
-    </div>
-  </section>
-ChainCrypto</h3>
             <p class="muted">Official Telegram, X (Twitter), YouTube and LinkedIn links will be added here after the accounts are verified.</p>
           </div>
         </div>
@@ -1612,7 +1604,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #ocCloseTradeBoard{position:sticky;top:0;float:right;z-index:3}
 @media(max-width:560px){#timedResultBoard[style*="display: block"]{width:calc(100vw - 18px)!important;max-height:calc(100dvh - 18px)!important}}
 </style>
-<script id="oc-trade-choice-modal-fix">
+<script id="oc-trade-choice-modal-fix-script">
 (function(){
  const $=id=>document.getElementById(id);
  const up=$('timedUpBtn'),down=$('timedDownBtn');
