@@ -1385,3 +1385,68 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </script>
 </body>
 </html>
+
+<style id="activity-history-compact-styles">
+#walletActivityHistory .oc-history-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto}
+#walletActivityHistory .oc-history-controls button{width:auto;padding:7px 11px;font-size:12px;white-space:nowrap}
+#walletActivityHistory .oc-history-extra{display:none!important}
+#walletActivityHistory.oc-history-expanded .oc-history-extra{display:flex!important}
+#walletActivityHistory.oc-history-hidden #walletHistory,
+#walletActivityHistory.oc-history-hidden #historyFilter,
+#walletActivityHistory.oc-history-hidden>p{display:none!important}
+@media(max-width:560px){#walletActivityHistory .section-head{align-items:flex-start;flex-wrap:wrap}#walletActivityHistory .oc-history-controls{width:100%;margin-left:0}#walletActivityHistory .oc-history-controls button{flex:1}}
+</style>
+<script id="activity-history-compact-controls">
+(function(){
+  const init = () => {
+    const section = document.getElementById('walletActivityHistory');
+    const rows = document.getElementById('walletHistory');
+    if (!section || !rows || section.dataset.compactReady === '1') return;
+    section.dataset.compactReady = '1';
+    const head = section.querySelector('.section-head');
+    if (!head) return;
+    const controls = document.createElement('div');
+    controls.className = 'oc-history-controls';
+    controls.innerHTML = '<button type="button" class="btn btn-secondary" id="ocHistoryMore" aria-expanded="false">Show more</button><button type="button" class="btn btn-secondary" id="ocHistoryHide">Hide history</button>';
+    head.appendChild(controls);
+    let expanded = false;
+    let hidden = false;
+    const originalRender = window.renderActivityHistory;
+    function updateRows(){
+      const items = Array.from(rows.children);
+      items.forEach((item,index)=>{
+        item.classList.toggle('oc-history-extra', !expanded && index >= 5 && item.classList.contains('list-row'));
+      });
+      const more = document.getElementById('ocHistoryMore');
+      const hasMore = Array.from(rows.children).filter(x=>x.classList.contains('list-row')).length > 5;
+      more.style.display = hasMore && !hidden ? '' : 'none';
+      more.textContent = expanded ? 'Show less' : 'Show more';
+      more.setAttribute('aria-expanded', String(expanded));
+      const hide = document.getElementById('ocHistoryHide');
+      hide.textContent = hidden ? 'Show history' : 'Hide history';
+      section.classList.toggle('oc-history-expanded', expanded);
+      section.classList.toggle('oc-history-hidden', hidden);
+    }
+    document.getElementById('ocHistoryMore').addEventListener('click',()=>{
+      expanded = !expanded;
+      updateRows();
+    });
+    document.getElementById('ocHistoryHide').addEventListener('click',()=>{
+      hidden = !hidden;
+      if (!hidden) updateRows();
+      else updateRows();
+    });
+    if (typeof originalRender === 'function') {
+      window.renderActivityHistory = function(){
+        const result = originalRender.apply(this, arguments);
+        updateRows();
+        return result;
+      };
+    }
+    updateRows();
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
