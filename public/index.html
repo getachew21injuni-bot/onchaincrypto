@@ -1388,7 +1388,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  function planFor(amount){return levels.find((p,i)=>amount>=p.min&&(amount<p.max||(i===levels.length-1&&amount<=p.max)))||null}
  function validatePlan(){
   const amount=Number($("timedStake")?.value||0);
-  const balance=Number(window.state?.balance ?? 0);
+  const balance=Number(typeof state!=="undefined" ? state.balance : 0);
   const plan=planFor(amount);
   const gate=$("ocTradePlanGate");
   if(gate){
@@ -1400,7 +1400,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   const confirm=$("timedConfirmBtn");
   if(confirm){
    const blocked=!plan||balance<plan.min||amount>balance||amount<plan.min||amount>plan.max;
-   confirm.disabled=blocked||!window.pendingTimedDirection||!!window.timedPaper;
+   confirm.disabled=blocked||(typeof pendingTimedDirection==="undefined"||!pendingTimedDirection)||(typeof timedPaper!=="undefined"&&!!timedPaper);
   }
  }
  function enhanceBoard(){
@@ -1419,7 +1419,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   const amount=Number(String($("timedBoardAmount")?.textContent||"").replace(/[^0-9.\-]/g,""));
   const p=planFor(amount);
   const value=$("ocBoardPlanValue");
-  if(value)value.textContent=p?p.label+" · "+p.min.toLocaleString()+"–"+p.max.toLocaleString()+" USDT · "+p.rate+"% illustrative estimate · "+p.duration+" sec expiry":"Investment plan unavailable";
+  if(value){const next=p?p.label+" · "+p.min.toLocaleString()+"–"+p.max.toLocaleString()+" USDT · "+p.rate+"% illustrative estimate · "+p.duration+" sec expiry":"Investment plan unavailable";if(value.textContent!==next)value.textContent=next;}
  }
  const stake=$("timedStake");
  if(stake){
