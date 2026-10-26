@@ -214,6 +214,11 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
     <div class="trade-layout" style="display:block">
       <section class="panel"><div class="chart-area"><div class="page-title"><div><h2 id="tradePairTitle">BTC / USDT</h2><div class="muted tiny">Indicative public price</div></div><div><div class="big" id="tradeCurrentPrice">$—</div><div id="tradeCurrentChange" class="muted">—</div></div></div><div class="chart-wrap"><iframe id="tradingViewChart" class="tv-chart" title="TradingView cryptocurrency candlestick chart" loading="lazy" referrerpolicy="origin" allowfullscreen src="https://www.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCUSDT&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false"></iframe><p class="muted tiny">Chart availability depends on the selected pair and TradingView market coverage. This embed does not place orders.</p></div><div class="chart-wrap" id="trendOverviewWrap" style="display:none"><div class="muted tiny">7-day trend overview</div><canvas id="priceChart" height="220" aria-label="Recent cryptocurrency price chart"></canvas><div id="chartStatus" class="muted tiny">Loading recent price history…</div></div><div class="signal-box"><div class="section-head"><h3>Live market signal</h3><span class="tag">INDICATOR ONLY</span></div><div id="signalResult">Waiting for price history…</div><p class="muted tiny">Rule-based educational indicator from recent prices; not financial advice or a promise of returns.</p></div><div class="list-row"><span class="muted">Selected asset</span><strong id="tradeAssetName">Bitcoin</strong></div><div class="list-row"><span class="muted">Demo USD available</span><strong id="tradeAvailable">$10,000.00</strong></div></div></section>
     </div>
+    <section class="panel" id="liveOrderBookPanel">
+      <div class="section-head"><div><h2>Order Book</h2><div class="muted tiny"><span id="orderBookPair">BTC/USDT</span> · refreshed with public market price</div></div><span class="tag" id="orderBookStatus">WAITING</span></div>
+      <div class="table-wrap"><table><thead><tr><th>PRICE (USDT approx.)</th><th>QTY (indicative)</th><th>Side</th></tr></thead><tbody id="liveOrderBookRows"><tr><td colspan="3" class="empty">Waiting for public market data…</td></tr></tbody></table></div>
+      <p class="muted tiny">Public market feeds provide prices, not exchange order-by-order depth here. These are indicative levels calculated around the current price—not live executable orders.</p>
+    </section>
     <section class="panel" id="timedPaperTrade"><div class="section-head"><div><h2>Quick Trade</h2><div class="muted tiny">One simple trade form. Choose a coin, amount, duration, then Buy or Sell.</div></div><span class="tag">PAPER TRADING</span></div>
       <div class="form-panel">
         <label for="tradeAsset">Trading asset</label><select id="tradeAsset" class="field"></select>
@@ -1296,5 +1301,49 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
 </script>
 
 <script type="module" src="./support-chat.js"></script>
+<script id="home-performance-and-orderbook-script">
+(function(){
+ const $=id=>document.getElementById(id);
+ const fmt=n=>"$"+Number(n||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+ function getTrades(){try{return Array.isArray(window.state?.history)?window.state.history:[]}catch(_){return []}}
+ function renderPerformance(){
+  const canvas=$("home7dChart");if(!canvas)return;
+  const now=Date.now(),start=now-7*86400000,trades=getTrades().filter(t=>{const d=Date.parse(t.time||t.timestamp||t.date||"");return Number.isFinite(d)&&d>=start&&d<=now});
+  const pnl=t=>Number(t.pnl??t.profit??t.resultValue??t.netPnl??0)||0;
+  const wins=trades.filter(t=>String(t.result||t.status||"").toLowerCase().includes("win")||pnl(t)>0).length;
+  const total=trades.reduce((a,t)=>a+pnl(t),0);
+  if($("home7dTrades"))$("home7dTrades").textContent=String(trades.length);
+  if($("home7dWins"))$("home7dWins").textContent=String(wins);
+  if($("home7dPnl"))$("home7dPnl").textContent=(total>=0?"+":"")+fmt(total);
+  const dpr=window.devicePixelRatio||1,w=Math.max(280,canvas.clientWidth||320),h=180;
+  canvas.width=w*dpr;canvas.height=h*dpr;const c=canvas.getContext("2d");c.scale(dpr,dpr);c.clearRect(0,0,w,h);
+  const vals=Array.from({length:7},(_,i)=>{const dayStart=new Date(now-(6-i)*86400000);dayStart.setHours(0,0,0,0);const dayEnd=new Date(dayStart);dayEnd.setDate(dayEnd.getDate()+1);return getTrades().filter(t=>{const d=Date.parse(t.time||t.timestamp||t.date||"");return d>=dayStart.getTime()&&d<dayEnd.getTime()}).reduce((a,t)=>a+pnl(t),0)});
+  const max=Math.max(1,...vals.map(Math.abs)),pad=18,base=h/2;
+  c.strokeStyle="#26384f";c.lineWidth=1;for(let j=0;j<5;j++){const y=pad+j*(h-2*pad)/4;c.beginPath();c.moveTo(pad,y);c.lineTo(w-pad,y);c.stroke()}
+  c.strokeStyle="#25c985";c.lineWidth=2.5;c.beginPath();vals.forEach((v,i)=>{const x=pad+i*(w-2*pad)/6,y=base-v/max*(h/2-pad);i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke();
+  vals.forEach((v,i)=>{const x=pad+i*(w-2*pad)/6,y=base-v/max*(h/2-pad);c.fillStyle=v>=0?"#25c985":"#f6465d";c.beginPath();c.arc(x,y,3,0,Math.PI*2);c.fill()});
+ }
+ function renderBook(){
+  const host=$("liveOrderBookRows");if(!host)return;
+  const sym=String(window.selected||$("tradeAsset")?.value||"BTC").toUpperCase();
+  const coin=(Array.isArray(window.market)?window.market:[]).find(c=>String(c.symbol).toUpperCase()===sym);
+  const price=Number(coin?.current_price)||0;
+  if($("orderBookPair"))$("orderBookPair").textContent=sym+"/USDT";
+  if(!price){if($("orderBookStatus"))$("orderBookStatus").textContent="WAITING";host.innerHTML='<tr><td colspan="3" class="empty">Waiting for public market data…</td></tr>';return}
+  if($("orderBookStatus"))$("orderBookStatus").textContent="PRICE UPDATED";
+  const fmtPrice=n=>n.toLocaleString("en-US",{minimumFractionDigits:n<1?6:2,maximumFractionDigits:n<1?8:2});
+  const levels=[];
+  for(let i=5;i>=1;i--)levels.push({p:price*(1+i*0.00015),q:(0.01+i*0.0037),side:"SELL",color:"#f6465d"});
+  for(let i=1;i<=5;i++)levels.push({p:price*(1-i*0.00015),q:(0.012+i*0.0041),side:"BUY",color:"#00c087"});
+  host.innerHTML=levels.map(x=>'<tr><td style="color:'+x.color+';font-weight:750">'+fmtPrice(x.p)+'</td><td>'+x.q.toFixed(4)+'</td><td style="color:'+x.color+'">'+x.side+'</td></tr>').join("");
+ }
+ window.addEventListener("load",()=>{renderPerformance();renderBook()});
+ document.addEventListener("click",e=>{if(e.target.closest('[data-go="history"]'))setTimeout(renderPerformance,100)});
+ document.addEventListener("change",e=>{if(e.target&&e.target.id==="tradeAsset")renderBook()});
+ window.addEventListener("resize",renderPerformance);
+ const originalRender=window.renderMarket;
+ setInterval(()=>{renderPerformance();renderBook()},15000);
+})();
+</script>
 </body>
 </html>
