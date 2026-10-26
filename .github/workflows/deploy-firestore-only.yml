@@ -2,15 +2,9 @@ name: Deploy Firestore only (no Cloud Functions)
 # Keep this workflow triggered when Firestore rules are updated.
 
 on:
+  # Manual-only: deploy-firebase.yml handles automatic backend changes.
+  # This avoids duplicate Firestore deployments racing each other.
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - "firestore.rules"
-      - "firestore.indexes.json"
-      - "firebase.json"
-      - ".github/workflows/deploy-firestore-only.yml"
 
 permissions:
   contents: read
