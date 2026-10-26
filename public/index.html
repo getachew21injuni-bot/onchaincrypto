@@ -1971,6 +1971,18 @@ main:has(> #page-browser:not(.hidden)) #quickAutoRange {
   display: none !important;
 }
 </style>
+
+<!-- Hide duplicate demo-trading panels requested for a cleaner Home / Market experience -->
+<style id="oc-cleanup-duplicate-trade-panels">
+/* Keep the Home and Market pages focused; retain the existing main market chart and pair selector. */
+#homePerformancePanel,
+#page-trade #timedPaperTrade,
+#page-trade section:has(#tradeHistory),
+#page-trade .performance-panel,
+#page-trade section:has(.level-grid) {
+  display: none !important;
+}
+</style>
 </body>
 </html>
 
