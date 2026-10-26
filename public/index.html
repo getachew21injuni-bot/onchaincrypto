@@ -1190,7 +1190,7 @@ onAuthStateChanged(auth, (user) => {
   window.onchaincryptoCurrentUser = user || null;
    if (typeof window.ocRefreshReferral === "function") window.ocRefreshReferral(user || null);
    if (user) { window.showPage?.(window.ocPendingPage || "home"); window.ocPendingPage = null; }
-   else { window.showPage?.("register"); document.getElementById("showRegisterBtn")?.click(); }
+   else { window.ocPendingPage = null; }
   const status = document.getElementById("authStatus");
   const signOutBtn = document.getElementById("signOutBtn");
   const identity = user ? (user.displayName || user.email || user.phoneNumber || "Signed-in user") : "";
@@ -1783,12 +1783,8 @@ td,th{overflow-wrap:anywhere}
     panel.classList.toggle('hidden', !signedIn);
   }
   window.ocRefreshReferral = buildInvitePanel;
-  const originalShowPage = window.showPage;
-  if (typeof originalShowPage === 'function') {
-    window.showPage = function(page){
-      if (page !== 'register' && !window.onchaincryptoCurrentUser) {
-        window.ocPendingPage = page;
-        applyReferral();
+  // Public browsing remains available; registration is optional while the platform is being tested.
+  applyReferral();
         originalShowPage('register');
         $('showRegisterBtn')?.click();
         return;
@@ -1797,10 +1793,7 @@ td,th{overflow-wrap:anywhere}
     };
   }
   applyReferral();
-  if (typeof window.showPage === 'function' && !window.onchaincryptoCurrentUser) {
-    window.showPage('register');
-    $('showRegisterBtn')?.click();
-  }
+  // Do not force visitors into registration; keep the existing home page available.
   document.addEventListener('DOMContentLoaded', applyReferral);
   setInterval(applyReferral, 700);
 })();
