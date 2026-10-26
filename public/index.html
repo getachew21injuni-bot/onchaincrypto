@@ -2348,8 +2348,9 @@ td,th{overflow-wrap:anywhere}
    const planSel=$('timedPlan');if(planSel)planSel.value=String(p.rate);
    // Auto-select the default expiry for the newly detected amount; the user may then change it.
    if(duration&&duration.dataset.lastAutoLevel!==String(p.rate)){duration.value=String(p.duration);duration.dataset.lastAutoLevel=String(p.rate);}
-   if(typeof window.updateQuickEstimate==='function')window.updateQuickEstimate();
-   // updateQuickEstimate has its own basic button gating; re-apply strict validation afterward.
+   const estimate=$('quickEstimatedProfit');
+   if(estimate)estimate.textContent=(amount*p.rate/100).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT';
+   // Keep the user's chosen expiry unless the amount moves into a different level.
    if(confirm)confirm.disabled=amount<100||amount>1000000||amount>balance||!direction||!!window.__ocTradeSubmitting||!!(typeof timedPaper!=='undefined'&&timedPaper);
   }else{
    const out=$('quickEstimatedProfit');if(out)out.textContent='—';
