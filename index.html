@@ -274,7 +274,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 </script>
   </section>
   <section id="page-deposit" class="hidden">
-    <div class="page-title"><div><h1>↓ Deposit crypto</h1><div class="muted">Choose a coin, then use only an address verified for your account.</div></div><span class="tag">Address setup required</span></div>
+    <div class="page-title"><div><h1>↓ Deposit crypto</h1><div class="muted">Choose a coin, then use only an address verified for your account.</div></div><span class="tag">Deposit network selection</span></div>
     <section class="panel form-panel">
       <label for="depositCoinSearch">Search coins</label><input id="depositCoinSearch" class="field" placeholder="Search Bitcoin, Ethereum, XRP…" autocomplete="off">
       <div class="coin-list-controls coin-picker-controls"><span class="muted tiny" id="depositCoinCount">Showing 6 coins</span><div><button class="secondary" type="button" id="depositCoinLess" disabled>Less</button> <button class="primary" type="button" id="depositCoinMore">More +6</button></div></div>
@@ -283,11 +283,11 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
       <div class="selected-coin"><span id="depositCoinIcon" class="coin-icon">₿</span><div><strong id="depositCoinName">Bitcoin (BTC)</strong><div class="muted tiny">Selected deposit asset</div></div></div>
       <label for="depositNetwork">Network</label><select id="depositNetwork" class="field"><option value="Bitcoin">Bitcoin</option><option value="Ethereum">Ethereum</option><option value="TRC20">TRON (TRC20)</option><option value="ERC20">Ethereum (ERC20)</option><option value="BEP20">BNB Smart Chain (BEP20)</option><option value="Solana">Solana</option><option value="Polygon">Polygon</option><option value="XRP">XRP Ledger</option></select>
       <div class="address-box"><div class="muted tiny">Your deposit address</div><div id="depositAddress" class="address-value">Deposit address not configured</div><div class="two-buttons"><button id="copyDepositAddress" class="secondary" type="button" disabled>▢ Copy address</button><button id="showDepositQr" class="secondary" type="button" disabled>▦ Show QR</button></div><div id="depositQr" class="qr-area"><span class="muted tiny">QR will appear only when a verified deposit address is configured.</span></div></div>
-      <p id="depositHelp" class="muted tiny">Real deposit addresses have not been configured. Do not send funds until a trusted wallet or payment provider supplies and verifies the correct coin and network address.</p>
+      <div id="fundsEtaDeposit">🟢 <strong>Deposit processing:</strong> Network confirmation time varies by coin and blockchain. Always verify the address and network before sending.</div><p id="depositHelp" class="muted tiny">Real deposit addresses have not been configured. Do not send funds until a trusted wallet or payment provider supplies and verifies the correct coin and network address.</p>
     </section>
   </section>
   <section id="page-withdraw" class="hidden">
-    <div class="page-title"><div><h1>↑ Withdraw crypto</h1><div class="muted">Choose a coin and network, then enter the destination address.</div></div><span class="tag">Backend setup required</span></div>
+    <div class="page-title"><div><h1>↑ Withdraw crypto</h1><div class="muted">Choose a coin and network, then enter the destination address.</div></div><span class="tag">Withdrawal review · up to 72 hours</span></div>
     <section class="panel form-panel">
       <label for="withdrawCoinSearch">Search coins</label><input id="withdrawCoinSearch" class="field" placeholder="Search Bitcoin, Ethereum, XRP…" autocomplete="off">
       <div class="coin-list-controls coin-picker-controls"><span class="muted tiny" id="withdrawCoinCount">Showing 6 coins</span><div><button class="secondary" type="button" id="withdrawCoinLess" disabled>Less</button> <button class="primary" type="button" id="withdrawCoinMore">More +6</button></div></div>
@@ -296,7 +296,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
       <label for="withdrawNetwork">Network</label><select id="withdrawNetwork" class="field"><option value="Bitcoin">Bitcoin</option><option value="Ethereum">Ethereum</option><option value="TRC20">TRON (TRC20)</option><option value="ERC20">Ethereum (ERC20)</option><option value="BEP20">BNB Smart Chain (BEP20)</option><option value="Solana">Solana</option><option value="Polygon">Polygon</option><option value="XRP">XRP Ledger</option></select>
       <label for="withdrawAddress">Destination address</label><input id="withdrawAddress" class="field" placeholder="Paste your receiving address" autocomplete="off" spellcheck="false">
       <label for="withdrawAmount">Amount</label><input id="withdrawAmount" class="field" type="number" min="0" step="any" placeholder="Enter amount">
-      <div id="withdrawNotice" class="notice">Withdrawals are not enabled until a secure backend, verified balance ledger, transaction screening and signing provider are configured.</div>
+      <div id="fundsEtaWithdraw">🔴 <strong>Estimated withdrawal time: up to 72 hours</strong><br>Estimated processing window only; timing is not guaranteed. Blockchain confirmation time may vary.</div><div id="withdrawNotice" class="notice">Withdrawals are not enabled until a secure backend, verified balance ledger, transaction screening and signing provider are configured.</div>
       <button class="primary full" id="withdrawSubmit" type="button" disabled>Withdrawal unavailable until backend is deployed</button>
       <p class="muted tiny">Never enter a seed phrase or private key. Always verify the coin and network before sending.</p>
     </section>
@@ -919,7 +919,8 @@ const supportedCoins=[["Bitcoin","BTC","₿"],["Ethereum","ETH","Ξ"],["BNB","BN
 let selectedDepositCoin="BTC",selectedWithdrawCoin="BTC";
 const coinPickerExpanded={deposit:6,withdraw:6};
 function drawCoinPicker(kind,query=""){const list=$(kind+"CoinList");if(!list)return;const selected=kind==="deposit"?selectedDepositCoin:selectedWithdrawCoin;const q=query.trim().toLowerCase();const filtered=supportedCoins.filter(c=>c[0].toLowerCase().includes(q)||c[1].toLowerCase().includes(q));const limit=coinPickerExpanded[kind]||6;const visible=filtered.slice(0,limit);list.innerHTML=visible.map(c=>'<button type="button" class="coin-choice '+(c[1]===selected?'selected':'')+'" data-coin="'+safe(c[1])+'"><span class="coin-icon">'+c[2]+'</span><span><strong>'+safe(c[0])+'</strong><small>'+safe(c[1])+'</small></span></button>').join("")||'<div class="empty">No matching coins.</div>';const count=$(kind+"CoinCount"),less=$(kind+"CoinLess"),more=$(kind+"CoinMore");if(count)count.textContent="Showing "+visible.length+" of "+filtered.length+" coins";if(less)less.disabled=limit<=6;if(more)more.disabled=visible.length>=filtered.length;list.querySelectorAll("[data-coin]").forEach(b=>b.addEventListener("click",()=>{if(kind==="deposit"){selectedDepositCoin=b.dataset.coin;updateSelectedCoin("deposit");drawCoinPicker("deposit", $("depositCoinSearch").value)}else{selectedWithdrawCoin=b.dataset.coin;updateSelectedCoin("withdraw");drawCoinPicker("withdraw", $("withdrawCoinSearch").value)}}))}
-function updateSelectedCoin(kind){const sym=kind==="deposit"?selectedDepositCoin:selectedWithdrawCoin;const c=supportedCoins.find(x=>x[1]===sym)||supportedCoins[0];$(kind+"CoinName").textContent=c[0]+" ("+c[1]+")";$(kind+"CoinIcon").textContent=c[2];$(kind+"CoinIcon").className="coin-icon coin-"+c[1];$(kind+"CoinIcon").parentElement.dataset.coin=c[1];if(kind==="deposit")refreshDepositAddress()}
+function autoSelectCoinNetwork(kind,sym){const sel=$(kind+"Network");if(!sel)return;const defaults={BTC:"Bitcoin",WBTC:"Ethereum",ETH:"Ethereum",USDT:"TRC20",USDC:"ERC20",BNB:"BEP20",SOL:"Solana",XRP:"XRP",TRX:"TRC20",MATIC:"Polygon",POL:"Polygon",DOGE:"Bitcoin",LTC:"Bitcoin",BCH:"Bitcoin",ADA:"Solana",AVAX:"Ethereum",LINK:"Ethereum",UNI:"Ethereum",DOT:"Ethereum",ATOM:"Ethereum",ETC:"Ethereum",XLM:"XRP"};const preferred=defaults[sym];if(preferred&&[...sel.options].some(o=>o.value===preferred))sel.value=preferred;sel.dispatchEvent(new Event("change",{bubbles:true}));}
+function updateSelectedCoin(kind){const sym=kind==="deposit"?selectedDepositCoin:selectedWithdrawCoin;const c=supportedCoins.find(x=>x[1]===sym)||supportedCoins[0];$(kind+"CoinName").textContent=c[0]+" ("+c[1]+")";$(kind+"CoinIcon").textContent=c[2];$(kind+"CoinIcon").className="coin-icon coin-"+c[1];$(kind+"CoinIcon").parentElement.dataset.coin=c[1];autoSelectCoinNetwork(kind,sym);if(kind==="deposit")refreshDepositAddress()}
 function refreshDepositAddress(){const el=$("depositAddress");if(!el)return;const network=$("depositNetwork").value;const address=window.ONCHAINCRYPTO_DEPOSIT_ADDRESSES?.[selectedDepositCoin]?.[network]||"";el.textContent=address||"Deposit address not configured";$("copyDepositAddress").disabled=!address;$("showDepositQr").disabled=!address;$("depositQr").innerHTML='<span class="muted tiny">'+(address?"Press Show QR to display the address QR code.":"QR will appear only when a verified deposit address is configured.")+'</span>'}
 function showDepositQr(){const address=window.ONCHAINCRYPTO_DEPOSIT_ADDRESSES?.[selectedDepositCoin]?.[$("depositNetwork").value]||"";if(!address)return;$("depositQr").innerHTML='<img alt="QR code for configured deposit address" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(address)+'"><span class="muted tiny">Verify coin and network before sending.</span>'}
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.go)));
@@ -1344,5 +1345,15 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
  setMode();
 })();
 </script>
+<style id="oc-funds-action-colors">
+/* Keep the original site theme; green for deposits and red for withdrawals. */
+.quick-action[data-go="deposit"],.wallet-action[data-wallet-action="deposit"]{background:linear-gradient(135deg,#087f50,#12a66a)!important;border-color:#1bc889!important;color:#fff!important}
+.quick-action[data-go="withdraw"],.wallet-action[data-wallet-action="withdraw"]{background:linear-gradient(135deg,#8f202c,#d93645)!important;border-color:#f04452!important;color:#fff!important}
+#page-deposit .page-title .tag{color:#20d99a;border-color:#16875b;background:rgba(22,199,132,.1)}
+#page-withdraw .page-title .tag{color:#ff6975;border-color:#a8323c;background:rgba(240,68,82,.1)}
+#fundsEtaDeposit,#fundsEtaWithdraw{border-radius:11px;padding:11px 13px;margin:12px 0;font-size:13px}
+#fundsEtaDeposit{border:1px solid #176a4b;background:rgba(22,199,132,.09);color:#7be7b6}
+#fundsEtaWithdraw{border:1px solid #87303a;background:rgba(240,68,82,.09);color:#ff9ca4}
+</style>
 </body>
 </html>
