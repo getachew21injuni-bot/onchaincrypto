@@ -104,19 +104,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 @media(max-width:380px){#page-home .oc-hero-art{min-height:205px}#page-home .oc-hero-terms{gap:7px;font-size:10px}#page-home .oc-profit-chip{max-width:150px}#page-home .oc-hero-person{width:80%;right:8%}}
 @media(prefers-reduced-motion:reduce){#page-home .oc-hero-terms span,#page-home .oc-coin,#page-home .oc-floating-term{animation:none!important}}
 </style>
-<style id="oc-trade-pair-list-style">
-#page-trade .oc-pair-list-panel{margin-bottom:14px}
-#page-trade .oc-pair-list-panel .oc-pair-list-items{display:none;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;margin-top:12px}
-#page-trade .oc-pair-list-panel.is-open .oc-pair-list-items{display:grid}
-#page-trade .oc-pair-list-items button{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:11px 12px;border:1px solid #243b54;border-radius:10px;background:#091827;color:#edf5ff;cursor:pointer;text-align:left;min-width:0}
-#page-trade .oc-pair-list-items button[aria-pressed="true"]{border-color:#f0b90b;background:#f0b90b13;box-shadow:inset 0 0 0 1px #f0b90b33}
-#page-trade .oc-pair-list-items button strong{font-size:12px}
-#page-trade .oc-pair-list-items button small{font-size:11px;color:#9bb2c8;white-space:nowrap}
-#page-trade .oc-pair-list-toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid #2b4763;border-radius:999px;padding:9px 14px;background:#10243a;color:#f4f8ff;font-weight:700;cursor:pointer}
-#page-trade .oc-pair-list-toggle .oc-chevron{transition:transform .18s}
-#page-trade .oc-pair-list-panel.is-open .oc-chevron{transform:rotate(180deg)}
-@media(max-width:520px){#page-trade .oc-pair-list-panel .oc-pair-list-items{grid-template-columns:repeat(2,minmax(0,1fr))}#page-trade .oc-pair-list-items button{padding:10px 8px}}
-</style>
+
 </head>
 <body>
 <header>
@@ -1697,14 +1685,14 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   const chart=document.getElementById('tradingViewChart');
   if(!page||!chart||document.getElementById('ocTradePairList'))return;
   const panel=document.createElement('section');panel.className='panel oc-pair-list-panel';panel.id='ocTradePairList';
-  panel.innerHTML='<div class="section-head"><div><h2>Trading Pairs</h2><div class="muted tiny">Choose a pair to update the chart.</div></div><button class="oc-pair-list-toggle" type="button" aria-expanded="false"><span>Pair List</span><span class="oc-chevron" aria-hidden="true">⌄</span></button></div><div class="oc-pair-list-items"></div>';
+  panel.innerHTML='<div class="oc-pair-list-head"><button class="oc-pair-list-toggle" type="button" aria-expanded="false"><span>◉ ACTIVE PAIR</span><strong class="oc-current-pair">BTC / USDT</strong><span class="oc-chevron" aria-hidden="true">⌄</span></button><span style="font-size:10px;font-weight:800;color:#00d9a0">SIGNALS ▴▾</span></div><div class="oc-pair-list-items"></div>';
   const grid=panel.querySelector('.oc-pair-list-items');
   pairs.forEach(([symbol,name])=>{
    const btn=document.createElement('button');btn.type='button';btn.dataset.symbol=symbol;btn.setAttribute('aria-pressed',symbol===activeSymbol?'true':'false');
    btn.innerHTML='<strong>'+symbol.replace('USDT',' / USDT')+'</strong><small>'+name+'</small>';
    btn.addEventListener('click',()=>{
     activeSymbol=symbol;
-    const title=document.getElementById('tradePairTitle');if(title)title.textContent=symbol.replace('USDT',' / USDT');
+    const title=document.getElementById('tradePairTitle');if(title)title.textContent=symbol.replace('USDT',' / USDT');const current=panel.querySelector('.oc-current-pair');if(current)current.textContent=symbol.replace('USDT',' / USDT');
     const orderPair=document.getElementById('orderBookPair');if(orderPair)orderPair.textContent=symbol.replace('USDT','/USDT');
     const select=document.getElementById('tradeAsset');
     if(select){const opt=Array.from(select.options).find(o=>(o.value||'').toUpperCase().replace('/','').replace('-','')===symbol || (o.textContent||'').toUpperCase().replace(/[^A-Z0-9]/g,'')===symbol);if(opt){select.value=opt.value;select.dispatchEvent(new Event('change',{bubbles:true}));}}
@@ -1716,8 +1704,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   panel.querySelector('.oc-pair-list-toggle').addEventListener('click',e=>{
    const open=panel.classList.toggle('is-open');e.currentTarget.setAttribute('aria-expanded',open?'true':'false');
   });
-  const layout=page.querySelector('.trade-layout');
-  if(layout)layout.insertAdjacentElement('beforebegin',panel);
+  const chartWrap=chart.closest('.chart-wrap');
+  if(chartWrap)chartWrap.insertAdjacentElement('afterbegin',panel);
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
 })();
@@ -1786,6 +1774,20 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
 @keyframes ocBtcFloat{0%,100%{transform:translateY(0) rotate(-7deg)}50%{transform:translateY(-12px) rotate(7deg)}}
 @media(prefers-reduced-motion:reduce){#page-home .oc-hero-art:before,#page-home .oc-hero-art:after{animation:none!important}}
 @media(max-width:700px){#page-home .oc-invest-hero{background-image:linear-gradient(180deg,rgba(2,10,17,.78),rgba(2,10,17,.94) 65%,#020a12),url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80')!important;background-position:center,72% 28%!important}#page-home .oc-hero-art:before{width:46px;height:46px;font-size:30px}#page-home .oc-hero-art:after{width:38px;height:38px;font-size:25px}}
+</style>
+<style id="oc-trade-pair-inside-chart">
+#page-trade .chart-wrap:has(#tradingViewChart){position:relative}
+#page-trade #ocTradePairList{position:absolute;z-index:20;left:10px;top:10px;width:min(420px,calc(100% - 20px));margin:0;padding:10px;background:rgba(3,14,26,.96);border:1px solid #24617a;border-radius:14px;box-shadow:0 12px 36px #0009;backdrop-filter:blur(12px)}
+#page-trade #ocTradePairList .oc-pair-list-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#page-trade #ocTradePairList .oc-pair-list-toggle{display:flex;align-items:center;gap:8px;max-width:100%;padding:9px 12px;border:1px solid #00d9a066;border-radius:10px;background:#061b20ee;color:#eafff7;font-weight:900;cursor:pointer}
+#page-trade #ocTradePairList .oc-pair-list-toggle .oc-current-pair{color:#16e6a2}
+#page-trade #ocTradePairList .oc-pair-list-items{display:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:10px;max-height:270px;overflow:auto}
+#page-trade #ocTradePairList.is-open .oc-pair-list-items{display:grid}
+#page-trade #ocTradePairList .oc-pair-list-items button{display:flex;justify-content:space-between;align-items:center;gap:7px;min-width:0;padding:9px;border:1px solid #25445a;border-radius:8px;background:#091b2a;color:#edf5ff;cursor:pointer;text-align:left}
+#page-trade #ocTradePairList .oc-pair-list-items button[aria-pressed="true"]{border-color:#00d9a0;background:#00d9a014}
+#page-trade #ocTradePairList .oc-pair-list-items button strong{font-size:11px;font-weight:900}
+#page-trade #ocTradePairList .oc-pair-list-items button small{font-size:10px;color:#9bb2c8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:520px){#page-trade #ocTradePairList{left:6px;top:6px;width:calc(100% - 12px);padding:7px}#page-trade #ocTradePairList .oc-pair-list-items{max-height:220px}#page-trade #ocTradePairList .oc-pair-list-items button{padding:8px 6px}}
 </style>
 </body>
 </html>
