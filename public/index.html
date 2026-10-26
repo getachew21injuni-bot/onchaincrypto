@@ -1443,6 +1443,77 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+
+<style id="oc-trade-choice-modal-fix">
+#timedUpBtn,#timedDownBtn{transition:filter .12s ease,box-shadow .12s ease,transform .12s ease,outline-color .12s ease;outline:2px solid transparent;outline-offset:2px}
+#timedUpBtn.oc-direction-selected{filter:brightness(1.12);box-shadow:0 0 0 3px rgba(22,217,160,.24),inset 0 0 0 2px rgba(255,255,255,.65);outline-color:#16d9a0;transform:translateY(-1px)}
+#timedDownBtn.oc-direction-selected{filter:brightness(1.12);box-shadow:0 0 0 3px rgba(255,85,115,.22),inset 0 0 0 2px rgba(255,255,255,.65);outline-color:#ff5573;transform:translateY(-1px)}
+#timedUpBtn[aria-pressed="true"],#timedDownBtn[aria-pressed="true"]{font-weight:850}
+#timedResultBoard[style*="display: block"]{position:fixed!important;z-index:10050!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important;width:min(720px,calc(100vw - 24px))!important;max-height:calc(100dvh - 28px)!important;overflow-y:auto!important;margin:0!important;box-shadow:0 0 0 100vmax rgba(5,12,24,.68),0 20px 70px rgba(0,0,0,.42)!important;border-radius:16px!important}
+#ocBoardPlan{display:block!important}
+#ocCloseTradeBoard{position:sticky;top:0;float:right;z-index:3}
+@media(max-width:560px){#timedResultBoard[style*="display: block"]{width:calc(100vw - 18px)!important;max-height:calc(100dvh - 18px)!important}}
+</style>
+<script id="oc-trade-choice-modal-fix">
+(function(){
+ const $=id=>document.getElementById(id);
+ const up=$('timedUpBtn'),down=$('timedDownBtn');
+ function syncDirection(){
+   const upSelected=!!up&&up.getAttribute('aria-pressed')==='true';
+   const downSelected=!!down&&down.getAttribute('aria-pressed')==='true';
+   up?.classList.toggle('oc-direction-selected',upSelected);
+   down?.classList.toggle('oc-direction-selected',downSelected);
+ }
+ up?.addEventListener('click',()=>setTimeout(syncDirection,0));
+ down?.addEventListener('click',()=>setTimeout(syncDirection,0));
+ syncDirection();
+ function refreshBoard(){
+   const board=$('timedResultBoard');
+   if(!board)return;
+   const close=$('ocCloseTradeBoard');
+   if(close){close.textContent='Close trade ✕';close.setAttribute('aria-label','Close trade');}
+   const plan=$('ocBoardPlan');
+   if(plan)plan.style.display='block';
+ }
+ const board=$('timedResultBoard');
+ if(board){
+   refreshBoard();
+   new MutationObserver(refreshBoard).observe(board,{subtree:true,childList:true,attributes:true,attributeFilter:['style','aria-pressed']});
+ }
+ const stake=$('timedStake');
+ function validateTier(){
+   const amount=Number(stake?.value||0);
+   const balance=Number(typeof state!=='undefined' ? state.balance : 0);
+   const levels=[
+     {min:100,max:5000,label:'Level 1'},
+     {min:5000,max:10000,label:'Level 2'},
+     {min:10000,max:25000,label:'Level 3'},
+     {min:25000,max:50000,label:'Level 4'},
+     {min:50000,max:100000,label:'Level 5'},
+     {min:100000,max:1000000,label:'Level 6'}
+   ];
+   const plan=levels.find((p,i)=>amount>=p.min&&(amount<p.max||(i===levels.length-1&&amount<=p.max)));
+   const gate=$('ocTradePlanGate');
+   if(gate&&amount>0){
+     if(!plan){gate.textContent='Enter an amount within an investment plan (100–1,000,000 USDT).';gate.style.display='block';}
+     else if(balance<plan.min){gate.textContent='Your balance is '+balance.toLocaleString()+' USDT. You need at least '+plan.min.toLocaleString()+' USDT to access '+plan.label+'.';gate.style.display='block';}
+     else if(amount>balance){gate.textContent='Insufficient balance for this investment amount.';gate.style.display='block';}
+     else {gate.textContent='';gate.style.display='none';}
+   }
+   const confirm=$('timedConfirmBtn');
+   if(confirm&&plan){
+     const directionSelected=(up?.getAttribute('aria-pressed')==='true')||(down?.getAttribute('aria-pressed')==='true');
+     confirm.disabled=balance<plan.min||amount<plan.min||amount>plan.max||amount>balance||!directionSelected||!!(typeof timedPaper!=='undefined'&&timedPaper);
+   }
+ }
+ stake?.addEventListener('input',()=>setTimeout(validateTier,0));
+ up?.addEventListener('click',()=>setTimeout(validateTier,0));
+ down?.addEventListener('click',()=>setTimeout(validateTier,0));
+ window.addEventListener('focus',validateTier);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)validateTier()});
+ validateTier();
+})();
+</script>
 </body>
 </html>
 
