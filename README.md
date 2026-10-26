@@ -1,45 +1,68 @@
 # OnChainCrypto
 
-OnChainCrypto is currently a **public demo website** for viewing public crypto-market data and trying simulated trades. It is not a live cryptocurrency exchange.
+A static demo website for viewing public crypto-market data and testing simulated trades. **This repository is not a live cryptocurrency exchange.**
 
-## Open the website
+## Live sites
 
-- Live demo: https://getachew21injuni-bot.github.io/onchaincrypto/
-- Repository: https://github.com/getachew21injuni-bot/onchaincrypto
+- **Firebase Hosting:** https://onchaincrypto-d976b.firebaseapp.com
+- **GitHub Pages:** https://getachew21injuni-bot.github.io/onchaincrypto/
+- **GitHub repository:** https://github.com/getachew21injuni-bot/onchaincrypto
 
-## Current status
+## Repository layout
 
-- GitHub Pages website: published.
-- Firebase Authentication UI: configured in the website; verify it in the live site before relying on it.
-- Cloud Functions source: present in `functions/src/index.ts`.
-- Backend build check: has passed.
-- Firebase backend deployment: **not confirmed deployed**.
-- Support contact: `onchaincryptosupport@gmail.com` is configured as a mailto address; create the mailbox before relying on it.
-- Real-money deposits, withdrawals, custody, and trading: **not implemented**. Balances and trades in the prototype are simulated and browser-local.
+| Path | Purpose | Editing guidance |
+| --- | --- | --- |
+| `public/index.html` | Main website served by Firebase Hosting | Update this file for Firebase site changes. |
+| `index.html` | Main website served by GitHub Pages | Keep its intended Pages-specific content in sync with shared UI changes. Do not assume it is byte-for-byte identical to `public/index.html`. |
+| `public/admin.html`, `public/admin-dashboard.html` | Admin pages served by Firebase | Update the public copy when changing Firebase admin pages. |
+| `admin.html`, `admin-dashboard.html` | Root admin-page copies | Update when the corresponding GitHub Pages version should change. |
+| `public/support-chat.js`, `public/support-admin.js` | Support UI scripts for Firebase Hosting | Update the public versions for Firebase changes. |
+| `support-chat.js`, `support-admin.js` | Root support-script copies | Keep aligned with shared support changes intended for GitHub Pages. |
+| `functions/src/index.ts` | Firebase Cloud Functions source | Build with `npm --prefix functions run build`. |
+| `functions/scripts/` | Backend administration scripts | Never commit credentials or private keys. |
+| `firestore.rules`, `firestore.indexes.json` | Firestore security rules and indexes | Review security rules carefully before deployment. |
+| `firebase.json`, `.firebaserc` | Firebase project and Hosting configuration | Check these before changing deployment behavior. |
+| `.github/workflows/` | Automated checks and deployment workflows | Use the automatic Hosting workflow for normal site updates; use manual workflows only when deliberately deploying a specific service. |
+| `README.md`, `*_GUIDE.md`, `BACKEND_SETUP.md` | Setup and maintenance documentation | Update docs when the deployment process changes. |
 
-## Security warning — required before deployment
+## Deployment workflow map
 
-A Firebase service-account private key was pasted into a chat. Treat that key as compromised:
+- **Website (Firebase Hosting):** `.github/workflows/hosting-only.yml` runs on pushes to `main` and can be started manually.
+- **Website (GitHub Pages):** GitHub Pages builds and publishes the root site separately.
+- **Backend build check:** `.github/workflows/backend-check.yml` compiles the Functions source; it does not deploy it.
+- **Backend deployment:** `.github/workflows/deploy-firebase.yml` deploys Cloud Functions and Firestore rules/indexes when backend-related files change, or when manually started.
+- **Firestore rules-only deployment:** `.github/workflows/deploy-firestore-only.yml` is manual-only to avoid overlapping automatic backend deployments.
+- **Manual Hosting alternatives:** `deploy-hosting.yml` and `firebase-deploy.yml` are retained for manual use. Prefer the standard Hosting workflow for ordinary website updates.
+
+After each change, check the relevant GitHub Actions run. Do not assume a commit is live until the deployment run finishes successfully. Hard-refresh the site with **Ctrl + Shift + R** after deployment.
+
+## Current status and limitations
+
+- Public market data and simulated trade UI are intended for demo use.
+- Firebase Authentication UI is present; test sign-in on the live site before relying on it.
+- Cloud Functions source is present, but backend deployment must be verified in GitHub Actions.
+- Support contact shown in the app: `onchaincryptosupport@gmail.com`. Create and test this mailbox before relying on it.
+- Real-money deposits, withdrawals, custody, and live exchange execution are **not implemented**. Balances and trades in the prototype are simulated and browser-local.
+
+## Security: rotate any exposed service-account key
+
+If a Firebase service-account private key was ever pasted into a chat, ticket, or other shared place, treat it as compromised:
 
 1. Open [Google Cloud Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts?project=onchaincrypto-d976b).
-2. Select the service account `firebase-adminsdk-fbsvc@onchaincrypto-d976b.iam.gserviceaccount.com` and open **Keys**.
-3. Delete/revoke the exposed key by its key ID. Do not delete the service account itself.
-4. Generate a replacement key only after revoking the exposed one. Keep the JSON file private. Never paste it into chat or commit it to GitHub.
+2. Select `firebase-adminsdk-fbsvc@onchaincrypto-d976b.iam.gserviceaccount.com` and open **Keys**.
+3. Revoke/delete only the exposed key by its key ID. Do not delete the service account itself.
+4. If needed, create a replacement key and store it only as the GitHub Actions secret `FIREBASE_SERVICE_ACCOUNT_ONCHAINCRYPTO`. Never paste it into chat or commit it to this repository.
 
-## Deploy the Firebase backend
+## Guides
 
-Follow [FIREBASE_DEPLOYMENT_GUIDE.md](FIREBASE_DEPLOYMENT_GUIDE.md). The short version:
+- [Firebase deployment guide](FIREBASE_DEPLOYMENT_GUIDE.md)
+- [Backend setup overview](BACKEND_SETUP.md)
+- [Windows installation guide](INSTALL_BACKEND_WINDOWS.md)
 
-1. Review Firebase billing and possible charges before enabling paid services.
-2. Add a fresh service-account JSON as a GitHub Actions repository secret named `FIREBASE_SERVICE_ACCOUNT_ONCHAINCRYPTO` at [Repository Actions secrets](https://github.com/getachew21injuni-bot/onchaincrypto/settings/secrets/actions). Paste the JSON only into GitHub's secret form—not into a chat or source file.
-3. Run [Deploy Firebase Backend](https://github.com/getachew21injuni-bot/onchaincrypto/actions/workflows/deploy-firebase.yml).
-4. Check the workflow run for a successful result.
-5. Configure Firebase App Check for the website before calling the support function. The support function currently stores tickets in Firestore and does not send email notifications.
+## Safe development checklist
 
-## Local Windows setup
-
-See [INSTALL_BACKEND_WINDOWS.md](INSTALL_BACKEND_WINDOWS.md) for beginner setup instructions and [BACKEND_SETUP.md](BACKEND_SETUP.md) for the backend overview.
-
-## Never commit secrets
-
-Never put service-account JSON, private keys, passwords, wallet recovery phrases, or exchange API secrets in this repository or website code. Do not collect users' wallet seed phrases. Do not accept real deposits until payment monitoring, ledger accounting, reconciliation, withdrawal controls, compliance review, and independent security testing are complete.
+- Keep API keys, service-account JSON, passwords, private keys, wallet recovery phrases, and exchange secrets out of source files and commits.
+- Never ask users for wallet seed phrases.
+- Do not describe demo balances as real funds.
+- Before accepting real deposits, require payment monitoring, ledger accounting, reconciliation, withdrawal controls, compliance review, and independent security testing.
+- Make the smallest targeted change possible, run the backend build check when backend files change, and confirm deployment status before telling users an update is live.
