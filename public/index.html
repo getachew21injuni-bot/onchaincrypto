@@ -467,6 +467,7 @@ ChainCrypto</h3>
     <div class="content-grid">
       <section class="panel form-panel auth-main-panel">
         <div id="authModeIntro"><h2>Sign in to your account</h2><p class="muted tiny">Enter your email and password to continue.</p></div>
+        <div id="registrationMethodOptions" class="hidden" style="display:flex;gap:10px;flex-wrap:wrap;margin:14px 0"><button type="button" class="secondary" id="chooseEmailRegistration">Register with Email</button><button type="button" class="secondary" id="choosePhoneRegistration">Register with Phone</button></div>
         <p class="muted tiny">Register with email and password without an email-verification step, or use the phone panel to confirm an SMS code. This uses Firebase Authentication only; Firestore and Cloud Functions are not required for sign-in. Real-money trading and online balances are not enabled.</p>
         <div id="authStatus" class="notice">Checking sign-in status…</div>
         <p id="registerMessage" class="muted tiny" aria-live="polite"></p>
@@ -494,7 +495,7 @@ ChainCrypto</h3>
           <p class="auth-switch" id="authSwitchText">Don’t have an account? <button type="button" id="showRegisterBtn">Register</button></p>
         </form>
         <div class="divider auth-phone-divider"></div>
-        <details class="auth-phone-details">
+        <details class="auth-phone-details hidden" id="phoneRegistrationPanel">
           <summary>Register or sign in with phone (SMS verification)</summary>
           <h3>Phone registration / login</h3>
           <p class="muted tiny">Enter your phone number in international format, including + and country code. Firebase will send an SMS code. New numbers create an account; existing numbers sign in.</p>
@@ -1209,10 +1210,15 @@ setTimeout(() => {
   const signIn=document.getElementById('signInForm'), register=document.getElementById('registerForm');
   const intro=document.getElementById('authModeIntro'), heading=document.getElementById('authHeading'), sub=document.getElementById('authSubheading');
   const google=document.getElementById('googleSignInBtn'), googleHint=document.querySelector('.auth-google-hint');
+  const methodOptions=document.getElementById("registrationMethodOptions"), phonePanel=document.getElementById("phoneRegistrationPanel");
+  function setRegistrationMethod(method){const phone=method==="phone";if(methodOptions)methodOptions.classList.remove("hidden");register.classList.toggle("hidden",phone);if(phonePanel){phonePanel.classList.toggle("hidden",!phone);phonePanel.open=phone;}register.querySelectorAll("input").forEach(el=>{el.disabled=phone;});if(phonePanel)phonePanel.querySelectorAll("input").forEach(el=>{el.disabled=!phone;});}
   const registerSwitch=document.getElementById('registerSwitchText'), switchText=document.getElementById('authSwitchText');
   if(!signIn||!register)return;
   function setMode(mode){
     const creating=mode==='register';
+    if(methodOptions)methodOptions.classList.toggle("hidden",!creating);
+    if(phonePanel){phonePanel.classList.add("hidden");phonePanel.open=false;phonePanel.querySelectorAll("input").forEach(el=>el.disabled=true);}
+    register.querySelectorAll("input").forEach(el=>{el.disabled=!creating;});
     signIn.classList.toggle('hidden',creating); register.classList.toggle('hidden',!creating);
     signIn.querySelectorAll('input').forEach(el=>el.disabled=creating);
     register.querySelectorAll('input').forEach(el=>el.disabled=!creating);
@@ -1225,6 +1231,8 @@ setTimeout(() => {
     if(sub)sub.textContent=creating?'Set up your account to continue.':'Access your crypto dashboard securely.';
   }
   document.getElementById('showRegisterBtn')?.addEventListener('click',()=>setMode('register'));
+  document.getElementById("chooseEmailRegistration")?.addEventListener("click",()=>setRegistrationMethod("email"));
+  document.getElementById("choosePhoneRegistration")?.addEventListener("click",()=>setRegistrationMethod("phone"));
   document.getElementById('signin-nav')?.addEventListener('click',()=>{setMode('signin');document.getElementById('signInEmail')?.focus();});
   document.getElementById('showSignInBtn')?.addEventListener('click',()=>setMode('signin'));
   document.getElementById('showSignInPassword')?.addEventListener('change',e=>{const p=document.getElementById('signInPassword');if(p)p.type=e.target.checked?'text':'password';});
