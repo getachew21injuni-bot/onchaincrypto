@@ -1685,7 +1685,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   const chart=document.getElementById('tradingViewChart');
   if(!page||!chart||document.getElementById('ocTradePairList'))return;
   const panel=document.createElement('section');panel.className='panel oc-pair-list-panel';panel.id='ocTradePairList';
-  panel.innerHTML='<div class="oc-pair-list-head"><button class="oc-pair-list-toggle" type="button" aria-expanded="false"><span>● LIVE</span><strong class="oc-current-pair">BTC / USDT</strong><span class="oc-chevron" aria-hidden="true">⌄</span></button></div><div class="oc-pair-list-items"></div>';
+  panel.innerHTML='<div class="oc-pair-list-head"><button class="oc-pair-list-toggle" type="button" aria-expanded="false"><strong class="oc-current-pair">BTC / USDT</strong><span class="oc-chevron" aria-hidden="true">⌄</span></button></div><div class="oc-pair-list-items"></div>';
   const grid=panel.querySelector('.oc-pair-list-items');
   pairs.forEach(([symbol,name])=>{
    const btn=document.createElement('button');btn.type='button';btn.dataset.symbol=symbol;btn.setAttribute('aria-pressed',symbol===activeSymbol?'true':'false');
