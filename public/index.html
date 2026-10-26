@@ -2417,3 +2417,12 @@ td,th{overflow-wrap:anywhere}
  font-size:24px;line-height:1;
 }
 </style>
+
+<style id="oc-hide-quick-trade-on-wallet-pages">
+/* Quick Trade belongs only on the Trade page, never on Wallet, Deposit, or Withdraw. */
+main:has(> #page-wallet:not(.hidden)) #timedPaperTrade,
+main:has(> #page-deposit:not(.hidden)) #timedPaperTrade,
+main:has(> #page-withdraw:not(.hidden)) #timedPaperTrade {
+  display: none !important;
+}
+</style>
