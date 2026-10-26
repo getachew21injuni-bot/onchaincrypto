@@ -211,9 +211,9 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
       <div class="form-panel">
         <label for="tradeAsset">Trading asset</label><select id="tradeAsset" class="field"></select>
         <div class="content-grid"><div><label>Available balance (USDT)</label><div class="card"><div class="big" id="quickAvailableBalance">10,000.00 USDT</div><div class="muted tiny">Simulated balance only</div></div><label for="timedStake">Trade amount (USDT)</label><input id="timedStake" class="field" type="number" min="100" step="1" value="100" placeholder="Enter amount in USDT">
-        <div class="cards" style="margin-top:10px"><div class="card"><div class="label">Automatic trading level</div><div class="big" id="quickAutoLevel">Level 1 · 12%</div><div class="muted tiny" id="quickAutoRange">100–5,000 USDT</div></div><div class="card"><div class="label">Automatic expiry</div><div class="big" id="quickAutoDuration">30 seconds</div><div class="muted tiny">Matched to your trade amount</div></div></div><select id="timedPlan" class="field" style="display:none" aria-hidden="true" tabindex="-1"><option value="12" data-min="100" data-max="5000">Level 1</option><option value="15" data-min="5000" data-max="10000">Level 2</option><option value="18" data-min="10000" data-max="25000">Level 3</option><option value="21" data-min="25000" data-max="50000">Level 4</option><option value="24" data-min="50000" data-max="100000">Level 5</option><option value="27" data-min="100000" data-max="1000000">Level 6</option></select>
+        <div class="oc-invest-label">Select Investment Plan</div><div class="oc-invest-grid" id="ocInvestmentPlans"><button type="button" data-plan="12" data-min="100" data-max="5000">$100 - $5K <strong>+12%</strong></button><button type="button" data-plan="15" data-min="5000" data-max="10000">$5K - $10K <strong>+15%</strong></button><button type="button" data-plan="18" data-min="10000" data-max="25000">$10K - $25K <strong>+18%</strong></button><button type="button" data-plan="21" data-min="25000" data-max="50000">$25K - $50K <strong>+21%</strong></button><button type="button" data-plan="24" data-min="50000" data-max="100000">$50K - $100K <strong>+24%</strong></button><button type="button" data-plan="27" data-min="100000" data-max="1000000">$100K - $1M <strong>+27%</strong></button></div><div class="cards" style="margin-top:10px"><div class="card"><div class="label">Selected plan</div><div class="big" id="quickAutoLevel">Level 1 · 12%</div><div class="muted tiny" id="quickAutoRange">100–5,000 USDT</div></div></div><select id="timedPlan" class="field" style="display:none" aria-hidden="true" tabindex="-1"><option value="12" data-min="100" data-max="5000">Level 1</option><option value="15" data-min="5000" data-max="10000">Level 2</option><option value="18" data-min="10000" data-max="25000">Level 3</option><option value="21" data-min="25000" data-max="50000">Level 4</option><option value="24" data-min="50000" data-max="100000">Level 5</option><option value="27" data-min="100000" data-max="1000000">Level 6</option></select>
         <div class="card" style="margin:10px 0"><div class="label">Estimated plan profit (illustrative)</div><div class="big green" id="quickEstimatedProfit">12.00 USDT</div><div class="muted tiny" id="quickPlanNote">12% of the entered amount · not guaranteed</div></div>
-        <select id="timedDuration" class="field" style="display:none" aria-hidden="true" tabindex="-1"><option value="30">30 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="120">120 seconds</option><option value="180">180 seconds</option><option value="270">270 seconds</option><option value="360">360 seconds</option></select>
+        <div class="oc-invest-label">Select Expiration Time</div><div class="oc-duration-grid" id="ocDurationChoices"><button type="button" data-duration="30">30s</button><button type="button" data-duration="60" class="active">60s</button><button type="button" data-duration="90">90s</button><button type="button" data-duration="120">120s</button><button type="button" data-duration="180">180s</button><button type="button" data-duration="270">270s</button><button type="button" data-duration="360">360s</button></div><select id="timedDuration" class="field" style="display:none" aria-hidden="true" tabindex="-1"><option value="30">30 seconds</option><option value="60" selected>60 seconds</option><option value="90">90 seconds</option><option value="120">120 seconds</option><option value="180">180 seconds</option><option value="270">270 seconds</option><option value="360">360 seconds</option></select>
         <label>Trade direction</label><div class="two-buttons"><button type="button" class="buy" id="timedUpBtn" aria-pressed="false">↗ Buy</button><button type="button" class="sell" id="timedDownBtn" aria-pressed="false">↘ Sell</button></div><div class="two-buttons" style="margin-top:10px"><button type="button" class="primary" id="timedConfirmBtn" disabled>Confirm trade</button><button type="button" class="secondary" id="timedCancelBtn">Cancel</button></div>
         <p class="muted tiny">Plan percentages are illustrative estimates, not promised returns. Quick Trade is a paper simulation; no real funds or orders are processed.</p></div>
         <div class="cards"><div class="card"><div class="label">Trading pair</div><div class="big" id="timedPair">BTC / USDT</div></div><div class="card"><div class="label">Entry price</div><div class="big" id="timedEntryPrice">—</div></div><div class="card"><div class="label">Time remaining</div><div class="big yellow" id="timedCountdown">00:30</div></div></div></div>
@@ -1289,5 +1289,55 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
 </script>
 
 <script type="module" src="./support-chat.js"></script>
+
+<style id="oc-screenshot-trade-layout">
+#page-trade #timedPaperTrade{border-radius:18px;overflow:hidden}
+#page-trade #timedPaperTrade>.section-head{padding:12px 14px 0}
+#page-trade #timedPaperTrade>.section-head .muted{display:none}
+#page-trade #timedPaperTrade .form-panel{padding:12px}
+#page-trade #timedPaperTrade .form-panel>label{margin:9px 0 5px;font-size:13px}
+.oc-invest-label{font-weight:750;color:var(--muted);margin:13px 0 8px;font-size:13px}
+.oc-invest-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.oc-invest-grid button,.oc-duration-grid button{background:#141d31;color:#f1f5f9;border:1px solid #293449;border-radius:11px;min-width:0;padding:10px 5px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;line-height:1.25}
+.oc-invest-grid button strong{color:#16d9a0;font-size:14px}
+.oc-invest-grid button.active,.oc-duration-grid button.active{border:2px solid #f5cf35;background:#292a25;box-shadow:0 0 0 1px #f5cf3520}
+.oc-duration-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.oc-duration-grid button{padding:9px 4px;font-weight:750}
+#page-trade #timedPaperTrade .content-grid{display:block}
+#page-trade #timedPaperTrade .cards{gap:7px}
+#page-trade #timedPaperTrade .card{padding:9px}
+#page-trade #timedPaperTrade .card .big{font-size:16px}
+#page-trade #timedPaperTrade .card .label{font-size:11px}
+#page-trade #timedPaperTrade .chart-wrap,#page-trade #timedPaperTrade .mini-card{display:none!important}
+#page-trade #timedPaperTrade .two-buttons{gap:8px;margin-top:10px}
+#page-trade #timedPaperTrade #timedUpBtn,#page-trade #timedPaperTrade #timedDownBtn{min-height:44px}
+#page-trade #timedPaperTrade #timedConfirmBtn,#page-trade #timedPaperTrade #timedCancelBtn{min-height:42px}
+#page-trade #timedResultBoard[style*="display: block"]{position:fixed;z-index:10020;inset:12px 10px 82px;overflow:auto;margin:0!important;max-height:calc(100dvh - 100px);box-shadow:0 20px 70px #000b;border:2px solid #f5cf35;border-radius:20px;padding:16px!important}
+#page-trade #timedResultBoard .oc-result-close{position:sticky;bottom:0;width:100%;margin-top:16px;background:#f5cf35;color:#151515;font-weight:800;padding:13px}
+@media(min-width:701px){.oc-invest-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){#page-trade .page-title h1{font-size:20px}#page-trade .page-title{margin-bottom:10px}#page-trade .chart-area{display:none}#page-trade #timedPaperTrade{margin-bottom:12px}#page-trade #timedPaperTrade>.section-head{padding:10px 12px 0}#page-trade #timedPaperTrade .form-panel{padding:10px}#page-trade #timedPaperTrade .field{padding:10px}#page-trade #timedPaperTrade .cards{grid-template-columns:repeat(2,minmax(0,1fr))}#page-trade #timedPaperTrade .two-buttons button{padding:10px 6px;font-size:13px}#page-trade #timedPaperTrade .form-panel>p{display:none!important}}
+</style>
+<script id="oc-screenshot-trade-controls">
+(function(){
+ const amount=document.getElementById('timedStake'),plan=document.getElementById('timedPlan'),duration=document.getElementById('timedDuration');
+ function refresh(){
+  const n=Number(amount&&amount.value||0);
+  document.querySelectorAll('#ocInvestmentPlans [data-plan]').forEach(b=>b.classList.toggle('active',Number(b.dataset.plan)===Number(plan&&plan.value)));
+  document.querySelectorAll('#ocDurationChoices [data-duration]').forEach(b=>b.classList.toggle('active',Number(b.dataset.duration)===Number(duration&&duration.value)));
+  const expiry=document.getElementById('quickAutoDuration');if(expiry)expiry.textContent=(duration&&duration.value||60)+' seconds';
+ }
+ document.querySelectorAll('#ocInvestmentPlans [data-plan]').forEach(b=>b.addEventListener('click',()=>{
+  if(plan)plan.value=b.dataset.plan;
+  const n=Number(amount&&amount.value||0),min=Number(b.dataset.min),max=Number(b.dataset.max);
+  if(amount&&(n<min||n>max))amount.value=min;
+  amount&&amount.dispatchEvent(new Event('input',{bubbles:true}));refresh();
+ }));
+ document.querySelectorAll('#ocDurationChoices [data-duration]').forEach(b=>b.addEventListener('click',()=>{if(duration)duration.value=b.dataset.duration;refresh();}));
+ amount&&amount.addEventListener('input',()=>{const n=Number(amount.value||0);const match=[...document.querySelectorAll('#ocInvestmentPlans [data-plan]')].find(b=>n>=Number(b.dataset.min)&&(n<Number(b.dataset.max)||(Number(b.dataset.plan)===27&&n<=Number(b.dataset.max))));if(match&&plan)plan.value=match.dataset.plan;refresh();});
+ const board=document.getElementById('timedResultBoard');
+ if(board&&!board.querySelector('.oc-result-close')){const c=document.createElement('button');c.type='button';c.className='oc-result-close';c.textContent='Close Trade';c.addEventListener('click',()=>{board.style.display='none';document.getElementById('timedPaperTrade')?.scrollIntoView({behavior:'smooth',block:'start'});});board.appendChild(c);}
+ refresh();
+})();
+</script>
 </body>
 </html>
