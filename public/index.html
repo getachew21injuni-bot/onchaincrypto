@@ -1827,6 +1827,55 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
 #page-trade #ocTradePairList .oc-pair-list-items button small{font-size:10px;color:#9bb2c8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(max-width:520px){#page-trade #ocTradePairList{left:6px;top:6px;width:calc(100% - 12px);padding:7px}#page-trade #ocTradePairList .oc-pair-list-items{max-height:220px}#page-trade #ocTradePairList .oc-pair-list-items button{padding:8px 6px}}
 </style>
+
+<!-- Navigation repair: keep Wallet, Deposit and Withdraw separate from Trade/Order Book. -->
+<script id="oc-page-navigation-repair">
+(function(){
+  const main=document.querySelector('main');
+  if(!main) return;
+  // Recover page sections if earlier markup edits accidentally nested them inside another page.
+  Array.from(main.querySelectorAll('section[id^="page-"]')).forEach(section=>{
+    if(section.parentElement!==main) main.appendChild(section);
+  });
+  const pages=()=>Array.from(main.children).filter(el=>el.matches('section[id^="page-"]'));
+  function navigate(page, opts={}){
+    const target=document.getElementById('page-'+page);
+    if(!target) return;
+    const original=window.__ocOriginalShowPage;
+    if(original && !opts.fromOriginal){ try{ original(page); }catch(err){ console.warn('Page setup skipped:',err); } }
+    pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-'+page));
+    document.querySelectorAll('#nav [data-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.page===page));
+    document.querySelectorAll('[data-bottom-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.bottomPage===page));
+    // The order book belongs only to Trade; never let it cover other pages.
+    const book=document.getElementById('liveOrderBookPanel');
+    if(book) book.style.display=page==='trade'?'':'none';
+    if(page==='wallet' && typeof window.renderWallet==='function'){try{window.renderWallet()}catch(_){}}
+    if(page==='profile' && typeof window.refreshProfileAccountInfo==='function'){try{window.refreshProfileAccountInfo()}catch(_){}}
+    if(!opts.keepScroll) window.scrollTo({top:0,behavior:'smooth'});
+    if(page==='home' && opts.history) requestAnimationFrame(()=>document.getElementById('homePerformancePanel')?.scrollIntoView({behavior:'smooth',block:'start'}));
+  }
+  if(typeof window.showPage==='function' && !window.__ocOriginalShowPage){
+    window.__ocOriginalShowPage=window.showPage;
+    window.showPage=function(page){navigate(page,{fromOriginal:true});return window.__ocOriginalShowPage(page);};
+    // Ensure the final visible page stays correct after legacy page setup runs.
+    const wrapped=window.showPage;
+    window.showPage=function(page){const result=window.__ocOriginalShowPage(page);navigate(page,{fromOriginal:true});return result;};
+  }
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest('[data-go],[data-page],[data-bottom-page],[data-wallet-action]');
+    if(!btn) return;
+    let page=btn.dataset.go||btn.dataset.page||btn.dataset.bottomPage||btn.dataset.walletAction;
+    if(!page) return;
+    if(btn.hasAttribute('data-wallet-action') && page==='transfer') page='transfer';
+    e.preventDefault();e.stopImmediatePropagation();
+    navigate(page,{history:btn.hasAttribute('data-home-history')});
+  },true);
+  // Initialize to the current Home page after repair.
+  const current=pages().find(s=>!s.classList.contains('hidden'));
+  if(current) navigate(current.id.slice(5),{fromOriginal:true,keepScroll:true});
+})();
+</script>
+
 </body>
 </html>
 
