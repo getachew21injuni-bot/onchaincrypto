@@ -1805,3 +1805,101 @@ td,th{overflow-wrap:anywhere}
   setInterval(applyReferral, 700);
 })();
 </script>
+
+
+<style id="oc-investment-plan-selector-style">
+#timedPaperTrade .oc-auto-plan-trigger{cursor:pointer;border:1px solid #284d6d;background:linear-gradient(145deg,#102b45,#091626);transition:border-color .15s,transform .15s}
+#timedPaperTrade .oc-auto-plan-trigger:hover,#timedPaperTrade .oc-auto-plan-trigger:focus-visible{border-color:#22d3ee;transform:translateY(-1px);outline:2px solid #22d3ee55}
+#timedPaperTrade .oc-auto-plan-trigger .oc-trigger-hint{display:block;font-size:12px;color:#8eb7d4;margin-top:5px}
+#ocInvestmentPlanPicker{margin:12px 0;padding:14px;border:1px solid #244766;border-radius:13px;background:linear-gradient(145deg,#0b2034,#071321)}
+#ocInvestmentPlanPicker h3{margin:0 0 12px;font-size:17px}
+#ocInvestmentPlanPicker .oc-plan-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#ocInvestmentPlanPicker .oc-plan-option{min-width:0;text-align:left;border:1px solid #28435c;background:#0c1929;color:#eaf6ff;padding:12px;border-radius:10px}
+#ocInvestmentPlanPicker .oc-plan-option strong,#ocInvestmentPlanPicker .oc-plan-option span{display:block}
+#ocInvestmentPlanPicker .oc-plan-option span{font-size:12px;color:#a8bfd4;margin-top:4px}
+#ocInvestmentPlanPicker .oc-plan-option[aria-pressed="true"]{border-color:#22d3ee;box-shadow:inset 0 0 0 1px #22d3ee;background:#103044}
+#ocInvestmentPlanPicker .oc-plan-status{font-size:12px;color:#a8bfd4;margin:10px 0 0}
+#timedPaperTrade .oc-hide-plan-copy,#page-trade .oc-workspace-levels{display:none!important}
+@media(max-width:560px){#ocInvestmentPlanPicker .oc-plan-options{grid-template-columns:1fr}#ocInvestmentPlanPicker .oc-plan-option{padding:11px}}
+</style>
+<script id="oc-investment-plan-selector">
+(function(){
+ const $=id=>document.getElementById(id);
+ const trade=$('timedPaperTrade'), stake=$('timedStake'), up=$('timedUpBtn'), down=$('timedDownBtn');
+ if(!trade||!stake||!up||!down)return;
+ const card=[...trade.querySelectorAll('.cards .card')].find(el=>el.querySelector('#quickAutoLevel'));
+ if(!card)return;
+ card.classList.add('oc-auto-plan-trigger');
+ card.setAttribute('role','button');card.setAttribute('tabindex','0');card.setAttribute('aria-label','Select investment plan');
+ const label=card.querySelector('.label');if(label)label.textContent='Investment plan';
+ let hint=card.querySelector('.oc-trigger-hint');
+ if(!hint){hint=document.createElement('span');hint.className='oc-trigger-hint';hint.textContent='Click to select';card.appendChild(hint);}
+ const amountCard=trade.querySelector('#quickEstimatedProfit')?.closest('.card');
+ if(amountCard){amountCard.querySelector('.label')?.remove();$('quickPlanNote')?.remove();}
+ trade.querySelectorAll('.muted.tiny').forEach(el=>{
+  const t=(el.textContent||'').toLowerCase();
+  if(t.includes('plan percentages are illustrative')||t.includes('not guaranteed')||t.includes('illustrative estimate'))el.classList.add('oc-hide-plan-copy');
+ });
+ const workspace=[...document.querySelectorAll('#page-trade .panel')].find(p=>p.querySelector('.level-grid'));
+ if(workspace)workspace.classList.add('oc-workspace-levels');
+ const plans=[
+  {rate:12,min:100,max:5000,duration:30},
+  {rate:15,min:5000,max:10000,duration:60},
+  {rate:18,min:10000,max:25000,duration:90},
+  {rate:21,min:25000,max:50000,duration:120},
+  {rate:24,min:50000,max:100000,duration:180},
+  {rate:27,min:100000,max:1000000,duration:360}
+ ];
+ let selectedRate=null;
+ let panel=$('ocInvestmentPlanPicker');
+ if(!panel){
+  panel=document.createElement('section');panel.id='ocInvestmentPlanPicker';panel.className='hidden';
+  panel.innerHTML='<h3>Select investment plan</h3><div class="oc-plan-options">'+plans.map(p=>'<button type="button" class="oc-plan-option" data-plan-rate="'+p.rate+'" aria-pressed="false"><strong>'+p.min.toLocaleString()+'–'+p.max.toLocaleString()+' USDT</strong><span>'+p.rate+'% · '+p.duration+' seconds</span></button>').join('')+'</div><p class="oc-plan-status" id="ocInvestmentPlanStatus" aria-live="polite"></p>';
+  card.insertAdjacentElement('afterend',panel);
+ }
+ function activePlan(){const n=Number(stake.value||0);return plans.find((p,i)=>n>=p.min&&(n<p.max||(i===plans.length-1&&n<=p.max)))||null}
+ function refresh(){
+  const p=activePlan(),balance=Number(window.onchaincryptoBalance||0);
+  const rate=selectedRate==null?(p?.rate??null):selectedRate;
+  const chosen=plans.find(x=>x.rate===rate)||p;
+  const value=$('quickAutoLevel'),range=$('quickAutoRange'),duration=$('quickAutoDuration');
+  if(value)value.textContent=chosen?chosen.rate+'%':'Choose plan';
+  if(range)range.textContent=chosen?chosen.min.toLocaleString()+'–'+chosen.max.toLocaleString()+' USDT':'';
+  if(duration)duration.textContent=chosen?chosen.duration+' seconds':'—';
+  panel.querySelectorAll('[data-plan-rate]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.planRate)===rate)));
+ }
+ function open(){panel.classList.remove('hidden');panel.scrollIntoView({behavior:'smooth',block:'nearest'});refresh()}
+ function close(){panel.classList.add('hidden')}
+ card.addEventListener('click',open);card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}});
+ function chooseDirection(direction){
+  if(direction==='buy')up.click();else down.click();
+  open();
+  const status=$('ocInvestmentPlanStatus');
+  if(status)status.textContent='Choose the plan that matches your trade amount.';
+ }
+ // Avoid recursively triggering the existing Buy/Sell handlers: observe direction state after click.
+ up.addEventListener('click',()=>{open();setTimeout(refresh,0)});
+ down.addEventListener('click',()=>{open();setTimeout(refresh,0)});
+ panel.querySelectorAll('[data-plan-rate]').forEach(btn=>btn.addEventListener('click',()=>{
+  const p=plans.find(x=>x.rate===Number(btn.dataset.planRate));if(!p)return;
+  const balance=Number($('quickAvailableBalance')?.textContent.replace(/[^0-9.]/g,'')||0);
+  selectedRate=p.rate;
+  let amount=Number(stake.value||0);
+  if(amount<p.min||amount>p.max)amount=p.min;
+  stake.value=String(amount);
+  const status=$('ocInvestmentPlanStatus');
+  if(status)status.textContent=amount>balance||balance<p.min?'This plan needs at least '+p.min.toLocaleString()+' USDT available.': 'Investment plan selected.';
+  refresh();
+  stake.dispatchEvent(new Event('input',{bubbles:true}));
+  if(typeof window.updateQuickEstimate==='function')window.updateQuickEstimate();
+  close();
+ }));
+ stake.addEventListener('input',()=>{selectedRate=null;refresh();});
+ const cancel=$('timedCancelBtn');cancel?.addEventListener('click',close);
+ const originalResult=$('timedResult');
+ const resultObserver=new MutationObserver(()=>{if(originalResult?.textContent.includes('Trade running'))close()});
+ if(originalResult)resultObserver.observe(originalResult,{childList:true,characterData:true,subtree:true});
+ // Hide plan selector until a direction is selected; Buy/Sell opens it.
+ close();refresh();
+})();
+</script>
