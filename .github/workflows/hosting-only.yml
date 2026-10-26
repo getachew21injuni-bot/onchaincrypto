@@ -6,6 +6,11 @@ on:
       - main
   workflow_dispatch:
 
+# Only one Hosting deployment may run at a time. Newer commits replace older pending runs.
+concurrency:
+  group: onchaincrypto-firebase-hosting
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
