@@ -464,7 +464,7 @@ ChainCrypto</h3>
           <p class="muted tiny">Join the OnChainCrypto institutional trading platform.</p>
           <label for="registerFirstName">First name <span class="yellow">(required)</span></label><input id="registerFirstName" class="field" maxlength="50" autocomplete="given-name" required placeholder="Enter your first name">
           <label for="registerLastName">Last name <span class="yellow">(required)</span></label><input id="registerLastName" class="field" maxlength="50" autocomplete="family-name" required placeholder="Enter your last name">
-          <label for="registerContactMethod">Registration contact</label><div class="oc-contact-row"><select id="registerContactMethod" class="field" aria-label="Choose email or phone"><option value="email">✉ Email</option><option value="phone">☎ Phone</option></select><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com"></div>
+          <label for="registerEmail">Email address</label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com"><div class="oc-register-contact-choice"><label for="registerContactMethod">Register using</label><select id="registerContactMethod" class="field" aria-label="Choose email or phone"><option value="email">✉ Email</option><option value="phone">☎ Phone</option></select></div>
           <p class="muted tiny">No email-verification link is required. To register using a phone number instead, use the SMS panel below.</p>
           <label for="registerPassword">Password <span class="yellow">(required)</span></label><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="Create a password (8+ characters)">
           <label for="referralCode">Referral code <span class="muted tiny">(optional)</span></label><input id="referralCode" class="field" maxlength="40" autocomplete="off" placeholder="Enter referral code if you have one">
@@ -1328,28 +1328,25 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
 })();
 </script>
 <style id="oc-contact-method-inline">
-.oc-contact-row{display:grid;grid-template-columns:112px minmax(0,1fr);gap:7px;align-items:center}
-.oc-contact-row select.field{width:100%;padding:11px 7px;font-size:13px}
-.oc-contact-row input.field{min-width:0}
-.oc-contact-row.phone-mode #registerEmail{display:none}
-@media(max-width:390px){.oc-contact-row{grid-template-columns:100px minmax(0,1fr)}}
+.oc-register-contact-choice{margin:10px 0 14px;display:grid;gap:6px}
+.oc-register-contact-choice label{font-size:13px;color:var(--muted)}
+.oc-register-contact-choice select{width:100%;min-height:44px}
+#registerForm.oc-phone-mode>*:not(.oc-register-contact-choice){display:none!important}
+#registerForm.oc-phone-mode .oc-register-contact-choice{display:grid!important}
+@media(max-width:560px){.oc-register-contact-choice select{min-height:46px}}
 </style>
 <script id="oc-contact-method-inline-script">
 (function(){
- const mode=document.getElementById('registerContactMethod'),email=document.getElementById('registerEmail'),details=document.querySelector('.auth-phone-details'),row=email?.closest('.oc-contact-row'),password=document.getElementById('registerPassword'),referral=document.getElementById('referralCode'),create=document.querySelector('#registerForm button[type="submit"]');
- if(!mode||!email||!details||!row)return;
+ const mode=document.getElementById('registerContactMethod'),email=document.getElementById('registerEmail'),details=document.querySelector('.auth-phone-details');
+ if(!mode||!email||!details)return;
  function setMode(){
   const phone=mode.value==='phone';
-  row.classList.toggle('phone-mode',phone);
-  email.required=!phone;
-  email.disabled=phone;
-  details.open=phone;
-  details.style.display=phone?'block':'none';
-  if(password){password.required=!phone;password.disabled=phone;const label=document.querySelector('label[for="registerPassword"]');if(label)label.style.display=phone?'none':'';password.style.display=phone?'none':''}
-  if(referral){referral.disabled=phone;const label=document.querySelector('label[for="referralCode"]');if(label)label.style.display=phone?'none':'';referral.style.display=phone?'none':''}
-  if(create)create.style.display=phone?'none':'';
-  const hint=email.closest('.oc-contact-row')?.nextElementSibling;
-  if(hint&&hint.tagName==='P')hint.style.display=phone?'none':'';
+  const form=document.getElementById('registerForm');
+  if(form)form.classList.toggle('oc-phone-mode',phone);
+  email.required=!phone; email.disabled=phone;
+  if(form)form.querySelectorAll('input').forEach(el=>{if(el!==email)el.disabled=phone;});
+  details.open=phone; details.style.display=phone?'block':'none';
+  details.querySelectorAll('input').forEach(el=>el.disabled=!phone);
   details.querySelector('summary').textContent=phone?'☎ Phone selected — enter number and verify by SMS':'Register or sign in with phone (SMS verification)';
  }
  mode.addEventListener('change',setMode);
@@ -1450,3 +1447,12 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+
+<style id="oc-register-contact-choice-style">
+.oc-register-contact-choice{margin:10px 0 14px;display:grid;gap:6px}
+.oc-register-contact-choice label{font-size:13px;color:var(--muted)}
+.oc-register-contact-choice select{width:100%;min-height:44px}
+#registerForm.oc-phone-mode>*:not(.oc-register-contact-choice){display:none!important}
+#registerForm.oc-phone-mode .oc-register-contact-choice{display:grid!important}
+@media(max-width:560px){.oc-register-contact-choice select{min-height:46px}}
+</style>
