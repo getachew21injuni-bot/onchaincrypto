@@ -1903,3 +1903,87 @@ td,th{overflow-wrap:anywhere}
  close();refresh();
 })();
 </script>
+
+<style id="oc-clear-validation-style">
+.oc-field-error{display:block;color:#ff777e;font-size:12px;line-height:1.45;margin:5px 0 8px}
+.oc-invalid-field{border-color:#ff5e68!important;outline:2px solid #ff5e6830!important}
+#ocValidationNotice{position:fixed;top:16px;left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 28px));z-index:10050;padding:12px 15px;border:1px solid #ff6873;border-radius:12px;background:#32151c;color:#fff0f1;box-shadow:0 12px 35px #0008;font-size:14px;line-height:1.45}
+#ocValidationNotice[hidden]{display:none}
+</style>
+<script id="oc-clear-validation">
+(function(){
+ if(window.__ocClearValidationInstalled)return;window.__ocClearValidationInstalled=true;
+ const $=id=>document.getElementById(id);
+ let notice=$('ocValidationNotice');
+ if(!notice){notice=document.createElement('div');notice.id='ocValidationNotice';notice.setAttribute('role','alert');notice.setAttribute('aria-live','assertive');notice.hidden=true;document.body.appendChild(notice);}
+ let noticeTimer;
+ function announce(message){notice.textContent=message;notice.hidden=false;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>notice.hidden=true,7000);}
+ function errorFor(el,message){
+   el.classList.add('oc-invalid-field');el.setAttribute('aria-invalid','true');
+   let e=el.parentElement?.querySelector(':scope > .oc-field-error');
+   if(!e){e=document.createElement('span');e.className='oc-field-error';e.setAttribute('role','alert');el.insertAdjacentElement('afterend',e);}
+   e.textContent=message;
+ }
+ function clearError(el){
+   el.classList.remove('oc-invalid-field');el.removeAttribute('aria-invalid');
+   el.parentElement?.querySelector(':scope > .oc-field-error')?.remove();
+ }
+ function passwordMessage(el){
+   const v=el.value||'';
+   if(v.length<8)return 'Password must be at least 8 characters long.';
+   if(!/[A-Za-z]/.test(v))return 'Password must include at least one letter, not numbers only.';
+   if(!/[0-9]/.test(v))return 'Password must include at least one number.';
+   return '';
+ }
+ function validate(el,show){
+   if(!el||el.disabled||el.type==='hidden'||el.closest('[hidden]')||el.closest('.hidden'))return true;
+   const id=el.id||'',value=String(el.value||'').trim();
+   let message='';
+   if(id==='registerPassword'&&!el.closest('#registerForm')?.classList.contains('oc-phone-mode'))message=passwordMessage(el);
+   else if(el.required&&!value)message='This field is required. Please enter a value.';
+   else if(el.type==='email'&&value&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))message='Enter a valid email address, for example name@example.com.';
+   else if(el.type==='tel'&&value&&!/^\+?[0-9 ()-]{7,20}$/.test(value))message='Enter a valid phone number with country code, for example +2519… .';
+   else if(el.type==='number'&&value!==''&&!Number.isFinite(Number(value)))message='Enter a valid number.';
+   else if(el.type==='number'&&value!==''&&el.min!==''&&Number(value)<Number(el.min))message='The minimum allowed value is '+el.min+'.';
+   else if(el.type==='number'&&value!==''&&el.max!==''&&Number(value)>Number(el.max))message='The maximum allowed value is '+Number(el.max).toLocaleString()+'.';
+   else if(el.minLength>0&&value&&value.length<el.minLength)message='Enter at least '+el.minLength+' characters.';
+   else if(el.pattern&&value&&!el.checkValidity())message=el.title||'The value format is not valid. Check the instructions and try again.';
+   if(show){if(message){errorFor(el,message);announce(message);return false;}clearError(el);}
+   return !message;
+ }
+ document.addEventListener('input',e=>{
+   const el=e.target;if(!(el instanceof HTMLInputElement||el instanceof HTMLSelectElement||el instanceof HTMLTextAreaElement))return;
+   if(el.classList.contains('oc-invalid-field')||el.id==='registerPassword'){
+     const ok=validate(el,true);
+     if(ok&&el.id==='registerPassword')announce('Password format looks good.');
+   }
+ },true);
+ document.addEventListener('change',e=>{
+   const el=e.target;if(el instanceof HTMLInputElement||el instanceof HTMLSelectElement||el instanceof HTMLTextAreaElement)validate(el,true);
+ },true);
+ document.addEventListener('invalid',e=>{
+   const el=e.target;if(!(el instanceof HTMLInputElement||el instanceof HTMLSelectElement||el instanceof HTMLTextAreaElement))return;
+   let message=el.validationMessage||'Please check this field.';
+   if(el.id==='registerPassword')message=passwordMessage(el)||message;
+   if(el.type==='email'&&el.value)message='Enter a valid email address, for example name@example.com.';
+   errorFor(el,message);announce(message);
+ },true);
+ document.addEventListener('submit',e=>{
+   const form=e.target;if(!(form instanceof HTMLFormElement))return;
+   const fields=[...form.querySelectorAll('input,select,textarea')].filter(el=>!el.disabled&&el.type!=='hidden');
+   for(const el of fields){if(!validate(el,true)){e.preventDefault();e.stopImmediatePropagation();el.focus();return;}}
+ },true);
+ // Catch form errors and surface them in a clear banner, while preserving existing form-specific messages.
+ const originalConsoleError=console.error;
+ console.error=function(...args){try{const s=args.map(x=>typeof x==='string'?x:(x?.message||'')).join(' ');if(/firebase|auth\/|failed|error/i.test(s))announce('Something went wrong. Check the form fields and try again. If it continues, refresh the page and retry.');}catch(_){}return originalConsoleError.apply(console,args);};
+ document.addEventListener('click',e=>{
+   const btn=e.target.closest('#timedUpBtn,#timedDownBtn,#timedConfirmBtn');
+   if(!btn)return;
+   const amount=$('timedStake');
+   if(amount&&(!amount.value||Number(amount.value)<100||Number(amount.value)>1000000)){
+     const m=!amount.value?'Enter a trade amount.':Number(amount.value)<100?'Minimum trade amount is 100 USDT.':'Maximum trade amount is 1,000,000 USDT.';
+     errorFor(amount,m);announce(m);amount.focus();e.preventDefault();e.stopImmediatePropagation();
+   }
+ },true);
+})();
+</script>
