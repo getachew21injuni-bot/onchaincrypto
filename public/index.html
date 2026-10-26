@@ -2426,3 +2426,36 @@ main:has(> #page-withdraw:not(.hidden)) #timedPaperTrade {
   display: none !important;
 }
 </style>
+
+
+<style id="oc-restore-wallet-action-colors">
+/* Restore the familiar action colors across Wallet, Deposit and Withdraw. */
+#page-wallet .wallet-action[data-wallet-action="deposit"],
+#page-deposit .page-title h1 { color: var(--green, #16d9a0) !important; }
+#page-wallet .wallet-action[data-wallet-action="deposit"] {
+  background: var(--green, #16d9a0) !important; border-color: var(--green, #16d9a0) !important;
+  color: #06251b !important; box-shadow: 0 5px 18px rgba(22,217,160,.16);
+}
+#page-wallet .wallet-action[data-wallet-action="withdraw"] {
+  background: var(--red, #ff4d67) !important; border-color: var(--red, #ff4d67) !important;
+  color: #fff !important; box-shadow: 0 5px 18px rgba(255,77,103,.16);
+}
+#page-wallet .wallet-action[data-wallet-action="transfer"] {
+  background: #208cff !important; border-color: #208cff !important;
+  color: #fff !important; box-shadow: 0 5px 18px rgba(32,140,255,.16);
+}
+#page-wallet .wallet-action { font-weight: 800; }
+#page-wallet .wallet-action:hover { filter: brightness(1.09); transform: translateY(-1px); }
+#page-deposit .page-title h1 { color: var(--green, #16d9a0) !important; }
+#page-withdraw .page-title h1 { color: var(--red, #ff4d67) !important; }
+#page-deposit .form-panel > button:not(:disabled),
+#page-deposit #copyDepositAddress:not(:disabled),
+#page-deposit #showDepositQr:not(:disabled) {
+  border-color: var(--green, #16d9a0);
+}
+#page-withdraw .form-panel > button:not(:disabled),
+#page-withdraw #withdrawSubmit:not(:disabled) {
+  background: var(--red, #ff4d67) !important; border-color: var(--red, #ff4d67) !important; color: #fff !important;
+}
+#page-wallet .wallet-action:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+</style>
