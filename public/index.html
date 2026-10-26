@@ -2676,23 +2676,31 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
  // so switching to Trade hid the form and made the user appear to return to Signals.
  const form=document.getElementById('timedPaperTrade');
  const tradeLayout=document.querySelector('#page-trade .trade-layout');
- if(form&&tradeLayout&&!tradeLayout.contains(form))tradeLayout.appendChild(form);
+ if(form&&tradeLayout){
+  // Put Quick Trade before the chart so Buy/Sell opens directly on the trade form.
+  if(form.parentElement!==tradeLayout||tradeLayout.firstElementChild!==form)tradeLayout.insertBefore(form,tradeLayout.firstElementChild);
+ }
  document.addEventListener('click',function(e){
   const target=e.target instanceof Element?e.target:null;
-  const btn=target&&target.closest('[data-oc-book-direction]');if(!btn)return;
-  // Capture the click before chart/signal containers can handle it and navigate away.
+  if(!target)return;
+  const bookBtn=target.closest('[data-oc-book-direction]');
+  const quickBtn=target.closest('#timedUpBtn,#timedDownBtn');
+  if(!bookBtn&&!quickBtn)return;
+  // Capture Buy/Sell before chart/signal handlers can redirect or change the view.
   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-  const direction=btn.dataset.ocBookDirection;
+  const direction=bookBtn?bookBtn.dataset.ocBookDirection:(quickBtn.id==='timedUpBtn'?'buy':'sell');
   const tradeForm=document.getElementById('timedPaperTrade');
   const directionButton=document.getElementById(direction==='buy'?'timedUpBtn':'timedDownBtn');
   if(!tradeForm||!directionButton)return;
   if(typeof window.showPage==='function')window.showPage('trade');
   tradeForm.classList.remove('hidden');
-  directionButton.click();
+  // For order-book buttons, forward the choice to the Quick Trade direction control.
+  if(bookBtn)directionButton.click();
   window.setTimeout(function(){
    const plans=document.getElementById('ocInvestmentPlanPicker');
-   (plans&&!plans.classList.contains('hidden')?plans:tradeForm).scrollIntoView({behavior:'smooth',block:'center'});
-  },180);
+   tradeForm.scrollIntoView({behavior:'auto',block:'start'});
+   if(plans&&!plans.classList.contains('hidden'))plans.scrollIntoView({behavior:'smooth',block:'center'});
+  },220);
  },true);
 })();
 </script>
