@@ -1,8 +1,6 @@
 name: Deploy OnChainCrypto to Firebase
+# Manual-only to avoid racing the automatic Hosting workflow.
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
