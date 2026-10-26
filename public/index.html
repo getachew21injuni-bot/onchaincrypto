@@ -1362,6 +1362,87 @@ function hook(){if(typeof window.updateSelectedCoin==='function'&&!window.update
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hook);else hook();
 })();
 </script>
+
+<style id="oc-trade-usability-update">
+/* Clear, subtle selected state for Buy / Sell. */
+#timedUpBtn[aria-pressed="true"]{background:#16834a!important;color:#fff!important;box-shadow:inset 0 0 0 2px rgba(255,255,255,.9),0 0 0 3px rgba(22,131,74,.22)!important;filter:brightness(.94);transform:translateY(1px)}
+#timedDownBtn[aria-pressed="true"]{background:#c93636!important;color:#fff!important;box-shadow:inset 0 0 0 2px rgba(255,255,255,.9),0 0 0 3px rgba(201,54,54,.22)!important;filter:brightness(.94);transform:translateY(1px)}
+#timedUpBtn[aria-pressed="false"],#timedDownBtn[aria-pressed="false"]{transition:box-shadow .12s ease,filter .12s ease,transform .12s ease}
+#timedResultBoard[style*="display: block"]{position:fixed!important;z-index:10050!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;width:min(720px,calc(100vw - 24px))!important;max-height:calc(100dvh - 28px)!important;overflow-y:auto!important;margin:0!important;box-shadow:0 0 0 100vmax rgba(5,12,24,.66),0 20px 70px rgba(0,0,0,.38)!important;border-radius:16px!important}
+#ocCloseTradeBoard{position:sticky;top:0;float:right;z-index:2;border:0;border-radius:9px;background:#172033;color:#fff;font-weight:700;padding:9px 13px;cursor:pointer;margin:0 0 8px 10px}
+#ocBoardPlan{clear:both;background:#edf6ff;border:1px solid #cfe3fb;border-radius:10px;padding:11px 12px;margin:8px 0 12px;color:#172033}
+#ocTradePlanGate{font-size:12px;margin-top:7px;color:#bd3333;display:none}
+@media(max-width:560px){#timedResultBoard[style*="display: block"]{padding:14px!important;width:calc(100vw - 18px)!important;max-height:calc(100dvh - 18px)!important}#ocCloseTradeBoard{padding:8px 11px}}
+</style>
+<script id="oc-trade-usability-update-script">
+(function(){
+ const $=id=>document.getElementById(id);
+ const levels=[
+  {rate:12,min:100,max:5000,label:"Level 1",duration:30},
+  {rate:15,min:5000,max:10000,label:"Level 2",duration:60},
+  {rate:18,min:10000,max:25000,label:"Level 3",duration:90},
+  {rate:21,min:25000,max:50000,label:"Level 4",duration:120},
+  {rate:24,min:50000,max:100000,label:"Level 5",duration:180},
+  {rate:27,min:100000,max:1000000,label:"Level 6",duration:360}
+ ];
+ function planFor(amount){return levels.find((p,i)=>amount>=p.min&&(amount<p.max||(i===levels.length-1&&amount<=p.max)))||null}
+ function validatePlan(){
+  const amount=Number($("timedStake")?.value||0);
+  const balance=Number(window.state?.balance ?? 0);
+  const plan=planFor(amount);
+  const gate=$("ocTradePlanGate");
+  if(gate){
+   if(amount>0&&!plan){gate.textContent="Choose an amount from 100 to 1,000,000 USDT.";gate.style.display="block"}
+   else if(plan&&balance<plan.min){gate.textContent="Your available balance is below this investment plan's minimum of "+plan.min.toLocaleString()+" USDT. Increase your balance before choosing this plan.";gate.style.display="block"}
+   else if(plan&&amount>balance){gate.textContent="Your available balance is too low for this investment amount.";gate.style.display="block"}
+   else {gate.textContent="";gate.style.display="none"}
+  }
+  const confirm=$("timedConfirmBtn");
+  if(confirm){
+   const blocked=!plan||balance<plan.min||amount>balance||amount<plan.min||amount>plan.max;
+   confirm.disabled=blocked||!window.pendingTimedDirection||!!window.timedPaper;
+  }
+ }
+ function enhanceBoard(){
+  const board=$("timedResultBoard");if(!board)return;
+  // Prevent the old result handler from scrolling the page to the board.
+  try{board.scrollIntoView=function(){};}catch(e){}
+  if(!$("ocCloseTradeBoard")){
+   const close=document.createElement("button");close.id="ocCloseTradeBoard";close.type="button";close.textContent="Close trade result ✕";close.setAttribute("aria-label","Close trade result board");
+   close.addEventListener("click",()=>{board.style.display="none";});
+   board.insertBefore(close,board.firstChild);
+  }
+  if(!$("ocBoardPlan")){
+   const plan=document.createElement("div");plan.id="ocBoardPlan";plan.innerHTML='<strong>Investment plan</strong><div id="ocBoardPlanValue">—</div>';
+   const summary=$("timedBoardSummary");if(summary)summary.insertAdjacentElement("beforebegin",plan);else board.insertBefore(plan,board.children[1]||null);
+  }
+  const amount=Number(String($("timedBoardAmount")?.textContent||"").replace(/[^0-9.\-]/g,""));
+  const p=planFor(amount);
+  const value=$("ocBoardPlanValue");
+  if(value)value.textContent=p?p.label+" · "+p.min.toLocaleString()+"–"+p.max.toLocaleString()+" USDT · "+p.rate+"% illustrative estimate · "+p.duration+" sec expiry":"Investment plan unavailable";
+ }
+ const stake=$("timedStake");
+ if(stake){
+  const gate=document.createElement("div");gate.id="ocTradePlanGate";gate.setAttribute("role","status");
+  stake.insertAdjacentElement("afterend",gate);
+  stake.addEventListener("input",()=>setTimeout(validatePlan,0));
+ }
+ ["timedUpBtn","timedDownBtn"].forEach(id=>$(id)?.addEventListener("click",()=>setTimeout(validatePlan,0)));
+ $("timedCancelBtn")?.addEventListener("click",()=>setTimeout(validatePlan,0));
+ const board=$("timedResultBoard");
+ if(board){
+  enhanceBoard();
+  const observer=new MutationObserver(()=>{if(board.style.display!=="none"){enhanceBoard();validatePlan();}});
+  observer.observe(board,{attributes:true,attributeFilter:["style"]});
+  const resultObserver=new MutationObserver(()=>{if(board.style.display!=="none")enhanceBoard()});
+  resultObserver.observe(board,{childList:true,subtree:true,characterData:true});
+ }
+ // Also validate immediately and after state/balance refreshes.
+ validatePlan();
+ document.addEventListener("visibilitychange",()=>{if(!document.hidden)validatePlan()});
+})();
+</script>
+
 </body>
 </html>
 
