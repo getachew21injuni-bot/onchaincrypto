@@ -2678,8 +2678,10 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
  const tradeLayout=document.querySelector('#page-trade .trade-layout');
  if(form&&tradeLayout&&!tradeLayout.contains(form))tradeLayout.appendChild(form);
  document.addEventListener('click',function(e){
-  const btn=e.target.closest('[data-oc-book-direction]');if(!btn)return;
-  e.preventDefault();e.stopPropagation();
+  const target=e.target instanceof Element?e.target:null;
+  const btn=target&&target.closest('[data-oc-book-direction]');if(!btn)return;
+  // Capture the click before chart/signal containers can handle it and navigate away.
+  e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
   const direction=btn.dataset.ocBookDirection;
   const tradeForm=document.getElementById('timedPaperTrade');
   const directionButton=document.getElementById(direction==='buy'?'timedUpBtn':'timedDownBtn');
@@ -2691,6 +2693,6 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
    const plans=document.getElementById('ocInvestmentPlanPicker');
    (plans&&!plans.classList.contains('hidden')?plans:tradeForm).scrollIntoView({behavior:'smooth',block:'center'});
   },180);
- });
+ },true);
 })();
 </script>
