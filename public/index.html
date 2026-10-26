@@ -1918,6 +1918,21 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
 })();
 </script>
 
+
+<style id="oc-hide-trade-panels-wallet-browser">
+/* Keep trade-only demo history and trading-level panels off Wallet and Browser pages. */
+#page-wallet :is(section, .panel, .card):has(> .section-head h2:is(:where(*))) { }
+#page-wallet :is(section, .panel, .card):has(#tradeHistory),
+#page-wallet :is(section, .panel, .card):has(#pnlRows),
+#page-wallet :is(section, .panel, .card):has(.level-grid),
+#page-browser :is(section, .panel, .card):has(#tradeHistory),
+#page-browser :is(section, .panel, .card):has(#pnlRows),
+#page-browser :is(section, .panel, .card):has(.level-grid) { display:none !important; }
+#page-wallet :is(section, .panel, .card):has(h1, h2, h3):has-text("Recent demo orders"),
+#page-browser :is(section, .panel, .card):has(h1, h2, h3):has-text("Recent demo orders"),
+#page-wallet :is(section, .panel, .card):has(h1, h2, h3):has-text("Trading levels"),
+#page-browser :is(section, .panel, .card):has(h1, h2, h3):has-text("Trading levels") { display:none !important; }
+</style>
 </body>
 </html>
 
