@@ -1722,6 +1722,43 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
 })();
 </script>
+<style id="oc-active-pairs-bold-style">
+#page-home #homeActivePairs{overflow:visible}
+#page-home #homeActivePairs .oc-active-pair-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:4px 0}
+#page-home #homeActivePairs .oc-active-pair{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 10px;align-items:center;min-width:0;padding:15px;border:1px solid #245269;border-radius:15px;background:linear-gradient(145deg,#0a2030,#06111d 75%);text-align:left;color:#f4fbff;cursor:pointer;box-shadow:inset 0 1px #ffffff0a;transition:transform .18s,border-color .18s}
+#page-home #homeActivePairs .oc-active-pair:hover{transform:translateY(-2px);border-color:#00d9a0}
+#page-home #homeActivePairs .oc-active-pair .coin-icon{grid-row:1 / span 2;width:42px;height:42px;font-size:14px}
+#page-home #homeActivePairs .oc-active-pair .coin-icon img{width:100%;height:100%;object-fit:contain}
+#page-home #homeActivePairs .oc-pair-name{font-size:14px;font-weight:900;letter-spacing:.25px;overflow-wrap:anywhere}
+#page-home #homeActivePairs .oc-pair-price{font-size:14px;font-weight:850;font-variant-numeric:tabular-nums}
+#page-home #homeActivePairs .oc-pair-bottom{grid-column:1 / -1;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:3px}
+#page-home #homeActivePairs .oc-pair-change{font-size:15px;font-weight:900;font-variant-numeric:tabular-nums}
+#page-home #homeActivePairs .oc-pair-spark{width:86px;height:27px;flex-shrink:0;overflow:visible}
+#page-home #homeActivePairs .oc-pair-signal{grid-column:1 / -1;font-size:10px;font-weight:900;letter-spacing:.8px}
+@media(max-width:760px){#page-home #homeActivePairs .oc-active-pair-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#page-home #homeActivePairs .oc-active-pair{padding:11px}#page-home #homeActivePairs .oc-active-pair .coin-icon{width:34px;height:34px}}
+@media(max-width:360px){#page-home #homeActivePairs .oc-pair-spark{width:62px}}
+</style>
+<script id="oc-active-pairs-bold-script">
+(function(){
+ function draw(){
+  const host=document.getElementById('homeActivePairs');
+  if(!host||!Array.isArray(window.market)||!window.market.length)return;
+  const list=window.market.slice(0,8);
+  const fmt=n=>{n=Number(n)||0;return n>=1? n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4}):n.toLocaleString(undefined,{maximumSignificantDigits:6});};
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  host.innerHTML='<div class="oc-active-pair-grid">'+list.map(c=>{
+   const change=Number(c.price_change_percentage_24h)||0,up=change>=0,color=up?'#00e5a0':'#ff5268',sym=String(c.symbol||'').toUpperCase(),pair=sym+'/USDT';
+   const seed=Array.from(sym).reduce((a,ch)=>a+ch.charCodeAt(0),0),points=Array.from({length:8},(_,i)=>{const trend=(up?1:-1)*i*1.15;return (13+(Math.sin(seed+i*1.7)*5)+(Math.cos(seed*.3+i)*2)-trend)}),min=Math.min(...points),max=Math.max(...points),path=points.map((v,i)=>(i?'L':'M')+(i*12.1).toFixed(1)+' '+(23-(v-min)/(max-min||1)*19).toFixed(1)).join(' ');
+   return '<button type="button" class="oc-active-pair" data-home-pair="'+esc(sym)+'" aria-label="Open '+esc(pair)+' trading chart"><span class="coin-icon">'+(c.image?'<img loading="lazy" alt="" src="'+esc(c.image)+'">':esc(sym.slice(0,3)))+'</span><strong class="oc-pair-name">'+esc(pair)+'</strong><span class="oc-pair-price">'+esc(fmt(c.current_price))+'</span><span class="oc-pair-bottom"><b class="oc-pair-change" style="color:'+color+'">'+(up?'↗ +':'↘ ')+change.toFixed(2)+'%</b><svg class="oc-pair-spark" viewBox="0 0 86 27" aria-label="'+(up?'Rising':'Falling')+' 24-hour signal line"><path d="'+path+'" fill="none" stroke="'+color+'" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="oc-pair-signal" style="color:'+color+'">'+(up?'▲ POSITIVE MOMENTUM':'▼ NEGATIVE MOMENTUM')+'</span></button>';
+  }).join('')+'</div>';
+  host.querySelectorAll('[data-home-pair]').forEach(btn=>btn.addEventListener('click',()=>{const sym=btn.dataset.homePair;const select=document.getElementById('tradeAsset');if(select){const option=Array.from(select.options).find(o=>String(o.value).toUpperCase().replace(/[^A-Z0-9]/g,'')===sym);if(option)select.value=option.value;}if(typeof window.updateTradingViewChart==='function')window.updateTradingViewChart(sym);const title=document.getElementById('tradePairTitle');if(title)title.textContent=sym+' / USDT';const nav=document.querySelector('[data-page="trade"]');if(nav)nav.click();else{const page=document.getElementById('page-trade');if(page){document.querySelectorAll('main>section[id^="page-"]').forEach(x=>x.classList.add('hidden'));page.classList.remove('hidden');}}}));
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',draw);else draw();
+ const oldRender=window.renderMarket;
+ const timer=setInterval(()=>{if(Array.isArray(window.market)&&window.market.length){draw();}},5000);
+ window.addEventListener('beforeunload',()=>clearInterval(timer));
+})();
+</script>
 </body>
 </html>
 
