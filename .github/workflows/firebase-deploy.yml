@@ -4,23 +4,35 @@ on:
     branches:
       - main
   workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Authenticate with Firebase service account
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ONCHAINCRYPTO_D976B }}
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
       - name: Install Firebase CLI
         run: npm install --global firebase-tools
+
+      - name: Authenticate with Firebase service account
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ONCHAINCRYPTO }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::error::Missing GitHub Actions secret FIREBASE_SERVICE_ACCOUNT_ONCHAINCRYPTO. The Hosting-only workflow uses this same secret."
+            exit 1
+          fi
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
+
       - name: Deploy Hosting and Firestore rules
         run: firebase deploy --only hosting,firestore:rules --project onchaincrypto-d976b --non-interactive
