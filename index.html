@@ -321,6 +321,15 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
       <div class="section-head"><div><h2>Order Book</h2><div class="muted tiny"><span id="orderBookPair">BTC/USDT</span> · refreshed with public market price</div></div><span class="tag" id="orderBookStatus">WAITING</span></div>
       <div class="table-wrap"><table><thead><tr><th>PRICE (USDT approx.)</th><th>QTY (indicative)</th><th>Side</th></tr></thead><tbody id="liveOrderBookRows"><tr><td colspan="3" class="empty">Waiting for public market data…</td></tr></tbody></table></div>
       <div class="oc-orderbook-actions" aria-label="Trade direction"><button type="button" class="buy" data-oc-book-direction="buy">↗ Buy</button><button type="button" class="sell" data-oc-book-direction="sell">↘ Sell</button></div>
+      <form id="ocInlineTradeForm" class="mini-card" style="display:none;margin-top:12px" novalidate>
+        <div class="section-head"><h3 id="ocInlineTradeTitle">Quick Buy</h3><span class="tag">SIMULATED</span></div>
+        <label for="ocInlineTradeAsset">Asset</label><select id="ocInlineTradeAsset" class="field"></select>
+        <label for="ocInlineTradeAmount">Amount (USDT)</label><input id="ocInlineTradeAmount" class="field" type="number" min="100" max="1000000" step="1" value="100" inputmode="decimal" required>
+        <div class="cards" style="margin-top:10px"><div class="card"><div class="label">Auto level</div><div class="big" id="ocInlineTradeLevel">Level 1 · 12%</div></div><div class="card"><div class="label">Auto expiry</div><div class="big" id="ocInlineTradeExpiry">30 seconds</div></div></div>
+        <p id="ocInlineTradeMessage" class="muted tiny" aria-live="polite">Enter an amount and confirm your simulated order.</p>
+        <div class="two-buttons"><button type="submit" class="primary" id="ocInlineTradeConfirm">Confirm Buy</button><button type="button" class="secondary" id="ocInlineTradeCancel">Cancel</button></div>
+        <p class="muted tiny">Simulation only. No real orders or funds are processed.</p>
+      </form>
       <p class="muted tiny">Public market feeds provide prices, not exchange order-by-order depth here. These are indicative levels calculated around the current price—not live executable orders.</p>
     </section>
     <section class="panel" id="timedPaperTrade"><div class="section-head"><div><h2>Quick Trade</h2><div class="muted tiny">One simple trade form. Choose a coin, amount, duration, then Buy or Sell.</div></div><span class="tag">PAPER TRADING</span></div>
@@ -2517,26 +2526,71 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
 </style>
 <script id="oc-orderbook-open-trade-plan">
 (function(){
- if(window.__ocOrderbookOpenTradePlan)return;window.__ocOrderbookOpenTradePlan=true;
- // Keep the Quick Trade form inside the actual Trade page. It was nested under Home,
- // so switching to Trade hid the form and made the user appear to return to Signals.
- const form=document.getElementById('timedPaperTrade');
- const tradeLayout=document.querySelector('#page-trade .trade-layout');
- if(form&&tradeLayout&&!tradeLayout.contains(form))tradeLayout.appendChild(form);
- document.addEventListener('click',function(e){
-  const btn=e.target.closest('[data-oc-book-direction]');if(!btn)return;
+ if(window.__ocInlineTradeFormReady)return;window.__ocInlineTradeFormReady=true;
+ const form=document.getElementById('ocInlineTradeForm');
+ const assetSelect=document.getElementById('ocInlineTradeAsset');
+ const amountInput=document.getElementById('ocInlineTradeAmount');
+ const message=document.getElementById('ocInlineTradeMessage');
+ let direction='buy';
+ const levels=[
+  {min:100,max:5000,rate:12,seconds:30,label:'Level 1'},
+  {min:5000,max:10000,rate:15,seconds:60,label:'Level 2'},
+  {min:10000,max:25000,rate:18,seconds:90,label:'Level 3'},
+  {min:25000,max:50000,rate:21,seconds:120,label:'Level 4'},
+  {min:50000,max:100000,rate:24,seconds:180,label:'Level 5'},
+  {min:100000,max:1000000,rate:27,seconds:360,label:'Level 6'}
+ ];
+ function syncAssets(){
+  const source=document.getElementById('tradeAsset');
+  if(!source||!assetSelect)return;
+  const previous=assetSelect.value;
+  assetSelect.innerHTML=source.innerHTML;
+  if(previous&&Array.from(assetSelect.options).some(o=>o.value===previous))assetSelect.value=previous;
+  else assetSelect.value=source.value;
+ }
+ function updatePlan(){
+  const amount=Number(amountInput.value||0);
+  const plan=levels.find((p,i)=>amount>=p.min&&(amount<p.max||(i===levels.length-1&&amount<=p.max)))||levels[0];
+  document.getElementById('ocInlineTradeLevel').textContent=plan.label+' · '+plan.rate+'%';
+  document.getElementById('ocInlineTradeExpiry').textContent=plan.seconds+' seconds';
+ }
+ document.querySelectorAll('[data-oc-book-direction]').forEach(btn=>btn.addEventListener('click',function(e){
   e.preventDefault();e.stopPropagation();
-  const direction=btn.dataset.ocBookDirection;
-  const tradeForm=document.getElementById('timedPaperTrade');
-  const directionButton=document.getElementById(direction==='buy'?'timedUpBtn':'timedDownBtn');
-  if(!tradeForm||!directionButton)return;
-  if(typeof window.showPage==='function')window.showPage('trade');
-  tradeForm.classList.remove('hidden');
-  directionButton.click();
-  window.setTimeout(function(){
-   const plans=document.getElementById('ocInvestmentPlanPicker');
-   (plans&&!plans.classList.contains('hidden')?plans:tradeForm).scrollIntoView({behavior:'smooth',block:'center'});
-  },180);
+  direction=btn.dataset.ocBookDirection;
+  syncAssets();
+  form.style.display='block';
+  document.getElementById('ocInlineTradeTitle').textContent=direction==='buy'?'Quick Buy':'Quick Sell';
+  document.getElementById('ocInlineTradeConfirm').textContent=direction==='buy'?'Confirm Buy':'Confirm Sell';
+  message.textContent='Enter an amount, review the automatic level, then confirm.';
+  updatePlan();
+  form.scrollIntoView({behavior:'smooth',block:'nearest'});
+ }));
+ amountInput.addEventListener('input',updatePlan);
+ form.addEventListener('submit',function(e){
+  e.preventDefault();
+  const amount=Number(amountInput.value);
+  if(!Number.isFinite(amount)||amount<100||amount>1000000){
+   message.textContent='Enter an amount from 100 to 1,000,000 USDT.';
+   amountInput.focus();return;
+  }
+  const tradeAsset=document.getElementById('tradeAsset');
+  const tradeStake=document.getElementById('timedStake');
+  if(tradeAsset&&assetSelect.value)tradeAsset.value=assetSelect.value;
+  if(tradeStake)tradeStake.value=String(amount);
+  if(typeof updateQuickEstimate==='function')updateQuickEstimate();
+  if(typeof startTimedPaper==='function'){
+   const existing=typeof timedPaper!=='undefined'&&timedPaper;
+   if(existing){message.textContent='A simulated trade is already running. Wait for it to finish before starting another.';return;}
+   if(typeof chooseTimedDirection==='function')chooseTimedDirection(direction==='buy'?'up':'down');
+   startTimedPaper(direction==='buy'?'up':'down');
+   message.textContent=(direction==='buy'?'Buy':'Sell')+' simulation started for '+amount.toLocaleString()+' USDT. No real funds or orders were processed.';
+  }else{
+   message.textContent='Trade engine is not ready yet. Please try again after the page finishes loading.';
+  }
  });
+ document.getElementById('ocInlineTradeCancel').addEventListener('click',function(){
+  form.style.display='none';message.textContent='Form closed.';
+ });
+ syncAssets();updatePlan();
 })();
 </script>
