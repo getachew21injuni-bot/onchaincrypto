@@ -1920,18 +1920,24 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
 
 
 <style id="oc-hide-trade-panels-wallet-browser">
-/* Keep trade-only demo history and trading-level panels off Wallet and Browser pages. */
-#page-wallet :is(section, .panel, .card):has(> .section-head h2:is(:where(*))) { }
-#page-wallet :is(section, .panel, .card):has(#tradeHistory),
-#page-wallet :is(section, .panel, .card):has(#pnlRows),
-#page-wallet :is(section, .panel, .card):has(.level-grid),
-#page-browser :is(section, .panel, .card):has(#tradeHistory),
-#page-browser :is(section, .panel, .card):has(#pnlRows),
-#page-browser :is(section, .panel, .card):has(.level-grid) { display:none !important; }
-#page-wallet :is(section, .panel, .card):has(h1, h2, h3):has-text("Recent demo orders"),
-#page-browser :is(section, .panel, .card):has(h1, h2, h3):has-text("Recent demo orders"),
-#page-wallet :is(section, .panel, .card):has(h1, h2, h3):has-text("Trading levels"),
-#page-browser :is(section, .panel, .card):has(h1, h2, h3):has-text("Trading levels") { display:none !important; }
+/* These panels belong to the trading workspace, not Wallet or Browser.
+   Hide the complete panel containers whenever either page is active. */
+main:has(> #page-wallet:not(.hidden)) section:has(#tradeHistory),
+main:has(> #page-wallet:not(.hidden)) section:has(#pnlRows),
+main:has(> #page-wallet:not(.hidden)) section:has(.level-grid),
+main:has(> #page-wallet:not(.hidden)) section:has(#quickAutoLevel),
+main:has(> #page-browser:not(.hidden)) section:has(#tradeHistory),
+main:has(> #page-browser:not(.hidden)) section:has(#pnlRows),
+main:has(> #page-browser:not(.hidden)) section:has(.level-grid),
+main:has(> #page-browser:not(.hidden)) section:has(#quickAutoLevel),
+main:has(> #page-wallet:not(.hidden)) #tradeHistory,
+main:has(> #page-wallet:not(.hidden)) #quickAutoLevel,
+main:has(> #page-wallet:not(.hidden)) #quickAutoRange,
+main:has(> #page-browser:not(.hidden)) #tradeHistory,
+main:has(> #page-browser:not(.hidden)) #quickAutoLevel,
+main:has(> #page-browser:not(.hidden)) #quickAutoRange {
+  display: none !important;
+}
 </style>
 </body>
 </html>
