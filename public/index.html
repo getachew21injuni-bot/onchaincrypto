@@ -1471,9 +1471,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
    const board=$('timedResultBoard');
    if(!board)return;
    const close=$('ocCloseTradeBoard');
-   if(close){close.textContent='Close trade ✕';close.setAttribute('aria-label','Close trade');}
+   if(close){if(close.textContent!=='Close trade ✕')close.textContent='Close trade ✕';if(close.getAttribute('aria-label')!=='Close trade')close.setAttribute('aria-label','Close trade');}
    const plan=$('ocBoardPlan');
-   if(plan)plan.style.display='block';
+   if(plan&&plan.style.display!=='block')plan.style.display='block';
  }
  const board=$('timedResultBoard');
  if(board){
