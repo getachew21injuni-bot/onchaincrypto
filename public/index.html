@@ -1891,6 +1891,15 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     let page=btn.dataset.go||btn.dataset.page||btn.dataset.bottomPage||btn.dataset.walletAction;
     if(!page) return;
     if(btn.hasAttribute('data-wallet-action') && page==='transfer') page='transfer';
+    if(btn.hasAttribute('data-gold-trade')){
+      const asset=document.getElementById('tradeAsset');
+      if(asset){asset.value='XAU';asset.dispatchEvent(new Event('change',{bubbles:true}));}
+      const title=document.getElementById('tradePairTitle');if(title)title.textContent='XAU / USDT';
+      const pair=document.getElementById('orderBookPair');if(pair)pair.textContent='XAU/USDT';
+      const name=document.getElementById('tradeAssetName');if(name)name.textContent='Gold (XAU)';
+      const result=document.getElementById('signalResult');
+      if(result)result.innerHTML='<div class="signal-value signal-neutral">GOLD (XAU) SELECTED</div><div class="muted tiny" style="margin-top:6px">Gold market data and momentum are shown when a valid XAU/USDT public quote is available.</div>';
+    }
     e.preventDefault();e.stopImmediatePropagation();
     navigate(page,{history:btn.hasAttribute('data-home-history')});
   },true);
