@@ -2373,3 +2373,30 @@ td,th{overflow-wrap:anywhere}
 #page-trade .chart-wrap #ocTradePairList{display:none!important}
 @media(max-width:480px){#page-trade .oc-indicative-toggle{gap:5px;padding:6px 8px}#page-trade .oc-indicative-list{max-height:260px}}
 </style>
+
+
+<style id="oc-remove-unwanted-home-market-browser-panels">
+/* Home: remove the practice-balance and active-coins summary cards only. */
+#page-home .cards .card:has(#homeSummaryBalance),
+#page-home .cards .card:has(#homeActiveCoinCount) {
+  display: none !important;
+}
+/* Markets: remove paper balance and tracked-assets cards, keeping market gainers/losers. */
+#page-markets .cards .card:has(#summaryBalance),
+#page-markets .cards .card:has(#assetCount) {
+  display: none !important;
+}
+/* Browser Search: never show trading widgets or trading result/level panels here. */
+main:has(> #page-browser:not(.hidden)) #timedPaperTrade,
+main:has(> #page-browser:not(.hidden)) .performance-panel,
+main:has(> #page-browser:not(.hidden)) #quickAutoLevel,
+main:has(> #page-browser:not(.hidden)) #quickAutoRange,
+main:has(> #page-browser:not(.hidden)) .level-grid,
+main:has(> #page-browser:not(.hidden)) .level-card,
+main:has(> #page-browser:not(.hidden)) .oc-workspace-levels,
+main:has(> #page-browser:not(.hidden)) #levelMessage,
+main:has(> #page-browser:not(.hidden)) #tradeOutcomeRows,
+main:has(> #page-browser:not(.hidden)) #pnlRows {
+  display: none !important;
+}
+</style>
