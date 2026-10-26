@@ -2623,3 +2623,21 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
   display: none !important;
 }
 </style>
+
+<!-- Final cleanup: remove redundant demo-trading panels while preserving the main market chart and pair selector -->
+<style id="oc-final-hide-demo-panels">
+  #homePerformancePanel,
+  #timedPaperTrade,
+  #timedResultBoard,
+  #page-trade section:has(#tradeHistory),
+  .performance-panel,
+  #page-trade section:has(.level-grid) {
+    display: none !important;
+  }
+  /* Keep Home quick-access actions and the main Market chart available. */
+  #page-markets section.panel:has(#apiStatus),
+  .header-right > .optional:has(#connection),
+  #page-markets #lastUpdate {
+    display: none !important;
+  }
+</style>
