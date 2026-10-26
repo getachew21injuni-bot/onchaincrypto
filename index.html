@@ -111,6 +111,12 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 @media(max-width:720px){#page-home .oc-invest-hero{grid-template-columns:minmax(0,1fr);padding:23px 18px 10px;min-height:0;border-radius:18px}#page-home .oc-hero-copy h2{font-size:clamp(29px,8vw,39px);letter-spacing:-.8px}#page-home .oc-hero-copy p{font-size:14px}#page-home .oc-hero-art{min-height:235px;margin-top:6px}#page-home .oc-hero-person{width:min(78%,270px);right:12%;bottom:-10px}#page-home .oc-orbit{left:20%;width:220px;height:220px}#page-home .oc-orbit-two{left:27%;width:185px;height:255px}#page-home .oc-hero-chart{inset:20% 2% 10% 15%}#page-home .oc-coin-btc{left:9%;top:12%;width:46px;height:46px;font-size:27px}#page-home .oc-coin-eth{left:5%;top:55%;width:36px;height:36px;font-size:20px}#page-home .oc-coin-usdt{right:7%;top:23%;width:34px;height:34px;font-size:20px}#page-home .oc-profit-chip{right:0;top:4%;padding:9px 10px}#page-home .oc-profit-chip strong{font-size:10px}#page-home .oc-term-one{top:78%}#page-home .oc-term-two{right:2%;top:69%}#page-home .oc-term-three{left:35%;top:3%}}
 @media(max-width:380px){#page-home .oc-hero-art{min-height:205px}#page-home .oc-hero-terms{gap:7px;font-size:10px}#page-home .oc-profit-chip{max-width:150px}#page-home .oc-hero-person{width:80%;right:8%}}
 @media(prefers-reduced-motion:reduce){#page-home .oc-hero-terms span,#page-home .oc-coin,#page-home .oc-floating-term{animation:none!important}}
+
+/* Always-visible Back and Exit controls; wrap neatly on narrow screens. */
+#ocBackBtn,#ocExitBtn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:36px;padding:7px 10px;font-size:12px;font-weight:700}
+#ocBackBtn{border-color:#3b82f6;color:#dbeafe}
+#ocExitBtn{border-color:#f6465d;color:#ffb4bd}
+@media(max-width:720px){header{flex-wrap:wrap;gap:8px}header .header-right{display:flex;align-items:center;gap:5px;flex-wrap:wrap}#ocBackBtn,#ocExitBtn{padding:7px 8px;min-height:34px}#ocBackBtn span,#ocExitBtn span{display:inline}}
 </style>
 
 </head>
@@ -125,7 +131,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
     
     <button data-page="register" id="register-nav" class="register-nav">Register</button>
   </nav>
-  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="primary mobile-register-btn" id="mobileRegisterBtn" type="button">Register</button><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open profile, notifications and verification menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" data-menu-account="true" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and preferences</small></span></button><button type="button" data-menu-page="profile" data-menu-settings="true" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security, preferences and support</small></span></button><button type="button" data-menu-page="profile" data-menu-notifications="true" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Account and security updates</small></span></button><button type="button" data-menu-page="profile" data-menu-kyc="true" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>KYC verification</strong><small>Identity verification status</small></span></button><button type="button" data-menu-action="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About OnChainCrypto</strong><small>Platform information and feature guide</small></span></button></div></div></div>
+  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="primary mobile-register-btn" id="mobileRegisterBtn" type="button">Register</button><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><button class="secondary oc-nav-control oc-exit-control" id="ocExitBtn" type="button" aria-label="Exit and sign out" title="Exit and sign out">↪ <span>Exit</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open profile, notifications and verification menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" data-menu-account="true" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and preferences</small></span></button><button type="button" data-menu-page="profile" data-menu-settings="true" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security, preferences and support</small></span></button><button type="button" data-menu-page="profile" data-menu-notifications="true" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Account and security updates</small></span></button><button type="button" data-menu-page="profile" data-menu-kyc="true" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>KYC verification</strong><small>Identity verification status</small></span></button><button type="button" data-menu-action="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About OnChainCrypto</strong><small>Platform information and feature guide</small></span></button></div></div></div>
 </header>
 <main>
   <section id="page-home" class="hidden">
@@ -1838,7 +1844,20 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     if(section.parentElement!==main) main.appendChild(section);
   });
   const pages=()=>Array.from(main.children).filter(el=>el.matches('section[id^="page-"]'));
+  const pageStack=[];
+  function goBack(){
+    const current=pages().find(section=>!section.classList.contains('hidden'));
+    const previous=pageStack.pop();
+    if(previous && document.getElementById('page-'+previous)){navigate(previous,{noStack:true});return;}
+    if(current && current.id!=='page-home'){navigate('home',{noStack:true});return;}
+    if(window.history.length>1){window.history.back();}
+  }
+  window.__ocNavigateBack=goBack;
+
   function navigate(page, opts={}){
+    const currentPage=pages().find(section=>!section.classList.contains('hidden'));
+    const currentName=currentPage?.id?.slice(5);
+    if(currentName && currentName!==page && !opts.noStack){pageStack.push(currentName);if(pageStack.length>30)pageStack.shift();}
     const target=document.getElementById('page-'+page);
     if(!target) return;
     const original=window.__ocOriginalShowPage;
@@ -1873,6 +1892,17 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
   // Initialize to the current Home page after repair.
   const current=pages().find(s=>!s.classList.contains('hidden'));
   if(current) navigate(current.id.slice(5),{fromOriginal:true,keepScroll:true});
+})();
+</script>
+<script id="oc-back-exit-controls">
+(function(){
+  document.getElementById('ocBackBtn')?.addEventListener('click',function(){if(typeof window.__ocNavigateBack==='function')window.__ocNavigateBack();});
+  document.getElementById('ocExitBtn')?.addEventListener('click',function(){
+    const signOut=document.getElementById('signOutBtn');
+    if(signOut){signOut.click();}
+    else if(typeof window.showPage==='function'){window.showPage('register');}
+    else {document.getElementById('register-nav')?.click();}
+  });
 })();
 </script>
 
