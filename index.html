@@ -1778,18 +1778,17 @@ td,th{overflow-wrap:anywhere}
     panel.classList.toggle('hidden', !signedIn);
   }
   window.ocRefreshReferral = buildInvitePanel;
-  // Public browsing remains available; registration is optional while the platform is being tested.
-  applyReferral();
-        originalShowPage('register');
-        $('showRegisterBtn')?.click();
-        return;
-      }
-      return originalShowPage(page);
-    };
+  // Developer testing mode: keep the platform accessible without forcing account registration.
+  // Account creation can be repaired separately; public pages remain browsable meanwhile.
+  const originalShowPage = window.showPage;
+  if (typeof originalShowPage === 'function') {
+    window.showPage = function(page) { return originalShowPage(page); };
   }
   applyReferral();
-  // Do not force visitors into registration; keep the existing home page available.
-  document.addEventListener('DOMContentLoaded', applyReferral);
+  document.addEventListener('DOMContentLoaded', function(){
+    applyReferral();
+    if (typeof window.showPage === 'function') window.showPage('home');
+  });
   setInterval(applyReferral, 700);
 })();
 </script>
