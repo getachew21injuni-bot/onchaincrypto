@@ -1623,7 +1623,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
    if(!wrap){wrap=document.createElement('div');wrap.className='oc-home-more-less';wrap.id=id;host.insertAdjacentElement('afterend',wrap);}
    let btn=wrap.querySelector('button');
    if(!btn){btn=document.createElement('button');btn.type='button';wrap.appendChild(btn);btn.addEventListener('click',onClick);}
-   btn.textContent=label;
+   if(btn.textContent!==label)btn.textContent=label;
  }
  function setupQuick(){
    document.querySelectorAll(HOME+' .quick-action-grid').forEach((grid)=>{
@@ -1635,7 +1635,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
      addToggle(grid,'ocQuickMoreLess',collapsed?'More +':'Less −',()=>{
        const isCollapsed=grid.classList.toggle('oc-collapsed');
        const button=document.querySelector('#ocQuickMoreLess button');
-       if(button)button.textContent=isCollapsed?'More +':'Less −';
+       if(button){const label=isCollapsed?'More +':'Less −';if(button.textContent!==label)button.textContent=label;}
      });
    });
  }
