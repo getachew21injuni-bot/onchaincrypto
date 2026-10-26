@@ -63,6 +63,8 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 #page-home .quick-action[data-go="wallet"]{--action-color:#a78bfa!important}
 #page-home .quick-action[data-go="markets"]{--action-color:#eabf38!important}
 #page-home .quick-action[data-go="profile"]{--action-color:#00cce8!important}
+#page-home .quick-action[data-gold-trade="true"]{--action-color:#f5bd42!important;border-color:rgba(245,189,66,.48)!important;background:linear-gradient(145deg,rgba(245,189,66,.14),#081321)!important}
+#page-home .quick-action[data-gold-trade="true"] .action-icon{background:rgba(245,189,66,.16)!important;color:#ffd36a!important}
 </style>
 </head>
 <body>
@@ -91,6 +93,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
    <button class="quick-action" style="--action-color:#00d7a0" type="button" data-go="deposit"><span class="action-icon">⇩</span><strong>Deposit</strong><small>Deposit instructions</small></button>
    <button class="quick-action" style="--action-color:#ff5573" type="button" data-go="withdraw"><span class="action-icon">⇧</span><strong>Withdraw</strong><small>Withdrawal options</small></button>
    <button class="quick-action" style="--action-color:#159cff" type="button" data-go="trade"><span class="action-icon">↗</span><strong>Trade Crypto</strong><small>Open trading workspace</small></button>
+   <button class="quick-action" style="--action-color:#f5bd42" type="button" data-go="trade" data-gold-trade="true"><span class="action-icon">🪙</span><strong>Gold Trade</strong><small>Trade gold-backed tokens</small></button>
    <button class="quick-action" style="--action-color:#a78bfa" type="button" data-go="wallet"><span class="action-icon">◉</span><strong>My Wallet</strong><small>View assets and balance</small></button>
    <button class="quick-action" style="--action-color:#eabf38" type="button" data-go="markets"><span class="action-icon">▥</span><strong>Markets</strong><small>View live coin prices</small></button>
    <button class="quick-action" style="--action-color:#00cce8" type="button" data-go="profile"><span class="action-icon">♙</span><strong>My Profile</strong><small>Account and settings</small></button>
@@ -636,7 +639,7 @@ ChainCrypto</h3>
 <a href="./admin.html" id="adminDashboardShortcut" style="position:fixed;right:14px;bottom:86px;z-index:30;background:#111c30;color:#eaf6ff;border:1px solid #2b4263;border-radius:12px;padding:10px 13px;text-decoration:none;font-size:12px;box-shadow:0 6px 22px #0005">⚙ Admin dashboard</a>
 <script>
 const COINS = [
-{id:"bitcoin",symbol:"BTC",name:"Bitcoin"},{id:"ethereum",symbol:"ETH",name:"Ethereum"},{id:"tether",symbol:"USDT",name:"Tether"},{id:"binancecoin",symbol:"BNB",name:"BNB"},{id:"solana",symbol:"SOL",name:"Solana"},{id:"ripple",symbol:"XRP",name:"XRP"},{id:"usd-coin",symbol:"USDC",name:"USDC"},{id:"dogecoin",symbol:"DOGE",name:"Dogecoin"},{id:"tron",symbol:"TRX",name:"TRON"},{id:"the-open-network",symbol:"TON",name:"Toncoin"},{id:"cardano",symbol:"ADA",name:"Cardano"},{id:"avalanche-2",symbol:"AVAX",name:"Avalanche"},{id:"shiba-inu",symbol:"SHIB",name:"Shiba Inu"},{id:"chainlink",symbol:"LINK",name:"Chainlink"},{id:"bitcoin-cash",symbol:"BCH",name:"Bitcoin Cash"},{id:"sui",symbol:"SUI",name:"Sui"},{id:"stellar",symbol:"XLM",name:"Stellar"},{id:"polkadot",symbol:"DOT",name:"Polkadot"},{id:"litecoin",symbol:"LTC",name:"Litecoin"},{id:"near",symbol:"NEAR",name:"NEAR Protocol"},
+{id:"bitcoin",symbol:"BTC",name:"Bitcoin"},{id:"ethereum",symbol:"ETH",name:"Ethereum"},{id:"tether",symbol:"USDT",name:"Tether"},{id:"binancecoin",symbol:"BNB",name:"BNB"},{id:"solana",symbol:"SOL",name:"Solana"},{id:"ripple",symbol:"XRP",name:"XRP"},{id:"usd-coin",symbol:"USDC",name:"USDC"},{id:"dogecoin",symbol:"DOGE",name:"Dogecoin"},{id:"tron",symbol:"TRX",name:"TRON"},{id:"the-open-network",symbol:"TON",name:"Toncoin"},{id:"cardano",symbol:"ADA",name:"Cardano"},{id:"avalanche-2",symbol:"AVAX",name:"Avalanche"},{id:"shiba-inu",symbol:"SHIB",name:"Shiba Inu"},{id:"chainlink",symbol:"LINK",name:"Chainlink"},{id:"bitcoin-cash",symbol:"BCH",name:"Bitcoin Cash"},{id:"sui",symbol:"SUI",name:"Sui"},{id:"stellar",symbol:"XLM",name:"Stellar"},{id:"polkadot",symbol:"DOT",name:"Polkadot"},{id:"litecoin",symbol:"LTC",name:"Litecoin"},{id:"near",symbol:"NEAR",name:"NEAR Protocol"},{id:"pax-gold",symbol:"PAXG",name:"PAX Gold"},{id:"tether-gold",symbol:"XAUT",name:"Tether Gold"},
 ];
 const $=id=>document.getElementById(id);
 const money=n=>Number.isFinite(Number(n))?"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:Number(n)<1?6:2}):"—";
@@ -947,6 +950,7 @@ function updateSelectedCoin(kind){const sym=kind==="deposit"?selectedDepositCoin
 function refreshDepositAddress(){const el=$("depositAddress");if(!el)return;const network=$("depositNetwork").value;const address=window.ONCHAINCRYPTO_DEPOSIT_ADDRESSES?.[selectedDepositCoin]?.[network]||"";el.textContent=address||"Deposit address not configured";$("copyDepositAddress").disabled=!address;$("showDepositQr").disabled=!address;$("depositQr").innerHTML='<span class="muted tiny">'+(address?"Press Show QR to display the address QR code.":"QR will appear only when a verified deposit address is configured.")+'</span>'}
 function showDepositQr(){const address=window.ONCHAINCRYPTO_DEPOSIT_ADDRESSES?.[selectedDepositCoin]?.[$("depositNetwork").value]||"";if(!address)return;$("depositQr").innerHTML='<img alt="QR code for configured deposit address" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(address)+'"><span class="muted tiny">Verify coin and network before sending.</span>'}
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.go)));
+document.querySelectorAll("[data-gold-trade]").forEach(b=>b.addEventListener("click",()=>{const asset=$("tradeAsset");if(asset){asset.value="PAXG";updateTradePreview();if(typeof updateTradingViewChart==="function")updateTradingViewChart("PAXG");}const title=$("tradePairTitle");if(title)title.textContent="PAXG / USDT";const timed=$("timedPair");if(timed)timed.textContent="PAXG / USDT";}));
 document.querySelectorAll("[data-bottom-page]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-bottom-page]").forEach(x=>x.classList.toggle("active",x===b));showPage(b.dataset.bottomPage)}));
 $("homeCoinSearch").addEventListener("input",renderHomeCoinResults);
 $("depositCoinSearch").addEventListener("input",e=>{coinPickerExpanded.deposit=6;drawCoinPicker("deposit",e.target.value)});$("withdrawCoinSearch").addEventListener("input",e=>{coinPickerExpanded.withdraw=6;drawCoinPicker("withdraw",e.target.value)});
