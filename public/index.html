@@ -1137,6 +1137,7 @@ renderWallet();loadMarket();setInterval(loadMarket,120000);window.addEventListen
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import {
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider,
@@ -1153,7 +1154,26 @@ const firebaseConfig = {
   appId: "1:74771017244:web:97e8b7d49d5b0e602d79d9",
   measurementId: "G-FS1EMZS5J9"
 };
-const auth = getAuth(initializeApp(firebaseConfig));
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+// Create or refresh the signed-in user's basic profile. Security Rules limit each
+// user to their own UID and approved profile fields; this never writes balances.
+async function saveBasicUserProfile(user) {
+  if (!user?.uid) return;
+  const profile = {
+    uid: user.uid,
+    email: user.email || "",
+    phoneNumber: user.phoneNumber || "",
+    displayName: user.displayName || "",
+    updatedAt: serverTimestamp()
+  };
+  try {
+    await setDoc(doc(db, "users", user.uid), profile, { merge: true });
+  } catch (error) {
+    console.warn("Basic profile could not be saved to Firestore:", error?.code || error);
+  }
+}
 const msg = (text) => { const el = document.getElementById("registerMessage"); if (el) el.textContent = text; };
 const friendlyError = (error) => {
   const code = error?.code || "";
@@ -1299,6 +1319,7 @@ document.getElementById("signOutBtn").addEventListener("click", async () => {
 });
 onAuthStateChanged(auth, (user) => {
   window.onchaincryptoCurrentUser = user || null;
+  if (user) void saveBasicUserProfile(user);
    if (typeof window.ocRefreshReferral === "function") window.ocRefreshReferral(user || null);
    if (user) { window.showPage?.(window.ocPendingPage || "home"); window.ocPendingPage = null; }
    else { window.ocPendingPage = null; }
