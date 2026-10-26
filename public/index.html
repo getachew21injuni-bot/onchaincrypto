@@ -178,7 +178,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
    <button class="quick-action" style="--action-color:#00d7a0" type="button" data-go="deposit"><span class="action-icon">⇩</span><strong>Deposit</strong><small>Deposit instructions</small></button>
    <button class="quick-action" style="--action-color:#ff5573" type="button" data-go="withdraw"><span class="action-icon">⇧</span><strong>Withdraw</strong><small>Withdrawal options</small></button>
    <button class="quick-action" style="--action-color:#159cff" type="button" data-go="trade"><span class="action-icon">↗</span><strong>Trade Crypto</strong><small>Open trading workspace</small></button>
-    <button class="quick-action" style="--action-color:#f5bd42" type="button" data-go="trade" data-gold-trade="true"><span class="action-icon">Au</span><strong>Trade Gold</strong><small>XAU / USDT · Gold futures</small></button>
+    <button class="quick-action" style="--action-color:#f5bd42" type="button" data-go="trade" data-gold-trade="true"><span class="action-icon gold-coin-icon" aria-hidden="true">◉</span><strong>Trade Gold</strong><small>XAU / USDT · Gold futures</small></button>
    <button class="quick-action" style="--action-color:#a78bfa" type="button" data-go="wallet"><span class="action-icon">◉</span><strong>My Wallet</strong><small>View assets and balance</small></button>
    <button class="quick-action" style="--action-color:#eabf38" type="button" data-go="markets"><span class="action-icon">▥</span><strong>Markets</strong><small>View live coin prices</small></button>
    <button class="quick-action" style="--action-color:#a78bfa" type="button" data-go="home" data-home-history="true"><span class="action-icon">◷</span><strong>History</strong><small>7-day performance</small></button>
@@ -1865,8 +1865,8 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
   function navigate(page, opts={}){
     const target=document.getElementById('page-'+page);
     if(!target) return;
-    const original=window.__ocOriginalShowPage;
-    if(original && !opts.fromOriginal){ try{ original(page); }catch(err){ console.warn('Page setup skipped:',err); } }
+    // Do not call the legacy page router here: its old listeners could re-open Trade
+    // after a Wallet/Deposit/Withdraw action. Keep one authoritative visible page.
     pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-'+page));
     document.querySelectorAll('#nav [data-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.page===page));
     document.querySelectorAll('[data-bottom-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.bottomPage===page));
@@ -2397,3 +2397,74 @@ td,th{overflow-wrap:anywhere}
 #page-trade .chart-wrap #ocTradePairList{display:none!important}
 @media(max-width:480px){#page-trade .oc-indicative-toggle{gap:5px;padding:6px 8px}#page-trade .oc-indicative-list{max-height:260px}}
 </style>
+
+
+<style id="oc-gold-and-wallet-navigation-fix">
+#page-home .quick-action[data-gold-trade="true"] .gold-coin-icon{
+ display:inline-flex;align-items:center;justify-content:center;
+ width:40px;height:40px;border-radius:50%;
+ color:#ffd45b!important;background:radial-gradient(circle at 30% 25%,#fff2ad 0%,#f7c84b 38%,#b77a12 100%)!important;
+ border:2px solid #ffe28b;box-shadow:0 0 16px #f5bd4240,inset 0 1px 2px #fff9;
+ font-size:24px;line-height:1;
+}
+.wallet-action-row .wallet-action[data-wallet-action="deposit"]{background:#16d9a0!important;color:#06251b!important;border:1px solid #16d9a0!important}
+.wallet-action-row .wallet-action[data-wallet-action="withdraw"]{background:#ff5573!important;color:#fff!important;border:1px solid #ff5573!important}
+.wallet-action-row .wallet-action[data-wallet-action="transfer"]{background:#438dff!important;color:#fff!important;border:1px solid #438dff!important}
+#page-deposit .page-title h1{color:#16d9a0!important}
+#page-withdraw .page-title h1{color:#ff5573!important}
+#page-deposit .selected-coin .coin-icon{background:#f7931a;color:#fff}
+#page-withdraw .selected-coin .coin-icon{background:#f7931a;color:#fff}
+</style>
+<script id="oc-final-page-and-gold-fix">
+(function(){
+  const $=id=>document.getElementById(id);
+  function forcePage(page){
+    const target=$('page-'+page); if(!target)return;
+    document.querySelectorAll('main>section[id^="page-"]').forEach(el=>el.classList.toggle('hidden',el!==target));
+    document.querySelectorAll('#nav [data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
+    document.querySelectorAll('[data-bottom-page]').forEach(el=>el.classList.toggle('active',el.dataset.bottomPage===page));
+    const book=$('liveOrderBookPanel'); if(book)book.style.display=page==='trade'?'':'none';
+    if(page==='wallet'&&typeof window.renderWallet==='function'){try{window.renderWallet()}catch(_){}}
+    if(page==='deposit'){
+      if(typeof window.drawCoinPicker==='function')window.drawCoinPicker('deposit',$('depositCoinSearch')?.value||'');
+      $('depositCoinList')?.classList.remove('hidden');
+    }
+    if(page==='withdraw'){
+      if(typeof window.drawCoinPicker==='function')window.drawCoinPicker('withdraw',$('withdrawCoinSearch')?.value||'');
+      $('withdrawCoinList')?.classList.remove('hidden');
+    }
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  // Capture clicks before legacy bubble handlers so each action opens its own page.
+  document.addEventListener('click',function(e){
+    const b=e.target.closest('[data-go],[data-page],[data-bottom-page],[data-wallet-action]');
+    if(!b)return;
+    const page=b.dataset.go||b.dataset.page||b.dataset.bottomPage||b.dataset.walletAction;
+    if(!page||!$('page-'+page))return;
+    e.preventDefault();e.stopImmediatePropagation();forcePage(page);
+  },true);
+  // Expose the final router for buttons and older handlers.
+  window.ocNavigatePage=forcePage;
+  // Gold should be the selected signal/trade asset, not fall back to BTC.
+  document.addEventListener('click',function(e){
+    const b=e.target.closest('[data-gold-trade="true"]');if(!b)return;
+    const asset=$('tradeAsset');
+    if(asset){
+      asset.value='XAU';
+      asset.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+    const title=$('tradePairTitle');if(title)title.textContent='XAU / USDT';
+    const pair=$('orderBookPair');if(pair)pair.textContent='XAU/USDT';
+    const name=$('tradeAssetName');if(name)name.textContent='Gold (XAU)';
+    const result=$('signalResult');if(result)result.innerHTML='<div class="signal-value signal-neutral">GOLD (XAU) SELECTED</div><div class="muted tiny" style="margin-top:6px">Gold market data and momentum are shown when a valid XAU/USDT public quote is available.</div>';
+  },true);
+  // Keep coin pickers visible and initialized when pages are opened directly.
+  document.addEventListener('DOMContentLoaded',function(){
+    if(typeof window.drawCoinPicker==='function'){
+      window.drawCoinPicker('deposit','');window.drawCoinPicker('withdraw','');
+    }
+    const gold=document.querySelector('[data-gold-trade="true"]');
+    if(gold){const icon=gold.querySelector('.gold-coin-icon');if(icon)icon.textContent='◉';}
+  });
+})();
+</script>
