@@ -2823,19 +2823,19 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
   }
  }
  function closeOverlay(){
-  if(window.timedPaper)return;
+  if($('timedUpBtn')?.disabled&&$('timedDownBtn')?.disabled)return;
   document.body.classList.remove('oc-trade-overlay-open');
   form.classList.remove('oc-stage-config','oc-stage-running','oc-stage-complete');
   form.classList.add('hidden');
  }
  $('timedConfirmBtn')?.addEventListener('click',function(){
   setTimeout(function(){
-   if(window.timedPaper){stage('running');form.scrollTop=0;}
+   if($('timedUpBtn')?.disabled&&$('timedDownBtn')?.disabled){stage('running');form.scrollTop=0;}
   },80);
  });
  $('timedCancelBtn')?.addEventListener('click',function(){
   setTimeout(function(){
-   if(!window.timedPaper)closeOverlay();
+   if(!($('timedUpBtn')?.disabled&&$('timedDownBtn')?.disabled))closeOverlay();
   },80);
  });
  // When the existing countdown reaches zero, reveal the graph result and details as the final step.
