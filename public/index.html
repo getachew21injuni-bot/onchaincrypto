@@ -2963,6 +2963,7 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
 @media(prefers-reduced-motion:reduce){#page-home .oc-coin-orbit-track,#page-home .oc-coin-orbit-track .oc-coin,#page-home .oc-hero-terms span{animation:none!important}}
 </style>
 
+<style id="oc-all-coin-deposit-withdraw">#page-deposit .coin-picker-controls,#page-withdraw .coin-picker-controls{display:none!important}#page-deposit .coin-picker,#page-withdraw .coin-picker{max-height:280px;overflow-y:auto}</style>
 <style id="oc-wallet-asset-selector">
 .wallet-total-line{position:relative}
 .wallet-currency{cursor:pointer;font:inherit}
@@ -2985,7 +2986,7 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  function renderOptions(){
   const marketRows=typeof market!=='undefined'&&Array.isArray(market)?market:[];
   const bySymbol=new Map(marketRows.map(c=>[String(c.symbol||'').toUpperCase(),c]));
-  const fallback=[{symbol:'BTC',name:'Bitcoin'},{symbol:'ETH',name:'Ethereum'},{symbol:'BNB',name:'BNB'},{symbol:'XRP',name:'XRP'},{symbol:'SOL',name:'Solana'},{symbol:'USDC',name:'USD Coin'},{symbol:'ADA',name:'Cardano'},{symbol:'DOGE',name:'Dogecoin'},{symbol:'TRX',name:'TRON'},{symbol:'LINK',name:'Chainlink'},{symbol:'LTC',name:'Litecoin'},{symbol:'XAU',name:'Gold'}];const symbols=[{symbol:'USDT',name:'Tether',current_price:1},...(marketRows.length?marketRows.filter(c=>String(c.symbol||'').toUpperCase()!=='USDT').sort((a,b)=>(b.market_cap||0)-(a.market_cap||0)):fallback)];
+  const fallback=[{symbol:'BTC',name:'Bitcoin'},{symbol:'ETH',name:'Ethereum'},{symbol:'BNB',name:'BNB'},{symbol:'XRP',name:'XRP'},{symbol:'SOL',name:'Solana'},{symbol:'USDC',name:'USD Coin'},{symbol:'ADA',name:'Cardano'},{symbol:'DOGE',name:'Dogecoin'},{symbol:'TRX',name:'TRON'},{symbol:'LINK',name:'Chainlink'},{symbol:'LTC',name:'Litecoin'},{symbol:'XAU',name:'Gold'}];const sourceRows=marketRows.length?marketRows.filter(c=>String(c.symbol||'').toUpperCase()!=='USDT').sort((a,b)=>(b.market_cap||0)-(a.market_cap||0)):fallback;const symbols=[{symbol:'USDT',name:'Tether',current_price:1},...sourceRows,...(!sourceRows.some(c=>String(c.symbol||'').toUpperCase()==='XAU')?[{symbol:'XAU',name:'Gold (XAU/USDT)',current_price:0}]:[])];
   const unique=[];const seen=new Set();
   symbols.forEach(c=>{const sym=String(c.symbol||'').toUpperCase();if(sym&&!seen.has(sym)){seen.add(sym);unique.push({...c,symbol:sym})}});
   options.innerHTML=unique.map(c=>{
