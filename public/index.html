@@ -913,7 +913,7 @@ async function loadMarket(){
    }
    /* XAU/USDT is the gold futures symbol, distinct from PAXG spot token. */
    try{const goldResp=await fetch("https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=XAUUSDT",{signal:AbortSignal.timeout(6000)});if(goldResp.ok){const g=await goldResp.json(),price=Number(g.lastPrice);if(Number.isFinite(price)&&price>0){const gold={id:"gold",name:"Gold (Spot Futures)",symbol:"XAU",current_price:price,price_change_percentage_24h:Number(g.priceChangePercent)||0,total_volume:Number(g.quoteVolume)||0,market_cap:null,market_cap_rank:null,image:""};data=data.filter(c=>c.symbol!=="XAU");data.push(gold);}}}catch(_){/* Do not substitute a tokenized-gold price for XAU if its futures quote is unavailable. */}
-   market=data;window.market=market;
+   market=data;window.market=market;if(window.__ocRefreshWalletAssets)window.__ocRefreshWalletAssets();
    const now=Date.now();
    try{localStorage.setItem("oc_market_cache",JSON.stringify({time:now,data:market}))}catch(e){}
    $("connection").textContent="Live data";
@@ -2985,7 +2985,7 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  function renderOptions(){
   const marketRows=typeof market!=='undefined'&&Array.isArray(market)?market:[];
   const bySymbol=new Map(marketRows.map(c=>[String(c.symbol||'').toUpperCase(),c]));
-  const symbols=[{symbol:'USDT',name:'Tether',current_price:1},...marketRows.filter(c=>String(c.symbol||'').toUpperCase()!=='USDT').sort((a,b)=>(b.market_cap||0)-(a.market_cap||0))];
+  const fallback=[{symbol:'BTC',name:'Bitcoin'},{symbol:'ETH',name:'Ethereum'},{symbol:'BNB',name:'BNB'},{symbol:'XRP',name:'XRP'},{symbol:'SOL',name:'Solana'},{symbol:'USDC',name:'USD Coin'},{symbol:'ADA',name:'Cardano'},{symbol:'DOGE',name:'Dogecoin'},{symbol:'TRX',name:'TRON'},{symbol:'LINK',name:'Chainlink'},{symbol:'LTC',name:'Litecoin'},{symbol:'XAU',name:'Gold'}];const symbols=[{symbol:'USDT',name:'Tether',current_price:1},...(marketRows.length?marketRows.filter(c=>String(c.symbol||'').toUpperCase()!=='USDT').sort((a,b)=>(b.market_cap||0)-(a.market_cap||0)):fallback)];
   const unique=[];const seen=new Set();
   symbols.forEach(c=>{const sym=String(c.symbol||'').toUpperCase();if(sym&&!seen.has(sym)){seen.add(sym);unique.push({...c,symbol:sym})}});
   options.innerHTML=unique.map(c=>{
@@ -2995,6 +2995,7 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
    return '<button type="button" role="option" data-wallet-asset="'+sym+'" aria-selected="'+(sym===selected)+'"><span><strong>'+sym+'</strong><small>'+String(c.name||sym).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))+'</small></span><span class="wallet-asset-price">'+fmt(qty)+'<small>≈ '+fmt(worth)+' USDT</small></span></button>';
   }).join('');
  }
+ window.__ocRefreshWalletAssets=renderOptions;
  function updateSelected(){
   const sym=selected, note=$('walletBalanceNote'), heading=document.querySelector('.wallet-eyebrow'), balance=$('walletBalance');
   const st=typeof state!=='undefined'?state:{};
