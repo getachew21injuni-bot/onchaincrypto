@@ -2736,8 +2736,8 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
   if(!tradeForm||!directionButton)return;
   if(typeof window.showPage==='function')window.showPage('trade');
   tradeForm.classList.remove('hidden');
-  // Select the requested direction when Buy/Sell was clicked in the Order Book.
-  if(bookBtn)directionButton.click();
+  // Select the requested direction directly; the capture handler intentionally blocks duplicate clicks.
+  if(bookBtn&&typeof window.chooseTimedDirection==='function')window.chooseTimedDirection(direction==='buy'?'up':'down');
   window.setTimeout(function(){
    tradeForm.scrollIntoView({behavior:'smooth',block:'start'});
   },180);
