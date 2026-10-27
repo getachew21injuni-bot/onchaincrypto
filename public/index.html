@@ -1453,6 +1453,8 @@ setTimeout(() => {
     if(sub)sub.textContent=creating?'Set up your account to continue.':'Access your crypto dashboard securely.';
   }
   document.getElementById('showRegisterBtn')?.addEventListener('click',()=>setMode('register'));
+   // The Login link inside the registration form must switch back to the sign-in form.
+   document.getElementById('registerLoginBtn')?.addEventListener('click',()=>{const selector=document.getElementById('registerContactMethod');if(selector)selector.value='email';setMode('signin');document.getElementById('signInEmail')?.focus();});
   document.getElementById("registerContactMethod")?.addEventListener("change",e=>setRegistrationMethod(e.target.value));
   
   document.getElementById('signin-nav')?.addEventListener('click',()=>{setMode('signin');document.getElementById('signInEmail')?.focus();});
