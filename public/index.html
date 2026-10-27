@@ -154,6 +154,10 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 .oc-floating-coin.bnb{right:2%;bottom:16%;background:linear-gradient(145deg,#ffe58b,#f3ba2f);color:#342500;animation-delay:-.8s}
 .oc-floating-coin.xrp{left:19%;top:0;background:linear-gradient(145deg,#d7e0ec,#66788d);color:#132333;animation-delay:-3s}
 .oc-floating-coin.gold{right:19%;top:0;background:linear-gradient(145deg,#fff0a3,#d9a520 62%,#a66b08);color:#493000;animation-delay:-1.8s}
+.oc-floating-coin.gold{border:3px solid #ffe7a0;box-shadow:0 8px 28px #0007,inset 0 0 0 3px #b77a12,inset 0 0 0 5px #ffedaa,inset 0 2px 5px #fff8;animation:ocGoldSpin 3.2s linear infinite,ocCoinFloat 4.8s ease-in-out infinite}
+.oc-floating-coin.gold b{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:2px solid #fff0ad;background:radial-gradient(circle at 30% 25%,#fff0a0,#e8b52e 52%,#9b6507);font-size:18px;text-shadow:0 1px 1px #8b5b00}
+@keyframes ocGoldSpin{0%{transform:perspective(220px) rotateY(0deg)}100%{transform:perspective(220px) rotateY(360deg)}}
+.oc-floating-coin.gold{animation-name:ocGoldSpin,ocCoinFloat;animation-duration:3.2s,4.8s;animation-timing-function:linear,ease-in-out;animation-iteration-count:infinite,infinite}
 @keyframes ocCoinFloat{0%,100%{transform:translate3d(0,0,0) rotate(-5deg)}50%{transform:translate3d(0,-13px,0) rotate(5deg)}}
 @media(max-width:700px){.oc-floating-coin{width:40px;height:40px}.oc-floating-coin b{font-size:18px}.oc-floating-coin small{font-size:7px}.oc-floating-coin.btc{left:0;top:10%}.oc-floating-coin.eth{right:0;top:12%}.oc-floating-coin.usdt{left:0;bottom:12%}.oc-floating-coin.bnb{right:0;bottom:12%}.oc-floating-coin.xrp{left:22%;top:0}.oc-floating-coin.gold{right:22%;top:0}}
 @media(prefers-reduced-motion:reduce){.oc-floating-coin{animation:none!important;will-change:auto}}
