@@ -2594,3 +2594,29 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
  syncAssets();updatePlan();
 })();
 </script>
+
+
+<!-- Final repair: restore the Quick Trade form and the Buy/Sell inline form. -->
+<style id="oc-final-restore-quick-trade">
+  /* The previous cleanup rules accidentally hid the Quick Trade section because it contains a .level-grid. */
+  #timedPaperTrade,
+  #page-trade #timedPaperTrade {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  /* Keep the investment plan UI usable inside Quick Trade, without restoring the separate old level cards. */
+  #timedPaperTrade .oc-auto-plan-trigger,
+  #timedPaperTrade #ocInvestmentPlanPicker {
+    display: block !important;
+    visibility: visible !important;
+  }
+  /* The order-book Quick Buy/Quick Sell form is intentionally hidden until Buy or Sell is clicked. */
+  #ocInlineTradeForm {
+    visibility: visible;
+    opacity: 1;
+  }
+</style>
