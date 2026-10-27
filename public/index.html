@@ -2718,21 +2718,17 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
 <script id="oc-orderbook-open-trade-plan">
 (function(){
  if(window.__ocOrderbookOpenTradePlan)return;window.__ocOrderbookOpenTradePlan=true;
- // Keep the Quick Trade form inside the actual Trade page. It was nested under Home,
- // so switching to Trade hid the form and made the user appear to return to Signals.
  const form=document.getElementById('timedPaperTrade');
- const tradeLayout=document.querySelector('#page-trade .trade-layout');
- if(form&&tradeLayout){
-  // Put Quick Trade before the chart so Buy/Sell opens directly on the trade form.
-  if(form.parentElement!==tradeLayout||tradeLayout.firstElementChild!==form)tradeLayout.insertBefore(form,tradeLayout.firstElementChild);
- }
+ // Keep Quick Trade in its original position, directly BELOW the Order Book.
+ // It starts hidden so the Trade page stays clean until Buy or Sell is selected.
+ if(form)form.classList.add('hidden');
  document.addEventListener('click',function(e){
   const target=e.target instanceof Element?e.target:null;
   if(!target)return;
   const bookBtn=target.closest('[data-oc-book-direction]');
   const quickBtn=target.closest('#timedUpBtn,#timedDownBtn');
   if(!bookBtn&&!quickBtn)return;
-  // Capture Buy/Sell before chart/signal handlers can redirect or change the view.
+  // Capture the action before other chart/signal handlers can redirect the page.
   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
   const direction=bookBtn?bookBtn.dataset.ocBookDirection:(quickBtn.id==='timedUpBtn'?'buy':'sell');
   const tradeForm=document.getElementById('timedPaperTrade');
@@ -2740,13 +2736,11 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
   if(!tradeForm||!directionButton)return;
   if(typeof window.showPage==='function')window.showPage('trade');
   tradeForm.classList.remove('hidden');
-  // For order-book buttons, forward the choice to the Quick Trade direction control.
+  // Select the requested direction when Buy/Sell was clicked in the Order Book.
   if(bookBtn)directionButton.click();
   window.setTimeout(function(){
-   const plans=document.getElementById('ocInvestmentPlanPicker');
-   tradeForm.scrollIntoView({behavior:'auto',block:'start'});
-   if(plans&&!plans.classList.contains('hidden'))plans.scrollIntoView({behavior:'smooth',block:'center'});
-  },220);
+   tradeForm.scrollIntoView({behavior:'smooth',block:'start'});
+  },180);
  },true);
 })();
 </script>
