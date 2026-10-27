@@ -329,7 +329,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
         <label for="tradeAsset">Trading asset</label><select id="tradeAsset" class="field"></select>
         <div class="content-grid"><div><label>Available balance (USDT)</label><div class="card"><div class="big" id="quickAvailableBalance">10,000.00 USDT</div><div class="muted tiny">Simulated balance only</div></div><label for="timedStake">Trade amount (USDT)</label><input id="timedStake" class="field" type="number" min="100" max="1000000" step="0.01" value="100" placeholder="Enter amount in USDT">
         <!-- Internal plan/expiry are calculated silently; no level list or auto-selection labels are shown to customers. --><select id="timedPlan" class="field" style="display:none" aria-hidden="true" tabindex="-1"><option value="12" data-min="100" data-max="5000">Level 1</option><option value="15" data-min="5000" data-max="10000">Level 2</option><option value="18" data-min="10000" data-max="25000">Level 3</option><option value="21" data-min="25000" data-max="50000">Level 4</option><option value="24" data-min="50000" data-max="100000">Level 5</option><option value="27" data-min="100000" data-max="1000000">Level 6</option></select>
-        <div class="card" style="margin:10px 0"><div class="label">Estimated plan profit (illustrative)</div><div class="big green" id="quickEstimatedProfit">12.00 USDT</div><div class="muted tiny" id="quickPlanNote">12% of the entered amount · not guaranteed</div></div>
+        <div class="card" style="margin:10px 0"><div class="label">Estimated profit</div><div class="big green" id="quickEstimatedProfit">12.00 USDT</div><div class="muted tiny" id="quickPlanNote">12% of the entered amount · not guaranteed</div></div>
         <select id="timedDuration" class="field" style="display:none" aria-hidden="true" tabindex="-1"><option value="30">30 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="120">120 seconds</option><option value="180">180 seconds</option><option value="270">270 seconds</option><option value="360">360 seconds</option></select>
         <label>Trade direction</label><div class="two-buttons"><button type="button" class="buy" id="timedUpBtn" aria-pressed="false">↗ Buy</button><button type="button" class="sell" id="timedDownBtn" aria-pressed="false">↘ Sell</button></div><div class="two-buttons" style="margin-top:10px"><button type="button" class="primary" id="timedConfirmBtn" disabled>Confirm trade</button><button type="button" class="secondary" id="timedCancelBtn">Cancel</button></div>
         <p class="muted tiny">Plan percentages are illustrative estimates, not promised returns. Quick Trade is a paper simulation; no real funds or orders are processed.</p></div>
@@ -2340,92 +2340,30 @@ td,th{overflow-wrap:anywhere}
 @media(max-width:560px){#ocInvestmentPlanPicker .oc-plan-options{grid-template-columns:1fr}#ocInvestmentPlanPicker .oc-plan-option{padding:11px}}
 </style>
 <script id="oc-investment-plan-selector">
+/* Keep plan and expiry calculation internal; never show a level picker or expiry dropdown. */
 (function(){
  const $=id=>document.getElementById(id);
- const trade=$('timedPaperTrade'),stake=$('timedStake'),up=$('timedUpBtn'),down=$('timedDownBtn');
- if(!trade||!stake||!up||!down)return;
- const summary=[...trade.querySelectorAll('.cards .card')].find(el=>el.querySelector('#quickAutoLevel'));
+ const stake=$('timedStake'),planSel=$('timedPlan'),duration=$('timedDuration');
  const plans=[
-  {rate:12,min:100,max:5000,duration:30,label:'Level 1',range:'100–4,999.99 USDT'},
-  {rate:15,min:5000,max:10000,duration:60,label:'Level 2',range:'5,000–9,999.99 USDT'},
-  {rate:18,min:10000,max:25000,duration:90,label:'Level 3',range:'10,000–24,999.99 USDT'},
-  {rate:21,min:25000,max:50000,duration:120,label:'Level 4',range:'25,000–49,999.99 USDT'},
-  {rate:24,min:50000,max:100000,duration:180,label:'Level 5',range:'50,000–99,999.99 USDT'},
-  {rate:27,min:100000,max:1000000,duration:360,label:'Level 6',range:'100,000–1,000,000 USDT'}
+  {rate:12,min:100,max:5000,duration:30},
+  {rate:15,min:5000,max:10000,duration:60},
+  {rate:18,min:10000,max:25000,duration:90},
+  {rate:21,min:25000,max:50000,duration:120},
+  {rate:24,min:50000,max:100000,duration:180},
+  {rate:27,min:100000,max:1000000,duration:360}
  ];
- const planFor=n=>Number.isFinite(n)?plans.find((p,i)=>n>=p.min&&(i===plans.length-1?n<=p.max:n<p.max))||null:null;
- const amountCard=$('quickEstimatedProfit')?.closest('.card');
- if(amountCard){amountCard.querySelector('.label')?.remove();$('quickPlanNote')?.remove();}
- trade.querySelectorAll('.muted.tiny').forEach(el=>{
-  const t=(el.textContent||'').toLowerCase();
-  if(t.includes('plan percentages are illustrative')||t.includes('not guaranteed')||t.includes('illustrative estimate'))el.classList.add('oc-hide-plan-copy');
- });
- const workspace=[...document.querySelectorAll('#page-trade .panel')].find(p=>p.querySelector('.level-grid'));
- if(workspace)workspace.classList.add('oc-workspace-levels');
- let panel=$('ocInvestmentPlanPicker');
- if(!panel){
-  panel=document.createElement('section');panel.id='ocInvestmentPlanPicker';panel.className='hidden';
-  panel.innerHTML='<h3>Automatically detected investment level</h3><div class="oc-plan-options">'+plans.map(p=>'<button type="button" class="oc-plan-option" data-plan-rate="'+p.rate+'" aria-pressed="false" tabindex="-1" disabled><strong>'+p.label+' · '+p.range+'</strong><span>'+p.rate+'% illustrative estimate · '+p.duration+' sec default expiry</span></button>').join('')+'</div><p class="oc-plan-status" id="ocInvestmentPlanStatus" aria-live="polite"></p>';
-  const directionRow=up.closest('.two-buttons');
-  if(directionRow)directionRow.insertAdjacentElement('afterend',panel);else summary?.insertAdjacentElement('afterend',panel);
- }else{
-  panel.querySelector('h3')?.replaceChildren(document.createTextNode('Automatically detected investment level'));
-  panel.querySelectorAll('[data-plan-rate]').forEach((b,i)=>{b.disabled=true;b.tabIndex=-1;const p=plans[i];if(p){const strong=b.querySelector('strong'),span=b.querySelector('span');if(strong)strong.textContent=p.label+' · '+p.range;if(span)span.textContent=p.rate+'% illustrative estimate · '+p.duration+' sec default expiry';}});
+ function sync(){
+  const raw=stake?.value?.trim()||'',amount=Number(raw);
+  const p=raw!==''?plans.find((x,i)=>amount>=x.min&&(amount<x.max||(i===plans.length-1&&amount<=x.max))):null;
+  if(p&&planSel)planSel.value=String(p.rate);
+  if(p&&duration)duration.value=String(p.duration);
+  if(duration){duration.style.setProperty('display','none','important');duration.setAttribute('aria-hidden','true');duration.tabIndex=-1;}
+  if(planSel){planSel.style.setProperty('display','none','important');planSel.setAttribute('aria-hidden','true');planSel.tabIndex=-1;}
+  $('ocInvestmentPlanPicker')?.remove();
+  ['quickAutoLevel','quickAutoRange','quickAutoDuration','quickPlanNote'].forEach(id=>{const el=$(id);if(el)el.style.setProperty('display','none','important');});
  }
- if(summary){summary.classList.remove('oc-auto-plan-trigger');summary.removeAttribute('role');summary.removeAttribute('tabindex');summary.removeAttribute('aria-label');summary.querySelector('.label')?.replaceChildren(document.createTextNode('Automatically selected level'));}
- const duration=$('timedDuration');
- if(duration){
-  duration.style.display='block';duration.removeAttribute('aria-hidden');duration.removeAttribute('tabindex');
-  const previous=duration.previousElementSibling;
-  if(!previous||previous.tagName!=='LABEL'||previous.htmlFor!=='timedDuration'){
-   const lab=document.createElement('label');lab.htmlFor='timedDuration';lab.textContent='Expiration time';duration.insertAdjacentElement('beforebegin',lab);
-  }
- }
- const status=$('ocInvestmentPlanStatus');
- function refresh(){
-  const raw=stake.value.trim(),amount=raw===''?NaN:Number(raw),p=planFor(amount);
-  const balanceText=$('quickAvailableBalance')?.textContent||'0';
-  const balance=Number(balanceText.replace(/[^0-9.]/g,''))||0;
-  const value=$('quickAutoLevel'),range=$('quickAutoRange'),expiry=$('quickAutoDuration');
-  if(value)value.textContent=p?p.label+' · '+p.rate+'%':'No level selected';
-  if(range)range.textContent=p?p.range:'Enter 100–1,000,000 USDT';
-  if(expiry)expiry.textContent=p?p.duration+' seconds default':'—';
-  panel.querySelectorAll('[data-plan-rate]').forEach(b=>b.setAttribute('aria-pressed',String(!!p&&Number(b.dataset.planRate)===p.rate)));
-  let message='';
-  if(raw===''||!Number.isFinite(amount))message='Enter a trade amount from 100 to 1,000,000 USDT.';
-  else if(amount<100||amount>1000000)message='Invalid amount. Minimum is 100 USDT and maximum is 1,000,000 USDT.';
-  else if(!p)message='No investment level matches this amount. Check the amount and try again.';
-  else if(amount>balance)message='Insufficient simulated USDT balance. Available: '+balance.toLocaleString()+' USDT.';
-  else message=p.label+' selected automatically for '+amount.toLocaleString()+' USDT.';
-  if(status)status.textContent=message;
-  const gate=$('ocTradePlanGate');
-  if(gate){gate.textContent=(raw!==''&&(!Number.isFinite(amount)||amount<100||amount>1000000))?'Enter a valid amount from 100 to 1,000,000 USDT.':(p&&amount>balance)?'Insufficient simulated USDT balance. Available: '+balance.toLocaleString()+' USDT.':'';gate.style.display=gate.textContent?'block':'none';}
-  const confirm=$('timedConfirmBtn');
-  const direction=!!(up.getAttribute('aria-pressed')==='true'||down.getAttribute('aria-pressed')==='true');
-  if(confirm)confirm.disabled=!p||amount>balance||!direction||!!window.__ocTradeSubmitting||!!(typeof timedPaper!=='undefined'&&timedPaper);
-  if(p){
-   const planSel=$('timedPlan');if(planSel)planSel.value=String(p.rate);
-   // Auto-select the default expiry for the newly detected amount; the user may then change it.
-   if(duration&&duration.dataset.lastAutoLevel!==String(p.rate)){duration.value=String(p.duration);duration.dataset.lastAutoLevel=String(p.rate);}
-   const estimate=$('quickEstimatedProfit');
-   if(estimate)estimate.textContent=(amount*p.rate/100).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT';
-   // Keep the user's chosen expiry unless the amount moves into a different level.
-   if(confirm)confirm.disabled=amount<100||amount>1000000||amount>balance||!direction||!!window.__ocTradeSubmitting||!!(typeof timedPaper!=='undefined'&&timedPaper);
-  }else{
-   const out=$('quickEstimatedProfit');if(out)out.textContent='—';
-  }
- }
- function open(){panel.classList.remove('hidden');refresh();}
- function close(){panel.classList.add('hidden');}
- up.addEventListener('click',()=>{open();setTimeout(refresh,0)});
- down.addEventListener('click',()=>{open();setTimeout(refresh,0)});
- stake.addEventListener('input',refresh);
- duration?.addEventListener('change',()=>{if(status&&planFor(Number(stake.value)))status.textContent='Expiration set to '+duration.value+' seconds. Investment level remains automatic.';refresh();});
- $('timedCancelBtn')?.addEventListener('click',()=>{setTimeout(refresh,0)});
- const result=$('timedResult');
- if(result)new MutationObserver(()=>{if((result.textContent||'').includes('Trade running'))close();}).observe(result,{childList:true,characterData:true,subtree:true});
- // Do not require manual investment-card selection. The amount alone determines the highlighted level.
- close();refresh();
+ stake?.addEventListener('input',sync);
+ sync();
 })();
 </script>
 
@@ -2975,3 +2913,12 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('oc-trade-overlay-open')&&!window.__ocTradeIsRunning){document.body.classList.remove('oc-trade-overlay-open');form.classList.add('hidden')}});
 })();
 </script>
+
+<style id="oc-final-compact-chart-and-hidden-plan-controls">
+/* Tighten the pair-to-chart spacing on desktop and mobile. Keep the clickable pair selector. */
+#page-trade .chart-area{padding:6px!important}
+#page-trade .chart-area>.page-title{margin-bottom:2px!important}
+#page-trade .chart-area>.chart-wrap{margin-top:2px!important}
+#page-trade .chart-wrap{margin-top:2px!important}
+#timedPlan,#timedDuration,#ocInvestmentPlanPicker,#quickAutoLevel,#quickAutoRange,#quickAutoDuration,#quickPlanNote{display:none!important}
+</style>
