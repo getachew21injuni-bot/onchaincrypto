@@ -2000,9 +2000,12 @@ main:has(> #page-browser:not(.hidden)) #quickAutoRange {
 
 <!-- OC BUY/SELL VISIBILITY RECOVERY -->
 <style id="oc-buy-sell-visibility-recovery">
-#page-trade #timedPaperTrade{display:block!important;visibility:visible!important;opacity:1!important}
-#page-trade #timedPaperTrade.hidden{display:block!important}
-#page-trade #timedPaperTrade .form-panel{display:block!important;visibility:visible!important}
+#page-trade #timedPaperTrade{display:none!important;visibility:hidden!important;opacity:0!important}
+body.oc-trade-overlay-open #page-trade #timedPaperTrade{display:block!important;visibility:visible!important;opacity:1!important;position:fixed!important;z-index:10020!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;width:min(720px,calc(100vw - 24px))!important;max-width:720px!important;max-height:calc(100dvh - 28px)!important;overflow-y:auto!important;margin:0!important;box-shadow:0 24px 90px #000b!important;border:1px solid #3b6584!important;border-radius:16px!important;background:#071321!important;padding:16px!important}
+body.oc-trade-overlay-open #page-trade #timedPaperTrade .form-panel{display:block!important;visibility:visible!important}
+body.oc-trade-overlay-open:after{content:"";position:fixed;inset:0;z-index:10010;background:rgba(1,7,15,.78);backdrop-filter:blur(4px)}
+#page-trade #timedPaperTrade .oc-trade-overlay-close{position:sticky;top:0;float:right;z-index:2;border:1px solid #46637a;border-radius:9px;background:#15283a;color:#fff;font-size:20px;font-weight:800;width:38px;height:38px;cursor:pointer;margin:-5px -5px 6px 10px}
+body.oc-trade-overlay-open{overflow:hidden}
 </style>
 <script id="oc-buy-sell-visibility-recovery-script">
 (function(){
@@ -2012,30 +2015,40 @@ main:has(> #page-browser:not(.hidden)) #quickAutoRange {
     var page=document.getElementById('page-trade');
     var form=document.getElementById('timedPaperTrade');
     if(page)page.classList.remove('hidden');
-    if(form){form.classList.remove('hidden');form.style.setProperty('display','block','important');form.style.visibility='visible';}
     document.querySelectorAll('#nav button,[data-bottom-page]').forEach(function(b){
       b.classList.toggle('active',b.dataset.page==='trade'||b.dataset.bottomPage==='trade');
     });
     if(typeof window.showPage==='function'){try{window.showPage('trade')}catch(e){}}
     if(page)page.classList.remove('hidden');
-    if(form){form.classList.remove('hidden');form.style.setProperty('display','block','important');}
-    if(direction){
-      var btn=document.getElementById(direction==='buy'?'timedUpBtn':'timedDownBtn');
-      if(btn && !btn.disabled && btn.getAttribute('aria-pressed')!=='true')btn.click();
+    if(form){
+      form.classList.remove('hidden');
+      document.body.classList.add('oc-trade-overlay-open');
+      form.style.removeProperty('display');
+      if(!form.querySelector('.oc-trade-overlay-close')){
+        var close=document.createElement('button');
+        close.type='button';close.className='oc-trade-overlay-close';close.setAttribute('aria-label','Close Quick Trade');close.textContent='×';
+        close.addEventListener('click',function(){document.body.classList.remove('oc-trade-overlay-open');});
+        form.insertBefore(close,form.firstChild);
+      }
     }
-    window.setTimeout(function(){
-      if(page)page.classList.remove('hidden');
-      if(form){form.classList.remove('hidden');form.style.setProperty('display','block','important');}
-      if(form)form.scrollIntoView({behavior:'smooth',block:'start'});
-    },80);
+    if(direction && typeof window.chooseTimedDirection==='function'){
+      window.chooseTimedDirection(direction==='buy'?'up':'down');
+    }
   }
   document.addEventListener('click',function(e){
     var t=e.target instanceof Element?e.target:null;if(!t)return;
+    var close=t.closest('.oc-trade-overlay-close');
+    if(close){e.preventDefault();e.stopPropagation();document.body.classList.remove('oc-trade-overlay-open');return;}
+    if(t===document.querySelector('body.oc-trade-overlay-open:after'))document.body.classList.remove('oc-trade-overlay-open');
     var b=t.closest('[data-oc-book-direction]');
     if(!b)return;
     e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
     revealTrade(b.dataset.ocBookDirection==='sell'?'sell':'buy');
   },true);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')document.body.classList.remove('oc-trade-overlay-open');});
+  document.addEventListener('click',function(e){
+    if(document.body.classList.contains('oc-trade-overlay-open') && e.target===document.getElementById('page-trade'))document.body.classList.remove('oc-trade-overlay-open');
+  });
   document.addEventListener('click',function(e){
     var t=e.target instanceof Element?e.target:null;if(!t)return;
     if(t.closest('#timedUpBtn')){revealTrade(null);}
