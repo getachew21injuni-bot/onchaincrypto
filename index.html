@@ -1980,7 +1980,52 @@ main:has(> #page-browser:not(.hidden)) #quickAutoRange {
 }
 /* Keep the account privacy/security controls and meaningful financial safety notices available. */
 </style>
-<script>(function(){const toggle=document.getElementById("walletCurrencyToggle"),menu=document.getElementById("walletCurrencyMenu"),balance=document.getElementById("walletBalance"),source=document.getElementById("summaryBalance");if(!toggle||!menu||!balance)return;let selected="USDT";function showBalance(){const raw=String(source?source.textContent:balance.textContent||"0").replace(/[^0-9.-]/g,"");const amount=Number(raw)||0;if(selected==="USDT"){balance.textContent=amount.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})+" USDT";return;}const coin=typeof priceFor==="function"?priceFor(selected):null;const price=Number(coin&&coin.current_price||0);balance.textContent=price>0?(amount/price).toLocaleString("en-US",{minimumFractionDigits:4,maximumFractionDigits:8})+" "+selected:amount.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})+" USDT";}toggle.addEventListener("click",function(){const open=menu.classList.contains("hidden");menu.classList.toggle("hidden",!open);toggle.setAttribute("aria-expanded",String(open));});menu.addEventListener("click",function(e){const choice=e.target.closest("[data-wallet-coin]");if(!choice)return;selected=choice.dataset.walletCoin;toggle.textContent=selected+"⌄";menu.querySelectorAll("[data-wallet-coin]").forEach(b=>b.setAttribute("aria-selected",String(b===choice)));menu.classList.add("hidden");toggle.setAttribute("aria-expanded","false");showBalance();});document.addEventListener("click",function(e){if(!e.target.closest(".wallet-currency-wrap")){menu.classList.add("hidden");toggle.setAttribute("aria-expanded","false");}});if(source)new MutationObserver(showBalance).observe(source,{childList:true,characterData:true,subtree:true});})();</script></body>
+<script id="oc-wallet-balance-currency-fix">(function(){
+ const toggle=document.getElementById("walletCurrencyToggle"),menu=document.getElementById("walletCurrencyMenu"),balance=document.getElementById("walletBalance"),source=document.getElementById("summaryBalance");
+ if(!toggle||!menu||!balance)return;
+ let selected="USDT";
+ function usdtAmount(){
+   const text=String(source?source.textContent:balance.textContent||"0");
+   const parsed=Number(text.replace(/[^0-9.\\-]/g,""));
+   return Number.isFinite(parsed)?parsed:0;
+ }
+ function coinPrice(symbol){
+   let coin=null;
+   try{if(typeof priceFor==="function")coin=priceFor(symbol)}catch(_){}
+   if(!coin&&Array.isArray(window.market))coin=window.market.find(c=>String(c.symbol||"").toUpperCase()===symbol.toUpperCase());
+   const price=Number(coin&&(coin.current_price??coin.price_usd??coin.price)||0);
+   return Number.isFinite(price)&&price>0?price:0;
+ }
+ function showBalance(){
+   const amount=usdtAmount();
+   if(selected==="USDT"){
+     balance.textContent=amount.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})+" USDT";
+     return;
+   }
+   const price=coinPrice(selected);
+   if(price>0){
+     const units=amount/price;
+     balance.textContent=units.toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:8})+" "+selected;
+     balance.title=amount.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})+" USDT equivalent";
+   }else{
+     // Never turn a valid USDT balance into zero just because a coin price has not loaded.
+     balance.textContent=amount.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})+" USDT";
+     balance.title="Coin price is loading; balance remains valued in USDT.";
+   }
+ }
+ toggle.addEventListener("click",function(){const open=menu.classList.contains("hidden");menu.classList.toggle("hidden",!open);toggle.setAttribute("aria-expanded",String(open));});
+ menu.addEventListener("click",function(e){
+   const choice=e.target.closest("[data-wallet-coin]");if(!choice)return;
+   selected=String(choice.dataset.walletCoin||"USDT").toUpperCase();
+   toggle.textContent=selected+"⌄";
+   menu.querySelectorAll("[data-wallet-coin]").forEach(b=>b.setAttribute("aria-selected",String(b===choice)));
+   menu.classList.add("hidden");toggle.setAttribute("aria-expanded","false");showBalance();
+ });
+ document.addEventListener("click",function(e){if(!e.target.closest(".wallet-currency-wrap")){menu.classList.add("hidden");toggle.setAttribute("aria-expanded","false");}});
+ if(source)new MutationObserver(showBalance).observe(source,{childList:true,characterData:true,subtree:true});
+ setInterval(showBalance,5000);
+ showBalance();
+})();</script></body>
 </html>
 
 <style id="activity-history-compact-styles">
