@@ -1256,8 +1256,7 @@ async function saveBasicUserProfile(user) {
     phoneNumber: user.phoneNumber || localProfile.phone || "", displayName: names,
     firstName: localProfile.firstName || names.split(" ")[0] || "",
     lastName: localProfile.lastName || names.split(" ").slice(1).join(" ") || "",
-    referralCode: localProfile.referralCode || "",
-    createdAt: localProfile.createdAt || new Date().toISOString(), updatedAt: serverTimestamp()
+    updatedAt: serverTimestamp()
   };
   try { await setDoc(doc(db, "users", user.uid), profile, { merge: true }); }
   catch (error) { console.warn("Basic profile could not be saved to Firestore:", error?.code || error); }
