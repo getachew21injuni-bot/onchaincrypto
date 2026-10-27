@@ -2758,9 +2758,12 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
   const target=e.target instanceof Element?e.target:null;if(!target)return;
   const bookBtn=target.closest('[data-oc-book-direction]');
   const quickBtn=target.closest('#timedUpBtn,#timedDownBtn');
-  if(!bookBtn&&!quickBtn)return;
+  // Buy/Sell buttons inside the already-open Quick Trade panel belong to the
+  // trade form's own handlers. Do not reopen the overlay or reset its stage.
+  if(quickBtn)return;
+  if(!bookBtn)return;
   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-  const direction=bookBtn?bookBtn.dataset.ocBookDirection:(quickBtn.id==='timedUpBtn'?'buy':'sell');
+  const direction=bookBtn.dataset.ocBookDirection;
   const tradeForm=document.getElementById('timedPaperTrade');
   if(!tradeForm)return;
   arrange();
@@ -2770,8 +2773,7 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
   tradeForm.classList.remove('oc-stage-running','oc-stage-complete');
   tradeForm.classList.add('oc-stage-config');
   const resultBoard=document.getElementById('timedResultBoard');if(resultBoard)resultBoard.style.display='none';
-  const directionButton=document.getElementById(direction==='buy'?'timedUpBtn':'timedDownBtn');
-  if(bookBtn&&typeof window.chooseTimedDirection==='function')window.chooseTimedDirection(direction==='buy'?'up':'down');
+  if(typeof window.chooseTimedDirection==='function')window.chooseTimedDirection(direction==='buy'?'up':'down');
   window.setTimeout(function(){tradeForm.scrollTop=0;tradeForm.scrollIntoView({behavior:'smooth',block:'center'});},180);
  },true);
 })();
