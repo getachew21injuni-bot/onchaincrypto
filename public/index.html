@@ -1165,7 +1165,7 @@ $("changePasswordBtn").addEventListener("click",()=>{showPage("register");$("sig
 $("manageSessionBtn").addEventListener("click",()=>{showPage("register");const signOut=$("signOutBtn");if(signOut&&!signOut.classList.contains("hidden")){signOut.scrollIntoView({behavior:"smooth",block:"center"});$("registerMessage").textContent="Use Sign out to end this browser session. Other active sessions are not managed here."}else{$("authStatus")?.scrollIntoView({behavior:"smooth",block:"center"});$("registerMessage").textContent="No active signed-in session is shown here. Sign in to view the current account state."}});
 $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new Date().toISOString(),notice:"This export contains browser-local OnChainCrypto data only; it is not a full server-account export.",profile:JSON.parse(localStorage.getItem("oc_profile")||"{}"),notificationPreferences:JSON.parse(localStorage.getItem("oc_notification_preferences")||"{}"),localData:{}};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&(/onchain|wallet|trade|history|profile|asset/i.test(key))&&!["oc_profile","oc_notification_preferences"].includes(key)){try{data.localData[key]=JSON.parse(localStorage.getItem(key))}catch(_){data.localData[key]=localStorage.getItem(key)}}}const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="onchaincrypto-data-export.json";link.click();URL.revokeObjectURL(url);$("privacyMessage").textContent="Downloaded available browser-local data. This does not include all server records."});
 $("requestDeleteAccountBtn").addEventListener("click",()=>{const ok=window.confirm("Account deletion is permanent. This site cannot delete your Firebase account automatically. Open an email request to support instead?");if(!ok)return;const subject="Account deletion request";const body="Please help me request deletion of my OnChainCrypto account and associated personal data. Please explain any identity checks required.";window.location.href="mailto:onchaincryptosupport@gmail.com?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);$("privacyMessage").textContent="Your email app should open with a deletion request draft. Review and send it; this website has not deleted your account."});
-document.getElementById("ocSaveProfileBtn")?.addEventListener("click",async()=>{const user=window.onchaincryptoCurrentUser;const status=document.getElementById("ocProfileSaveStatus");if(!user){if(status)status.textContent="Sign in first to save your profile.";return;}const firstName=document.getElementById("ocProfileFirstName")?.value.trim()||"";const lastName=document.getElementById("ocProfileLastName")?.value.trim()||"";if(!firstName||!lastName){if(status)status.textContent="Enter your first and last name.";return;}const profile={firstName,lastName,phone:document.getElementById("ocProfilePhone")?.value.trim()||"",country:document.getElementById("ocProfileCountry")?.value.trim()||"",dob:document.getElementById("ocProfileDob")?.value||"",gender:document.getElementById("ocProfileGender")?.value||"",address:document.getElementById("ocProfileAddress")?.value.trim()||"",email:user.email||"",updatedAt:new Date().toISOString()};try{await updateProfile(user,{displayName:(firstName+" "+lastName).trim()});const old=JSON.parse(localStorage.getItem("oc_profile_"+user.uid)||"{}");localStorage.setItem("oc_profile_"+user.uid,JSON.stringify({...old,...profile}));const display=document.getElementById("displayName");if(display)display.value=(firstName+" "+lastName).trim();if(status)status.textContent="Profile saved on this device.";if(typeof refreshProfileAccountInfo==="function")refreshProfileAccountInfo();}catch(error){if(status)status.textContent=error?.message||"Could not save profile. Please try again.";}});
+document.getElementById("ocSaveProfileBtn")?.addEventListener("click",async()=>{const user=window.onchaincryptoCurrentUser;const status=document.getElementById("ocProfileSaveStatus");if(!user){if(status)status.textContent="Sign in first to save your profile.";return;}const firstName=document.getElementById("ocProfileFirstName")?.value.trim()||"";const lastName=document.getElementById("ocProfileLastName")?.value.trim()||"";if(!firstName||!lastName){if(status)status.textContent="Enter your first and last name.";return;}const profile={firstName,lastName,phone:document.getElementById("ocProfilePhone")?.value.trim()||"",country:document.getElementById("ocProfileCountry")?.value.trim()||"",dob:document.getElementById("ocProfileDob")?.value||"",gender:document.getElementById("ocProfileGender")?.value||"",address:document.getElementById("ocProfileAddress")?.value.trim()||"",email:user.email||"",updatedAt:new Date().toISOString()};try{await updateProfile(user,{displayName:(firstName+" "+lastName).trim()});const old=JSON.parse(localStorage.getItem("oc_profile_"+user.uid)||"{}");localStorage.setItem("oc_profile_"+user.uid,JSON.stringify({...old,...profile}));const display=document.getElementById("displayName");if(display)display.value=(firstName+" "+lastName).trim();if(status)status.textContent="Profile saved; syncing to your account…";if(typeof refreshProfileAccountInfo==="function")refreshProfileAccountInfo();}catch(error){if(status)status.textContent=error?.message||"Could not save profile. Please try again.";}});
  renderWallet();loadMarket();setInterval(loadMarket,120000);window.addEventListener("resize",()=>{if(historySeries.length&&!$("page-trade").classList.contains("hidden"))drawPriceChart()});
 </script>
 
@@ -1208,6 +1208,37 @@ async function saveBasicUserProfile(user) {
     console.warn("Basic profile could not be saved to Firestore:", error?.code || error);
   }
 }
+
+// Save editable profile details to the signed-in user's private Firestore document.
+document.getElementById("ocSaveProfileBtn")?.addEventListener("click", async () => {
+  const status = document.getElementById("ocProfileSaveStatus");
+  const user = auth.currentUser;
+  if (!user?.uid) return;
+  const firstName = document.getElementById("ocProfileFirstName")?.value.trim() || "";
+  const lastName = document.getElementById("ocProfileLastName")?.value.trim() || "";
+  if (!firstName || !lastName) return;
+  const profile = {
+    uid: user.uid,
+    email: user.email || "",
+    phone: document.getElementById("ocProfilePhone")?.value.trim() || "",
+    phoneNumber: user.phoneNumber || "",
+    firstName,
+    lastName,
+    displayName: (firstName + " " + lastName).trim(),
+    country: document.getElementById("ocProfileCountry")?.value.trim() || "",
+    dateOfBirth: document.getElementById("ocProfileDob")?.value || "",
+    gender: document.getElementById("ocProfileGender")?.value || "",
+    address: document.getElementById("ocProfileAddress")?.value.trim() || "",
+    updatedAt: serverTimestamp()
+  };
+  try {
+    await setDoc(doc(db, "users", user.uid), profile, { merge: true });
+    if (status) status.textContent = "Profile saved securely to your account.";
+  } catch (error) {
+    console.warn("Full profile sync failed:", error?.code || error);
+    if (status) status.textContent = "Saved on this device only. Cloud sync failed; check Firestore rules/deployment.";
+  }
+});
 const msg = (text) => { const el = document.getElementById("registerMessage"); if (el) el.textContent = text; };
 const friendlyError = (error) => {
   const code = error?.code || "";
