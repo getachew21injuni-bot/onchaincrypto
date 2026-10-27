@@ -144,6 +144,19 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 @media(max-width:900px){.oc-get-started-hero{grid-template-columns:1fr;gap:8px}.oc-get-started-hero .oc-hero-copy h2{font-size:clamp(32px,7vw,48px)}.oc-market-visual{min-height:320px}}
 @media(max-width:700px){#nav #signin-nav,#nav #register-nav{display:none}.mobile-signin-btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 10px;font-size:12px;white-space:nowrap;min-height:38px}.oc-get-started-hero{padding:22px 16px 12px;min-height:0}.oc-market-visual{min-height:270px;padding:12px 5px 20px}.oc-chart-window{padding:13px;border-radius:14px}.oc-candlestick-chart{height:150px}.oc-chart-float{padding:8px 10px}.oc-chart-float-one{right:-2px;top:0}.oc-chart-float-two{left:-2px;bottom:0}.oc-chart-legend{gap:10px}.oc-landing-actions{margin-top:18px}.oc-landing-actions button{flex:1}}
 @media(max-width:380px){.mobile-signin-btn,.mobile-register-btn{padding:7px 8px;font-size:11px}.oc-chart-float-two{bottom:-5px}.oc-chart-float{font-size:10px}}
+/* Colorful floating coin badges, decorative only; no market or wallet data is changed. */
+.oc-floating-coins{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:visible}
+.oc-floating-coin{position:absolute;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;width:52px;height:52px;border-radius:50%;font-weight:900;box-shadow:0 8px 26px #0006,inset 0 2px 4px #ffffff45,inset 0 -4px 8px #0004;border:1px solid #ffffff35;animation:ocCoinFloat 4.8s ease-in-out infinite;will-change:transform}
+.oc-floating-coin b{font-size:23px;line-height:1}.oc-floating-coin small{font-size:8px;line-height:1;letter-spacing:.2px}
+.oc-floating-coin.btc{left:1%;top:14%;background:linear-gradient(145deg,#ffcf70,#f7931a);color:#fff}
+.oc-floating-coin.eth{right:2%;top:18%;background:linear-gradient(145deg,#aebcff,#627eea);color:#fff;animation-delay:-1.2s}
+.oc-floating-coin.usdt{left:2%;bottom:17%;background:linear-gradient(145deg,#69e6bb,#26a17b);color:#fff;animation-delay:-2.4s}
+.oc-floating-coin.bnb{right:2%;bottom:16%;background:linear-gradient(145deg,#ffe58b,#f3ba2f);color:#342500;animation-delay:-.8s}
+.oc-floating-coin.xrp{left:19%;top:0;background:linear-gradient(145deg,#d7e0ec,#66788d);color:#132333;animation-delay:-3s}
+.oc-floating-coin.gold{right:19%;top:0;background:linear-gradient(145deg,#fff0a3,#d9a520 62%,#a66b08);color:#493000;animation-delay:-1.8s}
+@keyframes ocCoinFloat{0%,100%{transform:translate3d(0,0,0) rotate(-5deg)}50%{transform:translate3d(0,-13px,0) rotate(5deg)}}
+@media(max-width:700px){.oc-floating-coin{width:40px;height:40px}.oc-floating-coin b{font-size:18px}.oc-floating-coin small{font-size:7px}.oc-floating-coin.btc{left:0;top:10%}.oc-floating-coin.eth{right:0;top:12%}.oc-floating-coin.usdt{left:0;bottom:12%}.oc-floating-coin.bnb{right:0;bottom:12%}.oc-floating-coin.xrp{left:22%;top:0}.oc-floating-coin.gold{right:22%;top:0}}
+@media(prefers-reduced-motion:reduce){.oc-floating-coin{animation:none!important;will-change:auto}}
 </style>
 <script id="oc-get-started-actions">
 document.addEventListener('DOMContentLoaded',function(){
@@ -200,6 +213,14 @@ document.addEventListener('DOMContentLoaded',function(){
    </div>
    <div class="oc-chart-float oc-chart-float-one"><span>24H CHANGE</span><strong class="green">+2.84%</strong></div>
    <div class="oc-chart-float oc-chart-float-two"><span>MARKET SIGNAL</span><strong><i class="up-dot"></i> Positive momentum</strong></div>
+   <div class="oc-floating-coins" aria-hidden="true">
+    <span class="oc-floating-coin btc"><b>₿</b><small>BITCOIN</small></span>
+    <span class="oc-floating-coin eth"><b>◆</b><small>ETHEREUM</small></span>
+    <span class="oc-floating-coin usdt"><b>₮</b><small>TETHER</small></span>
+    <span class="oc-floating-coin bnb"><b>◆</b><small>BNB</small></span>
+    <span class="oc-floating-coin xrp"><b>✕</b><small>XRP</small></span>
+    <span class="oc-floating-coin gold"><b>Au</b><small>GOLD</small></span>
+   </div>
   </div>
  </section>
 
