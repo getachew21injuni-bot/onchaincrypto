@@ -1498,7 +1498,7 @@ document.getElementById("signOutBtn").addEventListener("click", async () => {
 });
 onAuthStateChanged(auth, (user) => {
   window.onchaincryptoCurrentUser = user || null;
-  if (user) { void loadSavedUserProfile(user); void saveBasicUserProfile(user); }
+  if (user) { void (async () => { await loadSavedUserProfile(user); await saveBasicUserProfile(user); })(); }
    if (typeof window.ocRefreshReferral === "function") window.ocRefreshReferral(user || null);
    if (user) { window.showPage?.(window.ocPendingPage || "home"); window.ocPendingPage = null; }
    else { window.ocPendingPage = null; }
