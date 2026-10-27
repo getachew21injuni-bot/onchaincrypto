@@ -2622,3 +2622,79 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
     opacity: 1;
   }
 </style>
+
+
+<style id="oc-sequential-quick-trade-overlay-style">
+/* One same-screen modal: setup first, running countdown/graph next, final details at expiry. */
+#page-trade #ocInlineTradeForm{display:none!important}
+#page-trade #timedPaperTrade{display:none!important;visibility:hidden!important;opacity:0!important}
+body.oc-trade-overlay-open #page-trade #timedPaperTrade{
+ display:block!important;visibility:visible!important;opacity:1!important;position:fixed!important;
+ z-index:10050!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;
+ width:min(760px,calc(100vw - 24px))!important;max-width:760px!important;
+ max-height:calc(100dvh - 24px)!important;overflow-y:auto!important;margin:0!important;
+ box-shadow:0 24px 90px #000c!important;border:1px solid #3b6584!important;
+ border-radius:16px!important;background:#071321!important;padding:16px!important
+}
+body.oc-trade-overlay-open:after{content:"";position:fixed;inset:0;background:#020711c9;z-index:10040;backdrop-filter:blur(3px)}
+body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
+#timedPaperTrade.oc-stage-config>.cards,
+#timedPaperTrade.oc-stage-config>.chart-wrap,
+#timedPaperTrade.oc-stage-config>.mini-card,
+#timedPaperTrade.oc-stage-config>#timedResult,
+#timedPaperTrade.oc-stage-config>#timedResultBoard{display:none!important}
+#timedPaperTrade.oc-stage-running>.mini-card,
+#timedPaperTrade.oc-stage-running>#timedResultBoard{display:none!important}
+#timedPaperTrade.oc-stage-running>#timedResult{display:block!important}
+#timedPaperTrade.oc-stage-complete>.cards,
+#timedPaperTrade.oc-stage-complete>.chart-wrap,
+#timedPaperTrade.oc-stage-complete>.mini-card,
+#timedPaperTrade.oc-stage-complete>#timedResult,
+#timedPaperTrade.oc-stage-complete>#timedResultBoard{display:block!important}
+#timedPaperTrade.oc-stage-complete>.cards{display:grid!important}
+#timedPaperTrade.oc-stage-complete>.chart-wrap,#timedPaperTrade.oc-stage-complete>.mini-card{display:block!important}
+#timedPaperTrade .form-panel{display:block!important}
+@media(max-width:560px){body.oc-trade-overlay-open #page-trade #timedPaperTrade{padding:12px!important;max-height:calc(100dvh - 14px)!important}}
+</style>
+<script id="oc-sequential-quick-trade-overlay-script">
+(function(){
+ if(window.__ocRootSequentialTradeFlow)return;window.__ocRootSequentialTradeFlow=true;
+ const $=id=>document.getElementById(id),form=$('timedPaperTrade');
+ if(!form)return;
+ function closeSetup(){
+  if($('timedUpBtn')?.disabled&&$('timedDownBtn')?.disabled)return;
+  document.body.classList.remove('oc-trade-overlay-open');
+  form.classList.remove('oc-stage-config','oc-stage-running','oc-stage-complete');
+  form.classList.add('hidden');
+ }
+ document.addEventListener('click',function(e){
+  const target=e.target instanceof Element?e.target:null;if(!target)return;
+  const bookBtn=target.closest('[data-oc-book-direction]');if(!bookBtn)return;
+  e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+  if(typeof window.showPage==='function')window.showPage('trade');
+  form.classList.remove('hidden','oc-stage-running','oc-stage-complete');
+  form.classList.add('oc-stage-config');
+  document.body.classList.add('oc-trade-overlay-open');
+  const board=$('timedResultBoard');if(board)board.style.display='none';
+  if(typeof window.chooseTimedDirection==='function')window.chooseTimedDirection(bookBtn.dataset.ocBookDirection==='buy'?'up':'down');
+  setTimeout(()=>{form.scrollTop=0;},50);
+ },true);
+ $('timedConfirmBtn')?.addEventListener('click',function(){
+  setTimeout(function(){
+   if($('timedUpBtn')?.disabled&&$('timedDownBtn')?.disabled){
+    form.classList.remove('oc-stage-config','oc-stage-complete');form.classList.add('oc-stage-running');form.scrollTop=0;
+    const status=$('timedGraphStatus');if(status)status.textContent='IN PROGRESS';
+   }
+  },100);
+ });
+ $('timedCancelBtn')?.addEventListener('click',()=>setTimeout(()=>{if(!($('timedUpBtn')?.disabled&&$('timedDownBtn')?.disabled))closeSetup();},80));
+ const countdown=$('timedCountdown');
+ if(countdown)new MutationObserver(function(){
+  if(form.classList.contains('oc-stage-running')&&countdown.textContent.trim()==='00:00'){
+   form.classList.remove('oc-stage-running','oc-stage-config');form.classList.add('oc-stage-complete');form.scrollTop=0;
+   const status=$('timedGraphStatus');if(status)status.textContent='COMPLETED';
+  }
+ }).observe(countdown,{childList:true,characterData:true,subtree:true});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('oc-trade-overlay-open'))closeSetup();});
+})();
+</script>
