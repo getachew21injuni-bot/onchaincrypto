@@ -2715,32 +2715,47 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
 #liveOrderBookPanel .oc-orderbook-actions .sell{background:#ff5573;color:#fff}
 #liveOrderBookPanel .oc-orderbook-actions button:focus-visible{outline:2px solid #eaf6ff;outline-offset:2px}
 </style>
+<style id="oc-trade-side-by-side-layout">
+#page-trade .trade-layout.oc-trade-split{display:grid!important;grid-template-columns:minmax(0,1.65fr) minmax(280px,1fr);gap:14px;align-items:start}
+#page-trade .trade-layout.oc-trade-split>#liveOrderBookPanel{min-width:0;margin:0}
+#page-trade .trade-layout.oc-trade-split>#timedPaperTrade{grid-column:1/-1;margin-top:0}
+#page-trade #liveOrderBookPanel .oc-orderbook-actions{display:flex;gap:10px}
+#page-trade #liveOrderBookPanel .oc-orderbook-actions button{flex:1;min-height:44px}
+@media(max-width:760px){#page-trade .trade-layout.oc-trade-split{grid-template-columns:minmax(0,1fr)}#page-trade .trade-layout.oc-trade-split>#timedPaperTrade{grid-column:auto}}
+</style>
 <script id="oc-orderbook-open-trade-plan">
 (function(){
  if(window.__ocOrderbookOpenTradePlan)return;window.__ocOrderbookOpenTradePlan=true;
- const form=document.getElementById('timedPaperTrade');
- // Keep Quick Trade in its original position, directly BELOW the Order Book.
- // It starts hidden so the Trade page stays clean until Buy or Sell is selected.
- if(form)form.classList.add('hidden');
+ function arrange(){
+  const layout=document.querySelector('#page-trade .trade-layout');
+  const orderBook=document.getElementById('liveOrderBookPanel');
+  const form=document.getElementById('timedPaperTrade');
+  if(layout&&orderBook&&form){
+   layout.classList.add('oc-trade-split');
+   // Put Order Book beside the graph/signal panel, and Quick Trade directly below it.
+   const graphPanel=layout.querySelector(':scope > .panel:not(#liveOrderBookPanel):not(#timedPaperTrade)');
+   if(graphPanel&&orderBook.parentElement!==layout)graphPanel.insertAdjacentElement('afterend',orderBook);
+   if(orderBook.parentElement===layout&&form.parentElement!==layout)orderBook.insertAdjacentElement('afterend',form);
+   if(form.parentElement===layout&&form.previousElementSibling!==orderBook)orderBook.insertAdjacentElement('afterend',form);
+   form.classList.add('hidden');
+  }
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',arrange);else arrange();
  document.addEventListener('click',function(e){
-  const target=e.target instanceof Element?e.target:null;
-  if(!target)return;
+  const target=e.target instanceof Element?e.target:null;if(!target)return;
   const bookBtn=target.closest('[data-oc-book-direction]');
   const quickBtn=target.closest('#timedUpBtn,#timedDownBtn');
   if(!bookBtn&&!quickBtn)return;
-  // Capture the action before other chart/signal handlers can redirect the page.
   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
   const direction=bookBtn?bookBtn.dataset.ocBookDirection:(quickBtn.id==='timedUpBtn'?'buy':'sell');
   const tradeForm=document.getElementById('timedPaperTrade');
-  const directionButton=document.getElementById(direction==='buy'?'timedUpBtn':'timedDownBtn');
-  if(!tradeForm||!directionButton)return;
+  if(!tradeForm)return;
+  arrange();
   if(typeof window.showPage==='function')window.showPage('trade');
   tradeForm.classList.remove('hidden');
-  // Select the requested direction directly; the capture handler intentionally blocks duplicate clicks.
+  const directionButton=document.getElementById(direction==='buy'?'timedUpBtn':'timedDownBtn');
   if(bookBtn&&typeof window.chooseTimedDirection==='function')window.chooseTimedDirection(direction==='buy'?'up':'down');
-  window.setTimeout(function(){
-   tradeForm.scrollIntoView({behavior:'smooth',block:'start'});
-  },180);
+  window.setTimeout(function(){tradeForm.scrollIntoView({behavior:'smooth',block:'start'});},180);
  },true);
 })();
 </script>
