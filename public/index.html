@@ -1997,6 +1997,52 @@ main:has(> #page-browser:not(.hidden)) #quickAutoRange {
 }
 /* Keep the account privacy/security controls and meaningful financial safety notices available. */
 </style>
+
+<!-- OC BUY/SELL VISIBILITY RECOVERY -->
+<style id="oc-buy-sell-visibility-recovery">
+#page-trade #timedPaperTrade{display:block!important;visibility:visible!important;opacity:1!important}
+#page-trade #timedPaperTrade.hidden{display:block!important}
+#page-trade #timedPaperTrade .form-panel{display:block!important;visibility:visible!important}
+</style>
+<script id="oc-buy-sell-visibility-recovery-script">
+(function(){
+  function revealTrade(direction){
+    var pages=document.querySelectorAll('main>section[id^="page-"]');
+    pages.forEach(function(p){p.classList.toggle('hidden',p.id!=='page-trade');});
+    var page=document.getElementById('page-trade');
+    var form=document.getElementById('timedPaperTrade');
+    if(page)page.classList.remove('hidden');
+    if(form){form.classList.remove('hidden');form.style.setProperty('display','block','important');form.style.visibility='visible';}
+    document.querySelectorAll('#nav button,[data-bottom-page]').forEach(function(b){
+      b.classList.toggle('active',b.dataset.page==='trade'||b.dataset.bottomPage==='trade');
+    });
+    if(typeof window.showPage==='function'){try{window.showPage('trade')}catch(e){}}
+    if(page)page.classList.remove('hidden');
+    if(form){form.classList.remove('hidden');form.style.setProperty('display','block','important');}
+    if(direction){
+      var btn=document.getElementById(direction==='buy'?'timedUpBtn':'timedDownBtn');
+      if(btn && !btn.disabled && btn.getAttribute('aria-pressed')!=='true')btn.click();
+    }
+    window.setTimeout(function(){
+      if(page)page.classList.remove('hidden');
+      if(form){form.classList.remove('hidden');form.style.setProperty('display','block','important');}
+      if(form)form.scrollIntoView({behavior:'smooth',block:'start'});
+    },80);
+  }
+  document.addEventListener('click',function(e){
+    var t=e.target instanceof Element?e.target:null;if(!t)return;
+    var b=t.closest('[data-oc-book-direction]');
+    if(!b)return;
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    revealTrade(b.dataset.ocBookDirection==='sell'?'sell':'buy');
+  },true);
+  document.addEventListener('click',function(e){
+    var t=e.target instanceof Element?e.target:null;if(!t)return;
+    if(t.closest('#timedUpBtn')){revealTrade(null);}
+    else if(t.closest('#timedDownBtn')){revealTrade(null);}
+  },true);
+})();
+</script>
 </body>
 </html>
 
