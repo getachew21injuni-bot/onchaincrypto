@@ -2871,9 +2871,12 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
 #timedPaperTrade.oc-stage-config>#timedResult,
 #timedPaperTrade.oc-stage-config>#timedResultBoard{display:none!important}
 #timedPaperTrade.oc-stage-running>.cards{display:none!important}
-#timedPaperTrade.oc-stage-running>.cards:first-of-type{display:grid!important}
-#timedPaperTrade.oc-stage-running>.cards:first-of-type .card:nth-child(1),
-#timedPaperTrade.oc-stage-running>.cards:first-of-type .card:nth-child(2){display:none!important}
+#timedPaperTrade.oc-stage-running>.oc-running-timer-cards{display:grid!important}
+#timedPaperTrade.oc-stage-running>.oc-running-timer-cards .card:nth-child(1),
+#timedPaperTrade.oc-stage-running>.oc-running-timer-cards .card:nth-child(2){display:none!important}
+#timedPaperTrade .form-panel #quickEstimatedProfit{display:none!important}
+#timedPaperTrade .form-panel #quickPlanNote{display:none!important}
+#timedPaperTrade .form-panel #quickEstimatedProfit,#timedPaperTrade .form-panel #quickPlanNote{display:none!important}
 #timedPaperTrade.oc-stage-running>.chart-wrap{display:block!important}
 #timedPaperTrade.oc-stage-running>.mini-card,
 #timedPaperTrade.oc-stage-running>#timedResult,
@@ -2961,6 +2964,7 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
   const board=$('timedResultBoard');if(board)board.appendChild(closeBtn);
  }
  const countdown=$('timedCountdown');
+ if(countdown&&countdown.closest('.cards'))countdown.closest('.cards').classList.add('oc-running-timer-cards');
  if(countdown)new MutationObserver(function(){
   if(form.classList.contains('oc-stage-running')&&countdown.textContent.trim()==='00:00'){
    form.classList.remove('oc-stage-running','oc-stage-config');form.classList.add('oc-stage-complete');step(4);form.scrollTop=0;
