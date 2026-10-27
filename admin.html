@@ -195,7 +195,7 @@ document.getElementById('moreBtn').addEventListener('click',()=>showView('Settin
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, limit } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, limit, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"});
 
 const auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
@@ -206,12 +206,13 @@ window.adminGetLiveCollection=async function(view){
  try{
   const snap=await getDocs(query(collection(db,collectionName),limit(100)));
   const rows=snap.docs.map(d=>({id:d.id,...d.data()}));
-  const heads=isUsers?['Name','Email','Country','Firebase UID']:['Legal name','Email','Country','Document type','Status','Submitted'];
+  const heads=isUsers?['Name','Email','Country','Firebase UID','Actions']:['Legal name','Email','Country','Document type','Status','Submitted','Review'];
   const htmlRows=rows.map(r=>{
    const vals=isUsers?[r.displayName||[r.firstName,r.lastName].filter(Boolean).join(' ')||'—',r.email||'—',r.country||'—',r.uid||r.id]:[r.legalName||'—',r.email||'—',r.country||'—',r.documentType||'—',r.status||'pending',r.submittedAt&&typeof r.submittedAt.toDate==='function'?r.submittedAt.toDate().toLocaleDateString():'—'];
-   return '<tr>'+vals.map(v=>'<td>'+safeText(v)+'</td>').join('')+'</tr>';
+   return '<tr>'+vals.map(v=>'<td>'+safeText(v)+'</td>').join('')+(isUsers?'<td>Profile view only</td>':'<td>'+(r.status==='approved'||r.status==='rejected'?'<span>'+safeText(r.status)+'</span>':'<button type="button" data-kyc-review="approved" data-kyc-id="'+safeText(r.id)+'" class="icon-btn" style="background:#0b6b4b">Approve</button> <button type="button" data-kyc-review="rejected" data-kyc-id="'+safeText(r.id)+'" class="icon-btn" style="background:#8b2635">Reject</button>')+'</td>')+'</tr>';
   }).join('');
-  body.innerHTML='<div class="content-panel" style="margin:0"><h3>'+(isUsers?'Live registered profiles':'Live KYC submissions')+'</h3><p class="muted">Live Firestore records; maximum 100 shown. '+(isUsers?'A profile record is not necessarily an Authentication account.':'Viewing does not approve identity.')+'</p><strong>'+rows.length+(rows.length===100?'+':'')+' record(s) loaded</strong><div class="table-wrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(htmlRows||'<tr><td colspan="'+heads.length+'">No records found in this collection.</td></tr>')+'</tbody></table></div></div>';
+  body.innerHTML='<div class="content-panel" style="margin:0"><h3>'+(isUsers?'Live registered profiles':'Live KYC submissions')+'</h3><p class="muted">Live Firestore records; maximum 100 shown. '+(isUsers?'A profile record is not necessarily an Authentication account.':'Approve only after reviewing the submitted identity documents. Decisions are saved to Firestore.')+'</p><strong>'+rows.length+(rows.length===100?'+':'')+' record(s) loaded</strong><div class="table-wrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(htmlRows||'<tr><td colspan="'+heads.length+'">No records found in this collection.</td></tr>')+'</tbody></table></div><p id="kycReviewMessage" role="status" aria-live="polite"></p></div>';
+ body.querySelectorAll('[data-kyc-review]').forEach(button=>button.addEventListener('click',async()=>{const decision=button.dataset.kycReview,id=button.dataset.kycId;if(!confirm('Save KYC decision: '+decision.toUpperCase()+'?'))return;button.disabled=true;try{await updateDoc(doc(db,'kycSubmissions',id),{status:decision,reviewedAt:serverTimestamp(),reviewedBy:auth.currentUser.email,updatedAt:serverTimestamp()});byId('kycReviewMessage').textContent='KYC '+decision+' and saved.';window.adminRefreshDashboard();window.adminGetLiveCollection('KYC');}catch(error){byId('kycReviewMessage').textContent='Could not save decision ('+(error.code||'unknown error')+'). Check that the updated Firestore rules have deployed.';button.disabled=false;}}));
  }catch(error){
   body.innerHTML='<div class="notice"><strong>Could not load live '+(isUsers?'profiles':'KYC submissions')+'.</strong><p>Firebase denied access or Firestore is unavailable ('+safeText(error.code||'unknown error')+'). Confirm the administrator email is verified and Firestore rules permit admin reads.</p></div>';
  }
