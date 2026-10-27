@@ -1226,7 +1226,7 @@ document.getElementById("ocSaveProfileBtn")?.addEventListener("click",async()=>{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import {
-  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  getAuth, getDoc, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider,
   signInWithPopup, onAuthStateChanged, signOut, RecaptchaVerifier,
   signInWithPhoneNumber, updateProfile, reload
@@ -1248,18 +1248,37 @@ const db = getFirestore(app);
 // user to their own UID and approved profile fields; this never writes balances.
 async function saveBasicUserProfile(user) {
   if (!user?.uid) return;
+  let localProfile = {};
+  try { localProfile = JSON.parse(localStorage.getItem("oc_profile_" + user.uid) || "{}"); } catch (_) {}
+  const names = String(user.displayName || [localProfile.firstName, localProfile.lastName].filter(Boolean).join(" ")).trim();
   const profile = {
-    uid: user.uid,
-    email: user.email || "",
-    phoneNumber: user.phoneNumber || "",
-    displayName: user.displayName || "",
-    updatedAt: serverTimestamp()
+    uid: user.uid, email: user.email || localProfile.email || "",
+    phoneNumber: user.phoneNumber || localProfile.phone || "", displayName: names,
+    firstName: localProfile.firstName || names.split(" ")[0] || "",
+    lastName: localProfile.lastName || names.split(" ").slice(1).join(" ") || "",
+    referralCode: localProfile.referralCode || "",
+    createdAt: localProfile.createdAt || new Date().toISOString(), updatedAt: serverTimestamp()
   };
+  try { await setDoc(doc(db, "users", user.uid), profile, { merge: true }); }
+  catch (error) { console.warn("Basic profile could not be saved to Firestore:", error?.code || error); }
+}
+
+async function loadSavedUserProfile(user) {
+  if (!user?.uid) return;
   try {
-    await setDoc(doc(db, "users", user.uid), profile, { merge: true });
-  } catch (error) {
-    console.warn("Basic profile could not be saved to Firestore:", error?.code || error);
-  }
+    const snapshot = await getDoc(doc(db, "users", user.uid));
+    if (!snapshot.exists()) return;
+    const saved = snapshot.data() || {};
+    const values = {
+      ocProfileFirstName: saved.firstName || (user.displayName || "").split(" ")[0] || "",
+      ocProfileLastName: saved.lastName || (user.displayName || "").split(" ").slice(1).join(" ") || "",
+      ocProfilePhone: saved.phone || saved.phoneNumber || user.phoneNumber || "",
+      ocProfileCountry: saved.country || "", ocProfileDob: saved.dateOfBirth || saved.dob || "",
+      ocProfileGender: saved.gender || "", ocProfileAddress: saved.address || ""
+    };
+    Object.entries(values).forEach(([id, value]) => { const el = document.getElementById(id); if (el && value) el.value = value; });
+    try { localStorage.setItem("oc_profile_" + user.uid, JSON.stringify({ ...JSON.parse(localStorage.getItem("oc_profile_" + user.uid) || "{}"), ...saved })); } catch (_) {}
+  } catch (error) { console.warn("Saved profile could not be loaded from Firestore:", error?.code || error); }
 }
 
 // Save editable profile details to the signed-in user's private Firestore document.
@@ -1348,7 +1367,7 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
     const status = document.getElementById("authStatus");
     if (status) status.textContent = "Account created successfully. Signed in as " + (credential.user.displayName || credential.user.email || "user") + ". You can continue to the platform.";
     msg("Account created successfully. You are now signed in. You can continue to the platform.");
-    if (typeof showPage === "function") showPage("markets");
+    if (typeof showPage === "function") showPage("home");
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -1365,7 +1384,7 @@ document.getElementById("googleSignInBtn").addEventListener("click", async () =>
     msg("Google sign-in successful. Signed in as " + identity + ".");
     const status = document.getElementById("authStatus");
     if (status) status.textContent = "Signed in as " + identity + ". You can continue to the platform.";
-    if (typeof window.showPage === "function") window.showPage("markets");
+    if (typeof window.showPage === "function") window.showPage("home");
   } catch (error) {
     if (error?.code === "auth/operation-not-allowed") msg("Google sign-in is disabled in Firebase. Enable Google under Firebase Console → Authentication → Sign-in method.");
     else if (error?.code === "auth/unauthorized-domain") msg("Google sign-in blocked: add getachew21injuni-bot.github.io under Firebase Console → Authentication → Settings → Authorized domains.");
@@ -1386,7 +1405,7 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
     if (status) status.textContent = "Signed in as " + (credential.user.displayName || credential.user.email || credential.user.phoneNumber || "user") + ". You can continue to the platform.";
     msg("Signed in successfully. Opening the platform…");
     if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
-    if (typeof showPage === "function") showPage("markets");
+    if (typeof showPage === "function") showPage("home");
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -1432,7 +1451,10 @@ document.getElementById("verifyPhoneCodeBtn").addEventListener("click", async ()
     const last = document.getElementById("phoneLastName").value.trim();
     const name = (first + " " + last).trim();
     if (name && !credential.user.displayName) await updateProfile(credential.user, { displayName: name });
+    try { localStorage.setItem("oc_profile_" + credential.user.uid, JSON.stringify({ firstName:first, lastName:last, email:credential.user.email||"", phone:credential.user.phoneNumber||"", createdAt:new Date().toISOString() })); } catch (_) {}
+    await saveBasicUserProfile(credential.user);
     msg("Phone number verified. You are signed in as " + (credential.user.displayName || credential.user.phoneNumber || "user") + ".");
+    if (typeof window.showPage === "function") window.showPage("home");
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -1444,7 +1466,7 @@ document.getElementById("signOutBtn").addEventListener("click", async () => {
 });
 onAuthStateChanged(auth, (user) => {
   window.onchaincryptoCurrentUser = user || null;
-  if (user) void saveBasicUserProfile(user);
+  if (user) { void saveBasicUserProfile(user); void loadSavedUserProfile(user); }
    if (typeof window.ocRefreshReferral === "function") window.ocRefreshReferral(user || null);
    if (user) { window.showPage?.(window.ocPendingPage || "home"); window.ocPendingPage = null; }
    else { window.ocPendingPage = null; }
