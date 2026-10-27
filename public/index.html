@@ -2975,13 +2975,13 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  if(!toggle||!menu||!options)return;
  const fmt=n=>Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:8});
  function renderOptions(){
-  const marketRows=Array.isArray(window.market)?window.market:[];
+  const marketRows=typeof market!=='undefined'&&Array.isArray(market)?market:[];
   const bySymbol=new Map(marketRows.map(c=>[String(c.symbol||'').toUpperCase(),c]));
   const symbols=[{symbol:'USDT',name:'Tether',current_price:1},...marketRows.filter(c=>String(c.symbol||'').toUpperCase()!=='USDT').sort((a,b)=>(b.market_cap||0)-(a.market_cap||0))];
   const unique=[];const seen=new Set();
   symbols.forEach(c=>{const sym=String(c.symbol||'').toUpperCase();if(sym&&!seen.has(sym)){seen.add(sym);unique.push({...c,symbol:sym})}});
   options.innerHTML=unique.map(c=>{
-   const sym=c.symbol,qty=sym==='USDT'?Number(window.state?.balance||0):Number(window.state?.holdings?.[sym]||0);
+   const sym=c.symbol,qty=sym==='USDT'?Number(typeof state!=='undefined'?state.balance||0:0):Number(typeof state!=='undefined'?state.holdings?.[sym]||0:0);
    const price=sym==='USDT'?1:Number(c.current_price||0);
    const worth=qty*price;
    return '<button type="button" role="option" data-wallet-asset="'+sym+'" aria-selected="'+(sym===selected)+'"><span><strong>'+sym+'</strong><small>'+String(c.name||sym).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))+'</small></span><span class="wallet-asset-price">'+fmt(qty)+'<small>≈ '+fmt(worth)+' USDT</small></span></button>';
@@ -2989,14 +2989,14 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  }
  function updateSelected(){
   const sym=selected, note=$('walletBalanceNote'), heading=document.querySelector('.wallet-eyebrow'), balance=$('walletBalance');
-  const st=window.state||{};
+  const st=typeof state!=='undefined'?state:{};
   if(sym==='USDT'){
    if(heading)heading.textContent='ESTIMATED BALANCE';
    if(balance)balance.textContent=Number(st.balance||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT';
    if(note)note.textContent='≈ simulated account value · demo only';
   }else{
    const qty=Number(st.holdings?.[sym]||0);
-   const coin=(Array.isArray(window.market)?window.market:[]).find(c=>String(c.symbol||'').toUpperCase()===sym);
+   const coin=(typeof market!=='undefined'&&Array.isArray(market)?market:[]).find(c=>String(c.symbol||'').toUpperCase()===sym);
    const price=Number(coin?.current_price||0),value=qty*price;
    if(heading)heading.textContent=sym+' BALANCE';
    if(balance)balance.textContent=qty.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:8})+' '+sym;
