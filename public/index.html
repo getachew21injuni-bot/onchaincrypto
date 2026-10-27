@@ -144,7 +144,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
    <h2>Start Your Journey. <span>Build Your Future</span> with Smart Crypto Investment</h2>
    <p>A secure platform to explore multiple digital assets, follow market movements, and get support 24/7.</p>
    <div class="oc-hero-terms" aria-label="Investment terms">
-    <span>INVEST</span><i>•</i><span>TRADE</span><i>•</i><span>GROW</span><i>•</i><span>DISCOVER</span>
+    <span>Invest</span><i>•</i><span>Trade</span><i>•</i><span>Grow</span><i>•</i><span>Discover</span>
    </div>
    <button class="oc-hero-cta" type="button" data-go="markets">Explore Markets <span aria-hidden="true">↗</span></button>
    <div class="oc-hero-note">Public market insights <b>·</b> Simulated trading</div>
@@ -152,7 +152,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
   <div class="oc-hero-art" aria-hidden="true">
    <div class="oc-orbit oc-orbit-one"></div><div class="oc-orbit oc-orbit-two"></div>
    <div class="oc-hero-chart"><span style="height:22%"></span><span style="height:36%"></span><span style="height:29%"></span><span style="height:52%"></span><span style="height:43%"></span><span style="height:68%"></span><span style="height:61%"></span><span style="height:88%"></span></div>
-   <div class="oc-coin oc-coin-btc">₿</div><div class="oc-coin oc-coin-eth">◆</div><div class="oc-coin oc-coin-usdt">₮</div>
+   <div class="oc-coin-orbit-track"><div class="oc-coin oc-coin-btc">₿</div><div class="oc-coin oc-coin-eth">◆</div><div class="oc-coin oc-coin-usdt">₮</div></div>
    <div class="oc-profit-chip"><span>MARKET MOMENTUM</span><strong>↗ Explore opportunities</strong></div>
    <svg class="oc-hero-person" viewBox="0 0 340 340" role="img" aria-label="Illustration of a person celebrating crypto gains">
     <defs><linearGradient id="ocJacket" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#167fba"/><stop offset="1" stop-color="#102846"/></linearGradient><linearGradient id="ocSkin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b9774e"/><stop offset="1" stop-color="#754027"/></linearGradient></defs>
@@ -2921,4 +2921,36 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
 #page-trade .chart-area>.chart-wrap{margin-top:2px!important}
 #page-trade .chart-wrap{margin-top:2px!important}
 #timedPlan,#timedDuration,#ocInvestmentPlanPicker,#quickAutoLevel,#quickAutoRange,#quickAutoDuration,#quickPlanNote{display:none!important}
+</style>
+
+<style id="oc-home-coin-orbit-and-colored-terms">
+/* Coins travel together around a fixed oval orbit on the home hero. */
+#page-home .oc-hero-art{isolation:isolate}
+#page-home .oc-orbit-one{width:260px;height:205px;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-20deg);border:1px solid rgba(57,190,255,.5);box-shadow:0 0 24px rgba(0,174,255,.08),inset 0 0 18px rgba(0,174,255,.04)}
+#page-home .oc-orbit-two{width:224px;height:282px;left:50%;top:50%;transform:translate(-50%,-50%) rotate(42deg);border:1px solid rgba(255,193,53,.36)}
+#page-home .oc-coin-orbit-track{position:absolute;z-index:3;left:50%;top:50%;width:250px;height:205px;transform:translate(-50%,-50%);transform-origin:center;animation:ocCoinOrbitSpin 22s linear infinite}
+#page-home .oc-coin-orbit-track .oc-coin{position:absolute;display:grid;place-items:center;border-radius:50%;font-weight:900;border:2px solid rgba(255,255,255,.8);box-shadow:0 8px 22px #0007,inset -5px -7px 12px #0004;animation:ocCoinGlow 3.8s ease-in-out infinite}
+#page-home .oc-coin-orbit-track .oc-coin-btc{left:calc(50% - 28px);top:-26px;width:56px;height:56px;background:linear-gradient(135deg,#ffe47c,#e89b00);color:#fff;font-size:32px}
+#page-home .oc-coin-orbit-track .oc-coin-eth{left:-18px;top:calc(50% - 21px);width:42px;height:42px;background:linear-gradient(135deg,#b3c9ff,#536be5);color:#fff;font-size:23px;animation-delay:-1.2s}
+#page-home .oc-coin-orbit-track .oc-coin-usdt{right:-12px;top:calc(50% - 20px);width:40px;height:40px;background:linear-gradient(135deg,#7af4c9,#009c7c);color:#fff;font-size:23px;animation-delay:-2.4s}
+#page-home .oc-hero-terms{gap:7px;margin-top:16px;font-size:11px;font-weight:800;letter-spacing:.55px}
+#page-home .oc-hero-terms span{font-weight:850;animation:ocTermGlow 3.5s ease-in-out infinite}
+#page-home .oc-hero-terms span:nth-of-type(1){color:#ffc857;text-shadow:0 0 10px #ffc85726}
+#page-home .oc-hero-terms span:nth-of-type(2){color:#38d9ff;text-shadow:0 0 10px #38d9ff26}
+#page-home .oc-hero-terms span:nth-of-type(3){color:#43e3a5;text-shadow:0 0 10px #43e3a526}
+#page-home .oc-hero-terms span:nth-of-type(4){color:#b7a0ff;text-shadow:0 0 10px #b7a0ff26}
+#page-home .oc-hero-terms i{color:#7893b0}
+@keyframes ocCoinOrbitSpin{from{rotate:0deg}to{rotate:360deg}}
+@keyframes ocCoinGlow{0%,100%{filter:brightness(1);box-shadow:0 8px 22px #0007,inset -5px -7px 12px #0004}50%{filter:brightness(1.13);box-shadow:0 0 22px #55d7ff45,inset -5px -7px 12px #0004}}
+@media(max-width:720px){
+ #page-home .oc-hero-art{min-height:235px}
+ #page-home .oc-orbit-one{width:210px;height:165px;left:50%;top:48%}
+ #page-home .oc-orbit-two{width:178px;height:226px;left:50%;top:48%}
+ #page-home .oc-coin-orbit-track{width:200px;height:164px;left:50%;top:48%}
+ #page-home .oc-coin-orbit-track .oc-coin-btc{left:calc(50% - 22px);top:-20px;width:44px;height:44px;font-size:26px}
+ #page-home .oc-coin-orbit-track .oc-coin-eth{left:-12px;top:calc(50% - 17px);width:34px;height:34px;font-size:19px}
+ #page-home .oc-coin-orbit-track .oc-coin-usdt{right:-9px;top:calc(50% - 16px);width:32px;height:32px;font-size:18px}
+ #page-home .oc-hero-terms{gap:6px;font-size:10px;letter-spacing:.3px}
+}
+@media(prefers-reduced-motion:reduce){#page-home .oc-coin-orbit-track,#page-home .oc-coin-orbit-track .oc-coin,#page-home .oc-hero-terms span{animation:none!important}}
 </style>
