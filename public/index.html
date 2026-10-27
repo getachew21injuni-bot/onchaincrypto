@@ -324,11 +324,11 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
       <div class="oc-orderbook-actions" aria-label="Trade direction"><button type="button" class="buy" data-oc-book-direction="buy">↗ Buy</button><button type="button" class="sell" data-oc-book-direction="sell">↘ Sell</button></div>
       <p class="muted tiny">Public market feeds provide prices, not exchange order-by-order depth here. These are indicative levels calculated around the current price—not live executable orders.</p>
     </section>
-    <section class="panel" id="timedPaperTrade"><div class="section-head"><div><h2>Quick Trade</h2><div class="muted tiny">One simple trade form. Choose a coin, amount, duration, then Buy or Sell.</div></div><span class="tag">PAPER TRADING</span></div>
+    <section class="panel" id="timedPaperTrade"><div class="section-head"><div><h2>Quick Trade</h2><div class="muted tiny">Choose your asset and amount, then confirm your trade.</div></div><span class="tag">PAPER TRADING</span></div>
       <div class="form-panel">
         <label for="tradeAsset">Trading asset</label><select id="tradeAsset" class="field"></select>
         <div class="content-grid"><div><label>Available balance (USDT)</label><div class="card"><div class="big" id="quickAvailableBalance">10,000.00 USDT</div><div class="muted tiny">Simulated balance only</div></div><label for="timedStake">Trade amount (USDT)</label><input id="timedStake" class="field" type="number" min="100" max="1000000" step="0.01" value="100" placeholder="Enter amount in USDT">
-        <div class="cards" style="margin-top:10px"><div class="card"><div class="label">Automatic trading level</div><div class="big" id="quickAutoLevel">Level 1 · 12%</div><div class="muted tiny" id="quickAutoRange">100–5,000 USDT</div></div><div class="card"><div class="label">Automatic expiry</div><div class="big" id="quickAutoDuration">30 seconds</div><div class="muted tiny">Matched to your trade amount</div></div></div><select id="timedPlan" class="field" style="display:none" aria-hidden="true" tabindex="-1"><option value="12" data-min="100" data-max="5000">Level 1</option><option value="15" data-min="5000" data-max="10000">Level 2</option><option value="18" data-min="10000" data-max="25000">Level 3</option><option value="21" data-min="25000" data-max="50000">Level 4</option><option value="24" data-min="50000" data-max="100000">Level 5</option><option value="27" data-min="100000" data-max="1000000">Level 6</option></select>
+        <!-- Internal plan/expiry are calculated silently; no level list or auto-selection labels are shown to customers. --><select id="timedPlan" class="field" style="display:none" aria-hidden="true" tabindex="-1"><option value="12" data-min="100" data-max="5000">Level 1</option><option value="15" data-min="5000" data-max="10000">Level 2</option><option value="18" data-min="10000" data-max="25000">Level 3</option><option value="21" data-min="25000" data-max="50000">Level 4</option><option value="24" data-min="50000" data-max="100000">Level 5</option><option value="27" data-min="100000" data-max="1000000">Level 6</option></select>
         <div class="card" style="margin:10px 0"><div class="label">Estimated plan profit (illustrative)</div><div class="big green" id="quickEstimatedProfit">12.00 USDT</div><div class="muted tiny" id="quickPlanNote">12% of the entered amount · not guaranteed</div></div>
         <select id="timedDuration" class="field" style="display:none" aria-hidden="true" tabindex="-1"><option value="30">30 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="120">120 seconds</option><option value="180">180 seconds</option><option value="270">270 seconds</option><option value="360">360 seconds</option></select>
         <label>Trade direction</label><div class="two-buttons"><button type="button" class="buy" id="timedUpBtn" aria-pressed="false">↗ Buy</button><button type="button" class="sell" id="timedDownBtn" aria-pressed="false">↘ Sell</button></div><div class="two-buttons" style="margin-top:10px"><button type="button" class="primary" id="timedConfirmBtn" disabled>Confirm trade</button><button type="button" class="secondary" id="timedCancelBtn">Cancel</button></div>
@@ -2855,5 +2855,119 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  document.addEventListener('keydown',function(e){
   if(e.key==='Escape'&&document.body.classList.contains('oc-trade-overlay-open')&&!window.timedPaper)closeOverlay();
  });
+})();
+</script>
+
+<style id="oc-customer-sequential-flow-v2">
+/* Keep the trading experience in one modal and reveal only the current step. */
+#timedPaperTrade .form-panel .cards[style*="margin-top:10px"]{display:none!important}
+#timedPaperTrade .form-panel .label[for="tradeAsset"]{display:none!important}
+#timedPaperTrade .form-panel>label[for="tradeAsset"]{display:none!important}
+#timedPaperTrade .form-panel label[for="timedPlan"],
+#timedPaperTrade .form-panel label[for="timedDuration"]{display:none!important}
+#timedPaperTrade.oc-stage-config>.cards{display:none!important}
+#timedPaperTrade.oc-stage-config>.chart-wrap,
+#timedPaperTrade.oc-stage-config>.mini-card,
+#timedPaperTrade.oc-stage-config>#timedResult,
+#timedPaperTrade.oc-stage-config>#timedResultBoard{display:none!important}
+#timedPaperTrade.oc-stage-running>.cards{display:none!important}
+#timedPaperTrade.oc-stage-running>.cards:first-of-type{display:grid!important}
+#timedPaperTrade.oc-stage-running>.cards:first-of-type .card:nth-child(1),
+#timedPaperTrade.oc-stage-running>.cards:first-of-type .card:nth-child(2){display:none!important}
+#timedPaperTrade.oc-stage-running>.chart-wrap{display:block!important}
+#timedPaperTrade.oc-stage-running>.mini-card,
+#timedPaperTrade.oc-stage-running>#timedResult,
+#timedPaperTrade.oc-stage-running>#timedResultBoard{display:none!important}
+#timedPaperTrade.oc-stage-complete>.form-panel{display:none!important}
+#timedPaperTrade.oc-stage-complete>.cards,
+#timedPaperTrade.oc-stage-complete>.chart-wrap,
+#timedPaperTrade.oc-stage-complete>.mini-card,
+#timedPaperTrade.oc-stage-complete>#timedResult,
+#timedPaperTrade.oc-stage-complete>#timedResultBoard{display:block!important}
+#timedPaperTrade.oc-stage-complete>.cards{display:grid!important}
+#timedPaperTrade.oc-stage-complete .oc-close-trade{display:block!important;width:100%;margin-top:14px}
+#timedPaperTrade .oc-flow-step{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px}
+#timedPaperTrade .oc-flow-step span{font-size:12px;padding:6px 9px;border-radius:99px;background:#122236;color:#a9bfd3}
+#timedPaperTrade .oc-flow-step span.active{background:#16d9a0;color:#04241b;font-weight:700}
+@media(max-width:560px){body.oc-trade-overlay-open #page-trade #timedPaperTrade{padding:12px!important;max-height:calc(100dvh - 14px)!important}}
+</style>
+<script id="oc-customer-sequential-flow-v2-script">
+(function(){
+ if(window.__ocCustomerSequentialFlowV2)return;window.__ocCustomerSequentialFlowV2=true;
+ const $=id=>document.getElementById(id),form=$('timedPaperTrade');if(!form)return;
+ const header=form.querySelector('.section-head');
+ if(header&&!form.querySelector('.oc-flow-step')){
+  const steps=document.createElement('div');steps.className='oc-flow-step';
+  steps.innerHTML='<span data-step="1">1 · Select trade</span><span data-step="2">2 · Confirm</span><span data-step="3">3 · Running</span><span data-step="4">4 · Result</span>';
+  header.insertAdjacentElement('afterend',steps);
+ }
+ function step(n){form.querySelectorAll('.oc-flow-step [data-step]').forEach(el=>el.classList.toggle('active',Number(el.dataset.step)===n))}
+ function setAssetFromActivePair(){
+  const select=$('tradeAsset');if(!select)return;
+  if(!select.options.length)return;
+  // Keep an existing valid choice; if empty, select the first populated public-market asset.
+  if(!select.value||!Array.from(select.options).some(o=>o.value===select.value)){
+   const preferred=Array.from(select.options).find(o=>o.value==='BTC')||select.options[0];
+   if(preferred)select.value=preferred.value;
+   select.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  const inline=$('ocInlineTradeAsset');if(inline){inline.innerHTML=select.innerHTML;inline.value=select.value}
+ }
+ function openFlow(direction){
+  if(typeof window.showPage==='function')window.showPage('trade');
+  form.classList.remove('hidden','oc-stage-running','oc-stage-complete');
+  form.classList.add('oc-stage-config');document.body.classList.add('oc-trade-overlay-open');
+  const board=$('timedResultBoard');if(board)board.style.display='none';
+  setAssetFromActivePair();
+  if(typeof window.chooseTimedDirection==='function')window.chooseTimedDirection(direction==='buy'?'up':'down');
+  step(1);form.scrollTop=0;
+ }
+ document.addEventListener('click',function(e){
+  const t=e.target instanceof Element?e.target:null;if(!t)return;
+  const b=t.closest('[data-oc-book-direction]');if(!b)return;
+  e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openFlow(b.dataset.ocBookDirection);
+ },true);
+ const confirm=$('timedConfirmBtn');
+ if(confirm)confirm.addEventListener('click',function(){
+  setTimeout(function(){
+   if($('timedUpBtn')?.disabled&&$('timedDownBtn')?.disabled&&window.__ocCustomerSequentialFlowV2){
+    if(form.classList.contains('oc-trade-overlay-open')||document.body.classList.contains('oc-trade-overlay-open')){
+     form.classList.remove('oc-stage-config','oc-stage-complete');form.classList.add('oc-stage-running');step(3);form.scrollTop=0;
+    }
+   }
+  },180);
+ });
+ const cancel=$('timedCancelBtn');
+ if(cancel)cancel.addEventListener('click',function(){
+  setTimeout(function(){
+   if(!($('timedUpBtn')?.disabled&&$('timedDownBtn')?.disabled)){
+    form.classList.remove('oc-stage-config','oc-stage-running','oc-stage-complete');
+    document.body.classList.remove('oc-trade-overlay-open');
+   }
+  },100);
+ });
+ let closeBtn=form.querySelector('.oc-close-trade');
+ if(!closeBtn){
+  closeBtn=document.createElement('button');closeBtn.type='button';closeBtn.className='primary oc-close-trade';closeBtn.textContent='Close trade';
+  closeBtn.addEventListener('click',function(){
+   document.body.classList.remove('oc-trade-overlay-open');
+   form.classList.remove('oc-stage-config','oc-stage-running','oc-stage-complete','hidden');
+   form.classList.add('hidden');
+   if($('timedUpBtn'))$('timedUpBtn').disabled=false;
+   if($('timedDownBtn'))$('timedDownBtn').disabled=false;
+   if($('timedConfirmBtn'))$('timedConfirmBtn').disabled=true;
+   if(typeof window.showPage==='function')window.showPage('trade');
+  });
+  const board=$('timedResultBoard');if(board)board.appendChild(closeBtn);
+ }
+ const countdown=$('timedCountdown');
+ if(countdown)new MutationObserver(function(){
+  if(form.classList.contains('oc-stage-running')&&countdown.textContent.trim()==='00:00'){
+   form.classList.remove('oc-stage-running','oc-stage-config');form.classList.add('oc-stage-complete');step(4);form.scrollTop=0;
+   const board=$('timedResultBoard');if(board)board.style.display='block';
+   const status=$('timedGraphStatus');if(status)status.textContent='COMPLETED';
+  }
+ }).observe(countdown,{childList:true,characterData:true,subtree:true});
+ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('oc-trade-overlay-open')&&!window.__ocTradeIsRunning){document.body.classList.remove('oc-trade-overlay-open');form.classList.add('hidden')}});
 })();
 </script>
