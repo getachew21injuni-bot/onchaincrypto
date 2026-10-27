@@ -29,14 +29,23 @@ service cloud.firestore {
           'uid','email','legalName','country','documentType','documentNumber',
           'status','submittedAt','updatedAt'
         ]);
-      allow update: if owns(uid)
+      allow update: if (
+        owns(uid)
         && resource.data.status == 'pending'
         && request.resource.data.uid == uid
         && request.resource.data.status == 'pending'
         && request.resource.data.keys().hasOnly([
           'uid','email','legalName','country','documentType','documentNumber',
           'status','submittedAt','updatedAt'
-        ]);
+        ])
+      ) || (
+        isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status','reviewedAt','reviewedBy','updatedAt'
+        ])
+        && request.resource.data.status in ['approved','rejected']
+        && request.resource.data.reviewedBy == request.auth.token.email
+      );
       allow delete: if false;
     }
 
