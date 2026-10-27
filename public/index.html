@@ -2039,7 +2039,7 @@ body.oc-trade-overlay-open{overflow:hidden}
     var t=e.target instanceof Element?e.target:null;if(!t)return;
     var close=t.closest('.oc-trade-overlay-close');
     if(close){e.preventDefault();e.stopPropagation();document.body.classList.remove('oc-trade-overlay-open');return;}
-    if(t===document.querySelector('body.oc-trade-overlay-open:after'))document.body.classList.remove('oc-trade-overlay-open');
+    if(document.body.classList.contains('oc-trade-overlay-open') && t===document.body){document.body.classList.remove('oc-trade-overlay-open');return;}
     var b=t.closest('[data-oc-book-direction]');
     if(!b)return;
     e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
