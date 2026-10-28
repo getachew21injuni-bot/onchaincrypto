@@ -179,6 +179,37 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 
+<style id="oc-animated-trading-hero">
+/* Person-free homepage trading visual with subtle chart motion. */
+#page-home .oc-hero-art{perspective:900px}
+#page-home .oc-chart-window{position:relative;overflow:hidden;transform:rotateY(-3deg);border-color:#1e5675!important;box-shadow:0 22px 60px #0008,0 0 35px #00b8ff18,inset 0 0 24px #0a8ed00b;animation:ocChartHover 7s ease-in-out infinite}
+#page-home .oc-chart-window:after{content:"";position:absolute;inset:-40% 0 auto;height:45%;pointer-events:none;background:linear-gradient(180deg,transparent,#23d5ff14,transparent);animation:ocChartScan 5.5s linear infinite;z-index:3}
+#page-home .oc-candles .oc-candle{transform-origin:bottom;animation:ocCandlePulse 2.8s ease-in-out infinite alternate}
+#page-home .oc-candles .oc-candle:nth-child(3n){animation-delay:-.8s}
+#page-home .oc-candles .oc-candle:nth-child(3n + 1){animation-delay:-1.6s}
+#page-home .oc-volume-bars i{transform-origin:bottom;animation:ocVolumePulse 1.8s ease-in-out infinite alternate}
+#page-home .oc-volume-bars i:nth-child(2n){animation-delay:-.7s}
+#page-home .oc-volume-bars i:nth-child(3n){animation-delay:-1.2s}
+#page-home .oc-chart-float{animation:ocBadgeFloat 4.5s ease-in-out infinite}
+#page-home .oc-chart-float-two{animation-delay:-2s}
+#page-home .oc-floating-coin{animation:ocCoinFloat 5s ease-in-out infinite;filter:drop-shadow(0 7px 15px #0006)}
+#page-home .oc-floating-coin:nth-child(2){animation-delay:-1.1s}
+#page-home .oc-floating-coin:nth-child(3){animation-delay:-2.2s}
+#page-home .oc-floating-coin:nth-child(4){animation-delay:-3.3s}
+#page-home .oc-floating-coin:nth-child(5){animation-delay:-.6s}
+#page-home .oc-floating-coin:nth-child(6){animation-delay:-2.8s}
+#page-home .oc-chart-live i{animation:ocLiveBlink 1.4s ease-in-out infinite}
+@keyframes ocChartHover{0%,100%{transform:translateY(0) rotateY(-3deg)}50%{transform:translateY(-5px) rotateY(-1deg)}}
+@keyframes ocChartScan{0%{transform:translateY(-20%)}100%{transform:translateY(300%)}}
+@keyframes ocCandlePulse{0%{filter:brightness(.82);scale:1 .86}100%{filter:brightness(1.22);scale:1 1.04}}
+@keyframes ocVolumePulse{0%{scale:1 .58;opacity:.65}100%{scale:1 1;opacity:1}}
+@keyframes ocBadgeFloat{0%,100%{translate:0 0}50%{translate:0 -7px}}
+@keyframes ocCoinFloat{0%,100%{translate:0 0;rotate:-3deg}50%{translate:0 -10px;rotate:3deg}}
+@keyframes ocLiveBlink{0%,100%{opacity:1}50%{opacity:.55}}
+@media(max-width:700px){#page-home .oc-chart-window{transform:none;animation:ocBadgeFloat 7s ease-in-out infinite}}
+@media(prefers-reduced-motion:reduce){#page-home .oc-chart-window,#page-home .oc-candles .oc-candle,#page-home .oc-volume-bars i,#page-home .oc-chart-float,#page-home .oc-floating-coin,#page-home .oc-chart-live i{animation:none!important;transform:none!important;translate:none!important;rotate:none!important}}
+</style>
+
 </head>
 <body>
 <header>
