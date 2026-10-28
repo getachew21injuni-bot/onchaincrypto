@@ -956,7 +956,7 @@ async function loadMarket(){
  refreshButtons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent="Refreshing…"});
  $("connection").textContent="Updating";$("apiStatus").textContent="Loading public prices…";$("marketHint").textContent="Connecting to public market feeds…";
  const finish=()=>{marketRequestInProgress=false;refreshButtons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.originalText||"Refresh";delete b.dataset.originalText})};
- const fetchJson=async(url,ms=6500)=>{const res=await fetch(url,{headers:{accept:"application/json"},signal:AbortSignal.timeout(ms)});if(!res.ok)throw new Error("HTTP "+res.status);return res.json()};
+ const fetchJson=async(url,ms=6500)=>{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),ms);try{const res=await fetch(url,{headers:{accept:"application/json"},signal:controller.signal,cache:"no-store"});if(!res.ok)throw new Error("HTTP "+res.status);return await res.json()}finally{clearTimeout(timer)}};
  const cacheAndRender=(data,provider)=>{
   if(!Array.isArray(data)||!data.length)throw new Error("No market prices returned");
   market=data.filter(c=>Number(c.current_price)>0);window.market=market;
