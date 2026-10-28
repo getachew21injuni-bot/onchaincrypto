@@ -1,16 +1,10 @@
 name: Deploy Firebase backend
 
+# Manual-only: the public website deploys through hosting-only.yml.
+# Cloud Functions deployment requires additional Google Cloud API permissions
+# and is intentionally not run on ordinary website commits.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - "functions/**"
-      - "firestore.rules"
-      - "firestore.indexes.json"
-      - "firebase.json"
-      - ".github/workflows/deploy-firebase.yml"
 
 permissions:
   contents: read
@@ -41,7 +35,7 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ONCHAINCRYPTO }}
         run: |
           if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
-            echo "::error::Missing GitHub Actions secret FIREBASE_SERVICE_ACCOUNT_ONCHAINCRYPTO. Add a Firebase service-account JSON key in repository Settings > Secrets and variables > Actions."
+            echo "::error::Missing GitHub Actions secret FIREBASE_SERVICE_ACCOUNT_ONCHAINCRYPTO."
             exit 1
           fi
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
