@@ -594,9 +594,11 @@ ChainCrypto</h3>
       <section class="panel form-panel auth-main-panel">
         <div id="authModeIntro"><h2>Sign in to your account</h2><p class="muted tiny">Enter your email and password to continue.</p></div>
         
-        <p class="muted tiny">Register with email and password without an email-verification step, or use the phone panel to confirm an SMS code. This uses Firebase Authentication only; Firestore and Cloud Functions are not required for sign-in. Real-money trading and online balances are not enabled.</p>
+        <p class="muted tiny">Register with email and password without an email-verification step, or use the phone panel to confirm an SMS code. This uses Firebase Authentication only; Firestore and Cloud Functions are not required for sign-in. Email accounts can receive a verification link. Phone registration can be tested without SMS; real SMS delivery depends on Firebase project settings and limits. Real-money trading and online balances are not enabled.</p>
         <div id="authStatus" class="notice">Checking sign-in status…</div>
         <p id="registerMessage" class="muted tiny" aria-live="polite"></p>
+        <button class="secondary full hidden" id="resendEmailVerificationBtn" type="button">✉ Send / resend Gmail verification link</button>
+        <button class="secondary full hidden" id="refreshEmailVerificationBtn" type="button">I verified my email — refresh status</button>
         <form id="registerForm" class="auth-register-form hidden" aria-label="Create account">
           <h3>Create account</h3>
           <p class="muted tiny">Join the OnChainCrypto institutional trading platform.</p>
@@ -622,9 +624,9 @@ ChainCrypto</h3>
         </form>
         <div class="divider auth-phone-divider"></div>
         <details class="auth-phone-details hidden" id="phoneRegistrationPanel">
-          <summary>Register or sign in with phone (SMS verification)</summary>
+          <summary>Phone verification (optional SMS code)</summary>
           <h3>Phone registration / login</h3>
-          <p class="muted tiny">Enter your phone number in international format, including + and country code. Firebase will send an SMS code. New numbers create an account; existing numbers sign in.</p>
+          <p class="muted tiny">Enter your phone number in international format, including + and country code. Tap Send SMS verification code to request a real code. Real SMS delivery may require billing and allowed-country settings. For no-billing testing, configure a Firebase test phone number and fixed code in Authentication settings; test numbers do not receive real SMS.</p>
           <label for="phoneFirstName">First name <span class="muted tiny">(for new accounts)</span></label><input id="phoneFirstName" class="field" maxlength="50" autocomplete="given-name" placeholder="First name">
           <label for="phoneLastName">Last name <span class="muted tiny">(for new accounts)</span></label><input id="phoneLastName" class="field" maxlength="50" autocomplete="family-name" placeholder="Last name">
           <label for="phoneNumber">Phone number</label><input id="phoneNumber" class="field" type="tel" autocomplete="tel" placeholder="+2519…">
@@ -1232,7 +1234,7 @@ function updateRegistrationContactMode() {
   if (label) label.textContent = phoneMode ? "Phone number (include country code)" : "Email address";
   if (hint) hint.textContent = phoneMode
     ? "No SMS code is sent during this test. Enter a number like +85620… or +2519…. Use the same number and password to sign in later."
-    : "No email-verification link is required.";
+    : "A verification link will be sent to this email after account creation. Check Inbox and Spam.";
   if (contactInput) {
     contactInput.type = phoneMode ? "tel" : "email";
     contactInput.autocomplete = phoneMode ? "tel" : "email";
@@ -1275,9 +1277,18 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
     window.onchaincryptoCurrentUser = credential.user;
     const status = document.getElementById("authStatus");
     if (status) status.textContent = "Account created successfully. Signed in as " + (credential.user.displayName || "user") + ". You can continue to the platform.";
-    msg(phoneMode
-      ? "Account created without SMS verification for testing. This phone number is not yet verified. Save your password and use the same number to sign in."
-      : "Account created successfully. You are now signed in. You can continue to the platform.");
+    if (!phoneMode) {
+      try {
+        await sendEmailVerification(credential.user);
+        msg("Account created. A Gmail verification link was sent to " + enteredContact + ". Check Inbox and Spam. You can continue testing, then verify your email.");
+      } catch (verificationError) {
+        msg("Account created, but the verification email could not be sent: " + friendlyError(verificationError) + " Use the Send / resend Gmail verification link button to try again.");
+      }
+      document.getElementById("resendEmailVerificationBtn")?.classList.remove("hidden");
+      document.getElementById("refreshEmailVerificationBtn")?.classList.remove("hidden");
+    } else {
+      msg("Account created without SMS verification for testing. This phone number is not yet verified. Save your password and use the same number to sign in.");
+    }
     if (typeof showPage === "function") showPage("markets");
   } catch (error) { msg(friendlyError(error)); }
 });
@@ -1308,8 +1319,14 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
     window.onchaincryptoCurrentUser = credential.user;
     const status = document.getElementById("authStatus");
     if (status) status.textContent = "Signed in as " + (credential.user.displayName || credential.user.email || credential.user.phoneNumber || "user") + ". You can continue to the platform.";
-    msg("Signed in successfully. Opening the platform…");
+    msg(credential.user.email && !credential.user.email.endsWith("@phone.onchaincrypto.invalid") && !credential.user.emailVerified
+      ? "Signed in, but your Gmail is not verified yet. Use the Send / resend Gmail verification link button, then refresh verification status."
+      : "Signed in successfully. Opening the platform…");
     if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
+    if (credential.user.email && !credential.user.email.endsWith("@phone.onchaincrypto.invalid") && !credential.user.emailVerified) {
+      document.getElementById("resendEmailVerificationBtn")?.classList.remove("hidden");
+      document.getElementById("refreshEmailVerificationBtn")?.classList.remove("hidden");
+    }
     if (typeof showPage === "function") showPage("markets");
   } catch (error) { msg(friendlyError(error)); }
 });
@@ -1320,6 +1337,36 @@ document.getElementById("resetPasswordBtn").addEventListener("click", async () =
   if (!identifier.includes("@")) { msg("Password reset by email is not available for phone-only test accounts. We can add a verified recovery method later."); return; }
   try { await sendPasswordResetEmail(auth, identifier); msg("If the account exists, a password reset email has been sent."); }
   catch (error) { msg(friendlyError(error)); }
+});
+
+document.getElementById("resendEmailVerificationBtn")?.addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (!user || !user.email || user.email.endsWith("@phone.onchaincrypto.invalid")) {
+    msg("Sign in with your Gmail account first to request an email verification link.");
+    return;
+  }
+  try {
+    await sendEmailVerification(user);
+    msg("Verification link sent to " + user.email + ". Check Inbox, Spam, and Promotions.");
+  } catch (error) { msg("Could not send verification link: " + friendlyError(error)); }
+});
+document.getElementById("refreshEmailVerificationBtn")?.addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (!user) { msg("Sign in first, then refresh verification status."); return; }
+  try {
+    await reload(user);
+    const verified = !!auth.currentUser?.emailVerified;
+    if (verified) {
+      msg("Gmail verified successfully. Your account status is updated.");
+      document.getElementById("resendEmailVerificationBtn")?.classList.add("hidden");
+      document.getElementById("refreshEmailVerificationBtn")?.classList.add("hidden");
+    } else {
+      msg("Gmail is not verified yet. Open the latest verification link from your email, then try again.");
+    }
+    if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
+    const profileStatus=document.getElementById("profileAccountStatusText");
+    if(profileStatus)profileStatus.textContent=verified?"Active · Email verified":"Active · Email not verified";
+  } catch (error) { msg("Could not refresh verification status: " + friendlyError(error)); }
 });
 
 let recaptchaVerifier = null;
@@ -1377,11 +1424,14 @@ onAuthStateChanged(auth, (user) => {
   const identity = user ? (user.displayName || user.email || user.phoneNumber || "Signed-in user") : "";
   if (status) {
     status.textContent = user
-      ? "Signed in as " + identity + (user.email && !user.emailVerified ? " · Email not yet verified" : "") + ". You can continue to the platform."
+      ? "Signed in as " + identity + (user.email && !user.email.endsWith("@phone.onchaincrypto.invalid") && !user.emailVerified ? " · Email not yet verified" : "") + ". You can continue to the platform."
       : "Not signed in. Create an account or sign in below.";
     status.classList.toggle("notice", !user);
   }
   if (signOutBtn) signOutBtn.classList.toggle("hidden", !user);
+  const needsEmailVerification = !!(user && user.email && !user.email.endsWith("@phone.onchaincrypto.invalid") && !user.emailVerified);
+  document.getElementById("resendEmailVerificationBtn")?.classList.toggle("hidden", !needsEmailVerification);
+  document.getElementById("refreshEmailVerificationBtn")?.classList.toggle("hidden", !needsEmailVerification);
   const displayName = document.getElementById("displayName");
   if (user && displayName && !displayName.value) displayName.value = user.displayName || "";
   if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
