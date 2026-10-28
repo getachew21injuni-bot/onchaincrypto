@@ -1440,10 +1440,12 @@ const friendlyError = (error) => {
     "auth/captcha-check-failed": "reCAPTCHA verification failed. Refresh the page and try again.",
     "auth/network-request-failed": "Network request failed. Check your internet connection, disable blocking extensions temporarily, and try again.",
     "auth/invalid-api-key": "Firebase API key is invalid or restricted. Check the Firebase web app configuration and API key restrictions.",
+    "auth/api-key-not-valid": "Firebase rejected this website's API key. Check that the API key belongs to the OnChainCrypto web app and is not restricted from Firebase Authentication.",
+    "auth/configuration-not-found": "Firebase Authentication configuration was not found. Check that Email/Password is enabled for project onchaincrypto-d976b.",
     "auth/web-storage-unsupported": "Your browser blocks required storage. Enable site data and try again.",
     "auth/unauthorized-domain": "This website hostname is not authorized in Firebase Authentication settings."
   };
-  return messages[code] || (error?.message ? "Authentication error: " + error.message : "Something went wrong. Please try again.");
+  return messages[code] || (code ? "Authentication failed (" + code + "). Please send this exact code so the cause can be identified." : "Something went wrong. Please try again.");
 };
 
 function normalizedPhone(value) {
@@ -1489,8 +1491,11 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
     const status = document.getElementById("authStatus");
     if (status) status.textContent = "Account created successfully. Signed in as " + identity + ". You can continue to the platform.";
     msg("Account created successfully. You are now signed in. You can continue to the platform.");
-    if (typeof showPage === "function") showPage("profile");
-  } catch (error) { msg(friendlyError(error)); }
+    if (typeof window.showPage === "function") window.showPage("profile");
+  } catch (error) {
+    console.error("OnChainCrypto registration failed:", error?.code || error);
+    msg(friendlyError(error));
+  }
 });
 
 document.getElementById("googleSignInBtn").addEventListener("click", async () => {
