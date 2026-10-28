@@ -594,7 +594,7 @@ ChainCrypto</h3>
       <section class="panel form-panel auth-main-panel">
         <div id="authModeIntro"><h2>Sign in to your account</h2><p class="muted tiny">Enter your email and password to continue.</p></div>
         
-        <p class="muted tiny">Register with email and password without an email-verification step, or use the phone panel to confirm an SMS code. This uses Firebase Authentication only; Firestore and Cloud Functions are not required for sign-in. Email accounts can receive a verification link. Phone registration can be tested without SMS; real SMS delivery depends on Firebase project settings and limits. Real-money trading and online balances are not enabled.</p>
+        <p class="muted tiny">Register with email and password and receive a verification link, or register with a phone number without SMS verification for testing. The phone SMS panel also lets you request and enter a real code when SMS is configured. This uses Firebase Authentication only; Firestore and Cloud Functions are not required for sign-in. Email accounts can receive a verification link. Phone registration can be tested without SMS; real SMS delivery depends on Firebase project settings and limits. Real-money trading and online balances are not enabled.</p>
         <div id="authStatus" class="notice">Checking sign-in status…</div>
         <p id="registerMessage" class="muted tiny" aria-live="polite"></p>
         <button class="secondary full hidden" id="resendEmailVerificationBtn" type="button">✉ Send / resend Gmail verification link</button>
@@ -605,7 +605,7 @@ ChainCrypto</h3>
           <label for="registerFirstName">First name <span class="yellow">(required)</span></label><input id="registerFirstName" class="field" maxlength="50" autocomplete="given-name" required placeholder="Enter your first name">
           <label for="registerLastName">Last name <span class="yellow">(required)</span></label><input id="registerLastName" class="field" maxlength="50" autocomplete="family-name" required placeholder="Enter your last name">
           <div class="oc-register-contact-choice"><label for="registerContactMethod">Register with</label><select id="registerContactMethod" class="field" aria-label="Choose email or phone"><option value="email">✉ Email</option><option value="phone">☎ Phone (no SMS verification during testing)</option></select></div><label id="registerContactLabel" for="registerEmail">Email address</label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com">
-          <p id="registerContactHint" class="muted tiny">No email-verification link is required.</p>
+          <p id="registerContactHint" class="muted tiny">A verification link will be sent to this email after account creation. Check Inbox and Spam.</p>
           <label for="registerPassword">Password <span class="yellow">(required)</span></label><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="Create a password (8+ characters)">
           <label for="referralCode">Referral code <span class="muted tiny">(optional)</span></label><input id="referralCode" class="field" maxlength="40" autocomplete="off" placeholder="Enter referral code if you have one">
           <button class="primary full" type="submit">⚡ Create account</button>
@@ -634,6 +634,8 @@ ChainCrypto</h3>
           <button class="secondary full" id="sendPhoneCodeBtn" type="button">Send SMS verification code</button>
           <label for="phoneCode">SMS verification code</label><input id="phoneCode" class="field" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter the code">
           <button class="secondary full" id="verifyPhoneCodeBtn" type="button">Verify code and continue</button>
+          <button class="secondary full" id="skipPhoneCodeBtn" type="button">Continue registration without SMS code</button>
+          <p class="muted tiny">Skipping the code is for testing only. The phone number remains unverified; this button does not confirm ownership or mark the number as verified.</p>
         </details>
       </section>
     </div>
@@ -1393,6 +1395,21 @@ document.getElementById("sendPhoneCodeBtn").addEventListener("click", async () =
     msg(friendlyError(error));
     if (recaptchaVerifier) { try { await recaptchaVerifier.clear(); } catch (_) {} recaptchaVerifier = null; }
   }
+});
+document.getElementById("skipPhoneCodeBtn").addEventListener("click", () => {
+  // Do not claim that an SMS was verified: switch to the explicit no-SMS testing registration flow.
+  document.getElementById("showRegisterBtn")?.click();
+  const method = document.getElementById("registerContactMethod");
+  if (method) {
+    method.value = "phone";
+    method.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  const phone = document.getElementById("phoneNumber")?.value.trim();
+  if (phone) {
+    const registerContact = document.getElementById("registerEmail");
+    if (registerContact) registerContact.value = phone;
+  }
+  msg("Continue with phone registration without an SMS code. This number will remain unverified. Enter your name and create a password to finish registration.");
 });
 document.getElementById("verifyPhoneCodeBtn").addEventListener("click", async () => {
   const code = document.getElementById("phoneCode").value.trim();
