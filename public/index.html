@@ -3181,58 +3181,83 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
 (function(){
  if(window.__ocWalletAssetSelector)return;window.__ocWalletAssetSelector=true;
  const $=id=>document.getElementById(id);
- let selected='USDT';
+ let selected='USDT', requestToken=0;
+ const priceCache={USDT:1};
  const toggle=$('walletAssetToggle'),menu=$('walletAssetMenu'),options=$('walletAssetOptions');
  if(!toggle||!menu||!options)return;
  const fmt=n=>Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:8});
+ function marketRows(){return typeof market!=='undefined'&&Array.isArray(market)?market:[]}
+ function getMarketCoin(sym){return marketRows().find(c=>String(c.symbol||'').toUpperCase()===sym)}
+ function knownPrice(sym){
+  if(Number(priceCache[sym])>0)return Number(priceCache[sym]);
+  const c=getMarketCoin(sym),p=Number(c?.current_price||0);
+  if(p>0){priceCache[sym]=p;return p}
+  return 0;
+ }
+ async function resolvePrice(sym){
+  const existing=knownPrice(sym);if(existing>0)return existing;
+  const coin=Array.isArray(COINS)?COINS.find(c=>String(c.symbol||'').toUpperCase()===sym):null;
+  if(coin?.id){
+   try{
+    const res=await fetch('https://api.coingecko.com/api/v3/simple/price?ids='+encodeURIComponent(coin.id)+'&vs_currencies=usd',{headers:{accept:'application/json'},signal:AbortSignal.timeout(6000)});
+    if(res.ok){const data=await res.json(),p=Number(data?.[coin.id]?.usd||0);if(p>0){priceCache[sym]=p;return p}}
+   }catch(_){}
+  }
+  if(sym==='XAU'){
+   try{const res=await fetch('https://fapi.binance.com/fapi/v1/ticker/price?symbol=XAUUSDT',{signal:AbortSignal.timeout(5000)});if(res.ok){const d=await res.json(),p=Number(d.price||0);if(p>0){priceCache[sym]=p;return p}}}catch(_){}
+  }else{
+   try{const res=await fetch('https://api.binance.com/api/v3/ticker/price?symbol='+encodeURIComponent(sym+'USDT'),{signal:AbortSignal.timeout(5000)});if(res.ok){const d=await res.json(),p=Number(d.price||0);if(p>0){priceCache[sym]=p;return p}}}catch(_){}
+  }
+  return 0;
+ }
  function renderOptions(){
-  const marketRows=typeof market!=='undefined'&&Array.isArray(market)?market:[];
-  const bySymbol=new Map(marketRows.map(c=>[String(c.symbol||'').toUpperCase(),c]));
-  const fallback=[{symbol:'BTC',name:'Bitcoin'},{symbol:'ETH',name:'Ethereum'},{symbol:'BNB',name:'BNB'},{symbol:'XRP',name:'XRP'},{symbol:'SOL',name:'Solana'},{symbol:'USDC',name:'USD Coin'},{symbol:'ADA',name:'Cardano'},{symbol:'DOGE',name:'Dogecoin'},{symbol:'TRX',name:'TRON'},{symbol:'LINK',name:'Chainlink'},{symbol:'LTC',name:'Litecoin'},{symbol:'XAU',name:'Gold'}];const sourceRows=marketRows.length?marketRows.filter(c=>String(c.symbol||'').toUpperCase()!=='USDT').sort((a,b)=>(b.market_cap||0)-(a.market_cap||0)):fallback;const symbols=[{symbol:'USDT',name:'Tether',current_price:1},...sourceRows,...(!sourceRows.some(c=>String(c.symbol||'').toUpperCase()==='XAU')?[{symbol:'XAU',name:'Gold (XAU/USDT)',current_price:0}]:[])];
-  const unique=[];const seen=new Set();
+  const rows=marketRows();
+  const fallback=[{symbol:'BTC',name:'Bitcoin'},{symbol:'ETH',name:'Ethereum'},{symbol:'BNB',name:'BNB'},{symbol:'XRP',name:'XRP'},{symbol:'SOL',name:'Solana'},{symbol:'USDC',name:'USD Coin'},{symbol:'ADA',name:'Cardano'},{symbol:'DOGE',name:'Dogecoin'},{symbol:'TRX',name:'TRON'},{symbol:'LINK',name:'Chainlink'},{symbol:'LTC',name:'Litecoin'},{symbol:'XAU',name:'Gold'}];
+  const sourceRows=rows.length?rows.filter(c=>String(c.symbol||'').toUpperCase()!=='USDT').sort((a,b)=>(b.market_cap||0)-(a.market_cap||0)):fallback;
+  const symbols=[{symbol:'USDT',name:'Tether',current_price:1},...sourceRows,...(!sourceRows.some(c=>String(c.symbol||'').toUpperCase()==='XAU')?[{symbol:'XAU',name:'Gold (XAU/USDT)',current_price:0}]:[])];
+  const unique=[],seen=new Set();
   symbols.forEach(c=>{const sym=String(c.symbol||'').toUpperCase();if(sym&&!seen.has(sym)){seen.add(sym);unique.push({...c,symbol:sym})}});
   const usdtBalance=Number(typeof state!=='undefined'?state.balance||0:0);
   options.innerHTML=unique.map(c=>{
-   const sym=c.symbol,price=sym==='USDT'?1:Number(c.current_price||0);
-   const qty=price>0?usdtBalance/price:0;
-   const worth=price>0?qty*price:0;
-   const qtyText=price>0?fmt(qty):'Price unavailable';
-   const worthText=price>0?'≈ '+fmt(worth)+' USDT':'';
+   const sym=c.symbol,price=sym==='USDT'?1:knownPrice(sym),qty=price>0?usdtBalance/price:0;
+   const qtyText=price>0?fmt(qty):'Tap to load price';
+   const worthText=price>0?'≈ '+fmt(qty*price)+' USDT':'';
    return '<button type="button" role="option" data-wallet-asset="'+sym+'" aria-selected="'+(sym===selected)+'"><span><strong>'+sym+'</strong><small>'+String(c.name||sym).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))+'</small></span><span class="wallet-asset-price">'+qtyText+'<small>'+worthText+'</small></span></button>';
   }).join('');
  }
  window.__ocRefreshWalletAssets=renderOptions;
- function updateSelected(){
+ async function updateSelected(){
+  const token=++requestToken;
   const note=$('walletBalanceNote'),heading=document.querySelector('.wallet-eyebrow'),balance=$('walletBalance');
-  const st=typeof state!=='undefined'?state:{};
-  const usdtBalance=Number(st.balance||0);
-  const coin=(typeof market!=='undefined'&&Array.isArray(market)?market:[]).find(c=>String(c.symbol||'').toUpperCase()===selected);
-  const price=selected==='USDT'?1:Number(coin?.current_price||0);
-  if(selected!=='USDT'&&(!Number.isFinite(price)||price<=0)){
-   selected='USDT';
-   if(note)note.textContent='Coin price is unavailable; showing your USDT balance instead.';
-  }else if(note){
-   note.textContent=selected==='USDT'?'≈ simulated account value · demo only':'≈ '+usdtBalance.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2})+' equivalent · simulated only';
+  const st=typeof state!=='undefined'?state:{},usdtBalance=Number(st.balance||0);
+  let price=selected==='USDT'?1:knownPrice(selected);
+  if(selected!=='USDT'&&price<=0){
+   if(heading)heading.textContent=selected+' BALANCE';
+   if(balance)balance.textContent='Loading price…';
+   if(note)note.textContent='Fetching current public price…';
+   renderOptions();
+   price=await resolvePrice(selected);
+   if(token!==requestToken)return;
   }
-  const finalPrice=selected==='USDT'?1:Number(coin?.current_price||0);
-  const qty=finalPrice>0?usdtBalance/finalPrice:usdtBalance;
+  if(selected!=='USDT'&&(!Number.isFinite(price)||price<=0)){
+   if(heading)heading.textContent=selected+' BALANCE';
+   if(balance)balance.textContent='— '+selected;
+   if(note)note.textContent='Live price is temporarily unavailable. Your USDT balance is unchanged; try again shortly.';
+   toggle.textContent=selected+'⌄';renderOptions();return;
+  }
+  const qty=price>0?usdtBalance/price:usdtBalance;
   if(heading)heading.textContent=selected==='USDT'?'ESTIMATED BALANCE':selected+' BALANCE';
   if(balance)balance.textContent=selected==='USDT'?usdtBalance.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT':qty.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:8})+' '+selected;
-  toggle.textContent=selected+'⌄';
-  renderOptions();
+  if(note)note.textContent=selected==='USDT'?'≈ simulated account value · demo only':'≈ '+usdtBalance.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2})+' equivalent · simulated only';
+  toggle.textContent=selected+'⌄';renderOptions();
  }
- toggle.addEventListener('click',function(){
-  renderOptions();const open=menu.classList.contains('hidden');menu.classList.toggle('hidden',!open);toggle.setAttribute('aria-expanded',String(open));
- });
- options.addEventListener('click',function(e){
-  const btn=e.target.closest('[data-wallet-asset]');if(!btn)return;
-  selected=btn.dataset.walletAsset;menu.classList.add('hidden');toggle.setAttribute('aria-expanded','false');updateSelected();
- });
+ toggle.addEventListener('click',function(){renderOptions();const open=menu.classList.contains('hidden');menu.classList.toggle('hidden',!open);toggle.setAttribute('aria-expanded',String(open))});
+ options.addEventListener('click',function(e){const btn=e.target.closest('[data-wallet-asset]');if(!btn)return;selected=btn.dataset.walletAsset;menu.classList.add('hidden');toggle.setAttribute('aria-expanded','false');updateSelected()});
  document.addEventListener('click',function(e){if(!menu.contains(e.target)&&!toggle.contains(e.target)){menu.classList.add('hidden');toggle.setAttribute('aria-expanded','false')}});
  const oldRender=window.renderWallet;
  if(typeof oldRender==='function')window.renderWallet=function(){oldRender();updateSelected()};
  document.addEventListener('click',function(e){if(e.target.closest('[data-page="wallet"]'))setTimeout(updateSelected,0)});
- const marketTimer=setInterval(()=>{if(!menu.classList.contains('hidden'))renderOptions()},5000);
+ setInterval(()=>{if(!menu.classList.contains('hidden'))renderOptions()},5000);
  updateSelected();
 })();
 </script>
