@@ -992,10 +992,19 @@ async function loadMarket(){
    $("connection").textContent=hasCached?"Cached data":"Unavailable";
    $("apiStatus").innerHTML=hasCached?'<span class="muted">Showing saved prices · refresh later</span>':'<span class="red">Market data unavailable</span>';
    if(!hasCached){
-    if($("marketRows"))$("marketRows").innerHTML='<tr><td colspan="5" class="empty">Live market data is temporarily unavailable. Check your internet connection and press Refresh to try again.</td></tr>';
+    const unavailable='<tr><td colspan="5" class="empty">Market data is temporarily unavailable. Tap Refresh to try again.</td></tr>';
+    if($("marketRows"))$("marketRows").innerHTML=unavailable;
+    if($("homeActivePairs"))$("homeActivePairs").innerHTML='<div class="empty">Live prices are unavailable right now. Open Market and tap Refresh.</div>';
+    if($("marketPulseRows"))$("marketPulseRows").innerHTML='<div class="empty">Waiting for market data. Tap Refresh to retry.</div>';
+    if($("marketPulseStatus"))$("marketPulseStatus").textContent="Market feed unavailable";
     if($("assetCount"))$("assetCount").textContent="0";
+    if($("gainersList"))$("gainersList").textContent="Unavailable";
+    if($("losersList"))$("losersList").textContent="Unavailable";
+    if($("hotList"))$("hotList").textContent="Unavailable";
+   } else {
+    renderMarket();renderHomeCoinResults();renderSignalScanner();
    }
-   $("marketHint").textContent=hasCached?"Could not refresh now. Previously loaded prices remain visible; they may be stale.":"Both public market providers are unavailable right now. Try Refresh again later.";
+   $("marketHint").textContent=hasCached?"Could not refresh now. Previously loaded prices remain visible; they may be stale.":"Market providers did not respond. Check your connection and press Refresh to retry.";
  } finally {finish()}
 }
 let historySeries=[];
