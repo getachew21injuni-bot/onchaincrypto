@@ -2180,6 +2180,15 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     if(!btn) return;
     let page=btn.dataset.go||btn.dataset.page||btn.dataset.bottomPage||btn.dataset.walletAction;
     if(!page) return;
+    // The capture-phase router stops later click listeners, so explicitly switch the
+    // auth form mode before routing to the Register/Sign In page.
+    if(btn.id==='register-nav' || btn.id==='mobileRegisterBtn'){
+      document.getElementById('showRegisterBtn')?.click();
+      page='register';
+    } else if(btn.id==='signin-nav' || btn.id==='mobileSignInBtn'){
+      document.getElementById('showSignInBtn')?.click();
+      page='register';
+    }
     if(btn.hasAttribute('data-wallet-action') && page==='transfer') page='transfer';
     if(btn.hasAttribute('data-gold-trade')){
       const asset=document.getElementById('tradeAsset');
