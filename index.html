@@ -897,55 +897,60 @@ async function loadMarket(){
  marketRequestInProgress=true;
  const refreshButtons=[$("refreshBtn"),$("retryBtn"),$("refreshSignalsBtn")].filter(Boolean);
  refreshButtons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent="Refreshing…"});
- $("connection").textContent="Updating";$("apiStatus").textContent="Loading prices…";$("marketHint").textContent="Refreshing public market prices…";
+ const setStatus=(connection,status,hint)=>{
+  if($("connection"))$("connection").textContent=connection;
+  if($("apiStatus"))$("apiStatus").textContent=status;
+  if($("marketHint"))$("marketHint").textContent=hint;
+ };
+ setStatus("Updating","Loading prices…","Refreshing public market prices…");
  const finish=()=>{marketRequestInProgress=false;refreshButtons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.originalText||"Refresh";delete b.dataset.originalText})};
+ const getJSON=async(url,ms=10000)=>{
+  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),ms);
+  try{const response=await fetch(url,{headers:{accept:"application/json"},signal:controller.signal});if(!response.ok)throw new Error("HTTP "+response.status);return await response.json()}
+  finally{clearTimeout(timer)}
+ };
  try{
-   let data=null,provider="";
-   const url="https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h";
+  let data=null,provider="";
+  try{
+   const result=await getJSON("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",10000);
+   if(!Array.isArray(result)||!result.length)throw new Error("No CoinGecko prices");
+   data=result.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()}));
+   const extraIds=COINS.filter(c=>!data.some(m=>m.id===c.id)).map(c=>c.id);
+   if(extraIds.length){try{const extra=await getJSON("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(extraIds.join(","))+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",7000);if(Array.isArray(extra))data=data.concat(extra.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()})))}catch(_){}}
+   provider="CoinGecko";
+  }catch(primaryError){
    try{
-    const response=await fetch(url,{headers:{accept:"application/json"},signal:AbortSignal.timeout(12000)});
-    if(!response.ok)throw new Error("CoinGecko HTTP "+response.status);
-    const result=await response.json();
-    if(!Array.isArray(result)||!result.length)throw new Error("No CoinGecko prices");
-    data=result.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()}));
-    /* Merge configured assets (including tokenized gold) so they remain available even when outside the top 100. */
-    const extraIds=COINS.filter(c=>!data.some(m=>m.id===c.id)).map(c=>c.id);
-    if(extraIds.length){try{const extraResp=await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(extraIds.join(","))+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",{signal:AbortSignal.timeout(10000)});if(extraResp.ok){const extra=await extraResp.json();if(Array.isArray(extra))data=data.concat(extra.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()})));}}catch(_){}}
-    provider="CoinGecko";
-   }catch(primaryError){
-    const response=await fetch("https://api.binance.com/api/v3/ticker/24hr",{signal:AbortSignal.timeout(12000)});
-    if(!response.ok)throw new Error("Market providers unavailable");
-    const tickers=await response.json();
-    if(!Array.isArray(tickers))throw new Error("Invalid fallback market response");
+    const tickers=await getJSON("https://api.binance.com/api/v3/ticker/24hr",10000);
+    if(!Array.isArray(tickers))throw new Error("Invalid Binance response");
     const byPair=new Map(tickers.map(t=>[t.symbol,t]));
-    data=COINS.map(c=>{
-     const t=byPair.get(c.symbol+"USDT");
-     if(!t)return null;
-     return {id:c.id,name:c.name,symbol:c.symbol.toLowerCase(),current_price:Number(t.lastPrice),price_change_percentage_24h:Number(t.priceChangePercent),total_volume:Number(t.quoteVolume),market_cap:null,market_cap_rank:null,image:""};
-    }).filter(c=>c&&Number.isFinite(c.current_price));
-    if(!data.length)throw new Error("No prices returned by fallback provider");
+    data=COINS.map(c=>{const t=byPair.get(c.symbol+"USDT");if(!t)return null;return {id:c.id,name:c.name,symbol:c.symbol.toLowerCase(),current_price:Number(t.lastPrice),price_change_percentage_24h:Number(t.priceChangePercent),total_volume:Number(t.quoteVolume),market_cap:null,market_cap_rank:null,image:""}}).filter(c=>c&&Number.isFinite(c.current_price));
+    if(!data.length)throw new Error("No matching Binance prices");
     provider="Binance public market data";
+   }catch(binanceError){
+    const result=await getJSON("https://api.coincap.io/v2/assets?limit=100",10000);
+    if(!Array.isArray(result?.data)||!result.data.length)throw new Error("All public market providers failed");
+    data=result.data.map(c=>({id:c.id,name:c.name,symbol:(c.symbol||"").toUpperCase(),current_price:Number(c.priceUsd),price_change_percentage_24h:Number(c.changePercent24Hr),total_volume:Number(c.volumeUsd24Hr),market_cap:Number(c.marketCapUsd),market_cap_rank:Number(c.rank),image:""})).filter(c=>c.symbol&&Number.isFinite(c.current_price));
+    if(!data.length)throw new Error("CoinCap returned no valid prices");
+    provider="CoinCap public market data";
    }
-   market=data;window.market=market;
-   const now=Date.now();
-   try{localStorage.setItem("oc_market_cache",JSON.stringify({time:now,data:market}))}catch(e){}
-   $("connection").textContent="Live data";
-   $("apiStatus").innerHTML='<span class="green">Connected · '+safe(provider)+'</span>';
-   $("lastUpdate").textContent=new Date(now).toLocaleTimeString();
-   $("marketHint").textContent="Prices updated from "+provider+". Public prices are informational and may be delayed.";
-   renderMarket();renderHomeCoinResults();updateTradePreview();renderSignalScanner();
+  }
+  market=data;window.market=market;
+  const now=Date.now();
+  try{localStorage.setItem("oc_market_cache",JSON.stringify({time:now,data:market}))}catch(e){}
+  if($("connection"))$("connection").textContent="Live data";
+  if($("apiStatus"))$("apiStatus").innerHTML='<span class="green">Connected · '+safe(provider)+'</span>';
+  if($("lastUpdate"))$("lastUpdate").textContent=new Date(now).toLocaleTimeString();
+  if($("marketHint"))$("marketHint").textContent="Prices updated from "+provider+". Public prices are informational and may be delayed.";
+  renderMarket();renderHomeCoinResults();updateTradePreview();renderSignalScanner();
  }catch(err){
-   const hasCached=market.length>0||restoreCachedMarket();
-   $("connection").textContent=hasCached?"Cached data":"Unavailable";
-   $("apiStatus").innerHTML=hasCached?'<span class="muted">Showing saved prices · refresh later</span>':'<span class="red">Market data unavailable</span>';
-   if(!hasCached){
-    if($("marketRows"))$("marketRows").innerHTML='<tr><td colspan="5" class="empty">Live market data is temporarily unavailable. Check your internet connection and press Refresh to try again.</td></tr>';
-    if($("assetCount"))$("assetCount").textContent="0";
-   }
-   renderTradeSelect();
-   renderHomeCoinResults();
-   $("marketHint").textContent=hasCached?"Could not refresh now. Previously loaded prices remain visible; they may be stale.":"Market prices are unavailable right now. Asset choices remain visible, but trades cannot proceed until a public price loads.";
- } finally {finish()}
+  const hasCached=market.length>0||restoreCachedMarket();
+  if($("connection"))$("connection").textContent=hasCached?"Cached data":"Unavailable";
+  if($("apiStatus"))$("apiStatus").innerHTML=hasCached?'<span class="muted">Showing saved prices · refresh later</span>':'<span class="red">Market data unavailable</span>';
+  if(!hasCached&&$("marketRows"))$("marketRows").innerHTML='<tr><td colspan="5" class="empty">Live market data is temporarily unavailable. Check your connection and press Refresh to try again.</td></tr>';
+  if(!hasCached&&$("assetCount"))$("assetCount").textContent="0";
+  renderTradeSelect();renderHomeCoinResults();
+  if($("marketHint"))$("marketHint").textContent=hasCached?"Could not refresh now. Previously loaded prices remain visible; they may be stale.":"All public market providers are unavailable or blocked on this connection. Try Refresh later.";
+ }finally{finish()}
 }
 let historySeries=[];
 async function loadPriceHistory(){
