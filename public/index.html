@@ -1479,7 +1479,7 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
     const status = document.getElementById("authStatus");
     if (status) status.textContent = "Account created successfully. Signed in as " + identity + ". You can continue to the platform.";
     msg("Account created successfully. You are now signed in. You can continue to the platform.");
-    if (typeof showPage === "function") showPage("home");
+    if (typeof showPage === "function") showPage("profile");
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -1497,7 +1497,7 @@ document.getElementById("googleSignInBtn").addEventListener("click", async () =>
     msg("Google sign-in successful. Signed in as " + identity + ".");
     const status = document.getElementById("authStatus");
     if (status) status.textContent = "Signed in as " + identity + ". You can continue to the platform.";
-    if (typeof window.showPage === "function") window.showPage("home");
+    if (typeof window.showPage === "function") window.showPage("profile");
   } catch (error) {
     if (error?.code === "auth/operation-not-allowed") msg("Google sign-in is disabled in Firebase. Enable Google under Firebase Console → Authentication → Sign-in method.");
     else if (error?.code === "auth/unauthorized-domain") msg("Google sign-in blocked: add getachew21injuni-bot.github.io under Firebase Console → Authentication → Settings → Authorized domains.");
@@ -1519,7 +1519,7 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
     if (status) status.textContent = "Signed in as " + (credential.user.displayName || credential.user.email || credential.user.phoneNumber || "user") + ". You can continue to the platform.";
     msg("Signed in successfully. Opening the platform…");
     if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
-    if (typeof showPage === "function") showPage("home");
+    if (typeof showPage === "function") showPage("profile");
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -1568,7 +1568,7 @@ document.getElementById("verifyPhoneCodeBtn").addEventListener("click", async ()
     try { localStorage.setItem("oc_profile_" + credential.user.uid, JSON.stringify({ firstName:first, lastName:last, email:credential.user.email||"", phone:credential.user.phoneNumber||"", createdAt:new Date().toISOString() })); } catch (_) {}
     await saveBasicUserProfile(credential.user);
     msg("Phone number verified. You are signed in as " + (credential.user.displayName || credential.user.phoneNumber || "user") + ".");
-    if (typeof window.showPage === "function") window.showPage("home");
+    if (typeof window.showPage === "function") window.showPage("profile");
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -1582,7 +1582,7 @@ onAuthStateChanged(auth, (user) => {
   window.onchaincryptoCurrentUser = user || null;
   if (user) { void (async () => { await loadSavedUserProfile(user); await saveBasicUserProfile(user); })(); }
    if (typeof window.ocRefreshReferral === "function") window.ocRefreshReferral(user || null);
-   if (user) { window.showPage?.(window.ocPendingPage || "home"); window.ocPendingPage = null; }
+   if (user) { window.showPage?.(window.ocPendingPage || "profile"); window.ocPendingPage = null; }
    else { window.ocPendingPage = null; }
   const status = document.getElementById("authStatus");
   const signOutBtn = document.getElementById("signOutBtn");
@@ -2584,7 +2584,7 @@ td,th{overflow-wrap:anywhere}
   applyReferral();
   document.addEventListener('DOMContentLoaded', function(){
     applyReferral();
-    if (typeof window.showPage === 'function') window.showPage('home');
+    /* Do not force Home on load; preserve the visitor's current page. */
   });
   setInterval(applyReferral, 700);
 })();
