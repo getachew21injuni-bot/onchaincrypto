@@ -602,8 +602,8 @@ ChainCrypto</h3>
           <p class="muted tiny">Join the OnChainCrypto institutional trading platform.</p>
           <label for="registerFirstName">First name <span class="yellow">(required)</span></label><input id="registerFirstName" class="field" maxlength="50" autocomplete="given-name" required placeholder="Enter your first name">
           <label for="registerLastName">Last name <span class="yellow">(required)</span></label><input id="registerLastName" class="field" maxlength="50" autocomplete="family-name" required placeholder="Enter your last name">
-          <label for="registerEmail">Email address</label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com"><div class="oc-register-contact-choice"><label for="registerContactMethod">Choose email or phone</label><select id="registerContactMethod" class="field" aria-label="Choose email or phone"><option value="email">✉ Email</option><option value="phone">☎ Phone</option></select></div>
-          <p class="muted tiny">No email-verification link is required. To register using a phone number instead, use the SMS panel below.</p>
+          <div class="oc-register-contact-choice"><label for="registerContactMethod">Register with</label><select id="registerContactMethod" class="field" aria-label="Choose email or phone"><option value="email">✉ Email</option><option value="phone">☎ Phone (no SMS verification during testing)</option></select></div><label id="registerContactLabel" for="registerEmail">Email address</label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com">
+          <p id="registerContactHint" class="muted tiny">No email-verification link is required.</p>
           <label for="registerPassword">Password <span class="yellow">(required)</span></label><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="Create a password (8+ characters)">
           <label for="referralCode">Referral code <span class="muted tiny">(optional)</span></label><input id="referralCode" class="field" maxlength="40" autocomplete="off" placeholder="Enter referral code if you have one">
           <button class="primary full" type="submit">⚡ Create account</button>
@@ -613,7 +613,7 @@ ChainCrypto</h3>
         <p class="muted tiny auth-google-hint">For Google registration, enter your full name above first.</p>
         <form id="signInForm" class="auth-signin-form">
           <h3 style="margin-top:12px">Sign in</h3>
-          <label for="signInEmail">Email address</label><input id="signInEmail" class="field" type="email" autocomplete="username" required placeholder="you@example.com">
+          <label for="signInEmail">Email or phone number</label><input id="signInEmail" class="field" type="text" autocomplete="username" required placeholder="you@example.com">
           <label for="signInPassword">Password</label><input id="signInPassword" class="field" type="password" autocomplete="current-password" required placeholder="Enter your password">
           <div class="auth-options"><label class="auth-check"><input type="checkbox" id="rememberMe"> Remember me</label><label class="auth-check"><input type="checkbox" id="showSignInPassword"> Show password</label></div>
           <button class="primary full auth-submit" type="submit">⚡ Sign In Securely</button>
@@ -1223,25 +1223,61 @@ function authEmailForIdentifier(value) {
   return phone.replace(/\D/g, "") + "@phone.onchaincrypto.invalid";
 }
 
+const contactMethod = document.getElementById("registerContactMethod");
+const contactInput = document.getElementById("registerEmail");
+function updateRegistrationContactMode() {
+  const phoneMode = contactMethod?.value === "phone";
+  const label = document.getElementById("registerContactLabel");
+  const hint = document.getElementById("registerContactHint");
+  if (label) label.textContent = phoneMode ? "Phone number (include country code)" : "Email address";
+  if (hint) hint.textContent = phoneMode
+    ? "No SMS code is sent during this test. Enter a number like +85620… or +2519…. Use the same number and password to sign in later."
+    : "No email-verification link is required.";
+  if (contactInput) {
+    contactInput.type = phoneMode ? "tel" : "email";
+    contactInput.autocomplete = phoneMode ? "tel" : "email";
+    contactInput.placeholder = phoneMode ? "+85620… or +2519…" : "you@example.com";
+    contactInput.inputMode = phoneMode ? "tel" : "email";
+    contactInput.value = "";
+  }
+}
+contactMethod?.addEventListener("change", updateRegistrationContactMode);
+updateRegistrationContactMode();
+
 document.getElementById("registerForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  const email = document.getElementById("registerEmail").value.trim().toLowerCase();
+  const phoneMode = contactMethod?.value === "phone";
+  const enteredContact = contactInput.value.trim();
+  const phone = normalizedPhone(enteredContact);
+  let email = enteredContact.toLowerCase();
+  if (phoneMode) {
+    if (!/^\+[1-9]\d{7,14}$/.test(phone)) { msg("Enter a phone number in international format, including + and country code, such as +856… or +251…."); return; }
+    email = authEmailForIdentifier(phone);
+  } else if (!enteredContact || !enteredContact.includes("@")) {
+    msg("Enter a valid email address."); return;
+  }
   const password = document.getElementById("registerPassword").value;
   const firstName = document.getElementById("registerFirstName").value.trim();
   const lastName = document.getElementById("registerLastName").value.trim();
   const name = (firstName + " " + lastName).trim();
   if (!firstName || !lastName) { msg("Enter your first and last name."); return; }
-  if (!email) { msg("Enter an email address, or use the phone SMS registration panel."); return; }
+  if (password.length < 8) { msg("Use a password with at least 8 characters."); return; }
   msg("Creating your account…");
   try {
     const credential = await createUserWithEmailAndPassword(auth, email, password);
     if (name) await updateProfile(credential.user, { displayName: name });
-    try { const savedProfile={firstName,lastName,email,referralCode:(document.getElementById("referralCode")?.value||"").trim(),createdAt:new Date().toISOString()}; localStorage.setItem("oc_profile_"+credential.user.uid,JSON.stringify(savedProfile)); if(savedProfile.referralCode)localStorage.setItem("oc_referral_attribution_"+credential.user.uid,savedProfile.referralCode); } catch (_) {}
+    try {
+      const savedProfile={firstName,lastName,email:phoneMode?"":enteredContact,phone:phoneMode?phone:"",contactMethod:phoneMode?"phone":"email",referralCode:(document.getElementById("referralCode")?.value||"").trim(),createdAt:new Date().toISOString()};
+      localStorage.setItem("oc_profile_"+credential.user.uid,JSON.stringify(savedProfile));
+      if(savedProfile.referralCode)localStorage.setItem("oc_referral_attribution_"+credential.user.uid,savedProfile.referralCode);
+    } catch (_) {}
     document.getElementById("registerPassword").value = "";
     window.onchaincryptoCurrentUser = credential.user;
     const status = document.getElementById("authStatus");
-    if (status) status.textContent = "Account created successfully. Signed in as " + (credential.user.displayName || credential.user.email || "user") + ". You can continue to the platform.";
-    msg("Account created successfully. You are now signed in. You can continue to the platform.");
+    if (status) status.textContent = "Account created successfully. Signed in as " + (credential.user.displayName || "user") + ". You can continue to the platform.";
+    msg(phoneMode
+      ? "Account created without SMS verification for testing. This phone number is not yet verified. Save your password and use the same number to sign in."
+      : "Account created successfully. You are now signed in. You can continue to the platform.");
     if (typeof showPage === "function") showPage("markets");
   } catch (error) { msg(friendlyError(error)); }
 });
@@ -1266,7 +1302,7 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
   msg("Signing in…");
   try {
     const credential = await signInWithEmailAndPassword(auth,
-      document.getElementById("signInEmail").value.trim().toLowerCase(),
+      authEmailForIdentifier(document.getElementById("signInEmail").value.trim()),
       document.getElementById("signInPassword").value);
     document.getElementById("signInPassword").value = "";
     window.onchaincryptoCurrentUser = credential.user;
@@ -1279,9 +1315,10 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
 });
 
 document.getElementById("resetPasswordBtn").addEventListener("click", async () => {
-  const email = document.getElementById("signInEmail").value.trim() || document.getElementById("registerEmail").value.trim();
-  if (!email) { msg("Enter the email address for your account first."); return; }
-  try { await sendPasswordResetEmail(auth, email); msg("If the account exists, a password reset email has been sent."); }
+  const identifier = document.getElementById("signInEmail").value.trim() || document.getElementById("registerEmail").value.trim();
+  if (!identifier) { msg("Enter the email address for your account first."); return; }
+  if (!identifier.includes("@")) { msg("Password reset by email is not available for phone-only test accounts. We can add a verified recovery method later."); return; }
+  try { await sendPasswordResetEmail(auth, identifier); msg("If the account exists, a password reset email has been sent."); }
   catch (error) { msg(friendlyError(error)); }
 });
 
