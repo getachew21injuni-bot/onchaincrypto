@@ -941,7 +941,7 @@ function restoreCachedMarket(){
   if(Array.isArray(saved?.data)&&saved.data.length){
    market=saved.data;window.market=market;
    $("connection").textContent="Cached data";
-   $("apiStatus").textContent="Showing saved prices";
+   if($("apiStatus"))$("apiStatus").textContent="Showing saved prices";
    if(saved.time)$("lastUpdate").textContent=new Date(saved.time).toLocaleTimeString()+" (saved)";
    renderMarket();renderHomeCoinResults();updateTradePreview();
    return true;
@@ -954,7 +954,7 @@ async function loadMarket(){
  marketRequestInProgress=true;
  const refreshButtons=[$("refreshBtn"),$("retryBtn"),$("refreshSignalsBtn")].filter(Boolean);
  refreshButtons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent="Refreshing…"});
- $("connection").textContent="Updating";$("apiStatus").textContent="Loading public prices…";$("marketHint").textContent="Connecting to public market feeds…";
+ $("connection").textContent="Updating";if($("apiStatus"))$("apiStatus").textContent="Loading public prices…";$("marketHint").textContent="Connecting to public market feeds…";
  const finish=()=>{marketRequestInProgress=false;refreshButtons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.originalText||"Refresh";delete b.dataset.originalText})};
  const fetchJson=async(url,ms=6500)=>{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),ms);try{const res=await fetch(url,{headers:{accept:"application/json"},signal:controller.signal,cache:"no-store"});if(!res.ok)throw new Error("HTTP "+res.status);return await res.json()}finally{clearTimeout(timer)}};
  const cacheAndRender=(data,provider)=>{
@@ -962,7 +962,7 @@ async function loadMarket(){
   market=data.filter(c=>Number(c.current_price)>0);window.market=market;
   if(window.__ocRefreshWalletAssets)window.__ocRefreshWalletAssets();
   const now=Date.now();try{localStorage.setItem("oc_market_cache",JSON.stringify({time:now,data:market}))}catch(e){}
-  $("connection").textContent="Live data";$("apiStatus").innerHTML='<span class="green">Connected · '+safe(provider)+'</span>';
+  $("connection").textContent="Live data";if($("apiStatus"))$("apiStatus").innerHTML='<span class="green">Connected · '+safe(provider)+'</span>';
   $("lastUpdate").textContent=new Date(now).toLocaleTimeString();$("marketHint").textContent="Prices updated from "+provider+". Public prices may be delayed.";
   renderMarket();renderHomeCoinResults();updateTradePreview();renderSignalScanner();
  };
@@ -1007,7 +1007,7 @@ async function loadMarket(){
  }catch(err){
   const hasCached=market.length>0||restoreCachedMarket();
   $("connection").textContent=hasCached?"Cached data":"Unavailable";
-  $("apiStatus").innerHTML=hasCached?'<span class="muted">Showing saved prices · refresh later</span>':'<span class="red">Market data unavailable</span>';
+  if($("apiStatus"))$("apiStatus").innerHTML=hasCached?'<span class="muted">Showing saved prices · refresh later</span>':'<span class="red">Market data unavailable</span>';
   if(!hasCached){
    const unavailable='<tr><td colspan="5" class="empty">Public market prices are temporarily unavailable. Tap Refresh to try again.</td></tr>';
    if($("marketRows"))$("marketRows").innerHTML=unavailable;
@@ -1226,7 +1226,7 @@ $("marketSearch").addEventListener("input",renderMarket);$("refreshBtn").addEven
 })();
 updateQuickEstimate();
 $("historyFilter")?.addEventListener("change",renderActivityHistory);
-$("exportCsv").addEventListener("click",()=>{const rows=[["time","category","title","details","status"],...state.history.map(t=>[t.time,"trade",(t.side||"").toUpperCase()+" "+t.symbol,money(t.amount)+" · "+t.qty+" coins @ "+t.price,"Paper trade"]),...readActivity().map(x=>[x.time,x.type,x.title,x.details,x.status])];const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="onchaincrypto-activity-history.csv";a.click();URL.revokeObjectURL(a.href)});
+$("exportCsv")?.addEventListener("click",()=>{const rows=[["time","category","title","details","status"],...state.history.map(t=>[t.time,"trade",(t.side||"").toUpperCase()+" "+t.symbol,money(t.amount)+" · "+t.qty+" coins @ "+t.price,"Paper trade"]),...readActivity().map(x=>[x.time,x.type,x.title,x.details,x.status])];const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="onchaincrypto-activity-history.csv";a.click();URL.revokeObjectURL(a.href)});
 $("displayName").value=profile.name||"";$("displayCurrency").value=profile.currency||"USD";$("saveProfile").addEventListener("click",()=>{profile={name:$("displayName").value.trim(),currency:$("displayCurrency").value};localStorage.setItem("oc_profile",JSON.stringify(profile));$("profileMessage").textContent="Local settings saved in this browser only. No online account was created."});
 const preferenceIds=["prefNotifications","prefEmailAlerts","prefAllNotifications"];
 let notificationPrefs={notifications:true,emailAlerts:false,allNotifications:true};
