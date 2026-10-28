@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded',function(){
 #timedPaperTrade .form-panel #quickPlanNote{display:none!important}
 #page-trade .chart-wrap>p.muted.tiny{display:none!important}
 #page-trade .trade-layout>section>p.muted.tiny{display:none!important}
-</style></head>
+</style><style id="oc-hide-numbered-trade-steps">#timedPaperTrade .oc-flow-step{display:none!important}</style></head>
 <body>
 <header>
   <div class="brand"><div class="auth-logo-mark header-logo-mark" aria-hidden="true"><svg viewBox="0 0 120 120" role="img"><defs><linearGradient id="headerLogoGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#42e8ff"/><stop offset="1" stop-color="#3678ff"/></linearGradient></defs><circle cx="60" cy="60" r="51" fill="#071522" stroke="url(#headerLogoGradient)" stroke-width="3"/><path d="M73 35a29 29 0 1 0 0 50" fill="none" stroke="url(#headerLogoGradient)" stroke-width="10" stroke-linecap="round"/><path d="M87 43a21 21 0 1 0 0 34" fill="none" stroke="#42e8ff" stroke-width="8" stroke-linecap="round"/><path d="M45 60h29" stroke="#e8fbff" stroke-width="5" stroke-linecap="round"/><circle cx="88" cy="31" r="5" fill="#42e8ff"/></svg></div> <span>OnChainCrypto</span></div>
@@ -3104,11 +3104,8 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  if(window.__ocCustomerSequentialFlowV2)return;window.__ocCustomerSequentialFlowV2=true;
  const $=id=>document.getElementById(id),form=$('timedPaperTrade');if(!form)return;
  const header=form.querySelector('.section-head');
- if(header&&!form.querySelector('.oc-flow-step')){
-  const steps=document.createElement('div');steps.className='oc-flow-step';
-  steps.innerHTML='<span data-step="1">1 · Select trade</span><span data-step="2">2 · Confirm</span><span data-step="3">3 · Running</span><span data-step="4">4 · Result</span>';
-  header.insertAdjacentElement('afterend',steps);
- }
+ // Keep the existing sequential trade flow without displaying a numbered step list.
+ const oldSteps=form.querySelector('.oc-flow-step');if(oldSteps)oldSteps.remove();
  function step(n){form.querySelectorAll('.oc-flow-step [data-step]').forEach(el=>el.classList.toggle('active',Number(el.dataset.step)===n))}
  function setAssetFromActivePair(){
   const select=$('tradeAsset');if(!select)return;
