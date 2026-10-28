@@ -164,7 +164,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 </style>
 <script id="oc-get-started-actions">
 document.addEventListener('DOMContentLoaded',function(){
- const goRegister=()=>{const nav=document.getElementById('register-nav');if(nav)nav.click();const toggle=document.getElementById('showRegisterBtn');if(toggle)toggle.click();};
+ const goRegister=()=>{const nav=document.getElementById('signin-nav');if(nav)nav.click();const toggle=document.getElementById('showSignInBtn');if(toggle)toggle.click();};
  const goSignIn=()=>{const nav=document.getElementById('signin-nav');if(nav)nav.click();else{const fallback=document.getElementById('register-nav');if(fallback)fallback.click();const toggle=document.getElementById('showSignInBtn');if(toggle)toggle.click();}};
  document.getElementById('landingGetStarted')?.addEventListener('click',goRegister);
  document.getElementById('landingSignIn')?.addEventListener('click',goSignIn);
