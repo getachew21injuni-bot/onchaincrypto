@@ -1754,13 +1754,19 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
  }
  function renderBook(){
   const host=$("liveOrderBookRows");if(!host)return;
-  const sym=String((typeof selected!=="undefined"?selected:"")||$("tradeAsset")?.value||"BTC").toUpperCase();
-  const coin=(typeof market!=="undefined"&&Array.isArray(market)?market:[]).find(c=>String(c.symbol).toUpperCase()===sym);
+  const sym=String($("tradeAsset")?.value||((typeof selected!=="undefined"&&selected)||"BTC")).toUpperCase();
+  const coins=(typeof market!=="undefined"&&Array.isArray(market))?market:[];
+  const coin=coins.find(c=>String(c.symbol||"").toUpperCase()===sym);
   const price=Number(coin?.current_price)||0;
   if($("orderBookPair"))$("orderBookPair").textContent=sym+"/USDT";
-  if(!price){if($("orderBookStatus"))$("orderBookStatus").textContent="WAITING";host.innerHTML='<tr><td colspan="3" class="empty">Waiting for public market data…</td></tr>';return}
-  if($("orderBookStatus"))$("orderBookStatus").textContent="PRICE UPDATED";
+  if(!price){
+   if($("orderBookStatus"))$("orderBookStatus").textContent="WAITING";
+   host.innerHTML='<tr><td colspan="3" class="empty">Waiting for public market price…</td></tr>';
+   return;
+  }
+  if($("orderBookStatus"))$("orderBookStatus").textContent="UPDATED";
   const fmtPrice=n=>n.toLocaleString("en-US",{minimumFractionDigits:n<1?6:2,maximumFractionDigits:n<1?8:2});
+  // Indicative depth around the latest public price, not real exchange order quantities.
   const levels=[];
   for(let i=5;i>=1;i--)levels.push({p:price*(1+i*0.00015),q:(0.01+i*0.0037),side:"SELL",color:"#f6465d"});
   for(let i=1;i<=5;i++)levels.push({p:price*(1-i*0.00015),q:(0.012+i*0.0041),side:"BUY",color:"#00c087"});
