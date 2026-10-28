@@ -1459,7 +1459,7 @@ function authEmailForIdentifier(value) {
 
 document.getElementById("registerForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  window.ocPendingPage = "home";
+  window.ocPendingPage = "profile";
   const email = document.getElementById("registerEmail").value.trim().toLowerCase();
   const password = document.getElementById("registerPassword").value;
   const firstName = document.getElementById("registerFirstName").value.trim();
@@ -1494,7 +1494,7 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
 });
 
 document.getElementById("googleSignInBtn").addEventListener("click", async () => {
-  window.ocPendingPage = "home";
+  window.ocPendingPage = "profile";
   const first = document.getElementById("registerFirstName").value.trim();
   const last = document.getElementById("registerLastName").value.trim();
   const name = (first + " " + last).trim();
@@ -1517,7 +1517,7 @@ document.getElementById("googleSignInBtn").addEventListener("click", async () =>
 
 document.getElementById("signInForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  window.ocPendingPage = "home";
+  window.ocPendingPage = "profile";
   msg("Signing in…");
   try {
     const credential = await signInWithEmailAndPassword(auth,
