@@ -1514,7 +1514,7 @@ document.getElementById("googleSignInBtn").addEventListener("click", async () =>
       catch (profileError) { console.warn("Google profile name update deferred:", profileError?.code || profileError); }
     }
     const displayName = user.displayName || suppliedName || user.email || "user";
-    const nameParts = displayName.trim().split(/\\s+/);
+    const nameParts = displayName.trim().split(/\s+/);
     const savedProfile = {
       uid: user.uid,
       firstName: first || nameParts[0] || "",
