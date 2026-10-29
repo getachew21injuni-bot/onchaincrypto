@@ -1518,13 +1518,18 @@ document.getElementById("resendEmailCodeBtn")?.addEventListener("click", async (
     msg(error?.message || "Could not send the code. Please try again.");
   } finally { button.disabled = false; }
 });
-// Route authenticated users directly to their account profile, even if a legacy page handler races.
+// Route authenticated users directly to their account profile. Re-assert the route
+// briefly after sign-in because older navigation initializers can race the auth callback.
 function openAccountProfileAfterAuth() {
   window.ocPendingPage = null;
-  if (typeof window.showPage === "function") window.showPage("profile");
-  requestAnimationFrame(() => {
+  const applyProfileRoute = () => {
     const main = document.querySelector("main");
-    if (!main) return;
+    const profile = document.getElementById("page-profile");
+    if (!main || !profile) return;
+    // Keep the standard router/nav state in sync, then make the final visible page explicit.
+    if (typeof window.showPage === "function") {
+      try { window.showPage("profile"); } catch (error) { console.warn("Profile route handler failed:", error); }
+    }
     main.querySelectorAll('section[id^="page-"]').forEach(section => {
       section.classList.toggle("hidden", section.id !== "page-profile");
     });
@@ -1533,8 +1538,12 @@ function openAccountProfileAfterAuth() {
     if (typeof window.refreshProfileAccountInfo === "function") {
       try { window.refreshProfileAccountInfo(); } catch (_) {}
     }
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
+  };
+  applyProfileRoute();
+  requestAnimationFrame(applyProfileRoute);
+  // Short retry window only; no market, wallet, or trade state is changed.
+  [80, 300, 700].forEach(delay => window.setTimeout(applyProfileRoute, delay));
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 document.getElementById("registerForm").addEventListener("submit", async (event) => {
   event.preventDefault();
