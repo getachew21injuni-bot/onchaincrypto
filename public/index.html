@@ -3711,7 +3711,7 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  if(!amount||!all||amount.dataset.allBalanceReady)return;
  amount.dataset.allBalanceReady='1';
  const fmt=n=>Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
- function setAll(){const balance=Math.max(0,Number(window.state?.balance||0));amount.value=balance.toFixed(2);amount.dispatchEvent(new Event('input',{bubbles:true}));amount.dispatchEvent(new Event('change',{bubbles:true}));const msg=document.getElementById('timedResult');if(msg)msg.textContent='ALL selected · using your full available '+fmt(balance)+' USDT wallet balance.';}
+ function setAll(){const balance=Math.max(0,Number(typeof state!=='undefined'&&state?state.balance||0:0));amount.value=balance.toFixed(2);amount.dispatchEvent(new Event('input',{bubbles:true}));amount.dispatchEvent(new Event('change',{bubbles:true}));const msg=document.getElementById('timedResult');if(msg)msg.textContent='ALL selected · using your full available '+fmt(balance)+' USDT wallet balance.';}
  all.addEventListener('click',setAll);
  // Default to the full wallet balance when the user has not edited the amount.
  if(!amount.dataset.userEdited){const balance=Math.max(0,Number(window.state?.balance||0));if(balance>=100){amount.value=balance.toFixed(2);}}
