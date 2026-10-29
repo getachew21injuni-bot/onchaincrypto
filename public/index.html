@@ -3788,7 +3788,7 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
   const market=typeof priceFor==='function'?priceFor(coin):null,price=coin==='USDT'?1:Number(market?.current_price||0);
   const usd=q*price,isGold=symbol==='XAU',min=isGold?500:100;
   const h=typeof state!=='undefined'&&state&&state.holdings?state.holdings:{};
-  const balance=coin==='USDT'?Math.max(0,Number(state?.balance||0)):Math.max(0,Number(h[coin]||h[coin.toLowerCase()]||0));
+  const balance=coin==='USDT'?Math.max(0,Number(typeof state!=='undefined'&&state?state.balance||0:0)):Math.max(0,Number(h[coin]||h[coin.toLowerCase()]||0));
   let warning='';
   if(amount.value.trim()!==''&&(!Number.isFinite(q)||q<=0||!Number.isFinite(usd)||usd<min||usd>1000000))warning='Enter an amount within an investment plan (100–1,000,000 USDT).'+(isGold?' Gold trades require at least $500 equivalent.':'');
   else if(amount.value.trim()!==''&&q>balance+1e-10)warning='Amount exceeds your wallet balance ('+balance.toLocaleString('en-US',{maximumFractionDigits:8})+').';
