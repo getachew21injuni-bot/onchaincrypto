@@ -530,9 +530,9 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="page-title"><div><h1>⇄ Convert</h1><div class="muted">Convert supported assets using available public market prices.</div></div><span class="tag" style="color:#c4a1ff">WALLET CONVERSION</span></div>
     <section class="panel form-panel" id="ocConvertPanel">
       <div class="wallet-summary-strip" style="margin-bottom:14px"><div><span>Available USDT</span><strong id="convertUsdtBalance">— USDT</strong></div><div><span>Conversion fee</span><strong>0.1%</strong></div></div>
-      <label for="convertFrom">You pay</label><div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,.75fr);gap:9px"><input id="convertAmount" class="field" type="number" min="0" step="any" inputmode="decimal" placeholder="Amount to convert" aria-label="Amount to convert"><select id="convertFrom" class="field" aria-label="Asset to convert from"></select></div>
+      <label for="convertFrom">From · You pay</label><div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,.75fr);gap:9px"><div><input id="convertAmount" class="field" type="number" min="0" step="any" inputmode="decimal" placeholder="Amount to convert" aria-label="Amount to convert" style="width:100%"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px"><span id="convertFromBalance" class="muted tiny">Available: —</span><button id="convertMax" class="secondary" type="button" style="padding:4px 10px;color:#c4a1ff;border-color:#7652ac">MAX</button></div></div><select id="convertFrom" class="field" aria-label="Asset to convert from"></select></div>
       <div style="display:flex;justify-content:center;margin:12px 0"><button id="convertSwapDirection" class="secondary" type="button" aria-label="Swap conversion direction" title="Swap conversion direction" style="border-radius:50%;width:44px;height:44px;padding:0;font-size:22px;color:#c4a1ff;border-color:#7652ac">⇅</button></div>
-      <label for="convertTo">You receive (estimated)</label><div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,.75fr);gap:9px"><input id="convertOutput" class="field" type="text" readonly placeholder="0.00" aria-label="Estimated amount received"><select id="convertTo" class="field" aria-label="Asset to receive"></select></div>
+      <label for="convertTo">To · You receive (estimated)</label><div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,.75fr);gap:9px"><div><input id="convertOutput" class="field" type="text" readonly placeholder="0.00" aria-label="Estimated amount received" style="width:100%"><div id="convertToBalance" class="muted tiny" style="margin-top:6px">Wallet balance: —</div></div><select id="convertTo" class="field" aria-label="Asset to receive"></select></div>
       <div class="panel" style="padding:12px;margin-top:14px;background:#08182b"><div class="list-row"><span class="muted">Exchange rate</span><strong id="convertRate">Waiting for market prices</strong></div><div class="list-row"><span class="muted">Fee</span><strong id="convertFee">—</strong></div><div class="list-row"><span class="muted">You receive</span><strong id="convertReceiveSummary">—</strong></div></div>
       <p id="convertMessage" class="muted tiny" role="status" aria-live="polite">Uses demo wallet balances and public prices. No real exchange or blockchain transaction is performed.</p>
       <button id="convertConfirm" class="primary full" type="button" disabled>Convert</button>
@@ -3624,6 +3624,9 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
   const fromSym=from.value,toSym=to.value,qty=Number(amount.value||0),pFrom=price(fromSym),pTo=price(toSym);
   const balance=holding(fromSym),usdt=$('convertUsdtBalance');
   if(usdt)usdt.textContent=fmt(Number(state.balance||0),2)+' USDT';
+  const fromBalance=$('convertFromBalance'),toBalance=$('convertToBalance');
+  if(fromBalance)fromBalance.textContent='Available: '+fmt(balance,8)+' '+(fromSym||'');
+  if(toBalance)toBalance.textContent='Wallet balance: '+fmt(holding(toSym),8)+' '+(toSym||'');
   const ownedFrom=assets().some(c=>c.symbol===fromSym),ownedTo=assets().some(c=>c.symbol===toSym);
   const valid=ownedFrom&&ownedTo&&fromSym&&toSym&&fromSym!==toSym&&qty>0&&Number.isFinite(qty)&&pFrom>0&&pTo>0&&qty<=balance+1e-10;
   const feeValue=valid?qty*pFrom*0.001:0,receive=valid?Math.max(0,(qty*pFrom-feeValue)/pTo):0;
@@ -3647,8 +3650,10 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
   let rows=[];try{rows=JSON.parse(localStorage.getItem('oc_convert_history')||'[]')}catch(_){}
   el.innerHTML=rows.length?rows.slice(0,10).map(x=>'<div class="list-row"><div><strong>'+safeText(x.fromQty)+' '+safeText(x.from) +' → '+safeText(x.toQty)+' '+safeText(x.to)+'</strong><div class="muted tiny">'+safeText(new Date(x.time).toLocaleString())+' · '+safeText(x.status)+'</div></div><span class="tag" style="color:#c4a1ff">CONVERT</span></div>').join(''):'<div class="empty">No conversions yet.</div>';
  }
- from.addEventListener('change',()=>{if(from.value===to.value)to.value=from.value==='USDT'?'BTC':'USDT';preview()});
- to.addEventListener('change',preview);amount.addEventListener('input',preview);
+ from.addEventListener('change',()=>{if(from.value===to.value){const alternative=assets().find(c=>c.symbol!==from.value);to.value=alternative?.symbol||''}preview()});
+ to.addEventListener('change',()=>{if(from.value===to.value){const alternative=assets().find(c=>c.symbol!==to.value);from.value=alternative?.symbol||''}preview()});
+ amount.addEventListener('input',preview);
+ $('convertMax')?.addEventListener('click',()=>{amount.value=String(holding(from.value));preview()});
  $('convertSwapDirection')?.addEventListener('click',()=>{const old=from.value;from.value=to.value;to.value=old;preview()});
  confirmBtn.addEventListener('click',()=>{
   if(typeof state==='undefined'||!state)return;
