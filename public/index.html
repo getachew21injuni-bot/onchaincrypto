@@ -692,7 +692,7 @@ document.addEventListener('DOMContentLoaded',function(){
           <label for="registerLastName">Last name <span class="yellow">(required)</span></label><input id="registerLastName" class="field" maxlength="50" autocomplete="family-name" required placeholder="Enter your last name">
           <label for="registerEmail">Email address</label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com"><div id="emailCodePanel" class="hidden"><label for="registerEmailCode">Gmail verification code</label><input id="registerEmailCode" class="field" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="Enter 6-digit code"><p class="muted tiny">Check your inbox and spam folder. Code expires in 10 minutes.</p><button id="resendEmailCodeBtn" class="secondary full" type="button">Send code again</button></div><div class="oc-register-contact-choice"><label for="registerContactMethod">Choose email or phone</label><select id="registerContactMethod" class="field" aria-label="Choose email or phone"><option value="email">✉ Email</option><option value="phone">☎ Phone</option></select></div>
           <p class="muted tiny">No email link needed. To register by phone, use SMS below.</p>
-          <label for="registerPassword">Password <span class="yellow">(required)</span></label><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="Create a password (8+ characters)">
+          <label for="registerPassword">Password <span class="yellow">(required)</span></label><div class="oc-password-wrap"><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="Create a password (8+ characters)"><button class="oc-password-toggle" type="button" data-password-target="registerPassword" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
           <label for="referralCode">Referral code <span class="muted tiny">(optional)</span></label><input id="referralCode" class="field" maxlength="40" autocomplete="off" placeholder="Enter referral code if you have one">
           <button class="primary full" type="submit">⚡ Create account</button>
           <p class="auth-switch">Already have an account? <button type="button" id="registerLoginBtn">Login</button></p>
@@ -702,7 +702,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <form id="signInForm" class="auth-signin-form">
           <h3 style="margin-top:12px">Sign in</h3>
           <label for="signInEmail">Email address</label><input id="signInEmail" class="field" type="email" autocomplete="username" required placeholder="you@example.com">
-          <label for="signInPassword">Password</label><input id="signInPassword" class="field" type="password" autocomplete="current-password" required placeholder="Enter your password">
+          <label for="signInPassword">Password</label><div class="oc-password-wrap"><input id="signInPassword" class="field" type="password" autocomplete="current-password" required placeholder="Enter your password"><button class="oc-password-toggle" type="button" data-password-target="signInPassword" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
           <div class="auth-options"><label class="auth-check"><input type="checkbox" id="rememberMe"> Remember me</label><label class="auth-check"><input type="checkbox" id="showSignInPassword"> Show password</label></div>
           <button class="primary full auth-submit" type="submit">⚡ Sign In Securely</button>
           <button class="secondary full" id="resetPasswordBtn" type="button">Forgot password?</button>
@@ -3497,5 +3497,42 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  document.addEventListener('click',function(e){if(e.target.closest('[data-page="wallet"]'))setTimeout(updateSelected,0)});
  setInterval(()=>{if(!menu.classList.contains('hidden'))renderOptions()},5000);
  updateSelected();
+})();
+</script>
+
+
+<style id="oc-password-visibility-toggle">
+.oc-password-wrap{position:relative;display:flex;align-items:center;width:100%;margin:0 0 12px}
+.oc-password-wrap>.field{width:100%;padding-right:48px!important;margin-bottom:0!important}
+.oc-password-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:34px;height:34px;padding:6px;border:0;border-radius:8px;background:transparent;color:#9db8d5;cursor:pointer;z-index:2}
+.oc-password-toggle:hover{background:#173453;color:#fff}
+.oc-password-toggle:focus-visible{outline:2px solid #4cc9f0;outline-offset:1px}
+.oc-password-toggle svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+</style>
+<script id="oc-password-visibility-toggle-script">
+(function(){
+ document.querySelectorAll('[data-password-target]').forEach(function(button){
+   if(button.dataset.visibilityReady)return;
+   button.dataset.visibilityReady='true';
+   button.addEventListener('click',function(){
+     const input=document.getElementById(button.dataset.passwordTarget);
+     if(!input)return;
+     const show=input.type==='password';
+     input.type=show?'text':'password';
+     button.setAttribute('aria-label',show?'Hide password':'Show password');
+     button.setAttribute('title',show?'Hide password':'Show password');
+     button.setAttribute('aria-pressed',String(show));
+   });
+ });
+ const oldCheckbox=document.getElementById('showSignInPassword');
+ if(oldCheckbox){
+   oldCheckbox.checked=false;
+   oldCheckbox.addEventListener('change',function(){
+     const input=document.getElementById('signInPassword');
+     if(input)input.type=oldCheckbox.checked?'text':'password';
+     const button=document.querySelector('[data-password-target="signInPassword"]');
+     if(button){button.setAttribute('aria-pressed',String(oldCheckbox.checked));button.setAttribute('aria-label',oldCheckbox.checked?'Hide password':'Show password');button.setAttribute('title',oldCheckbox.checked?'Hide password':'Show password');}
+   });
+ }
 })();
 </script>
