@@ -287,6 +287,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="quick-action-grid">
    <button class="quick-action" style="--action-color:#00d7a0" type="button" data-go="deposit"><span class="action-icon">⇩</span><strong>Deposit</strong><small>Deposit instructions</small></button>
    <button class="quick-action" style="--action-color:#ff5573" type="button" data-go="withdraw"><span class="action-icon">⇧</span><strong>Withdraw</strong><small>Withdrawal options</small></button>
+   <button class="quick-action" style="--action-color:#a78bfa" type="button" data-go="convert"><span class="action-icon">⇄</span><strong>Convert</strong><small>Swap supported assets</small></button>
    <button class="quick-action" style="--action-color:#159cff" type="button" data-go="trade"><span class="action-icon">↗</span><strong>Trade Crypto</strong><small>Open trading workspace</small></button>
     <button class="quick-action" style="--action-color:#f5bd42" type="button" data-go="trade" data-gold-trade="true"><span class="action-icon gold-coin-icon" aria-hidden="true">◉</span><strong>Trade Gold</strong><small>XAU / USDT · Gold</small></button>
    <button class="quick-action" style="--action-color:#a78bfa" type="button" data-go="wallet"><span class="action-icon">◉</span><strong>My Wallet</strong><small>View assets and balance</small></button>
@@ -526,8 +527,17 @@ document.addEventListener('DOMContentLoaded',function(){
     <section class="panel form-panel"><label for="transferAsset">Asset</label><select id="transferAsset" class="field"><option>USDT</option><option>BTC</option><option>ETH</option><option>BNB</option><option>XRP</option></select><label for="transferDestination">Destination account / wallet</label><input id="transferDestination" class="field" placeholder="Recipient account ID"><label for="transferAmount">Amount</label><input id="transferAmount" class="field" type="number" min="0" step="any" placeholder="Enter amount"><button class="primary full" type="button" disabled>Transfers unavailable until secure ledger setup.</button><p class="muted tiny">Preview only. Transfers require secure backend validation.</p></section>
   </section>
   <section id="page-convert" class="hidden">
-    <div class="page-title"><div><h1>⇄ Convert</h1><div class="muted">Choose assets to preview a conversion.</div></div><span class="tag">Preview</span></div>
-    <section class="panel form-panel"><label for="convertFrom">From</label><select id="convertFrom" class="field"><option>USDT</option><option>BTC</option><option>ETH</option><option>BNB</option><option>XRP</option></select><label for="convertTo">To</label><select id="convertTo" class="field"><option>BTC</option><option>ETH</option><option>BNB</option><option>XRP</option><option>USDT</option></select><label for="convertAmount">Amount</label><input id="convertAmount" class="field" type="number" min="0" step="any" placeholder="Enter amount"><p class="muted tiny">Conversion requires a connected provider; none is executed here.</p><button class="primary full" type="button" disabled>Convert unavailable: no provider connected.</button></section>
+    <div class="page-title"><div><h1>⇄ Convert</h1><div class="muted">Convert supported assets using available public market prices.</div></div><span class="tag" style="color:#c4a1ff">WALLET CONVERSION</span></div>
+    <section class="panel form-panel" id="ocConvertPanel">
+      <div class="wallet-summary-strip" style="margin-bottom:14px"><div><span>Available USDT</span><strong id="convertUsdtBalance">— USDT</strong></div><div><span>Conversion fee</span><strong>0.1%</strong></div></div>
+      <label for="convertFrom">You pay</label><div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,.75fr);gap:9px"><input id="convertAmount" class="field" type="number" min="0" step="any" inputmode="decimal" placeholder="Amount to convert" aria-label="Amount to convert"><select id="convertFrom" class="field" aria-label="Asset to convert from"></select></div>
+      <div style="display:flex;justify-content:center;margin:12px 0"><button id="convertSwapDirection" class="secondary" type="button" aria-label="Swap conversion direction" title="Swap conversion direction" style="border-radius:50%;width:44px;height:44px;padding:0;font-size:22px;color:#c4a1ff;border-color:#7652ac">⇅</button></div>
+      <label for="convertTo">You receive (estimated)</label><div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,.75fr);gap:9px"><input id="convertOutput" class="field" type="text" readonly placeholder="0.00" aria-label="Estimated amount received"><select id="convertTo" class="field" aria-label="Asset to receive"></select></div>
+      <div class="panel" style="padding:12px;margin-top:14px;background:#08182b"><div class="list-row"><span class="muted">Exchange rate</span><strong id="convertRate">Waiting for market prices</strong></div><div class="list-row"><span class="muted">Fee</span><strong id="convertFee">—</strong></div><div class="list-row"><span class="muted">You receive</span><strong id="convertReceiveSummary">—</strong></div></div>
+      <p id="convertMessage" class="muted tiny" role="status" aria-live="polite">Uses demo wallet balances and public prices. No real exchange or blockchain transaction is performed.</p>
+      <button id="convertConfirm" class="primary full" type="button" disabled>Convert</button>
+    </section>
+    <section class="panel" style="padding:16px"><h2>Recent conversions</h2><div id="convertHistory" class="muted tiny" style="margin-top:10px">No conversions yet.</div></section>
   </section>
   <section id="page-notifications" class="hidden"><div class="page-title"><div><h1>♢ Notifications</h1><div class="muted">Account and security settings.</div></div><span class="tag">NOTIFICATIONS</span></div><section class="panel form-panel"><div class="list-row"><div class="asset"><span class="menu-symbol notification-symbol">♢</span><div><strong>Account security</strong><div class="muted tiny">Sign in to check account and email status.</div></div></div><span class="tag">Action may be needed</span></div><div class="list-row"><div class="asset"><span class="menu-symbol kyc-symbol">✓</span><div><strong>KYC verification</strong><div class="muted tiny">KYC is unavailable until a secure provider is connected.</div></div></d  <section id="page-profile" class="hidden">
     <div class="page-title"><div><h1>Profile</h1><div class="muted">Manage account and preference.</div></div><span class="tag">ACCOUNT CENTER</span></div>
@@ -3552,5 +3562,106 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
      if(button){button.setAttribute('aria-pressed',String(oldCheckbox.checked));button.setAttribute('aria-label',oldCheckbox.checked?'Hide password':'Show password');button.setAttribute('title',oldCheckbox.checked?'Hide password':'Show password');}
    });
  }
+})();
+</script>
+
+
+<style id="oc-functional-wallet-convert-styles">
+#page-home [data-go="convert"]{--action-color:#a78bfa!important}
+#page-home [data-go="convert"] .action-icon{background:rgba(167,139,250,.18);color:#c4a1ff}
+#page-convert #ocConvertPanel{max-width:760px;margin:0 auto 18px}
+#page-convert .wallet-summary-strip{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#page-convert .wallet-summary-strip>div{background:#102641;border:1px solid #1b4263;border-radius:9px;padding:12px}
+#page-convert .wallet-summary-strip span{display:block;color:#91abc5;font-size:12px}
+#page-convert .wallet-summary-strip strong{display:block;margin-top:4px}
+#page-convert #convertHistory .list-row{align-items:center}
+@media(max-width:520px){#page-convert #ocConvertPanel{padding:12px!important}#page-convert .wallet-summary-strip{gap:7px}#page-convert .wallet-summary-strip>div{padding:9px}}
+</style>
+<script id="oc-functional-wallet-convert-script">
+(function(){
+ if(window.__ocFunctionalWalletConvert)return;window.__ocFunctionalWalletConvert=true;
+ const $=id=>document.getElementById(id);
+ const from=$('convertFrom'),to=$('convertTo'),amount=$('convertAmount'),output=$('convertOutput'),confirmBtn=$('convertConfirm');
+ if(!from||!to||!amount||!output||!confirmBtn)return;
+ const fallback=[
+  ['USDT','Tether'],['BTC','Bitcoin'],['ETH','Ethereum'],['BNB','BNB'],['XRP','XRP'],['SOL','Solana'],['USDC','USD Coin'],['ADA','Cardano'],['DOGE','Dogecoin'],['TRX','TRON'],['TON','Toncoin'],['DOT','Polkadot'],['LTC','Litecoin'],['LINK','Chainlink'],['AVAX','Avalanche'],['SHIB','Shiba Inu'],['XAU','Gold']
+ ];
+ const fmt=(n,max=8)=>Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:max});
+ const getMarket=()=>Array.isArray(market)?market:[];
+ const getCoin=sym=>getMarket().find(c=>String(c.symbol||'').toUpperCase()===sym);
+ const price=sym=>{if(sym==='USDT'||sym==='USDC')return 1;const c=getCoin(sym);const p=Number(c?.current_price||0);return Number.isFinite(p)&&p>0?p:0};
+ const safeText=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function assets(){
+  const list=[...fallback.map(([symbol,name])=>({symbol,name})),...getMarket().map(c=>({symbol:String(c.symbol||'').toUpperCase(),name:c.name||c.symbol}))];
+  const seen=new Set();return list.filter(c=>c.symbol&&!seen.has(c.symbol)&&seen.add(c.symbol)).filter(c=>c.symbol==='USDT'||c.symbol==='USDC'||price(c.symbol)>0||c.symbol==='XAU').sort((a,b)=>a.symbol==='USDT'?-1:b.symbol==='USDT'?1:a.symbol.localeCompare(b.symbol));
+ }
+ function fillSelects(){
+  const oldFrom=from.value||'USDT',oldTo=to.value||'BTC',list=assets();
+  const html=list.map(c=>'<option value="'+safeText(c.symbol)+'">'+safeText(c.symbol)+' · '+safeText(c.name)+'</option>').join('');
+  from.innerHTML=html;to.innerHTML=html;
+  from.value=list.some(c=>c.symbol===oldFrom)?oldFrom:'USDT';
+  to.value=list.some(c=>c.symbol===oldTo)&&oldTo!==from.value?oldTo:(from.value==='USDT'?'BTC':'USDT');
+  if(from.value===to.value)to.value=from.value==='USDT'?'BTC':'USDT';
+ }
+ function balances(){return typeof state!=='undefined'&&state&&state.holdings?state.holdings:{}}
+ function holding(sym){return sym==='USDT'?Number(state?.balance||0):Number(balances()[sym]||0)}
+ function preview(){
+  if(typeof state==='undefined'||!state)return;
+  const fromSym=from.value,toSym=to.value,qty=Number(amount.value||0),pFrom=price(fromSym),pTo=price(toSym);
+  const balance=holding(fromSym),usdt=$('convertUsdtBalance');
+  if(usdt)usdt.textContent=fmt(Number(state.balance||0),2)+' USDT';
+  const valid=fromSym&&toSym&&fromSym!==toSym&&qty>0&&Number.isFinite(qty)&&pFrom>0&&pTo>0&&qty<=balance+1e-10;
+  const feeValue=valid?qty*pFrom*0.001:0,receive=valid?Math.max(0,(qty*pFrom-feeValue)/pTo):0;
+  output.value=valid?fmt(receive,8):'';
+  const rate=$('convertRate'),fee=$('convertFee'),summary=$('convertReceiveSummary'),message=$('convertMessage');
+  if(rate)rate.textContent=pFrom>0&&pTo>0?'1 '+fromSym+' ≈ '+fmt(pFrom/pTo,8)+' '+toSym:'Live price unavailable';
+  if(fee)fee.textContent=valid?fmt(feeValue,8)+' USDT (0.1%)':'—';
+  if(summary)summary.textContent=valid?fmt(receive,8)+' '+toSym:'—';
+  if(message){
+   if(fromSym===toSym)message.textContent='Choose two different assets.';
+   else if(!(qty>0))message.textContent='Enter an amount to see the conversion estimate.';
+   else if(qty>balance)message.textContent='Insufficient '+fromSym+' balance. Available: '+fmt(balance,8)+' '+fromSym+'.';
+   else if(!pFrom||!pTo)message.textContent='A public price is not available for one of these assets yet. Try another pair.';
+   else message.textContent='Estimated conversion using available public prices. 0.1% fee applies. Demo wallet only; no real exchange order is placed.';
+  }
+  confirmBtn.disabled=!valid;
+  confirmBtn.textContent=valid?'Convert '+fromSym+' to '+toSym:'Convert';
+ }
+ function renderHistory(){
+  const el=$('convertHistory');if(!el)return;
+  let rows=[];try{rows=JSON.parse(localStorage.getItem('oc_convert_history')||'[]')}catch(_){}
+  el.innerHTML=rows.length?rows.slice(0,10).map(x=>'<div class="list-row"><div><strong>'+safeText(x.fromQty)+' '+safeText(x.from) +' → '+safeText(x.toQty)+' '+safeText(x.to)+'</strong><div class="muted tiny">'+safeText(new Date(x.time).toLocaleString())+' · '+safeText(x.status)+'</div></div><span class="tag" style="color:#c4a1ff">CONVERT</span></div>').join(''):'<div class="empty">No conversions yet.</div>';
+ }
+ from.addEventListener('change',()=>{if(from.value===to.value)to.value=from.value==='USDT'?'BTC':'USDT';preview()});
+ to.addEventListener('change',preview);amount.addEventListener('input',preview);
+ $('convertSwapDirection')?.addEventListener('click',()=>{const old=from.value;from.value=to.value;to.value=old;preview()});
+ confirmBtn.addEventListener('click',()=>{
+  if(typeof state==='undefined'||!state)return;
+  const a=from.value,b=to.value,q=Number(amount.value||0),pa=price(a),pb=price(b),available=holding(a);
+  if(!a||!b||a===b||!(q>0)||!pa||!pb||q>available+1e-10){preview();return}
+  const feeUsdt=q*pa*0.001,receive=Math.max(0,(q*pa-feeUsdt)/pb);
+  if(a==='USDT')state.balance=Number(state.balance||0)-q;
+  else state.holdings[a]=Math.max(0,Number(state.holdings[a]||0)-q);
+  if(b==='USDT')state.balance=Number(state.balance||0)+receive;
+  else state.holdings[b]=Number(state.holdings[b]||0)+receive;
+  if(!state.holdings[a]||state.holdings[a]<1e-12)delete state.holdings[a];
+  if(!Array.isArray(state.history))state.history=[];
+  const item={from:a,to:b,fromQty:q,toQty:receive,feeUsdt,time:new Date().toISOString(),status:'Completed · demo wallet'};
+  let history=[];try{history=JSON.parse(localStorage.getItem('oc_convert_history')||'[]')}catch(_){}
+  history.unshift(item);localStorage.setItem('oc_convert_history',JSON.stringify(history.slice(0,100)));
+  if(typeof saveState==='function')saveState();
+  if(typeof recordActivity==='function')recordActivity('convert','Converted '+a+' to '+b,fmt(q,8)+' '+a+' → '+fmt(receive,8)+' '+b+' · fee '+fmt(feeUsdt,8)+' USDT','Completed · demo wallet');
+  if(typeof renderWallet==='function')renderWallet();
+  if(typeof renderWalletCoinList==='function')renderWalletCoinList();
+  if(typeof renderPnl==='function')renderPnl();
+  amount.value='';fillSelects();renderHistory();preview();
+  const msg=$('convertMessage');if(msg)msg.textContent='Conversion completed in your demo wallet. Balances and history have been updated; no real funds were moved.';
+ });
+ const oldShowPage=window.showPage;
+ if(typeof oldShowPage==='function')window.showPage=function(page){oldShowPage(page);if(page==='convert'){fillSelects();renderHistory();preview()}};
+ document.addEventListener('click',e=>{const btn=e.target.closest('[data-go="convert"]');if(btn){e.preventDefault();window.showPage('convert')}});
+ document.addEventListener('market-updated',()=>{fillSelects();preview()});
+ fillSelects();renderHistory();preview();
+ setInterval(()=>{if(!$('page-convert')?.classList.contains('hidden')){fillSelects();preview()}},8000);
 })();
 </script>
