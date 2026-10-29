@@ -1503,20 +1503,41 @@ document.getElementById("googleSignInBtn").addEventListener("click", async () =>
   window.ocPendingPage = "profile";
   const first = document.getElementById("registerFirstName").value.trim();
   const last = document.getElementById("registerLastName").value.trim();
-  const name = (first + " " + last).trim();
+  const suppliedName = (first + " " + last).trim();
   msg("Opening Google sign-in…");
   try {
     const credential = await signInWithPopup(auth, new GoogleAuthProvider());
-    // Google already provides a display name; only replace it when the user supplied one.
-    if (name) await updateProfile(credential.user, { displayName: name });
-    const identity = (name || credential.user.displayName || credential.user.email || "user");
+    const user = credential.user;
+    // Keep Google sign-in resilient if the optional profile-name update fails.
+    if (suppliedName && suppliedName !== user.displayName) {
+      try { await updateProfile(user, { displayName: suppliedName }); }
+      catch (profileError) { console.warn("Google profile name update deferred:", profileError?.code || profileError); }
+    }
+    const displayName = user.displayName || suppliedName || user.email || "user";
+    const nameParts = displayName.trim().split(/\\s+/);
+    const savedProfile = {
+      uid: user.uid,
+      firstName: first || nameParts[0] || "",
+      lastName: last || nameParts.slice(1).join(" "),
+      email: user.email || "",
+      displayName,
+      createdAt: new Date().toISOString()
+    };
+    try {
+      const previous = JSON.parse(localStorage.getItem("oc_profile_" + user.uid) || "{}");
+      savedProfile.createdAt = previous.createdAt || savedProfile.createdAt;
+      localStorage.setItem("oc_profile_" + user.uid, JSON.stringify({ ...previous, ...savedProfile }));
+    } catch (_) {}
+    try { await saveBasicUserProfile(user); }
+    catch (profileError) { console.warn("Google account profile sync deferred:", profileError?.code || profileError); }
+    const identity = displayName;
     msg("Google sign-in successful. Signed in as " + identity + ".");
     const status = document.getElementById("authStatus");
     if (status) status.textContent = "Signed in as " + identity + ". You can continue to the platform.";
     if (typeof window.showPage === "function") window.showPage("profile");
   } catch (error) {
     if (error?.code === "auth/operation-not-allowed") msg("Google sign-in is disabled in Firebase. Enable Google under Firebase Console → Authentication → Sign-in method.");
-    else if (error?.code === "auth/unauthorized-domain") msg("Google sign-in blocked: add getachew21injuni-bot.github.io under Firebase Console → Authentication → Settings → Authorized domains.");
+    else if (error?.code === "auth/unauthorized-domain") msg("Google sign-in blocked: add this website hostname under Firebase Console → Authentication → Settings → Authorized domains.");
     else msg(friendlyError(error));
   }
 });
