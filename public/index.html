@@ -690,7 +690,7 @@ document.addEventListener('DOMContentLoaded',function(){
           <p class="muted tiny">Join OnChainCrypto.</p>
           <label for="registerFirstName">First name <span class="yellow">(required)</span></label><input id="registerFirstName" class="field" maxlength="50" autocomplete="given-name" required placeholder="Enter your first name">
           <label for="registerLastName">Last name <span class="yellow">(required)</span></label><input id="registerLastName" class="field" maxlength="50" autocomplete="family-name" required placeholder="Enter your last name">
-          <label for="registerEmail">Email address</label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com"><div class="oc-register-contact-choice"><label for="registerContactMethod">Choose email or phone</label><select id="registerContactMethod" class="field" aria-label="Choose email or phone"><option value="email">✉ Email</option><option value="phone">☎ Phone</option></select></div>
+          <label for="registerEmail">Email address</label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com"><div id="emailCodePanel" class="hidden"><label for="registerEmailCode">Gmail verification code</label><input id="registerEmailCode" class="field" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="Enter 6-digit code"><p class="muted tiny">Check your inbox and spam folder. Code expires in 10 minutes.</p><button id="resendEmailCodeBtn" class="secondary full" type="button">Send code again</button></div><div class="oc-register-contact-choice"><label for="registerContactMethod">Choose email or phone</label><select id="registerContactMethod" class="field" aria-label="Choose email or phone"><option value="email">✉ Email</option><option value="phone">☎ Phone</option></select></div>
           <p class="muted tiny">No email link needed. To register by phone, use SMS below.</p>
           <label for="registerPassword">Password <span class="yellow">(required)</span></label><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="Create a password (8+ characters)">
           <label for="referralCode">Referral code <span class="muted tiny">(optional)</span></label><input id="referralCode" class="field" maxlength="40" autocomplete="off" placeholder="Enter referral code if you have one">
@@ -1325,6 +1325,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const EMAIL_VERIFICATION_URL = "https://script.google.com/macros/s/AKfycbxUnw388WC-rAZY5RJBGs6_Zo13VKvnTgrbz78hOqYEu9uPa2lJRI_V9Y8JNGGOItHJ/exec";
 // Create or refresh the signed-in user's basic profile. Security Rules limit each
 // user to their own UID and approved profile fields; this never writes balances.
 async function saveBasicUserProfile(user) {
@@ -1460,6 +1461,48 @@ function authEmailForIdentifier(value) {
   return phone.replace(/\D/g, "") + "@phone.onchaincrypto.invalid";
 }
 
+let emailCodeSentFor = "";
+async function requestEmailVerificationCode(email) {
+  const response = await fetch(EMAIL_VERIFICATION_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "send", email })
+  });
+  const result = await response.json();
+  if (!result.success) throw new Error(result.message || "Could not send verification code.");
+  return result;
+}
+async function verifyEmailVerificationCode(email, code) {
+  const response = await fetch(EMAIL_VERIFICATION_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "verify", email, code })
+  });
+  const result = await response.json();
+  if (!result.success || result.verified !== true) throw new Error(result.message || "Email code could not be verified.");
+  return result;
+}
+document.getElementById("registerEmail").addEventListener("input", () => {
+  emailCodeSentFor = "";
+  document.getElementById("emailCodePanel")?.classList.add("hidden");
+  const code = document.getElementById("registerEmailCode");
+  if (code) code.value = "";
+});
+document.getElementById("resendEmailCodeBtn")?.addEventListener("click", async () => {
+  const email = document.getElementById("registerEmail").value.trim().toLowerCase();
+  if (!email) { msg("Enter your email address first."); return; }
+  const button = document.getElementById("resendEmailCodeBtn");
+  button.disabled = true;
+  msg("Sending a new Gmail code…");
+  try {
+    await requestEmailVerificationCode(email);
+    emailCodeSentFor = email;
+    msg("A new code was sent. Check your inbox and spam folder.");
+  } catch (error) {
+    console.error("Email code resend failed:", error);
+    msg(error?.message || "Could not send the code. Please try again.");
+  } finally { button.disabled = false; }
+});
 document.getElementById("registerForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   window.ocPendingPage = "profile";
@@ -1470,28 +1513,60 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
   const name = (firstName + " " + lastName).trim();
   if (!firstName || !lastName) { msg("Enter your first and last name."); return; }
   if (!email) { msg("Enter an email address, or use the phone SMS registration panel."); return; }
-  msg("Creating your account…");
+
+  if (emailCodeSentFor !== email) {
+    msg("Sending a verification code to your Gmail…");
+    try {
+      await requestEmailVerificationCode(email);
+      emailCodeSentFor = email;
+      document.getElementById("emailCodePanel")?.classList.remove("hidden");
+      document.getElementById("registerEmailCode")?.focus();
+      msg("Code sent. Enter the six-digit code from your Gmail to finish registration.");
+    } catch (error) {
+      console.error("Email code send failed:", error);
+      msg(error?.message || "Could not send a Gmail code. Please try again.");
+    }
+    return;
+  }
+
+  const code = document.getElementById("registerEmailCode")?.value.trim() || "";
+  if (!/^\d{6}$/.test(code)) {
+    document.getElementById("emailCodePanel")?.classList.remove("hidden");
+    msg("Enter the six-digit verification code sent to your Gmail.");
+    return;
+  }
+  msg("Verifying your Gmail code…");
+  try {
+    await verifyEmailVerificationCode(email, code);
+  } catch (error) {
+    console.error("Email code verification failed:", error);
+    msg(error?.message || "That code could not be verified. Please try again.");
+    return;
+  }
+
+  msg("Email verified. Creating your account…");
   try {
     const credential = await createUserWithEmailAndPassword(auth, email, password);
     window.onchaincryptoCurrentUser = credential.user;
-    // Account creation must remain successful even if the optional display-name update
-    // or cloud profile sync is unavailable. Keep each user's profile keyed by their UID.
     if (name) {
       try { await updateProfile(credential.user, { displayName: name }); }
       catch (profileError) { console.warn("Display name update deferred:", profileError?.code || profileError); }
     }
     try {
-      const savedProfile = { firstName, lastName, email, displayName: name, referralCode: (document.getElementById("referralCode")?.value || "").trim(), createdAt: new Date().toISOString() };
+      const savedProfile = { firstName, lastName, email, displayName: name, referralCode: (document.getElementById("referralCode")?.value || "").trim(), createdAt: new Date().toISOString(), emailVerifiedByCode: true };
       localStorage.setItem("oc_profile_" + credential.user.uid, JSON.stringify(savedProfile));
       if (savedProfile.referralCode) localStorage.setItem("oc_referral_attribution_" + credential.user.uid, savedProfile.referralCode);
     } catch (_) {}
     try { await saveBasicUserProfile(credential.user); }
     catch (profileError) { console.warn("Basic profile sync deferred:", profileError?.code || profileError); }
     document.getElementById("registerPassword").value = "";
+    document.getElementById("registerEmailCode").value = "";
+    document.getElementById("emailCodePanel")?.classList.add("hidden");
+    emailCodeSentFor = "";
     const identity = name || credential.user.displayName || credential.user.email || "user";
     const status = document.getElementById("authStatus");
     if (status) status.textContent = "Account created successfully. Signed in as " + identity + ". You can continue to the platform.";
-    msg("Account created successfully. You are now signed in. You can continue to the platform.");
+    msg("Gmail code verified. Account created successfully. You are now signed in.");
     if (typeof window.showPage === "function") window.showPage("profile");
   } catch (error) {
     console.error("OnChainCrypto registration failed:", error?.code || error);
