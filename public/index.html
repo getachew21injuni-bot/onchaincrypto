@@ -3754,8 +3754,8 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  }
  function sync(){
   const list=coins(),old=sel.value;
-  sel.innerHTML=list.map(c=>'<option value="'+c.symbol+'">'+c.symbol+' · '+fmt(c.qty)+' available</option>').join('');
-  if(!list.length){sel.innerHTML='<option value="USDT">USDT · no available balance</option>';window.__ocTradeFundingCoin='USDT'}
+  sel.innerHTML=list.map(c=>'<option value="'+c.symbol+'">'+c.symbol+' · '+fmt(c.qty)+'</option>').join('');
+  if(!list.length){sel.innerHTML='<option value="USDT">USDT · 0</option>';window.__ocTradeFundingCoin='USDT'}
   else{const c=list.find(x=>x.symbol===old)||list.find(x=>x.symbol==='USDT')||list.slice().sort((a,b)=>b.qty*b.price-a.qty*a.price)[0];sel.value=c.symbol;window.__ocTradeFundingCoin=c.symbol}
   const coin=window.__ocTradeFundingCoin||'USDT',item=list.find(x=>x.symbol===coin),amount=document.getElementById('timedStake');
   if(amount){amount.min=coin==='USDT'?'100':'0.00000001';amount.max=String(item?.qty||0);amount.step=coin==='USDT'?'0.01':'0.00000001';amount.placeholder='Enter amount in '+coin;if(!amount.dataset.userEdited&&item)amount.value=String(item.qty)}
@@ -3768,3 +3768,36 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  document.addEventListener('market-updated',sync);document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync()});sync();
 })();
 </script>
+
+
+<style id="oc-trade-amount-inline-all">
+#timedPaperTrade .oc-trade-amount-row{position:relative;display:flex;align-items:center;width:100%;gap:0}
+#timedPaperTrade .oc-trade-amount-row #timedStake{width:100%;flex:1;min-width:0;padding-right:76px;margin:0}
+#timedPaperTrade .oc-trade-amount-row #timedStakeAll{position:absolute;right:5px;top:50%;transform:translateY(-50%);min-width:58px;height:calc(100% - 10px);padding:0 12px;border-radius:8px;background:#173b2e;color:#16d9a0;border:1px solid #167c58;font-weight:800;z-index:2}
+#timedPaperTrade .oc-trade-amount-row #timedStakeAll:active{transform:translateY(-50%) scale(.98)}
+#ocTradeAmountAlert{display:none;margin:7px 0 10px;padding:9px 11px;border:1px solid #b94c55;border-radius:8px;background:rgba(185,76,85,.12);color:#ff9da5;font-size:12px;line-height:1.4}
+#ocTradeAmountAlert.show{display:block}
+</style>
+<script id="oc-trade-amount-inline-all-script">
+(function(){
+ const amount=document.getElementById('timedStake'),row=amount?.closest('.oc-trade-amount-row'),coinSel=document.getElementById('ocTradeFundingCoin'),pair=document.getElementById('tradeAsset');
+ if(!amount||!row||document.getElementById('ocTradeAmountAlert'))return;
+ const alertBox=document.createElement('div');alertBox.id='ocTradeAmountAlert';alertBox.setAttribute('role','alert');alertBox.setAttribute('aria-live','polite');row.insertAdjacentElement('afterend',alertBox);
+ function validate(){
+  const q=Number(amount.value),coin=(coinSel?.value||'USDT').toUpperCase(),symbol=(pair?.value||'').toUpperCase();
+  const market=typeof priceFor==='function'?priceFor(coin):null,price=coin==='USDT'?1:Number(market?.current_price||0);
+  const usd=q*price,isGold=symbol==='XAU',min=isGold?500:100;
+  const h=typeof state!=='undefined'&&state&&state.holdings?state.holdings:{};
+  const balance=coin==='USDT'?Math.max(0,Number(state?.balance||0)):Math.max(0,Number(h[coin]||h[coin.toLowerCase()]||0));
+  let warning='';
+  if(amount.value.trim()!==''&&(!Number.isFinite(q)||q<=0||!Number.isFinite(usd)||usd<min||usd>1000000))warning='Enter an amount within an investment plan (100–1,000,000 USDT).'+(isGold?' Gold trades require at least $500 equivalent.':'');
+  else if(amount.value.trim()!==''&&q>balance+1e-10)warning='Amount exceeds your wallet balance ('+balance.toLocaleString('en-US',{maximumFractionDigits:8})+').';
+  alertBox.textContent=warning;alertBox.classList.toggle('show',!!warning);amount.setAttribute('aria-invalid',String(!!warning));
+ }
+ amount.addEventListener('input',validate);amount.addEventListener('change',validate);
+ coinSel?.addEventListener('change',()=>setTimeout(validate,0));pair?.addEventListener('change',()=>setTimeout(validate,0));
+ document.addEventListener('market-updated',validate);
+ validate();
+})();
+</script>
+
