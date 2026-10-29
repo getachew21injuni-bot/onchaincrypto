@@ -1506,7 +1506,7 @@ document.getElementById("resendEmailCodeBtn")?.addEventListener("click", async (
 // Route authenticated users directly to their account profile, even if a legacy page handler races.
 function openAccountProfileAfterAuth() {
   window.ocPendingPage = null;
-  openAccountProfileAfterAuth();
+  if (typeof window.showPage === "function") window.showPage("profile");
   requestAnimationFrame(() => {
     const main = document.querySelector("main");
     if (!main) return;
