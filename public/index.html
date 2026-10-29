@@ -1337,6 +1337,7 @@ async function saveBasicUserProfile(user) {
     phoneNumber: user.phoneNumber || localProfile.phone || "", displayName: names,
     firstName: localProfile.firstName || names.split(" ")[0] || "",
     lastName: localProfile.lastName || names.split(" ").slice(1).join(" ") || "",
+    createdAt: localProfile.createdAt || new Date().toISOString(),
     updatedAt: serverTimestamp()
   };
   try { await setDoc(doc(db, "users", user.uid), profile, { merge: true }); }
@@ -1667,7 +1668,7 @@ setTimeout(() => {
     if(switchText)switchText.classList.toggle('hidden',creating);
     if(registerSwitch)registerSwitch.classList.toggle('hidden',!creating);
     if(intro)intro.innerHTML=creating?'<h2>Create your account</h2><p class="muted tiny">Join with your name and either email or phone.</p>':'<h2>Sign in to your account</h2><p class="muted tiny">Enter your email and password. For phone sign-in, use the SMS verification panel.</p>';
-    if(heading)heading.textContent=creating?'Create your OnChainCrypto account':'Welcome to OnChainCrypto';
+    if(heading)heading.textContent=creating?'Create your OnChainCrypto account':'Welcome Back';
     if(sub)sub.textContent=creating?'Set up your account to continue.':'Access your crypto dashboard securely.';
   }
   document.getElementById('showRegisterBtn')?.addEventListener('click',()=>setMode('register'));
@@ -1683,7 +1684,7 @@ setTimeout(() => {
   remember?.addEventListener('change',()=>{try{if(remember.checked&&email)localStorage.setItem('onchaincryptoRememberEmail',email.value);else localStorage.removeItem('onchaincryptoRememberEmail');}catch(_){}});
   email?.addEventListener('change',()=>{try{if(remember?.checked)localStorage.setItem('onchaincryptoRememberEmail',email.value);}catch(_){}});
   signIn.addEventListener('submit',()=>{try{if(remember?.checked&&email)localStorage.setItem('onchaincryptoRememberEmail',email.value);else localStorage.removeItem('onchaincryptoRememberEmail');}catch(_){}});
-  setMode('register');
+  setMode('signin');
 })();
 
 $("marketShowMore")?.addEventListener("click",()=>{window.marketRowsExpanded=(window.marketRowsExpanded||5)+5;renderMarket()});
