@@ -12,7 +12,7 @@ service cloud.firestore {
         && request.resource.data.uid == uid
         && request.resource.data.keys().hasOnly([
           'uid','email','phoneNumber','phone','firstName','lastName','displayName',
-          'country','dateOfBirth','gender','address','updatedAt'
+          'country','dateOfBirth','gender','address','createdAt','updatedAt'
         ]);
       allow delete: if false;
     }
