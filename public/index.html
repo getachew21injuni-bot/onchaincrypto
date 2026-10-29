@@ -1503,6 +1503,24 @@ document.getElementById("resendEmailCodeBtn")?.addEventListener("click", async (
     msg(error?.message || "Could not send the code. Please try again.");
   } finally { button.disabled = false; }
 });
+// Route authenticated users directly to their account profile, even if a legacy page handler races.
+function openAccountProfileAfterAuth() {
+  window.ocPendingPage = null;
+  openAccountProfileAfterAuth();
+  requestAnimationFrame(() => {
+    const main = document.querySelector("main");
+    if (!main) return;
+    main.querySelectorAll('section[id^="page-"]').forEach(section => {
+      section.classList.toggle("hidden", section.id !== "page-profile");
+    });
+    document.querySelectorAll("#nav [data-page]").forEach(button => button.classList.toggle("active", button.dataset.page === "profile"));
+    document.querySelectorAll("[data-bottom-page]").forEach(button => button.classList.toggle("active", button.dataset.bottomPage === "profile"));
+    if (typeof window.refreshProfileAccountInfo === "function") {
+      try { window.refreshProfileAccountInfo(); } catch (_) {}
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
 document.getElementById("registerForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   window.ocPendingPage = "profile";
@@ -1631,7 +1649,7 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
     if (status) status.textContent = "Signed in as " + (credential.user.displayName || credential.user.email || credential.user.phoneNumber || "user") + ". You can continue to the platform.";
     msg("Signed in successfully. Opening the platform…");
     if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
-    if (typeof showPage === "function") showPage("profile");
+    openAccountProfileAfterAuth();
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -1694,7 +1712,7 @@ onAuthStateChanged(auth, (user) => {
   window.onchaincryptoCurrentUser = user || null;
   if (user) { void (async () => { await loadSavedUserProfile(user); await saveBasicUserProfile(user); })(); }
    if (typeof window.ocRefreshReferral === "function") window.ocRefreshReferral(user || null);
-   if (user) { window.showPage?.(window.ocPendingPage || "profile"); window.ocPendingPage = null; }
+   if (user) { openAccountProfileAfterAuth(); }
    else { window.ocPendingPage = null; }
   const status = document.getElementById("authStatus");
   const signOutBtn = document.getElementById("signOutBtn");
