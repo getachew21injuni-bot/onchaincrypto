@@ -1351,8 +1351,13 @@ async function saveBasicUserProfile(user) {
     createdAt: localProfile.createdAt || new Date().toISOString(),
     updatedAt: serverTimestamp()
   };
-  try { await setDoc(doc(db, "users", user.uid), profile, { merge: true }); }
-  catch (error) { console.warn("Basic profile could not be saved to Firestore:", error?.code || error); }
+  try {
+    await setDoc(doc(db, "users", user.uid), profile, { merge: true });
+    return { ok: true };
+  } catch (error) {
+    console.error("Basic profile could not be saved to Firestore:", error?.code || error, error?.message || "");
+    throw error;
+  }
 }
 
 async function loadSavedUserProfile(user) {
@@ -1585,16 +1590,24 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
       localStorage.setItem("oc_profile_" + credential.user.uid, JSON.stringify(savedProfile));
       if (savedProfile.referralCode) localStorage.setItem("oc_referral_attribution_" + credential.user.uid, savedProfile.referralCode);
     } catch (_) {}
+    let cloudProfileSaved = true;
     try { await saveBasicUserProfile(credential.user); }
-    catch (profileError) { console.warn("Basic profile sync deferred:", profileError?.code || profileError); }
+    catch (profileError) {
+      cloudProfileSaved = false;
+      console.error("Registration succeeded but cloud profile sync failed:", profileError?.code || profileError, profileError?.message || "");
+    }
     document.getElementById("registerPassword").value = "";
     document.getElementById("registerEmailCode").value = "";
     document.getElementById("emailCodePanel")?.classList.add("hidden");
     emailCodeSentFor = "";
     const identity = name || credential.user.displayName || credential.user.email || "user";
     const status = document.getElementById("authStatus");
-    if (status) status.textContent = "Account created successfully. Signed in as " + identity + ". You can continue to the platform.";
-    msg("Gmail code verified. Account created successfully. You are now signed in.");
+    if (status) status.textContent = cloudProfileSaved
+      ? "Account and cloud profile created successfully. Signed in as " + identity + "."
+      : "Account created, but the cloud profile could not be saved. Check Firestore rules/deployment and connection.";
+    msg(cloudProfileSaved
+      ? "Gmail code verified. Account and profile created successfully."
+      : "Account created, but profile sync failed. Your sign-in is active; please check the profile save status.");
     if (typeof window.showPage === "function") window.showPage("profile");
   } catch (error) {
     console.error("OnChainCrypto registration failed:", error?.code || error);
@@ -1720,7 +1733,15 @@ document.getElementById("signOutBtn").addEventListener("click", async () => {
 });
 onAuthStateChanged(auth, (user) => {
   window.onchaincryptoCurrentUser = user || null;
-  if (user) { void (async () => { await loadSavedUserProfile(user); await saveBasicUserProfile(user); })(); }
+  if (user) { void (async () => {
+    await loadSavedUserProfile(user);
+    try { await saveBasicUserProfile(user); }
+    catch (error) {
+      console.error("Signed-in profile sync failed:", error?.code || error, error?.message || "");
+      const profileStatus = document.getElementById("ocProfileSaveStatus");
+      if (profileStatus) profileStatus.textContent = "Cloud profile sync failed (" + (error?.code || "connection error") + "). Check Firestore rules and deployment.";
+    }
+  })(); }
    if (typeof window.ocRefreshReferral === "function") window.ocRefreshReferral(user || null);
    if (user) { openAccountProfileAfterAuth(); }
    else { window.ocPendingPage = null; }
