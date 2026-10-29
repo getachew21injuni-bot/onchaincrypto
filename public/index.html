@@ -3592,8 +3592,22 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  const price=sym=>{if(sym==='USDT'||sym==='USDC')return 1;const c=getCoin(sym);const p=Number(c?.current_price||0);return Number.isFinite(p)&&p>0?p:0};
  const safeText=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  function assets(){
-  const list=[...fallback.map(([symbol,name])=>({symbol,name})),...getMarket().map(c=>({symbol:String(c.symbol||'').toUpperCase(),name:c.name||c.symbol}))];
-  const seen=new Set();return list.filter(c=>c.symbol&&!seen.has(c.symbol)&&seen.add(c.symbol)).filter(c=>c.symbol==='USDT'||c.symbol==='USDC'||price(c.symbol)>0||c.symbol==='XAU').sort((a,b)=>a.symbol==='USDT'?-1:b.symbol==='USDT'?1:a.symbol.localeCompare(b.symbol));
+  // Conversion options come only from positive balances in the current wallet.
+  // USDT is the wallet's cash balance; other assets are state.holdings.
+  const owned=[];
+  const usdtBalance=Number(state?.balance||0);
+  if(usdtBalance>0)owned.push({symbol:'USDT',name:'Tether'});
+  const holdings=balances();
+  for(const [rawSym,rawQty] of Object.entries(holdings)){
+   const symbol=String(rawSym||'').toUpperCase(),qty=Number(rawQty||0);
+   if(!symbol||qty<=0||!Number.isFinite(qty))continue;
+   const c=getCoin(symbol);
+   const fallbackCoin=fallback.find(x=>x[0]===symbol);
+   const name=c?.name||fallbackCoin?.[1]||symbol;
+   owned.push({symbol,name});
+  }
+  const seen=new Set();
+  return owned.filter(c=>c.symbol&&!seen.has(c.symbol)&&seen.add(c.symbol));
  }
  function fillSelects(){
   const oldFrom=from.value||'USDT',oldTo=to.value||'BTC',list=assets();
@@ -3604,13 +3618,14 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
   if(from.value===to.value)to.value=from.value==='USDT'?'BTC':'USDT';
  }
  function balances(){return typeof state!=='undefined'&&state&&state.holdings?state.holdings:{}}
- function holding(sym){return sym==='USDT'?Number(state?.balance||0):Number(balances()[sym]||0)}
+ function holding(sym){if(sym==='USDT')return Math.max(0,Number(state?.balance||0));const holdings=balances();const key=Object.keys(holdings).find(k=>String(k).toUpperCase()===String(sym).toUpperCase());return Math.max(0,Number(key?holdings[key]:0)||0)}
  function preview(){
   if(typeof state==='undefined'||!state)return;
   const fromSym=from.value,toSym=to.value,qty=Number(amount.value||0),pFrom=price(fromSym),pTo=price(toSym);
   const balance=holding(fromSym),usdt=$('convertUsdtBalance');
   if(usdt)usdt.textContent=fmt(Number(state.balance||0),2)+' USDT';
-  const valid=fromSym&&toSym&&fromSym!==toSym&&qty>0&&Number.isFinite(qty)&&pFrom>0&&pTo>0&&qty<=balance+1e-10;
+  const ownedFrom=assets().some(c=>c.symbol===fromSym),ownedTo=assets().some(c=>c.symbol===toSym);
+  const valid=ownedFrom&&ownedTo&&fromSym&&toSym&&fromSym!==toSym&&qty>0&&Number.isFinite(qty)&&pFrom>0&&pTo>0&&qty<=balance+1e-10;
   const feeValue=valid?qty*pFrom*0.001:0,receive=valid?Math.max(0,(qty*pFrom-feeValue)/pTo):0;
   output.value=valid?fmt(receive,8):'';
   const rate=$('convertRate'),fee=$('convertFee'),summary=$('convertReceiveSummary'),message=$('convertMessage');
@@ -3638,7 +3653,8 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  confirmBtn.addEventListener('click',()=>{
   if(typeof state==='undefined'||!state)return;
   const a=from.value,b=to.value,q=Number(amount.value||0),pa=price(a),pb=price(b),available=holding(a);
-  if(!a||!b||a===b||!(q>0)||!pa||!pb||q>available+1e-10){preview();return}
+  const owned=assets().map(c=>c.symbol);
+  if(!owned.includes(a)||!owned.includes(b)||!a||!b||a===b||!(q>0)||!pa||!pb||q>available+1e-10){preview();return}
   const feeUsdt=q*pa*0.001,receive=Math.max(0,(q*pa-feeUsdt)/pb);
   if(a==='USDT')state.balance=Number(state.balance||0)-q;
   else state.holdings[a]=Math.max(0,Number(state.holdings[a]||0)-q);
