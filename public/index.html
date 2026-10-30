@@ -2419,10 +2419,11 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
   function goBack(){
     const current=pages().find(section=>!section.classList.contains('hidden'));
     const previous=pageStack.pop();
-    if(previous && document.getElementById('page-'+previous)){navigate(previous,{noStack:true});return;}
-    if(current && current.id!=='page-home'){navigate('home',{noStack:true});return;}
-    // At Home, use browser history only if it stays on this site; otherwise remain safely on Home.
-    if(window.history.length>1){window.history.back();}
+    if(previous && document.getElementById('page-'+previous)){navigate(previous,{noStack:true,keepScroll:false});return;}
+    // Do not force users to Home when the app has no earlier in-app page.
+    // Keep the current page visible; browser history is handled only when available.
+    if(window.history.length>1 && document.referrer && new URL(document.referrer).origin===window.location.origin){window.history.back();return;}
+    if(current && current.id==='page-home') return;
   }
   window.__ocNavigateBack=goBack;
 
@@ -2447,7 +2448,7 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     if(page==='home' && opts.history) requestAnimationFrame(()=>document.getElementById('homePerformancePanel')?.scrollIntoView({behavior:'smooth',block:'start'}));
   }
   // Auth flows can route directly to a page without triggering legacy click handlers.
-  window.__ocNavigatePage=(page)=>navigate(page,{noStack:true});
+  window.__ocNavigatePage=(page,opts={})=>navigate(page,opts);
   if(typeof window.showPage==='function' && !window.__ocOriginalShowPage){
     window.__ocOriginalShowPage=window.showPage;
     window.showPage=function(page){navigate(page,{fromOriginal:true});return window.__ocOriginalShowPage(page);};
