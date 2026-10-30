@@ -49,10 +49,11 @@
 <main class="main">
 <div class="heading"><div><h1 id="pageTitle">Dashboard Overview</h1><p id="pageSubtitle">Welcome to your OnChainCrypto administration panel.</p></div><span class="status">● Panel ready</span></div>
 <section id="dashboardView">
-<h2 class="section-title">Quick Actions</h2>
+<h2 class="section-title">Quick Actions <span style="font-size:12px;color:#9ca9bd;font-weight:500">— open a section with one click</span></h2>
 <div class="quick-grid">
 <button class="quick" data-view="Users"><span class="qicon">♟</span><span>Users</span></button>
-<button class="quick" data-view="Deposits"><span class="qicon">↓</span><span>Deposit</span></button>
+<button class="quick" data-view="Deposits"><span class="qicon">↓</span><span>Add Demo Balance</span></button>
+<button class="quick" data-view="Assets"><span class="qicon">◈</span><span>Manage Coin Assets</span></button>
 <button class="quick" data-view="Withdrawals"><span class="qicon">↑</span><span>Withdraw</span></button>
 <button class="quick" data-view="Transfers"><span class="qicon">⇄</span><span>Transfer</span></button>
 <button class="quick" data-view="History"><span class="qicon">◴</span><span>History</span></button>
@@ -160,15 +161,78 @@ function getRecords(view){const data=loadAdminData();return Array.isArray(data[v
 function renderLiveCollection(view){if(window.adminGetLiveCollection)window.adminGetLiveCollection(view);else document.getElementById('detailBody').textContent='Firebase admin data module is not ready. Refresh and sign in again.';}
 
 async function renderDemoFinance(view){
- const body=document.getElementById('detailBody');body.innerHTML='<div class="content-panel"><p class="muted">Loading registered users and demo ledger…</p></div>';
+ const body=document.getElementById('detailBody');
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading registered users and demo wallet ledger…</p></div>';
+ const assets=['USDT','BTC','ETH','BNB','SOL','XRP','USDC','DOGE','TRX','TON','ADA','AVAX','SHIB','LINK','BCH','SUI','XLM','DOT','LTC','NEAR','UNI','ETC','ICP','APT','FIL','HBAR','ARB','OP','RENDER','ATOM','VET','INJ','MKR','DAI','FDUSD','PAXG','XAUT','XAU'];
  try{
   const {collection,getDocs,query,limit,doc,writeBatch,serverTimestamp}=window.__ocAdminFirebase;
-  const [us,ts]=await Promise.all([getDocs(query(collection(window.__ocAdminFirebase.db,'users'),limit(200))),getDocs(query(collection(window.__ocAdminFirebase.db,'demoTransactions'),limit(200)))]);
-  const users=us.docs.map(d=>({id:d.id,...d.data()})),txs=ts.docs.map(d=>({id:d.id,...d.data()})).filter(t=>view==='Deposits'?t.type==='deposit':t.type==='withdrawal');
+  const db=window.__ocAdminFirebase.db;
+  const [us,usdtSnap,assetSnap]=await Promise.all([
+   getDocs(query(collection(db,'users'),limit(200))),
+   getDocs(query(collection(db,'demoTransactions'),limit(200))),
+   getDocs(query(collection(db,'demoAssetTransactions'),limit(300)))
+  ]);
+  const users=us.docs.map(d=>({id:d.id,...d.data()}));
+  const allTx=[...usdtSnap.docs.map(d=>({id:d.id,...d.data(),asset:'USDT',amount:d.data().amountUSDT,balanceAfter:d.data().balanceAfterUSDT})),...assetSnap.docs.map(d=>({id:d.id,...d.data()}))];
+  const txs=allTx.filter(t=>view==='Deposits'?t.type==='deposit':t.type==='withdrawal').sort((a,b)=>String(b.createdAtText||'').localeCompare(String(a.createdAtText||''))).slice(0,100);
+  if(!users.length){body.innerHTML='<div class="notice">No registered user profiles were found. A user must complete registration before a demo credit can be assigned.</div>';return;}
   const opts=users.map(u=>'<option value="'+esc(u.id)+'">'+esc((u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id)+' — '+(u.email||u.id))+'</option>').join('');
-  body.innerHTML='<div style="display:grid;gap:16px"><div class="notice"><strong>DEMO LEDGER ONLY</strong><p>Simulated USDT only. No payment is accepted and no cryptocurrency or real withdrawal is sent.</p></div><form id="demoFinanceForm" class="content-panel" style="margin:0;display:grid;gap:12px"><h3 style="margin:0">'+(view==='Deposits'?'Add demo USDT to a user':'Deduct a demo USDT withdrawal')+'</h3><label>User account<select name="uid" required style="display:block;width:100%;padding:12px;margin-top:6px;border-radius:9px;background:#102333;color:white;border:1px solid #526878">'+opts+'</select></label><label>Amount (USDT)<input name="amount" type="number" min="0.01" max="1000000000" step="0.01" required placeholder="e.g. 1000" style="display:block;width:100%;padding:12px;margin-top:6px;border-radius:9px;background:#102333;color:white;border:1px solid #526878"></label><label>Admin note (optional)<input name="note" maxlength="200" placeholder="Demo balance adjustment" style="display:block;width:100%;padding:12px;margin-top:6px;border-radius:9px;background:#102333;color:white;border:1px solid #526878"></label><button class="icon-btn" type="submit" style="background:'+(view==='Deposits'?'#0e7a56':'#7d3042')+';padding:13px;font-weight:800">'+(view==='Deposits'?'＋ Add demo balance':'− Record demo withdrawal')+'</button><p id="demoFinanceMessage" class="muted" role="status"></p></form><div class="content-panel" style="margin:0"><h3 style="margin-top:0">Registered user balances</h3><div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>Demo balance (USDT)</th><th>Status</th></tr></thead><tbody>'+(users.map(u=>'<tr><td>'+esc(u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||'—')+'</td><td>'+esc(u.email||'—')+'</td><td>'+Number(u.demoBalanceUSDT||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</td><td>'+esc(u.accountStatus||'active')+'</td></tr>').join('')||'<tr><td colspan="4">No user profiles found.</td></tr>')+'</tbody></table></div></div><div class="content-panel" style="margin:0"><h3 style="margin-top:0">Recent demo '+(view==='Deposits'?'deposits':'withdrawals')+'</h3><div class="table-wrap"><table><thead><tr><th>Time</th><th>User UID</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody>'+(txs.map(t=>'<tr><td>'+esc(t.createdAtText||'Recorded')+'</td><td>'+esc(t.uid)+'</td><td>'+Number(t.amountUSDT||0).toLocaleString()+' USDT</td><td>'+Number(t.balanceAfterUSDT||0).toLocaleString()+' USDT</td><td>'+esc(t.note||'—')+'</td></tr>').join('')||'<tr><td colspan="5">No demo transactions recorded yet.</td></tr>')+'</tbody></table></div></div></div>';
-  const form=document.getElementById('demoFinanceForm');form.addEventListener('submit',async e=>{e.preventDefault();const msg=document.getElementById('demoFinanceMessage'),fd=new FormData(form),uid=String(fd.get('uid')||''),amount=Number(fd.get('amount')),note=String(fd.get('note')||'').trim();if(!uid||!Number.isFinite(amount)||amount<=0||amount>1000000000){msg.textContent='Choose a user and enter an amount up to 1,000,000,000 USDT.';return;}const btn=form.querySelector('button[type=submit]');btn.disabled=true;msg.textContent='Saving demo transaction…';try{const selected=users.find(u=>u.id===uid);if(!selected)throw new Error('Selected user no longer exists. Refresh and try again.');const before=Math.max(0,Number(selected.demoBalanceUSDT)||0),delta=view==='Deposits'?amount:-amount;if(before+delta<0)throw new Error('Insufficient demo balance for this withdrawal.');const after=Math.round((before+delta)*100)/100;const batch=writeBatch(window.__ocAdminFirebase.db),userRef=doc(window.__ocAdminFirebase.db,'users',uid),txRef=doc(collection(window.__ocAdminFirebase.db,'demoTransactions'));batch.update(userRef,{demoBalanceUSDT:after,demoBalanceUpdatedAt:serverTimestamp(),adminUpdatedAt:serverTimestamp(),adminUpdatedBy:window.__ocAdminFirebase.auth.currentUser.email||''});batch.set(txRef,{uid,type:view==='Deposits'?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:window.__ocAdminFirebase.auth.currentUser.uid,note,source:'admin-demo',status:'completed'});await batch.commit();msg.textContent='Saved '+amount.toLocaleString()+' demo USDT. New balance: '+after.toLocaleString()+' USDT.';await renderDemoFinance(view);}catch(err){msg.textContent='Could not save ('+(err.code||err.message||'error')+'). Check deployed Firestore rules and admin verification.';}finally{const b=form.querySelector('button[type=submit]');if(b)b.disabled=false;}});
- }catch(error){body.innerHTML='<div class="notice"><strong>Could not load demo ledger.</strong><p>Firestore access failed ('+esc(error.code||error.message||'unknown error')+'). Verify admin access and deploy updated rules.</p></div>';}
+  const assetOptions=assets.map(a=>'<option value="'+a+'">'+a+'</option>').join('');
+  const userRows=users.map(u=>{
+   const extra=Object.entries(u.demoAssetBalances||{}).filter(([a,n])=>a!=='USDT'&&Number(n)>0).map(([a,n])=>a+' '+Number(n).toLocaleString(undefined,{maximumFractionDigits:8})).join(' · ');
+   return '<tr><td>'+esc(u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||'—')+'</td><td>'+esc(u.email||'—')+'</td><td>'+Number(u.demoBalanceUSDT||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT</td><td>'+esc(extra||'—')+'</td><td>'+esc(u.accountStatus||'active')+'</td></tr>';
+  }).join('');
+  const txRows=txs.map(t=>'<tr><td>'+esc(t.createdAtText||'Recorded')+'</td><td>'+esc(t.uid||'—')+'</td><td>'+esc(t.type)+'</td><td>'+Number(t.amount??0).toLocaleString(undefined,{maximumFractionDigits:8})+' '+esc(t.asset||'USDT')+'</td><td>'+Number(t.balanceAfter??0).toLocaleString(undefined,{maximumFractionDigits:8})+' '+esc(t.asset||'USDT')+'</td><td>'+esc(t.note||'—')+'</td></tr>').join('');
+  body.innerHTML='<div style="display:grid;gap:16px">'+
+   '<div class="notice" style="border-color:#1d8065;background:linear-gradient(120deg,#0d332b,#102333);font-size:13px"><strong style="color:#6ee7b7;font-size:14px">LIVE DEMO WALLET CREDIT</strong><p style="margin:6px 0 0">When you submit here, the selected user’s Firestore wallet record is updated. If the user is signed in, their wallet refreshes automatically. These are simulated balances only—not real deposits, exchange custody or withdrawable funds.</p></div>'+
+   '<form id="demoFinanceForm" class="content-panel" style="margin:0;display:grid;gap:13px;border:1px solid #267b68;box-shadow:0 12px 35px #0003">'+
+   '<div><h3 style="margin:0 0 5px;font-size:20px">'+(view==='Deposits'?'＋ Add demo balance to user wallet':'− Deduct demo balance from user wallet')+'</h3><p class="muted" style="margin:0">Choose one coin or apply the same quantity to all supported assets.</p></div>'+
+   '<label style="display:grid;gap:6px;font-weight:700">USER ACCOUNT<select name="uid" required style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878">'+opts+'</select></label>'+
+   '<label style="display:grid;gap:6px;font-weight:700">COIN / ASSET<select name="asset" required style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"><option value="__ALL__">✦ ALL SUPPORTED ASSETS</option>'+assetOptions+'</select></label>'+
+   '<label style="display:grid;gap:6px;font-weight:700">AMOUNT<input name="amount" type="number" min="0.00000001" max="1000000000" step="any" required placeholder="Enter quantity for selected coin(s)" style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label>'+
+   '<label style="display:grid;gap:6px;font-weight:700">ADMIN NOTE (OPTIONAL)<input name="note" maxlength="200" placeholder="Reason for this demo balance adjustment" style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label>'+
+   '<button class="icon-btn" type="submit" style="background:'+(view==='Deposits'?'linear-gradient(90deg,#087b56,#12a879)':'linear-gradient(90deg,#813246,#bd4058)')+';border:0;padding:16px;font-size:16px;font-weight:850;box-shadow:0 8px 22px #0004">'+(view==='Deposits'?'＋ ADD TO USER WALLET':'− CONFIRM DEMO DEDUCTION')+'</button><p id="demoFinanceMessage" class="muted" role="status" aria-live="polite" style="margin:0"></p></form>'+
+   '<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Registered user wallet balances</h3><span class="tag">'+users.length+' profiles</span></div><div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>USDT balance</th><th>Other coin balances</th><th>Status</th></tr></thead><tbody>'+userRows+'</tbody></table></div></div>'+
+   '<div class="content-panel" style="margin:0"><h3 style="margin-top:0">Recent demo '+(view==='Deposits'?'credits':'deductions')+'</h3><div class="table-wrap"><table><thead><tr><th>Time</th><th>User UID</th><th>Type</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody>'+(txRows||'<tr><td colspan="6">No demo transactions recorded yet.</td></tr>')+'</tbody></table></div></div></div>';
+  const form=document.getElementById('demoFinanceForm');
+  form.addEventListener('submit',async e=>{
+   e.preventDefault();
+   const msg=document.getElementById('demoFinanceMessage'),fd=new FormData(form),uid=String(fd.get('uid')||''),asset=String(fd.get('asset')||''),amount=Number(fd.get('amount')),note=String(fd.get('note')||'').trim();
+   if(!uid||!Number.isFinite(amount)||amount<=0||amount>1000000000){msg.textContent='Choose a user and enter a valid quantity up to 1,000,000,000.';return;}
+   const selected=users.find(u=>u.id===uid);if(!selected){msg.textContent='Selected user no longer exists. Refresh and try again.';return;}
+   const targets=asset==='__ALL__'?assets:[asset];
+   if(!targets.length||targets.some(a=>!assets.includes(a))){msg.textContent='Select a supported coin.';return;}
+   const isDeposit=view==='Deposits',oldMap={...(selected.demoAssetBalances||{})},nextMap={...oldMap};
+   let usdtBefore=Math.max(0,Number(selected.demoBalanceUSDT)||0),usdtAfter=usdtBefore;
+   const changes=[];
+   for(const symbol of targets){
+    const before=symbol==='USDT'?usdtBefore:Math.max(0,Number(oldMap[symbol])||0);
+    const after=Math.round((before+(isDeposit?amount:-amount))*100000000)/100000000;
+    if(after<0){msg.textContent='Insufficient '+symbol+' demo balance. No changes were saved.';return;}
+    changes.push({symbol,before,after});
+    if(symbol==='USDT')usdtAfter=Math.round(after*100)/100;else nextMap[symbol]=after;
+   }
+   const btn=form.querySelector('button[type=submit]');btn.disabled=true;msg.textContent='Publishing wallet update to Firebase…';
+   try{
+    const batch=writeBatch(db),userRef=doc(db,'users',uid),adminEmail=window.__ocAdminFirebase.auth.currentUser?.email||'';
+    const userUpdate={demoAssetBalances:nextMap,demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:adminEmail,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:adminEmail};
+    if(targets.includes('USDT')){userUpdate.demoBalanceUSDT=usdtAfter;userUpdate.demoBalanceUpdatedAt=serverTimestamp();}
+    batch.update(userRef,userUpdate);
+    for(const c of changes){
+     const txRef=doc(collection(db,c.symbol==='USDT'?'demoTransactions':'demoAssetTransactions'));
+     if(c.symbol==='USDT'){
+      batch.set(txRef,{uid,type:isDeposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:c.before,balanceAfterUSDT:c.after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:window.__ocAdminFirebase.auth.currentUser.uid,note,source:'admin-demo',status:'completed'});
+     }else{
+      batch.set(txRef,{uid,type:isDeposit?'deposit':'withdrawal',asset:c.symbol,amount,balanceBefore:c.before,balanceAfter:c.after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:window.__ocAdminFirebase.auth.currentUser.uid,note,source:'admin-demo',status:'completed'});
+     }
+    }
+    await batch.commit();
+    msg.textContent=(isDeposit?'Added ':'Deducted ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'of every supported asset':asset)+'. The user wallet has been published to Firebase.';
+    await renderDemoFinance(view);
+   }catch(err){msg.textContent='Could not publish wallet update ('+(err.code||err.message||'error')+'). Check admin verification and deploy the updated Firestore rules.';}
+   finally{const b=form.querySelector('button[type=submit]');if(b)b.disabled=false;}
+  });
+ }catch(error){body.innerHTML='<div class="notice"><strong>Could not load demo wallet ledger.</strong><p>Firestore access failed ('+esc(error.code||error.message||'unknown error')+'). Verify admin access and deploy the updated Firestore rules.</p></div>';}
 }
 function renderModule(view){
  const body=document.getElementById('detailBody');
