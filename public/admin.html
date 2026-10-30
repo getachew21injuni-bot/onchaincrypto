@@ -234,11 +234,82 @@ async function renderDemoFinance(view){
   });
  }catch(error){body.innerHTML='<div class="notice"><strong>Could not load demo wallet ledger.</strong><p>Firestore access failed ('+esc(error.code||error.message||'unknown error')+'). Verify admin access and deploy the updated Firestore rules.</p></div>';}
 }
+
+async function renderWalletAddresses(){
+ const body=document.getElementById('detailBody');
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading saved wallet address settings…</p></div>';
+ const api=window.__ocAdminFirebase;
+ if(!api){body.innerHTML='<div class="notice">Firebase is not ready. Refresh the admin dashboard.</div>';return;}
+ const {db,collection,getDocs,doc,setDoc,deleteDoc,serverTimestamp}=api;
+ const escHtml=v=>String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+ const assets=['BTC','ETH','USDT','USDC','BNB','SOL','XRP','DOGE','TRX','TON','ADA','AVAX','SHIB','LINK','BCH','SUI','XLM','DOT','LTC','NEAR','UNI','ETC','ICP','APT','FIL','HBAR','ARB','OP','RENDER','ATOM','VET','INJ','MKR','DAI','FDUSD','PAXG','XAUT','XAU','POL','AAVE','GRT','ALGO','THETA','MANA','SAND','AXS','EOS','ZEC','XMR','DASH','QNT','CAKE','FLOKI','PEPE','BONK','FET','TAO','JUP','ONDO','SEI','KAS','STX','IMX','WLD'];
+ const networks=['Bitcoin','Ethereum','TRC20','ERC20','BEP20','Solana','Polygon','XRP Ledger','Arbitrum','Optimism','Base','Avalanche C-Chain'];
+ let records=[];
+ try{
+  const snap=await getDocs(collection(db,'walletAddresses'));
+  records=snap.docs.map(d=>({id:d.id,...d.data()})).sort((x,y)=>(x.asset||'').localeCompare(y.asset||'')||(x.network||'').localeCompare(y.network||''));
+ }catch(error){
+  body.innerHTML='<div class="notice"><strong>Could not load wallet address settings.</strong><p>Firestore returned '+escHtml(error.code||error.message||'an error')+'. Confirm admin verification and deploy the Firestore rules update.</p></div>';return;
+ }
+ const options=assets.map(x=>'<option value="'+x+'">'+x+'</option>').join('');
+ const networkOptions=networks.map(x=>'<option value="'+x+'">'+x+'</option>').join('');
+ body.innerHTML='<div style="display:grid;gap:16px">'+
+ '<div class="notice" style="border-color:#267b68;background:#0d332b;color:#c7f9e7"><strong style="color:#6ee7b7">PUBLISHED WALLET SETTINGS</strong><p style="margin:6px 0 0">Saved settings are shared with users through Firestore. Deposit addresses and QR images are public receiving instructions. Only publish addresses and QR codes that you have independently verified. This does not monitor blockchain payments or automatically credit balances.</p></div>'+
+ '<form id="walletAddressForm" class="content-panel" style="margin:0;display:grid;gap:12px;border-color:#267b68">'+
+ '<div><h3 style="margin:0 0 4px">＋ Add / edit coin wallet details</h3><p class="muted" style="margin:0">Create one record for each coin and network combination.</p></div>'+
+ '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">'+
+ '<label style="display:grid;gap:6px">Coin / asset<select name="asset" id="walletAddressAsset" required style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white">'+options+'</select></label>'+
+ '<label style="display:grid;gap:6px">Blockchain network<input name="network" id="walletAddressNetwork" list="walletNetworkOptions" maxlength="50" required placeholder="e.g. TRC20" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><datalist id="walletNetworkOptions">'+networkOptions+'</datalist></label></div>'+
+ '<label style="display:grid;gap:6px">Deposit address<input name="depositAddress" id="walletDepositAddress" maxlength="500" autocomplete="off" spellcheck="false" placeholder="Paste the public receiving address" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"></label>'+
+ '<label style="display:grid;gap:6px">Deposit QR-code image URL (optional)<input name="qrCodeUrl" id="walletQrCodeUrl" type="url" maxlength="1500" placeholder="https://… (leave blank to generate QR from deposit address)" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"></label>'+
+ '<div id="walletQrPreview" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px;border:1px dashed #526878;border-radius:10px"><span class="muted">QR preview will appear when a deposit address is entered.</span></div>'+
+ '<label style="display:grid;gap:6px">Withdrawal wallet address (admin-side payout source / reference)<input name="withdrawalAddress" id="walletWithdrawalAddress" maxlength="500" autocomplete="off" spellcheck="false" placeholder="Paste the public sending-wallet address" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"></label>'+
+ '<div style="display:flex;gap:18px;flex-wrap:wrap"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="depositEnabled" checked> Enable deposits</label><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="withdrawalEnabled" checked> Enable withdrawals</label></div>'+
+ '<div style="display:flex;gap:9px;flex-wrap:wrap"><button class="icon-btn" type="submit" style="background:linear-gradient(90deg,#087b56,#12a879);border:0;padding:13px 18px;font-weight:800">Save & publish for users</button><button class="icon-btn" id="walletAddressClear" type="button">Clear form</button></div><p id="walletAddressMessage" class="muted" role="status" aria-live="polite" style="margin:0"></p></form>'+
+ '<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Saved coin addresses</h3><span class="tag">'+records.length+' network record(s)</span></div><div class="table-wrap"><table style="min-width:850px"><thead><tr><th>Coin</th><th>Network</th><th>Deposit address</th><th>QR</th><th>Withdrawal address</th><th>Status</th><th>Actions</th></tr></thead><tbody id="walletAddressRows">'+
+ (records.length?records.map(r=>'<tr><td><strong>'+escHtml(r.asset)+'</strong></td><td>'+escHtml(r.network)+'</td><td style="max-width:180px;overflow-wrap:anywhere">'+escHtml(r.depositAddress||'—')+'</td><td>'+(r.qrCodeUrl?'Custom QR':'Generated QR')+'</td><td style="max-width:180px;overflow-wrap:anywhere">'+escHtml(r.withdrawalAddress||'—')+'</td><td>'+(r.depositEnabled?'Deposit on':'Deposit off')+' · '+(r.withdrawalEnabled?'Withdraw on':'Withdraw off')+'</td><td style="white-space:nowrap"><button type="button" class="icon-btn" data-wallet-edit="'+escHtml(r.id)+'">Edit</button> <button type="button" class="icon-btn" data-wallet-delete="'+escHtml(r.id)+'">Delete</button></td></tr>').join(''):'<tr><td colspan="7" class="empty">No coin addresses configured yet. Add the first one above.</td></tr>')+
+ '</tbody></table></div></div>'+
+ '<div class="notice">Important: the withdrawal address stored here is an administrator-side wallet reference. It is not shown as the customer’s withdrawal destination and does not send funds. Customer withdrawal requests still need a separately secured payout/approval process.</div></div>';
+ const form=document.getElementById('walletAddressForm');
+ const qrPreview=document.getElementById('walletQrPreview');
+ function updateQrPreview(){
+  const address=form.elements.depositAddress.value.trim(),url=form.elements.qrCodeUrl.value.trim();
+  if(url){qrPreview.innerHTML='<img alt="Deposit QR preview" src="'+escHtml(url)+'" style="width:150px;height:150px;object-fit:contain;background:white;border-radius:8px;padding:5px"><span class="muted">Custom QR image</span>';return;}
+  if(address){qrPreview.innerHTML='<img alt="Generated deposit QR preview" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent(address)+'" style="width:150px;height:150px;object-fit:contain;background:white;border-radius:8px;padding:5px"><span class="muted">QR generated from deposit address</span>';return;}
+  qrPreview.innerHTML='<span class="muted">QR preview will appear when a deposit address is entered.</span>';
+ }
+ form.elements.depositAddress.addEventListener('input',updateQrPreview);form.elements.qrCodeUrl.addEventListener('input',updateQrPreview);
+ document.getElementById('walletAddressClear').addEventListener('click',()=>{form.reset();form.elements.asset.value='BTC';updateQrPreview();document.getElementById('walletAddressMessage').textContent='Form cleared.';});
+ form.addEventListener('submit',async e=>{
+  e.preventDefault();const msg=document.getElementById('walletAddressMessage'),fd=new FormData(form);
+  const asset=String(fd.get('asset')||'').trim().toUpperCase(),network=String(fd.get('network')||'').trim(),depositAddress=String(fd.get('depositAddress')||'').trim(),qrCodeUrl=String(fd.get('qrCodeUrl')||'').trim(),withdrawalAddress=String(fd.get('withdrawalAddress')||'').trim();
+  if(!asset||!network){msg.textContent='Choose a coin and enter its blockchain network.';return;}
+  if(!depositAddress&&!withdrawalAddress){msg.textContent='Enter at least a deposit address or withdrawal wallet address.';return;}
+  if(qrCodeUrl&&!/^https:\/\/\S+$/i.test(qrCodeUrl)){msg.textContent='QR image URL must use HTTPS.';return;}
+  const id=(asset+'_'+network).toLowerCase().replace(/[^a-z0-9_-]+/g,'_');
+  const button=form.querySelector('button[type=submit]');button.disabled=true;msg.textContent='Saving securely to Firestore…';
+  try{
+   await setDoc(doc(db,'walletAddresses',id),{asset,network,depositAddress,qrCodeUrl,withdrawalAddress,depositEnabled:fd.has('depositEnabled'),withdrawalEnabled:fd.has('withdrawalEnabled'),updatedAt:serverTimestamp(),updatedBy:api.auth.currentUser?.email||''},{merge:true});
+   msg.textContent='Saved and published. Users will see the updated deposit address and QR code when they open their wallet.';
+   await renderWalletAddresses();
+  }catch(error){msg.textContent='Could not publish this address ('+(error.code||error.message||'error')+'). Confirm admin verification and deploy the updated Firestore rules.';button.disabled=false;}
+ });
+ body.querySelectorAll('[data-wallet-edit]').forEach(btn=>btn.addEventListener('click',()=>{
+  const r=records.find(x=>x.id===btn.dataset.walletEdit);if(!r)return;
+  form.elements.asset.value=r.asset||'BTC';form.elements.network.value=r.network||'Bitcoin';form.elements.depositAddress.value=r.depositAddress||'';form.elements.qrCodeUrl.value=r.qrCodeUrl||'';form.elements.withdrawalAddress.value=r.withdrawalAddress||'';form.elements.depositEnabled.checked=r.depositEnabled!==false;form.elements.withdrawalEnabled.checked=r.withdrawalEnabled!==false;updateQrPreview();form.scrollIntoView({behavior:'smooth',block:'start'});
+ }));
+ body.querySelectorAll('[data-wallet-delete]').forEach(btn=>btn.addEventListener('click',async()=>{
+  const r=records.find(x=>x.id===btn.dataset.walletDelete);if(!r||!confirm('Delete '+r.asset+' on '+r.network+' from published wallet settings?'))return;
+  try{await deleteDoc(doc(db,'walletAddresses',r.id));await renderWalletAddresses();}catch(error){alert('Could not delete address: '+(error.code||error.message||'error'));}
+ }));
+}
+
 function renderModule(view){
  const body=document.getElementById('detailBody');
  if(view==='Support'&&window.renderSupportInbox){window.renderSupportInbox();return;}
  if(view==='Deposits'||view==='Withdrawals'){renderDemoFinance(view);return;}
  if(view==='Assets'){renderDemoFinance('Deposits');return;}
+ if(view==='Addresses'){renderWalletAddresses();return;}
  if(view==='Users'||view==='KYC'){renderLiveCollection(view);return;}
  if(view==='Analytics'){
   const data=loadAdminData();const counts=moduleNames.reduce((o,n)=>(o[n]=getRecords(n).length,o),{});
@@ -272,11 +343,11 @@ document.getElementById('moreBtn').addEventListener('click',()=>showView('Settin
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, limit, doc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, limit, doc, setDoc, deleteDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"});
 
 const auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
-window.__ocAdminFirebase={auth,db,collection,getDocs,query,limit,doc,writeBatch,serverTimestamp};
+window.__ocAdminFirebase={auth,db,collection,getDocs,query,limit,doc,setDoc,deleteDoc,writeBatch,serverTimestamp};
 const safeText=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 window.adminGetLiveCollection=async function(view){
  const body=byId('detailBody'),collectionName=view==='Users'?'users':'kycSubmissions',isUsers=view==='Users';
