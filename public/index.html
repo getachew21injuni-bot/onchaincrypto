@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <button data-page="register" id="register-nav" class="register-nav">Sign Up</button>
     <button data-page="register" id="signin-nav" class="secondary">Sign In</button>
   </nav>
-  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="primary mobile-register-btn" id="mobileRegisterBtn" type="button">Sign Up</button><button class="secondary mobile-signin-btn" id="mobileSignInBtn" type="button">Sign In</button><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><button class="secondary oc-nav-control oc-exit-control" id="ocExitBtn" type="button" aria-label="Exit and sign out" title="Exit and sign out">↪ <span>Exit</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open profile, notifications and verification menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" data-menu-account="true" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and preferences</small></span></button><button type="button" data-menu-page="profile" data-menu-settings="true" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security, preferences and support</small></span></button><button type="button" data-menu-page="profile" data-menu-notifications="true" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Account and security updates</small></span></button><button type="button" data-menu-page="profile" data-menu-kyc="true" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>KYC verification</strong><small>Identity verification status</small></span></button><button type="button" data-menu-action="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About OnChainCrypto</strong><small>Platform information and feature guide</small></span></button></div></div></div>
+  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="primary mobile-register-btn" id="mobileRegisterBtn" type="button">Sign Up</button><button class="secondary mobile-signin-btn" id="mobileSignInBtn" type="button">Sign In</button><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><button class="secondary oc-nav-control oc-exit-control" id="ocExitBtn" type="button" aria-label="Exit and sign out" title="Exit and sign out">↪ <span>Exit</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open profile, notifications and verification menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Support</strong><small>Help and account assistance</small></span></button><button type="button" data-menu-page="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About</strong><small>Platform information</small></span></button></div></div></div>
 </header>
 <main>
   <section id="page-home">
@@ -1287,7 +1287,7 @@ document.addEventListener("click",e=>{for(const kind of ["deposit","withdraw"]){
 $("depositNetwork").addEventListener("change",refreshDepositAddress);$("copyDepositAddress").addEventListener("click",async()=>{const a=window.ONCHAINCRYPTO_DEPOSIT_ADDRESSES?.[selectedDepositCoin]?.[$("depositNetwork").value]||"";if(a){try{await navigator.clipboard.writeText(a);$("depositHelp").textContent="Address copied. Verify the coin and network before sending."}catch{$("depositHelp").textContent="Copy failed. Select and copy the address manually."}}});$("showDepositQr").addEventListener("click",showDepositQr);
 drawCoinPicker("deposit");drawCoinPicker("withdraw");updateSelectedCoin("deposit");updateSelectedCoin("withdraw");
 const moreMenuBtn=document.getElementById("moreMenuBtn"),moreMenu=document.getElementById("moreMenu");
-function ensureMoreMenuContent(){if(!moreMenu)return;if(!moreMenu.querySelector("button")){moreMenu.innerHTML='<button type="button" data-menu-page="profile" data-menu-account="true" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and preferences</small></span></button><button type="button" data-menu-page="profile" data-menu-financial="true" role="menuitem"><span class="menu-symbol transfer-symbol">⇄</span><span><strong>Financial</strong><small>Wallet, deposits, withdrawals and activity</small></span></button><button type="button" data-menu-page="profile" data-menu-settings="true" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Password and session security</small></span></button><button type="button" data-menu-page="profile" data-menu-notifications="true" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Account and security updates</small></span></button><button type="button" data-menu-page="profile" data-menu-kyc="true" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>KYC verification</strong><small>Identity verification status</small></span></button><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Support Center</strong><small>Help and account assistance</small></span></button><button type="button" data-menu-action="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About OnChainCrypto</strong><small>Platform information and feature guide</small></span></button>';} }
+function ensureMoreMenuContent(){if(!moreMenu)return;if(!moreMenu.querySelector("button")){moreMenu.innerHTML="<button type=\"button\" data-menu-page=\"profile\" role=\"menuitem\"><span class=\"menu-symbol profile-symbol\">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type=\"button\" data-menu-page=\"settings\" role=\"menuitem\"><span class=\"menu-symbol settings-symbol\">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type=\"button\" data-menu-page=\"notifications\" role=\"menuitem\"><span class=\"menu-symbol notification-symbol\">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type=\"button\" data-menu-page=\"kyc\" role=\"menuitem\"><span class=\"menu-symbol kyc-symbol\">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button><button type=\"button\" data-menu-page=\"support\" role=\"menuitem\"><span class=\"menu-symbol support-symbol\">☏</span><span><strong>Support</strong><small>Help and account assistance</small></span></button><button type=\"button\" data-menu-page=\"about\" role=\"menuitem\"><span class=\"menu-symbol\" style=\"color:#42e8ff\">ⓘ</span><span><strong>About</strong><small>Platform information</small></span></button>";}}
 function setMoreMenuOpen(open){if(!moreMenu||!moreMenuBtn)return;ensureMoreMenuContent();moreMenu.classList.toggle("hidden",!open);moreMenu.style.setProperty("display",open?"block":"none","important");moreMenu.style.setProperty("visibility",open?"visible":"hidden","important");moreMenu.style.setProperty("opacity",open?"1":"0","important");moreMenu.style.setProperty("z-index","99999","important");moreMenuBtn.setAttribute("aria-expanded",String(open));moreMenu.setAttribute("aria-hidden",String(!open));}
 moreMenuBtn?.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();setMoreMenuOpen(moreMenuBtn.getAttribute("aria-expanded")!=="true");});
 document.addEventListener("click",event=>{const btn=event.target.closest("[data-menu-page]");if(!btn||!moreMenu?.contains(btn))return;const page=btn.dataset.menuPage;setMoreMenuOpen(false);showPage(page);const openSection=(id)=>{const section=document.getElementById(id);if(section){section.open=true;section.scrollIntoView({behavior:"smooth",block:"start"})}};if(btn.dataset.menuAccount==="true")openSection("profileAccountSection");if(btn.dataset.menuFinancial==="true")openSection("profileFinancialSection");if(btn.dataset.menuSettings==="true")openSection("profileSettingsSection");if(btn.dataset.menuNotifications==="true")openSection("profileNotificationsSection");if(btn.dataset.menuKyc==="true")openSection("profileKycSection")});
@@ -2660,6 +2660,69 @@ body.oc-trade-overlay-open{overflow:hidden}
 .hot-coin-results .mini-left img{width:24px;height:24px}
 @media(max-width:560px){.hot-coin-tabs{gap:2px;padding-left:10px;padding-right:10px}.hot-coin-tab{padding:9px 8px;font-size:11px}.hot-coin-results{padding:5px 12px 12px}}
 </style>
+
+<script id="oc-separate-account-pages">
+(function(){
+ if(window.__ocSeparateAccountPagesReady)return;window.__ocSeparateAccountPagesReady=true;
+ const main=document.querySelector("main");if(!main)return;
+ const byId=id=>document.getElementById(id);
+ const profile=byId("page-profile");
+ const list=profile?.querySelector(".profile-menu-list");
+ if(!list)return;
+ const take=(id)=>{const d=byId(id);if(!d)return null;const body=d.querySelector(":scope > .profile-menu-content");if(!body)return null;const fragment=document.createDocumentFragment();while(body.firstChild)fragment.appendChild(body.firstChild);d.remove();return fragment};
+ const aboutDetail=Array.from(list.querySelectorAll(":scope > details")).find(d=>d.querySelector(":scope > summary strong")?.textContent.trim()==="About");
+ const takeAbout=()=>{if(!aboutDetail)return null;const body=aboutDetail.querySelector(":scope > .profile-menu-content");if(!body)return null;const fragment=document.createDocumentFragment();while(body.firstChild)fragment.appendChild(body.firstChild);aboutDetail.remove();return fragment};
+ const create=(id,title,subtitle,content)=>{
+  let page=byId("page-"+id);
+  if(!page){page=document.createElement("section");page.id="page-"+id;page.className="hidden";main.appendChild(page)}
+  page.innerHTML='<div class="page-title"><div><h1>'+title+'</h1><div class="muted">'+subtitle+'</div></div></div>';
+  const panel=document.createElement("section");panel.className="panel form-panel oc-standalone-account-page";
+  if(content)panel.appendChild(content);
+  page.appendChild(panel);return page;
+ };
+ const account=take("profileAccountSection");
+ const financial=take("profileFinancialSection");
+ const settings=take("profileSettingsSection");
+ const notifications=take("profileNotificationsSection");
+ const identity=take("profileKycSection");
+ const about=takeAbout();
+ if(account){
+  // Keep account identity and editable personal information on Profile only.
+  const currency=Array.from(account.querySelectorAll(".settings-item")).find(x=>x.textContent.includes("Display currency"));
+  const profilePage=create("profile","Profile","Account details and personal preferences",account);
+  if(currency&&settings)settings.appendChild(currency);
+ }
+ if(financial)create("financial","Financial","Wallet, deposits, withdrawals and activity",financial);
+ if(settings)create("settings","Settings","Security and personal preferences",settings);
+ if(notifications)create("notifications","Notifications","Manage your notification preferences",notifications);
+ if(identity){
+  const kycText=identity.querySelectorAll("*");
+  kycText.forEach(el=>{if(el.children.length===0)el.textContent=el.textContent.replace(/KYC verification/gi,"Identity verification").replace(/\bKYC\b/gi,"identity verification")});
+  create("kyc","Identity verification","Your identity verification status",identity);
+ }
+ if(about){
+  const aboutPage=create("about","About","Platform information",about);
+  aboutPage.querySelectorAll("*").forEach(el=>{if(el.children.length===0)el.textContent=el.textContent.replace(/ABOUT ONCHAINCRYPTO/gi,"ABOUT THE PLATFORM").replace(/OnChainCrypto is in development/gi,"The platform is in development").replace(/Follow OnChainCrypto/gi,"Follow the platform").replace(/OnChainCrypto/gi,"the platform")});
+  const hero=aboutPage.querySelector(".about-hero");if(hero){const brandHeading=hero.querySelector("h2");if(brandHeading)brandHeading.remove()}
+ }
+ // Keep the Profile page limited to account details; move the existing display-currency
+ // preference into Settings when present.
+ if(profile){profile.querySelector(".page-title")?.remove();profile.querySelector(".profile-menu-list")?.remove()}
+ // The original notification placeholder is replaced by the actual preference controls.
+ const oldNotifications=byId("page-notifications");
+ if(oldNotifications&&notifications){oldNotifications.className="hidden";oldNotifications.innerHTML=""}
+ // Ensure all standalone destinations use the common page router and scroll to top.
+ document.addEventListener("click",e=>{
+  const button=e.target.closest("[data-menu-page]");if(!button||!document.getElementById("moreMenu")?.contains(button))return;
+  const page=button.dataset.menuPage;
+  if(typeof window.showPage==="function")window.showPage(page);
+ });
+ const style=document.createElement("style");style.id="oc-separate-account-pages-style";style.textContent=
+  '.oc-standalone-account-page{max-width:900px;margin:0 auto 20px;padding:16px}.oc-standalone-account-page .profile-menu-content{padding:0;border:0}.oc-standalone-account-page .profile-menu-content>.panel{margin-top:12px}.oc-standalone-account-page .settings-item:first-child{border-top:0}@media(max-width:600px){.oc-standalone-account-page{padding:12px}}';
+ document.head.appendChild(style);
+})();
+</script>
+
 </body>
 </html>
 
