@@ -355,20 +355,33 @@ const auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id
 window.__ocAdminFirebase={auth,db,collection,getDocs,query,limit,doc,setDoc,deleteDoc,writeBatch,serverTimestamp};
 const safeText=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 window.adminGetLiveCollection=async function(view){
- const body=byId('detailBody'),collectionName=view==='Users'?'users':'kycSubmissions',isUsers=view==='Users';
+ const body=byId('detailBody'),isUsers=view==='Users',collectionName=isUsers?'users':'kycSubmissions';
  body.innerHTML='<div class="content-panel"><p class="muted">Loading live Firebase data…</p></div>';
  try{
-  const snap=await getDocs(query(collection(db,collectionName),limit(100)));
-  const rows=snap.docs.map(d=>({id:d.id,...d.data()}));
-  const heads=isUsers?['Name','Email','Country','Firebase UID']:['Legal name','Email','Country','Document type','Status','Submitted'];
-  const htmlRows=rows.map(r=>{
-   const vals=isUsers?[r.displayName||[r.firstName,r.lastName].filter(Boolean).join(' ')||'—',r.email||'—',r.country||'—',r.uid||r.id]:[r.legalName||'—',r.email||'—',r.country||'—',r.documentType||'—',r.status||'pending',r.submittedAt&&typeof r.submittedAt.toDate==='function'?r.submittedAt.toDate().toLocaleDateString():'—'];
-   return '<tr>'+vals.map(v=>'<td>'+safeText(v)+'</td>').join('')+'</tr>';
+  const snap=await getDocs(query(collection(db,collectionName),limit(100))),rows=snap.docs.map(d=>({id:d.id,...d.data()}));
+  if(isUsers){
+   const heads=['Name','Email','Country','Firebase UID'],html=rows.map(r=>'<tr>'+[r.displayName||[r.firstName,r.lastName].filter(Boolean).join(' ')||'—',r.email||'—',r.country||'—',r.uid||r.id].map(v=>'<td>'+safeText(v)+'</td>').join('')+'</tr>').join('');
+   body.innerHTML='<div class="content-panel" style="margin:0"><h3>Live registered profiles</h3><p class="muted">Live Firestore records; maximum 100 shown.</p><strong>'+rows.length+' record(s) loaded</strong><div class="table-wrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(html||'<tr><td colspan="4">No records found.</td></tr>')+'</tbody></table></div></div>';return;
+  }
+  const pending=rows.filter(r=>(r.status||'pending')==='pending').length;
+  const html=rows.map(r=>{
+   const submitted=r.submittedAt&&typeof r.submittedAt.toDate==='function'?r.submittedAt.toDate().toLocaleString():'—',status=String(r.status||'pending');
+   const action=status==='pending'?'<button type="button" class="primary oc-kyc-review-action" data-kyc-action="approve" data-kyc-uid="'+safeText(r.id)+'">Approve</button> <button type="button" class="secondary oc-kyc-review-action" data-kyc-action="reject" data-kyc-uid="'+safeText(r.id)+'">Reject</button>':'<span class="muted tiny">'+safeText(status)+'</span>';
+   return '<tr><td>'+safeText(r.legalName||'—')+'</td><td>'+safeText(r.email||'—')+'</td><td>'+safeText(r.country||'—')+'</td><td>'+safeText(r.documentType||'—')+'</td><td>'+safeText(r.documentNumber||'—')+'</td><td>'+safeText(status)+'</td><td>'+safeText(submitted)+'</td><td>'+action+'</td></tr>';
   }).join('');
-  body.innerHTML='<div class="content-panel" style="margin:0"><h3>'+(isUsers?'Live registered profiles':'Live KYC submissions')+'</h3><p class="muted">Live Firestore records; maximum 100 shown. '+(isUsers?'A profile record is not necessarily an Authentication account.':'Viewing does not approve identity.')+'</p><strong>'+rows.length+(rows.length===100?'+':'')+' record(s) loaded</strong><div class="table-wrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(htmlRows||'<tr><td colspan="'+heads.length+'">No records found in this collection.</td></tr>')+'</tbody></table></div></div>';
- }catch(error){
-  body.innerHTML='<div class="notice"><strong>Could not load live '+(isUsers?'profiles':'KYC submissions')+'.</strong><p>Firebase denied access or Firestore is unavailable ('+safeText(error.code||'unknown error')+'). Confirm the administrator email is verified and Firestore rules permit admin reads.</p></div>';
- }
+  body.innerHTML='<div class="content-panel" style="margin:0"><h3>Identity verification review</h3><p class="muted">Check the submitted details before approving. ID images are not uploaded by this form.</p><strong>'+pending+' pending · '+rows.length+' total record(s)</strong><div class="table-wrap"><table><thead><tr>'+['Legal name','Email','Country','Document type','Document number','Status','Submitted','Admin action'].map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(html||'<tr><td colspan="8">No identity verification submissions found.</td></tr>')+'</tbody></table></div><p id="ocAdminKycMessage" class="muted tiny" role="status"></p></div>';
+  body.querySelectorAll('.oc-kyc-review-action').forEach(button=>button.addEventListener('click',async()=>{
+   const uid=button.dataset.kycUid,action=button.dataset.kycAction;if(!uid||!['approve','reject'].includes(action))return;
+   if(!window.confirm('Are you sure you want to '+action+' this identity verification submission?'))return;
+   const msg=byId('ocAdminKycMessage');button.disabled=true;if(msg)msg.textContent='Saving review decision…';
+   try{
+    const current=auth.currentUser;if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('admin-session-not-authorized');
+    await setDoc(doc(db,'kycSubmissions',uid),{status:action==='approve'?'approved':'rejected',reviewedAt:serverTimestamp(),reviewedBy:current.email,updatedAt:serverTimestamp()},{merge:true});
+    if(msg)msg.textContent=action==='approve'?'Approved. The user will now see Successfully Verified.':'Rejected. The user can correct and resubmit.';
+    await window.adminGetLiveCollection('KYC');await window.adminRefreshDashboard();
+   }catch(error){button.disabled=false;if(msg)msg.textContent='Could not save decision ('+(error.code||error.message||'unknown error')+'). Check admin access and Firestore rules.';}
+  }));
+ }catch(error){body.innerHTML='<div class="notice"><strong>Could not load live '+(isUsers?'profiles':'KYC submissions')+'.</strong><p>Firebase denied access or Firestore is unavailable ('+safeText(error.code||'unknown error')+'). Check administrator access and Firestore rules.</p></div>';}
 };
 window.adminRefreshDashboard=async function(){
  const users=byId('liveUsersCount'),kyc=byId('liveKycCount'),status=byId('dashboardDataStatus'),updated=byId('dashboardUpdatedAt');
