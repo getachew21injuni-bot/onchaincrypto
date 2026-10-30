@@ -2708,7 +2708,65 @@ body.oc-trade-overlay-open{overflow:hidden}
   const page=button.dataset.menuPage;
   if(typeof window.showPage==="function")window.showPage(page);
  });
- const style=document.createElement("style");style.id="oc-separate-account-pages-style";style.textContent=
+ 
+/* Click-to-open guidance: panels stay closed until the matching action is selected. */
+function openActionPanel(buttonId,panelId){
+ const button=byId(buttonId),panel=byId(panelId);
+ if(!button||!panel)return;
+ panel.hidden=true;
+ panel.style.display="none";
+ button.setAttribute("aria-expanded","false");
+ button.addEventListener("click",e=>{
+  e.preventDefault();
+  const opening=panel.hidden||panel.style.display==="none";
+  panel.hidden=!opening;
+  panel.style.display=opening?"block":"none";
+  button.setAttribute("aria-expanded",String(opening));
+  if(opening){panel.scrollIntoView({behavior:"smooth",block:"nearest"});}
+ });
+}
+openActionPanel("changePasswordBtn","ocPasswordChangePanel");
+openActionPanel("manageSessionBtn","ocSessionPanel");
+openActionPanel("settingsDeleteAccountBtn","ocDeleteRequestPanel");
+function revealProfilePanel(buttonId,panel){
+ const b=byId(buttonId);if(!b||!panel)return;
+ b.setAttribute("aria-expanded","false");
+ b.addEventListener("click",e=>{
+  e.preventDefault();
+  const opening=panel.hidden||panel.style.display==="none";
+  panel.hidden=!opening;panel.style.display=opening?"block":"none";
+  b.setAttribute("aria-expanded",String(opening));
+  if(opening)panel.scrollIntoView({behavior:"smooth",block:"nearest"});
+ });
+}
+const accountInfo=byId("profileAccountInformation");
+if(accountInfo){accountInfo.hidden=true;accountInfo.style.display="none";revealProfilePanel("accountStatusBtn",accountInfo);}
+const securityInfo=byId("profileSecurityDetailsBtn")?.closest(".panel");
+if(securityInfo){securityInfo.hidden=true;securityInfo.style.display="none";revealProfilePanel("securityInfoBtn",securityInfo);}
+const passwordPanel=byId("ocPasswordChangePanel");
+if(passwordPanel){
+ const heading=passwordPanel.querySelector("h3");if(heading)heading.textContent="Change password";
+ const intro=passwordPanel.querySelector("p");
+ if(intro)intro.textContent="Steps: 1. Enter your current password. 2. Enter a new password (at least 8 characters). 3. Confirm it. 4. Select Update password.";
+ const label=byId("changePasswordBtn");if(label)label.textContent="Change password";
+}
+const sessionPanel=byId("ocSessionPanel");
+if(sessionPanel){
+ const h=sessionPanel.querySelector("h3");if(h)h.textContent="Session management steps";
+ const p=sessionPanel.querySelector("#ocSessionState");
+ if(p){const note=document.createElement("p");note.className="muted tiny";note.textContent="Steps: review the device and last sign-in shown below. Check whether this device supports biometrics. To end this session, use Logout in Settings. Remote session revocation is not connected yet.";p.insertAdjacentElement("beforebegin",note);}
+}
+const deletePanel=byId("ocDeleteRequestPanel");
+if(deletePanel){
+ const p=deletePanel.querySelector("p");
+ if(p)p.textContent="Steps: 1. Select Send Gmail confirmation code. 2. Check your inbox or spam folder. 3. Enter the code. 4. Select Verify and send request. Your account remains active until an administrator reviews the request.";
+}
+const logoutBtn=byId("settingsLogoutBtn");
+logoutBtn?.addEventListener("click",()=>{const msg=byId("ocLogoutGuideMessage");if(msg)msg.textContent="Signing out of this device…";});
+if(logoutBtn&&!byId("ocLogoutGuideMessage")){
+ const msg=document.createElement("p");msg.id="ocLogoutGuideMessage";msg.className="muted tiny";msg.setAttribute("aria-live","polite");logoutBtn.closest(".settings-item")?.append(msg);
+}
+\nconst style=document.createElement("style");style.id="oc-separate-account-pages-style";style.textContent=
   '.oc-standalone-account-page{max-width:900px;margin:0 auto 20px;padding:16px}.oc-standalone-account-page .profile-menu-content{padding:0;border:0}.oc-standalone-account-page .profile-menu-content>.panel{margin-top:12px}.oc-standalone-account-page .settings-item:first-child{border-top:0}@media(max-width:600px){.oc-standalone-account-page{padding:12px}}';
  document.head.appendChild(style);
 })();
@@ -3945,7 +4003,7 @@ if(support){
  const title=support.querySelector(".page-title h1");if(title)title.textContent="Help and Guidance";
  const quick=support.querySelector(":scope > section.panel");
  if(quick&&!quick.parentElement.matches("details")){
-  const d=document.createElement("details");d.className="panel oc-help-accordion";d.open=true;const sum=document.createElement("summary");sum.textContent="Choose a help topic";d.append(sum);quick.replaceWith(d);d.append(quick);
+  const d=document.createElement("details");d.className="panel oc-help-accordion";d.open=false;const sum=document.createElement("summary");sum.textContent="Choose a help topic";d.append(sum);quick.replaceWith(d);d.append(quick);
  }
  const notice=support.querySelector(":scope > .notice");
  if(notice){const d=document.createElement("details");d.className="panel oc-help-accordion";const sum=document.createElement("summary");sum.textContent="Contact details";d.append(sum);notice.replaceWith(d);d.append(notice);}
