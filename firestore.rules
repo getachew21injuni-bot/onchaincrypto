@@ -21,12 +21,39 @@ service cloud.firestore {
         ])
       ) || (
         isAdmin()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['demoBalanceUSDT','demoBalanceUpdatedAt','adminUpdatedAt','adminUpdatedBy','accountStatus'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['demoBalanceUSDT','demoBalanceUpdatedAt','demoAssetBalances','demoAssetBalancesUpdatedAt','demoAssetBalancesUpdatedBy','adminUpdatedAt','adminUpdatedBy','accountStatus'])
         && (!('demoBalanceUSDT' in request.resource.data) || (request.resource.data.demoBalanceUSDT is number && request.resource.data.demoBalanceUSDT >= 0 && request.resource.data.demoBalanceUSDT <= 1000000000))
         && (!('accountStatus' in request.resource.data) || request.resource.data.accountStatus in ['active','suspended'])
+        && (!('demoAssetBalances' in request.resource.data) || request.resource.data.demoAssetBalances is map)
+        && (!('demoAssetBalancesUpdatedBy' in request.resource.data) || request.resource.data.demoAssetBalancesUpdatedBy == request.auth.token.email)
         && (!('adminUpdatedBy' in request.resource.data) || request.resource.data.adminUpdatedBy == request.auth.token.email)
       );
       allow delete: if false;
+    }
+
+
+    // Admin-issued simulated coin credits/debits. Users can only read their own
+    // entries; only a verified administrator can create ledger records.
+    match /demoAssetTransactions/{transactionId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly([
+          'uid','type','asset','amount','balanceBefore','balanceAfter',
+          'createdAt','createdAtText','createdBy','note','source','status'
+        ])
+        && request.resource.data.uid is string
+        && request.resource.data.type in ['deposit','withdrawal']
+        && request.resource.data.asset is string
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0
+        && request.resource.data.amount <= 1000000000
+        && request.resource.data.balanceBefore is number
+        && request.resource.data.balanceAfter is number
+        && request.resource.data.balanceAfter >= 0
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.source == 'admin-demo'
+        && request.resource.data.status == 'completed';
+      allow update, delete: if false;
     }
 
     match /demoTransactions/{transactionId} {
