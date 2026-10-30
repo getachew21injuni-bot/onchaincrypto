@@ -2959,9 +2959,8 @@ td,th{overflow-wrap:anywhere}
    const fields=[...form.querySelectorAll('input,select,textarea')].filter(el=>!el.disabled&&el.type!=='hidden');
    for(const el of fields){if(!validate(el,true)){e.preventDefault();e.stopImmediatePropagation();el.focus();return;}}
  },true);
- // Catch form errors and surface them in a clear banner, while preserving existing form-specific messages.
- const originalConsoleError=console.error;
- console.error=function(...args){try{const s=args.map(x=>typeof x==='string'?x:(x?.message||'')).join(' ');if(/firebase|auth\/|failed|error/i.test(s))announce('Something went wrong. Check the form fields and try again. If it continues, refresh the page and retry.');}catch(_){}return originalConsoleError.apply(console,args);};
+ // Do not replace specific Firebase/form errors with a generic banner.
+ // Registration and sign-in handlers display the actionable message in their own status area.
  document.addEventListener('click',e=>{
    const btn=e.target.closest('#timedUpBtn,#timedDownBtn,#timedConfirmBtn');
    if(!btn)return;
