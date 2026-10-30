@@ -1260,8 +1260,8 @@ let selectedDepositCoin="BTC",selectedWithdrawCoin="BTC";
 const coinPickerExpanded={deposit:1000,withdraw:1000};
 function drawCoinPicker(kind,query=""){const list=$(kind+"CoinList");if(!list)return;const selected=kind==="deposit"?selectedDepositCoin:selectedWithdrawCoin;const q=query.trim().toLowerCase();const filtered=supportedCoins.filter(c=>c[0].toLowerCase().includes(q)||c[1].toLowerCase().includes(q));const limit=coinPickerExpanded[kind]||6;const visible=filtered.slice(0,limit);list.innerHTML=visible.map(c=>'<button type="button" class="coin-choice '+(c[1]===selected?'selected':'')+'" data-coin="'+safe(c[1])+'"><span class="coin-icon" style="'+coinIconStyle(c[1])+'">'+c[2]+'</span><span><strong>'+safe(c[0])+'</strong><small>'+safe(c[1])+'</small></span></button>').join("")||'<div class="empty">No matching coins.</div>';const count=$(kind+"CoinCount"),less=$(kind+"CoinLess"),more=$(kind+"CoinMore");if(count)count.textContent="Showing "+visible.length+" of "+filtered.length+" coins";if(less)less.disabled=limit<=6;if(more)more.disabled=visible.length>=filtered.length;list.querySelectorAll("[data-coin]").forEach(b=>b.addEventListener("click",()=>{if(kind==="deposit"){selectedDepositCoin=b.dataset.coin;updateSelectedCoin("deposit");drawCoinPicker("deposit", $("depositCoinSearch").value)}else{selectedWithdrawCoin=b.dataset.coin;updateSelectedCoin("withdraw");drawCoinPicker("withdraw", $("withdrawCoinSearch").value)}}))}
 function updateSelectedCoin(kind){const sym=kind==="deposit"?selectedDepositCoin:selectedWithdrawCoin;const c=supportedCoins.find(x=>x[1]===sym)||supportedCoins[0];$(kind+"CoinName").textContent=c[0]+" ("+c[1]+")";$(kind+"CoinIcon").textContent=c[2];$(kind+"CoinIcon").className="coin-icon coin-"+c[1];$(kind+"CoinIcon").style.cssText=coinIconStyle(c[1]);$(kind+"CoinIcon").parentElement.dataset.coin=c[1];if(kind==="deposit")refreshDepositAddress()}
-function refreshDepositAddress(){const el=$("depositAddress");if(!el)return;const network=$("depositNetwork").value;const address=window.ONCHAINCRYPTO_DEPOSIT_ADDRESSES?.[selectedDepositCoin]?.[network]||"";el.textContent=address||"Deposit address not configured";$("copyDepositAddress").disabled=!address;$("showDepositQr").disabled=!address;$("depositQr").innerHTML='<span class="muted tiny">'+(address?"Press Show QR to display the address QR code.":"QR will appear only when a verified deposit address is configured.")+'</span>'}
-function showDepositQr(){const address=window.ONCHAINCRYPTO_DEPOSIT_ADDRESSES?.[selectedDepositCoin]?.[$("depositNetwork").value]||"";if(!address)return;$("depositQr").innerHTML='<img alt="QR code for configured deposit address" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(address)+'"><span class="muted tiny">Verify coin and network before sending.</span>'}
+function refreshDepositAddress(){const el=$("depositAddress");if(!el)return;const select=$("depositNetwork");const configured=window.ONCHAINCRYPTO_DEPOSIT_NETWORKS?.[selectedDepositCoin]||[];if(configured.length){const prior=select.value;select.innerHTML=configured.map(n=>'<option value="'+safe(n)+'">'+safe(n)+'</option>').join("");select.value=configured.includes(prior)?prior:configured[0]}const network=select.value;const address=window.ONCHAINCRYPTO_DEPOSIT_ADDRESSES?.[selectedDepositCoin]?.[network]||"";el.textContent=address||"Deposit address not configured";$("copyDepositAddress").disabled=!address;$("showDepositQr").disabled=!address;$("depositHelp").textContent=address?"Send only "+selectedDepositCoin+" using "+network+". Deposits are not automatically credited; contact support after sending.":"This coin/network is not configured for deposits yet.";const customQr=window.ONCHAINCRYPTO_DEPOSIT_QR_CODES?.[selectedDepositCoin]?.[network]||"";$("depositQr").innerHTML='<span class="muted tiny">'+(address?(customQr?"Custom deposit QR code is ready. Press Show QR.":"Press Show QR to display the address QR code."):"No published deposit address for this coin/network.")+'</span>'}
+function showDepositQr(){const network=$("depositNetwork").value,address=window.ONCHAINCRYPTO_DEPOSIT_ADDRESSES?.[selectedDepositCoin]?.[network]||"";if(!address)return;const custom=window.ONCHAINCRYPTO_DEPOSIT_QR_CODES?.[selectedDepositCoin]?.[network]||"";const src=custom||("https://api.qrserver.com/v1/create-qr-code/?size=220x220&data="+encodeURIComponent(address));$("depositQr").innerHTML='<img alt="QR code for '+safe(selectedDepositCoin)+' on '+safe(network)+'" src="'+safe(src)+'" style="max-width:220px;width:100%;background:white;padding:8px;border-radius:10px"><span class="muted tiny">Verify coin and network before sending. Only send '+safe(selectedDepositCoin)+' over '+safe(network)+'.</span>'}
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>{showPage(b.dataset.go);if(b.dataset.go==="trade"&&!b.hasAttribute("data-gold-trade")){const asset=$("tradeAsset");if(asset){asset.value="";const title=$("tradePairTitle");if(title)title.textContent="Select a coin / USDT";const timed=$("timedPair");if(timed)timed.textContent="Select a coin / USDT";const name=$("tradeAssetName");if(name)name.textContent="Choose a trading coin";const price=$("tradeCurrentPrice");if(price)price.textContent="—";updateQuickEstimate();setTimeout(()=>asset.focus(),50)}}}));
 document.querySelectorAll("[data-home-history]").forEach(b=>b.addEventListener("click",()=>{showPage("home");requestAnimationFrame(()=>document.getElementById("homePerformancePanel")?.scrollIntoView({behavior:"smooth",block:"start"}));}));
 document.querySelectorAll("[data-gold-trade]").forEach(b=>b.addEventListener("click",()=>{const asset=$("tradeAsset");if(asset){selected="XAU";renderTradeSelect();asset.value="XAU";updateTradePreview();if(typeof updateTradingViewChart==="function")updateTradingViewChart("XAU");}const title=$("tradePairTitle");if(title)title.textContent="XAU / USDT";const timed=$("timedPair");if(timed)timed.textContent="XAU / USDT";showPage("trade");updateQuickEstimate();}));
@@ -1270,7 +1270,7 @@ $("homeCoinSearch").addEventListener("input",renderHomeCoinResults);
 $("depositCoinSearch").addEventListener("input",e=>{coinPickerExpanded.deposit=6;drawCoinPicker("deposit",e.target.value)});$("withdrawCoinSearch").addEventListener("input",e=>{coinPickerExpanded.withdraw=6;drawCoinPicker("withdraw",e.target.value)});
 document.addEventListener("click",e=>{for(const kind of ["deposit","withdraw"]){if(e.target.closest("#"+kind+"CoinMore")){coinPickerExpanded[kind]=(coinPickerExpanded[kind]||6)+6;drawCoinPicker(kind,$(kind+"CoinSearch")?.value||"")}if(e.target.closest("#"+kind+"CoinLess")){coinPickerExpanded[kind]=Math.max(6,(coinPickerExpanded[kind]||6)-6);drawCoinPicker(kind,$(kind+"CoinSearch")?.value||"")}}});
 
-$("depositNetwork").addEventListener("change",refreshDepositAddress);$("copyDepositAddress").addEventListener("click",async()=>{const a=window.ONCHAINCRYPTO_DEPOSIT_ADDRESSES?.[selectedDepositCoin]?.[$("depositNetwork").value]||"";if(a){try{await navigator.clipboard.writeText(a);$("depositHelp").textContent="Address copied. Verify the coin and network before sending."}catch{$("depositHelp").textContent="Copy failed. Select and copy the address manually."}}});$("showDepositQr").addEventListener("click",showDepositQr);
+window.addEventListener("oc-wallet-addresses-updated",refreshDepositAddress);$("depositNetwork").addEventListener("change",refreshDepositAddress);$("copyDepositAddress").addEventListener("click",async()=>{const a=window.ONCHAINCRYPTO_DEPOSIT_ADDRESSES?.[selectedDepositCoin]?.[$("depositNetwork").value]||"";if(a){try{await navigator.clipboard.writeText(a);$("depositHelp").textContent="Address copied. Verify the coin and network before sending."}catch{$("depositHelp").textContent="Copy failed. Select and copy the address manually."}}});$("showDepositQr").addEventListener("click",showDepositQr);
 drawCoinPicker("deposit");drawCoinPicker("withdraw");updateSelectedCoin("deposit");updateSelectedCoin("withdraw");
 const moreMenuBtn=document.getElementById("moreMenuBtn"),moreMenu=document.getElementById("moreMenu");
 function ensureMoreMenuContent(){if(!moreMenu||moreMenu.querySelector("button"))return;moreMenu.innerHTML=
@@ -1361,7 +1361,7 @@ $("requestDeleteAccountBtn").addEventListener("click",()=>{const ok=window.confi
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import {
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider,
@@ -1380,7 +1380,25 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
 const db = getFirestore(app);
+// Public wallet instructions are read from Firestore so admin edits appear
+// for all visitors without another website deployment.
+onSnapshot(collection(db, "walletAddresses"), snapshot => {
+  const addresses = {}, qrCodes = {}, networks = {};
+  snapshot.docs.forEach(item => {
+    const row = item.data() || {}, asset = String(row.asset || "").toUpperCase(), network = String(row.network || "");
+    if (!asset || !network || row.depositEnabled !== true || !String(row.depositAddress || "").trim()) return;
+    (addresses[asset] ||= {})[network] = String(row.depositAddress).trim();
+    (qrCodes[asset] ||= {})[network] = String(row.qrCodeUrl || "").trim();
+    (networks[asset] ||= []).push(network);
+  });
+  window.ONCHAINCRYPTO_DEPOSIT_ADDRESSES = addresses;
+  window.ONCHAINCRYPTO_DEPOSIT_QR_CODES = qrCodes;
+  window.ONCHAINCRYPTO_DEPOSIT_NETWORKS = networks;
+  window.dispatchEvent(new Event("oc-wallet-addresses-updated"));
+}, error => console.warn("Published wallet address settings could not be loaded:", error?.code || error));
+
 const EMAIL_VERIFICATION_URL = "https://script.google.com/macros/s/AKfycbxUnw388WC-rAZY5RJBGs6_Zo13VKvnTgrbz78hOqYEu9uPa2lJRI_V9Y8JNGGOItHJ/exec";
 // Create or refresh the signed-in user's basic profile. Security Rules limit each
 // user to their own UID and approved profile fields; this never writes balances.
