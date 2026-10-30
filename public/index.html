@@ -1388,6 +1388,7 @@ async function saveBasicUserProfile(user) {
     phoneNumber: user.phoneNumber || localProfile.phone || "", displayName: names,
     firstName: localProfile.firstName || names.split(" ")[0] || "",
     lastName: localProfile.lastName || names.split(" ").slice(1).join(" ") || "",
+    referralCode: String(localProfile.referralCode || "").trim().slice(0, 40),
     createdAt: localProfile.createdAt || new Date().toISOString(),
     updatedAt: serverTimestamp()
   };
@@ -1587,80 +1588,55 @@ function openAccountProfileAfterAuth() {
 }
 document.getElementById("registerForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  window.ocPendingPage = "profile";
+  const form = event.currentTarget;
+  const submitButton = form.querySelector('button[type="submit"]');
+  if (submitButton?.disabled) return;
   const email = document.getElementById("registerEmail").value.trim().toLowerCase();
   const password = document.getElementById("registerPassword").value;
   const firstName = document.getElementById("registerFirstName").value.trim();
   const lastName = document.getElementById("registerLastName").value.trim();
   const name = (firstName + " " + lastName).trim();
+  const referralCode = (document.getElementById("referralCode")?.value || "").trim().replace(/[^a-z0-9_-]/gi, "").slice(0, 40);
   if (!firstName || !lastName) { msg("Enter your first and last name."); return; }
-  if (!email) { msg("Enter an email address, or use the phone SMS registration panel."); return; }
-
-  if (emailCodeSentFor !== email) {
-    msg("Sending a verification code to your Gmail…");
-    try {
-      await requestEmailVerificationCode(email);
-      emailCodeSentFor = email;
-      document.getElementById("emailCodePanel")?.classList.remove("hidden");
-      document.getElementById("registerEmailCode")?.focus();
-      msg("Code sent. Enter the six-digit code from your Gmail to finish registration.");
-    } catch (error) {
-      console.error("Email code send failed:", error);
-      msg(error?.message || "Could not send a Gmail code. Please try again.");
-    }
-    return;
-  }
-
-  const code = document.getElementById("registerEmailCode")?.value.trim() || "";
-  if (!/^\d{6}$/.test(code)) {
-    document.getElementById("emailCodePanel")?.classList.remove("hidden");
-    msg("Enter the six-digit verification code sent to your Gmail.");
-    return;
-  }
-  msg("Verifying your Gmail code…");
-  try {
-    await verifyEmailVerificationCode(email, code);
-  } catch (error) {
-    console.error("Email code verification failed:", error);
-    msg(error?.message || "That code could not be verified. Please try again.");
-    return;
-  }
-
-  msg("Email verified. Creating your account…");
+  if (!email) { msg("Enter a valid email address."); return; }
+  if (password.length < 8) { msg("Choose a password with at least 8 characters."); return; }
+  if (submitButton) { submitButton.disabled = true; submitButton.textContent = "Creating account…"; }
+  msg("Creating your secure account…");
   try {
     const credential = await createUserWithEmailAndPassword(auth, email, password);
     window.onchaincryptoCurrentUser = credential.user;
-    if (name) {
-      try { await updateProfile(credential.user, { displayName: name }); }
-      catch (profileError) { console.warn("Display name update deferred:", profileError?.code || profileError); }
-    }
+    try { await updateProfile(credential.user, { displayName: name }); }
+    catch (profileError) { console.warn("Display name update deferred:", profileError?.code || profileError); }
+    const localProfile = {
+      uid: credential.user.uid, firstName, lastName, email, displayName: name,
+      referralCode, createdAt: new Date().toISOString()
+    };
+    try { localStorage.setItem("oc_profile_" + credential.user.uid, JSON.stringify(localProfile)); } catch (_) {}
+    let cloudProfileSaved = false;
     try {
-      const savedProfile = { firstName, lastName, email, displayName: name, referralCode: (document.getElementById("referralCode")?.value || "").trim(), createdAt: new Date().toISOString(), emailVerifiedByCode: true };
-      localStorage.setItem("oc_profile_" + credential.user.uid, JSON.stringify(savedProfile));
-      if (savedProfile.referralCode) localStorage.setItem("oc_referral_attribution_" + credential.user.uid, savedProfile.referralCode);
-    } catch (_) {}
-    let cloudProfileSaved = true;
-    try { await saveBasicUserProfile(credential.user); }
-    catch (profileError) {
-      cloudProfileSaved = false;
+      await saveBasicUserProfile(credential.user);
+      cloudProfileSaved = true;
+    } catch (profileError) {
       console.error("Registration succeeded but cloud profile sync failed:", profileError?.code || profileError, profileError?.message || "");
     }
+    let verificationSent = false;
+    try { await sendEmailVerification(credential.user); verificationSent = true; }
+    catch (verificationError) { console.warn("Verification email could not be sent:", verificationError?.code || verificationError); }
     document.getElementById("registerPassword").value = "";
-    document.getElementById("registerEmailCode").value = "";
-    document.getElementById("emailCodePanel")?.classList.add("hidden");
-    emailCodeSentFor = "";
-    const identity = name || credential.user.displayName || credential.user.email || "user";
     const status = document.getElementById("authStatus");
+    const identity = name || credential.user.email || "user";
     if (status) status.textContent = cloudProfileSaved
-      ? "Account and cloud profile created successfully. Signed in as " + identity + "."
-      : "Account created, but the cloud profile could not be saved. Check Firestore rules/deployment and connection.";
-    msg(cloudProfileSaved
-      ? "Gmail code verified. Account and profile created successfully."
-      : "Account created, but profile sync failed. Your sign-in is active; please check the profile save status.");
-    if (typeof window.showPage === "function") window.showPage("profile");
+      ? "Account and personal profile created for " + identity + "."
+      : "Account created for " + identity + ", but cloud profile sync needs attention.";
+    msg((cloudProfileSaved ? "Account and profile created successfully. " : "Account created; profile cloud sync needs attention. ") +
+      (verificationSent ? "A Firebase verification email was sent. " : "") +
+      "Opening your personal account…");
+    openAccountProfileAfterAuth();
   } catch (error) {
-    console.error("OnChainCrypto registration failed:", error?.code || error);
+    console.error("OnChainCrypto registration failed:", error?.code || error, error?.message || "");
     msg(friendlyError(error));
+  } finally {
+    if (submitButton) { submitButton.disabled = false; submitButton.textContent = "⚡ Create account"; }
   }
 });
 
