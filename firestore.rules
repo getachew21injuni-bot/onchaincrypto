@@ -17,7 +17,7 @@ service cloud.firestore {
       allow update: if (
         owns(uid) && request.resource.data.uid == uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'email','phoneNumber','phone','firstName','lastName','displayName','referralCode','country','dateOfBirth','gender','address','updatedAt'
+          'email','phoneNumber','phone','firstName','lastName','displayName','referralCode','country','dateOfBirth','gender','address','createdAt','updatedAt'
         ])
       ) || (
         isAdmin()
