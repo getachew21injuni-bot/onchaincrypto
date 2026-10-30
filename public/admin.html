@@ -218,6 +218,8 @@ async function renderDemoFinance(view){
     const userUpdate={demoAssetBalances:nextMap,demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:adminEmail,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:adminEmail};
     if(targets.includes('USDT')){userUpdate.demoBalanceUSDT=usdtAfter;userUpdate.demoBalanceUpdatedAt=serverTimestamp();}
     batch.update(userRef,userUpdate);
+    const notificationRef=doc(collection(db,'userNotifications',uid,'items'));
+    batch.set(notificationRef,{kind:isDeposit?'deposit':'withdrawal',title:isDeposit?'Demo deposit credited':'Demo withdrawal deducted',message:(isDeposit?'Your demo wallet was credited with ':'A demo withdrawal deduction of ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+'. '+(note?'Admin note: '+note:'This is a simulated balance update, not a real blockchain transfer.'),createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:window.__ocAdminFirebase.auth.currentUser.uid,source:'admin-demo'});
     for(const c of changes){
      const txRef=doc(collection(db,c.symbol==='USDT'?'demoTransactions':'demoAssetTransactions'));
      if(c.symbol==='USDT'){
@@ -377,6 +379,7 @@ window.adminGetLiveCollection=async function(view){
    try{
     const current=auth.currentUser;if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('admin-session-not-authorized');
     await setDoc(doc(db,'kycSubmissions',uid),{status:action==='approve'?'approved':'rejected',reviewedAt:serverTimestamp(),reviewedBy:current.email,updatedAt:serverTimestamp()},{merge:true});
+    await setDoc(doc(collection(db,'userNotifications',uid,'items')),{kind:action==='approve'?'kyc_approved':'kyc_rejected',title:action==='approve'?'Identity verification approved':'Identity verification not approved',message:action==='approve'?'Your identity verification was approved. Your account now shows Successfully Verified.':'Your identity verification was not approved. Please review your details and resubmit them.',createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:current.uid});
     if(msg)msg.textContent=action==='approve'?'Approved. The user will now see Successfully Verified.':'Rejected. The user can correct and resubmit.';
     await window.adminGetLiveCollection('KYC');await window.adminRefreshDashboard();
    }catch(error){button.disabled=false;if(msg)msg.textContent='Could not save decision ('+(error.code||error.message||'unknown error')+'). Check admin access and Firestore rules.';}
