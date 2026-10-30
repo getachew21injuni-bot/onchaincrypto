@@ -1685,20 +1685,38 @@ document.getElementById("googleSignInBtn").addEventListener("click", async () =>
 
 document.getElementById("signInForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  window.ocPendingPage = "profile";
-  msg("Signing in…");
+  const form = event.currentTarget;
+  const button = form.querySelector('button[type="submit"]');
+  const email = document.getElementById("signInEmail").value.trim().toLowerCase();
+  const password = document.getElementById("signInPassword").value;
+  const status = document.getElementById("authStatus");
+  if (!email || !password) {
+    msg("Enter both your email address and password.");
+    if (status) status.textContent = "Sign-in needs your email address and password.";
+    return;
+  }
+  if (button?.disabled) return;
+  if (button) { button.disabled = true; button.textContent = "Signing in…"; }
+  msg("Connecting securely to Firebase Authentication…");
+  if (status) status.textContent = "Checking your sign-in details…";
   try {
-    const credential = await signInWithEmailAndPassword(auth,
-      document.getElementById("signInEmail").value.trim().toLowerCase(),
-      document.getElementById("signInPassword").value);
+    const credential = await signInWithEmailAndPassword(auth, email, password);
     document.getElementById("signInPassword").value = "";
     window.onchaincryptoCurrentUser = credential.user;
-    const status = document.getElementById("authStatus");
-    if (status) status.textContent = "Signed in as " + (credential.user.displayName || credential.user.email || credential.user.phoneNumber || "user") + ". You can continue to the platform.";
-    msg("Signed in successfully. Opening the platform…");
+    window.ocPendingPage = "profile";
+    if (status) status.textContent = "Signed in successfully as " + (credential.user.displayName || credential.user.email || credential.user.phoneNumber || "user") + ".";
+    msg("Login successful. Opening your personal account…");
     if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
     openAccountProfileAfterAuth();
-  } catch (error) { msg(friendlyError(error)); }
+  } catch (error) {
+    const code = error?.code || "unknown";
+    console.error("OnChainCrypto sign-in failed:", code, error?.message || error);
+    const message = friendlyError(error);
+    msg(message + (code === "unknown" ? "" : " Error code: " + code));
+    if (status) status.textContent = "Login failed: " + message + (code === "unknown" ? "" : " (" + code + ")");
+  } finally {
+    if (button) { button.disabled = false; button.textContent = "⚡ Sign In Securely"; }
+  }
 });
 
 document.getElementById("resetPasswordBtn").addEventListener("click", async () => {
