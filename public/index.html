@@ -564,8 +564,13 @@ document.addEventListener('DOMContentLoaded',function(){
       <details class="panel profile-menu-section" id="profileAccountSection">
         <summary><span class="profile-menu-icon profile-symbol">♙</span><span class="profile-menu-copy"><strong>Account</strong><small>Manage your profile</small></span><span class="profile-menu-chevron">⌄</span></summary>
         <div class="profile-menu-content">
+          <div class="panel about-section" id="ocUserProfileSummary" style="margin:12px 0;padding:14px">
+            <h3 class="feature-heading">Your account information</h3>
+            <p class="muted tiny" id="ocProfileSummaryIntro">Your personal information is private to your signed-in account.</p>
+            <div id="ocProfileSummaryGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px"></div>
+          </div>
           <div class="panel about-section" id="ocUserProfileEditor" style="margin:12px 0;padding:14px">
-            <h3 class="feature-heading">Personal profile</h3><p class="muted tiny">Signed-in account: <strong id="ocProfileIdentity">Your account</strong></p><p class="muted tiny">Edit your personal details. Changes sync to your signed-in account.</p>
+            <h3 class="feature-heading">Edit personal profile</h3><p class="muted tiny">Signed-in account: <strong id="ocProfileIdentity">Your account</strong></p><p class="muted tiny">Update your own details below. Changes are saved to this signed-in account.</p>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px">
               <div><label for="ocProfileFirstName">First name</label><input id="ocProfileFirstName" class="field" maxlength="50" autocomplete="given-name" placeholder="First name"></div>
               <div><label for="ocProfileLastName">Last name</label><input id="ocProfileLastName" class="field" maxlength="50" autocomplete="family-name" placeholder="Last name"></div>
@@ -1417,8 +1422,45 @@ async function saveBasicUserProfile(user) {
   }
 }
 
+function ocEscapeProfileText(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+function renderOwnProfileSummary(user, saved = {}) {
+  const grid = document.getElementById("ocProfileSummaryGrid");
+  const intro = document.getElementById("ocProfileSummaryIntro");
+  if (!grid || !intro) return;
+  if (!user?.uid) {
+    intro.textContent = "Sign in to view your personal account information.";
+    grid.innerHTML = "";
+    return;
+  }
+  const fullName = String(saved.displayName || [saved.firstName, saved.lastName].filter(Boolean).join(" ") || user.displayName || "").trim();
+  const created = user.metadata?.creationTime || saved.createdAt || "";
+  const memberSince = created && !Number.isNaN(new Date(created).getTime())
+    ? new Date(created).toLocaleDateString(undefined, {year:"numeric",month:"short",day:"numeric"})
+    : "Not available";
+  const fields = [
+    ["Full name", fullName || "Not added"],
+    ["Email", user.email || saved.email || "Not provided"],
+    ["Phone", saved.phone || saved.phoneNumber || user.phoneNumber || "Not added"],
+    ["Country", saved.country || "Not added"],
+    ["Date of birth", saved.dateOfBirth || saved.dob || "Not added"],
+    ["Gender", saved.gender || "Not added"],
+    ["Address", saved.address || "Not added"],
+    ["Account status", user.emailVerified ? "Active · Email verified" : "Active · Signed in"],
+    ["Member since", memberSince],
+    ["User ID", user.uid]
+  ];
+  intro.textContent = "This information belongs to the account currently signed in. Other users cannot see or edit it.";
+  grid.innerHTML = fields.map(([label,value]) =>
+    '<div style="background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px;min-width:0">' +
+    '<div class="muted tiny">' + ocEscapeProfileText(label) + '</div>' +
+    '<div style="font-weight:650;overflow-wrap:anywhere;margin-top:4px">' + ocEscapeProfileText(value) + '</div></div>'
+  ).join("");
+}
+
 async function loadSavedUserProfile(user) {
-  if (!user?.uid) return;
+  if (!user?.uid) { renderOwnProfileSummary(null, {}); return; }
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem("oc_profile_" + user.uid) || "{}"); } catch (_) {}
   try {
@@ -1451,6 +1493,7 @@ async function loadSavedUserProfile(user) {
   } catch (_) {}
   const identity = document.getElementById("ocProfileIdentity");
   if (identity) identity.textContent = values.displayName || user.email || user.phoneNumber || "My account";
+  renderOwnProfileSummary(user, { ...saved, ...values, phone: saved.phone || values.ocProfilePhone });
 }
 
 // Save profile once, keyed by the authenticated user's UID.
@@ -1488,6 +1531,7 @@ document.getElementById("ocSaveProfileBtn")?.addEventListener("click", async () 
     if (display) display.value = displayName;
     const identity = document.getElementById("ocProfileIdentity");
     if (identity) identity.textContent = displayName;
+    renderOwnProfileSummary(user, profile);
     if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
   } catch (error) {
     console.warn("Profile update failed:", error?.code || error);
