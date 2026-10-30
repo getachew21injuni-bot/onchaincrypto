@@ -8,13 +8,43 @@ service cloud.firestore {
     // Each member may read and update only their own profile.
     match /users/{uid} {
       allow read: if owns(uid) || isAdmin();
-      allow create, update: if owns(uid)
+      allow create: if owns(uid)
         && request.resource.data.uid == uid
         && request.resource.data.keys().hasOnly([
           'uid','email','phoneNumber','phone','firstName','lastName','displayName','referralCode',
           'country','dateOfBirth','gender','address','createdAt','updatedAt'
         ]);
+      allow update: if (
+        owns(uid) && request.resource.data.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'email','phoneNumber','phone','firstName','lastName','displayName','referralCode','country','dateOfBirth','gender','address','updatedAt'
+        ])
+      ) || (
+        isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['demoBalanceUSDT','demoBalanceUpdatedAt','adminUpdatedAt','adminUpdatedBy','accountStatus'])
+        && (!('demoBalanceUSDT' in request.resource.data) || (request.resource.data.demoBalanceUSDT is number && request.resource.data.demoBalanceUSDT >= 0 && request.resource.data.demoBalanceUSDT <= 1000000000))
+        && (!('accountStatus' in request.resource.data) || request.resource.data.accountStatus in ['active','suspended'])
+        && (!('adminUpdatedBy' in request.resource.data) || request.resource.data.adminUpdatedBy == request.auth.token.email)
+      );
       allow delete: if false;
+    }
+
+    match /demoTransactions/{transactionId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['uid','type','amountUSDT','balanceBeforeUSDT','balanceAfterUSDT','createdAt','createdAtText','createdBy','note','source','status'])
+        && request.resource.data.uid is string
+        && request.resource.data.type in ['deposit','withdrawal']
+        && request.resource.data.amountUSDT is number
+        && request.resource.data.amountUSDT > 0
+        && request.resource.data.amountUSDT <= 1000000000
+        && request.resource.data.balanceBeforeUSDT is number
+        && request.resource.data.balanceAfterUSDT is number
+        && request.resource.data.balanceAfterUSDT >= 0
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.source == 'admin-demo'
+        && request.resource.data.status == 'completed';
+      allow update, delete: if false;
     }
 
     // Members may submit/read their own KYC details. They cannot set an
