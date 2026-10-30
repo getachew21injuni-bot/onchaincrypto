@@ -2709,7 +2709,7 @@ body.oc-trade-overlay-open{overflow:hidden}
  }
  // Keep the Profile page limited to account details; move the existing display-currency
  // preference into Settings when present.
- if(profile){profile.querySelector(".page-title")?.remove();profile.querySelector(".profile-menu-list")?.remove()}
+ if(profile){profile.querySelector(".profile-menu-list")?.remove()}
  // The original notification placeholder is replaced by the actual preference controls.
  // Ensure all standalone destinations use the common page router and scroll to top.
  document.addEventListener("click",e=>{
