@@ -261,7 +261,7 @@ async function renderWalletAddresses(){
  '<div><h3 style="margin:0 0 4px">＋ Add / edit coin wallet details</h3><p class="muted" style="margin:0">Create one record for each coin and network combination.</p></div>'+
  '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">'+
  '<label style="display:grid;gap:6px">Coin / asset<select name="asset" id="walletAddressAsset" required style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white">'+options+'</select></label>'+
- '<label style="display:grid;gap:6px">Blockchain network<input name="network" id="walletAddressNetwork" list="walletNetworkOptions" maxlength="50" required placeholder="e.g. TRC20" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><datalist id="walletNetworkOptions">'+networkOptions+'</datalist></label></div>'+
+ '<label style="display:grid;gap:6px">Blockchain network<input name="network" id="walletAddressNetwork" list="walletNetworkOptions" maxlength="50" required placeholder="Auto-detected when possible" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><datalist id="walletNetworkOptions">'+networkOptions+'</datalist></label></div><p id="walletNetworkDetection" class="muted" role="status" aria-live="polite" style="margin:-4px 0 0;font-size:12px">Paste a wallet address below to detect its network where possible. Always verify the exact chain before publishing.</p>'+
  '<label style="display:grid;gap:6px">Deposit address<input name="depositAddress" id="walletDepositAddress" maxlength="500" autocomplete="off" spellcheck="false" placeholder="Paste the public receiving address" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"></label>'+
  '<label style="display:grid;gap:6px">Deposit QR-code image URL (optional)<input name="qrCodeUrl" id="walletQrCodeUrl" type="text" maxlength="500000" placeholder="https://… or upload a QR image below" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"></label>'+
  '<label style="display:grid;gap:6px">Or upload QR-code image (PNG, JPG or WebP; maximum 300 KB)<input name="qrImageFile" id="walletQrImageFile" type="file" accept="image/png,image/jpeg,image/webp" style="padding:10px;border:1px solid #526878;border-radius:9px;background:#102333;color:white"><small class="muted">The small QR image is saved with this coin/network record in Firestore; Firebase Storage is not required.</small></label><div id="walletQrPreview" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px;border:1px dashed #526878;border-radius:10px"><span class="muted">QR preview will appear when a deposit address is entered.</span></div>'+
@@ -274,6 +274,33 @@ async function renderWalletAddresses(){
  '<div class="notice">Important: the withdrawal address stored here is an administrator-side wallet reference. It is not shown as the customer’s withdrawal destination and does not send funds. Customer withdrawal requests still need a separately secured payout/approval process.</div></div>';
  const form=document.getElementById('walletAddressForm');
  const qrPreview=document.getElementById('walletQrPreview');
+ const networkField=form.elements.network,networkHint=document.getElementById('walletNetworkDetection');
+ function detectWalletNetwork(value){
+  const a=String(value||'').trim();if(!a)return null;
+  if(/^0x[a-fA-F0-9]{40}$/.test(a))return {network:null,message:'EVM-compatible address detected. This format is shared by Ethereum, BNB Smart Chain, Polygon, Arbitrum, Optimism, Base and Avalanche. Select the exact chain manually.'};
+  if(/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(a))return {network:'TRC20',message:'TRON address format detected (TRC20). Verify that this coin supports TRC20.'};
+  if(/^bc1[ac-hj-np-z02-9]{11,87}$/i.test(a)||/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(a))return {network:'Bitcoin',message:'Bitcoin address format detected. Verify the asset and network before publishing.'};
+  if(/^(EQ|UQ)[A-Za-z0-9_-]{30,}$/i.test(a))return {network:'TON',message:'TON address format detected. Verify the address and asset before publishing.'};
+  if(/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(a))return {network:'XRP Ledger',message:'XRP Ledger address format detected. A destination tag may also be required.'};
+  if(/^bitcoincash:(q|p)[a-z0-9]{20,}$/i.test(a))return {network:'Bitcoin Cash',message:'Bitcoin Cash address format detected.'};
+  if(/^ltc1[ac-hj-np-z02-9]{11,87}$/i.test(a)||/^[LM][a-km-zA-HJ-NP-Z1-9]{26,33}$/.test(a))return {network:'Litecoin',message:'Litecoin address format detected.'};
+  if(/^D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{ is invalid}$/.test(a))return null;
+  if(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a))return {network:'Solana',message:'Base58 address may be Solana, but this format is not unique. Confirm the chain manually.'};
+  return {network:null,message:'Network not confidently recognized. Choose the exact network manually; do not guess.'};
+ }
+ function updateNetworkDetection(){
+  const dep=form.elements.depositAddress.value.trim(),wd=form.elements.withdrawalAddress.value.trim();
+  const d=dep?detectWalletNetwork(dep):null,w=wd?detectWalletNetwork(wd):null;
+  if(dep&&wd&&d&&w&&d.network&&w.network&&d.network!==w.network){networkHint.textContent='Deposit and withdrawal addresses appear to use different networks. Confirm both manually; one network setting applies to this record.';networkHint.style.color='#fbbf24';return;}
+  const result=dep?d:w;
+  if(!result){networkHint.textContent='Paste a wallet address to detect its network where possible.';networkHint.style.color='';return;}
+  networkHint.textContent=result.message;
+  networkHint.style.color=result.network?'#6ee7b7':'#fbbf24';
+  if(result.network&&(!networkField.value.trim()||networkField.dataset.autoDetected==='true')){networkField.value=result.network;networkField.dataset.autoDetected='true';}
+ }
+ networkField.addEventListener('input',()=>{networkField.dataset.autoDetected='false';});
+ form.elements.depositAddress.addEventListener('input',updateNetworkDetection);
+ form.elements.withdrawalAddress.addEventListener('input',updateNetworkDetection);
  function updateQrPreview(){
   const address=form.elements.depositAddress.value.trim(),url=form.elements.qrCodeUrl.value.trim();
   if(url){qrPreview.innerHTML='<img alt="Deposit QR preview" src="'+escHtml(url)+'" style="width:150px;height:150px;object-fit:contain;background:white;border-radius:8px;padding:5px"><span class="muted">Custom QR image</span>';return;}
@@ -286,7 +313,7 @@ async function renderWalletAddresses(){
   if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>300000){form.elements.qrImageFile.value='';document.getElementById('walletAddressMessage').textContent='Choose a PNG, JPG or WebP QR image smaller than 300 KB.';return;}
   const reader=new FileReader();reader.onload=()=>{form.elements.qrCodeUrl.value=String(reader.result||'');updateQrPreview();document.getElementById('walletAddressMessage').textContent='QR image loaded. Save & publish to share it with users.';};reader.onerror=()=>{document.getElementById('walletAddressMessage').textContent='Could not read that QR image. Try another file.';};reader.readAsDataURL(file);
  });
- document.getElementById('walletAddressClear').addEventListener('click',()=>{form.reset();form.elements.asset.value='BTC';updateQrPreview();document.getElementById('walletAddressMessage').textContent='Form cleared.';});
+ document.getElementById('walletAddressClear').addEventListener('click',()=>{form.reset();form.elements.asset.value='BTC';networkField.dataset.autoDetected='false';updateNetworkDetection();updateQrPreview();document.getElementById('walletAddressMessage').textContent='Form cleared.';});
  form.addEventListener('submit',async e=>{
   e.preventDefault();const msg=document.getElementById('walletAddressMessage'),fd=new FormData(form);
   const asset=String(fd.get('asset')||'').trim().toUpperCase(),network=String(fd.get('network')||'').trim(),depositAddress=String(fd.get('depositAddress')||'').trim(),qrCodeUrl=String(fd.get('qrCodeUrl')||'').trim(),withdrawalAddress=String(fd.get('withdrawalAddress')||'').trim();
@@ -303,7 +330,7 @@ async function renderWalletAddresses(){
  });
  body.querySelectorAll('[data-wallet-edit]').forEach(btn=>btn.addEventListener('click',()=>{
   const r=records.find(x=>x.id===btn.dataset.walletEdit);if(!r)return;
-  form.elements.asset.value=r.asset||'BTC';form.elements.network.value=r.network||'Bitcoin';form.elements.depositAddress.value=r.depositAddress||'';form.elements.qrCodeUrl.value=r.qrCodeUrl||'';form.elements.withdrawalAddress.value=r.withdrawalAddress||'';form.elements.depositEnabled.checked=r.depositEnabled!==false;form.elements.withdrawalEnabled.checked=r.withdrawalEnabled!==false;updateQrPreview();form.scrollIntoView({behavior:'smooth',block:'start'});
+  form.elements.asset.value=r.asset||'BTC';form.elements.network.value=r.network||'Bitcoin';form.elements.depositAddress.value=r.depositAddress||'';form.elements.qrCodeUrl.value=r.qrCodeUrl||'';form.elements.withdrawalAddress.value=r.withdrawalAddress||'';networkField.dataset.autoDetected='false';updateNetworkDetection();form.elements.depositEnabled.checked=r.depositEnabled!==false;form.elements.withdrawalEnabled.checked=r.withdrawalEnabled!==false;updateQrPreview();form.scrollIntoView({behavior:'smooth',block:'start'});
  }));
  body.querySelectorAll('[data-wallet-delete]').forEach(btn=>btn.addEventListener('click',async()=>{
   const r=records.find(x=>x.id===btn.dataset.walletDelete);if(!r||!confirm('Delete '+r.asset+' on '+r.network+' from published wallet settings?'))return;
