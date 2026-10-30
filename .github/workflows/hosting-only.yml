@@ -40,5 +40,5 @@ jobs:
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
 
-      - name: Deploy website only (no Functions or Firestore API enablement)
-        run: firebase deploy --project onchaincrypto-d976b --only hosting --non-interactive
+      - name: Deploy website and Firestore security rules only (no Functions or API enablement)
+        run: firebase deploy --project onchaincrypto-d976b --only hosting,firestore:rules --non-interactive
