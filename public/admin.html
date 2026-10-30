@@ -261,8 +261,8 @@ async function renderWalletAddresses(){
  '<label style="display:grid;gap:6px">Coin / asset<select name="asset" id="walletAddressAsset" required style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white">'+options+'</select></label>'+
  '<label style="display:grid;gap:6px">Blockchain network<input name="network" id="walletAddressNetwork" list="walletNetworkOptions" maxlength="50" required placeholder="e.g. TRC20" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><datalist id="walletNetworkOptions">'+networkOptions+'</datalist></label></div>'+
  '<label style="display:grid;gap:6px">Deposit address<input name="depositAddress" id="walletDepositAddress" maxlength="500" autocomplete="off" spellcheck="false" placeholder="Paste the public receiving address" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"></label>'+
- '<label style="display:grid;gap:6px">Deposit QR-code image URL (optional)<input name="qrCodeUrl" id="walletQrCodeUrl" type="url" maxlength="1500" placeholder="https://… (leave blank to generate QR from deposit address)" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"></label>'+
- '<div id="walletQrPreview" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px;border:1px dashed #526878;border-radius:10px"><span class="muted">QR preview will appear when a deposit address is entered.</span></div>'+
+ '<label style="display:grid;gap:6px">Deposit QR-code image URL (optional)<input name="qrCodeUrl" id="walletQrCodeUrl" type="text" maxlength="500000" placeholder="https://… or upload a QR image below" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"></label>'+
+ '<label style="display:grid;gap:6px">Or upload QR-code image (PNG, JPG or WebP; maximum 300 KB)<input name="qrImageFile" id="walletQrImageFile" type="file" accept="image/png,image/jpeg,image/webp" style="padding:10px;border:1px solid #526878;border-radius:9px;background:#102333;color:white"><small class="muted">The small QR image is saved with this coin/network record in Firestore; Firebase Storage is not required.</small></label><div id="walletQrPreview" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px;border:1px dashed #526878;border-radius:10px"><span class="muted">QR preview will appear when a deposit address is entered.</span></div>'+
  '<label style="display:grid;gap:6px">Withdrawal wallet address (admin-side payout source / reference)<input name="withdrawalAddress" id="walletWithdrawalAddress" maxlength="500" autocomplete="off" spellcheck="false" placeholder="Paste the public sending-wallet address" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"></label>'+
  '<div style="display:flex;gap:18px;flex-wrap:wrap"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="depositEnabled" checked> Enable deposits</label><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="withdrawalEnabled" checked> Enable withdrawals</label></div>'+
  '<div style="display:flex;gap:9px;flex-wrap:wrap"><button class="icon-btn" type="submit" style="background:linear-gradient(90deg,#087b56,#12a879);border:0;padding:13px 18px;font-weight:800">Save & publish for users</button><button class="icon-btn" id="walletAddressClear" type="button">Clear form</button></div><p id="walletAddressMessage" class="muted" role="status" aria-live="polite" style="margin:0"></p></form>'+
@@ -279,13 +279,18 @@ async function renderWalletAddresses(){
   qrPreview.innerHTML='<span class="muted">QR preview will appear when a deposit address is entered.</span>';
  }
  form.elements.depositAddress.addEventListener('input',updateQrPreview);form.elements.qrCodeUrl.addEventListener('input',updateQrPreview);
+ form.elements.qrImageFile.addEventListener('change',()=>{
+  const file=form.elements.qrImageFile.files?.[0];if(!file)return;
+  if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>300000){form.elements.qrImageFile.value='';document.getElementById('walletAddressMessage').textContent='Choose a PNG, JPG or WebP QR image smaller than 300 KB.';return;}
+  const reader=new FileReader();reader.onload=()=>{form.elements.qrCodeUrl.value=String(reader.result||'');updateQrPreview();document.getElementById('walletAddressMessage').textContent='QR image loaded. Save & publish to share it with users.';};reader.onerror=()=>{document.getElementById('walletAddressMessage').textContent='Could not read that QR image. Try another file.';};reader.readAsDataURL(file);
+ });
  document.getElementById('walletAddressClear').addEventListener('click',()=>{form.reset();form.elements.asset.value='BTC';updateQrPreview();document.getElementById('walletAddressMessage').textContent='Form cleared.';});
  form.addEventListener('submit',async e=>{
   e.preventDefault();const msg=document.getElementById('walletAddressMessage'),fd=new FormData(form);
   const asset=String(fd.get('asset')||'').trim().toUpperCase(),network=String(fd.get('network')||'').trim(),depositAddress=String(fd.get('depositAddress')||'').trim(),qrCodeUrl=String(fd.get('qrCodeUrl')||'').trim(),withdrawalAddress=String(fd.get('withdrawalAddress')||'').trim();
   if(!asset||!network){msg.textContent='Choose a coin and enter its blockchain network.';return;}
   if(!depositAddress&&!withdrawalAddress){msg.textContent='Enter at least a deposit address or withdrawal wallet address.';return;}
-  if(qrCodeUrl&&!/^https:\/\/\S+$/i.test(qrCodeUrl)){msg.textContent='QR image URL must use HTTPS.';return;}
+  if(qrCodeUrl&&!/^https:\/\/\S+$/i.test(qrCodeUrl)&&!/^data:image\/(png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(qrCodeUrl)){msg.textContent='Use an HTTPS QR image URL or upload a valid PNG/JPG/WebP image.';return;}
   const id=(asset+'_'+network).toLowerCase().replace(/[^a-z0-9_-]+/g,'_');
   const button=form.querySelector('button[type=submit]');button.disabled=true;msg.textContent='Saving securely to Firestore…';
   try{
