@@ -1384,24 +1384,33 @@ const EMAIL_VERIFICATION_URL = "https://script.google.com/macros/s/AKfycbxUnw388
 // Create or refresh the signed-in user's basic profile. Security Rules limit each
 // user to their own UID and approved profile fields; this never writes balances.
 async function saveBasicUserProfile(user) {
-  if (!user?.uid) return;
+  if (!user?.uid) throw new Error("A signed-in account is required to load its profile.");
   let localProfile = {};
   try { localProfile = JSON.parse(localStorage.getItem("oc_profile_" + user.uid) || "{}"); } catch (_) {}
-  const names = String(user.displayName || [localProfile.firstName, localProfile.lastName].filter(Boolean).join(" ")).trim();
+  // The Firebase Auth UID is the permanent profile key. Read the cloud record first
+  // so returning users keep their original details and registration date on any device.
+  const profileRef = doc(db, "users", user.uid);
+  const existingSnapshot = await getDoc(profileRef);
+  const existingProfile = existingSnapshot.exists() ? (existingSnapshot.data() || {}) : {};
+  const names = String(existingProfile.displayName || user.displayName || [existingProfile.firstName || localProfile.firstName, existingProfile.lastName || localProfile.lastName].filter(Boolean).join(" ")).trim();
   const profile = {
-    uid: user.uid, email: user.email || localProfile.email || "",
-    phoneNumber: user.phoneNumber || localProfile.phone || "", displayName: names,
-    firstName: localProfile.firstName || names.split(" ")[0] || "",
-    lastName: localProfile.lastName || names.split(" ").slice(1).join(" ") || "",
-    referralCode: String(localProfile.referralCode || "").trim().slice(0, 40),
-    createdAt: localProfile.createdAt || new Date().toISOString(),
+    ...existingProfile,
+    uid: user.uid,
+    email: user.email || existingProfile.email || localProfile.email || "",
+    phoneNumber: user.phoneNumber || existingProfile.phoneNumber || localProfile.phone || "",
+    displayName: names,
+    firstName: existingProfile.firstName || localProfile.firstName || names.split(" ")[0] || "",
+    lastName: existingProfile.lastName || localProfile.lastName || names.split(" ").slice(1).join(" ") || "",
+    referralCode: String(existingProfile.referralCode || localProfile.referralCode || "").trim().slice(0, 40),
+    createdAt: existingProfile.createdAt || localProfile.createdAt || user.metadata?.creationTime || new Date().toISOString(),
     updatedAt: serverTimestamp()
   };
   try {
-    await setDoc(doc(db, "users", user.uid), profile, { merge: true });
-    return { ok: true };
+    await setDoc(profileRef, profile, { merge: true });
+    try { localStorage.setItem("oc_profile_" + user.uid, JSON.stringify({ ...profile, updatedAt: new Date().toISOString() })); } catch (_) {}
+    return { ok: true, profile };
   } catch (error) {
-    console.error("Basic profile could not be saved to Firestore:", error?.code || error, error?.message || "");
+    console.error("Account profile could not be saved to Firestore:", error?.code || error, error?.message || "");
     throw error;
   }
 }
@@ -1757,8 +1766,12 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
     document.getElementById("signInPassword").value = "";
     window.onchaincryptoCurrentUser = credential.user;
     window.ocPendingPage = "profile";
-    if (status) status.textContent = "Signed in successfully as " + (credential.user.displayName || credential.user.email || credential.user.phoneNumber || "user") + ".";
-    msg("Login successful. Opening Home…");
+    // Load this exact Firebase UID's saved cloud profile before routing Home.
+    // A matching email always signs into the same Auth UID and therefore the same profile.
+    await loadSavedUserProfile(credential.user);
+    await saveBasicUserProfile(credential.user);
+    if (status) status.textContent = "Welcome back, " + (credential.user.displayName || credential.user.email || credential.user.phoneNumber || "user") + ". Your account profile has been loaded.";
+    msg("Login successful. Your personal profile is ready. Opening Home…");
     if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
     openHomeAfterAuth();
   } catch (error) {
