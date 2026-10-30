@@ -2770,7 +2770,8 @@ logoutBtn?.addEventListener("click",()=>{const msg=byId("ocLogoutGuideMessage");
 if(logoutBtn&&!byId("ocLogoutGuideMessage")){
  const msg=document.createElement("p");msg.id="ocLogoutGuideMessage";msg.className="muted tiny";msg.setAttribute("aria-live","polite");logoutBtn.closest(".settings-item")?.append(msg);
 }
-\nconst style=document.createElement("style");style.id="oc-separate-account-pages-style";style.textContent=
+
+const style=document.createElement("style");style.id="oc-separate-account-pages-style";style.textContent=
   '.oc-standalone-account-page{max-width:900px;margin:0 auto 20px;padding:16px}.oc-standalone-account-page .profile-menu-content{padding:0;border:0}.oc-standalone-account-page .profile-menu-content>.panel{margin-top:12px}.oc-standalone-account-page .settings-item:first-child{border-top:0}@media(max-width:600px){.oc-standalone-account-page{padding:12px}}';
  document.head.appendChild(style);
 })();
