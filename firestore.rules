@@ -110,6 +110,20 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Private in-app notifications; only verified admins can issue notifications.
+    match /userNotifications/{uid}/items/{notificationId} {
+      allow read: if owns(uid) || isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['kind','title','message','createdAt','createdAtText','readAt','createdBy','source'])
+        && request.resource.data.kind in ['kyc_approved','kyc_rejected','deposit','withdrawal']
+        && request.resource.data.title is string && request.resource.data.title.size() <= 120
+        && request.resource.data.message is string && request.resource.data.message.size() <= 500
+        && request.resource.data.createdBy == request.auth.uid
+        && (!('source' in request.resource.data) || request.resource.data.source == 'admin-demo');
+      allow update: if owns(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt']) && request.resource.data.readAt != null;
+      allow delete: if owns(uid);
+    }
+
     // Private customer-support conversations.
     match /supportTickets/{ticketId} {
       allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid
