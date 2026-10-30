@@ -233,10 +233,8 @@ document.addEventListener('DOMContentLoaded',function(){
     <button data-page="trade">Trade</button>
     <button data-page="wallet">Wallet</button>
     
-    <button data-page="register" id="register-nav" class="register-nav">Sign Up</button>
-    <button data-page="register" id="signin-nav" class="secondary">Sign In</button>
   </nav>
-  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="primary mobile-register-btn" id="mobileRegisterBtn" type="button">Sign Up</button><button class="secondary mobile-signin-btn" id="mobileSignInBtn" type="button">Sign In</button><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><button class="secondary oc-nav-control oc-exit-control" id="ocExitBtn" type="button" aria-label="Exit and sign out" title="Exit and sign out">↪ <span>Exit</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Guides and account assistance</small></span></button><button type="button" data-menu-page="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About</strong><small>Platform information</small></span></button></div></div></div>
+  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><button class="secondary oc-nav-control oc-exit-control" id="ocExitBtn" type="button" aria-label="Exit and sign out" title="Exit and sign out">↪ <span>Exit</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Guides and account assistance</small></span></button><button type="button" data-menu-page="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About</strong><small>Platform information</small></span></button></div></div></div>
 </header>
 <main>
   <section id="page-home">
@@ -247,10 +245,6 @@ document.addEventListener('DOMContentLoaded',function(){
    <div class="oc-hero-pill"><span class="oc-pulse-dot"></span> WELCOME TO ONCHAINCRYPTO</div>
    <h2>Take Control of Your <span>Crypto Future</span></h2>
    <p>Fast, secure, low-cost — everything you need to trade confidently.</p>
-   <div class="oc-landing-actions">
-    <button class="oc-hero-cta" type="button" id="landingGetStarted">Get Started <span aria-hidden="true">↗</span></button>
-    <button class="secondary oc-landing-signin" type="button" id="landingSignIn">Sign In</button>
-   </div>
   </div>
   <div class="oc-hero-art oc-market-visual" aria-label="Illustrative cryptocurrency candlestick chart">
    <div class="oc-chart-window">
@@ -709,7 +703,13 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
     <div class="content-grid">
       <section class="panel form-panel auth-main-panel">
-        <div id="authModeIntro"><h2>Sign in to your account</h2><p class="muted tiny">Enter your email and password to continue.</p></div>
+        <div id="authModeIntro"><h2>Welcome to OnChainCrypto</h2><p class="muted tiny">Choose a secure way to access your account or create a new one.</p></div>
+        <section id="authChoicePanel" class="oc-auth-choice" aria-label="Choose how to continue">
+          <div class="oc-auth-preface"><span class="oc-auth-eyebrow">YOUR DIGITAL ASSET JOURNEY</span><h2>Trade with clarity. Move with confidence.</h2><p>Access market insights, explore digital assets and manage your personal account through one secure platform.</p><div class="oc-auth-benefits"><span>✦ Market intelligence</span><span>◈ Personal account</span><span>✓ Secure access</span></div></div>
+          <button class="primary full oc-auth-choice-button" id="authChoiceGoogle" type="button"><span aria-hidden="true">G</span> Login with Google</button>
+          <button class="secondary full oc-auth-choice-button" id="authChoiceEmail" type="button"><span aria-hidden="true">✉</span> Login with email or phone</button>
+          <p class="oc-auth-register-prompt">Don’t have an account? <button type="button" id="authChoiceRegister">Register</button></p>
+        </section>
         
         <p class="muted tiny">Register with email and password, or verify by SMS. Real-money trading and online balances are unavailable.</p>
         <div id="authStatus" class="notice">Checking sign-in status…</div>
@@ -726,9 +726,9 @@ document.addEventListener('DOMContentLoaded',function(){
           <button class="primary full" type="submit">⚡ Create account</button>
           <p class="auth-switch">Already have an account? <button type="button" id="registerLoginBtn">Login</button></p>
         </form>
-        <button class="secondary full auth-google-btn" id="googleSignInBtn" type="button"><span aria-hidden="true">🌐</span> Continue with Google</button>
+        <button class="secondary full auth-google-btn hidden" id="googleSignInBtn" type="button"><span aria-hidden="true">🌐</span> Continue with Google</button>
         <p class="muted tiny auth-google-hint">Enter your full name above to register with Google.</p>
-        <form id="signInForm" class="auth-signin-form">
+        <form id="signInForm" class="auth-signin-form hidden">
           <h3 style="margin-top:12px">Sign in</h3>
           <label for="signInEmail">Email address</label><input id="signInEmail" class="field" type="email" autocomplete="username" required placeholder="you@example.com">
           <label for="signInPassword">Password</label><div class="oc-password-wrap"><input id="signInPassword" class="field" type="password" autocomplete="current-password" required placeholder="Enter your password"><button class="oc-password-toggle" type="button" data-password-target="signInPassword" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
@@ -737,7 +737,7 @@ document.addEventListener('DOMContentLoaded',function(){
           <button class="secondary full" id="resetPasswordBtn" type="button">Forgot password?</button>
           <p class="auth-switch" id="authSwitchText">Don’t have an account? <button type="button" id="showRegisterBtn">Register</button></p>
         </form>
-        <div class="divider auth-phone-divider"></div>
+        <div class="divider auth-phone-divider hidden" id="authPhoneDivider"></div>
         <details class="auth-phone-details hidden" id="phoneRegistrationPanel">
           <summary>Register or sign in by phone</summary>
           <h3>Phone registration / login</h3>
@@ -1928,14 +1928,40 @@ setTimeout(() => {
   remember?.addEventListener('change',()=>{try{if(remember.checked&&email)localStorage.setItem('onchaincryptoRememberEmail',email.value);else localStorage.removeItem('onchaincryptoRememberEmail');}catch(_){}});
   email?.addEventListener('change',()=>{try{if(remember?.checked)localStorage.setItem('onchaincryptoRememberEmail',email.value);}catch(_){}});
   signIn.addEventListener('submit',()=>{try{if(remember?.checked&&email)localStorage.setItem('onchaincryptoRememberEmail',email.value);else localStorage.removeItem('onchaincryptoRememberEmail');}catch(_){}});
-  setMode('signin');
+  function showAuthChoice(){
+    document.getElementById("authChoicePanel")?.classList.remove("hidden");
+    signIn.classList.add("hidden");register.classList.add("hidden");
+    if(google)google.classList.add("hidden");if(googleHint)googleHint.classList.add("hidden");
+    if(phonePanel){phonePanel.classList.add("hidden");phonePanel.open=false;phonePanel.querySelectorAll("input").forEach(el=>el.disabled=true);}
+    if(intro)intro.innerHTML='<h2>Welcome to OnChainCrypto</h2><p class="muted tiny">Choose a secure way to access your account or create a new one.</p>';
+    if(heading)heading.textContent="Welcome to OnChainCrypto";
+    if(sub)sub.textContent="Your digital asset journey starts here.";
+  }
+  document.getElementById("authChoiceGoogle")?.addEventListener("click",()=>{document.getElementById("authChoicePanel")?.classList.add("hidden");if(google)google.classList.remove("hidden");if(googleHint)googleHint.classList.add("hidden");signIn.classList.add("hidden");register.classList.add("hidden");google?.click();});
+  document.getElementById("authChoiceEmail")?.addEventListener("click",()=>{document.getElementById("authChoicePanel")?.classList.add("hidden");setMode("signin");if(google)google.classList.add("hidden");if(googleHint)googleHint.classList.add("hidden");const divider=document.getElementById("authPhoneDivider");divider?.classList.remove("hidden");if(phonePanel){phonePanel.classList.remove("hidden");phonePanel.open=false;phonePanel.querySelectorAll("input").forEach(el=>el.disabled=false);} });
+  document.getElementById("authChoiceRegister")?.addEventListener("click",()=>{document.getElementById("authChoicePanel")?.classList.add("hidden");setMode("register");});
+  setMode("signin");
+  showAuthChoice();
 })();
 
 $("marketShowMore")?.addEventListener("click",()=>{window.marketRowsExpanded=(window.marketRowsExpanded||5)+5;renderMarket()});
 $("marketShowLess")?.addEventListener("click",()=>{window.marketRowsExpanded=5;renderMarket()});
 $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q=$("browserSearchInput")?.value.trim();if(!q)return;window.open("https://www.google.com/search?q="+encodeURIComponent(q),"_blank","noopener,noreferrer")});
 </script>
+<script id="oc-auth-deep-links">
+(function(){
+ const params=new URLSearchParams(window.location.search),mode=(params.get("auth")||"").toLowerCase();
+ if(mode!=="login"&&mode!=="register")return;
+ window.showPage?.("register");
+ const open=()=>document.getElementById(mode==="register"?"authChoiceRegister":"authChoicePanel")?.click();
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",open,{once:true});else setTimeout(open,0);
+})();
+</script>
 
+<style id="oc-auth-choice-style">
+.oc-auth-choice{max-width:620px;margin:18px auto 8px;padding:clamp(18px,4vw,30px);border:1px solid #24547a;border-radius:18px;background:linear-gradient(145deg,#0c2540f2,#071629f5 70%);box-shadow:0 18px 55px #0005,inset 0 1px #ffffff12}
+.oc-auth-preface{text-align:center;margin-bottom:22px}.oc-auth-eyebrow{font-size:10px;font-weight:800;letter-spacing:1.8px;color:#20d9ff}.oc-auth-preface h2{font-size:clamp(22px,4vw,30px);line-height:1.2;margin:9px 0;color:#f2f9ff}.oc-auth-preface p{max-width:460px;margin:0 auto;color:#a9bfd5;line-height:1.7}.oc-auth-benefits{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 16px;margin-top:17px;color:#b9d9ee;font-size:11px}.oc-auth-choice-button{min-height:52px;margin-top:11px;font-size:15px;display:flex;align-items:center;justify-content:center;gap:10px}.oc-auth-choice-button>span{font-weight:850;font-size:19px}.oc-auth-register-prompt{text-align:center;margin:20px 0 0;color:#a9bfd5}.oc-auth-register-prompt button{background:transparent;color:#20d9ff;padding:4px 6px;font-weight:800}.auth-main-panel{max-width:850px;margin:0 auto}.auth-welcome{text-align:center}
+</style>
 
 <style id="oc-live-support-widget-style">
 #ocLiveSupport{position:fixed;right:18px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:9998;display:flex;align-items:center;text-decoration:none;font-family:inherit}
