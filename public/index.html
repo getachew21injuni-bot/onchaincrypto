@@ -2689,6 +2689,8 @@ body.oc-trade-overlay-open{overflow:hidden}
  if(account){
   // Keep account identity and editable personal information on Profile only.
   const currency=Array.from(account.querySelectorAll(".settings-item")).find(x=>x.textContent.includes("Display currency"));
+  Array.from(account.querySelectorAll(".about-section")).forEach(panel=>{const heading=panel.querySelector("h3")?.textContent.trim();if(heading==="Security Information"||heading==="Financial Information")panel.remove()});
+  Array.from(account.querySelectorAll(".settings-item")).forEach(item=>{if(item.textContent.includes("Security information"))item.remove()});
   const profilePage=create("profile","Profile","Account details and personal preferences",account);
   if(currency&&settings)settings.appendChild(currency);
  }
@@ -2709,8 +2711,6 @@ body.oc-trade-overlay-open{overflow:hidden}
  // preference into Settings when present.
  if(profile){profile.querySelector(".page-title")?.remove();profile.querySelector(".profile-menu-list")?.remove()}
  // The original notification placeholder is replaced by the actual preference controls.
- const oldNotifications=byId("page-notifications");
- if(oldNotifications&&notifications){oldNotifications.className="hidden";oldNotifications.innerHTML=""}
  // Ensure all standalone destinations use the common page router and scroll to top.
  document.addEventListener("click",e=>{
   const button=e.target.closest("[data-menu-page]");if(!button||!document.getElementById("moreMenu")?.contains(button))return;
