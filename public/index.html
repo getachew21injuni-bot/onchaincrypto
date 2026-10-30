@@ -2772,6 +2772,60 @@ if(logoutBtn&&!byId("ocLogoutGuideMessage")){
 })();
 </script>
 
+
+<script id="oc-menu-separation-and-no-forced-login">
+(function(){
+ const menu=document.getElementById("moreMenu");
+ const settings=document.getElementById("page-settings");
+ if(!menu||!settings)return;
+ // The three-dot menu is the single home for these destinations.
+ menu.querySelectorAll('[data-menu-page="about"]').forEach(el=>el.remove());
+ const help=menu.querySelector('[data-menu-page="support"]');
+ if(help){const strong=help.querySelector("strong"),small=help.querySelector("small");if(strong)strong.textContent="Help and Guidance";if(small)small.textContent="Guides and account assistance";}
+ // Move the existing, already-wired logout action out of Settings and into the menu.
+ const logout=document.getElementById("settingsLogoutBtn");
+ if(logout){
+   const row=logout.closest(".settings-item");
+   logout.className="more-menu-logout";
+   logout.type="button";
+   logout.innerHTML='<span class="menu-symbol" style="color:#ff9292;background:#402424">↪</span><span><strong>Logout</strong><small>Sign out of this device</small></span>';
+   logout.setAttribute("role","menuitem");
+   menu.appendChild(logout);
+   row?.remove();
+ }
+ // Profile contains personal/account profile information only; remove any legacy
+ // logout or settings controls that may still be present in older markup.
+ const profile=document.getElementById("page-profile");
+ profile?.querySelectorAll("#profileLogoutBtn,#settingsLogoutBtn").forEach(el=>el.remove());
+ // Security guidance belongs in Settings, not Profile, and never opens the sign-in page.
+ const settingsBody=settings.querySelector(".oc-standalone-account-page")||settings;
+ if(!document.getElementById("ocSettingsSecurityGuide")){
+   const panel=document.createElement("section");
+   panel.id="ocSettingsSecurityGuide";
+   panel.className="panel about-section";
+   panel.style.cssText="margin:12px 0;padding:14px";
+   panel.innerHTML='<h3 class="feature-heading">Account security guidance</h3><p class="muted tiny">You can read these steps while signed out. Account changes require an active session, but this page will not redirect you to Sign In.</p><ol class="resource-detail-list"><li>Use a unique password of at least 8 characters.</li><li>Keep your email account secure and follow the verification instructions sent to it.</li><li>Never share your password, verification code, private key or recovery phrase.</li><li>Review the current device session and sign out on shared devices.</li><li>If you cannot access your account, use the password recovery option from the Sign In page when you choose to.</li></ol>';
+   settingsBody.appendChild(panel);
+ }
+ // Remove old profile security controls which used to redirect directly to Sign In.
+ profile?.querySelectorAll("#securityInfoBtn,#profileSecurityDetailsBtn").forEach(el=>el.closest(".settings-item,.panel")?.remove());
+ // Keep the menu destinations usable without authentication. Pages can explain
+ // which individual actions need a signed-in account without changing the page.
+ menu.querySelectorAll("[data-menu-page]").forEach(button=>{
+   button.addEventListener("click",()=>{
+     const page=button.dataset.menuPage;
+     if(page&&typeof window.showPage==="function")window.showPage(page);
+     menu.classList.add("hidden");
+     document.getElementById("moreMenuBtn")?.setAttribute("aria-expanded","false");
+   });
+ });
+ const style=document.createElement("style");
+ style.id="oc-menu-separation-style";
+ style.textContent='.more-menu-logout{display:flex;align-items:center;gap:11px;width:100%;min-height:54px;text-align:left;padding:11px 9px;background:transparent;color:#eaf6ff;border-radius:8px}.more-menu-logout:hover{background:var(--panel2)}.more-menu-logout>span:nth-child(2){display:flex;flex-direction:column;gap:2px;flex:1}.more-menu-logout strong{font-size:13px}.more-menu-logout small{font-size:11px;color:var(--muted);font-weight:400}';
+ document.head.appendChild(style);
+})();
+</script>
+
 </body>
 </html>
 
