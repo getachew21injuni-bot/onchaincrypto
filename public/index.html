@@ -290,10 +290,10 @@ document.addEventListener('DOMContentLoaded',function(){
    <button class="quick-action" style="--action-color:#a78bfa" type="button" data-go="convert"><span class="action-icon">⇄</span><strong>Convert</strong><small>Swap supported assets</small></button>
    <button class="quick-action" style="--action-color:#159cff" type="button" data-go="trade"><span class="action-icon">↗</span><strong>Trade Crypto</strong><small>Open trading workspace</small></button>
     <button class="quick-action" style="--action-color:#f5bd42" type="button" data-go="trade" data-gold-trade="true"><span class="action-icon gold-coin-icon" aria-hidden="true">◉</span><strong>Trade Gold</strong><small>XAU / USDT · Gold</small></button>
-   <button class="quick-action" style="--action-color:#a78bfa" type="button" data-go="wallet"><span class="action-icon">◉</span><strong>My Wallet</strong><small>View assets and balance</small></button>
+   
    <button class="quick-action" style="--action-color:#eabf38" type="button" data-go="markets"><span class="action-icon">▥</span><strong>Markets</strong><small>View live coin prices</small></button>
    <button class="quick-action" style="--action-color:#a78bfa" type="button" data-go="home" data-home-history="true"><span class="action-icon">◷</span><strong>History</strong><small>7-day performance</small></button>
-   <button class="quick-action" style="--action-color:#00cce8" type="button" data-go="profile"><span class="action-icon">♙</span><strong>My Profile</strong><small>Account and settings</small></button>
+   <button class="quick-action" style="--action-color:#00cce8" type="button" data-go="wallet"><span class="action-icon">◉</span><strong>Wallet</strong><small>View assets and balance</small></button>
   </div>
  </section>
  <section class="panel" id="homePerformancePanel">
@@ -302,6 +302,11 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="chart-wrap"><canvas id="home7dChart" height="180" style="width:100%;display:block" aria-label="Seven-day paper trading performance chart"></canvas></div>
   <p class="muted tiny">Based on this device’s paper-trade history.</p>
  </section>
+  <section class="panel" id="homeActivityHistory">
+   <div class="section-head"><div><h2>Activity History</h2><div class="muted tiny">Recent trades, deposits, withdrawals and account actions</div></div><select id="homeHistoryFilter" class="field" style="max-width:165px"><option value="7days">Last 7 days</option><option value="all">All activity</option><option value="trade">Trades</option><option value="deposit">Deposits</option><option value="withdraw">Withdrawals</option><option value="activity">Account activity</option></select></div>
+   <div id="homeActivityHistoryRows"><div class="empty">Your recent activity will appear here.</div></div>
+   <p class="muted tiny" style="padding:0 18px 14px">History is recorded in this browser for this demo; no real funds are moved.</p>
+  </section>
  <section class="panel">
   <div class="section-head"><div><h2>Active Coin Pairs</h2><div class="muted tiny">Prices update when data is available.</div></div><button class="secondary" type="button" data-go="markets">View all</button></div>
   <div id="homeActivePairs" class="table-wrap"><table><thead><tr><th>Coin / Pair</th><th>Price (USDT approx.</th><th>24h Change</th><th>Action</th></tr></thead><tbody><tr><td colspan="4" class="empty">Waiting for public market prices…</td></tr></tbody></table></div>
@@ -881,7 +886,25 @@ if(localStorage.getItem("oc_training_credit_10000_v1")!=="granted"){
 }
 function readActivity(){try{return JSON.parse(localStorage.getItem("oc_activity_history")||"[]")}catch(e){return []}}
 function recordActivity(type,title,details,status="Recorded"){const items=readActivity();items.unshift({id:Date.now()+"-"+Math.random().toString(36).slice(2,7),type,title,details,status,time:new Date().toISOString()});localStorage.setItem("oc_activity_history",JSON.stringify(items.slice(0,1000)));renderActivityHistory()}
-function renderActivityHistory(){const el=$("walletHistory");if(!el)return;const filter=$("historyFilter")?.value||"all";const trades=state.history.map(t=>({type:"trade",title:(t.side||"trade").toUpperCase()+" "+String(t.symbol||""),details:money(t.amount)+" · "+Number(t.qty||0).toFixed(8)+" coins @ "+money(t.price),status:"Paper trade",time:t.time||new Date().toISOString()}));const all=[...trades,...readActivity()].sort((a,b)=>new Date(b.time)-new Date(a.time));const rows=all.filter(x=>filter==="all"||x.type===filter||((filter==="activity")&&x.type==="activity"));el.innerHTML=rows.length?rows.map(x=>'<div class="list-row"><div><strong>'+safe(x.title||x.type)+'</strong><div class="muted tiny">'+new Date(x.time).toLocaleString()+' · '+safe(x.status||"Recorded")+'</div><div class="muted tiny">'+safe(x.details||"") +'</div></div><span class="tag">'+safe((x.type||"activity").toUpperCase())+'</span></div>').join(""):'<div class="empty">No '+(filter==="all"?"activity":safe(filter)+" activity")+' recorded yet.</div>'}
+function renderActivityHistory(){
+ const walletHost=$("walletHistory"),homeHost=$("homeActivityHistoryRows");
+ const walletFilter=$("historyFilter")?.value||"all",homeFilter=$("homeHistoryFilter")?.value||"7days";
+ const trades=state.history.map(t=>({type:"trade",title:(t.side||"trade").toUpperCase()+" "+String(t.symbol||""),details:money(t.amount)+" · "+Number(t.qty||0).toFixed(8)+" coins @ "+money(t.price),status:"Paper trade",time:t.time||new Date().toISOString()}));
+ const all=[...trades,...readActivity()].sort((a,b)=>new Date(b.time)-new Date(a.time));
+ const renderRows=(host,filter,limit)=>{
+  if(!host)return;
+  const cutoff=Date.now()-7*24*60*60*1000;
+  const rows=all.filter(x=>{
+   if(filter==="7days"&&new Date(x.time).getTime()<cutoff)return false;
+   if(filter==="all"||filter==="7days")return true;
+   if(filter==="activity")return x.type==="activity";
+   return x.type===filter;
+  });
+  host.innerHTML=rows.length?rows.slice(0,limit||1000).map(x=>'<div class="list-row"><div><strong>'+safe(x.title||x.type)+'</strong><div class="muted tiny">'+new Date(x.time).toLocaleString()+' · '+safe(x.status||"Recorded")+'</div><div class="muted tiny">'+safe(x.details||"")+'</div></div><span class="tag">'+safe((x.type||"activity").toUpperCase())+'</span></div>').join(""):'<div class="empty">No '+(filter==="all"?"activity":filter==="7days"?"activity in the last 7 days":safe(filter)+" activity")+' recorded yet.</div>';
+ };
+ renderRows(walletHost,walletFilter,1000);
+ renderRows(homeHost,homeFilter,12);
+}
 function priceFor(symbol){return market.find(c=>c.symbol.toUpperCase()===symbol.toUpperCase())}
 function coinIcon(c,size=29){
  const sym=String(c?.symbol||"?").toUpperCase();
@@ -1181,7 +1204,7 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-profile-fi
 function refreshProfileAccountInfo(){const badge=$("profileAccountStatusBadge"),status=$("profileAccountStatusText"),member=$("profileMemberSince");const user=window.onchaincryptoCurrentUser||null;if(badge)badge.textContent=user?"Signed in":"Guest";if(status)status.textContent=user?(user.emailVerified?"Active · Email verified":"Active · Email not verified"):"Guest · Not signed in";if(member){const created=user&&user.metadata&&user.metadata.creationTime;if(created){const d=new Date(created);member.textContent=isNaN(d.getTime())?"Available after sign-in":d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"})}else member.textContent="Available after sign-in"}}
 function renderWalletMarket(){const el=$("walletMarketRows");if(!el)return;const q=String($("walletCoinSearch")?.value||"").trim().toLowerCase();const limitValue=String(window.walletCoinExpanded||5);const filter=document.querySelector("#walletCoinFilters [data-wallet-filter].active")?.dataset.walletFilter||"all";let rows=[...market].filter(c=>String(c.name||"").toLowerCase().includes(q)||String(c.symbol||"").toLowerCase().includes(q)).sort((a,b)=>(b.market_cap||0)-(a.market_cap||0));if(filter==="gainers")rows=rows.filter(c=>(c.price_change_percentage_24h||0)>0).sort((a,b)=>(b.price_change_percentage_24h||0)-(a.price_change_percentage_24h||0));if(filter==="losers")rows=rows.filter(c=>(c.price_change_percentage_24h||0)<0).sort((a,b)=>(a.price_change_percentage_24h||0)-(b.price_change_percentage_24h||0));const total=rows.length;rows=rows.slice(0,Number(limitValue)||5);el.innerHTML=rows.length?rows.map(c=>'<tr><td>'+coinAsset(c)+'</td><td>'+money(c.current_price)+'</td><td class="'+((c.price_change_percentage_24h||0)>=0?'green':'red')+'">'+pct(c.price_change_percentage_24h)+'</td><td><button class="secondary" type="button" data-wallet-market-trade="'+safe(c.symbol)+'">Trade</button></td></tr>').join(""):'<tr><td colspan="4" class="empty">No matching coins found. Try another search or filter.</td></tr>';const count=$("walletCoinCount");if(count)count.textContent="Showing "+rows.length+" of "+total+" matching coins";const less=$("walletCoinLess"),more=$("walletCoinMore");if(less)less.disabled=(window.walletCoinExpanded||5)<=5;if(more)more.disabled=rows.length>=total;el.querySelectorAll("[data-wallet-market-trade]").forEach(b=>b.addEventListener("click",()=>{const sel=$("tradeAsset");if(sel)sel.value=b.dataset.walletMarketTrade;showPage("trade");updateTradePreview()}))}
 function renderWallet(){const value=Object.entries(state.holdings).reduce((sum,[sym,qty])=>sum+(Number(qty)||0)*(priceFor(sym)?.current_price||0),0);$("summaryBalance").textContent=usdtMoney(state.balance);$("walletBalance").textContent=usdtMoney(state.balance);$("holdingsValue").textContent=usdtMoney(value);const rows=Object.entries(state.holdings).filter(([sym,qty])=>Number(qty)>0.0000000001&&(! $("hideSmallBalances")?.checked||Number(qty)*(priceFor(sym)?.current_price||0)>=1));$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym,current_price:0};return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+' '+safe(sym.toUpperCase())+'</td><td>'+usdtMoney(Number(qty)*(c.current_price||0))+'</td></tr>'}).join(""):'<tr><td colspan="3" class="empty">No holdings yet. Place a paper trade to see assets.</td></tr>';renderActivityHistory();renderTradeHistory();renderPnl();renderWalletMarket()}
-document.addEventListener("change",e=>{if(e.target&&e.target.id==="hideSmallBalances")renderWallet()});
+document.addEventListener("change",e=>{if(e.target&&e.target.id==="hideSmallBalances")renderWallet();if(e.target&&e.target.id==="homeHistoryFilter")renderActivityHistory()});
 function showPage(page){if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="wallet")renderWallet();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
 window.showPage = showPage;
 let timedPaper=null,timedTimer=null,pendingTimedDirection=null;
@@ -2177,7 +2200,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
    const home=document.querySelector(HOME);
    if(home){new MutationObserver(setup).observe(home,{childList:true,subtree:true});}
    document.addEventListener('click',e=>{if(e.target.closest('[data-go="home"]'))setTimeout(setup,120);});
-   setInterval(setup,1800);
+   // Home MutationObserver and click handler keep controls in sync without polling.
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
@@ -2426,7 +2449,7 @@ main:has(> #page-browser:not(.hidden)) #quickAutoRange {
 <!-- Hide duplicate demo-trading panels requested for a cleaner Home / Market experience -->
 <style id="oc-cleanup-duplicate-trade-panels">
 /* Keep the Home and Market pages focused; retain the existing main market chart and pair selector. */
-#homePerformancePanel,
+/* #homePerformancePanel remains visible. */
 /* Keep Quick Trade visible on the Trade page. */
 #page-trade section:has(#tradeHistory),
 #page-trade .performance-panel,
@@ -2833,7 +2856,7 @@ td,th{overflow-wrap:anywhere}
     applyReferral();
     /* Do not force Home on load; preserve the visitor's current page. */
   });
-  setInterval(applyReferral, 700);
+  // Referral values are applied on startup and DOMContentLoaded; no rapid polling needed.
 })();
 </script>
 
