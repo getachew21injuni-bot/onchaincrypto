@@ -4177,11 +4177,28 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
 <script type="module" id="oc-account-security-and-guidance">
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const cfg={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
 const app=getApps()[0]||initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
 const byId=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function submitKycDetails(data){
+ if(typeof auth.authStateReady==="function") await auth.authStateReady();
+ const user=auth.currentUser;
+ if(!user||user.uid!==data.uid) throw new Error("auth/session-missing");
+ const ref=doc(db,"kycSubmissions",user.uid);
+ const existing=await getDoc(ref);
+ if(existing.exists()&&existing.data()?.status==="approved") throw new Error("kyc-already-approved");
+ await setDoc(ref,{
+  uid:user.uid,email:user.email||"",
+  legalName:String(data.legalName||"").trim(),
+  country:String(data.country||"").trim(),
+  documentType:String(data.documentType||"").trim(),
+  documentNumber:String(data.documentNumber||"").trim(),
+  status:"pending",submittedAt:serverTimestamp(),updatedAt:serverTimestamp()
+ },{merge:true});
+ return {ok:true,status:"pending"};
+}
 const settings=byId("page-settings");
 if(settings){
  const old=byId("changePasswordBtn")?.closest(".settings-item");
@@ -4248,8 +4265,7 @@ if(kyc){
         documentNumber:String(values.get("documentNumber")||"").trim()
       };
       if(!data.legalName||!data.country||!data.documentType||!data.documentNumber)throw new Error("Please complete all required fields.");
-      if(typeof window.ocSubmitKycDetails!=="function")throw new Error("Submission service is not ready. Refresh the page and try again.");
-      await window.ocSubmitKycDetails(data);
+      await submitKycDetails(data);
       status.textContent="Your identity details have been submitted and are pending review. ID images are currently preview-only and have not been uploaded.";
     }catch(err){
       const code=err?.code||err?.message||"unknown-error";
