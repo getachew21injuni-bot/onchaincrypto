@@ -1480,14 +1480,17 @@ async function loadSavedUserProfile(user) {
   renderOwnProfileSummary(user, { ...saved, ...values, phone: saved.phone || values.ocProfilePhone });
 }
 
-// Save profile once, keyed by the authenticated user's UID.
-document.getElementById("ocSaveProfileBtn")?.addEventListener("click", async () => {
+// Save the signed-in user's profile once, then take them straight to Home.
+const saveProfileButton = document.getElementById("ocSaveProfileBtn");
+saveProfileButton?.addEventListener("click", async () => {
   const status = document.getElementById("ocProfileSaveStatus");
+  const button = saveProfileButton;
+  if (button.disabled) return;
   const user = auth.currentUser;
-  if (!user?.uid) { if (status) status.textContent = "Sign in first to save your profile."; return; }
+  if (!user?.uid) { if (status) status.textContent = "Please sign in before saving your profile."; return; }
   const firstName = document.getElementById("ocProfileFirstName")?.value.trim() || "";
   const lastName = document.getElementById("ocProfileLastName")?.value.trim() || "";
-  if (!firstName || !lastName) { if (status) status.textContent = "Enter your first and last name."; return; }
+  if (!firstName || !lastName) { if (status) status.textContent = "Please enter your first and last name."; return; }
   const displayName = (firstName + " " + lastName).trim();
   const profile = {
     uid: user.uid, email: user.email || "",
@@ -1500,26 +1503,31 @@ document.getElementById("ocSaveProfileBtn")?.addEventListener("click", async () 
     address: document.getElementById("ocProfileAddress")?.value.trim() || "",
     updatedAt: serverTimestamp()
   };
+  button.disabled = true;
+  const originalLabel = button.textContent;
+  button.textContent = "Saving…";
+  if (status) status.textContent = "Saving your profile…";
   try {
     await updateProfile(user, { displayName });
+    // The cloud write must succeed before we report completion or navigate away.
+    await setDoc(doc(db, "users", user.uid), profile, { merge: true });
     try { localStorage.setItem("oc_profile_" + user.uid, JSON.stringify({ ...profile, updatedAt: new Date().toISOString() })); } catch (_) {}
-    if (status) status.textContent = "Saving profile to your account…";
-    try {
-      await setDoc(doc(db, "users", user.uid), profile, { merge: true });
-      if (status) status.textContent = "Profile saved to your account.";
-    } catch (error) {
-      console.warn("Cloud profile save failed:", error?.code || error);
-      if (status) status.textContent = "Saved on this device. Cloud sync failed; check Firestore rules and connection.";
-    }
     const display = document.getElementById("displayName");
     if (display) display.value = displayName;
     const identity = document.getElementById("ocProfileIdentity");
     if (identity) identity.textContent = displayName;
     renderOwnProfileSummary(user, profile);
     if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
+    if (status) status.textContent = "Your profile is saved. Welcome to OnChainCrypto!";
+    // A single Save click completes the process and opens the signed-in user's Home.
+    openHomeAfterAuth();
   } catch (error) {
-    console.warn("Profile update failed:", error?.code || error);
-    if (status) status.textContent = "Could not update your profile. Please try again.";
+    console.warn("Profile save failed:", error?.code || error, error?.message || "");
+    if (status) status.textContent = error?.code === "permission-denied"
+      ? "We could not save your profile to your account. Please check your account permissions and try again."
+      : "Your profile could not be saved right now. Please check your connection and try again.";
+    button.disabled = false;
+    button.textContent = originalLabel || "Save profile";
   }
 });
 const msg = (text) => { const el = document.getElementById("registerMessage"); if (el) el.textContent = text; };
