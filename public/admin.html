@@ -284,8 +284,7 @@ async function renderWalletAddresses(){
   if(/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(a))return {network:'XRP Ledger',message:'XRP Ledger address format detected. A destination tag may also be required.'};
   if(/^bitcoincash:(q|p)[a-z0-9]{20,}$/i.test(a))return {network:'Bitcoin Cash',message:'Bitcoin Cash address format detected.'};
   if(/^ltc1[ac-hj-np-z02-9]{11,87}$/i.test(a)||/^[LM][a-km-zA-HJ-NP-Z1-9]{26,33}$/.test(a))return {network:'Litecoin',message:'Litecoin address format detected.'};
-  if(/^D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{ is invalid}$/.test(a))return null;
-  if(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a))return {network:'Solana',message:'Base58 address may be Solana, but this format is not unique. Confirm the chain manually.'};
+  if(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a))return {network:null,message:'Base58 address detected. It may be Solana, but this format is not unique. Select the exact chain manually.'};
   return {network:null,message:'Network not confidently recognized. Choose the exact network manually; do not guess.'};
  }
  function updateNetworkDetection(){
