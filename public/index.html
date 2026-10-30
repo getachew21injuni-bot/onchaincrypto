@@ -1828,15 +1828,7 @@ document.getElementById("settingsLogoutBtn")?.addEventListener("click", async ()
   try { await signOut(auth); window.showPage?.("home"); }
   catch (_) { alert("Could not log out. Please try again."); }
 });
-document.getElementById("settingsDeleteAccountBtn")?.addEventListener("click", () => {
-  const user = auth.currentUser;
-  if (!user) { alert("Sign in to request account deletion."); return; }
-  const confirmed = window.confirm("Request deletion of the OnChainCrypto account for " + (user.email || user.phoneNumber || "this user") + "? This opens an email request; it will not instantly delete the account.");
-  if (!confirmed) return;
-  const subject = encodeURIComponent("OnChainCrypto account deletion request");
-  const body = encodeURIComponent("Please review my account deletion request.\nFirebase user ID: " + user.uid + "\nEmail: " + (user.email || "not provided") + "\nPhone: " + (user.phoneNumber || "not provided"));
-  window.location.href = "mailto:onchaincryptosupport@gmail.com?subject=" + subject + "&body=" + body;
-});
+// Account deletion is handled by the Gmail-confirmed request flow below.
 setTimeout(() => {
   const status = document.getElementById("authStatus");
   if (status && status.textContent.includes("Checking sign-in status")) {
@@ -3992,7 +3984,6 @@ byId("ocCheckBiometric")?.addEventListener("click",async()=>{
  try{const supported=!!(window.PublicKeyCredential&&PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable&&await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());el.textContent=supported?"This device reports a platform authenticator (such as Windows Hello, Touch ID or Android biometrics). Secure passkey enrollment still needs a server challenge and is not enabled yet.":"No platform biometric authenticator is available or the browser does not support checking it. Password sign-in remains available."}
  catch(_){el.textContent="Could not check biometric support in this browser."}
 });
-byId("settingsLogoutBtn")?.addEventListener("click",async()=>{try{await auth.signOut();window.showPage?.("home")}catch(e){alert("Sign out failed: "+(e.message||"Please try again."))}});
 const ENDPOINT="https://script.google.com/macros/s/AKfycbxUnw388WC-rAZY5RJBGs6_Zo13VKvnTgrbz78hOqYEu9uPa2lJRI_V9Y8JNGGOItHJ/exec";
 async function gmailCode(action,email,code){const response=await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,email,...(code?{code}:{})})});const result=await response.json();if(!result.success||(action==="verify"&&result.verified!==true))throw new Error(result.message||"Email confirmation failed.");return result}
 byId("settingsDeleteAccountBtn")?.addEventListener("click",()=>{const p=byId("ocDeleteRequestPanel");if(p){p.scrollIntoView({behavior:"smooth",block:"center"});byId("ocDeleteRequestMessage").textContent="Confirm the email address on your signed-in account to continue."}});
