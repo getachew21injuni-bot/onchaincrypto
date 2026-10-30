@@ -2084,32 +2084,60 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
   c.strokeStyle="#25c985";c.lineWidth=2.5;c.beginPath();vals.forEach((v,i)=>{const x=pad+i*(w-2*pad)/6,y=base-v/max*(h/2-pad);i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke();
   vals.forEach((v,i)=>{const x=pad+i*(w-2*pad)/6,y=base-v/max*(h/2-pad);c.fillStyle=v>=0?"#25c985":"#f6465d";c.beginPath();c.arc(x,y,3,0,Math.PI*2);c.fill()});
  }
- function renderBook(){
+ let bookSocket=null,bookSymbol="",bookRetry=null,bookRetryDelay=1500,bookLastUpdate=0;
+ function renderBookRows(data){
   const host=$("liveOrderBookRows");if(!host)return;
-  const sym=String($("tradeAsset")?.value||((typeof selected!=="undefined"&&selected)||"BTC")).toUpperCase();
-  const coins=(typeof market!=="undefined"&&Array.isArray(market))?market:[];
-  const coin=coins.find(c=>String(c.symbol||"").toUpperCase()===sym);
-  const price=Number(coin?.current_price)||0;
-  if($("orderBookPair"))$("orderBookPair").textContent=sym+"/USDT";
-  if(!price){
-   if($("orderBookStatus"))$("orderBookStatus").textContent="WAITING";
-   host.innerHTML='<tr><td colspan="3" class="empty">Waiting for public market price…</td></tr>';
-   return;
-  }
-  if($("orderBookStatus"))$("orderBookStatus").textContent="UPDATED";
-  const fmtPrice=n=>n.toLocaleString("en-US",{minimumFractionDigits:n<1?6:2,maximumFractionDigits:n<1?8:2});
-  // Indicative depth around the latest public price, not real exchange order quantities.
-  const levels=[];
-  for(let i=5;i>=1;i--)levels.push({p:price*(1+i*0.00015),q:(0.01+i*0.0037),side:"SELL",color:"#f6465d"});
-  for(let i=1;i<=5;i++)levels.push({p:price*(1-i*0.00015),q:(0.012+i*0.0041),side:"BUY",color:"#00c087"});
-  host.innerHTML=levels.map(x=>'<tr><td style="color:'+x.color+';font-weight:750">'+fmtPrice(x.p)+'</td><td>'+x.q.toFixed(4)+'</td><td style="color:'+x.color+'">'+x.side+'</td></tr>').join("");
+  const fmtPrice=n=>Number(n).toLocaleString("en-US",{minimumFractionDigits:n<1?6:2,maximumFractionDigits:n<1?8:2});
+  const asks=(data.asks||[]).slice(0,6).sort((a,b)=>Number(a[0])-Number(b[0]));
+  const bids=(data.bids||[]).slice(0,6).sort((a,b)=>Number(b[0])-Number(a[0]));
+  const rows=[...asks.map(x=>({p:Number(x[0]),q:Number(x[1]),side:"SELL",color:"#f6465d"})),...bids.map(x=>({p:Number(x[0]),q:Number(x[1]),side:"BUY",color:"#00c087"}))].filter(x=>x.p>0&&x.q>0);
+  if(!rows.length){host.innerHTML='<tr><td colspan="3" class="empty">Waiting for exchange depth…</td></tr>';return}
+  host.innerHTML=rows.map(x=>'<tr><td style="color:'+x.color+';font-weight:750">'+fmtPrice(x.p)+'</td><td>'+x.q.toLocaleString("en-US",{minimumFractionDigits:4,maximumFractionDigits:8})+'</td><td style="color:'+x.color+';font-weight:750">'+x.side+'</td></tr>').join("");
+  const bestAsk=asks.length?Number(asks[0][0]):0,bestBid=bids.length?Number(bids[0][0]):0;
+  const spread=bestAsk>0&&bestBid>0?bestAsk-bestBid:0;
+  const caption=$("orderBookPair");
+  if(caption)caption.textContent=bookSymbol+"/USDT · spread "+(spread?fmtPrice(spread):"—");
+  if($("orderBookStatus"))$("orderBookStatus").textContent="LIVE";
+  bookLastUpdate=Date.now();
  }
+ function stopBookSocket(){
+  if(bookRetry){clearTimeout(bookRetry);bookRetry=null}
+  if(bookSocket){const old=bookSocket;bookSocket=null;old.onclose=null;old.onerror=null;old.onmessage=null;try{old.close()}catch(_){}}
+ }
+ function connectLiveBook(){
+  const host=$("liveOrderBookRows");if(!host)return;
+  const sym=String($("tradeAsset")?.value||((typeof selected!=="undefined"&&selected)||"BTC")).toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if(!sym)return;
+  if(sym===bookSymbol&&bookSocket&&bookSocket.readyState<=1)return;
+  stopBookSocket();bookSymbol=sym;bookRetryDelay=1500;
+  if($("orderBookPair"))$("orderBookPair").textContent=sym+"/USDT";
+  if($("orderBookStatus"))$("orderBookStatus").textContent="CONNECTING";
+  host.innerHTML='<tr><td colspan="3" class="empty">Connecting to live exchange order book…</td></tr>';
+  if(!("WebSocket" in window)){if($("orderBookStatus"))$("orderBookStatus").textContent="UNAVAILABLE";return}
+  const isGold=sym==="XAU";
+  const stream=isGold?"wss://fstream.binance.com/ws/xauusdt@depth20@100ms":"wss://stream.binance.com:9443/ws/"+sym.toLowerCase()+"usdt@depth20@100ms";
+  try{
+   const ws=new WebSocket(stream);bookSocket=ws;
+   ws.onopen=()=>{if(bookSocket!==ws)return;bookRetryDelay=1500;if($("orderBookStatus"))$("orderBookStatus").textContent="LIVE";};
+   ws.onmessage=event=>{
+    if(bookSocket!==ws||bookSymbol!==sym)return;
+    try{const packet=JSON.parse(event.data);if(Array.isArray(packet.bids)&&Array.isArray(packet.asks))renderBookRows({bids:packet.bids,asks:packet.asks});}catch(_){}
+   };
+   ws.onerror=()=>{if(bookSocket===ws&&$("orderBookStatus"))$("orderBookStatus").textContent="RECONNECTING"};
+   ws.onclose=()=>{
+    if(bookSocket!==ws)return;bookSocket=null;
+    if($("orderBookStatus"))$("orderBookStatus").textContent="RECONNECTING";
+    if(host.isConnected){bookRetry=setTimeout(()=>{if(bookSymbol===sym)connectLiveBook()},bookRetryDelay);bookRetryDelay=Math.min(bookRetryDelay*2,15000)}
+   };
+  }catch(_){if($("orderBookStatus"))$("orderBookStatus").textContent="UNAVAILABLE"}
+ }
+ function renderBook(){connectLiveBook()}
  window.addEventListener("load",()=>{renderPerformance();renderBook()});
  document.addEventListener("click",e=>{const b=e.target.closest("[data-home-history]");if(b){e.preventDefault();showPage("home");setTimeout(()=>{const h=document.getElementById("homePerformancePanel");if(h)h.scrollIntoView({behavior:"smooth",block:"start"});renderPerformance()},250)}});
  document.addEventListener("change",e=>{if(e.target&&e.target.id==="tradeAsset")renderBook()});
+ document.addEventListener("visibilitychange",()=>{if(document.hidden){stopBookSocket()}else if($("page-trade")&&!$("page-trade").classList.contains("hidden"))renderBook()});
  window.addEventListener("resize",renderPerformance);
- const originalRender=window.renderMarket;
- setInterval(()=>{renderPerformance();renderBook()},15000);
+ setInterval(()=>{renderPerformance();if(bookSocket&&bookSocket.readyState===1&&Date.now()-bookLastUpdate>12000){if($("orderBookStatus"))$("orderBookStatus").textContent="RECONNECTING";stopBookSocket();renderBook()}},15000);
 })();
 </script>
 
