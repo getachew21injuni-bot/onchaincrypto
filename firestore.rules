@@ -61,11 +61,15 @@ service cloud.firestore {
         ]);
       allow update: if (
         owns(uid)
-        && resource.data.status == 'pending'
+        && resource.data.status in ['pending','rejected']
         && request.resource.data.uid == uid
         && request.resource.data.status == 'pending'
         && request.resource.data.keys().hasOnly([
           'uid','email','legalName','country','documentType','documentNumber',
+          'status','submittedAt','updatedAt','reviewedAt','reviewedBy'
+        ])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'email','legalName','country','documentType','documentNumber',
           'status','submittedAt','updatedAt'
         ])
       ) || (
