@@ -128,6 +128,34 @@ service cloud.firestore {
       }
     }
 
+
+    // Public receiving-wallet instructions. Only the verified administrator
+    // can publish or change coin/network addresses; users may read them.
+    match /walletAddresses/{walletAddressId} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && request.resource.data.keys().hasOnly([
+          'asset','network','depositAddress','qrCodeUrl','withdrawalAddress',
+          'depositEnabled','withdrawalEnabled','updatedAt','updatedBy'
+        ])
+        && request.resource.data.asset is string
+        && request.resource.data.asset.size() > 0
+        && request.resource.data.asset.size() <= 20
+        && request.resource.data.network is string
+        && request.resource.data.network.size() > 0
+        && request.resource.data.network.size() <= 50
+        && request.resource.data.depositAddress is string
+        && request.resource.data.depositAddress.size() <= 500
+        && request.resource.data.qrCodeUrl is string
+        && request.resource.data.qrCodeUrl.size() <= 1500
+        && request.resource.data.withdrawalAddress is string
+        && request.resource.data.withdrawalAddress.size() <= 500
+        && request.resource.data.depositEnabled is bool
+        && request.resource.data.withdrawalEnabled is bool
+        && request.resource.data.updatedBy == request.auth.token.email;
+      allow delete: if isAdmin();
+    }
+
     // All other collections remain closed by default.
     match /{document=**} {
       allow read, write: if false;
