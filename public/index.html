@@ -1571,37 +1571,32 @@ document.getElementById("resendEmailCodeBtn")?.addEventListener("click", async (
     msg(error?.message || "Could not send the code. Please try again.");
   } finally { button.disabled = false; }
 });
-// Route authenticated users directly to their account profile. Re-assert the route
-// briefly after sign-in because older navigation initializers can race the auth callback.
-function openAccountProfileAfterAuth() {
+// Route authenticated users directly to Home after sign-in or registration.
+function openHomeAfterAuth() {
   window.ocPendingPage = null;
-  const applyProfileRoute = () => {
+  const applyHomeRoute = () => {
     const main = document.querySelector("main");
-    const profile = document.getElementById("page-profile");
-    if (!main || !profile) return;
-    // Keep the standard router/nav state in sync, then make the final visible page explicit.
-    // Use the final navigation controller directly. The legacy showPage wrapper
-    // can race the auth form and leave the Register page visible after sign-in.
+    const home = document.getElementById("page-home");
+    if (!main || !home) return;
     if (typeof window.__ocNavigatePage === "function") {
-      try { window.__ocNavigatePage("profile"); }
-      catch (error) { console.warn("Profile route handler failed:", error); }
+      try { window.__ocNavigatePage("home"); }
+      catch (error) { console.warn("Home route handler failed:", error); }
     } else if (typeof window.showPage === "function") {
-      try { window.showPage("profile"); }
-      catch (error) { console.warn("Profile route handler failed:", error); }
+      try { window.showPage("home"); }
+      catch (error) { console.warn("Home route handler failed:", error); }
     }
     main.querySelectorAll('section[id^="page-"]').forEach(section => {
-      section.classList.toggle("hidden", section.id !== "page-profile");
+      section.classList.toggle("hidden", section.id !== "page-home");
     });
-    document.querySelectorAll("#nav [data-page]").forEach(button => button.classList.toggle("active", button.dataset.page === "profile"));
-    document.querySelectorAll("[data-bottom-page]").forEach(button => button.classList.toggle("active", button.dataset.bottomPage === "profile"));
+    document.querySelectorAll("#nav [data-page]").forEach(button => button.classList.toggle("active", button.dataset.page === "home"));
+    document.querySelectorAll("[data-bottom-page]").forEach(button => button.classList.toggle("active", button.dataset.bottomPage === "home"));
     if (typeof window.refreshProfileAccountInfo === "function") {
       try { window.refreshProfileAccountInfo(); } catch (_) {}
     }
   };
-  applyProfileRoute();
-  requestAnimationFrame(applyProfileRoute);
-  // Short retry window only; no market, wallet, or trade state is changed.
-  [80, 300, 700].forEach(delay => window.setTimeout(applyProfileRoute, delay));
+  applyHomeRoute();
+  requestAnimationFrame(applyHomeRoute);
+  [80, 300, 700].forEach(delay => window.setTimeout(applyHomeRoute, delay));
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 document.getElementById("registerForm").addEventListener("submit", async (event) => {
@@ -1648,8 +1643,8 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
       : "Account created for " + identity + ", but cloud profile sync needs attention.";
     msg((cloudProfileSaved ? "Account and profile created successfully. " : "Account created; profile cloud sync needs attention. ") +
       (verificationSent ? "A Firebase verification email was sent. " : "") +
-      "Opening your personal account…");
-    openAccountProfileAfterAuth();
+      "Opening Home…");
+    openHomeAfterAuth();
   } catch (error) {
     console.error("OnChainCrypto registration failed:", error?.code || error, error?.message || "");
     msg(friendlyError(error));
@@ -1659,7 +1654,7 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
 });
 
 document.getElementById("googleSignInBtn").addEventListener("click", async () => {
-  window.ocPendingPage = "profile";
+  window.ocPendingPage = "home";
   const first = document.getElementById("registerFirstName").value.trim();
   const last = document.getElementById("registerLastName").value.trim();
   const suppliedName = (first + " " + last).trim();
@@ -1693,7 +1688,7 @@ document.getElementById("googleSignInBtn").addEventListener("click", async () =>
     msg("Google sign-in successful. Signed in as " + identity + ".");
     const status = document.getElementById("authStatus");
     if (status) status.textContent = "Signed in as " + identity + ". You can continue to the platform.";
-    if (typeof window.showPage === "function") window.showPage("profile");
+    openHomeAfterAuth();
   } catch (error) {
     if (error?.code === "auth/operation-not-allowed") msg("Google sign-in is disabled in Firebase. Enable Google under Firebase Console → Authentication → Sign-in method.");
     else if (error?.code === "auth/unauthorized-domain") msg("Google sign-in blocked: add this website hostname under Firebase Console → Authentication → Settings → Authorized domains.");
@@ -1723,9 +1718,9 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
     window.onchaincryptoCurrentUser = credential.user;
     window.ocPendingPage = "profile";
     if (status) status.textContent = "Signed in successfully as " + (credential.user.displayName || credential.user.email || credential.user.phoneNumber || "user") + ".";
-    msg("Login successful. Opening your personal account…");
+    msg("Login successful. Opening Home…");
     if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
-    openAccountProfileAfterAuth();
+    openHomeAfterAuth();
   } catch (error) {
     const code = error?.code || "unknown";
     console.error("OnChainCrypto sign-in failed:", code, error?.message || error);
@@ -1782,7 +1777,7 @@ document.getElementById("verifyPhoneCodeBtn").addEventListener("click", async ()
     try { localStorage.setItem("oc_profile_" + credential.user.uid, JSON.stringify({ firstName:first, lastName:last, email:credential.user.email||"", phone:credential.user.phoneNumber||"", createdAt:new Date().toISOString() })); } catch (_) {}
     await saveBasicUserProfile(credential.user);
     msg("Phone number verified. You are signed in as " + (credential.user.displayName || credential.user.phoneNumber || "user") + ".");
-    if (typeof window.showPage === "function") window.showPage("profile");
+    openHomeAfterAuth();
   } catch (error) { msg(friendlyError(error)); }
 });
 
@@ -1804,7 +1799,7 @@ onAuthStateChanged(auth, (user) => {
     }
   })(); }
    if (typeof window.ocRefreshReferral === "function") window.ocRefreshReferral(user || null);
-   if (user) { openAccountProfileAfterAuth(); }
+   if (user) { openHomeAfterAuth(); }
    else { window.ocPendingPage = null; }
   const status = document.getElementById("authStatus");
   const signOutBtn = document.getElementById("signOutBtn");
