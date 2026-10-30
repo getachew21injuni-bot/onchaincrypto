@@ -147,7 +147,7 @@ service cloud.firestore {
         && request.resource.data.depositAddress is string
         && request.resource.data.depositAddress.size() <= 500
         && request.resource.data.qrCodeUrl is string
-        && request.resource.data.qrCodeUrl.size() <= 1500
+        && request.resource.data.qrCodeUrl.size() <= 500000
         && request.resource.data.withdrawalAddress is string
         && request.resource.data.withdrawalAddress.size() <= 500
         && request.resource.data.depositEnabled is bool
