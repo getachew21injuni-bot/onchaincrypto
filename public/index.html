@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="section-head"><span></span><button class="secondary" id="retryBtn">Refresh</button></div>
       </section>
       <aside>
-        <section class="panel"><div class="section-head"><h2>🔥 Hot Coins</h2><span class="muted tiny">24h volume</span></div><div class="market-pills"><div class="mini-card"><h3>Top Gainers</h3><div id="gainersList" class="muted">Loading…</div></div><div class="mini-card"><h3>Top Losers</h3><div id="losersList" class="muted">Loading…</div></div><div class="mini-card"><h3>Hot by Volume</h3><div id="hotList" class="muted">Loading…</div></div></div></section>
+        <section class="panel"><div class="section-head"><h2>🔥 Hot Coins</h2><span class="muted tiny">24h volume</span></div><div class="hot-coin-tabs" role="tablist" aria-label="Hot coin categories"><button type="button" class="hot-coin-tab active" data-hot-tab="active" role="tab" aria-selected="true">Active</button><button type="button" class="hot-coin-tab" data-hot-tab="gainers" role="tab" aria-selected="false">Top Gainers</button><button type="button" class="hot-coin-tab" data-hot-tab="losers" role="tab" aria-selected="false">Top Losers</button><button type="button" class="hot-coin-tab" data-hot-tab="volume" role="tab" aria-selected="false">Hot by Volume</button></div><div id="hotCoinResults" class="hot-coin-results" role="tabpanel" aria-live="polite">Loading market data…</div></section>
         
       </aside>
     </div>
@@ -954,9 +954,7 @@ function renderMarket(){renderMarketPulse();renderMarketActivity();
  document.querySelectorAll("[data-star]").forEach(b=>b.addEventListener("click",e=>{e.stopPropagation();const s=b.dataset.star;watchlist.has(s)?watchlist.delete(s):watchlist.add(s);localStorage.setItem("oc_watchlist",JSON.stringify([...watchlist]));renderMarket()}));
  document.querySelectorAll("#marketRows tr[data-symbol]").forEach(row=>row.addEventListener("click",e=>{if(e.target.closest("[data-star]"))return;selected=row.dataset.symbol;$("tradeAsset").value=selected;updateTradePreview();showPage("trade")}));
  renderSignalScanner();
- renderMiniList("gainersList",[...market].sort((a,b)=>(b.price_change_percentage_24h||0)-(a.price_change_percentage_24h||0)).slice(0,3),"change");
- renderMiniList("losersList",[...market].sort((a,b)=>(a.price_change_percentage_24h||0)-(b.price_change_percentage_24h||0)).slice(0,3),"change");
- renderMiniList("hotList",[...market].sort((a,b)=>(b.total_volume||0)-(a.total_volume||0)).slice(0,3),"volume");
+ renderHotCoinTab();
  const up=[...market].sort((a,b)=>(b.price_change_percentage_24h||0)-(a.price_change_percentage_24h||0))[0];
  const down=[...market].sort((a,b)=>(a.price_change_percentage_24h||0)-(b.price_change_percentage_24h||0))[0];
  $("topGainer").textContent=up?up.symbol.toUpperCase():"—";$("topGainerChange").textContent=up?pct(up.price_change_percentage_24h):"Waiting for data";
@@ -1033,6 +1031,19 @@ document.addEventListener("click",function(event){
 document.addEventListener("input",function(event){if(event.target&&event.target.id==="tradePairSearch")renderTradePairOptions(event.target.value);});
 
 function renderMiniList(id,items,mode){$(id).innerHTML=items.length?items.map(c=>'<div class="mini-row"><div class="mini-left">'+coinIcon(c,22)+'<span>'+safe(c.symbol.toUpperCase())+'</span></div><div class="mini-price '+(mode==="change"?((c.price_change_percentage_24h||0)>=0?"green":"red"):"")+'">'+(mode==="change"?pct(c.price_change_percentage_24h):money(c.total_volume))+'</div></div>').join(""):'<div class="muted tiny">No data</div>'}
+let hotCoinCategory="active";
+function renderHotCoinTab(category=hotCoinCategory){
+ hotCoinCategory=category;
+ const result=$("hotCoinResults");if(!result)return;
+ document.querySelectorAll("[data-hot-tab]").forEach(tab=>{const active=tab.dataset.hotTab===category;tab.classList.toggle("active",active);tab.setAttribute("aria-selected",active?"true":"false")});
+ let items=[...market];
+ if(category==="gainers")items.sort((a,b)=>(b.price_change_percentage_24h||0)-(a.price_change_percentage_24h||0));
+ else if(category==="losers")items.sort((a,b)=>(a.price_change_percentage_24h||0)-(b.price_change_percentage_24h||0));
+ else if(category==="volume")items.sort((a,b)=>(b.total_volume||0)-(a.total_volume||0));
+ else items.sort((a,b)=>Math.abs(b.price_change_percentage_24h||0)-Math.abs(a.price_change_percentage_24h||0));
+ result.innerHTML=items.length?items.slice(0,5).map(c=>'<div class="mini-row"><div class="mini-left">'+coinIcon(c,22)+'<span>'+safe(c.symbol.toUpperCase())+'</span></div><div class="mini-price '+((c.price_change_percentage_24h||0)>=0?"green":"red")+'">'+pct(c.price_change_percentage_24h)+'</div></div>').join(""):'<div class="muted tiny">No market data available</div>';
+}
+document.querySelectorAll("[data-hot-tab]").forEach(tab=>tab.addEventListener("click",()=>renderHotCoinTab(tab.dataset.hotTab)));
 let marketRequestInProgress=false;
 function restoreCachedMarket(){
  try{
@@ -2644,6 +2655,15 @@ body.oc-trade-overlay-open{overflow:hidden}
 })();
 </script>
 
+<style id="hot-coin-tabs-style">
+.hot-coin-tabs{display:flex;gap:7px;padding:12px 14px 4px;overflow-x:auto;scrollbar-width:thin}
+.hot-coin-tab{flex:0 0 auto;background:transparent;border:0;border-bottom:2px solid transparent;border-radius:0;color:var(--muted);padding:9px 10px;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer}
+.hot-coin-tab.active{color:var(--yellow);border-bottom-color:var(--yellow)}
+.hot-coin-results{padding:6px 16px 14px;min-height:140px}
+.hot-coin-results .mini-row{padding:10px 2px}
+.hot-coin-results .mini-left img{width:24px;height:24px}
+@media(max-width:560px){.hot-coin-tabs{gap:2px;padding-left:10px;padding-right:10px}.hot-coin-tab{padding:9px 8px;font-size:11px}.hot-coin-results{padding:5px 12px 12px}}
+</style>
 </body>
 </html>
 
