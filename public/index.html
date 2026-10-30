@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <p class="muted tiny">Based on this device’s paper-trade history.</p>
  </section>
   <section class="panel" id="homeActivityHistory">
-   <div class="section-head"><div><h2>Activity History</h2><div class="muted tiny">Recent trades, deposits, withdrawals and account actions</div></div><select id="homeHistoryFilter" class="field" style="max-width:165px"><option value="7days">Last 7 days</option><option value="all">All activity</option><option value="trade">Trades</option><option value="deposit">Deposits</option><option value="withdraw">Withdrawals</option><option value="activity">Account activity</option></select></div>
+   <div class="section-head"><div><h2>Activity History</h2><div class="muted tiny">Recent trades, deposits, withdrawals and account actions</div></div><div class="history-controls" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><select id="homeHistoryFilter" class="field" style="max-width:165px"><option value="7days">Last 7 days</option><option value="all">All activity</option><option value="trade">Trades</option><option value="deposit">Deposits</option><option value="withdraw">Withdrawals</option><option value="activity">Account activity</option></select><button type="button" class="secondary" id="homeHistoryMore" aria-expanded="false">Show more</button><button type="button" class="secondary" id="homeHistoryHide">Hide history</button></div></div>
    <div id="homeActivityHistoryRows"><div class="empty">Your recent activity will appear here.</div></div>
    <p class="muted tiny" style="padding:0 18px 14px">History is recorded in this browser for this demo; no real funds are moved.</p>
   </section>
@@ -475,7 +475,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <div class="wallet-summary-strip"><div><span>Coin holdings value</span><strong id="holdingsValue">0.00 USDT</strong></div><div><span>Account type</span><strong>Paper trading</strong></div><div><span>Transaction status</span><strong class="wallet-status"><i></i> Training</strong></div></div>
     </section>
     <section class="panel wallet-assets-panel"><div class="section-head wallet-assets-heading"><div><h2>Your Assets</h2><p class="muted tiny">Your simulated balances at a glance</p></div><label class="wallet-hide-small"><input type="checkbox" id="hideSmallBalances"> Hide small balances</label></div><div class="table-wrap"><table><thead><tr><th>Asset</th><th>Amount owned</th><th>Value (USDT)</th></tr></thead><tbody id="holdingsRows"><tr><td colspan="3" class="empty">No holdings yet. Place a paper trade to see assets.</td></tr></tbody></table></div></section>
-    <section class="panel" id="walletActivityHistory" style="margin-top:18px"><div class="section-head"><div><h2>Activity History</h2><div class="muted tiny">Your recent account actions and paper trades</div></div><select id="historyFilter" class="field" style="max-width:155px"><option value="all">All activity</option><option value="trade">Trades</option><option value="deposit">Deposits</option><option value="withdraw">Withdrawals</option><option value="activity">Other actions</option></select></div><div id="walletHistory"><div class="empty">Your activity history will appear here.</div></div><p class="muted tiny">Browser history only; no real funds moved.</p></section>
+
 <section class="panel" id="marketActivityHistory" hidden aria-hidden="true" style="display:none!important" style="margin-bottom:18px"><div class="section-head"><div><h2>Market Activity History</h2><div class="muted tiny">Recent market-price updates</div></div><button type="button" class="btn btn-secondary" id="clearMarketActivity" style="width:auto;padding:8px 12px">Clear</button></div><div id="marketPriceActivityRows"><div class="empty">Waiting for market data…</div></div><p class="muted tiny" style="margin-top:12px">Price observations only—not deposits, withdrawals, or trades. Saved in this browser.</p></section>
 <script id="market-activity-history-script">
 (function(){
@@ -900,8 +900,8 @@ if(localStorage.getItem("oc_training_credit_10000_v1")!=="granted"){
 function readActivity(){try{return JSON.parse(localStorage.getItem("oc_activity_history")||"[]")}catch(e){return []}}
 function recordActivity(type,title,details,status="Recorded"){const items=readActivity();items.unshift({id:Date.now()+"-"+Math.random().toString(36).slice(2,7),type,title,details,status,time:new Date().toISOString()});localStorage.setItem("oc_activity_history",JSON.stringify(items.slice(0,1000)));renderActivityHistory()}
 function renderActivityHistory(){
- const walletHost=$("walletHistory"),homeHost=$("homeActivityHistoryRows");
- const walletFilter=$("historyFilter")?.value||"all",homeFilter=$("homeHistoryFilter")?.value||"7days";
+ const homeHost=$("homeActivityHistoryRows");
+ const homeFilter=$("homeHistoryFilter")?.value||"7days";
  const trades=state.history.map(t=>({type:"trade",title:(t.side||"trade").toUpperCase()+" "+String(t.symbol||""),details:money(t.amount)+" · "+Number(t.qty||0).toFixed(8)+" coins @ "+money(t.price),status:"Paper trade",time:t.time||new Date().toISOString()}));
  const all=[...trades,...readActivity()].sort((a,b)=>new Date(b.time)-new Date(a.time));
  const renderRows=(host,filter,limit)=>{
@@ -915,8 +915,7 @@ function renderActivityHistory(){
   });
   host.innerHTML=rows.length?rows.slice(0,limit||1000).map(x=>'<div class="list-row"><div><strong>'+safe(x.title||x.type)+'</strong><div class="muted tiny">'+new Date(x.time).toLocaleString()+' · '+safe(x.status||"Recorded")+'</div><div class="muted tiny">'+safe(x.details||"")+'</div></div><span class="tag">'+safe((x.type||"activity").toUpperCase())+'</span></div>').join(""):'<div class="empty">No '+(filter==="all"?"activity":filter==="7days"?"activity in the last 7 days":safe(filter)+" activity")+' recorded yet.</div>';
  };
- renderRows(walletHost,walletFilter,1000);
- renderRows(homeHost,homeFilter,12);
+ renderRows(homeHost,homeFilter,1000);
 }
 function priceFor(symbol){return market.find(c=>c.symbol.toUpperCase()===symbol.toUpperCase())}
 function coinIcon(c,size=29){
@@ -2606,72 +2605,46 @@ body.oc-trade-overlay-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){#page-trade #timedPaperTrade #timedResultBoard[style*="display: block"]{animation:none}}
 </style>
 
+
+<style id="history-page-compact-styles">
+#homeActivityHistory .history-controls button{width:auto;padding:7px 11px;font-size:12px;white-space:nowrap}
+#homeActivityHistory.oc-history-hidden #homeActivityHistoryRows{display:none!important}
+@media(max-width:560px){#homeActivityHistory .section-head{align-items:flex-start;flex-wrap:wrap}#homeActivityHistory .history-controls{width:100%}#homeActivityHistory .history-controls select{flex:1;min-width:130px}}
+</style>
+<script id="history-page-compact-controls">
+(function(){
+ const init=()=>{
+  const section=document.getElementById('homeActivityHistory');
+  const rows=document.getElementById('homeActivityHistoryRows');
+  const more=document.getElementById('homeHistoryMore');
+  const hide=document.getElementById('homeHistoryHide');
+  if(!section||!rows||!more||!hide||section.dataset.compactReady==='1')return;
+  section.dataset.compactReady='1';
+  let expanded=false,hidden=false;
+  function update(){
+   const items=Array.from(rows.children).filter(x=>x.classList.contains('list-row'));
+   items.forEach((item,index)=>item.style.display=(!expanded&&index>=5)?'none':'');
+   more.style.display=items.length>5&&!hidden?'':'none';
+   more.textContent=expanded?'Show less':'Show more';
+   more.setAttribute('aria-expanded',String(expanded));
+   hide.textContent=hidden?'Show history':'Hide history';
+   section.classList.toggle('oc-history-hidden',hidden);
+  }
+  more.addEventListener('click',()=>{expanded=!expanded;update()});
+  hide.addEventListener('click',()=>{hidden=!hidden;update()});
+  const original=window.renderActivityHistory;
+  if(typeof original==='function')window.renderActivityHistory=function(){const result=original.apply(this,arguments);update();return result};
+  const observer=new MutationObserver(update);observer.observe(rows,{childList:true});
+  update();
+ };
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
 </body>
 </html>
 
-<style id="activity-history-compact-styles">
-#walletActivityHistory .oc-history-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto}
-#walletActivityHistory .oc-history-controls button{width:auto;padding:7px 11px;font-size:12px;white-space:nowrap}
-#walletActivityHistory .oc-history-extra{display:none!important}
-#walletActivityHistory.oc-history-expanded .oc-history-extra{display:flex!important}
-#walletActivityHistory.oc-history-hidden #walletHistory,
-#walletActivityHistory.oc-history-hidden #historyFilter,
-#walletActivityHistory.oc-history-hidden>p{display:none!important}
-@media(max-width:560px){#walletActivityHistory .section-head{align-items:flex-start;flex-wrap:wrap}#walletActivityHistory .oc-history-controls{width:100%;margin-left:0}#walletActivityHistory .oc-history-controls button{flex:1}}
-</style>
-<script id="activity-history-compact-controls">
-(function(){
-  const init = () => {
-    const section = document.getElementById('walletActivityHistory');
-    const rows = document.getElementById('walletHistory');
-    if (!section || !rows || section.dataset.compactReady === '1') return;
-    section.dataset.compactReady = '1';
-    const head = section.querySelector('.section-head');
-    if (!head) return;
-    const controls = document.createElement('div');
-    controls.className = 'oc-history-controls';
-    controls.innerHTML = '<button type="button" class="btn btn-secondary" id="ocHistoryMore" aria-expanded="false">Show more</button><button type="button" class="btn btn-secondary" id="ocHistoryHide">Hide history</button>';
-    head.appendChild(controls);
-    let expanded = false;
-    let hidden = false;
-    const originalRender = window.renderActivityHistory;
-    function updateRows(){
-      const items = Array.from(rows.children);
-      items.forEach((item,index)=>{
-        item.classList.toggle('oc-history-extra', !expanded && index >= 5 && item.classList.contains('list-row'));
-      });
-      const more = document.getElementById('ocHistoryMore');
-      const hasMore = Array.from(rows.children).filter(x=>x.classList.contains('list-row')).length > 5;
-      more.style.display = hasMore && !hidden ? '' : 'none';
-      more.textContent = expanded ? 'Show less' : 'Show more';
-      more.setAttribute('aria-expanded', String(expanded));
-      const hide = document.getElementById('ocHistoryHide');
-      hide.textContent = hidden ? 'Show history' : 'Hide history';
-      section.classList.toggle('oc-history-expanded', expanded);
-      section.classList.toggle('oc-history-hidden', hidden);
-    }
-    document.getElementById('ocHistoryMore').addEventListener('click',()=>{
-      expanded = !expanded;
-      updateRows();
-    });
-    document.getElementById('ocHistoryHide').addEventListener('click',()=>{
-      hidden = !hidden;
-      if (!hidden) updateRows();
-      else updateRows();
-    });
-    if (typeof originalRender === 'function') {
-      window.renderActivityHistory = function(){
-        const result = originalRender.apply(this, arguments);
-        updateRows();
-        return result;
-      };
-    }
-    updateRows();
-  };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
-})();
-</script>
+
 
 
 <style id="oc-register-contact-choice-style">
