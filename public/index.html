@@ -564,7 +564,6 @@ document.addEventListener('DOMContentLoaded',function(){
       <details class="panel profile-menu-section" id="profileAccountSection">
         <summary><span class="profile-menu-icon profile-symbol">♙</span><span class="profile-menu-copy"><strong>Account</strong><small>Manage your profile</small></span><span class="profile-menu-chevron">⌄</span></summary>
         <div class="profile-menu-content">
-          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#8ab4ff" aria-hidden="true">♙</span>Display name</strong><p class="muted tiny">Edit your display name for your account.</p></div><div class="settings-control"><input id="displayName" class="field" maxlength="50" placeholder="Your display name" aria-label="Display name"></div></div>
           <div class="panel about-section" id="ocUserProfileEditor" style="margin:12px 0;padding:14px">
             <h3 class="feature-heading">Personal profile</h3><p class="muted tiny">Signed-in account: <strong id="ocProfileIdentity">Your account</strong></p><p class="muted tiny">Edit your personal details. Changes sync to your signed-in account.</p>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px">
@@ -686,7 +685,6 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
   </section>
   <section id="page-financial" class="hidden"><div class="page-title"><div><h1>⇵ Financial</h1><div class="muted">Wallet actions, transfers and transaction activity.</div></div><span class="tag">FINANCIAL</span></div><div id="financialPageContent"></div></section>
-  <section id="page-settings" class="hidden"><div class="page-title"><div><h1>⚙ Settings</h1><div class="muted">Password, sessions, privacy and account preferences.</div></div><span class="tag">SETTINGS</span></div><div class="panel form-panel"><div class="settings-item"><div><strong>Display currency</strong><p class="muted tiny">Choose the currency used for display.</p></div><div class="settings-control"><select id="displayCurrency" class="field" aria-label="Display currency"><option value="USD">USD — US Dollar</option></select></div></div><div class="settings-item"><div><strong>Account status</strong><p class="muted tiny">Check sign-in and email status.</p></div><button class="secondary" id="accountStatusBtn" type="button">View status</button></div><div class="settings-item"><div><strong>Security information</strong><p class="muted tiny">Tips for keeping your account secure.</p></div><button class="secondary" id="securityInfoBtn" type="button">Security help</button></div></div><div id="settingsPageContent"></div></section>
   <section id="page-kyc" class="hidden"><div class="page-title"><div><h1>✓ Identity Verification</h1><div class="muted">Review identity verification status and requirements.</div></div><span class="tag">IDENTITY</span></div><div id="kycPageContent"></div></section>
   <section id="page-about" class="hidden"><div class="page-title"><div><h1>ⓘ About OnChainCrypto</h1><div class="muted">Platform information and status.</div></div><span class="tag">ABOUT</span></div><div id="aboutPageContent"></div></section>
   <section id="page-browser" class="hidden">
@@ -1292,16 +1290,8 @@ function ensureMoreMenuContent(){if(!moreMenu)return;moreMenu.innerHTML=
  '<button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>KYC status and requirements</small></span></button>'+
  '<button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Support, FAQs and guides</small></span></button>'+
  '<button type="button" data-menu-page="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About</strong><small>Platform information</small></span></button>'+
- '<div class="menu-divider"></div><button type="button" id="menuLogoutBtn" role="menuitem"><span class="menu-symbol">↪</span><span><strong>Logout</strong><small>Sign out of this account</small></span></button>';
+ ';
 }
-function relocateProfileSections(){
- [["profileFinancialSection","financialPageContent"],["profileSettingsSection","settingsPageContent"],["profileNotificationsSection","notificationsPageContent"],["profileKycSection","kycPageContent"]].forEach(([id,targetId])=>{const source=document.getElementById(id),target=document.getElementById(targetId);if(!source||!target||source.dataset.relocated==="yes")return;const summary=source.querySelector(":scope > summary");if(summary)summary.remove();source.open=true;source.style.marginBottom="14px";target.appendChild(source);source.dataset.relocated="yes";});
- const about=document.querySelector("#page-profile details.profile-menu-section:not(#profileAccountSection):not(#profileFinancialSection):not(#profileSettingsSection):not(#profileNotificationsSection):not(#profileKycSection)"),aboutTarget=document.getElementById("aboutPageContent");
- if(about&&aboutTarget&&!about.dataset.relocated){const summary=about.querySelector(":scope > summary");if(summary)summary.remove();about.open=true;aboutTarget.appendChild(about);about.dataset.relocated="yes";}
- const account=document.getElementById("profileAccountSection");if(account){["accountStatusBtn","securityInfoBtn"].forEach(id=>{const control=document.getElementById(id),target=document.getElementById("settingsPageContent");const row=control?.closest(".settings-item");if(row&&target)target.appendChild(row);});const summary=account.querySelector(":scope > summary");if(summary)summary.innerHTML='<span class="profile-menu-icon profile-symbol">♙</span><span class="profile-menu-copy"><strong>Personal information</strong><small>Your account profile</small></span>';account.open=true;}
-}
-relocateProfileSections();
-document.addEventListener("click",event=>{if(!event.target.closest("#menuLogoutBtn"))return;setMoreMenuOpen(false);const signOutButton=document.getElementById("signOutBtn");if(signOutButton)signOutButton.click();else{showPage("register");const message=document.getElementById("registerMessage");if(message)message.textContent="Sign in first to access your account.";}});
 function setMoreMenuOpen(open){if(!moreMenu||!moreMenuBtn)return;ensureMoreMenuContent();moreMenu.classList.toggle("hidden",!open);moreMenu.style.setProperty("display",open?"block":"none","important");moreMenu.style.setProperty("visibility",open?"visible":"hidden","important");moreMenu.style.setProperty("opacity",open?"1":"0","important");moreMenu.style.setProperty("z-index","99999","important");moreMenuBtn.setAttribute("aria-expanded",String(open));moreMenu.setAttribute("aria-hidden",String(!open));}
 moreMenuBtn?.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();setMoreMenuOpen(moreMenuBtn.getAttribute("aria-expanded")!=="true");});
 document.addEventListener("click",event=>{const btn=event.target.closest("[data-menu-page]");if(!btn||!moreMenu?.contains(btn))return;const page=btn.dataset.menuPage;setMoreMenuOpen(false);showPage(page);});
@@ -2794,7 +2784,7 @@ window.addEventListener("load",function(){
  const settings=document.getElementById("page-settings");
  if(!menu||!settings)return;
  // The three-dot menu is the single home for these destinations.
- menu.querySelectorAll('[data-menu-page="about"]').forEach(el=>el.remove());
+
  const help=menu.querySelector('[data-menu-page="support"]');
  if(help){const strong=help.querySelector("strong"),small=help.querySelector("small");if(strong)strong.textContent="Help and Guidance";if(small)small.textContent="Guides and account assistance";}
  // Move the existing, already-wired logout action out of Settings and into the menu.
