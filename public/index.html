@@ -1568,8 +1568,14 @@ function openAccountProfileAfterAuth() {
     const profile = document.getElementById("page-profile");
     if (!main || !profile) return;
     // Keep the standard router/nav state in sync, then make the final visible page explicit.
-    if (typeof window.showPage === "function") {
-      try { window.showPage("profile"); } catch (error) { console.warn("Profile route handler failed:", error); }
+    // Use the final navigation controller directly. The legacy showPage wrapper
+    // can race the auth form and leave the Register page visible after sign-in.
+    if (typeof window.__ocNavigatePage === "function") {
+      try { window.__ocNavigatePage("profile"); }
+      catch (error) { console.warn("Profile route handler failed:", error); }
+    } else if (typeof window.showPage === "function") {
+      try { window.showPage("profile"); }
+      catch (error) { console.warn("Profile route handler failed:", error); }
     }
     main.querySelectorAll('section[id^="page-"]').forEach(section => {
       section.classList.toggle("hidden", section.id !== "page-profile");
@@ -2360,6 +2366,7 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
   window.__ocNavigateBack=goBack;
 
   function navigate(page, opts={}){
+
     const target=document.getElementById('page-'+page);
     if(!target) return;
     const currentPage=pages().find(section=>!section.classList.contains('hidden'));
@@ -2378,6 +2385,8 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     if(!opts.keepScroll) window.scrollTo({top:0,behavior:'smooth'});
     if(page==='home' && opts.history) requestAnimationFrame(()=>document.getElementById('homePerformancePanel')?.scrollIntoView({behavior:'smooth',block:'start'}));
   }
+  // Auth flows can route directly to a page without triggering legacy click handlers.
+  window.__ocNavigatePage=(page)=>navigate(page,{noStack:true});
   if(typeof window.showPage==='function' && !window.__ocOriginalShowPage){
     window.__ocOriginalShowPage=window.showPage;
     window.showPage=function(page){navigate(page,{fromOriginal:true});return window.__ocOriginalShowPage(page);};
