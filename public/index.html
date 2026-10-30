@@ -4191,7 +4191,7 @@ if(support){
  makeHelpSection(support.querySelector(":scope > section.panel"),"✨ Quick Support","quick");
  makeHelpSection(support.querySelector(":scope > .notice"),"✉ Contact Support","contact");
  makeHelpSection(byId("support-ticket-section"),"✉ Send a Support Request","ticket");
- const helpResources=Array.from(support.querySelectorAll("h2")).find(h=>/Help\\s*&\\s*Resources/i.test(h.textContent))?.closest(".panel");
+ const helpResources=Array.from(support.querySelectorAll("h2")).find(h=>h.textContent.toLowerCase().includes("help & resources"))?.closest(".panel");
  makeHelpSection(helpResources,"🤝 Help and Resources","resources");
  const walletResources=Array.from(support.querySelectorAll("h2")).find(h=>/Exchange and wallet services/i.test(h.textContent))?.closest(".panel");
  makeHelpSection(walletResources,"👛 Exchange and Wallet Services","wallet");
