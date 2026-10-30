@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded',function(){
     </section>
   </section>
   <section id="page-withdraw" class="hidden">
-    <div class="page-title"><div><h1>↑ Withdraw crypto</h1><div class="muted">Choose a coin, network, and destination address.</div></div><span class="tag">Unavailable</span></div>
+    <div class="page-title"><div><h1>↑ Withdraw crypto</h1><div class="muted">Choose a coin, network, and destination address.</div></div><span class="tag">Secure withdrawal setup</span></div>
     <section class="panel form-panel">
       <label for="withdrawCoinSearch">Search coins</label><input id="withdrawCoinSearch" class="field" placeholder="Search Bitcoin, Ethereum, XRP…" autocomplete="off">
       <div class="coin-list-controls coin-picker-controls"><span class="muted tiny" id="withdrawCoinCount">Showing 6 coins</span><div><button class="secondary" type="button" id="withdrawCoinLess" disabled>Less</button> <button class="primary" type="button" id="withdrawCoinMore">More +6</button></div></div>
@@ -529,8 +529,8 @@ document.addEventListener('DOMContentLoaded',function(){
       <label for="withdrawNetwork">Network</label><select id="withdrawNetwork" class="field"><option value="Bitcoin">Bitcoin</option><option value="Ethereum">Ethereum</option><option value="TRC20">TRON (TRC20)</option><option value="ERC20">Ethereum (ERC20)</option><option value="BEP20">BNB Smart Chain (BEP20)</option><option value="Solana">Solana</option><option value="Polygon">Polygon</option><option value="XRP">XRP Ledger</option></select>
       <label for="withdrawAddress">Destination address</label><input id="withdrawAddress" class="field" placeholder="Paste your receiving address" autocomplete="off" spellcheck="false">
       <label for="withdrawAmount">Amount</label><input id="withdrawAmount" class="field" type="number" min="0" step="any" placeholder="Enter amount">
-      <div id="withdrawNotice" class="notice">Withdrawals unavailable</div>
-      <button class="primary full" id="withdrawSubmit" type="button" disabled>Withdraw unavailable</button>
+      <div id="withdrawNotice" class="notice">Your withdrawal details are ready to be prepared. Follow the coin, network and destination guidance carefully.</div>
+      <button class="primary full" id="withdrawSubmit" type="button" disabled>Continue</button>
       <p class="muted tiny">Verify the coin, network, and address.</p>
     </section>
   </section>
@@ -3401,7 +3401,7 @@ main:has(> #page-withdraw:not(.hidden)) #timedPaperTrade {
 #page-wallet .wallet-action { font-weight: 800; }
 #page-wallet .wallet-action:hover { filter: brightness(1.09); transform: translateY(-1px); }
 #page-deposit .page-title h1 { color: var(--green, #16d9a0) !important; }
-#page-withdraw .page-title h1 { color: var(--red, #ff4d67) !important; }
+#page-withdraw .page-title h1 { color: var(--green, #16d9a0) !important; }
 #page-deposit .form-panel > button:not(:disabled),
 #page-deposit #copyDepositAddress:not(:disabled),
 #page-deposit #showDepositQr:not(:disabled) {
@@ -3409,7 +3409,7 @@ main:has(> #page-withdraw:not(.hidden)) #timedPaperTrade {
 }
 #page-withdraw .form-panel > button:not(:disabled),
 #page-withdraw #withdrawSubmit:not(:disabled) {
-  background: var(--red, #ff4d67) !important; border-color: var(--red, #ff4d67) !important; color: #fff !important;
+  background: var(--green, #16d9a0) !important; border-color: var(--green, #16d9a0) !important; color: #071b16 !important;
 }
 #page-wallet .wallet-action:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 </style>
