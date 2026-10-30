@@ -2774,7 +2774,7 @@ if(logoutBtn&&!byId("ocLogoutGuideMessage")){
 
 
 <script id="oc-menu-separation-and-no-forced-login">
-(function(){
+window.addEventListener("load",function(){
  const menu=document.getElementById("moreMenu");
  const settings=document.getElementById("page-settings");
  if(!menu||!settings)return;
@@ -2819,11 +2819,25 @@ if(logoutBtn&&!byId("ocLogoutGuideMessage")){
      document.getElementById("moreMenuBtn")?.setAttribute("aria-expanded","false");
    });
  });
- const style=document.createElement("style");
+
+ // Bind the click-to-open panels after Firebase module setup has created them.
+ [["changePasswordBtn","ocPasswordChangePanel"],["manageSessionBtn","ocSessionPanel"],["settingsDeleteAccountBtn","ocDeleteRequestPanel"]].forEach(([buttonId,panelId])=>{
+   const button=document.getElementById(buttonId),panel=document.getElementById(panelId);
+   if(!button||!panel||button.dataset.ocRevealBound==="true")return;
+   panel.hidden=true;panel.style.display="none";button.setAttribute("aria-expanded","false");button.dataset.ocRevealBound="true";
+   button.addEventListener("click",event=>{
+     event.preventDefault();
+     const open=panel.hidden||panel.style.display==="none";
+     panel.hidden=!open;panel.style.display=open?"block":"none";
+     button.setAttribute("aria-expanded",String(open));
+     if(open)panel.scrollIntoView({behavior:"smooth",block:"nearest"});
+   });
+ });
+\n const style=document.createElement("style");
  style.id="oc-menu-separation-style";
  style.textContent='.more-menu-logout{display:flex;align-items:center;gap:11px;width:100%;min-height:54px;text-align:left;padding:11px 9px;background:transparent;color:#eaf6ff;border-radius:8px}.more-menu-logout:hover{background:var(--panel2)}.more-menu-logout>span:nth-child(2){display:flex;flex-direction:column;gap:2px;flex:1}.more-menu-logout strong{font-size:13px}.more-menu-logout small{font-size:11px;color:var(--muted);font-weight:400}';
  document.head.appendChild(style);
-})();
+},{once:true});
 </script>
 
 </body>
