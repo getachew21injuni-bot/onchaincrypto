@@ -1282,15 +1282,14 @@ document.addEventListener("click",e=>{for(const kind of ["deposit","withdraw"]){
 $("depositNetwork").addEventListener("change",refreshDepositAddress);$("copyDepositAddress").addEventListener("click",async()=>{const a=window.ONCHAINCRYPTO_DEPOSIT_ADDRESSES?.[selectedDepositCoin]?.[$("depositNetwork").value]||"";if(a){try{await navigator.clipboard.writeText(a);$("depositHelp").textContent="Address copied. Verify the coin and network before sending."}catch{$("depositHelp").textContent="Copy failed. Select and copy the address manually."}}});$("showDepositQr").addEventListener("click",showDepositQr);
 drawCoinPicker("deposit");drawCoinPicker("withdraw");updateSelectedCoin("deposit");updateSelectedCoin("withdraw");
 const moreMenuBtn=document.getElementById("moreMenuBtn"),moreMenu=document.getElementById("moreMenu");
-function ensureMoreMenuContent(){if(!moreMenu)return;moreMenu.innerHTML=
+function ensureMoreMenuContent(){if(!moreMenu||moreMenu.querySelector("button"))return;moreMenu.innerHTML=
  '<button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Personal information only</small></span></button>'+
- '<button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposit, withdraw, transfer and history</small></span></button>'+
+ '<button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button>'+
  '<button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Password, sessions and privacy</small></span></button>'+
  '<button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification and email preferences</small></span></button>'+
  '<button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>KYC status and requirements</small></span></button>'+
- '<button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Support, FAQs and guides</small></span></button>'+
- '<button type="button" data-menu-page="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About</strong><small>Platform information</small></span></button>'+
- ';
+ '<button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Guides and account assistance</small></span></button>'+
+ '<button type="button" data-menu-page="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About</strong><small>Platform information</small></span></button>';
 }
 function setMoreMenuOpen(open){if(!moreMenu||!moreMenuBtn)return;ensureMoreMenuContent();moreMenu.classList.toggle("hidden",!open);moreMenu.style.setProperty("display",open?"block":"none","important");moreMenu.style.setProperty("visibility",open?"visible":"hidden","important");moreMenu.style.setProperty("opacity",open?"1":"0","important");moreMenu.style.setProperty("z-index","99999","important");moreMenuBtn.setAttribute("aria-expanded",String(open));moreMenu.setAttribute("aria-hidden",String(!open));}
 moreMenuBtn?.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();setMoreMenuOpen(moreMenuBtn.getAttribute("aria-expanded")!=="true");});
