@@ -1840,7 +1840,25 @@ document.getElementById("signOutBtn").addEventListener("click", async () => {
   try { await signOut(auth); msg("You have signed out."); }
   catch (error) { msg(friendlyError(error)); }
 });
-window.ocSubmitKycDetails=async function(data){const user=auth.currentUser;if(!user||user.uid!==data.uid)throw new Error("Sign in again to continue.");const ref=doc(db,"kycSubmissions",user.uid);await setDoc(ref,{...data,status:"pending",submittedAt:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true});};
+window.ocSubmitKycDetails=async function(data){
+  if (typeof auth.authStateReady === "function") await auth.authStateReady();
+  const user=auth.currentUser;
+  if(!user||user.uid!==data.uid)throw new Error("auth/session-missing");
+  const ref=doc(db,"kycSubmissions",user.uid);
+  const existing=await getDoc(ref);
+  if(existing.exists() && existing.data()?.status==="approved") throw new Error("kyc-already-approved");
+  await setDoc(ref,{
+    uid:user.uid,email:user.email||"",
+    legalName:String(data.legalName||"").trim(),
+    country:String(data.country||"").trim(),
+    documentType:String(data.documentType||"").trim(),
+    documentNumber:String(data.documentNumber||"").trim(),
+    status:"pending",
+    submittedAt:serverTimestamp(),
+    updatedAt:serverTimestamp()
+  },{merge:true});
+  return {ok:true,status:"pending"};
+};
 async function syncAdminDemoBalance(user){if(!user?.uid)return;try{const snap=await getDoc(doc(db,"users",user.uid));if(snap.exists()&&typeof snap.data().demoBalanceUSDT==="number"&&typeof window.ocApplyAdminDemoBalance==="function")window.ocApplyAdminDemoBalance(snap.data().demoBalanceUSDT);}catch(error){console.warn("Demo balance sync unavailable:",error?.code||error);}}
 onAuthStateChanged(auth, (user) => {
   window.onchaincryptoCurrentUser = user || null;
@@ -4187,7 +4205,45 @@ if(kyc){
    box.addEventListener("dragleave",()=>{box.style.borderColor="var(--line)";});
    box.addEventListener("drop",e=>{e.preventDefault();box.style.borderColor="var(--line)";const file=e.dataTransfer.files&&e.dataTransfer.files[0];if(file){try{const dt=new DataTransfer();dt.items.add(file);input.files=dt.files;}catch(_){}show(file);}});
   });
-  form.addEventListener("submit",async e=>{e.preventDefault();const status=form.querySelector("#ocKycStatus");const user=window.onchaincryptoCurrentUser;if(!user){status.textContent="Please sign in before submitting identity details.";return;}const values=new FormData(form),data={uid:user.uid,email:user.email||"",legalName:String(values.get("legalName")||"").trim(),country:String(values.get("country")||"").trim(),documentType:String(values.get("documentType")||"").trim(),documentNumber:String(values.get("documentNumber")||"").trim()};if(!data.legalName||!data.country||!data.documentType||!data.documentNumber){status.textContent="Complete all required identity fields.";return;}const submit=form.querySelector('button[type="submit"]');submit.disabled=true;status.textContent="Submitting identity details securely…";try{if(typeof window.ocSubmitKycDetails!=="function")throw new Error("Identity submission is not ready. Refresh and try again.");await window.ocSubmitKycDetails(data);status.textContent="Identity details submitted for pending review. Note: ID images were previewed only and were not uploaded, so image verification is still incomplete.";}catch(err){status.textContent="Could not submit details ("+(err.code||err.message||"error")+"). Please retry later.";}finally{submit.disabled=false;}}
+  form.addEventListener("submit",async e=>{
+    e.preventDefault();
+    const status=form.querySelector("#ocKycStatus");
+    const submit=form.querySelector('button[type="submit"]');
+    if(submit.disabled)return;
+    submit.disabled=true;
+    const originalLabel=submit.textContent;
+    submit.textContent="Submitting…";
+    status.textContent="Checking your account and submitting your identity details…";
+    try{
+      if(typeof auth.authStateReady==="function")await auth.authStateReady();
+      const user=auth.currentUser||window.onchaincryptoCurrentUser;
+      if(!user)throw new Error("auth/session-missing");
+      const values=new FormData(form);
+      const data={
+        uid:user.uid,email:user.email||"",
+        legalName:String(values.get("legalName")||"").trim(),
+        country:String(values.get("country")||"").trim(),
+        documentType:String(values.get("documentType")||"").trim(),
+        documentNumber:String(values.get("documentNumber")||"").trim()
+      };
+      if(!data.legalName||!data.country||!data.documentType||!data.documentNumber)throw new Error("Please complete all required fields.");
+      if(typeof window.ocSubmitKycDetails!=="function")throw new Error("Submission service is not ready. Refresh the page and try again.");
+      await window.ocSubmitKycDetails(data);
+      status.textContent="Your identity details have been submitted and are pending review. ID images are currently preview-only and have not been uploaded.";
+    }catch(err){
+      const code=err?.code||err?.message||"unknown-error";
+      const messages={
+        "auth/session-missing":"Your sign-in session is not ready. Sign in again, reopen Identity Verification and retry.",
+        "kyc-already-approved":"Your identity verification is already approved. Contact support if your details need correction.",
+        "permission-denied":"The database denied this submission. Check that the latest Firestore rules are deployed.",
+        "unavailable":"Connection problem. Check your internet connection and try again."
+      };
+      status.textContent=messages[code]||("Submission failed: "+code+". Please retry. If it continues, send this exact message to support.");
+    }finally{
+      submit.disabled=false;
+      submit.textContent=originalLabel||"Submit identity details";
+    }
+  }
   );
  }
 }
