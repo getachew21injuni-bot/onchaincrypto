@@ -86,7 +86,7 @@ const descriptions={
 'Addresses':'Manage deposit address records only after secure wallet infrastructure is configured.',
 'Trades':'Review order history after a trusted trading backend is connected.',
 'Trade Controls':'Configure transparent paper-trading take-profit and stop-loss thresholds for testing. These settings are local to this browser and do not control user trades.',
-'Assets':'View asset accounting after secure ledger integration.',
+'Assets':'Add demo coin balances to a selected user wallet or view the supported asset balances.',
 'Transfers':'Review transfer requests after server-side authorization is implemented.',
 'History':'View platform event history after the audit-log backend is connected.',
 'Settings':'Admin settings and access controls must be enforced by the server, not only this page.',
@@ -238,6 +238,7 @@ function renderModule(view){
  const body=document.getElementById('detailBody');
  if(view==='Support'&&window.renderSupportInbox){window.renderSupportInbox();return;}
  if(view==='Deposits'||view==='Withdrawals'){renderDemoFinance(view);return;}
+ if(view==='Assets'){renderDemoFinance('Deposits');return;}
  if(view==='Users'||view==='KYC'){renderLiveCollection(view);return;}
  if(view==='Analytics'){
   const data=loadAdminData();const counts=moduleNames.reduce((o,n)=>(o[n]=getRecords(n).length,o),{});
