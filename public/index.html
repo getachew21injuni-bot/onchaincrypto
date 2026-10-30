@@ -586,24 +586,22 @@ document.addEventListener('DOMContentLoaded',function(){
             <h2 style="margin:12px 0 8px">Your financial journey starts with knowledge.</h2>
             <p class="muted">Learn how digital assets, market movements and risk management work. Set clear goals, make thoughtful decisions and give your strategy time to develop.</p>
           </div>
-          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#00d7a0" aria-hidden="true">◈</span>Understanding your wallet</strong><p class="muted tiny">A crypto wallet is a tool for viewing and managing digital assets. Learn about balances, supported networks, wallet addresses and private-key security before using any financial service.</p></div></div>
-          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#22d3ee" aria-hidden="true">⇩</span>Deposits — what to know</strong><p class="muted tiny">A deposit means transferring digital assets into a wallet or platform. Always check the asset, network and destination address carefully. Sending assets to the wrong network or address may result in permanent loss.</p></div></div>
-          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#ff9b54" aria-hidden="true">⇧</span>Withdrawals — what to know</strong><p class="muted tiny">A withdrawal sends assets from a platform to an external wallet. Before any real withdrawal, review network fees, processing times, destination details and applicable platform rules.</p></div></div>
-          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#a78bfa" aria-hidden="true">◷</span>Financial activity and records</strong><p class="muted tiny">Keep clear records of trades, fees, deposits and withdrawals. Review transaction dates, amounts and status regularly so you can understand your financial activity and spot anything unexpected.</p></div></div>
-          <div class="panel about-section">
-            <h3 class="feature-heading">Grow through learning and discipline</h3>
-            <p class="muted tiny">Successful investing is not about trading as often as possible. Focus on understanding the market, setting realistic goals, managing risk and avoiding decisions driven by fear or excitement. More trading does not guarantee more profit.</p>
-            <ul class="muted tiny" style="padding-left:20px;line-height:1.8">
-              <li>Learn before you invest and only risk money you can afford to lose.</li>
-              <li>Use a plan, set limits and review your decisions regularly.</li>
-              <li>Diversify thoughtfully instead of relying on one asset.</li>
-              <li>Be patient, stay consistent and treat losses as a reason to reassess.</li>
-              <li>Be cautious of anyone promising guaranteed returns or fast profits.</li>
-            </ul>
-          </div>
-          <div class="panel about-section" style="border-color:rgba(240,185,11,.25)">
-            <h3 class="feature-heading">Platform information</h3>
-            <p class="muted tiny">This section is educational only. OnChainCrypto does not process real deposits, withdrawals, transfers or custody through this information page. No coins or funds are moved here. Trading and investing involve risk, and you may lose some or all of your capital.</p>
+          <div class="panel about-section" style="padding:0;overflow:hidden">
+            <details class="oc-financial-topic"><summary><strong>◈ Understanding your wallet</strong><span class="profile-menu-chevron">⌄</span></summary><div style="padding:0 16px 16px"><p class="muted tiny">A crypto wallet is a tool for viewing and managing digital assets. Learn about balances, supported networks, wallet addresses and private-key security before using any financial service.</p></div></details>
+            <details class="oc-financial-topic"><summary><strong>⇩ Deposits — what to know</strong><span class="profile-menu-chevron">⌄</span></summary><div style="padding:0 16px 16px"><p class="muted tiny">A deposit means transferring digital assets into a wallet or platform. Always check the asset, network and destination address carefully. Sending assets to the wrong network or address may result in permanent loss.</p></div></details>
+            <details class="oc-financial-topic"><summary><strong>⇧ Withdrawals — what to know</strong><span class="profile-menu-chevron">⌄</span></summary><div style="padding:0 16px 16px"><p class="muted tiny">A withdrawal sends assets from a platform to an external wallet. Before any real withdrawal, review network fees, processing times, destination details and applicable platform rules.</p></div></details>
+            <details class="oc-financial-topic"><summary><strong>◷ Financial activity and records</strong><span class="profile-menu-chevron">⌄</span></summary><div style="padding:0 16px 16px"><p class="muted tiny">Keep clear records of trades, fees, deposits and withdrawals. Review transaction dates, amounts and status regularly so you can understand your financial activity and spot anything unexpected.</p></div></details>
+            <details class="oc-financial-topic"><summary><strong>✦ Grow through learning and discipline</strong><span class="profile-menu-chevron">⌄</span></summary><div style="padding:0 16px 16px">
+              <p class="muted tiny">Successful investing is not about trading as often as possible. Focus on understanding the market, setting realistic goals, managing risk and avoiding decisions driven by fear or excitement. More trading does not guarantee more profit.</p>
+              <ul class="muted tiny" style="padding-left:20px;line-height:1.8">
+                <li>Learn before you invest and only risk money you can afford to lose.</li>
+                <li>Use a plan, set limits and review your decisions regularly.</li>
+                <li>Diversify thoughtfully instead of relying on one asset.</li>
+                <li>Be patient, stay consistent and treat losses as a reason to reassess.</li>
+                <li>Be cautious of anyone promising guaranteed returns or fast profits.</li>
+              </ul>
+            </div></details>
+            <details class="oc-financial-topic"><summary><strong>ⓘ Platform information</strong><span class="profile-menu-chevron">⌄</span></summary><div style="padding:0 16px 16px"><p class="muted tiny">This section is educational only. OnChainCrypto does not process real deposits, withdrawals, transfers or custody through this information page. No coins or funds are moved here. Trading and investing involve risk, and you may lose some or all of your capital.</p></div></details>
           </div>
         </div>
       </details>
@@ -4094,6 +4092,16 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
 #timedPaperTrade .oc-trade-amount-row #timedStakeAll:active{transform:translateY(-50%) scale(.98)}
 #ocTradeAmountAlert{display:none;margin:7px 0 10px;padding:9px 11px;border:1px solid #b94c55;border-radius:8px;background:rgba(185,76,85,.12);color:#ff9da5;font-size:12px;line-height:1.4}
 #ocTradeAmountAlert.show{display:block}
+
+/* Financial learning topics: show the information only after a topic is opened. */
+.oc-financial-topic{border-bottom:1px solid var(--line,rgba(255,255,255,.09));}
+.oc-financial-topic:last-child{border-bottom:0;}
+.oc-financial-topic>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:none;cursor:pointer;padding:16px;color:var(--text,#fff);}
+.oc-financial-topic>summary::-webkit-details-marker{display:none;}
+.oc-financial-topic>summary strong{font-size:14px;font-weight:650;}
+.oc-financial-topic[open]>summary{color:var(--accent,#00d7a0);}
+.oc-financial-topic>summary .profile-menu-chevron{transition:transform .2s ease;}
+.oc-financial-topic[open]>summary .profile-menu-chevron{transform:rotate(180deg);}
 </style>
 <script id="oc-trade-amount-inline-all-script">
 (function(){
