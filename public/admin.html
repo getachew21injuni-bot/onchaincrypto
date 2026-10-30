@@ -60,7 +60,7 @@
 </div>
 <div class="stats">
 <div class="stat"><span class="label">Saved User Profiles</span><span class="sicon">♟</span><div class="value" id="liveUsersCount">—</div><div class="trend" id="liveUsersStatus">● Waiting for admin data connection</div></div>
-<div class="stat"><span class="label">Total Assets (USDT)</span><span class="sicon" style="color:#34d399">◈</span><div class="value">Not connected</div><div class="muted">No trusted financial ledger is configured</div></div>
+<div class="stat"><span class="label">Total Demo Wallet Assets (USDT)</span><span class="sicon" style="color:#34d399">◈</span><div class="value" id="liveTotalDemoAssets">—</div><div class="muted" id="liveTotalDemoAssetsStatus">Connecting to demo wallet records</div></div>
 <div class="stat"><span class="label">Pending KYC</span><span class="sicon" style="color:#b197ff">▣</span><div class="value" id="liveKycCount">—</div><div class="muted" id="liveKycStatus">Waiting for secure KYC data</div></div>
 <div class="stat"><span class="label">Deposit Requests</span><span class="sicon" style="color:#68aaff">↓</span><div class="value">Not connected</div><div class="muted">No payment request backend is configured</div></div>
 <div class="stat"><span class="label">Withdrawal Requests</span><span class="sicon" style="color:#fb7185">↑</span><div class="value">Not connected</div><div class="muted">No payout backend is configured</div></div>
@@ -384,19 +384,24 @@ window.adminGetLiveCollection=async function(view){
  }catch(error){body.innerHTML='<div class="notice"><strong>Could not load live '+(isUsers?'profiles':'KYC submissions')+'.</strong><p>Firebase denied access or Firestore is unavailable ('+safeText(error.code||'unknown error')+'). Check administrator access and Firestore rules.</p></div>';}
 };
 window.adminRefreshDashboard=async function(){
- const users=byId('liveUsersCount'),kyc=byId('liveKycCount'),status=byId('dashboardDataStatus'),updated=byId('dashboardUpdatedAt');
+ const users=byId('liveUsersCount'),kyc=byId('liveKycCount'),status=byId('dashboardDataStatus'),updated=byId('dashboardUpdatedAt'),totalAssets=byId('liveTotalDemoAssets'),totalAssetsStatus=byId('liveTotalDemoAssetsStatus');
  if(!users||!kyc||!status||!updated)return;
  status.textContent='Loading';updated.textContent='Connecting to Firestore…';
  try{
-  const results=await Promise.all([getDocs(query(collection(db,'users'),limit(100))),getDocs(query(collection(db,'kycSubmissions'),limit(100)))]);
-  const u=results[0],k=results[1];users.textContent=u.size===100?'100+':String(u.size);
-  byId('liveUsersStatus').textContent=u.size===100?'● 100 profiles loaded (display capped)':'● Live profile records loaded';
+  const results=await Promise.all([getDocs(query(collection(db,'users'),limit(1000))),getDocs(query(collection(db,'kycSubmissions'),limit(100)))]);
+  const u=results[0],k=results[1];users.textContent=u.size===1000?'1000+':String(u.size);
+  byId('liveUsersStatus').textContent=u.size===1000?'1000 profiles loaded (display capped)':'Live profile records loaded';
   const pending=k.docs.filter(d=>(d.data().status||'pending')==='pending').length;
   kyc.textContent=k.size===100&&pending===k.size?'100+':String(pending);
   byId('liveKycStatus').textContent=k.size===100?'Pending count from first 100 KYC records':'Pending submissions from Firestore';
+  const demoTotal=u.docs.reduce((sum,d)=>{const data=d.data()||{};const n=Number(data.demoBalanceUSDT||0);return sum+(Number.isFinite(n)&&n>0?n:0);},0);
+  if(totalAssets)totalAssets.textContent=demoTotal.toLocaleString(undefined,{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
+  if(totalAssetsStatus)totalAssetsStatus.textContent='Sum of user demo USDT balances; not real customer funds'+(u.size===1000?' (first 1000 profiles only)':'');
   status.textContent='Connected';updated.textContent='Last updated '+new Date().toLocaleTimeString();
  }catch(error){
   users.textContent='—';kyc.textContent='—';status.textContent='Unavailable';updated.textContent='Firestore access failed: '+(error.code||'unknown error');
+  if(totalAssets)totalAssets.textContent='Unavailable';
+  if(totalAssetsStatus)totalAssetsStatus.textContent='Could not read demo wallet records';
   byId('liveUsersStatus').textContent='Admin access or Firestore rules need attention';byId('liveKycStatus').textContent='Could not retrieve KYC records';
  }
 };
