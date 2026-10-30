@@ -11,7 +11,7 @@ service cloud.firestore {
       allow create, update: if owns(uid)
         && request.resource.data.uid == uid
         && request.resource.data.keys().hasOnly([
-          'uid','email','phoneNumber','phone','firstName','lastName','displayName',
+          'uid','email','phoneNumber','phone','firstName','lastName','displayName','referralCode',
           'country','dateOfBirth','gender','address','createdAt','updatedAt'
         ]);
       allow delete: if false;
