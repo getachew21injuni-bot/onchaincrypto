@@ -697,15 +697,13 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="auth-welcome">
       <div class="auth-logo-mark" aria-hidden="true"><svg viewBox="0 0 120 120" role="img"><defs><linearGradient id="authLogoGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#42e8ff"/><stop offset="1" stop-color="#3678ff"/></linearGradient></defs><circle cx="60" cy="60" r="51" fill="#071522" stroke="url(#authLogoGradient)" stroke-width="3"/><path d="M73 35a29 29 0 1 0 0 50" fill="none" stroke="url(#authLogoGradient)" stroke-width="10" stroke-linecap="round"/><path d="M87 43a21 21 0 1 0 0 34" fill="none" stroke="#42e8ff" stroke-width="8" stroke-linecap="round"/><path d="M45 60h29" stroke="#e8fbff" stroke-width="5" stroke-linecap="round"/><circle cx="88" cy="31" r="5" fill="#42e8ff"/></svg></div>
       <div class="auth-brand">ONCHAIN<span>CRYPTO</span></div>
-      <h1 id="authHeading">Welcome to OnChainCrypto</h1>
-      <p id="authSubheading">Access your crypto dashboard securely.</p>
-      <div class="auth-trust"><span>⚡ Simple access</span><span>♧ Account protection</span><span>✓ Personal account</span></div>
+      <h1 id="authHeading">Welcome back to OnChainCrypto</h1>
+      <p id="authSubheading" class="hidden"></p>
     </div>
     <div class="content-grid">
       <section class="panel form-panel auth-main-panel">
-        <div id="authModeIntro"><h2>Welcome to OnChainCrypto</h2><p class="muted tiny">Choose a secure way to access your account or create a new one.</p></div>
+        <div id="authModeIntro" class="hidden" aria-hidden="true"></div>
         <section id="authChoicePanel" class="oc-auth-choice" aria-label="Choose how to continue">
-          <div class="oc-auth-preface"><span class="oc-auth-eyebrow">YOUR DIGITAL ASSET JOURNEY</span><h2>Trade with clarity. Move with confidence.</h2><p>Access market insights, explore digital assets and manage your personal account through one secure platform.</p><div class="oc-auth-benefits"><span>✦ Market intelligence</span><span>◈ Personal account</span><span>✓ Secure access</span></div></div>
           <button class="primary full oc-auth-choice-button" id="authChoiceGoogle" type="button"><span aria-hidden="true">G</span> Login with Google</button>
           <button class="secondary full oc-auth-choice-button" id="authChoiceEmail" type="button"><span aria-hidden="true">✉</span> Login with email or phone</button>
           <p class="oc-auth-register-prompt">Don’t have an account? <button type="button" id="authChoiceRegister">Register</button></p>
@@ -1912,8 +1910,8 @@ setTimeout(() => {
     if(switchText)switchText.classList.toggle('hidden',creating);
     if(registerSwitch)registerSwitch.classList.toggle('hidden',!creating);
     if(intro)intro.innerHTML=creating?'<h2>Create your account</h2><p class="muted tiny">Join with your name and either email or phone.</p>':'<h2>Sign in to your account</h2><p class="muted tiny">Enter your email and password. For phone sign-in, use the SMS verification panel.</p>';
-    if(heading)heading.textContent=creating?'Create your OnChainCrypto account':'Welcome Back';
-    if(sub)sub.textContent=creating?'Set up your account to continue.':'Access your crypto dashboard securely.';
+    if(heading)heading.textContent=creating?'Create your OnChainCrypto account':'Welcome back to OnChainCrypto';
+    if(sub){sub.textContent=creating?'Set up your account to continue.':'';sub.classList.toggle('hidden',!creating);}
   }
   document.getElementById('showRegisterBtn')?.addEventListener('click',()=>setMode('register'));
    // The Login link inside the registration form must switch back to the sign-in form.
@@ -1959,8 +1957,9 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
 </script>
 
 <style id="oc-auth-choice-style">
-.oc-auth-choice{max-width:620px;margin:18px auto 8px;padding:clamp(18px,4vw,30px);border:1px solid #24547a;border-radius:18px;background:linear-gradient(145deg,#0c2540f2,#071629f5 70%);box-shadow:0 18px 55px #0005,inset 0 1px #ffffff12}
-.oc-auth-preface{text-align:center;margin-bottom:22px}.oc-auth-eyebrow{font-size:10px;font-weight:800;letter-spacing:1.8px;color:#20d9ff}.oc-auth-preface h2{font-size:clamp(22px,4vw,30px);line-height:1.2;margin:9px 0;color:#f2f9ff}.oc-auth-preface p{max-width:460px;margin:0 auto;color:#a9bfd5;line-height:1.7}.oc-auth-benefits{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 16px;margin-top:17px;color:#b9d9ee;font-size:11px}.oc-auth-choice-button{min-height:52px;margin-top:11px;font-size:15px;display:flex;align-items:center;justify-content:center;gap:10px}.oc-auth-choice-button>span{font-weight:850;font-size:19px}.oc-auth-register-prompt{text-align:center;margin:20px 0 0;color:#a9bfd5}.oc-auth-register-prompt button{background:transparent;color:#20d9ff;padding:4px 6px;font-weight:800}.auth-main-panel{max-width:850px;margin:0 auto}.auth-welcome{text-align:center}
+.oc-auth-choice{max-width:620px;margin:0 auto 8px;padding:clamp(18px,4vw,30px);border:1px solid #236078;border-radius:18px;background:radial-gradient(ellipse at 78% 45%,#153e57 0%,#102432 36%,#101820 68%,#0b0e11 100%);box-shadow:0 20px 60px #0005,inset 0 0 40px #25d9ff0b;position:relative;overflow:hidden}
+.oc-auth-choice:before,.oc-auth-choice:after{content:"";position:absolute;border:1px solid #36d9ff20;border-radius:50%;pointer-events:none}.oc-auth-choice:before{width:360px;height:360px;right:-120px;top:-235px}.oc-auth-choice:after{width:260px;height:260px;right:-70px;top:-185px}
+.oc-auth-choice-button,.oc-auth-register-prompt{position:relative;z-index:1}.oc-auth-choice-button{min-height:52px;margin-top:11px;font-size:15px;display:flex;align-items:center;justify-content:center;gap:10px}.oc-auth-choice-button>span{font-weight:850;font-size:19px}.oc-auth-register-prompt{text-align:center;margin:20px 0 0;color:#a9bfd5}.oc-auth-register-prompt button{background:transparent;color:#20d9ff;padding:4px 6px;font-weight:800}.auth-main-panel{max-width:850px;margin:0 auto}.auth-welcome{position:relative;overflow:hidden;text-align:center;border:1px solid #236078;border-radius:22px;background:radial-gradient(ellipse at 78% 45%,#153e57 0%,#102432 36%,#101820 68%,#0b0e11 100%);box-shadow:0 20px 60px #0005,inset 0 0 40px #25d9ff0b}.auth-welcome:before,.auth-welcome:after{content:"";position:absolute;border:1px solid #36d9ff20;border-radius:50%;pointer-events:none}.auth-welcome:before{width:560px;height:560px;right:-120px;top:-390px}.auth-welcome:after{width:420px;height:420px;right:-45px;top:-330px}.auth-welcome>*{position:relative;z-index:1}.auth-welcome h1{color:#f2f9ff;text-shadow:0 0 26px #20d9ff35}
 </style>
 
 <style id="oc-live-support-widget-style">
