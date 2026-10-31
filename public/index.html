@@ -223,7 +223,22 @@ document.addEventListener('DOMContentLoaded',function(){
 #page-trade .chart-area>.chart-wrap{margin-top:3px!important;padding:6px!important}
 #page-trade .chart-area>.signal-box{margin-top:6px!important;padding:9px!important}
 #page-trade .chart-area>.signal-box .section-head{padding:0!important}
-</style><style id="oc-hide-numbered-trade-steps">#timedPaperTrade .oc-flow-step{display:none!important}</style></head>
+</style><style id="oc-hide-numbered-trade-steps">#timedPaperTrade .oc-flow-step{display:none!important}</style>
+<style id="oc-logged-out-lockscreen">
+/* Signed-out visitors see only the authentication panel. */
+body.oc-logged-out > header,
+body.oc-logged-out > footer,
+body.oc-logged-out > #bottomNav,
+body.oc-logged-out > #adminDashboardShortcut,
+body.oc-logged-out > a,
+body.oc-logged-out > nav,
+body.oc-logged-out > aside,
+body.oc-logged-out > .more-menu-wrap { display:none !important; }
+body.oc-logged-out main > section[id^="page-"]:not(#page-register) { display:none !important; }
+body.oc-logged-out main { display:block !important; min-height:100vh; padding-top:24px; }
+body.oc-logged-out #page-register { display:block !important; }
+</style>
+</head>
 <body>
 <header>
   <div class="brand"><div class="auth-logo-mark header-logo-mark" aria-hidden="true"><svg viewBox="0 0 120 120" role="img"><defs><linearGradient id="headerLogoGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#42e8ff"/><stop offset="1" stop-color="#3678ff"/></linearGradient></defs><circle cx="60" cy="60" r="51" fill="#071522" stroke="url(#headerLogoGradient)" stroke-width="3"/><path d="M73 35a29 29 0 1 0 0 50" fill="none" stroke="url(#headerLogoGradient)" stroke-width="10" stroke-linecap="round"/><path d="M87 43a21 21 0 1 0 0 34" fill="none" stroke="#42e8ff" stroke-width="8" stroke-linecap="round"/><path d="M45 60h29" stroke="#e8fbff" stroke-width="5" stroke-linecap="round"/><circle cx="88" cy="31" r="5" fill="#42e8ff"/></svg></div> <span>OnChainCrypto</span></div>
@@ -1870,6 +1885,7 @@ async function ocPerformSignOut() {
   try {
     await signOut(auth);
     window.ocLoggedOut = true;
+    document.body.classList.add("oc-logged-out");
     window.onchaincryptoCurrentUser = null;
     try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#register"); } catch (_) {}
     window.ocPendingPage = null;
@@ -1920,7 +1936,7 @@ onAuthStateChanged(auth, (user) => {
   if(stopAdminWalletSync){stopAdminWalletSync();stopAdminWalletSync=null;}
   const previousUser = window.onchaincryptoCurrentUser || null;
   window.onchaincryptoCurrentUser = user || null;
-  if (user) { window.ocLoggedOut = false; void (async () => {
+  if (user) { window.ocLoggedOut = false; document.body.classList.remove("oc-logged-out"); void (async () => {
     await loadSavedUserProfile(user);
     await syncAdminDemoBalance(user);
     try { await saveBasicUserProfile(user); }
@@ -1933,8 +1949,13 @@ onAuthStateChanged(auth, (user) => {
    if (typeof window.ocRefreshReferral === "function") window.ocRefreshReferral(user || null);
    if (user) { openHomeAfterAuth(); }
     else {
+      // Any signed-out visitor is restricted to Sign In / Register only.
       window.ocPendingPage = null;
-      if (previousUser) { window.ocLoggedOut = true; try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#register"); } catch (_) {} window.showPage?.("register"); }
+      window.ocLoggedOut = true;
+      document.body.classList.add("oc-logged-out");
+      try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#register"); } catch (_) {}
+      window.showPage?.("register");
+      window.ocForceSignInScreen?.();
     }
   const status = document.getElementById("authStatus");
   const signOutBtn = document.getElementById("signOutBtn");
@@ -1964,6 +1985,7 @@ onAuthStateChanged(auth, (user) => {
 window.ocForceSignInScreen = function() {
   if (auth.currentUser) return;
   window.ocLoggedOut = true;
+  document.body.classList.add("oc-logged-out");
   if (typeof window.showPage === "function") window.showPage("register");
   const choice = document.getElementById("authChoicePanel");
   if (choice && !choice.classList.contains("hidden")) {
