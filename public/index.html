@@ -4643,3 +4643,46 @@ byId("ocVerifyDeleteCode")?.addEventListener("click",async()=>{
  check();
 })();
 </script>
+
+<script id="oc-close-profile-and-menu-on-navigation">
+(function(){
+  function closeProfileAndMenu(){
+    document.querySelectorAll("#page-profile details[open]").forEach(function(panel){panel.open=false;});
+    const menu=document.getElementById("moreMenu");
+    if(menu)menu.classList.add("hidden");
+    const trigger=document.getElementById("moreMenuBtn");
+    if(trigger)trigger.setAttribute("aria-expanded","false");
+  }
+  // Any page change away from Profile closes expanded profile sections and the three-dot menu.
+  const originalShowPage=window.showPage;
+  if(typeof originalShowPage==="function"&&!originalShowPage.__ocCloseProfileWrapped){
+    const wrappedShowPage=function(page){
+      if(page!=="profile")closeProfileAndMenu();
+      else {
+        const menu=document.getElementById("moreMenu");
+        if(menu)menu.classList.add("hidden");
+        document.getElementById("moreMenuBtn")?.setAttribute("aria-expanded","false");
+      }
+      return originalShowPage.apply(this,arguments);
+    };
+    wrappedShowPage.__ocCloseProfileWrapped=true;
+    window.showPage=wrappedShowPage;
+  }
+  // Also close on navigation controls and other actions outside the Profile page.
+  document.addEventListener("click",function(event){
+    const profile=document.getElementById("page-profile");
+    if(profile&&profile.contains(event.target))return;
+    if(event.target.closest("#moreMenuBtn"))return;
+    if(event.target.closest("button,a,[role=button],[data-page],[data-bottom-page],[data-menu-page],#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn")){
+      closeProfileAndMenu();
+    }
+  },true);
+  // A logout/auth reset must never leave old profile accordions or the menu expanded.
+  const observer=new MutationObserver(function(){
+    if(document.body.classList.contains("oc-logged-out"))closeProfileAndMenu();
+  });
+  observer.observe(document.body,{attributes:true,attributeFilter:["class"]});
+  window.addEventListener("pageshow",function(){if(document.body.classList.contains("oc-logged-out"))closeProfileAndMenu();});
+  closeProfileAndMenu();
+})();
+</script>
