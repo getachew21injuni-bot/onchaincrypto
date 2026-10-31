@@ -1226,7 +1226,7 @@ window.ocApplyAdminDemoBalance=function(amount){const n=Number(amount);if(!Numbe
 window.ocApplyAdminDemoAssets=function(balances){if(!balances||typeof balances!=="object"||Array.isArray(balances))return;let changed=false;for(const [rawSymbol,rawAmount] of Object.entries(balances)){const symbol=String(rawSymbol||"").toUpperCase();const amount=Number(rawAmount);if(!/^[A-Z0-9]{2,12}$/.test(symbol)||!Number.isFinite(amount)||amount<0)continue;state.holdings[symbol]=amount;changed=true;}if(changed){saveState();renderWallet();}};
 function renderWallet(){const value=Object.entries(state.holdings).reduce((sum,[sym,qty])=>sum+(Number(qty)||0)*(priceFor(sym)?.current_price||0),0);$("summaryBalance").textContent=usdtMoney(state.balance);$("walletBalance").textContent=usdtMoney(state.balance);$("holdingsValue").textContent=usdtMoney(value);const rows=Object.entries(state.holdings).filter(([sym,qty])=>Number(qty)>0.0000000001&&(! $("hideSmallBalances")?.checked||Number(qty)*(priceFor(sym)?.current_price||0)>=1));$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym,current_price:0};return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+' '+safe(sym.toUpperCase())+'</td><td>'+usdtMoney(Number(qty)*(c.current_price||0))+'</td></tr>'}).join(""):'<tr><td colspan="3" class="empty">No holdings yet. Place a paper trade to see assets.</td></tr>';renderActivityHistory();renderTradeHistory();renderPnl();renderWalletMarket()}
 document.addEventListener("change",e=>{if(e.target&&e.target.id==="hideSmallBalances")renderWallet();if(e.target&&e.target.id==="homeHistoryFilter")renderActivityHistory()});
-function showPage(page){if(window.ocLoggedOut===true && !auth.currentUser && page!=="register")page="register";if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
+function showPage(page){if(window.ocLoggedOut===true && !auth.currentUser)page="register";if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
 window.showPage = showPage;
 let timedPaper=null,timedTimer=null,pendingTimedDirection=null;
 function quickPlan(){const amount=Number($("timedStake")?.value||0)*Number(priceFor(window.__ocTradeFundingCoin||"USDT")?.current_price||1),isGold=($("tradeAsset")?.value||selected)==="XAU",minimum=isGold?500:100;const levels=[{rate:12,min:minimum,max:5000,duration:30,label:"Level 1"},{rate:15,min:5000,max:10000,duration:60,label:"Level 2"},{rate:18,min:10000,max:25000,duration:90,label:"Level 3"},{rate:21,min:25000,max:50000,duration:120,label:"Level 4"},{rate:24,min:50000,max:100000,duration:180,label:"Level 5"},{rate:27,min:100000,max:1000000,duration:360,label:"Level 6"}];return levels.find((p,i)=>amount>=p.min&&(amount<p.max||i===levels.length-1&&amount<=p.max))||levels[0]}
@@ -1877,6 +1877,7 @@ async function ocPerformSignOut() {
     const nameField = document.getElementById("displayName");
     if (nameField) nameField.value = "";
     if (typeof window.showPage === "function") window.showPage("register");
+    window.ocForceSignInScreen?.();
     const status = document.getElementById("authStatus");
     if (status) { status.textContent = "You are signed out. Sign in to access your own account."; status.classList.add("notice"); }
     const message = document.getElementById("registerMessage");
@@ -1959,12 +1960,40 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+// A signed-out visitor must always land on the actual sign-in form, not Home or the auth choice screen.
+window.ocForceSignInScreen = function() {
+  if (auth.currentUser) return;
+  window.ocLoggedOut = true;
+  if (typeof window.showPage === "function") window.showPage("register");
+  const choice = document.getElementById("authChoicePanel");
+  if (choice && !choice.classList.contains("hidden")) {
+    document.getElementById("authChoiceEmail")?.click();
+  } else {
+    document.getElementById("registerLoginBtn")?.click();
+  }
+};
+document.addEventListener("click", event => {
+  if (auth.currentUser || window.ocLoggedOut !== true) return;
+  const target = event.target instanceof Element ? event.target : null;
+  if (!target) return;
+  // Keep sign-in/register controls usable; every other app action routes to sign-in.
+  if (target.closest("#page-register") || target.closest("#authChoicePanel") ||
+      target.closest("#signInForm") || target.closest("#registerForm") ||
+      target.closest("#authPhonePanel") || target.closest("#authPhoneDivider") ||
+      target.closest("#resetPasswordBtn") || target.closest("#googleSignInBtn")) return;
+  if (target.closest("button,a,[role=button],[data-page],[data-bottom-page],[data-menu-page]")) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    window.ocForceSignInScreen();
+  }
+}, true);
 // Prevent browser Back/Forward or back-forward-cache restoration from reopening a signed-out session.
 window.addEventListener("pageshow", async () => {
   try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
   if (!auth.currentUser && window.ocLoggedOut === true) {
     document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-register"));
     window.showPage?.("register");
+    window.ocForceSignInScreen?.();
     try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#register"); } catch (_) {}
   }
 });
