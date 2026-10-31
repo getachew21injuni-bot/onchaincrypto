@@ -2623,6 +2623,26 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
   if(current) navigate(current.id.slice(5),{fromOriginal:true,keepScroll:true});
 })();
 </script>
+<script id="oc-auto-close-profile-panels">
+(function(){
+  // Collapse any expanded Profile sections when the user interacts elsewhere
+  // in the app. Keep interactions inside Profile working normally.
+  function closeProfilePanels(){
+    const profile=document.getElementById("page-profile");
+    if(!profile)return;
+    profile.querySelectorAll("details[open]").forEach(panel=>{panel.open=false;});
+  }
+  document.addEventListener("click",function(event){
+    const profile=document.getElementById("page-profile");
+    if(!profile)return;
+    if(!profile.contains(event.target)) closeProfilePanels();
+  },true);
+  document.addEventListener("keydown",function(event){
+    if(event.key==="Escape") closeProfilePanels();
+  });
+})();
+</script>
+
 <script id="oc-back-exit-controls">
 (function(){
   document.getElementById('ocBackBtn')?.addEventListener('click',function(){if(typeof window.__ocNavigateBack==='function')window.__ocNavigateBack();});
