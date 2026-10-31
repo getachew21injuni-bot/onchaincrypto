@@ -1116,6 +1116,13 @@ async function loadMarket(){
    if($("gainersList"))$("gainersList").textContent="Unavailable";
    if($("losersList"))$("losersList").textContent="Unavailable";
    if($("hotList"))$("hotList").textContent="Unavailable";
+   if($("hotCoinResults"))$("hotCoinResults").innerHTML='<div class="empty">Live coin feed is unavailable. Check your connection and tap Refresh.</div>';
+   if($("marketGainers"))$("marketGainers").textContent="Unavailable";
+   if($("marketLosers"))$("marketLosers").textContent="Unavailable";
+   if($("topGainer"))$("topGainer").innerHTML='<span class="muted">Market feed unavailable</span>';
+   if($("topLoser"))$("topLoser").innerHTML='<span class="muted">Market feed unavailable</span>';
+   if($("signalRows"))$("signalRows").innerHTML='<tr><td colspan="5" class="empty">Live signals are unavailable until a public price feed responds. Tap Refresh to retry.</td></tr>';
+   if($("signalCountLabel"))$("signalCountLabel").textContent="No live prices loaded";
   }else{renderMarket();renderHomeCoinResults();renderSignalScanner()}
   $("marketHint").textContent=hasCached?"Could not refresh now. Saved prices remain visible and may be stale.":"Public price providers could not be reached. Check connection and tap Refresh.";
  }finally{finish()}
