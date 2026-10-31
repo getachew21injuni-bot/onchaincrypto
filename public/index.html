@@ -1031,6 +1031,8 @@ function renderHotCoinTab(category=hotCoinCategory){
 }
 document.querySelectorAll("[data-hot-tab]").forEach(tab=>tab.addEventListener("click",()=>renderHotCoinTab(tab.dataset.hotTab)));
 let marketRequestInProgress=false;
+let marketRetryDelay=15000;
+let marketRetryTimer=null;
 function restoreCachedMarket(){
  try{
   const saved=JSON.parse(localStorage.getItem("oc_market_cache")||"null");
@@ -1093,6 +1095,8 @@ async function loadMarket(){
    result={provider:"Binance public data",data:rows};
   }
   cacheAndRender(result.data,result.provider);
+  marketRetryDelay=15000;
+  if(marketRetryTimer){clearTimeout(marketRetryTimer);marketRetryTimer=null;}
   /* Add the separate XAU quote after the main market is already visible, so gold cannot hold up the page. */
   fetchJson("https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=XAUUSDT",2500).then(g=>{
    const price=Number(g.lastPrice);if(!(price>0))return;
@@ -1118,6 +1122,10 @@ async function loadMarket(){
    if($("hotList"))$("hotList").textContent="Unavailable";
   }else{renderMarket();renderHomeCoinResults();renderSignalScanner()}
   $("marketHint").textContent=hasCached?"Could not refresh now. Saved prices remain visible and may be stale.":"Public price providers could not be reached. Check connection and tap Refresh.";
+  if(marketRetryTimer)clearTimeout(marketRetryTimer);
+  const retryIn=marketRetryDelay;
+  marketRetryTimer=setTimeout(()=>{marketRetryTimer=null;loadMarket()},retryIn);
+  marketRetryDelay=Math.min(marketRetryDelay*2,120000);
  }finally{finish()}
 }
 let historySeries=[];
@@ -1359,7 +1367,7 @@ $("manageSessionBtn").addEventListener("click",()=>{document.getElementById("ocS
 $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new Date().toISOString(),notice:"This export contains browser-local OnChainCrypto data only; it is not a full server-account export.",profile:JSON.parse(localStorage.getItem("oc_profile")||"{}"),notificationPreferences:JSON.parse(localStorage.getItem("oc_notification_preferences")||"{}"),localData:{}};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&(/onchain|wallet|trade|history|profile|asset/i.test(key))&&!["oc_profile","oc_notification_preferences"].includes(key)){try{data.localData[key]=JSON.parse(localStorage.getItem(key))}catch(_){data.localData[key]=localStorage.getItem(key)}}}const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="onchaincrypto-data-export.json";link.click();URL.revokeObjectURL(url);$("privacyMessage").textContent="Downloaded available browser-local data. This does not include all server records."});
 $("requestDeleteAccountBtn").addEventListener("click",()=>{const ok=window.confirm("Account deletion is permanent. This site cannot delete your Firebase account automatically. Open an email request to support instead?");if(!ok)return;const subject="Account deletion request";const body="Please help me request deletion of my OnChainCrypto account and associated personal data. Please explain any identity checks required.";window.location.href="mailto:onchaincryptosupport@gmail.com?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);$("privacyMessage").textContent="Your email app should open with a deletion request draft. Review and send it; this website has not deleted your account."});
 // Profile saving is handled once by the Firebase module below.
- renderWallet();loadMarket();setInterval(loadMarket,120000);window.addEventListener("resize",()=>{if(historySeries.length&&!$("page-trade").classList.contains("hidden"))drawPriceChart()});
+ renderWallet();restoreCachedMarket();loadMarket();setInterval(loadMarket,120000);window.addEventListener("online",()=>{if(marketRetryTimer){clearTimeout(marketRetryTimer);marketRetryTimer=null;}marketRetryDelay=15000;loadMarket()});document.addEventListener("visibilitychange",()=>{if(!document.hidden){if(marketRetryTimer){clearTimeout(marketRetryTimer);marketRetryTimer=null;}loadMarket()}});window.addEventListener("resize",()=>{if(historySeries.length&&!$("page-trade").classList.contains("hidden"))drawPriceChart()});
 </script>
 
 <script type="module">
