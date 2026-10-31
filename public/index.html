@@ -112,11 +112,9 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 @media(max-width:380px){#page-home .oc-hero-art{min-height:205px}#page-home .oc-hero-terms{gap:7px;font-size:10px}#page-home .oc-profit-chip{max-width:150px}#page-home .oc-hero-person{width:80%;right:8%}}
 @media(prefers-reduced-motion:reduce){#page-home .oc-hero-terms span,#page-home .oc-coin,#page-home .oc-floating-term{animation:none!important}}
 
-/* Always-visible Back and Exit controls; wrap neatly on narrow screens. */
-#ocBackBtn,#ocExitBtn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:36px;padding:7px 10px;font-size:12px;font-weight:700}
-#ocBackBtn{border-color:#3b82f6;color:#dbeafe}
-#ocExitBtn{border-color:#f6465d;color:#ffb4bd}
-@media(max-width:720px){header{flex-wrap:wrap;gap:8px}header .header-right{display:flex;align-items:center;gap:5px;flex-wrap:wrap}#ocBackBtn,#ocExitBtn{padding:7px 8px;min-height:34px}#ocBackBtn span,#ocExitBtn span{display:inline}}
+/* Back navigation control; wrap neatly on narrow screens. */
+#ocBackBtn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:36px;padding:7px 10px;font-size:12px;font-weight:700;border-color:#3b82f6;color:#dbeafe}
+@media(max-width:720px){header{flex-wrap:wrap;gap:8px}header .header-right{display:flex;align-items:center;gap:5px;flex-wrap:wrap}#ocBackBtn{padding:7px 8px;min-height:34px}#ocBackBtn span{display:inline}}
 </style>
 
 <style id="oc-single-support-launcher">#ocLiveSupport,#ocSupportPanel{display:none!important}</style>
@@ -257,7 +255,7 @@ body.oc-logged-out .auth-welcome { text-align:center; }
     <button data-page="wallet">Wallet</button>
     
   </nav>
-  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><button class="secondary oc-nav-control oc-exit-control" id="ocExitBtn" type="button" aria-label="Exit and sign out" title="Exit and sign out">↪ <span>Exit</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Guides and account assistance</small></span></button><button type="button" data-menu-page="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About</strong><small>Platform information</small></span></button></div></div></div>
+  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Guides and account assistance</small></span></button><button type="button" data-menu-page="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About</strong><small>Platform information</small></span></button></div></div></div>
 </header>
 <main>
   <section id="page-home">
@@ -2730,12 +2728,6 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
 <script id="oc-back-exit-controls">
 (function(){
   document.getElementById('ocBackBtn')?.addEventListener('click',function(){if(typeof window.__ocNavigateBack==='function')window.__ocNavigateBack();});
-  document.getElementById('ocExitBtn')?.addEventListener('click',function(){
-    const signOut=document.getElementById('signOutBtn');
-    if(signOut){signOut.click();}
-    else if(typeof window.showPage==='function'){window.showPage('register');}
-    else {document.getElementById('register-nav')?.click();}
-  });
 })();
 </script>
 
