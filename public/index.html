@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </header>
 <main>
   <section id="page-home">
- <div class="page-title"><div><h1>OnChainCrypto</h1></div><button class="secondary" type="button" data-go="markets">Explore Markets ↗</button></div>
+ <div class="page-title"><div><h1 id="homeGreeting">OnChainCrypto</h1></div><button class="secondary" type="button" data-go="markets">Explore Markets ↗</button></div>
   
  <section class="oc-invest-hero oc-get-started-hero" aria-label="Get started with OnChainCrypto">
   <div class="oc-hero-copy">
@@ -1907,6 +1907,11 @@ window.ocSubmitKycDetails=async function(data){
 let stopAdminWalletSync=null;
 function syncAdminDemoBalance(user){if(stopAdminWalletSync){stopAdminWalletSync();stopAdminWalletSync=null;}if(!user?.uid)return;try{stopAdminWalletSync=onSnapshot(doc(db,"users",user.uid),snap=>{if(!snap.exists())return;const data=snap.data()||{};if(typeof data.demoBalanceUSDT==="number"&&typeof window.ocApplyAdminDemoBalance==="function")window.ocApplyAdminDemoBalance(data.demoBalanceUSDT);if(data.demoAssetBalances&&typeof window.ocApplyAdminDemoAssets==="function")window.ocApplyAdminDemoAssets(data.demoAssetBalances);},error=>console.warn("Live demo wallet sync unavailable:",error?.code||error));}catch(error){console.warn("Demo wallet sync unavailable:",error?.code||error);}}
 onAuthStateChanged(auth, (user) => {
+  const homeGreeting = document.getElementById("homeGreeting");
+  if (homeGreeting) {
+    const savedName = user ? (user.displayName || user.email?.split("@")[0] || user.phoneNumber || "there") : "";
+    homeGreeting.textContent = user ? "Hi, " + savedName : "OnChainCrypto";
+  }
   if(stopAdminWalletSync){stopAdminWalletSync();stopAdminWalletSync=null;}
   const previousUser = window.onchaincryptoCurrentUser || null;
   window.onchaincryptoCurrentUser = user || null;
