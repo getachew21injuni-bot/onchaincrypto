@@ -238,6 +238,14 @@ body.oc-logged-out main > section[id^="page-"]:not(#page-register) { display:non
 body.oc-logged-out main { display:block !important; min-height:100vh; padding-top:24px; }
 body.oc-logged-out #page-register { display:block !important; }
 </style>
+
+<style id="oc-auth-only-screen-tweaks">
+body.oc-logged-out #authChoicePanel { display:none !important; }
+body.oc-logged-out #signInForm { display:block !important; }
+body.oc-logged-out #authStatus:empty, body.oc-logged-out #registerMessage:empty { display:none !important; }
+body.oc-logged-out .auth-main-panel { width:min(100%,480px); margin:0 auto; }
+body.oc-logged-out .auth-welcome { text-align:center; }
+</style>
 </head>
 <body>
 <header>
@@ -729,7 +737,7 @@ body.oc-logged-out #page-register { display:block !important; }
         <p class="muted tiny auth-google-hint">Enter your full name above to register with Google.</p>
         <form id="signInForm" class="auth-signin-form hidden">
           <h3 style="margin-top:12px">Sign in</h3>
-          <label for="signInEmail">Email address</label><input id="signInEmail" class="field" type="email" autocomplete="username" required placeholder="you@example.com">
+          <label for="signInEmail">Username or email</label><input id="signInEmail" class="field" type="text" autocomplete="username" required placeholder="Enter your username or email">
           <label for="signInPassword">Password</label><div class="oc-password-wrap"><input id="signInPassword" class="field" type="password" autocomplete="current-password" required placeholder="Enter your password"><button class="oc-password-toggle" type="button" data-password-target="signInPassword" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
           <div class="auth-options"><label class="auth-check"><input type="checkbox" id="rememberMe"> Remember me</label><label class="auth-check"><input type="checkbox" id="showSignInPassword"> Show password</label></div>
           <button class="primary full auth-submit" type="submit">⚡ Sign In Securely</button>
@@ -1798,8 +1806,8 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
   const password = document.getElementById("signInPassword").value;
   const status = document.getElementById("authStatus");
   if (!email || !password) {
-    msg("Enter both your email address and password.");
-    if (status) status.textContent = "Sign-in needs your email address and password.";
+    msg("Enter your username or email and password.");
+    if (status) status.textContent = "Sign-in needs your username or email and password.";
     return;
   }
   if (button?.disabled) return;
@@ -1987,12 +1995,12 @@ window.ocForceSignInScreen = function() {
   window.ocLoggedOut = true;
   document.body.classList.add("oc-logged-out");
   if (typeof window.showPage === "function") window.showPage("register");
-  const choice = document.getElementById("authChoicePanel");
-  if (choice && !choice.classList.contains("hidden")) {
-    document.getElementById("authChoiceEmail")?.click();
-  } else {
-    document.getElementById("registerLoginBtn")?.click();
-  }
+  document.getElementById("authChoicePanel")?.classList.add("hidden");
+  document.getElementById("registerForm")?.classList.add("hidden");
+  document.getElementById("signInForm")?.classList.remove("hidden");
+  document.getElementById("googleSignInBtn")?.classList.add("hidden");
+  document.getElementById("authHeading").textContent = "Welcome back to OnChainCrypto";
+  document.getElementById("signInEmail")?.focus();
 };
 document.addEventListener("click", event => {
   if (auth.currentUser || window.ocLoggedOut !== true) return;
@@ -2058,7 +2066,7 @@ setTimeout(() => {
     if(googleHint)googleHint.classList.toggle('hidden',creating);
     if(switchText)switchText.classList.toggle('hidden',creating);
     if(registerSwitch)registerSwitch.classList.toggle('hidden',!creating);
-    if(intro)intro.innerHTML=creating?'<h2>Create your account</h2><p class="muted tiny">Join with your name and either email or phone.</p>':'<h2>Sign in to your account</h2><p class="muted tiny">Enter your email and password. For phone sign-in, use the SMS verification panel.</p>';
+    if(intro)intro.innerHTML=creating?'<h2>Create your account</h2><p class="muted tiny">Join with your name and either email or phone.</p>':'';
     if(heading)heading.textContent=creating?'Create your OnChainCrypto account':'Welcome back to OnChainCrypto';
     if(sub){sub.textContent=creating?'Set up your account to continue.':'';sub.classList.toggle('hidden',!creating);}
   }
