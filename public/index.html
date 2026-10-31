@@ -1036,7 +1036,7 @@ function restoreCachedMarket(){
   const saved=JSON.parse(localStorage.getItem("oc_market_cache")||"null");
   if(Array.isArray(saved?.data)&&saved.data.length){
    market=saved.data;window.market=market;
-   $("connection").textContent="Cached data";
+   $("connection").textContent="Cached data";setHeaderMarketStatus("stale");
    if($("apiStatus"))$("apiStatus").textContent="Showing saved prices";
    if(saved.time)$("lastUpdate").textContent=new Date(saved.time).toLocaleTimeString()+" (saved)";
    renderMarket();renderHomeCoinResults();updateTradePreview();
@@ -1045,12 +1045,13 @@ function restoreCachedMarket(){
  }catch(e){}
  return false;
 }
+function setHeaderMarketStatus(state){const dot=document.querySelector(".header-right .status-dot");if(!dot)return;dot.classList.toggle("is-live",state==="live");dot.classList.toggle("is-offline",state==="offline");dot.title=state==="live"?"Live market data connected":state==="offline"?"Live market data unavailable":state==="stale"?"Showing cached market data":"Connecting to market data";}
 async function loadMarket(){
  if(marketRequestInProgress)return;
  marketRequestInProgress=true;
  const refreshButtons=[$("refreshBtn"),$("retryBtn"),$("refreshSignalsBtn")].filter(Boolean);
  refreshButtons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent="Refreshing…"});
- $("connection").textContent="Updating";if($("apiStatus"))$("apiStatus").textContent="Loading public prices…";$("marketHint").textContent="Connecting to public market feeds…";
+ $("connection").textContent="Updating";setHeaderMarketStatus("connecting");if($("apiStatus"))$("apiStatus").textContent="Loading public prices…";$("marketHint").textContent="Connecting to public market feeds…";
  const finish=()=>{marketRequestInProgress=false;refreshButtons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.originalText||"Refresh";delete b.dataset.originalText})};
  const fetchJson=async(url,ms=6500)=>{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),ms);try{const res=await fetch(url,{headers:{accept:"application/json"},signal:controller.signal,cache:"no-store"});if(!res.ok)throw new Error("HTTP "+res.status);return await res.json()}finally{clearTimeout(timer)}};
  const cacheAndRender=(data,provider)=>{
@@ -1059,7 +1060,7 @@ async function loadMarket(){
   if(window.__ocRefreshWalletAssets)window.__ocRefreshWalletAssets();
   const now=Date.now();try{localStorage.setItem("oc_market_cache",JSON.stringify({time:now,data:market}))}catch(e){}
   const liveIndicator=$("marketLiveIndicator");if(liveIndicator){liveIndicator.className="oc-chart-live is-live";liveIndicator.querySelector("span").textContent="LIVE";liveIndicator.title="Public market data refreshed successfully";}
-  $("connection").textContent="Live data";if($("apiStatus"))$("apiStatus").innerHTML='<span class="green">Connected · '+safe(provider)+'</span>';
+  $("connection").textContent="Live data";setHeaderMarketStatus("live");if($("apiStatus"))$("apiStatus").innerHTML='<span class="green">Connected · '+safe(provider)+'</span>';
   $("lastUpdate").textContent=new Date(now).toLocaleTimeString();$("marketHint").textContent="Prices updated from "+provider+". Public prices may be delayed.";
   renderMarket();renderHomeCoinResults();updateTradePreview();renderSignalScanner();
  };
@@ -1104,7 +1105,7 @@ async function loadMarket(){
  }catch(err){
   const hasCached=market.length>0||restoreCachedMarket();
   const liveIndicator=$("marketLiveIndicator");if(liveIndicator){liveIndicator.className="oc-chart-live "+(hasCached?"is-stale":"is-offline");liveIndicator.querySelector("span").textContent=hasCached?"STALE":"OFFLINE";liveIndicator.title=hasCached?"Showing saved prices; live refresh failed":"Live market data is unavailable";}
-  $("connection").textContent=hasCached?"Cached data":"Unavailable";
+  $("connection").textContent=hasCached?"Cached data":"Unavailable";setHeaderMarketStatus(hasCached?"stale":"offline");
   if($("apiStatus"))$("apiStatus").innerHTML=hasCached?'<span class="muted">Showing saved prices · refresh later</span>':'<span class="red">Market data unavailable</span>';
   if(!hasCached){
    const unavailable='<tr><td colspan="5" class="empty">Public market prices are temporarily unavailable. Tap Refresh to try again.</td></tr>';
