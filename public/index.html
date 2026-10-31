@@ -527,9 +527,9 @@ document.addEventListener('DOMContentLoaded',function(){
       <div id="withdrawCoinList" class="coin-picker" role="listbox" aria-label="Withdrawal coin list"></div>
       <div class="selected-coin"><span id="withdrawCoinIcon" class="coin-icon">₿</span><div><strong id="withdrawCoinName">Bitcoin (BTC)</strong><div class="muted tiny">Selected withdrawal asset</div></div></div>
       <label for="withdrawNetwork">Network</label><select id="withdrawNetwork" class="field"><option value="Bitcoin">Bitcoin</option><option value="Ethereum">Ethereum</option><option value="TRC20">TRON (TRC20)</option><option value="ERC20">Ethereum (ERC20)</option><option value="BEP20">BNB Smart Chain (BEP20)</option><option value="Solana">Solana</option><option value="Polygon">Polygon</option><option value="XRP">XRP Ledger</option></select>
-      <label for="withdrawAddress">Destination address</label><input id="withdrawAddress" class="field" placeholder="Paste your receiving address" autocomplete="off" spellcheck="false">
+      <label for="withdrawAddress">Destination address</label><input id="withdrawAddress" class="field" placeholder="Paste your receiving address" autocomplete="off" spellcheck="false" aria-describedby="withdrawAddressCheck"><div id="withdrawAddressCheck" class="muted tiny" aria-live="polite"></div>
       <label for="withdrawAmount">Amount</label><input id="withdrawAmount" class="field" type="number" min="0" step="any" placeholder="Enter amount">
-      <div id="withdrawNotice" class="notice">Check network.</div>
+      <div id="withdrawNotice" class="muted tiny" aria-live="polite"></div>
       <button class="primary full" id="withdrawSubmit" type="button" disabled>Continue</button>
       <p class="muted tiny">Verify the coin, network, and address.</p>
     </section>
@@ -2150,7 +2150,7 @@ const cfg={XAU:[['TradingOnly','Gold (XAU/USDT) · trading only']],XAUT:[['ERC20
 const times={Bitcoin:'10–60 min',Ethereum:'2–10 min',ERC20:'2–10 min',TRC20:'1–5 min',BEP20:'1–5 min',Solana:'Usually under 1 min',Polygon:'2–10 min',XRP:'1–5 min',Dogecoin:'10–60 min',Cardano:'5–20 min',Litecoin:'5–30 min',Avalanche:'Usually under 5 min',TON:'1–10 min',Stellar:'1–5 min',BitcoinCash:'10–60 min',Polkadot:'2–10 min',EthereumClassic:'5–30 min'};
 function sym(kind){return window.__ocSelectedCoins[kind]||$(kind+'CoinName')?.textContent.match(/\(([A-Z0-9]+)\)/)?.[1]||'BTC'}
 function box(kind,html){let id=kind+'NetworkEstimate',el=$(id);if(!el){el=document.createElement('div');el.id=id;el.className='network-estimate '+kind+'-estimate';$(kind+'Network')?.insertAdjacentElement('afterend',el)}el.innerHTML=html}
-function update(kind){const sel=$(kind+'Network');if(!sel)return;const s=sym(kind),nets=cfg[s]||[['Ethereum','Ethereum']];const old=sel.value;sel.innerHTML=nets.map(n=>'<option value="'+n[0]+'">'+n[1]+'</option>').join('');sel.value=nets.some(n=>n[0]===old)?old:nets[0][0];const label=nets.find(n=>n[0]===sel.value)?.[1]||sel.value;if(kind==='deposit'&&typeof window.refreshDepositAddress==='function')window.refreshDepositAddress();if(kind==='deposit'&&s==='XAU'){box(kind,'');return}if(kind==='withdraw'&&s==='XAU'){box(kind,'<strong>Gold (XAU/USDT) is trading-only</strong><div class="muted tiny">XAU/USDT is a market pair, not an on-chain withdrawal asset. Real withdrawals are not enabled.</div>');return}if(kind==='deposit')box(kind,'<strong>Check network</strong><div class="muted tiny">Send only '+s+' via '+label+'. Confirm the network and deposit address before transferring.</div>');else box(kind,'<strong>Withdrawal network & estimated completion</strong><div class="estimate-line"><span>Selected asset</span><span class="estimate-value">'+s+'</span></div><div class="estimate-line"><span>Auto-selected network</span><span class="estimate-value">'+label+'</span></div><div class="estimate-line"><span>Estimated processing time</span><span class="estimate-value">Up to 72 hours</span></div><div class="muted tiny">Estimate only; actual time may vary. Confirm the receiving wallet supports this network. Real withdrawals require a secure backend.</div>')}
+function update(kind){const sel=$(kind+'Network');if(!sel)return;const s=sym(kind),nets=cfg[s]||[['Ethereum','Ethereum']];const old=sel.value;sel.innerHTML=nets.map(n=>'<option value="'+n[0]+'">'+n[1]+'</option>').join('');sel.value=nets.some(n=>n[0]===old)?old:nets[0][0];const label=nets.find(n=>n[0]===sel.value)?.[1]||sel.value;if(kind==='deposit'&&typeof window.refreshDepositAddress==='function')window.refreshDepositAddress();if(kind==='deposit'&&s==='XAU'){box(kind,'');return}if(kind==='withdraw'&&s==='XAU'){box(kind,'<strong>Gold (XAU/USDT) is trading-only</strong><div class="muted tiny">XAU/USDT is a market pair, not an on-chain withdrawal asset. Real withdrawals are not enabled.</div>');return}if(kind==='deposit')box(kind,'<strong>Check network</strong><div class="muted tiny">Send only '+s+' via '+label+'. Confirm the network and deposit address before transferring.</div>');else box(kind,'<strong>Estimated processing time</strong><div class="estimate-line"><span>Up to 72 hours</span></div>')}
 function hook(){if(typeof window.updateSelectedCoin==='function'&&!window.updateSelectedCoin.__ocWrapped){const old=window.updateSelectedCoin;const wrap=function(kind){const r=old.apply(this,arguments);window.__ocSelectedCoins[kind]=($(kind+'CoinName')?.textContent.match(/\(([A-Z0-9]+)\)/)||[])[1]||'BTC';update(kind);return r};wrap.__ocWrapped=true;window.updateSelectedCoin=wrap}['deposit','withdraw'].forEach(k=>{const n=$(k+'Network');if(n&&!n.dataset.ocBound){n.addEventListener('change',()=>{if(k==='deposit'&&typeof window.refreshDepositAddress==='function')window.refreshDepositAddress();update(k)});n.dataset.ocBound='1'}});update('deposit');update('withdraw')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hook);else hook();
 })();
@@ -4457,3 +4457,60 @@ byId("ocVerifyDeleteCode")?.addEventListener("click",async()=>{
 });
 </script>
 
+
+<style id="oc-withdraw-address-check-style">
+#withdrawAddressCheck{min-height:18px;margin-top:5px}
+#withdrawAddressCheck[data-state="valid"]{color:var(--green)}
+#withdrawAddressCheck[data-state="invalid"]{color:var(--red)}
+#page-withdraw #withdrawNotice:empty{display:none}
+</style>
+<script id="oc-withdraw-address-validation">
+(function(){
+ const address=document.getElementById("withdrawAddress");
+ const network=document.getElementById("withdrawNetwork");
+ const coin=document.getElementById("withdrawCoinName");
+ const output=document.getElementById("withdrawAddressCheck");
+ if(!address||!network||!output)return;
+ const patterns={
+  Bitcoin:/^(bc1[ac-hj-np-z02-9]{11,71}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/i,
+  Ethereum:/^0x[a-fA-F0-9]{40}$/,
+  ERC20:/^0x[a-fA-F0-9]{40}$/,
+  BEP20:/^0x[a-fA-F0-9]{40}$/,
+  Polygon:/^0x[a-fA-F0-9]{40}$/,
+  TRC20:/^T[1-9A-HJ-NP-Za-km-z]{33}$/,
+  Solana:/^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
+  XRP:/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/,
+  Dogecoin:/^(D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{ ಪ್ರ?})$/,
+  Cardano:/^(addr1|addr_test1)[a-z0-9]{20,100}$/i,
+  Litecoin:/^(ltc1[ac-hj-np-z02-9]{11,71}|[LM3][a-km-zA-HJ-NP-Z1-9]{26,33})$/i,
+  Avalanche:/^0x[a-fA-F0-9]{40}$/,
+  TON:/^(EQ|UQ)[A-Za-z0-9_-]{46}$/,
+  Stellar:/^G[A-Z2-7]{55}$/,
+  BitcoinCash:/^(bitcoincash:)?(q|p)[a-z0-9]{41}$/i,
+  Polkadot:/^1[1-9A-HJ-NP-Za-km-z]{45,47}$/,
+  EthereumClassic:/^0x[a-fA-F0-9]{40}$/
+ };
+ patterns.Dogecoin=/^(D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{24,33})$/;
+ function check(){
+  const value=address.value.trim(),net=network.value;
+  output.dataset.state="";
+  if(!value){output.textContent="";return false}
+  const re=patterns[net];
+  if(!re){output.textContent="Address format check is not available for this network.";output.dataset.state="invalid";return false}
+  if(!re.test(value)){output.textContent="Address format does not match the selected network.";output.dataset.state="invalid";return false}
+  output.textContent="Address format looks valid for "+net+".";
+  output.dataset.state="valid";
+  return true;
+ }
+ address.addEventListener("input",check);
+ network.addEventListener("change",check);
+ const selectedCoin=document.getElementById("withdrawCoinList");
+ if(selectedCoin){selectedCoin.addEventListener("click",()=>setTimeout(check,0));}
+ if(typeof window.updateSelectedCoin==="function"&&!window.updateSelectedCoin.__ocAddressCheckWrapped){
+  const old=window.updateSelectedCoin;
+  const wrapped=function(kind){const result=old.apply(this,arguments);if(kind==="withdraw")setTimeout(check,0);return result};
+  wrapped.__ocAddressCheckWrapped=true;window.updateSelectedCoin=wrapped;
+ }
+ check();
+})();
+</script>
