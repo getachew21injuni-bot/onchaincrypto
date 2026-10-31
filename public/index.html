@@ -1226,7 +1226,7 @@ window.ocApplyAdminDemoBalance=function(amount){const n=Number(amount);if(!Numbe
 window.ocApplyAdminDemoAssets=function(balances){if(!balances||typeof balances!=="object"||Array.isArray(balances))return;let changed=false;for(const [rawSymbol,rawAmount] of Object.entries(balances)){const symbol=String(rawSymbol||"").toUpperCase();const amount=Number(rawAmount);if(!/^[A-Z0-9]{2,12}$/.test(symbol)||!Number.isFinite(amount)||amount<0)continue;state.holdings[symbol]=amount;changed=true;}if(changed){saveState();renderWallet();}};
 function renderWallet(){const value=Object.entries(state.holdings).reduce((sum,[sym,qty])=>sum+(Number(qty)||0)*(priceFor(sym)?.current_price||0),0);$("summaryBalance").textContent=usdtMoney(state.balance);$("walletBalance").textContent=usdtMoney(state.balance);$("holdingsValue").textContent=usdtMoney(value);const rows=Object.entries(state.holdings).filter(([sym,qty])=>Number(qty)>0.0000000001&&(! $("hideSmallBalances")?.checked||Number(qty)*(priceFor(sym)?.current_price||0)>=1));$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym,current_price:0};return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+' '+safe(sym.toUpperCase())+'</td><td>'+usdtMoney(Number(qty)*(c.current_price||0))+'</td></tr>'}).join(""):'<tr><td colspan="3" class="empty">No holdings yet. Place a paper trade to see assets.</td></tr>';renderActivityHistory();renderTradeHistory();renderPnl();renderWalletMarket()}
 document.addEventListener("change",e=>{if(e.target&&e.target.id==="hideSmallBalances")renderWallet();if(e.target&&e.target.id==="homeHistoryFilter")renderActivityHistory()});
-function showPage(page){if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
+function showPage(page){if(window.ocLoggedOut===true && !auth.currentUser && page!=="register")page="register";if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
 window.showPage = showPage;
 let timedPaper=null,timedTimer=null,pendingTimedDirection=null;
 function quickPlan(){const amount=Number($("timedStake")?.value||0)*Number(priceFor(window.__ocTradeFundingCoin||"USDT")?.current_price||1),isGold=($("tradeAsset")?.value||selected)==="XAU",minimum=isGold?500:100;const levels=[{rate:12,min:minimum,max:5000,duration:30,label:"Level 1"},{rate:15,min:5000,max:10000,duration:60,label:"Level 2"},{rate:18,min:10000,max:25000,duration:90,label:"Level 3"},{rate:21,min:25000,max:50000,duration:120,label:"Level 4"},{rate:24,min:50000,max:100000,duration:180,label:"Level 5"},{rate:27,min:100000,max:1000000,duration:360,label:"Level 6"}];return levels.find((p,i)=>amount>=p.min&&(amount<p.max||i===levels.length-1&&amount<=p.max))||levels[0]}
@@ -1869,7 +1869,9 @@ window.addEventListener("resize",()=>{if(!$("page-trade").classList.contains("hi
 async function ocPerformSignOut() {
   try {
     await signOut(auth);
+    window.ocLoggedOut = true;
     window.onchaincryptoCurrentUser = null;
+    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#register"); } catch (_) {}
     window.ocPendingPage = null;
     document.querySelectorAll("#ocProfileFirstName,#ocProfileLastName,#ocProfilePhone,#ocProfileCountry,#ocProfileDob,#ocProfileGender,#ocProfileAddress").forEach(el => { if (el) el.value = ""; });
     const nameField = document.getElementById("displayName");
@@ -1917,7 +1919,7 @@ onAuthStateChanged(auth, (user) => {
   if(stopAdminWalletSync){stopAdminWalletSync();stopAdminWalletSync=null;}
   const previousUser = window.onchaincryptoCurrentUser || null;
   window.onchaincryptoCurrentUser = user || null;
-  if (user) { void (async () => {
+  if (user) { window.ocLoggedOut = false; void (async () => {
     await loadSavedUserProfile(user);
     await syncAdminDemoBalance(user);
     try { await saveBasicUserProfile(user); }
@@ -1931,7 +1933,7 @@ onAuthStateChanged(auth, (user) => {
    if (user) { openHomeAfterAuth(); }
     else {
       window.ocPendingPage = null;
-      if (previousUser) window.showPage?.("register");
+      if (previousUser) { window.ocLoggedOut = true; try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#register"); } catch (_) {} window.showPage?.("register"); }
     }
   const status = document.getElementById("authStatus");
   const signOutBtn = document.getElementById("signOutBtn");
@@ -1956,10 +1958,23 @@ onAuthStateChanged(auth, (user) => {
     if (message && !message.textContent.trim()) message.textContent = "Your account is signed in. You can continue to the platform.";
   }
 });
-document.getElementById("settingsLogoutBtn")?.addEventListener("click", async () => {
-  if (!auth.currentUser) { alert("You are already signed out."); return; }
-  try { await signOut(auth); window.showPage?.("home"); }
-  catch (_) { alert("Could not log out. Please try again."); }
+
+// Prevent browser Back/Forward or back-forward-cache restoration from reopening a signed-out session.
+window.addEventListener("pageshow", async () => {
+  try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
+  if (!auth.currentUser && window.ocLoggedOut === true) {
+    document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-register"));
+    window.showPage?.("register");
+    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#register"); } catch (_) {}
+  }
+});
+window.addEventListener("popstate", async () => {
+  try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
+  if (!auth.currentUser && window.ocLoggedOut === true) {
+    document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-register"));
+    window.showPage?.("register");
+    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#register"); } catch (_) {}
+  }
 });
 // Account deletion is handled by the Gmail-confirmed request flow below.
 setTimeout(() => {
