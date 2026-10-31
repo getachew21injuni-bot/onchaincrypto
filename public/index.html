@@ -1865,9 +1865,25 @@ document.getElementById("verifyPhoneCodeBtn").addEventListener("click", async ()
 
 document.querySelectorAll("[data-level]").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll("[data-level]").forEach(b=>b.classList.toggle("active",b===btn));const level=btn.dataset.level;document.getElementById("levelMessage").textContent=({beginner:"Beginner view selected. Levels change display only.",intermediate:"Intermediate workspace selected. Use market movement and estimated P/L to review paper positions.",advanced:"Advanced workspace selected. Review more market details and estimated paper-position performance."})[level]}));
 window.addEventListener("resize",()=>{if(!$("page-trade").classList.contains("hidden"))renderPnl()});
-document.getElementById("signOutBtn").addEventListener("click", async () => {
-  try { await signOut(auth); msg("You have signed out."); }
-  catch (error) { msg(friendlyError(error)); }
+async function ocPerformSignOut() {
+  try {
+    await signOut(auth);
+    window.onchaincryptoCurrentUser = null;
+    window.ocPendingPage = null;
+    document.querySelectorAll("#ocProfileFirstName,#ocProfileLastName,#ocProfilePhone,#ocProfileCountry,#ocProfileDob,#ocProfileGender,#ocProfileAddress").forEach(el => { if (el) el.value = ""; });
+    const nameField = document.getElementById("displayName");
+    if (nameField) nameField.value = "";
+    if (typeof window.showPage === "function") window.showPage("register");
+    const status = document.getElementById("authStatus");
+    if (status) { status.textContent = "You are signed out. Sign in to access your own account."; status.classList.add("notice"); }
+    const message = document.getElementById("registerMessage");
+    if (message) message.textContent = "You have signed out successfully. Sign in again to access your account.";
+  } catch (error) { msg(friendlyError(error)); }
+}
+document.getElementById("signOutBtn")?.addEventListener("click", ocPerformSignOut);
+document.addEventListener("click", event => {
+  const button = event.target.closest("#profileLogoutBtn,#settingsLogoutBtn");
+  if (button) { event.preventDefault(); void ocPerformSignOut(); }
 });
 window.ocSubmitKycDetails=async function(data){
   if (typeof auth.authStateReady === "function") await auth.authStateReady();
@@ -1892,6 +1908,7 @@ let stopAdminWalletSync=null;
 function syncAdminDemoBalance(user){if(stopAdminWalletSync){stopAdminWalletSync();stopAdminWalletSync=null;}if(!user?.uid)return;try{stopAdminWalletSync=onSnapshot(doc(db,"users",user.uid),snap=>{if(!snap.exists())return;const data=snap.data()||{};if(typeof data.demoBalanceUSDT==="number"&&typeof window.ocApplyAdminDemoBalance==="function")window.ocApplyAdminDemoBalance(data.demoBalanceUSDT);if(data.demoAssetBalances&&typeof window.ocApplyAdminDemoAssets==="function")window.ocApplyAdminDemoAssets(data.demoAssetBalances);},error=>console.warn("Live demo wallet sync unavailable:",error?.code||error));}catch(error){console.warn("Demo wallet sync unavailable:",error?.code||error);}}
 onAuthStateChanged(auth, (user) => {
   if(stopAdminWalletSync){stopAdminWalletSync();stopAdminWalletSync=null;}
+  const previousUser = window.onchaincryptoCurrentUser || null;
   window.onchaincryptoCurrentUser = user || null;
   if (user) { void (async () => {
     await loadSavedUserProfile(user);
@@ -1905,7 +1922,10 @@ onAuthStateChanged(auth, (user) => {
   })(); }
    if (typeof window.ocRefreshReferral === "function") window.ocRefreshReferral(user || null);
    if (user) { openHomeAfterAuth(); }
-   else { window.ocPendingPage = null; }
+    else {
+      window.ocPendingPage = null;
+      if (previousUser) window.showPage?.("register");
+    }
   const status = document.getElementById("authStatus");
   const signOutBtn = document.getElementById("signOutBtn");
   const identity = user ? (user.displayName || user.email || user.phoneNumber || "Signed-in user") : "";
