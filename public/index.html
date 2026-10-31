@@ -4480,7 +4480,7 @@ byId("ocVerifyDeleteCode")?.addEventListener("click",async()=>{
   TRC20:/^T[1-9A-HJ-NP-Za-km-z]{33}$/,
   Solana:/^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
   XRP:/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/,
-  Dogecoin:/^(D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{ ಪ್ರ?})$/,
+  Dogecoin:/^(D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{24,33})$/,
   Cardano:/^(addr1|addr_test1)[a-z0-9]{20,100}$/i,
   Litecoin:/^(ltc1[ac-hj-np-z02-9]{11,71}|[LM3][a-km-zA-HJ-NP-Z1-9]{26,33})$/i,
   Avalanche:/^0x[a-fA-F0-9]{40}$/,
@@ -4490,7 +4490,7 @@ byId("ocVerifyDeleteCode")?.addEventListener("click",async()=>{
   Polkadot:/^1[1-9A-HJ-NP-Za-km-z]{45,47}$/,
   EthereumClassic:/^0x[a-fA-F0-9]{40}$/
  };
- patterns.Dogecoin=/^(D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{24,33})$/;
+ 
  function check(){
   const value=address.value.trim(),net=network.value;
   output.dataset.state="";
