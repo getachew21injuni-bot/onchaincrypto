@@ -3243,6 +3243,10 @@ td,th{overflow-wrap:anywhere}
     const code = signedIn ? referralCodeFor(user) : '';
     const link = new URL(window.location.pathname, window.location.origin);
     if (code) link.searchParams.set('ref',code);
+    // Shared invite links must open the authentication screen for new visitors.
+    // The existing auth deep-link handler opens the registration choice and
+    // the referral handler pre-fills the code without sending guests to Home.
+    link.searchParams.set('auth','register');
     const field = $('ocInviteLink');
     if (field) field.value = signedIn ? link.href : 'Sign in to create your personal invite link';
     panel.classList.toggle('hidden', !signedIn);
