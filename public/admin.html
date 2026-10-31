@@ -388,8 +388,28 @@ window.adminGetLiveCollection=async function(view){
  try{
   const snap=await getDocs(query(collection(db,collectionName),limit(100))),rows=snap.docs.map(d=>({id:d.id,...d.data()}));
   if(isUsers){
-   const heads=['Name','Email','Country','Firebase UID'],html=rows.map(r=>'<tr>'+[r.displayName||[r.firstName,r.lastName].filter(Boolean).join(' ')||'—',r.email||'—',r.country||'—',r.uid||r.id].map(v=>'<td>'+safeText(v)+'</td>').join('')+'</tr>').join('');
-   body.innerHTML='<div class="content-panel" style="margin:0"><h3>Live registered profiles</h3><p class="muted">Live Firestore records; maximum 100 shown.</p><strong>'+rows.length+' record(s) loaded</strong><div class="table-wrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(html||'<tr><td colspan="4">No records found.</td></tr>')+'</tbody></table></div></div>';return;
+   const heads=['Name','Email','Country','Firebase UID','Account status','Admin action'];
+   const html=rows.map(r=>{
+    const accountStatus=String(r.accountStatus||'active').toLowerCase()==='suspended'?'suspended':'active';
+    const actionLabel=accountStatus==='active'?'Suspend account':'Activate account';
+    const actionColor=accountStatus==='active'?'#8a3343':'#087b56';
+    return '<tr><td>'+safeText(r.displayName||[r.firstName,r.lastName].filter(Boolean).join(' ')||'—')+'</td><td>'+safeText(r.email||'—')+'</td><td>'+safeText(r.country||'—')+'</td><td>'+safeText(r.uid||r.id)+'</td><td><span style="display:inline-block;padding:4px 9px;border-radius:20px;background:'+(accountStatus==='active'?'#12372e':'#40242b')+';color:'+(accountStatus==='active'?'#6ee7b7':'#fda4af')+'">'+safeText(accountStatus.toUpperCase())+'</span></td><td><button type="button" class="oc-user-status-action icon-btn" data-uid="'+safeText(r.id)+'" data-status="'+accountStatus+'" style="background:'+actionColor+';border:0">'+actionLabel+'</button></td></tr>';
+   }).join('');
+   body.innerHTML='<div class="content-panel" style="margin:0"><h3>Live registered profiles</h3><p class="muted">Profiles read from Firestore; maximum 100 shown. New accounts default to ACTIVE until an admin changes their status.</p><strong>'+rows.length+' account(s) loaded</strong><div class="table-wrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(html||'<tr><td colspan="6">No registered accounts found.</td></tr>')+'</tbody></table></div><p id="ocUserAdminMessage" class="muted" role="status" aria-live="polite"></p></div>';
+   body.querySelectorAll('.oc-user-status-action').forEach(button=>button.addEventListener('click',async()=>{
+    const uid=button.dataset.uid,currentStatus=button.dataset.status,nextStatus=currentStatus==='active'?'suspended':'active',msg=byId('ocUserAdminMessage');
+    if(!uid||!['active','suspended'].includes(nextStatus))return;
+    if(!window.confirm((nextStatus==='suspended'?'Suspend':'Activate')+' this user account?'))return;
+    button.disabled=true;if(msg)msg.textContent='Saving account status…';
+    try{
+     const current=auth.currentUser;
+     if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('admin-session-not-authorized');
+     await setDoc(doc(db,'users',uid),{accountStatus:nextStatus,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:current.email},{merge:true});
+     if(msg)msg.textContent='Account status saved as '+nextStatus.toUpperCase()+'.';
+     await window.adminGetLiveCollection('Users');await window.adminRefreshDashboard();
+    }catch(error){button.disabled=false;if(msg)msg.textContent='Could not save account status ('+(error.code||error.message||'unknown error')+'). Check Firestore rules and administrator verification.';}
+   }));
+   return;
   }
   const pending=rows.filter(r=>(r.status||'pending')==='pending').length;
   const html=rows.map(r=>{
