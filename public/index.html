@@ -1911,7 +1911,8 @@ onAuthStateChanged(auth, (user) => {
   const homeGreeting = document.getElementById("homeGreeting");
   if (homeGreeting) {
     const savedName = user ? (user.displayName || user.email?.split("@")[0] || user.phoneNumber || "there") : "";
-    homeGreeting.textContent = user ? "Hi, " + savedName : "OnChainCrypto";
+    const firstName = savedName.trim().split(/\s+/)[0];
+    homeGreeting.textContent = user ? "Hi " + firstName : "OnChainCrypto";
   }
   if(stopAdminWalletSync){stopAdminWalletSync();stopAdminWalletSync=null;}
   const previousUser = window.onchaincryptoCurrentUser || null;
