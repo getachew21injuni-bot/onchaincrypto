@@ -131,7 +131,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 .oc-market-visual{min-height:345px;display:flex;align-items:center;justify-content:center;position:relative;padding:20px}
 .oc-chart-window{position:relative;z-index:2;width:100%;max-width:580px;padding:18px;border:1px solid #1b4263;border-radius:18px;background:linear-gradient(145deg,#081a2bf2,#06101ff5);box-shadow:0 22px 65px #0006,inset 0 1px #ffffff0b}
 .oc-chart-top,.oc-chart-price,.oc-chart-legend{display:flex;align-items:center;justify-content:space-between;gap:12px}.oc-chart-top strong{display:block;font-size:15px}.oc-chart-subtitle{display:block;color:var(--muted);font-size:11px;margin-top:2px}
-.oc-chart-live{display:flex;align-items:center;gap:6px;color:var(--green);font-size:10px;font-weight:800;letter-spacing:1px}.oc-chart-live i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px #16d9a0}
+.oc-chart-live{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:1px}.oc-chart-live i{width:6px;height:6px;flex:0 0 6px;border-radius:50%;background:#778397;box-shadow:none}.oc-chart-live.is-live{color:var(--green)}.oc-chart-live.is-live i{background:#16d9a0;box-shadow:0 0 7px #16d9a080}.oc-chart-live.is-stale{color:var(--muted)}.oc-chart-live.is-stale i{background:#f0b34a;box-shadow:none}.oc-chart-live.is-offline{color:#ff788b}.oc-chart-live.is-offline i{background:#ff5573;box-shadow:none}
 .oc-chart-price{justify-content:flex-start;margin-top:16px}.oc-chart-price strong{font-size:clamp(19px,2.4vw,27px);letter-spacing:-.5px}.oc-chart-price span{font-size:12px;font-weight:800}
 .oc-candlestick-chart{height:190px;position:relative;overflow:hidden;margin-top:10px;background:repeating-linear-gradient(to bottom,transparent 0,transparent 46px,#1b426355 47px),repeating-linear-gradient(to right,transparent 0,transparent 54px,#1b426322 55px);border-bottom:1px solid #1b4263}
 .oc-candles{position:absolute;inset:0}.oc-candle{position:absolute;left:var(--left);bottom:var(--bottom);height:var(--body);width:4.4%;border-radius:2px}
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
   <div class="oc-hero-art oc-market-visual" aria-label="Illustrative cryptocurrency candlestick chart">
    <div class="oc-chart-window">
-    <div class="oc-chart-top"><div><strong>BTC / USDT</strong><span class="oc-chart-subtitle">Market overview</span></div><span class="oc-chart-live"><i></i> MARKET</span></div>
+    <div class="oc-chart-top"><div><strong>BTC / USDT</strong><span class="oc-chart-subtitle">Market overview</span></div><span class="oc-chart-live" id="marketLiveIndicator" aria-live="polite" title="Market feed status"><i></i><span>CHECKING</span></span></div>
     <div class="oc-chart-price"><strong>$67,428.50</strong><span class="green">+2.84%</span></div>
     <div class="oc-candlestick-chart" aria-hidden="true">
      <div class="oc-chart-gridline"></div><div class="oc-chart-gridline"></div><div class="oc-chart-gridline"></div>
@@ -1058,6 +1058,7 @@ async function loadMarket(){
   market=data.filter(c=>Number(c.current_price)>0);window.market=market;
   if(window.__ocRefreshWalletAssets)window.__ocRefreshWalletAssets();
   const now=Date.now();try{localStorage.setItem("oc_market_cache",JSON.stringify({time:now,data:market}))}catch(e){}
+  const liveIndicator=$("marketLiveIndicator");if(liveIndicator){liveIndicator.className="oc-chart-live is-live";liveIndicator.querySelector("span").textContent="LIVE";liveIndicator.title="Public market data refreshed successfully";}
   $("connection").textContent="Live data";if($("apiStatus"))$("apiStatus").innerHTML='<span class="green">Connected · '+safe(provider)+'</span>';
   $("lastUpdate").textContent=new Date(now).toLocaleTimeString();$("marketHint").textContent="Prices updated from "+provider+". Public prices may be delayed.";
   renderMarket();renderHomeCoinResults();updateTradePreview();renderSignalScanner();
@@ -1102,6 +1103,7 @@ async function loadMarket(){
   }).catch(()=>{});
  }catch(err){
   const hasCached=market.length>0||restoreCachedMarket();
+  const liveIndicator=$("marketLiveIndicator");if(liveIndicator){liveIndicator.className="oc-chart-live "+(hasCached?"is-stale":"is-offline");liveIndicator.querySelector("span").textContent=hasCached?"STALE":"OFFLINE";liveIndicator.title=hasCached?"Showing saved prices; live refresh failed":"Live market data is unavailable";}
   $("connection").textContent=hasCached?"Cached data":"Unavailable";
   if($("apiStatus"))$("apiStatus").innerHTML=hasCached?'<span class="muted">Showing saved prices · refresh later</span>':'<span class="red">Market data unavailable</span>';
   if(!hasCached){
