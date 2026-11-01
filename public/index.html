@@ -1460,7 +1460,7 @@ async function saveBasicUserProfile(user) {
     displayName: names,
     firstName: existingProfile.firstName || localProfile.firstName || names.split(" ")[0] || "",
     lastName: existingProfile.lastName || localProfile.lastName || names.split(" ").slice(1).join(" ") || "",
-    referralCode: await referralCodeFor(user),
+    referralCode: await window.ocReferralCodeFor(user),
     referredByCode: String(existingProfile.referredByCode || existingProfile.referralCode || localProfile.referredByCode || localProfile.referralCode || "").trim().replace(/[^a-z0-9_-]/gi, "").slice(0, 40),
     createdAt: existingProfile.createdAt || localProfile.createdAt || user.metadata?.creationTime || new Date().toISOString(),
     updatedAt: serverTimestamp()
@@ -3352,6 +3352,7 @@ td,th{overflow-wrap:anywhere}
       if (field) field.value = 'Your invite link could not be prepared. Please refresh and try again.';
     });
   }
+  window.ocReferralCodeFor = referralCodeFor;
   window.ocRefreshReferral = buildInvitePanel;
   const originalShowPage = window.showPage;
   if (typeof originalShowPage === 'function') {
