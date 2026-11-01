@@ -2681,6 +2681,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  function draw(){
   const host=document.getElementById('homeActivePairs');
   if(!host||!Array.isArray(window.market)||!window.market.length)return;
+  // Remove the legacy table toggle left behind when the old table is replaced by pair cards.
+  document.getElementById('ocPairsMoreLess')?.remove();
+  host.parentElement?.querySelectorAll(':scope > .oc-listing-more').forEach(button=>button.remove());
   const allPairs=window.market.slice(0,8);
   const list=homePairsExpanded?allPairs:allPairs.slice(0,4);
   const fmt=n=>{n=Number(n)||0;return n>=1? n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4}):n.toLocaleString(undefined,{maximumSignificantDigits:6});};
