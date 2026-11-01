@@ -288,7 +288,7 @@ export const adminAdjustRealWallet = onCall(
         throw new HttpsError("not-found", "Customer account was not found.");
       }
       const wallet = walletSnap.exists ? walletSnap.data() ?? {} : {};
-      const balances = wallet.balances && typeof wallet.balances === "object"
+      const balances: Record<string, number> = wallet.balances && typeof wallet.balances === "object"
         ? { ...wallet.balances } as Record<string, number>
         : {};
       const current = balances[asset] ?? 0;
