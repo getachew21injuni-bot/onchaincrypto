@@ -3364,6 +3364,64 @@ body.oc-logged-out.oc-register-mode #authSwitchText{display:none!important}
   },true);
 })();
 </script>
+
+<!-- OnChainCrypto progressive listing system -->
+<style id="oc-progressive-listing-style">
+.oc-listing-more{display:flex;justify-content:center;width:100%;margin:12px auto 16px;padding:9px 16px;border:1px solid var(--line,#1b4263);border-radius:9px;background:var(--panel2,#102641);color:var(--text,#eaf6ff);font-weight:700}
+.oc-listing-more:hover{border-color:var(--yellow,#20d9ff);color:var(--yellow,#20d9ff)}
+.oc-listing-hidden{display:none!important}
+</style>
+<script id="oc-progressive-listing-system">
+(function(){
+  const LIMIT=5, BUTTON='oc-listing-more';
+  const groups=[
+    {selector:'tbody',item:'tr'},
+    {selector:'.list-row',item:'.list-row'},
+    {selector:'.mini-row',item:'.mini-row'},
+    {selector:'.faq-item',item:'.faq-item'},
+    {selector:'.resource-card',item:'.resource-card'}
+  ];
+  function applyGroup(container,itemSelector){
+    if(!container||container.dataset.ocListingReady==='1')return;
+    const items=Array.from(container.querySelectorAll(':scope > '+itemSelector));
+    if(items.length<=LIMIT)return;
+    container.dataset.ocListingReady='1';
+    const button=document.createElement('button');
+    button.type='button';button.className=BUTTON;button.textContent='See more';
+    button.setAttribute('aria-expanded','false');
+    const update=expanded=>{
+      items.forEach((item,index)=>item.classList.toggle('oc-listing-hidden',!expanded&&index>=LIMIT));
+      button.textContent=expanded?'See less':'See more';
+      button.setAttribute('aria-expanded',String(expanded));
+    };
+    update(false);
+    button.addEventListener('click',()=>update(button.getAttribute('aria-expanded')!=='true'));
+    container.insertAdjacentElement('afterend',button);
+  }
+  function scan(){
+    groups.forEach(group=>{
+      document.querySelectorAll(group.selector).forEach(item=>{
+        if(group.selector==='tbody')applyGroup(item,group.item);
+        else applyGroup(item.parentElement,group.item);
+      });
+    });
+  }
+  let queued=false;
+  function schedule(){
+    if(queued)return;queued=true;
+    requestAnimationFrame(()=>{queued=false;scan();});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});
+  else schedule();
+  const observer=new MutationObserver(schedule);
+  observer.observe(document.body,{childList:true,subtree:true});
+  document.addEventListener('click',event=>{
+    const button=event.target.closest('.'+BUTTON);
+    if(button)event.stopPropagation();
+  },true);
+})();
+</script>
+
 </body>
 </html>
 
