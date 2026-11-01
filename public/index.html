@@ -1442,7 +1442,7 @@ const {
   sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider,
   signInWithPopup, onAuthStateChanged, signOut, RecaptchaVerifier,
   signInWithPhoneNumber, updateProfile, reload,
-  browserLocalPersistence, setPersistence
+  browserLocalPersistence, indexedDBLocalPersistence, setPersistence
 } = firebaseAuthSdk;
 window.ocFirebaseModuleStarted = true;
 
@@ -1457,13 +1457,24 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-// Keep the Firebase session on this browser/device across reloads and browser restarts.
-// Only the explicit Logout action below calls signOut(auth).
-try {
-  await setPersistence(auth, browserLocalPersistence);
+// Persist every successful sign-in on this browser/device until the user explicitly logs out.
+// Prefer IndexedDB (Firebase's durable browser storage), with localStorage as a compatibility fallback.
+window.ocAuthReady = (async () => {
+  try {
+    await setPersistence(auth, indexedDBLocalPersistence);
+  } catch (indexedDbError) {
+    console.warn("IndexedDB auth persistence unavailable; trying browser local storage:", indexedDbError?.code || indexedDbError);
+    await setPersistence(auth, browserLocalPersistence);
+  }
+  // Do not expose the app as signed out until Firebase has restored the saved session.
   if (typeof auth.authStateReady === "function") await auth.authStateReady();
+  return auth.currentUser || null;
+})();
+try {
+  await window.ocAuthReady;
 } catch (error) {
-  console.error("Could not establish persistent sign-in on this device:", error?.code || error, error?.message || "");
+  console.error("Persistent sign-in could not be initialized:", error?.code || error, error?.message || "");
+  throw error;
 }
 window.ocFirebaseAuth = auth;
 
