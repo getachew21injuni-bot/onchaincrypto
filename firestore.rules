@@ -170,6 +170,21 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Each customer's real wallet is private. Clients can read only their own
+    // wallet; only a trusted server using the Admin SDK may create or credit it.
+    match /realWallets/{uid} {
+      allow get: if owns(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    // Verified deposit ledger entries are private to their owner and immutable
+    // from clients. Trusted verification backend writes these records.
+    match /depositLedger/{entryId} {
+      allow get, list: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create, update, delete: if false;
+    }
+
     // All other collections remain closed by default.
     match /{document=**} {
       allow read, write: if false;

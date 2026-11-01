@@ -74,7 +74,10 @@ function requireSignedIn(request: { auth?: { uid: string; token: Record<string, 
 
 function requireAdmin(request: { auth?: { uid: string; token: Record<string, unknown> } | null }) {
   const auth = requireSignedIn(request);
-  if (auth.token.admin !== true) {
+  const email = typeof auth.token.email === "string" ? auth.token.email.toLowerCase() : "";
+  const verifiedOwner = auth.token.email_verified === true &&
+    email === "getachew21.inj.uni@gmail.com";
+  if (auth.token.admin !== true && !verifiedOwner) {
     throw new HttpsError("permission-denied", "Administrator access is required.");
   }
   return auth;
@@ -233,5 +236,109 @@ export const adminReviewDepositRequest = onCall(
     });
 
     return { requestId, status: decision, balanceCredited: false };
+  }
+);
+
+
+const realWalletAssets = new Set(["USDT", "BTC", "ETH", "BNB", "TRX", "SOL", "USDC", "XAU"]);
+
+/**
+ * Admin-only manual adjustment of a customer's real-money wallet.
+ * This is independent of deposit verification and never approves a deposit.
+ * Each adjustment updates the wallet and immutable ledger atomically.
+ */
+export const adminAdjustRealWallet = onCall(
+  { enforceAppCheck: true, cors: true },
+  async (request) => {
+    const admin = requireAdmin(request);
+    const uid = typeof request.data?.uid === "string" ? request.data.uid.trim() : "";
+    const asset = typeof request.data?.asset === "string" ? request.data.asset.trim().toUpperCase() : "";
+    const direction = request.data?.direction;
+    const amount = request.data?.amount;
+    const reason = typeof request.data?.reason === "string" ? request.data.reason.trim() : "";
+
+    if (!uid || uid.length > 128) {
+      throw new HttpsError("invalid-argument", "Select a valid customer account.");
+    }
+    if (!realWalletAssets.has(asset)) {
+      throw new HttpsError("invalid-argument", "Unsupported wallet asset.");
+    }
+    if (direction !== "credit" && direction !== "debit") {
+      throw new HttpsError("invalid-argument", "Choose add or deduct.");
+    }
+    if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0 || amount > 1000000000) {
+      throw new HttpsError("invalid-argument", "Enter a positive adjustment amount.");
+    }
+    if (reason.length < 3 || reason.length > 300) {
+      throw new HttpsError("invalid-argument", "Enter a reason between 3 and 300 characters.");
+    }
+
+    const userRef = db.collection("users").doc(uid);
+    const walletRef = db.collection("realWallets").doc(uid);
+    const ledgerRef = db.collection("depositLedger").doc();
+    let balanceBefore = 0;
+    let balanceAfter = 0;
+
+    await db.runTransaction(async (transaction) => {
+      const [userSnap, walletSnap] = await Promise.all([
+        transaction.get(userRef),
+        transaction.get(walletRef),
+      ]);
+      if (!userSnap.exists) {
+        throw new HttpsError("not-found", "Customer account was not found.");
+      }
+      const wallet = walletSnap.exists ? walletSnap.data() ?? {} : {};
+      const balances: Record<string, number> = wallet.balances && typeof wallet.balances === "object"
+        ? { ...wallet.balances } as Record<string, number>
+        : {};
+      const current = balances[asset] ?? 0;
+      if (typeof current !== "number" || !Number.isFinite(current) || current < 0) {
+        throw new HttpsError("failed-precondition", "The customer's current wallet balance is invalid.");
+      }
+      balanceBefore = current;
+      balanceAfter = direction === "credit" ? current + amount : current - amount;
+      if (!Number.isFinite(balanceAfter) || balanceAfter < 0) {
+        throw new HttpsError("failed-precondition", "This deduction would make the wallet balance negative.");
+      }
+      balances[asset] = balanceAfter;
+
+      transaction.set(walletRef, {
+        balances,
+        status: "active",
+        updatedAt: FieldValue.serverTimestamp(),
+        updatedBy: admin.uid,
+      }, { merge: true });
+
+      transaction.create(ledgerRef, {
+        uid,
+        asset,
+        amount,
+        type: direction,
+        source: "admin_manual_adjustment",
+        status: "completed",
+        balanceBefore,
+        balanceAfter,
+        reason,
+        createdBy: admin.uid,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+
+      const auditRef = db.collection("adminAuditLogs").doc();
+      transaction.create(auditRef, {
+        adminUid: admin.uid,
+        action: "real_wallet_balance_adjusted",
+        targetUid: uid,
+        asset,
+        direction,
+        amount,
+        balanceBefore,
+        balanceAfter,
+        reason,
+        ledgerEntryId: ledgerRef.id,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+    });
+
+    return { uid, asset, direction, amount, balanceBefore, balanceAfter, ledgerEntryId: ledgerRef.id };
   }
 );

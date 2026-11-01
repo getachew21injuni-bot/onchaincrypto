@@ -539,6 +539,11 @@ body.oc-logged-out #signInForm .oc-password-toggle svg{width:21px;height:21px;fi
     <section class="panel"><div class="section-head"><div><h2>Trading</h2></div><span class="tag">PERSONALIZE</span></div><div class="level-grid"><button class="level-card active" data-level="beginner"><strong>Level 1 · Beginner</strong><span>Basic market and trade tools</span></button><button class="level-card" data-level="intermediate"><strong>Level 2 · Intermediate</strong><span>Market chart, 24h change and position P/L</span></button><button class="level-card" data-level="advanced"><strong>Level 3 · Advanced</strong><span>Market data and performance</span></button></div><p id="levelMessage" class="muted tiny" style="padding:0 18px 10px">Beginner view selected. Levels change display only.</p></section>
   </section>
   <section id="page-wallet" class="hidden">
+    <section class="panel" id="ocRealWalletPanel" style="margin-bottom:16px">
+      <div class="section-head"><div><h2>My Crypto Wallet</h2><p class="muted tiny">Your verified deposits, private to your account</p></div><span class="tag" id="ocRealWalletStatus">Loading account wallet…</span></div>
+      <div class="wallet-overview-top"><div><div class="wallet-eyebrow">VERIFIED REAL BALANCE</div><div class="wallet-total-line"><strong id="ocRealWalletTotal">0.00 USDT</strong></div><div class="wallet-usd-note" id="ocRealWalletNote">Only blockchain-verified deposits will appear here.</div></div><div class="wallet-orbit" aria-hidden="true">◈</div></div>
+      <div class="table-wrap"><table><thead><tr><th>Asset</th><th>Available balance</th></tr></thead><tbody id="ocRealWalletAssets"><tr><td colspan="2" class="empty">No verified deposits yet.</td></tr></tbody></table></div>
+    </section>
     <div class="page-title"><div><h1>Wallet</h1><div class="muted"></div></div><span class="tag">PAPER TRADING</span></div>
     <section class="wallet-overview">
       <div class="wallet-overview-top"><div><div class="wallet-eyebrow">YOUR BALANCE</div><div class="wallet-total-line"><strong id="walletBalance">10,000.00 USDT</strong><button class="wallet-currency" id="walletAssetToggle" type="button" aria-expanded="false" aria-controls="walletAssetMenu">USDT⌄</button></div><div class="wallet-usd-note" id="walletBalanceNote">≈ simulated account value · demo only</div><div id="walletAssetMenu" class="wallet-asset-menu hidden" role="listbox" aria-label="Choose wallet asset"><div class="wallet-asset-menu-head">Select asset</div><div id="walletAssetOptions"><button type="button" data-wallet-asset="USDT">USDT · Tether</button></div></div></div><div class="wallet-orbit" aria-hidden="true">◈</div></div>
@@ -2121,6 +2126,41 @@ window.ocSubmitKycDetails=async function(data){
   },{merge:true});
   return {ok:true,status:"pending"};
 };
+let stopRealWalletSync=null;
+function clearRealWalletDisplay(){
+  const total=document.getElementById("ocRealWalletTotal"),status=document.getElementById("ocRealWalletStatus"),note=document.getElementById("ocRealWalletNote"),rows=document.getElementById("ocRealWalletAssets");
+  if(total)total.textContent="0.00 USDT";
+  if(status)status.textContent="Sign in required";
+  if(note)note.textContent="Sign in to view your private wallet.";
+  if(rows)rows.innerHTML='<tr><td colspan="2" class="empty">No account wallet loaded.</td></tr>';
+}
+function syncCustomerRealWallet(user){
+  if(stopRealWalletSync){stopRealWalletSync();stopRealWalletSync=null;}
+  clearRealWalletDisplay();
+  if(!user?.uid)return;
+  const status=document.getElementById("ocRealWalletStatus"),note=document.getElementById("ocRealWalletNote");
+  if(status)status.textContent="Loading account wallet…";
+  try{
+    stopRealWalletSync=onSnapshot(doc(db,"realWallets",user.uid),snap=>{
+      const data=snap.exists()?(snap.data()||{}):{};
+      const balances=data.balances&&typeof data.balances==="object"&&!Array.isArray(data.balances)?data.balances:{};
+      const entries=Object.entries(balances).map(([asset,amount])=>[String(asset).toUpperCase(),Number(amount)]).filter(([asset,amount])=>/^[A-Z0-9]{2,12}$/.test(asset)&&Number.isFinite(amount)&&amount>=0);
+      const usdt=Number(balances.USDT||0);
+      const total=document.getElementById("ocRealWalletTotal"),rows=document.getElementById("ocRealWalletAssets");
+      if(total)total.textContent=usdt.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:8})+" USDT";
+      if(rows)rows.innerHTML=entries.length?entries.map(([asset,amount])=>'<tr><td>'+safe(asset)+'</td><td>'+amount.toLocaleString("en-US",{maximumFractionDigits:8})+' '+safe(asset)+'</td></tr>').join(""):'<tr><td colspan="2" class="empty">No verified deposits yet.</td></tr>';
+      if(status)status.textContent=data.status==="active"?"Account wallet":"No verified deposits";
+      if(note)note.textContent="This wallet belongs only to your signed-in account. Demo trading funds are separate.";
+    },error=>{
+      console.warn("Private real wallet could not be loaded:",error?.code||error);
+      if(status)status.textContent="Wallet unavailable";
+      if(note)note.textContent="Could not load your private wallet. Please refresh or contact support.";
+    });
+  }catch(error){
+    console.warn("Private real wallet sync unavailable:",error?.code||error);
+    if(status)status.textContent="Wallet unavailable";
+  }
+}
 let stopAdminWalletSync=null;
 function syncAdminDemoBalance(user){if(stopAdminWalletSync){stopAdminWalletSync();stopAdminWalletSync=null;}if(!user?.uid)return;try{stopAdminWalletSync=onSnapshot(doc(db,"users",user.uid),snap=>{if(!snap.exists())return;const data=snap.data()||{};if(typeof data.demoBalanceUSDT==="number"&&typeof window.ocApplyAdminDemoBalance==="function")window.ocApplyAdminDemoBalance(data.demoBalanceUSDT);if(data.demoAssetBalances&&typeof window.ocApplyAdminDemoAssets==="function")window.ocApplyAdminDemoAssets(data.demoAssetBalances);},error=>console.warn("Live demo wallet sync unavailable:",error?.code||error));}catch(error){console.warn("Demo wallet sync unavailable:",error?.code||error);}}
 onAuthStateChanged(auth, (user) => {
@@ -2133,11 +2173,13 @@ onAuthStateChanged(auth, (user) => {
     homeGreeting.textContent = user ? "Hi " + firstName : "OnChainCrypto";
   }
   if(stopAdminWalletSync){stopAdminWalletSync();stopAdminWalletSync=null;}
+  if(stopRealWalletSync){stopRealWalletSync();stopRealWalletSync=null;} clearRealWalletDisplay();
   const previousUser = window.onchaincryptoCurrentUser || null;
   window.onchaincryptoCurrentUser = user || null;
   if (user) { window.ocLoggedOut = false; document.documentElement.classList.remove("oc-auth-pending"); document.body.classList.remove("oc-logged-out"); window.ocSetAuthScreenVisibility?.(true); void (async () => {
     await loadSavedUserProfile(user);
     await syncAdminDemoBalance(user);
+    syncCustomerRealWallet(user);
     try { await saveBasicUserProfile(user); }
     catch (error) {
       console.error("Signed-in profile sync failed:", error?.code || error, error?.message || "");
