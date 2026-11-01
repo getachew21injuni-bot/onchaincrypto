@@ -1959,30 +1959,27 @@ async function ocPerformSignOut() {
   const button = document.getElementById("ocMenuLogoutBtn") || document.getElementById("signOutBtn");
   if (button) { button.disabled = true; button.setAttribute("aria-busy", "true"); }
   try {
-    // Always ask Firebase to clear this device's persisted authentication session.
-    // Do not treat hiding the menu or changing pages as a successful sign-out.
+    // Logout has one account-level responsibility: end this device's Firebase session.
+    // It must not edit, clear, or delete the user's profile, balances, referrals, or records.
     await signOut(auth);
-    if (auth.currentUser !== null) {
-      throw new Error("Firebase still reports an authenticated user after signOut.");
-    }
-    window.ocLoggedOut = true;
-    window.onchaincryptoCurrentUser = null;
-    window.ocPendingPage = null;
-    document.body.classList.add("oc-logged-out");
-    document.body.classList.remove("oc-register-mode");
-    const password = document.getElementById("signInPassword");
-    if (password) password.value = "";
-    document.querySelectorAll("#ocProfileFirstName,#ocProfileLastName,#ocProfilePhone,#ocProfileCountry,#ocProfileDob,#ocProfileGender,#ocProfileAddress").forEach(el => { el.value = ""; });
-    // Collapse the menu only after Firebase confirms sign-out.
+    if (auth.currentUser !== null) throw new Error("Firebase session is still active.");
+
+    // Close the menu as presentation only; the auth-state listener handles signed-out UI.
     const menu = document.getElementById("moreMenu");
     menu?.classList.add("hidden");
     menu?.setAttribute("aria-hidden", "true");
     menu?.style.setProperty("display", "none", "important");
     menu?.style.setProperty("pointer-events", "none", "important");
     document.getElementById("moreMenuBtn")?.setAttribute("aria-expanded", "false");
-    // A full navigation discards any stale in-memory page state. Firebase's
-    // persisted session is now signed out, so the fresh page must show Sign In.
-    location.replace(location.pathname + location.search + "#login");
+
+    window.ocLoggedOut = true;
+    window.onchaincryptoCurrentUser = null;
+    window.ocPendingPage = null;
+    document.body.classList.add("oc-logged-out");
+    document.body.classList.remove("oc-register-mode");
+    window.showPage?.("register");
+    window.ocForceSignInScreen?.();
+    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#login"); } catch (_) {}
   } catch (error) {
     console.error("OnChainCrypto sign-out failed:", error?.code || error, error?.message || "");
     const status = document.getElementById("authStatus");
@@ -1997,8 +1994,7 @@ async function ocPerformSignOut() {
   }
 }
 window.ocPerformSignOut = ocPerformSignOut;
-// Handle Logout during document capture, before generic menu-collapse handlers.
-// This remains reliable even if the original Settings button was moved or rebuilt.
+// Capture the Logout action before generic menu handlers can intercept it.
 document.addEventListener("click", function(event) {
   const target = event.target instanceof Element ? event.target : null;
   const logout = target?.closest("#ocMenuLogoutBtn,#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn");
@@ -3200,12 +3196,6 @@ window.addEventListener("load",function(){
    logout.innerHTML='<span class="menu-symbol" style="color:#ff9292;background:#402424">↪</span><span><strong style="color:#ff6b75">Logout</strong></span>';
    logout.setAttribute("role","menuitem");
    menu.appendChild(logout);
-   // Bind the visible menu action directly: no menu-navigation handler can swallow it.
-   logout.addEventListener("click",function(event){
-     event.preventDefault();
-     event.stopPropagation();
-     if(typeof window.ocPerformSignOut==="function") void window.ocPerformSignOut();
-   });
    row?.remove();
  }
  // Profile contains personal/account profile information only; remove any legacy
