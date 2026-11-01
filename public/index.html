@@ -3224,15 +3224,26 @@ body.oc-logged-out #authSwitchText{display:block!important;visibility:visible!im
 body.oc-logged-out #authSwitchText button{display:inline!important;color:#20d9ff!important;background:transparent!important;font-weight:800}
 body.oc-logged-out #signInForm{display:block!important}
 body.oc-logged-out #registerForm{display:none!important}
+body.oc-logged-out.oc-register-mode #registerForm{display:block!important}
+body.oc-logged-out.oc-register-mode #signInForm{display:none!important}
+body.oc-logged-out.oc-register-mode #authSwitchText{display:none!important}
 </style>
 <script id="oc-login-first-logout-guard">
 (function(){
+  document.addEventListener("click",function(event){
+    const target=event.target instanceof Element?event.target:null;
+    if(!target)return;
+    if(target.closest("#showRegisterBtn"))document.body.classList.add("oc-register-mode");
+    if(target.closest("#registerLoginBtn"))document.body.classList.remove("oc-register-mode");
+  },true);
   function enforceLoginOnly(){
     if(window.ocLoggedOut!==true||window.onchaincryptoCurrentUser)return;
-    document.getElementById("authChoicePanel")?.classList.add("hidden");
-    document.getElementById("registerForm")?.classList.add("hidden");
-    document.getElementById("signInForm")?.classList.remove("hidden");
-    document.getElementById("authSwitchText")?.classList.remove("hidden");
+    if(!document.body.classList.contains("oc-register-mode")){
+      document.getElementById("authChoicePanel")?.classList.add("hidden");
+      document.getElementById("registerForm")?.classList.add("hidden");
+      document.getElementById("signInForm")?.classList.remove("hidden");
+      document.getElementById("authSwitchText")?.classList.remove("hidden");
+    }
   }
   document.addEventListener("click",function(event){
     if(window.ocLoggedOut!==true||window.onchaincryptoCurrentUser)return;
