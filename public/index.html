@@ -2569,17 +2569,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
    if(btn.textContent!==label)btn.textContent=label;
  }
  function setupQuick(){
+   // The home page has a dedicated More + / Less − control.
+   // Remove the older generic toggle to prevent a duplicate button.
+   const legacy=document.getElementById('ocQuickMoreLess');
+   if(legacy)legacy.remove();
    document.querySelectorAll(HOME+' .quick-action-grid').forEach((grid)=>{
-     if(!grid.closest('section') || grid.closest('#marketQuickActionsPanel')) return;
-     const cards=grid.querySelectorAll(':scope > .quick-action');
-     if(cards.length<=4){const old=document.getElementById('ocQuickMoreLess');if(old)old.remove();return;}
-     const collapsed=grid.classList.contains('oc-collapsed');
-     grid.classList.toggle('oc-collapsed',collapsed);
-     addToggle(grid,'ocQuickMoreLess',collapsed?'More +':'Less −',()=>{
-       const isCollapsed=grid.classList.toggle('oc-collapsed');
-       const button=document.querySelector('#ocQuickMoreLess button');
-       if(button){const label=isCollapsed?'More +':'Less −';if(button.textContent!==label)button.textContent=label;}
-     });
+     if(grid.closest('#marketQuickActionsPanel')) return;
+     grid.classList.remove('oc-collapsed');
    });
  }
  function setupPairs(){
