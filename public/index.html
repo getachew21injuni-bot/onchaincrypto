@@ -3235,16 +3235,6 @@ body.oc-logged-out #registerForm{display:none!important}
     document.getElementById("authSwitchText")?.classList.remove("hidden");
   }
   document.addEventListener("click",function(event){
-    const target=event.target instanceof Element?event.target:null;
-    if(!target)return;
-    const logout=target.closest("#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn,.more-menu-logout");
-    if(logout){
-      event.preventDefault();
-      event.stopPropagation();
-      if(typeof window.ocPerformSignOut==="function")void window.ocPerformSignOut();
-    }
-  },true);
-  document.addEventListener("click",function(event){
     if(window.ocLoggedOut!==true||window.onchaincryptoCurrentUser)return;
     const target=event.target instanceof Element?event.target:null;
     if(target?.closest("#showRegisterBtn"))return;
