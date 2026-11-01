@@ -3293,15 +3293,15 @@ body.oc-logged-out.oc-register-mode #authSwitchText{display:none!important}
     if(!button)return;
     event.preventDefault();
     event.stopImmediatePropagation();
+    if(typeof window.ocPerformSignOut==="function"){
+      await window.ocPerformSignOut();
+      return;
+    }
     if(window.ocLogoutInProgress)return;
     window.ocLogoutInProgress=true;
     button.disabled=true;
     button.setAttribute("aria-busy","true");
     try{
-      if(typeof window.ocPerformSignOut==="function"){
-        await window.ocPerformSignOut();
-        return;
-      }
       // Fallback for a delayed/failed Firebase module: initialize the same app
       // and sign out this browser session without touching any user documents.
       const load=async(primary,fallback)=>{try{return await import(primary)}catch(_){return await import(fallback)}};
