@@ -1496,7 +1496,14 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase Auth with browser-local persistence directly. This avoids
 // IndexedDB startup stalls and, importantly, does not block the page module on
 // an awaited persistence promise before the auth-state listener can be attached.
-const auth = initializeAuth(app, { persistence: browserLocalPersistence });
+let auth;
+try {
+  auth = initializeAuth(app, { persistence: browserLocalPersistence });
+} catch (initializeError) {
+  // Reuse an Auth instance if this page or a cached module already initialized it.
+  console.warn("Firebase Auth initialization fallback:", initializeError?.code || initializeError);
+  auth = getAuth(app);
+}
 window.ocAuthReady = Promise.resolve(
   typeof auth.authStateReady === "function" ? auth.authStateReady() : null
 ).then(() => auth.currentUser || null).catch(error => {
@@ -1504,6 +1511,27 @@ window.ocAuthReady = Promise.resolve(
   return auth.currentUser || null;
 });
 window.ocFirebaseAuth = auth;
+// Attach the first auth-state observer immediately. The full account/profile
+// handlers are registered farther down the module, but the login gate must not
+// depend on the rest of the app finishing its initialization.
+window.ocAuthBootstrapUnsubscribe = onAuthStateChanged(auth, user => {
+  document.documentElement.classList.remove("oc-auth-pending");
+  const status = document.getElementById("authStatus");
+  if (user) {
+    document.body.classList.remove("oc-logged-out");
+    if (status) status.textContent = "Signed in. Opening your account…";
+  } else {
+    window.ocLoggedOut = true;
+    document.body.classList.add("oc-logged-out");
+    if (status) status.textContent = "Please sign in to continue.";
+  }
+}, error => {
+  console.error("Early Firebase auth-state check failed:", error?.code || error, error?.message || "");
+  document.documentElement.classList.remove("oc-auth-pending");
+  document.body.classList.add("oc-logged-out");
+  const status = document.getElementById("authStatus");
+  if (status) status.textContent = "Unable to confirm sign-in. Please sign in again or refresh.";
+});
 
 const db = getFirestore(app);
 // Public wallet instructions are read from Firestore so admin edits appear
