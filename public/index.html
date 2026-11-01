@@ -3428,6 +3428,43 @@ body.oc-logged-out.oc-register-mode #authSwitchText{display:none!important}
 })();
 </script>
 
+
+<style id="oc-quick-actions-more-style">
+#page-home .quick-action.oc-quick-action-hidden{display:none!important}
+#page-home #homeQuickActionsMoreWrap{display:flex;justify-content:center;padding:12px 0 2px}
+#page-home #homeQuickActionsMore{min-width:112px}
+</style>
+<script id="oc-quick-actions-more-script">
+(function(){
+ function setup(){
+  const page=document.getElementById("page-home");
+  const grid=page?.querySelector(".quick-action-grid");
+  if(!grid)return;
+  const actions=Array.from(grid.querySelectorAll(":scope > .quick-action"));
+  if(actions.length<=4)return;
+  let expanded=false;
+  let wrap=page.querySelector("#homeQuickActionsMoreWrap");
+  if(!wrap){
+   wrap=document.createElement("div");
+   wrap.id="homeQuickActionsMoreWrap";
+   wrap.innerHTML='<button type="button" class="secondary" id="homeQuickActionsMore" aria-expanded="false">More +</button>';
+   grid.insertAdjacentElement("afterend",wrap);
+  }
+  const button=wrap.querySelector("button");
+  function render(){
+   actions.forEach((item,index)=>item.classList.toggle("oc-quick-action-hidden",!expanded&&index>=4));
+   button.textContent=expanded?"Less −":"More +";
+   button.setAttribute("aria-expanded",String(expanded));
+   wrap.hidden=actions.length<=4;
+  }
+  button.onclick=()=>{expanded=!expanded;render();};
+  render();
+ }
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",setup,{once:true});
+ else setup();
+})();
+</script>
+
 </body>
 </html>
 
