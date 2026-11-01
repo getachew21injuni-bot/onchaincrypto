@@ -1441,7 +1441,8 @@ const {
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider,
   signInWithPopup, onAuthStateChanged, signOut, RecaptchaVerifier,
-  signInWithPhoneNumber, updateProfile, reload
+  signInWithPhoneNumber, updateProfile, reload,
+  browserLocalPersistence, setPersistence
 } = firebaseAuthSdk;
 window.ocFirebaseModuleStarted = true;
 
@@ -1456,6 +1457,14 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+// Keep the Firebase session on this browser/device across reloads and browser restarts.
+// Only the explicit Logout action below calls signOut(auth).
+try {
+  await setPersistence(auth, browserLocalPersistence);
+  if (typeof auth.authStateReady === "function") await auth.authStateReady();
+} catch (error) {
+  console.error("Could not establish persistent sign-in on this device:", error?.code || error, error?.message || "");
+}
 window.ocFirebaseAuth = auth;
 
 const db = getFirestore(app);
