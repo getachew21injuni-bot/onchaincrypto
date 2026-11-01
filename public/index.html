@@ -1630,8 +1630,8 @@ saveProfileButton?.addEventListener("click", async () => {
   } catch (error) {
     console.warn("Profile save failed:", error?.code || error, error?.message || "");
     if (status) status.textContent = error?.code === "permission-denied"
-      ? "We could not save your profile to your account. Please check your account permissions and try again."
-      : "Your profile could not be saved right now. Please check your connection and try again.";
+      ? "Profile save blocked by Firestore permissions (permission-denied). Please refresh after the security-rules update."
+      : "Profile save failed (" + (error?.code || "connection error") + "). Please check your connection and try again.";
     button.disabled = false;
     button.textContent = originalLabel || "Save profile";
   }
@@ -1957,11 +1957,18 @@ window.addEventListener("resize",()=>{if(!$("page-trade").classList.contains("hi
 async function ocPerformSignOut() {
   try {
     await signOut(auth);
+    try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
     window.ocLoggedOut = true;
     document.body.classList.add("oc-logged-out");
+    document.body.classList.remove("oc-register-mode");
     window.onchaincryptoCurrentUser = null;
-    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#login"); } catch (_) {}
     window.ocPendingPage = null;
+    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#login"); } catch (_) {}
+    // Clear password and stale account identity from the visible auth form.
+    const loginPassword = document.getElementById("signInPassword");
+    if (loginPassword) loginPassword.value = "";
+    const loginIdentity = document.getElementById("signInEmail");
+    if (loginIdentity) loginIdentity.value = "";
     document.querySelectorAll("#ocProfileFirstName,#ocProfileLastName,#ocProfilePhone,#ocProfileCountry,#ocProfileDob,#ocProfileGender,#ocProfileAddress").forEach(el => { if (el) el.value = ""; });
     const nameField = document.getElementById("displayName");
     if (nameField) nameField.value = "";
@@ -2056,11 +2063,15 @@ onAuthStateChanged(auth, (user) => {
 
 // A signed-out visitor must always land on the actual sign-in form, not Home or the auth choice screen.
 window.ocForceSignInScreen = function() {
-  if (auth.currentUser) return;
+  // Always restore the signed-out screen explicitly; do not leave a stale
+  // profile/home page visible while Firebase finishes its auth-state callback.
   window.ocLoggedOut = true;
   document.body.classList.add("oc-logged-out");
   document.body.classList.remove("oc-register-mode");
   window.ocPendingPage = null;
+  document.querySelectorAll("main>section[id^=page-]").forEach(section => {
+    section.classList.toggle("hidden", section.id !== "page-register");
+  });
   if (typeof window.showPage === "function") window.showPage("register");
   const choice = document.getElementById("authChoicePanel");
   const register = document.getElementById("registerForm");
