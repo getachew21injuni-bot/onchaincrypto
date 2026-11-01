@@ -1422,14 +1422,29 @@ $("requestDeleteAccountBtn").addEventListener("click",()=>{const ok=window.confi
 </script>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-import {
+// Load Firebase SDK with a CDN fallback so a blocked gstatic request does not
+// leave the sign-in screen permanently waiting for its auth-state callback.
+async function loadFirebaseModule(primary, fallback) {
+  try { return await import(primary); }
+  catch (primaryError) {
+    console.warn("Primary Firebase SDK CDN failed; trying fallback:", primaryError?.message || primaryError);
+    return await import(fallback);
+  }
+}
+const [firebaseAppSdk, firebaseFirestoreSdk, firebaseAuthSdk] = await Promise.all([
+  loadFirebaseModule("https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js", "https://esm.sh/firebase@11.10.0/app"),
+  loadFirebaseModule("https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js", "https://esm.sh/firebase@11.10.0/firestore"),
+  loadFirebaseModule("https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js", "https://esm.sh/firebase@11.10.0/auth")
+]);
+const { initializeApp } = firebaseAppSdk;
+const { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, serverTimestamp } = firebaseFirestoreSdk;
+const {
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider,
   signInWithPopup, onAuthStateChanged, signOut, RecaptchaVerifier,
   signInWithPhoneNumber, updateProfile, reload
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+} = firebaseAuthSdk;
+window.ocFirebaseModuleStarted = true;
 
 const firebaseConfig = {
   apiKey: "AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",
@@ -1831,12 +1846,29 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
   event.preventDefault();
   const form = event.currentTarget;
   const button = form.querySelector('button[type="submit"]');
-  const email = document.getElementById("signInEmail").value.trim().toLowerCase();
+  const identifier = document.getElementById("signInEmail").value.trim();
+  const email = identifier.toLowerCase();
   const password = document.getElementById("signInPassword").value;
   const status = document.getElementById("authStatus");
-  if (!email || !password) {
-    msg("Enter your username or email and password.");
-    if (status) status.textContent = "Sign-in needs your username or email and password.";
+  if (!identifier || !password) {
+    msg("Enter your email, phone or username and password.");
+    if (status) status.textContent = "Enter your sign-in details to continue.";
+    return;
+  }
+  // Firebase email/password accounts authenticate by email. Phone accounts use
+  // the separate SMS + reCAPTCHA flow; usernames need a verified username lookup.
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)) {
+    if (/^\+[1-9]\d{7,14}$/.test(identifier)) {
+      const phonePanel = document.getElementById("phoneRegistrationPanel");
+      if (phonePanel) { phonePanel.classList.remove("hidden"); phonePanel.open = true; }
+      const phoneField = document.getElementById("phoneNumber");
+      if (phoneField) phoneField.value = identifier;
+      msg("Phone accounts use SMS verification. Complete the phone sign-in code below.");
+      phonePanel?.scrollIntoView({behavior:"smooth",block:"center"});
+    } else {
+      msg("Username sign-in is not enabled yet. Please enter the email address registered to your account.");
+    }
+    if (status) status.textContent = "Use your registered email for password sign-in, or use SMS verification for a phone account.";
     return;
   }
   if (button?.disabled) return;
@@ -2072,9 +2104,11 @@ window.addEventListener("popstate", async () => {
 setTimeout(() => {
   const status = document.getElementById("authStatus");
   if (status && status.textContent.includes("Checking sign-in status")) {
-    status.textContent = "Authentication is taking too long to initialize. Refresh this page and check your internet connection and Firebase authorized domains.";
+    status.textContent = window.ocFirebaseModuleStarted
+      ? "Firebase loaded, but sign-in state is still waiting. Check your connection, then retry."
+      : "Firebase could not load from its CDN. Check your internet connection or network restrictions, then refresh.";
   }
-}, 8000);
+}, 12000);
 </script>
 
 
