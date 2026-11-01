@@ -1995,11 +1995,11 @@ async function ocPerformSignOut() {
   }
 }
 window.ocPerformSignOut = ocPerformSignOut;
-// Capture logout clicks centrally so moved menu buttons and profile/settings buttons
-// all execute the same Firebase sign-out operation exactly once.
+// Capture the dedicated three-dot Logout button and legacy logout controls centrally.
+// This keeps the action working even after the Settings button is moved into the menu.
 document.addEventListener("click", event => {
   const target = event.target instanceof Element ? event.target : null;
-  const button = target?.closest("#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn");
+  const button = target?.closest("#ocMenuLogoutBtn,#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn");
   if (!button) return;
   event.preventDefault();
   event.stopImmediatePropagation();
@@ -3197,6 +3197,7 @@ window.addEventListener("load",function(){
  if(logout){
    const row=logout.closest(".settings-item");
    logout.className="more-menu-logout";
+   logout.id="ocMenuLogoutBtn";
    logout.type="button";
    logout.innerHTML='<span class="menu-symbol" style="color:#ff9292;background:#402424">↪</span><span><strong style="color:#ff6b75">Logout</strong></span>';
    logout.setAttribute("role","menuitem");
