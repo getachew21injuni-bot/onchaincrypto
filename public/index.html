@@ -246,11 +246,30 @@ body.oc-logged-out #page-register { display:block !important; }
 </style>
 
 <style id="oc-auth-only-screen-tweaks">
-body.oc-logged-out #authChoicePanel { display:none !important; }
+body.oc-logged-out #authChoicePanel,
+body.oc-logged-out #registerForm,
+body.oc-logged-out #googleSignInBtn,
+body.oc-logged-out .auth-google-hint,
+body.oc-logged-out #authSubheading,
+body.oc-logged-out #authModeIntro,
+body.oc-logged-out .auth-welcome .auth-logo-mark,
+body.oc-logged-out .auth-welcome .auth-brand,
+body.oc-logged-out #signInForm h3,
+body.oc-logged-out #signInForm .auth-options,
+body.oc-logged-out #resetPasswordBtn,
+body.oc-logged-out #signInForm .oc-password-toggle,
+body.oc-logged-out #authPhoneDivider,
+body.oc-logged-out #phoneRegistrationPanel { display:none !important; }
 body.oc-logged-out #signInForm { display:block !important; }
-body.oc-logged-out #authStatus:empty, body.oc-logged-out #registerMessage:empty { display:none !important; }
-body.oc-logged-out .auth-main-panel { width:min(100%,480px); margin:0 auto; }
-body.oc-logged-out .auth-welcome { text-align:center; }
+body.oc-logged-out #authStatus:empty,
+body.oc-logged-out #registerMessage:empty { display:none !important; }
+body.oc-logged-out .auth-welcome { text-align:center; margin:0 0 12px; padding:10px 0 4px; border:0; border-radius:0; background:transparent; box-shadow:none; }
+body.oc-logged-out .auth-welcome:before,
+body.oc-logged-out .auth-welcome:after { display:none !important; }
+body.oc-logged-out .auth-welcome h1 { margin:0; font-size:clamp(23px,5vw,30px); letter-spacing:0; }
+body.oc-logged-out #page-register .content-grid { display:block; }
+body.oc-logged-out .auth-main-panel { width:min(100%,480px); margin:0 auto; padding:18px; }
+body.oc-logged-out #signInForm { margin:0; }
 </style>
 </head>
 <body>
@@ -1910,9 +1929,9 @@ async function ocPerformSignOut() {
     if (typeof window.showPage === "function") window.showPage("register");
     window.ocForceSignInScreen?.();
     const status = document.getElementById("authStatus");
-    if (status) { status.textContent = "You are signed out. Sign in to access your own account."; status.classList.add("notice"); }
+    if (status) { status.textContent = ""; status.classList.remove("notice"); }
     const message = document.getElementById("registerMessage");
-    if (message) message.textContent = "You have signed out successfully. Sign in again to access your account.";
+    if (message) message.textContent = "";
   } catch (error) { msg(friendlyError(error)); }
 }
 document.getElementById("signOutBtn")?.addEventListener("click", ocPerformSignOut);
@@ -1978,7 +1997,7 @@ onAuthStateChanged(auth, (user) => {
   if (status) {
     status.textContent = user
       ? "Signed in as " + identity + (user.email && !user.emailVerified ? " · Email not yet verified" : "") + ". You can continue to the platform."
-      : "Not signed in. Create an account or sign in below.";
+      : "";
     status.classList.toggle("notice", !user);
   }
   if (signOutBtn) signOutBtn.classList.toggle("hidden", !user);
@@ -2006,7 +2025,7 @@ window.ocForceSignInScreen = function() {
   document.getElementById("registerForm")?.classList.add("hidden");
   document.getElementById("signInForm")?.classList.remove("hidden");
   document.getElementById("googleSignInBtn")?.classList.add("hidden");
-  document.getElementById("authHeading").textContent = "Welcome back to OnChainCrypto";
+  document.getElementById("authHeading").textContent = "Welcome back to onchaincrypto";
   document.getElementById("signInEmail")?.focus();
 };
 document.addEventListener("click", event => {
@@ -3332,7 +3351,7 @@ td,th{overflow-wrap:anywhere}
         catch(e) { field.focus(); field.select(); try { document.execCommand('copy'); status.textContent='OnChainCrypto invite link copied.'; } catch(_) { status.textContent='Select and copy the link above.'; } }
       });
       $('ocShareInvite').addEventListener('click', async function(){
-        const data={title:'OnChainCrypto — Crypto Markets',text:'Explore OnChainCrypto: institutional crypto intelligence, digital asset markets, trading tools, wallet services and platform support. Create your account to get started.',url:$('ocInviteLink').value};
+        const data={title:'OnChainCrypto — Crypto Markets',text:'Open OnChainCrypto with this private referral link. Sign in or register, then access the full platform: digital asset markets, trading tools, wallet services, your account dashboard and platform support. The link contains a unique referral code only; it does not reveal the sender’s name, email, phone or profile.',url:$('ocInviteLink').value};
         const status=$('ocInviteStatus');
         if(navigator.share){try{await navigator.share(data);status.textContent='OnChainCrypto invitation shared.';}catch(e){if(e.name!=='AbortError')status.textContent='Sharing is unavailable. You can copy the link instead.';}}
         else {try{await navigator.clipboard.writeText(data.url);status.textContent='Sharing is unavailable here, so the invite link was copied.';}catch(e){status.textContent='Copy the invite link above and send it to your friends.';}}
@@ -3346,7 +3365,7 @@ td,th{overflow-wrap:anywhere}
       if (!code || !field || !auth.currentUser || auth.currentUser.uid !== user.uid) return;
       const link = new URL(window.location.pathname, window.location.origin);
       link.searchParams.set('ref',code);
-      link.searchParams.set('auth','register');
+      link.searchParams.set('auth','login');
       field.value = link.href;
     }).catch(() => {
       if (field) field.value = 'Your invite link could not be prepared. Please refresh and try again.';
