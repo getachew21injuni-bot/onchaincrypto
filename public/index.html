@@ -1977,15 +1977,37 @@ window.addEventListener("resize",()=>{if(!$("page-trade").classList.contains("hi
 async function ocPerformSignOut() {
   if (window.ocLogoutInProgress) return;
   window.ocLogoutInProgress = true;
-  const button = document.getElementById("ocMenuLogoutBtn") || document.getElementById("signOutBtn");
+  const button = document.getElementById("ocMenuLogoutBtn") || document.getElementById("signOutBtn") || document.getElementById("settingsLogoutBtn");
+  const activeAuth = window.ocFirebaseAuth || auth;
   if (button) { button.disabled = true; button.setAttribute("aria-busy", "true"); }
   try {
-    // Logout has one account-level responsibility: end this device's Firebase session.
-    // It must not edit, clear, or delete the user's profile, balances, referrals, or records.
-    await signOut(auth);
-    if (auth.currentUser !== null) throw new Error("Firebase session is still active.");
+    // Wait until Firebase has finished restoring this browser's saved session.
+    if (typeof activeAuth.authStateReady === "function") await activeAuth.authStateReady();
 
-    // Close the menu as presentation only; the auth-state listener handles signed-out UI.
+    // Firebase signOut is a local, device-only action; it does not delete account data.
+    await signOut(activeAuth);
+
+    // Confirm the signed-out state through Firebase's auth observer rather than
+    // checking currentUser immediately, which can race the observer update.
+    const signedOut = activeAuth.currentUser === null || await new Promise(resolve => {
+      let unsubscribe = () => {};
+      let settled = false;
+      const finish = value => {
+        if (settled) return;
+        settled = true;
+        unsubscribe();
+        clearTimeout(timer);
+        resolve(value);
+      };
+      const timer = setTimeout(() => finish(activeAuth.currentUser === null), 4000);
+      unsubscribe = onAuthStateChanged(activeAuth, user => {
+        if (!user) finish(true);
+      }, () => finish(activeAuth.currentUser === null));
+    });
+    if (!signedOut || activeAuth.currentUser !== null) {
+      throw new Error("Firebase did not confirm that this device signed out.");
+    }
+
     const menu = document.getElementById("moreMenu");
     menu?.classList.add("hidden");
     menu?.setAttribute("aria-hidden", "true");
@@ -2005,7 +2027,8 @@ async function ocPerformSignOut() {
     console.error("OnChainCrypto sign-out failed:", error?.code || error, error?.message || "");
     const status = document.getElementById("authStatus");
     if (status) {
-      status.textContent = "Sign out failed. Your session is still active. Please check your connection and try again.";
+      const detail = error?.code ? " (" + error.code + ")" : "";
+      status.textContent = "Sign out could not be confirmed" + detail + ". Please try again.";
       status.classList.add("notice");
     }
     if (button) button.disabled = false;
