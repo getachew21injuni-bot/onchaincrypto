@@ -1456,6 +1456,7 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+window.ocFirebaseAuth = auth;
 
 const db = getFirestore(app);
 // Public wallet instructions are read from Firestore so admin edits appear
@@ -3280,6 +3281,67 @@ body.oc-logged-out.oc-register-mode #authSwitchText{display:none!important}
     enforceLoginOnly();
   },true);
   window.addEventListener("pageshow",enforceLoginOnly);
+})();
+</script>
+<script id="oc-logout-independent-click-fallback">
+(function(){
+  if(window.__ocLogoutIndependentHandlerInstalled)return;
+  window.__ocLogoutIndependentHandlerInstalled=true;
+  document.addEventListener("click",async function(event){
+    const target=event.target instanceof Element?event.target:null;
+    const button=target?.closest("#ocMenuLogoutBtn,#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn");
+    if(!button)return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    if(window.ocLogoutInProgress)return;
+    window.ocLogoutInProgress=true;
+    button.disabled=true;
+    button.setAttribute("aria-busy","true");
+    try{
+      if(typeof window.ocPerformSignOut==="function"){
+        await window.ocPerformSignOut();
+        return;
+      }
+      // Fallback for a delayed/failed Firebase module: initialize the same app
+      // and sign out this browser session without touching any user documents.
+      const load=async(primary,fallback)=>{try{return await import(primary)}catch(_){return await import(fallback)}};
+      const [appSdk,authSdk]=await Promise.all([
+        load("https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js","https://esm.sh/firebase@11.10.0/app"),
+        load("https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js","https://esm.sh/firebase@11.10.0/auth")
+      ]);
+      const config={
+        apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",
+        authDomain:"onchaincrypto-d976b.firebaseapp.com",
+        projectId:"onchaincrypto-d976b",
+        storageBucket:"onchaincrypto-d976b.firebasestorage.app",
+        messagingSenderId:"74771017244",
+        appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9",
+        measurementId:"G-FS1EMZS5J9"
+      };
+      const app=appSdk.getApps().length?appSdk.getApp():appSdk.initializeApp(config);
+      const auth=window.ocFirebaseAuth||authSdk.getAuth(app);
+      await authSdk.signOut(auth);
+      if(auth.currentUser!==null)throw new Error("Firebase session is still active.");
+      window.ocLoggedOut=true;
+      window.onchaincryptoCurrentUser=null;
+      window.ocPendingPage=null;
+      document.body.classList.add("oc-logged-out");
+      document.getElementById("moreMenu")?.classList.add("hidden");
+      document.getElementById("moreMenu")?.setAttribute("aria-hidden","true");
+      document.getElementById("moreMenuBtn")?.setAttribute("aria-expanded","false");
+      window.showPage?.("register");
+      window.ocForceSignInScreen?.();
+      try{history.replaceState({ocSignedOut:true},"",location.pathname+location.search+"#login")}catch(_){}
+    }catch(error){
+      console.error("Independent OnChainCrypto sign-out failed:",error?.code||error,error?.message||"");
+      const status=document.getElementById("authStatus");
+      if(status){status.textContent="Sign out failed. Your session is still active. Please check your connection and try again.";status.classList.add("notice");}
+      button.disabled=false;
+    }finally{
+      window.ocLogoutInProgress=false;
+      button.removeAttribute("aria-busy");
+    }
+  },true);
 })();
 </script>
 </body>
