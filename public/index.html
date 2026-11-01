@@ -3401,8 +3401,11 @@ body.oc-logged-out.oc-register-mode #authSwitchText{display:none!important}
   function scan(){
     groups.forEach(group=>{
       document.querySelectorAll(group.selector).forEach(item=>{
-        if(group.selector==='tbody')applyGroup(item,group.item);
-        else applyGroup(item.parentElement,group.item);
+        // Active Coin Pairs has its own single More/Less control; do not add a second generic toggle.
+        if(group.selector==='tbody'){
+          if(item.closest('#homeActivePairs'))return;
+          applyGroup(item,group.item);
+        } else applyGroup(item.parentElement,group.item);
       });
     });
   }
