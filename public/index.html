@@ -1958,10 +1958,16 @@ async function ocPerformSignOut() {
   window.ocLogoutInProgress = true;
   const button = document.getElementById("ocMenuLogoutBtn") || document.getElementById("signOutBtn");
   if (button) button.disabled = true;
+  // Collapse the menu as part of the Logout action, not instead of it.
+  const menu = document.getElementById("moreMenu");
+  menu?.classList.add("hidden");
+  menu?.setAttribute("aria-hidden", "true");
+  menu?.style.setProperty("display", "none", "important");
+  menu?.style.setProperty("pointer-events", "none", "important");
+  document.getElementById("moreMenuBtn")?.setAttribute("aria-expanded", "false");
   try {
     if (typeof auth.authStateReady === "function") await auth.authStateReady();
     if (auth.currentUser) await signOut(auth);
-    // Always land on the sign-in form after the local device session ends.
     window.ocLoggedOut = true;
     window.onchaincryptoCurrentUser = null;
     window.ocPendingPage = null;
@@ -1971,10 +1977,6 @@ async function ocPerformSignOut() {
     const password = document.getElementById("signInPassword");
     if (password) password.value = "";
     document.querySelectorAll("#ocProfileFirstName,#ocProfileLastName,#ocProfilePhone,#ocProfileCountry,#ocProfileDob,#ocProfileGender,#ocProfileAddress").forEach(el => { el.value = ""; });
-    const menu = document.getElementById("moreMenu");
-    menu?.classList.add("hidden");
-    menu?.setAttribute("aria-hidden", "true");
-    document.getElementById("moreMenuBtn")?.setAttribute("aria-expanded", "false");
     if (typeof window.showPage === "function") window.showPage("register");
     if (typeof window.ocForceSignInScreen === "function") window.ocForceSignInScreen();
   } catch (error) {
@@ -1989,6 +1991,16 @@ async function ocPerformSignOut() {
   }
 }
 window.ocPerformSignOut = ocPerformSignOut;
+// Handle Logout during document capture, before generic menu-collapse handlers.
+// This remains reliable even if the original Settings button was moved or rebuilt.
+document.addEventListener("click", function(event) {
+  const target = event.target instanceof Element ? event.target : null;
+  const logout = target?.closest("#ocMenuLogoutBtn,#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn");
+  if (!logout) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  void window.ocPerformSignOut();
+}, true);
 window.ocSubmitKycDetails=async function(data){
   if (typeof auth.authStateReady === "function") await auth.authStateReady();
   const user=auth.currentUser;
