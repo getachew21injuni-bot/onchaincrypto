@@ -3465,37 +3465,21 @@ td,th{overflow-wrap:anywhere}
       panel.id = 'ocInviteReferralPanel';
       panel.className = 'panel form-panel';
       panel.style.cssText = 'margin:16px 0;padding:18px;border:1px solid #2c6b8b;background:linear-gradient(145deg,#0b2036,#071321);border-radius:14px';
-      panel.innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#103d48;color:#42e8ff;font-size:24px">↗</span><div><h2 style="margin:0;font-size:19px">Invite & Referral</h2><p class="muted tiny" style="margin:3px 0 0">Your personal code and link are unique to this account. Personal details are never shared.</p></div></div><label for="ocInviteCode">Your unique referral code</label><input id="ocInviteCode" class="field" readonly aria-label="Your unique OnChainCrypto referral code"><label for="ocInviteLink" style="display:block;margin-top:10px">Your private referral link</label><input id="ocInviteLink" class="field" readonly aria-label="Your OnChainCrypto referral link"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="primary" id="ocCopyInviteCode">Copy referral code</button><button type="button" class="primary" id="ocCopyInvite">Copy invite link</button><button type="button" class="secondary" id="ocShareInvite">Share invite</button></div><p class="muted tiny" id="ocInviteStatus" aria-live="polite" style="margin:10px 0 0"></p><p class="muted tiny" style="margin:8px 0 0">Invitees see OnChainCrypto platform information only. Your name, email, phone number and profile are never added to the shared link or invitation message.</p>';
+      panel.innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#103d48;color:#42e8ff;font-size:24px">↗</span><div><h2 style="margin:0;font-size:19px">Invite & Referral</h2><p class="muted tiny" style="margin:3px 0 0">Your unique referral code is generated for this account.</p></div></div><label for="ocInviteCode">Your unique referral code</label><input id="ocInviteCode" class="field" readonly aria-label="Your unique OnChainCrypto referral code"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="primary" id="ocCopyInviteCode">Copy referral code</button></div><p class="muted tiny" id="ocInviteStatus" aria-live="polite" style="margin:10px 0 0"></p>';
       const logout = profile.querySelector('#profileLogoutBtn');
       if (logout && logout.parentNode) logout.parentNode.insertBefore(panel, logout);
       else profile.appendChild(panel);
       $('ocCopyInviteCode').addEventListener('click', async function(){const field=$('ocInviteCode'),status=$('ocInviteStatus');try{await navigator.clipboard.writeText(field.value);status.textContent='Your unique referral code was copied.';}catch(e){field.focus();field.select();try{document.execCommand('copy');status.textContent='Your unique referral code was copied.';}catch(_){status.textContent='Select and copy your referral code above.';}}});
-      $('ocCopyInvite').addEventListener('click', async function(){
-        const field=$('ocInviteLink'), status=$('ocInviteStatus');
-        try { await navigator.clipboard.writeText(field.value); status.textContent='OnChainCrypto invite link copied.'; }
-        catch(e) { field.focus(); field.select(); try { document.execCommand('copy'); status.textContent='OnChainCrypto invite link copied.'; } catch(_) { status.textContent='Select and copy the link above.'; } }
-      });
-      $('ocShareInvite').addEventListener('click', async function(){
-        const data={title:'OnChainCrypto — Crypto Markets',text:'Open OnChainCrypto with this private referral link. Sign in or register, then access the full platform: digital asset markets, trading tools, wallet services, your account dashboard and platform support. The link contains a unique referral code only; it does not reveal the sender’s name, email, phone or profile.',url:$('ocInviteLink').value};
-        const status=$('ocInviteStatus');
-        if(navigator.share){try{await navigator.share(data);status.textContent='OnChainCrypto invitation shared.';}catch(e){if(e.name!=='AbortError')status.textContent='Sharing is unavailable. You can copy the link instead.';}}
-        else {try{await navigator.clipboard.writeText(data.url);status.textContent='Sharing is unavailable here, so the invite link was copied.';}catch(e){status.textContent='Copy the invite link above and send it to your friends.';}}
-      });
     }
-    const field = $('ocInviteLink'), codeField=$('ocInviteCode');
+    const codeField = $('ocInviteCode');
     if (!user) { panel.classList.add('hidden'); return; }
     panel.classList.remove('hidden');
-    if (field) field.value = 'Preparing your private OnChainCrypto invite link…';
     if (codeField) codeField.value = 'Generating your unique code…';
     referralCodeFor(user).then(code => {
-      if (!code || !field || !auth.currentUser || auth.currentUser.uid !== user.uid) return;
-      if (codeField) codeField.value = code;
-      const link = new URL(window.location.pathname, window.location.origin);
-      link.searchParams.set('ref',code);
-      link.searchParams.set('auth','login');
-      field.value = link.href;
+      if (!code || !codeField || !auth.currentUser || auth.currentUser.uid !== user.uid) return;
+      codeField.value = code;
     }).catch(() => {
-      if (field) field.value = 'Your invite link could not be prepared. Please refresh and try again.';
+      if (codeField) codeField.value = 'Your unique code could not be generated. Please refresh and try again.';
     });
   }
   window.ocReferralCodeFor = referralCodeFor;
