@@ -1957,37 +1957,43 @@ async function ocPerformSignOut() {
   if (window.ocLogoutInProgress) return;
   window.ocLogoutInProgress = true;
   const button = document.getElementById("ocMenuLogoutBtn") || document.getElementById("signOutBtn");
-  if (button) button.disabled = true;
-  // Collapse the menu as part of the Logout action, not instead of it.
-  const menu = document.getElementById("moreMenu");
-  menu?.classList.add("hidden");
-  menu?.setAttribute("aria-hidden", "true");
-  menu?.style.setProperty("display", "none", "important");
-  menu?.style.setProperty("pointer-events", "none", "important");
-  document.getElementById("moreMenuBtn")?.setAttribute("aria-expanded", "false");
+  if (button) { button.disabled = true; button.setAttribute("aria-busy", "true"); }
   try {
-    if (typeof auth.authStateReady === "function") await auth.authStateReady();
-    if (auth.currentUser) await signOut(auth);
+    // Always ask Firebase to clear this device's persisted authentication session.
+    // Do not treat hiding the menu or changing pages as a successful sign-out.
+    await signOut(auth);
+    if (auth.currentUser !== null) {
+      throw new Error("Firebase still reports an authenticated user after signOut.");
+    }
     window.ocLoggedOut = true;
     window.onchaincryptoCurrentUser = null;
     window.ocPendingPage = null;
     document.body.classList.add("oc-logged-out");
     document.body.classList.remove("oc-register-mode");
-    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#login"); } catch (_) {}
     const password = document.getElementById("signInPassword");
     if (password) password.value = "";
     document.querySelectorAll("#ocProfileFirstName,#ocProfileLastName,#ocProfilePhone,#ocProfileCountry,#ocProfileDob,#ocProfileGender,#ocProfileAddress").forEach(el => { el.value = ""; });
-    if (typeof window.showPage === "function") window.showPage("register");
-    if (typeof window.ocForceSignInScreen === "function") window.ocForceSignInScreen();
+    // Collapse the menu only after Firebase confirms sign-out.
+    const menu = document.getElementById("moreMenu");
+    menu?.classList.add("hidden");
+    menu?.setAttribute("aria-hidden", "true");
+    menu?.style.setProperty("display", "none", "important");
+    menu?.style.setProperty("pointer-events", "none", "important");
+    document.getElementById("moreMenuBtn")?.setAttribute("aria-expanded", "false");
+    // A full navigation discards any stale in-memory page state. Firebase's
+    // persisted session is now signed out, so the fresh page must show Sign In.
+    location.replace(location.pathname + location.search + "#login");
   } catch (error) {
+    console.error("OnChainCrypto sign-out failed:", error?.code || error, error?.message || "");
     const status = document.getElementById("authStatus");
     if (status) {
-      status.textContent = "Could not sign out. Please try again.";
+      status.textContent = "Sign out failed. Your session is still active. Please check your connection and try again.";
       status.classList.add("notice");
     }
+    if (button) button.disabled = false;
   } finally {
     window.ocLogoutInProgress = false;
-    if (button && auth.currentUser) button.disabled = false;
+    button?.removeAttribute("aria-busy");
   }
 }
 window.ocPerformSignOut = ocPerformSignOut;
