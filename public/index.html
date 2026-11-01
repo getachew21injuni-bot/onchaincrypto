@@ -1956,55 +1956,39 @@ window.addEventListener("resize",()=>{if(!$("page-trade").classList.contains("hi
 async function ocPerformSignOut() {
   if (window.ocLogoutInProgress) return;
   window.ocLogoutInProgress = true;
-  const logoutButtons = document.querySelectorAll("#ocMenuLogoutBtn,#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn");
-  logoutButtons.forEach(button => { button.disabled = true; button.setAttribute("aria-busy", "true"); });
-  const guide = document.getElementById("ocLogoutGuideMessage");
-  if (guide) guide.textContent = "Signing out…";
+  const button = document.getElementById("ocMenuLogoutBtn") || document.getElementById("signOutBtn");
+  if (button) button.disabled = true;
   try {
-    // Firebase signOut is the source of truth; only show the signed-out UI after it succeeds.
-    await signOut(auth);
+    if (typeof auth.authStateReady === "function") await auth.authStateReady();
+    if (auth.currentUser) await signOut(auth);
+    // Always land on the sign-in form after the local device session ends.
     window.ocLoggedOut = true;
-    document.body.classList.add("oc-logged-out");
-    document.body.classList.remove("oc-register-mode");
     window.onchaincryptoCurrentUser = null;
     window.ocPendingPage = null;
+    document.body.classList.add("oc-logged-out");
+    document.body.classList.remove("oc-register-mode");
     try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#login"); } catch (_) {}
-    const loginPassword = document.getElementById("signInPassword");
-    if (loginPassword) loginPassword.value = "";
-    const loginIdentity = document.getElementById("signInEmail");
-    if (loginIdentity) loginIdentity.value = "";
+    const password = document.getElementById("signInPassword");
+    if (password) password.value = "";
     document.querySelectorAll("#ocProfileFirstName,#ocProfileLastName,#ocProfilePhone,#ocProfileCountry,#ocProfileDob,#ocProfileGender,#ocProfileAddress").forEach(el => { el.value = ""; });
-    const nameField = document.getElementById("displayName");
-    if (nameField) nameField.value = "";
     const menu = document.getElementById("moreMenu");
     menu?.classList.add("hidden");
+    menu?.setAttribute("aria-hidden", "true");
+    document.getElementById("moreMenuBtn")?.setAttribute("aria-expanded", "false");
     if (typeof window.showPage === "function") window.showPage("register");
-    window.ocForceSignInScreen?.();
-    window.ocLogoutInProgress = false;
-    const status = document.getElementById("authStatus");
-    if (status) { status.textContent = ""; status.classList.remove("notice"); }
-    const message = document.getElementById("registerMessage");
-    if (message) message.textContent = "";
+    if (typeof window.ocForceSignInScreen === "function") window.ocForceSignInScreen();
   } catch (error) {
     const status = document.getElementById("authStatus");
-    const errorText = friendlyError(error);
-    if (status) { status.textContent = "Logout failed: " + errorText; status.classList.add("notice"); }
-    if (guide) guide.textContent = "Logout failed. Please try again.";
-    logoutButtons.forEach(button => { button.disabled = false; button.removeAttribute("aria-busy"); });
+    if (status) {
+      status.textContent = "Could not sign out. Please try again.";
+      status.classList.add("notice");
+    }
+  } finally {
     window.ocLogoutInProgress = false;
+    if (button && auth.currentUser) button.disabled = false;
   }
 }
 window.ocPerformSignOut = ocPerformSignOut;
-// Capture the dedicated three-dot Logout button and legacy logout controls centrally.
-// This keeps the action working even after the Settings button is moved into the menu.
-document.addEventListener("click", event => {
-  const target = event.target instanceof Element ? event.target : null;
-  const button = target?.closest("#ocMenuLogoutBtn,#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn");
-  if (!button) return;
-  event.preventDefault();
-  event.stopImmediatePropagation();
-  void ocPerformSignOut();
-}, true);
 window.ocSubmitKycDetails=async function(data){
   if (typeof auth.authStateReady === "function") await auth.authStateReady();
   const user=auth.currentUser;
@@ -3171,10 +3155,6 @@ if(deletePanel){
  if(p)p.textContent="Steps: 1. Select Send Gmail confirmation code. 2. Check your inbox or spam folder. 3. Enter the code. 4. Select Verify and send request. Your account remains active until an administrator reviews the request.";
 }
 const logoutBtn=byId("settingsLogoutBtn");
-logoutBtn?.addEventListener("click",()=>{const msg=byId("ocLogoutGuideMessage");if(msg)msg.textContent="Signing out of this device…";});
-if(logoutBtn&&!byId("ocLogoutGuideMessage")){
- const msg=document.createElement("p");msg.id="ocLogoutGuideMessage";msg.className="muted tiny";msg.setAttribute("aria-live","polite");logoutBtn.closest(".settings-item")?.append(msg);
-}
 
 const style=document.createElement("style");style.id="oc-separate-account-pages-style";style.textContent=
   '.oc-standalone-account-page{max-width:900px;margin:0 auto 20px;padding:16px}.oc-standalone-account-page .profile-menu-content{padding:0;border:0}.oc-standalone-account-page .profile-menu-content>.panel{margin-top:12px}.oc-standalone-account-page .settings-item:first-child{border-top:0}@media(max-width:600px){.oc-standalone-account-page{padding:12px}}';
@@ -3202,6 +3182,12 @@ window.addEventListener("load",function(){
    logout.innerHTML='<span class="menu-symbol" style="color:#ff9292;background:#402424">↪</span><span><strong style="color:#ff6b75">Logout</strong></span>';
    logout.setAttribute("role","menuitem");
    menu.appendChild(logout);
+   // Bind the visible menu action directly: no menu-navigation handler can swallow it.
+   logout.addEventListener("click",function(event){
+     event.preventDefault();
+     event.stopPropagation();
+     if(typeof window.ocPerformSignOut==="function") void window.ocPerformSignOut();
+   });
    row?.remove();
  }
  // Profile contains personal/account profile information only; remove any legacy
@@ -4893,7 +4879,9 @@ byId("ocVerifyDeleteCode")?.addEventListener("click",async()=>{
   // Any other control tap returns the three-dot control to its compact state.
   document.addEventListener("click",function(event){
     if(event.target.closest("#moreMenuBtn"))return;
-    if(event.target.closest("button,a,[role=button],[data-page],[data-bottom-page],[data-menu-page],#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn,#ocMenuLogoutBtn")){
+    // Keep the menu in place until Logout has actually signed out the device.
+    if(event.target.closest("#ocMenuLogoutBtn,#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn"))return;
+    if(event.target.closest("button,a,[role=button],[data-page],[data-bottom-page],[data-menu-page]")){
       closeProfileAndMenu();
     }
   },true);
