@@ -1475,7 +1475,7 @@ const [firebaseAppSdk, firebaseFirestoreSdk, firebaseAuthSdk] = await Promise.al
 const { initializeApp } = firebaseAppSdk;
 const { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, serverTimestamp } = firebaseFirestoreSdk;
 const {
-  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  getAuth, initializeAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider,
   signInWithPopup, onAuthStateChanged, signOut, RecaptchaVerifier,
   signInWithPhoneNumber, updateProfile, reload,
@@ -1493,22 +1493,16 @@ const firebaseConfig = {
   measurementId: "G-FS1EMZS5J9"
 };
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-// Persist successful sign-ins on this browser/device until explicit Logout.
-// Use Firebase's browser-local storage directly so a stalled IndexedDB database
-// cannot block the login form or prevent the auth-state observer from starting.
-window.ocAuthReady = (async () => {
-  await setPersistence(auth, browserLocalPersistence);
-  // Wait for Firebase to restore any saved local session before routing.
-  if (typeof auth.authStateReady === "function") await auth.authStateReady();
+// Initialize Firebase Auth with browser-local persistence directly. This avoids
+// IndexedDB startup stalls and, importantly, does not block the page module on
+// an awaited persistence promise before the auth-state listener can be attached.
+const auth = initializeAuth(app, { persistence: browserLocalPersistence });
+window.ocAuthReady = Promise.resolve(
+  typeof auth.authStateReady === "function" ? auth.authStateReady() : null
+).then(() => auth.currentUser || null).catch(error => {
+  console.warn("Firebase auth-state restoration was delayed:", error?.code || error, error?.message || "");
   return auth.currentUser || null;
-})();
-try {
-  await window.ocAuthReady;
-} catch (error) {
-  console.error("Persistent sign-in could not be initialized:", error?.code || error, error?.message || "");
-  throw error;
-}
+});
 window.ocFirebaseAuth = auth;
 
 const db = getFirestore(app);
