@@ -5,7 +5,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b0e11">
-<title>OnChainCrypto | Crypto Markets</title>
+<meta name="description" content="OnChainCrypto — institutional crypto intelligence, digital asset markets, trading tools, wallet services and account support. Explore crypto markets and manage your digital asset journey.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="OnChainCrypto">
+<meta property="og:title" content="OnChainCrypto | Institutional Crypto Intelligence Platform">
+<meta property="og:description" content="Explore digital asset markets, trading tools, wallet services and platform support with OnChainCrypto. Create your account to get started.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OnChainCrypto | Institutional Crypto Intelligence Platform">
+<meta name="twitter:description" content="Explore digital asset markets, trading tools, wallet services and platform support with OnChainCrypto.">
+<title>OnChainCrypto | Institutional Crypto Intelligence Platform</title>
 <style>
 :root{--bg:#06101f;--panel:#0b1b30;--panel2:#102641;--line:#1b4263;--text:#eaf6ff;--muted:#91abc5;--yellow:#20d9ff;--green:#16d9a0;--red:#ff5573;--blue:#438dff}
 .performance-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:8px 18px 14px}.performance-stats>div{background:var(--panel2);border:1px solid var(--line);padding:12px;border-radius:9px}.performance-stats .big{font-size:20px;font-weight:750}.pnl-rows{padding:0 18px 14px}.pnl-row{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.level-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:0 18px 10px}.level-card{display:flex;flex-direction:column;text-align:left;gap:8px;background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:14px}.level-card span{font-size:12px;color:var(--muted);font-weight:400}.level-card.active{border-color:var(--yellow);box-shadow:inset 0 0 0 1px var(--yellow)}#pnlChart{display:block;width:calc(100% - 36px);margin:0 18px 14px;max-height:230px}.performance-panel .section-head{align-items:center}.quick-action-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.quick-action{min-height:112px;text-align:left;display:flex;flex-direction:column;gap:8px;align-items:flex-start;background:linear-gradient(145deg,#071d31,#081321);border:1px solid var(--action-color,#17334e);border-radius:15px;padding:16px;color:#eaf6ff;box-shadow:inset 0 1px #ffffff08;transition:transform .18s,border-color .18s}.quick-action:hover{transform:translateY(-2px);border-color:var(--action-color,#00bfff)}.quick-action .action-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:color-mix(in srgb,var(--action-color,#00bfff) 22%,transparent);color:var(--action-color,#00bfff);font-size:22px}.quick-action strong{font-size:15px}.quick-action small{color:#9eb5cf;font-weight:400}.bottom-nav{position:fixed;left:0;right:0;bottom:0;width:100%;z-index:60;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:8px max(10px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom));background:#030b18f5;border-top:1px solid #17334e;backdrop-filter:blur(16px);margin-top:0}.bottom-nav button{min-width:0;white-space:nowrap}body{padding-bottom:82px}.bottom-nav button{display:flex;flex-direction:column;align-items:center;gap:3px;background:transparent;color:#8aa6c7;font-size:11px;padding:7px 2px}.bottom-nav button span{font-size:20px}.bottom-nav button.active{color:#18a9ff;text-shadow:0 0 14px #078bff55}@media(max-width:700px){.mobile-register-btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 10px;font-size:12px;white-space:nowrap;min-height:38px}.header-right{gap:6px}#refreshBtn{display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:38px;padding:6px}header{grid-template-columns:1fr auto;padding:0 12px;gap:8px}.brand{display:flex;align-items:center;justify-self:center;gap:9px}.brand .header-logo-mark{width:34px;height:34px;flex:0 0 34px;margin:0;filter:drop-shadow(0 0 9px #20dfff38)}.brand .header-logo-mark svg{width:100%;height:100%;display:block}.brand>span{font-weight:800;letter-spacing:.2px;color:var(--text)}
@@ -1452,7 +1460,8 @@ async function saveBasicUserProfile(user) {
     displayName: names,
     firstName: existingProfile.firstName || localProfile.firstName || names.split(" ")[0] || "",
     lastName: existingProfile.lastName || localProfile.lastName || names.split(" ").slice(1).join(" ") || "",
-    referralCode: String(existingProfile.referralCode || localProfile.referralCode || "").trim().slice(0, 40),
+    referralCode: await referralCodeFor(user),
+    referredByCode: String(existingProfile.referredByCode || existingProfile.referralCode || localProfile.referredByCode || localProfile.referralCode || "").trim().replace(/[^a-z0-9_-]/gi, "").slice(0, 40),
     createdAt: existingProfile.createdAt || localProfile.createdAt || user.metadata?.creationTime || new Date().toISOString(),
     updatedAt: serverTimestamp()
   };
@@ -1722,7 +1731,7 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
     catch (profileError) { console.warn("Display name update deferred:", profileError?.code || profileError); }
     const localProfile = {
       uid: credential.user.uid, firstName, lastName, email, displayName: name,
-      referralCode, createdAt: new Date().toISOString()
+      referredByCode: referralCode, createdAt: new Date().toISOString()
     };
     try { localStorage.setItem("oc_profile_" + credential.user.uid, JSON.stringify(localProfile)); } catch (_) {}
     let cloudProfileSaved = false;
@@ -3286,9 +3295,23 @@ td,th{overflow-wrap:anywhere}
     if (code && !input.value) input.value = code;
     input.addEventListener('input', () => { input.dataset.ocReferralTouched = 'yes'; }, {once:true});
   }
-  function referralCodeFor(user){
-    const raw = String(user && (user.uid || user.email || user.phoneNumber) || 'guest').replace(/[^a-z0-9]/gi,'').toUpperCase();
-    return 'OC' + raw.slice(-10);
+  // A one-way SHA-256 digest makes a stable invite code without exposing a UID,
+  // email address, phone number, display name or other account detail in the URL.
+  async function referralCodeFor(user){
+    const uid = String(user && user.uid || '');
+    if (!uid) return '';
+    try {
+      if (window.crypto && crypto.subtle) {
+        const bytes = new TextEncoder().encode('OnChainCrypto-invite-v1:' + uid);
+        const digest = await crypto.subtle.digest('SHA-256', bytes);
+        return 'OC' + Array.from(new Uint8Array(digest).slice(0,8), b => b.toString(16).padStart(2,'0')).join('').toUpperCase();
+      }
+    } catch(e) {}
+    // Opaque deterministic fallback for browsers without SubtleCrypto.
+    let h1=0x811c9dc5,h2=0x9e3779b9;
+    const value='OnChainCrypto-invite-v1:'+uid;
+    for(let i=0;i<value.length;i++){h1=Math.imul(h1^value.charCodeAt(i),0x01000193);h2=Math.imul(h2+value.charCodeAt(i),0x85ebca6b);}
+    return 'OC'+(h1>>>0).toString(16).padStart(8,'0')+(h2>>>0).toString(16).padStart(8,'0');
   }
   function buildInvitePanel(user){
     const profile = $('page-profile');
@@ -3299,47 +3322,43 @@ td,th{overflow-wrap:anywhere}
       panel.id = 'ocInviteReferralPanel';
       panel.className = 'panel form-panel';
       panel.style.cssText = 'margin:16px 0;padding:18px;border:1px solid #2c6b8b;background:linear-gradient(145deg,#0b2036,#071321);border-radius:14px';
-      panel.innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#103d48;color:#42e8ff;font-size:24px">↗</span><div><h2 style="margin:0;font-size:19px">Invite & Referral</h2><p class="muted tiny" style="margin:3px 0 0">Share your personal invite link with friends.</p></div></div><label for="ocInviteLink">Your invite link</label><input id="ocInviteLink" class="field" readonly aria-label="Your personal invite link"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="primary" id="ocCopyInvite">Copy invite link</button><button type="button" class="secondary" id="ocShareInvite">Share invite</button></div><p class="muted tiny" id="ocInviteStatus" aria-live="polite" style="margin:10px 0 0"></p><p class="muted tiny" style="margin:8px 0 0">Referral codes are used to prefill the signup form. Referral tracking or rewards are not activated unless a secure backend is added.</p>';
+      panel.innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#103d48;color:#42e8ff;font-size:24px">↗</span><div><h2 style="margin:0;font-size:19px">Invite & Referral</h2><p class="muted tiny" style="margin:3px 0 0">Share OnChainCrypto with friends. Your personal details are not included.</p></div></div><label for="ocInviteLink">Your private referral link</label><input id="ocInviteLink" class="field" readonly aria-label="Your OnChainCrypto referral link"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="primary" id="ocCopyInvite">Copy invite link</button><button type="button" class="secondary" id="ocShareInvite">Share invite</button></div><p class="muted tiny" id="ocInviteStatus" aria-live="polite" style="margin:10px 0 0"></p><p class="muted tiny" style="margin:8px 0 0">Invitees see OnChainCrypto platform information only. Your name, email, phone number and profile are never added to the shared link or invitation message.</p>';
       const logout = profile.querySelector('#profileLogoutBtn');
       if (logout && logout.parentNode) logout.parentNode.insertBefore(panel, logout);
       else profile.appendChild(panel);
       $('ocCopyInvite').addEventListener('click', async function(){
         const field=$('ocInviteLink'), status=$('ocInviteStatus');
-        try { await navigator.clipboard.writeText(field.value); status.textContent='Invite link copied.'; }
-        catch(e) { field.focus(); field.select(); try { document.execCommand('copy'); status.textContent='Invite link copied.'; } catch(_) { status.textContent='Select and copy the link above.'; } }
+        try { await navigator.clipboard.writeText(field.value); status.textContent='OnChainCrypto invite link copied.'; }
+        catch(e) { field.focus(); field.select(); try { document.execCommand('copy'); status.textContent='OnChainCrypto invite link copied.'; } catch(_) { status.textContent='Select and copy the link above.'; } }
       });
       $('ocShareInvite').addEventListener('click', async function(){
-        const data={title:'Join OnChainCrypto',text:'Create your OnChainCrypto account using my invite link:',url:$('ocInviteLink').value};
+        const data={title:'OnChainCrypto — Crypto Markets',text:'Explore OnChainCrypto: institutional crypto intelligence, digital asset markets, trading tools, wallet services and platform support. Create your account to get started.',url:$('ocInviteLink').value};
         const status=$('ocInviteStatus');
-        if(navigator.share){try{await navigator.share(data);status.textContent='Invite shared.';}catch(e){if(e.name!=='AbortError')status.textContent='Sharing was cancelled or unavailable.';}}
+        if(navigator.share){try{await navigator.share(data);status.textContent='OnChainCrypto invitation shared.';}catch(e){if(e.name!=='AbortError')status.textContent='Sharing is unavailable. You can copy the link instead.';}}
         else {try{await navigator.clipboard.writeText(data.url);status.textContent='Sharing is unavailable here, so the invite link was copied.';}catch(e){status.textContent='Copy the invite link above and send it to your friends.';}}
       });
     }
-    const signedIn = !!user;
-    const code = signedIn ? referralCodeFor(user) : '';
-    const link = new URL(window.location.pathname, window.location.origin);
-    if (code) link.searchParams.set('ref',code);
-    // Shared invite links must open the authentication screen for new visitors.
-    // The existing auth deep-link handler opens the registration choice and
-    // the referral handler pre-fills the code without sending guests to Home.
-    link.searchParams.set('auth','register');
     const field = $('ocInviteLink');
-    if (field) field.value = signedIn ? link.href : 'Sign in to create your personal invite link';
-    panel.classList.toggle('hidden', !signedIn);
+    if (!user) { panel.classList.add('hidden'); return; }
+    panel.classList.remove('hidden');
+    if (field) field.value = 'Preparing your private OnChainCrypto invite link…';
+    referralCodeFor(user).then(code => {
+      if (!code || !field || !auth.currentUser || auth.currentUser.uid !== user.uid) return;
+      const link = new URL(window.location.pathname, window.location.origin);
+      link.searchParams.set('ref',code);
+      link.searchParams.set('auth','register');
+      field.value = link.href;
+    }).catch(() => {
+      if (field) field.value = 'Your invite link could not be prepared. Please refresh and try again.';
+    });
   }
   window.ocRefreshReferral = buildInvitePanel;
-  // Developer testing mode: keep the platform accessible without forcing account registration.
-  // Account creation can be repaired separately; public pages remain browsable meanwhile.
   const originalShowPage = window.showPage;
   if (typeof originalShowPage === 'function') {
     window.showPage = function(page) { return originalShowPage(page); };
   }
   applyReferral();
-  document.addEventListener('DOMContentLoaded', function(){
-    applyReferral();
-    /* Do not force Home on load; preserve the visitor's current page. */
-  });
-  // Referral values are applied on startup and DOMContentLoaded; no rapid polling needed.
+  document.addEventListener('DOMContentLoaded', function(){ applyReferral(); });
 })();
 </script>
 
