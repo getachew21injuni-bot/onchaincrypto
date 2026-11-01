@@ -1430,6 +1430,17 @@ $("requestDeleteAccountBtn").addEventListener("click",()=>{const ok=window.confi
  renderWallet();loadMarket();setInterval(loadMarket,120000);window.addEventListener("resize",()=>{if(historySeries.length&&!$("page-trade").classList.contains("hidden"))drawPriceChart()});
 </script>
 
+<script>
+/* Keep auth diagnostics outside the Firebase module so this still runs if a CDN import stalls. */
+setTimeout(() => {
+  const status = document.getElementById("authStatus");
+  if (!status || !status.textContent.includes("Checking sign-in status")) return;
+  status.textContent = window.ocFirebaseModuleStarted
+    ? "Firebase loaded, but sign-in state is still waiting. Check your connection, then refresh."
+    : "Firebase sign-in service did not finish loading. Check your connection or network restrictions, then refresh.";
+}, 12000);
+</script>
+
 <script type="module">
 // Load Firebase SDK with a CDN fallback so a blocked gstatic request does not
 // leave the sign-in screen permanently waiting for its auth-state callback.
@@ -2202,14 +2213,6 @@ window.addEventListener("popstate", async () => {
   }
 });
 // Account deletion is handled by the Gmail-confirmed request flow below.
-setTimeout(() => {
-  const status = document.getElementById("authStatus");
-  if (status && status.textContent.includes("Checking sign-in status")) {
-    status.textContent = window.ocFirebaseModuleStarted
-      ? "Firebase loaded, but sign-in state is still waiting. Check your connection, then retry."
-      : "Firebase could not load from its CDN. Check your internet connection or network restrictions, then refresh.";
-  }
-}, 12000);
 </script>
 
 
