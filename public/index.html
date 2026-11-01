@@ -21,15 +21,15 @@
   document.documentElement.classList.add("oc-auth-pending");
 </script>
 <style id="oc-auth-pending-gate">
-  /* Fail closed: before Firebase confirms a user, expose only the sign-in page. */
+  /* Fail closed: the login form is the only visible page until Firebase confirms a user. */
   html.oc-auth-pending body > :not(main),
   body.oc-logged-out > :not(main) { display:none!important; }
   html.oc-auth-pending main > :not(#page-register),
   body.oc-logged-out main > :not(#page-register) { display:none!important; }
+  html.oc-auth-pending main > #page-register,
+  body.oc-logged-out main > #page-register { display:block!important; }
   html.oc-auth-pending main,
   body.oc-logged-out main { display:block!important; min-height:100vh; padding-top:24px; }
-  html.oc-auth-pending #page-register,
-  body.oc-logged-out #page-register { display:block!important; }
   html.oc-auth-pending #authChoicePanel,
   html.oc-auth-pending #registerForm,
   html.oc-auth-pending #googleSignInBtn,
@@ -37,6 +37,8 @@
   html.oc-auth-pending #authPhoneDivider,
   html.oc-auth-pending #phoneRegistrationPanel { display:none!important; }
   html.oc-auth-pending #signInForm { display:block!important; }
+  body.oc-logged-out [hidden],
+  html.oc-auth-pending [hidden] { display:none!important; }
 </style>
 <style>
 :root{--bg:#06101f;--panel:#0b1b30;--panel2:#102641;--line:#1b4263;--text:#eaf6ff;--muted:#91abc5;--yellow:#20d9ff;--green:#16d9a0;--red:#ff5573;--blue:#438dff}
@@ -2115,7 +2117,7 @@ onAuthStateChanged(auth, (user) => {
   if(stopAdminWalletSync){stopAdminWalletSync();stopAdminWalletSync=null;}
   const previousUser = window.onchaincryptoCurrentUser || null;
   window.onchaincryptoCurrentUser = user || null;
-  if (user) { window.ocLoggedOut = false; document.body.classList.remove("oc-logged-out"); void (async () => {
+  if (user) { window.ocLoggedOut = false; document.documentElement.classList.remove("oc-auth-pending"); document.body.classList.remove("oc-logged-out"); window.ocSetAuthScreenVisibility?.(true); void (async () => {
     await loadSavedUserProfile(user);
     await syncAdminDemoBalance(user);
     try { await saveBasicUserProfile(user); }
@@ -2131,7 +2133,9 @@ onAuthStateChanged(auth, (user) => {
       // Any signed-out visitor is restricted to Sign In / Register only.
       window.ocPendingPage = null;
       window.ocLoggedOut = true;
+      document.documentElement.classList.add("oc-auth-pending");
       document.body.classList.add("oc-logged-out");
+      window.ocSetAuthScreenVisibility?.(false);
       try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#login"); } catch (_) {}
       window.showPage?.("register");
       window.ocForceSignInScreen?.();
@@ -2160,14 +2164,26 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+window.ocSetAuthScreenVisibility = function(signedIn) {
+  // Native hidden attributes guarantee protected navigation and pages stay out of view.
+  document.querySelectorAll("body > :not(main)").forEach(node => {
+    if (signedIn) node.removeAttribute("hidden"); else node.setAttribute("hidden", "");
+  });
+  document.querySelectorAll("main > *").forEach(node => {
+    if (signedIn || node.id === "page-register") node.removeAttribute("hidden");
+    else node.setAttribute("hidden", "");
+  });
+};
 // A signed-out visitor must always land on the actual sign-in form, not Home or the auth choice screen.
 window.ocForceSignInScreen = function() {
   // Always restore the signed-out screen explicitly; do not leave a stale
   // profile/home page visible while Firebase finishes its auth-state callback.
   window.ocLoggedOut = true;
+  document.documentElement.classList.add("oc-auth-pending");
   document.body.classList.add("oc-logged-out");
   document.body.classList.remove("oc-register-mode");
   window.ocPendingPage = null;
+  window.ocSetAuthScreenVisibility(false);
   document.querySelectorAll("main>section[id^=page-]").forEach(section => {
     section.classList.toggle("hidden", section.id !== "page-register");
   });
