@@ -4879,9 +4879,8 @@ byId("ocVerifyDeleteCode")?.addEventListener("click",async()=>{
   // Any other control tap returns the three-dot control to its compact state.
   document.addEventListener("click",function(event){
     if(event.target.closest("#moreMenuBtn"))return;
-    // Keep the menu in place until Logout has actually signed out the device.
-    if(event.target.closest("#ocMenuLogoutBtn,#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn"))return;
-    if(event.target.closest("button,a,[role=button],[data-page],[data-bottom-page],[data-menu-page]")){
+    // Collapse the three-dot menu immediately for every selected action, including Logout.
+    if(event.target.closest("button,a,[role=button],[data-page],[data-bottom-page],[data-menu-page],#ocMenuLogoutBtn,#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn")){
       closeProfileAndMenu();
     }
   },true);
