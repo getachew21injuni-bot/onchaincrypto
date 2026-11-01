@@ -257,7 +257,6 @@ body.oc-logged-out .auth-welcome .auth-brand,
 body.oc-logged-out #signInForm h3,
 body.oc-logged-out #signInForm .auth-options,
 body.oc-logged-out #resetPasswordBtn,
-body.oc-logged-out #signInForm .oc-password-toggle,
 body.oc-logged-out #authPhoneDivider,
 body.oc-logged-out #phoneRegistrationPanel { display:none !important; }
 body.oc-logged-out #signInForm { display:block !important; }
@@ -270,6 +269,10 @@ body.oc-logged-out .auth-welcome h1 { margin:0; font-size:clamp(23px,5vw,30px); 
 body.oc-logged-out #page-register .content-grid { display:block; }
 body.oc-logged-out .auth-main-panel { width:min(100%,480px); margin:0 auto; padding:18px; }
 body.oc-logged-out #signInForm { margin:0; }
+body.oc-logged-out #signInForm .oc-password-wrap{position:relative;display:flex;align-items:center}
+body.oc-logged-out #signInForm .oc-password-wrap .field{padding-right:48px}
+body.oc-logged-out #signInForm .oc-password-toggle{display:flex!important;position:absolute;right:5px;top:50%;transform:translateY(-50%);width:38px;height:38px;align-items:center;justify-content:center;background:transparent!important;color:#b8d4ef!important;border:0!important;padding:8px;z-index:2}
+body.oc-logged-out #signInForm .oc-password-toggle svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
 <body>
@@ -731,7 +734,7 @@ body.oc-logged-out #signInForm { margin:0; }
     <div class="auth-welcome">
       <div class="auth-logo-mark" aria-hidden="true"><svg viewBox="0 0 120 120" role="img"><defs><linearGradient id="authLogoGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#42e8ff"/><stop offset="1" stop-color="#3678ff"/></linearGradient></defs><circle cx="60" cy="60" r="51" fill="#071522" stroke="url(#authLogoGradient)" stroke-width="3"/><path d="M73 35a29 29 0 1 0 0 50" fill="none" stroke="url(#authLogoGradient)" stroke-width="10" stroke-linecap="round"/><path d="M87 43a21 21 0 1 0 0 34" fill="none" stroke="#42e8ff" stroke-width="8" stroke-linecap="round"/><path d="M45 60h29" stroke="#e8fbff" stroke-width="5" stroke-linecap="round"/><circle cx="88" cy="31" r="5" fill="#42e8ff"/></svg></div>
       <div class="auth-brand">ONCHAIN<span>CRYPTO</span></div>
-      <h1 id="authHeading">Welcome back to OnChainCrypto</h1>
+      <h1 id="authHeading">Welcome back to onchaincrypto</h1>
       <p id="authSubheading" class="hidden"></p>
     </div>
     <div class="content-grid">
@@ -762,8 +765,8 @@ body.oc-logged-out #signInForm { margin:0; }
         <p class="muted tiny auth-google-hint">Enter your full name above to register with Google.</p>
         <form id="signInForm" class="auth-signin-form hidden">
           <h3 style="margin-top:12px">Sign in</h3>
-          <label for="signInEmail">Username or email</label><input id="signInEmail" class="field" type="text" autocomplete="username" required placeholder="Enter your username or email">
-          <label for="signInPassword">Password</label><div class="oc-password-wrap"><input id="signInPassword" class="field" type="password" autocomplete="current-password" required placeholder="Enter your password"><button class="oc-password-toggle" type="button" data-password-target="signInPassword" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+          <label for="signInEmail">Username or email</label><input id="signInEmail" class="field" type="text" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="Username or email">
+          <label for="signInPassword">Password</label><div class="oc-password-wrap"><input id="signInPassword" class="field" type="password" autocomplete="current-password" required placeholder="Password"><button class="oc-password-toggle" type="button" data-password-target="signInPassword" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
           <div class="auth-options"><label class="auth-check"><input type="checkbox" id="rememberMe"> Remember me</label><label class="auth-check"><input type="checkbox" id="showSignInPassword"> Show password</label></div>
           <button class="primary full auth-submit" type="submit">⚡ Sign In Securely</button>
           <button class="secondary full" id="resetPasswordBtn" type="button">Forgot password?</button>
@@ -1845,12 +1848,16 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
     document.getElementById("signInPassword").value = "";
     window.onchaincryptoCurrentUser = credential.user;
     window.ocPendingPage = "profile";
-    // Load this exact Firebase UID's saved cloud profile before routing Home.
-    // A matching email always signs into the same Auth UID and therefore the same profile.
-    await loadSavedUserProfile(credential.user);
-    await saveBasicUserProfile(credential.user);
-    if (status) status.textContent = "Welcome back, " + (credential.user.displayName || credential.user.email || credential.user.phoneNumber || "user") + ". Your account profile has been loaded.";
-    msg("Login successful. Your personal profile is ready. Opening Home…");
+    // Authentication is the sign-in decision. A profile read/write outage must
+    // never turn a successful Firebase login into a false "login failed" message.
+    const signedInUser = credential.user;
+    window.onchaincryptoCurrentUser = signedInUser;
+    try { await loadSavedUserProfile(signedInUser); }
+    catch (profileError) { console.warn("Profile load deferred after successful sign-in:", profileError?.code || profileError); }
+    try { await saveBasicUserProfile(signedInUser); }
+    catch (profileError) { console.warn("Profile sync deferred after successful sign-in:", profileError?.code || profileError); }
+    if (status) status.textContent = "Welcome back, " + (signedInUser.displayName || signedInUser.email || signedInUser.phoneNumber || "user") + ".";
+    msg("Login successful. Welcome back to OnChainCrypto.");
     if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
     openHomeAfterAuth();
   } catch (error) {
