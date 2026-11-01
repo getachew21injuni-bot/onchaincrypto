@@ -1960,7 +1960,7 @@ async function ocPerformSignOut() {
     window.ocLoggedOut = true;
     document.body.classList.add("oc-logged-out");
     window.onchaincryptoCurrentUser = null;
-    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#register"); } catch (_) {}
+    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#login"); } catch (_) {}
     window.ocPendingPage = null;
     document.querySelectorAll("#ocProfileFirstName,#ocProfileLastName,#ocProfilePhone,#ocProfileCountry,#ocProfileDob,#ocProfileGender,#ocProfileAddress").forEach(el => { if (el) el.value = ""; });
     const nameField = document.getElementById("displayName");
@@ -2026,7 +2026,7 @@ onAuthStateChanged(auth, (user) => {
       window.ocPendingPage = null;
       window.ocLoggedOut = true;
       document.body.classList.add("oc-logged-out");
-      try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#register"); } catch (_) {}
+      try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#login"); } catch (_) {}
       window.showPage?.("register");
       window.ocForceSignInScreen?.();
     }
@@ -2059,12 +2059,27 @@ window.ocForceSignInScreen = function() {
   if (auth.currentUser) return;
   window.ocLoggedOut = true;
   document.body.classList.add("oc-logged-out");
+  window.ocPendingPage = null;
   if (typeof window.showPage === "function") window.showPage("register");
-  document.getElementById("authChoicePanel")?.classList.add("hidden");
-  document.getElementById("registerForm")?.classList.add("hidden");
-  document.getElementById("signInForm")?.classList.remove("hidden");
+  const choice = document.getElementById("authChoicePanel");
+  const register = document.getElementById("registerForm");
+  const signIn = document.getElementById("signInForm");
+  choice?.classList.add("hidden");
+  register?.classList.add("hidden");
+  signIn?.classList.remove("hidden");
+  signIn?.querySelectorAll("input").forEach(input => { input.disabled = false; });
   document.getElementById("googleSignInBtn")?.classList.add("hidden");
-  document.getElementById("authHeading").textContent = "Welcome back to onchaincrypto";
+  document.querySelector(".auth-google-hint")?.classList.add("hidden");
+  document.getElementById("authPhoneDivider")?.classList.add("hidden");
+  const phone = document.getElementById("phoneRegistrationPanel");
+  if (phone) { phone.classList.add("hidden"); phone.open = false; }
+  const switchLink = document.getElementById("authSwitchText");
+  switchLink?.classList.remove("hidden");
+  const heading = document.getElementById("authHeading");
+  if (heading) heading.textContent = "Welcome back to onchaincrypto";
+  document.getElementById("authSubheading")?.classList.add("hidden");
+  const status = document.getElementById("authStatus");
+  if (status) { status.textContent = ""; status.classList.remove("notice"); }
   document.getElementById("signInEmail")?.focus();
 };
 document.addEventListener("click", event => {
@@ -2089,7 +2104,7 @@ window.addEventListener("pageshow", async () => {
     document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-register"));
     window.showPage?.("register");
     window.ocForceSignInScreen?.();
-    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#register"); } catch (_) {}
+    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#login"); } catch (_) {}
   }
 });
 window.addEventListener("popstate", async () => {
@@ -2097,7 +2112,7 @@ window.addEventListener("popstate", async () => {
   if (!auth.currentUser && window.ocLoggedOut === true) {
     document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-register"));
     window.showPage?.("register");
-    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#register"); } catch (_) {}
+    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#login"); } catch (_) {}
   }
 });
 // Account deletion is handled by the Gmail-confirmed request flow below.
@@ -3203,6 +3218,42 @@ window.addEventListener("load",function(){
 },{once:true});
 </script>
 
+
+<style id="oc-login-first-logout-style">
+body.oc-logged-out #authSwitchText{display:block!important;visibility:visible!important;opacity:1!important;text-align:center;margin-top:14px}
+body.oc-logged-out #authSwitchText button{display:inline!important;color:#20d9ff!important;background:transparent!important;font-weight:800}
+body.oc-logged-out #signInForm{display:block!important}
+body.oc-logged-out #registerForm{display:none!important}
+</style>
+<script id="oc-login-first-logout-guard">
+(function(){
+  function enforceLoginOnly(){
+    if(window.ocLoggedOut!==true||window.onchaincryptoCurrentUser)return;
+    document.getElementById("authChoicePanel")?.classList.add("hidden");
+    document.getElementById("registerForm")?.classList.add("hidden");
+    document.getElementById("signInForm")?.classList.remove("hidden");
+    document.getElementById("authSwitchText")?.classList.remove("hidden");
+  }
+  document.addEventListener("click",function(event){
+    const target=event.target instanceof Element?event.target:null;
+    if(!target)return;
+    const logout=target.closest("#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn,.more-menu-logout");
+    if(logout){
+      event.preventDefault();
+      event.stopPropagation();
+      if(typeof window.ocPerformSignOut==="function")void window.ocPerformSignOut();
+    }
+  },true);
+  document.addEventListener("click",function(event){
+    if(window.ocLoggedOut!==true||window.onchaincryptoCurrentUser)return;
+    const target=event.target instanceof Element?event.target:null;
+    if(target?.closest("#showRegisterBtn"))return;
+    if(target?.closest("#authSwitchText"))return;
+    enforceLoginOnly();
+  },true);
+  window.addEventListener("pageshow",enforceLoginOnly);
+})();
+</script>
 </body>
 </html>
 
