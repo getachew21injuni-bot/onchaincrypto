@@ -677,8 +677,7 @@ body.oc-logged-out #signInForm .oc-password-toggle svg{width:21px;height:21px;fi
       <details class="panel profile-menu-section" id="profileKycSection">
         <summary><span class="profile-menu-icon kyc-symbol">✓</span><span class="profile-menu-copy"><strong>KYC Verification</strong><small>Identity verification status</small></span><span class="profile-menu-chevron">⌄</span></summary>
         <div class="profile-menu-content">
-          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#0ecb81" aria-hidden="true">⛨</span>Identity verification (KYC)</strong><p class="muted tiny">KYC is inactive. A verified provider and secure backend are required before checks or uploads.</p></div><span class="tag">Not connected</span></div>
-          <p class="muted tiny">Do not upload ID documents until secure KYC is configured.</p>
+          <div id="ocProfileKycStatus" aria-live="polite"><div class="settings-item"><div><strong class="feature-label">Identity verification (KYC)</strong><p class="muted tiny">Checking your verification status…</p></div><span class="tag">Checking</span></div></div><button type="button" class="secondary" id="ocOpenKycPage">Open KYC review</button>
         </div>
       </details>
       <details class="panel profile-menu-section">
@@ -1957,7 +1956,7 @@ window.addEventListener("resize",()=>{if(!$("page-trade").classList.contains("hi
 async function ocPerformSignOut() {
   if (window.ocLogoutInProgress) return;
   window.ocLogoutInProgress = true;
-  const logoutButtons = document.querySelectorAll("#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn");
+  const logoutButtons = document.querySelectorAll("#ocMenuLogoutBtn,#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn");
   logoutButtons.forEach(button => { button.disabled = true; button.setAttribute("aria-busy", "true"); });
   const guide = document.getElementById("ocLogoutGuideMessage");
   if (guide) guide.textContent = "Signing out…";
@@ -1981,6 +1980,7 @@ async function ocPerformSignOut() {
     menu?.classList.add("hidden");
     if (typeof window.showPage === "function") window.showPage("register");
     window.ocForceSignInScreen?.();
+    window.ocLogoutInProgress = false;
     const status = document.getElementById("authStatus");
     if (status) { status.textContent = ""; status.classList.remove("notice"); }
     const message = document.getElementById("registerMessage");
@@ -3467,10 +3467,11 @@ td,th{overflow-wrap:anywhere}
       panel.id = 'ocInviteReferralPanel';
       panel.className = 'panel form-panel';
       panel.style.cssText = 'margin:16px 0;padding:18px;border:1px solid #2c6b8b;background:linear-gradient(145deg,#0b2036,#071321);border-radius:14px';
-      panel.innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#103d48;color:#42e8ff;font-size:24px">↗</span><div><h2 style="margin:0;font-size:19px">Invite & Referral</h2><p class="muted tiny" style="margin:3px 0 0">Share OnChainCrypto with friends. Your personal details are not included.</p></div></div><label for="ocInviteLink">Your private referral link</label><input id="ocInviteLink" class="field" readonly aria-label="Your OnChainCrypto referral link"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="primary" id="ocCopyInvite">Copy invite link</button><button type="button" class="secondary" id="ocShareInvite">Share invite</button></div><p class="muted tiny" id="ocInviteStatus" aria-live="polite" style="margin:10px 0 0"></p><p class="muted tiny" style="margin:8px 0 0">Invitees see OnChainCrypto platform information only. Your name, email, phone number and profile are never added to the shared link or invitation message.</p>';
+      panel.innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#103d48;color:#42e8ff;font-size:24px">↗</span><div><h2 style="margin:0;font-size:19px">Invite & Referral</h2><p class="muted tiny" style="margin:3px 0 0">Your personal code and link are unique to this account. Personal details are never shared.</p></div></div><label for="ocInviteCode">Your unique referral code</label><input id="ocInviteCode" class="field" readonly aria-label="Your unique OnChainCrypto referral code"><label for="ocInviteLink" style="display:block;margin-top:10px">Your private referral link</label><input id="ocInviteLink" class="field" readonly aria-label="Your OnChainCrypto referral link"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="primary" id="ocCopyInviteCode">Copy referral code</button><button type="button" class="primary" id="ocCopyInvite">Copy invite link</button><button type="button" class="secondary" id="ocShareInvite">Share invite</button></div><p class="muted tiny" id="ocInviteStatus" aria-live="polite" style="margin:10px 0 0"></p><p class="muted tiny" style="margin:8px 0 0">Invitees see OnChainCrypto platform information only. Your name, email, phone number and profile are never added to the shared link or invitation message.</p>';
       const logout = profile.querySelector('#profileLogoutBtn');
       if (logout && logout.parentNode) logout.parentNode.insertBefore(panel, logout);
       else profile.appendChild(panel);
+      $('ocCopyInviteCode').addEventListener('click', async function(){const field=$('ocInviteCode'),status=$('ocInviteStatus');try{await navigator.clipboard.writeText(field.value);status.textContent='Your unique referral code was copied.';}catch(e){field.focus();field.select();try{document.execCommand('copy');status.textContent='Your unique referral code was copied.';}catch(_){status.textContent='Select and copy your referral code above.';}}});
       $('ocCopyInvite').addEventListener('click', async function(){
         const field=$('ocInviteLink'), status=$('ocInviteStatus');
         try { await navigator.clipboard.writeText(field.value); status.textContent='OnChainCrypto invite link copied.'; }
@@ -3483,12 +3484,14 @@ td,th{overflow-wrap:anywhere}
         else {try{await navigator.clipboard.writeText(data.url);status.textContent='Sharing is unavailable here, so the invite link was copied.';}catch(e){status.textContent='Copy the invite link above and send it to your friends.';}}
       });
     }
-    const field = $('ocInviteLink');
+    const field = $('ocInviteLink'), codeField=$('ocInviteCode');
     if (!user) { panel.classList.add('hidden'); return; }
     panel.classList.remove('hidden');
     if (field) field.value = 'Preparing your private OnChainCrypto invite link…';
+    if (codeField) codeField.value = 'Generating your unique code…';
     referralCodeFor(user).then(code => {
       if (!code || !field || !auth.currentUser || auth.currentUser.uid !== user.uid) return;
+      if (codeField) codeField.value = code;
       const link = new URL(window.location.pathname, window.location.origin);
       link.searchParams.set('ref',code);
       link.searchParams.set('auth','login');
@@ -4629,7 +4632,8 @@ if(kyc){
   if(!user){statusHost.innerHTML='<div class="notice">Sign in to view your identity verification status.</div>';return;}
   statusHost.innerHTML='<div class="panel" style="padding:14px;margin-bottom:12px">Checking verification status…</div>';
   window.__ocKycStatusUnsubscribe=onSnapshot(doc(db,"kycSubmissions",user.uid),snap=>{
-   const state=String((snap.exists()?snap.data()?.status:null)||"not_submitted").toLowerCase(),form=byId("ocKycForm");
+   const state=String((snap.exists()?snap.data()?.status:null)||"not_submitted").toLowerCase(),form=byId("ocKycForm"),profileStatus=byId("ocProfileKycStatus");
+   if(profileStatus){const labels={approved:["Verified","Successfully verified. Your identity has been approved by the OnChainCrypto admin team.","green-tag"],pending:["Pending","Your KYC submission is waiting for admin review.",""],rejected:["Rejected","Your KYC submission was not approved. Please review and resubmit.",""],not_submitted:["Not submitted","Submit your identity details to request verification.",""]};const item=labels[state]||labels.not_submitted;profileStatus.innerHTML='<div class="settings-item"><div><strong class="feature-label">Identity verification</strong><p class="muted tiny">'+item[1]+'</p></div><span class="tag '+item[2]+'">'+item[0]+'</span></div>';}
    if(state==="approved"){
     statusHost.innerHTML='<div class="panel" style="padding:16px;margin-bottom:14px;border:1px solid #0ecb81"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:30px;color:#0ecb81">✓</span><div><h3 style="margin:0;color:#0ecb81">Successfully Verified</h3><p style="margin:4px 0 0">Your identity has been approved by the OnChainCrypto admin team.</p></div></div><p class="muted tiny" style="margin:12px 0 0">Your identity verification status is approved.</p></div>';if(form)form.hidden=true;
    }else if(state==="pending"){
@@ -4693,6 +4697,9 @@ if(kyc){
   }
   );
  }
+ const openKyc=byId("ocOpenKycPage");if(openKyc)openKyc.addEventListener("click",()=>window.showPage?.("kyc"));
+ watchKycStatus();
+ onAuthStateChanged(auth,()=>watchKycStatus());
 }
 const support=byId("page-support");
 if(support){
