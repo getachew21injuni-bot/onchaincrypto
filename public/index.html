@@ -777,7 +777,7 @@ body.oc-logged-out #signInForm .oc-password-toggle svg{width:21px;height:21px;fi
           <label for="signInEmail">Username or email</label><input id="signInEmail" class="field" type="text" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="Username or email">
           <label for="signInPassword">Password</label><div class="oc-password-wrap"><input id="signInPassword" class="field" type="password" autocomplete="current-password" required placeholder="Password"><button class="oc-password-toggle" type="button" data-password-target="signInPassword" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
           <div class="auth-options"><label class="auth-check"><input type="checkbox" id="rememberMe"> Remember me</label><label class="auth-check"><input type="checkbox" id="showSignInPassword"> Show password</label></div>
-          <button class="primary full auth-submit" type="submit">⚡ Sign In Securely</button>
+          <button class="primary full auth-submit" type="submit">Get Started</button>
           <button class="secondary full" id="resetPasswordBtn" type="button">Forgot password?</button>
           <p class="auth-switch" id="authSwitchText">Don’t have an account? <button type="button" id="showRegisterBtn">Register</button></p>
         </form>
@@ -3498,6 +3498,111 @@ body.oc-logged-out.oc-register-mode #authSwitchText{display:none!important}
  else setup();
 })();
 </script>
+
+
+<style id="oc-binance-inspired-login-redesign">
+/* Login-only visual refresh. Registration and authenticated pages retain their existing styles. */
+body.oc-logged-out{
+  min-height:100vh!important;
+  padding:clamp(22px,5vh,56px) 18px!important;
+  background:
+    radial-gradient(ellipse at 12% 14%,rgba(240,185,11,.20),transparent 34%),
+    radial-gradient(ellipse at 88% 18%,rgba(37,99,235,.22),transparent 35%),
+    radial-gradient(ellipse at 78% 88%,rgba(124,58,237,.18),transparent 34%),
+    linear-gradient(135deg,#07090d 0%,#101722 52%,#080b12 100%)!important;
+}
+body.oc-logged-out main{
+  display:grid!important;
+  place-items:center!important;
+  min-height:calc(100vh - 44px)!important;
+  padding:0!important;
+}
+body.oc-logged-out #page-register{
+  width:100%!important;
+  max-width:1080px!important;
+  margin:0 auto!important;
+  display:block!important;
+}
+body.oc-logged-out #page-register .content-grid{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(330px,430px)!important;
+  align-items:stretch!important;
+  gap:0!important;
+  overflow:hidden!important;
+  border:1px solid rgba(240,185,11,.28)!important;
+  border-radius:28px!important;
+  background:linear-gradient(135deg,rgba(20,27,38,.97),rgba(10,15,23,.98))!important;
+  box-shadow:0 30px 90px rgba(0,0,0,.58),0 0 55px rgba(240,185,11,.08),inset 0 1px rgba(255,255,255,.07)!important;
+}
+body.oc-logged-out .auth-main-panel{
+  position:relative!important;
+  isolation:isolate!important;
+  width:100%!important;
+  max-width:none!important;
+  min-height:520px!important;
+  margin:0!important;
+  padding:clamp(28px,5vw,54px)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  background:linear-gradient(145deg,rgba(17,27,42,.98),rgba(8,13,22,.98))!important;
+  border:0!important;
+  border-radius:0!important;
+}
+body.oc-logged-out .auth-main-panel:before{
+  content:"";position:absolute;z-index:-1;width:300px;height:300px;right:-110px;top:-115px;border-radius:50%;
+  background:radial-gradient(circle,rgba(240,185,11,.22),rgba(240,185,11,0) 70%);pointer-events:none;
+}
+body.oc-logged-out .auth-main-panel:after{
+  content:"";position:absolute;z-index:-1;width:260px;height:260px;left:-130px;bottom:-130px;border-radius:50%;
+  background:radial-gradient(circle,rgba(43,123,255,.20),rgba(43,123,255,0) 70%);pointer-events:none;
+}
+body.oc-logged-out .auth-welcome{
+  text-align:left!important;margin:0 0 24px!important;padding:0!important;
+}
+body.oc-logged-out .auth-welcome h1{
+  font-size:clamp(30px,4vw,43px)!important;line-height:1.12!important;font-weight:850!important;letter-spacing:-1.2px!important;
+  background:linear-gradient(100deg,#fff 5%,#f0b90b 52%,#55c7ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;
+}
+body.oc-logged-out .auth-welcome p{
+  color:#a8b4c5!important;font-size:14px!important;line-height:1.7!important;max-width:420px!important;margin:12px 0 0!important;
+}
+body.oc-logged-out #signInForm{margin:0!important;display:block!important}
+body.oc-logged-out #signInForm label{display:block!important;color:#cbd5e1!important;font-size:12px!important;font-weight:650!important;margin:17px 0 7px!important}
+body.oc-logged-out #signInForm .field{
+  min-height:52px!important;padding:14px 15px!important;border-radius:12px!important;
+  color:#f8fafc!important;background:rgba(4,9,17,.78)!important;border:1px solid #344255!important;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.25)!important;transition:border-color .2s,box-shadow .2s!important;
+}
+body.oc-logged-out #signInForm .field:focus{
+  border-color:#f0b90b!important;box-shadow:0 0 0 3px rgba(240,185,11,.13)!important;outline:none!important;
+}
+body.oc-logged-out #signInForm .auth-submit{
+  min-height:54px!important;margin-top:24px!important;border:0!important;border-radius:13px!important;
+  color:#17130a!important;font-size:15px!important;font-weight:850!important;letter-spacing:.15px!important;
+  background:linear-gradient(105deg,#f0b90b 0%,#ffd76a 36%,#39c6c8 72%,#477cff 100%)!important;
+  box-shadow:0 12px 30px rgba(240,185,11,.18),0 5px 18px rgba(54,129,255,.16)!important;
+}
+body.oc-logged-out #signInForm .auth-submit:hover{filter:brightness(1.08);transform:translateY(-1px)}
+body.oc-logged-out #signInForm .auth-switch{
+  color:#aab7c8!important;text-align:center!important;margin:20px 0 0!important;font-size:13px!important;
+}
+body.oc-logged-out #signInForm .auth-switch button{
+  color:#f0b90b!important;background:transparent!important;padding:4px 6px!important;font-weight:800!important;
+}
+body.oc-logged-out #authStatus,body.oc-logged-out #registerMessage{
+  color:#f5c84b!important;font-size:12px!important;margin-top:12px!important;
+}
+body.oc-logged-out #signInForm .oc-password-toggle{right:7px!important}
+@media(max-width:760px){
+ body.oc-logged-out{padding:14px!important}
+ body.oc-logged-out main{min-height:calc(100vh - 28px)!important}
+ body.oc-logged-out #page-register .content-grid{display:block!important;max-width:480px!important;border-radius:22px!important}
+ body.oc-logged-out .auth-main-panel{min-height:0!important;padding:clamp(24px,7vw,36px)!important}
+ body.oc-logged-out .auth-welcome{margin-bottom:18px!important}
+}
+@media(prefers-reduced-motion:reduce){body.oc-logged-out #signInForm .auth-submit{transition:none!important}}
+</style>
 
 </body>
 </html>
