@@ -11,13 +11,13 @@ service cloud.firestore {
       allow create: if owns(uid)
         && request.resource.data.uid == uid
         && request.resource.data.keys().hasOnly([
-          'uid','email','phoneNumber','phone','firstName','lastName','displayName','referralCode',
+          'uid','email','phoneNumber','phone','firstName','lastName','displayName','referralCode','referredByCode',
           'country','dateOfBirth','gender','address','createdAt','updatedAt'
         ]);
       allow update: if (
         owns(uid) && request.resource.data.uid == uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'email','phoneNumber','phone','firstName','lastName','displayName','referralCode','country','dateOfBirth','gender','address','createdAt','updatedAt'
+          'email','phoneNumber','phone','firstName','lastName','displayName','referralCode','referredByCode','country','dateOfBirth','gender','address','createdAt','updatedAt'
         ])
       ) || (
         isAdmin()
