@@ -1344,7 +1344,7 @@ function ensureMoreMenuContent(){if(!moreMenu||moreMenu.querySelector("button"))
  '<button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Guides and account assistance</small></span></button>'+
  '<button type="button" data-menu-page="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About</strong><small>Platform information</small></span></button>';
 }
-function setMoreMenuOpen(open){if(!moreMenu||!moreMenuBtn)return;ensureMoreMenuContent();moreMenu.classList.toggle("hidden",!open);moreMenu.style.setProperty("display",open?"block":"none","important");moreMenu.style.setProperty("visibility",open?"visible":"hidden","important");moreMenu.style.setProperty("opacity",open?"1":"0","important");moreMenu.style.setProperty("z-index","99999","important");moreMenuBtn.setAttribute("aria-expanded",String(open));moreMenu.setAttribute("aria-hidden",String(!open));}
+function setMoreMenuOpen(open){if(!moreMenu||!moreMenuBtn)return;ensureMoreMenuContent();moreMenu.classList.toggle("hidden",!open);moreMenu.style.setProperty("display",open?"block":"none","important");moreMenu.style.setProperty("visibility",open?"visible":"hidden","important");moreMenu.style.setProperty("opacity",open?"1":"0","important");moreMenu.style.setProperty("pointer-events",open?"auto":"none","important");moreMenu.style.setProperty("z-index","99999","important");moreMenuBtn.setAttribute("aria-expanded",String(open));moreMenu.setAttribute("aria-hidden",String(!open));}
 moreMenuBtn?.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();setMoreMenuOpen(moreMenuBtn.getAttribute("aria-expanded")!=="true");});
 document.addEventListener("click",event=>{const btn=event.target.closest("[data-menu-page]");if(!btn||!moreMenu?.contains(btn))return;const page=btn.dataset.menuPage;setMoreMenuOpen(false);showPage(page);});
 document.querySelectorAll("[data-menu-action]").forEach(btn=>btn.addEventListener("click",()=>{const action=btn.dataset.menuAction;moreMenu.classList.add("hidden");moreMenuBtn.setAttribute("aria-expanded","false");if(action==="contact"){window.location.href="mailto:onchaincryptosupport@gmail.com?subject=OnChainCrypto%20Support";return}if(action==="about"){alert("OnChainCrypto provides public crypto market information and a paper-trading interface. Real deposits, withdrawals and live exchange orders are not connected.");}}));
@@ -4862,40 +4862,42 @@ byId("ocVerifyDeleteCode")?.addEventListener("click",async()=>{
   function closeProfileAndMenu(){
     document.querySelectorAll("#page-profile details[open]").forEach(function(panel){panel.open=false;});
     const menu=document.getElementById("moreMenu");
-    if(menu)menu.classList.add("hidden");
     const trigger=document.getElementById("moreMenuBtn");
+    if(menu){
+      menu.classList.add("hidden");
+      menu.style.setProperty("display","none","important");
+      menu.style.setProperty("visibility","hidden","important");
+      menu.style.setProperty("opacity","0","important");
+      menu.style.setProperty("pointer-events","none","important");
+      menu.setAttribute("aria-hidden","true");
+    }
     if(trigger)trigger.setAttribute("aria-expanded","false");
   }
-  // Any page change away from Profile closes expanded profile sections and the three-dot menu.
+  // Close the dropdown on every route change, including navigation to Profile.
   const originalShowPage=window.showPage;
   if(typeof originalShowPage==="function"&&!originalShowPage.__ocCloseProfileWrapped){
     const wrappedShowPage=function(page){
-      if(page!=="profile")closeProfileAndMenu();
-      else {
-        const menu=document.getElementById("moreMenu");
-        if(menu)menu.classList.add("hidden");
-        document.getElementById("moreMenuBtn")?.setAttribute("aria-expanded","false");
-      }
+      closeProfileAndMenu();
       return originalShowPage.apply(this,arguments);
     };
     wrappedShowPage.__ocCloseProfileWrapped=true;
     window.showPage=wrappedShowPage;
   }
-  // Also close on navigation controls and other actions outside the Profile page.
+  // Any other control tap returns the three-dot control to its compact state.
   document.addEventListener("click",function(event){
-    const profile=document.getElementById("page-profile");
-    if(profile&&profile.contains(event.target))return;
     if(event.target.closest("#moreMenuBtn"))return;
-    if(event.target.closest("button,a,[role=button],[data-page],[data-bottom-page],[data-menu-page],#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn")){
+    if(event.target.closest("button,a,[role=button],[data-page],[data-bottom-page],[data-menu-page],#signOutBtn,#profileLogoutBtn,#settingsLogoutBtn,#ocMenuLogoutBtn")){
       closeProfileAndMenu();
     }
   },true);
-  // A logout/auth reset must never leave old profile accordions or the menu expanded.
+  document.addEventListener("keydown",function(event){
+    if(event.key==="Escape")closeProfileAndMenu();
+  });
   const observer=new MutationObserver(function(){
     if(document.body.classList.contains("oc-logged-out"))closeProfileAndMenu();
   });
   observer.observe(document.body,{attributes:true,attributeFilter:["class"]});
-  window.addEventListener("pageshow",function(){if(document.body.classList.contains("oc-logged-out"))closeProfileAndMenu();});
+  window.addEventListener("pageshow",closeProfileAndMenu);
   closeProfileAndMenu();
 })();
 </script>
