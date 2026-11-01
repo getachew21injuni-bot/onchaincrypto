@@ -2059,6 +2059,7 @@ window.ocForceSignInScreen = function() {
   if (auth.currentUser) return;
   window.ocLoggedOut = true;
   document.body.classList.add("oc-logged-out");
+  document.body.classList.remove("oc-register-mode");
   window.ocPendingPage = null;
   if (typeof window.showPage === "function") window.showPage("register");
   const choice = document.getElementById("authChoicePanel");
