@@ -56,7 +56,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 </nav>
 </aside>
 <main class="main">
-<div class="heading"><div><h1 id="pageTitle">Dashboard Overview</h1><p id="pageSubtitle">Welcome to your Onchainspro administration panel.</p></div><span class="status">● Panel ready</span></div>
+<div class="heading"><div><h1 id="pageTitle">Dashboard Overview</h1><p id="pageSubtitle">Welcome to your Onchain administration panel.</p></div><span class="status">● Panel ready</span></div>
 <section id="dashboardView">
 <h2 class="section-title">Quick Actions <span style="font-size:12px;color:#9ca9bd;font-weight:500">— open a section with one click</span></h2>
 <div class="quick-grid">
@@ -169,7 +169,7 @@ const moduleNames=['Users','Login History','Notifications','KYC','Email','Analyt
 const seedRecords={
  'Users':[{title:'Demo user A',owner:'demo-a@example.test',amount:'0',status:'Active'},{title:'Demo user B',owner:'demo-b@example.test',amount:'0',status:'Pending'}],
  'Login History':[{title:'Demo sign-in event',owner:'demo-a@example.test',amount:'—',status:'Recorded'}],
- 'Notifications':[{title:'Welcome to Onchainspro demo',owner:'All demo users',amount:'—',status:'Draft'}],
+ 'Notifications':[{title:'Welcome to Onchain demo',owner:'All demo users',amount:'—',status:'Draft'}],
  'KYC':[{title:'Demo review item (no documents)',owner:'Demo user B',amount:'—',status:'Pending'}],
  'Email':[{title:'Demo announcement draft',owner:'Admin',amount:'—',status:'Draft'}],
  'Deposits':[{title:'Demo deposit request',owner:'Demo user A',amount:'100 USDT',status:'Pending'}],
@@ -489,7 +489,7 @@ function renderModule(view){
  body.querySelectorAll('[data-record-action]').forEach(btn=>btn.addEventListener('click',()=>{const data=loadAdminData();data[view]=getRecords(view);const i=Number(btn.dataset.recordIndex);if(!data[view][i])return;if(btn.dataset.recordAction==='delete'){data[view].splice(i,1);}else{const cycle=['New','Pending','In review','Approved (demo)','Rejected (demo)','Completed (demo)'];const current=data[view][i].status||'New';data[view][i].status=cycle[(cycle.indexOf(current)+1+cycle.length)%cycle.length];}saveAdminData(data);renderModule(view);const msg=document.getElementById('moduleMessage');if(msg)msg.textContent='Demo record updated locally. No real transaction or account was changed.';}));
  document.getElementById('exportDemoRecords').addEventListener('click',()=>{const csv=[['Record','Owner','Amount','Status'],...getRecords(view).map(r=>[r.title,r.owner,r.amount,r.status])].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=view.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-demo.csv';a.click();URL.revokeObjectURL(url);});
 }
-function showView(view){const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your Onchainspro administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent='';if(view==='Trade Controls')renderTradeControls();else if(!isHome)renderModule(view);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
+function showView(view){const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your Onchain administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent='';if(view==='Trade Controls')renderTradeControls();else if(!isHome)renderModule(view);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
 document.getElementById('menuToggle').addEventListener('click',()=>sidebar.classList.toggle('open'));
 document.getElementById('refreshBtn').addEventListener('click',()=>{const active=document.querySelector('[data-view].active')?.dataset.view||'Dashboard';showView(active);const b=document.getElementById('refreshBtn');b.textContent='✓ Refreshed';setTimeout(()=>b.textContent='↻ Refresh',1200);});
