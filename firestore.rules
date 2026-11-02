@@ -10,14 +10,16 @@ service cloud.firestore {
       allow read: if owns(uid) || isAdmin();
       allow create: if owns(uid)
         && request.resource.data.uid == uid
+        && request.resource.data.adminAssigned == true
         && request.resource.data.keys().hasOnly([
-          'uid','email','phoneNumber','phone','firstName','lastName','displayName','referralCode','referredByCode',
+          'uid','adminAssigned','email','phoneNumber','phone','firstName','lastName','displayName','referralCode','referredByCode',
           'country','dateOfBirth','gender','address','createdAt','updatedAt'
         ]);
       allow update: if (
         owns(uid) && request.resource.data.uid == uid
+        && request.resource.data.adminAssigned == true
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'email','phoneNumber','phone','firstName','lastName','displayName','referralCode','referredByCode','country','dateOfBirth','gender','address','createdAt','updatedAt'
+          'adminAssigned','email','phoneNumber','phone','firstName','lastName','displayName','referralCode','referredByCode','country','dateOfBirth','gender','address','createdAt','updatedAt'
         ])
       ) || (
         isAdmin()
@@ -168,6 +170,17 @@ service cloud.firestore {
         && request.resource.data.withdrawalEnabled is bool
         && request.resource.data.updatedBy == request.auth.token.email;
       allow delete: if isAdmin();
+    }
+
+    // Shared demo trade mode. Every signed-in user can read the published mode;
+    // only the verified administrator can change it.
+    match /platformSettings/{settingId} {
+      allow read: if signedIn();
+      allow create, update: if isAdmin() && settingId == 'demoTradeControl'
+        && request.resource.data.keys().hasOnly(['mode','updatedAt','updatedBy'])
+        && request.resource.data.mode in ['market','win','lose']
+        && request.resource.data.updatedBy == request.auth.token.email;
+      allow delete: if false;
     }
 
     // All other collections remain closed by default.
