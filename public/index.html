@@ -1254,11 +1254,13 @@ async function loadMarket(){
   renderMarket();renderHomeCoinResults();updateTradePreview();renderSignalScanner();
  };
  try{
-  let geckoData=null,binanceTickers=null;
+  let geckoData=null,coincapData=null,binanceTickers=null;
   const publishAvailable=()=>{
    const sources=[];
-   let combined=geckoData||market.slice();
+   // Prefer CoinGecko, then CoinCap; Binance fills gaps and can operate alone.
+   let combined=geckoData||coincapData||market.slice();
    if(geckoData)sources.push("CoinGecko");
+   else if(coincapData)sources.push("CoinCap");
    if(binanceTickers){combined=mergeBinance(combined,binanceTickers);sources.push("Binance")}
    if(sources.length&&combined.length)cacheAndRender(combined,sources);
   };
@@ -1292,13 +1294,26 @@ async function loadMarket(){
    if(!Array.isArray(tickers))throw new Error("Binance returned invalid ticker data");
    binanceTickers=tickers;publishAvailable();return tickers;
   })();
-  const results=await Promise.allSettled([geckoTask,binanceTask]);
-  if(!results.some(result=>result.status==="fulfilled")||!market.length)throw new Error("Both CoinGecko and Binance market feeds are unavailable");
+  const coincapTask=(async()=>{
+   const response=await fetchJson("https://api.coincap.io/v2/assets?limit=2000",12000);
+   if(!Array.isArray(response?.data))throw new Error("CoinCap returned invalid asset data");
+   coincapData=response.data.map(item=>({
+    id:item.id,name:item.name,symbol:String(item.symbol||"").toUpperCase(),
+    current_price:Number(item.priceUsd)||0,market_cap:Number(item.marketCapUsd)||0,
+    total_volume:Number(item.volumeUsd24Hr)||0,
+    price_change_percentage_24h:Number(item.changePercent24Hr)||0,
+    market_cap_rank:Number(item.rank)||null,image:""
+   })).filter(item=>item.current_price>0&&item.symbol);
+   if(!coincapData.length)throw new Error("CoinCap returned no usable prices");
+   publishAvailable();return coincapData;
+  })();
+  const results=await Promise.allSettled([geckoTask,binanceTask,coincapTask]);
+  if(!results.some(result=>result.status==="fulfilled")||!market.length)throw new Error("CoinGecko, Binance, and CoinCap market feeds are unavailable");
  }catch(err){
   const hasCached=market.length>0||restoreCachedMarket();
   const liveIndicator=$("marketLiveIndicator");if(liveIndicator){liveIndicator.className="oc-chart-live "+(hasCached?"is-stale":"is-offline");const label=liveIndicator.querySelector("span");if(label)label.textContent=hasCached?"STALE":"OFFLINE";liveIndicator.title=hasCached?"Showing saved prices; both live provider refreshes failed":"Live market data is unavailable";}
   $("connection").textContent=hasCached?"Cached data":"Unavailable";setHeaderMarketStatus(hasCached?"stale":"offline");
-  if($("apiStatus"))$("apiStatus").innerHTML=hasCached?'<span class="muted">Saved prices · not live · retrying</span>':'<span class="red">CoinGecko and Binance market feeds unavailable</span>';
+  if($("apiStatus"))$("apiStatus").innerHTML=hasCached?'<span class="muted">Saved prices · not live · retrying</span>':'<span class="red">All public market feeds unavailable</span>';
   if(!hasCached){
    const unavailable='<tr><td colspan="5" class="empty">Live market prices are temporarily unavailable. Tap Refresh to try again.</td></tr>';
    if($("marketRows"))$("marketRows").innerHTML=unavailable;
