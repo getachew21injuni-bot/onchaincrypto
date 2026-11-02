@@ -95,7 +95,7 @@ const descriptions={
 async function renderTradeControls(){
  const body=document.getElementById('detailBody');
  const api=window.__ocAdminFirebase;
- body.innerHTML='<div class="content-panel"><p class="muted">Loading registered user profiles from Firebase…</p></div>';
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading users…</p></div>';
  if(!api){body.textContent='Firebase admin connection is not ready. Refresh and sign in again.';return;}
  const {db,collection,getDocs,query,limit,doc,setDoc,serverTimestamp,auth}=api;
  try{
