@@ -5592,3 +5592,21 @@ body.oc-logged-out #page-register .auth-welcome:after{content:none!important;dis
   animation: none !important;
 }
 </style>
+
+
+<style id="oc-keep-orderbook-visible-during-quick-trade">
+/* Buy/Sell opens Quick Trade inline below the Order Book; do not cover the book. */
+body.oc-trade-overlay-open:after{display:none!important;content:none!important}
+body.oc-trade-overlay-open #page-trade #timedPaperTrade{
+  position:relative!important;left:auto!important;top:auto!important;
+  transform:none!important;width:100%!important;max-width:none!important;
+  max-height:none!important;overflow:visible!important;margin:14px 0 0!important;
+  z-index:1!important;box-shadow:0 12px 32px #0005!important;
+}
+body.oc-trade-overlay-open{overflow:auto!important}
+@media(max-width:560px){
+ body.oc-trade-overlay-open #page-trade #timedPaperTrade{
+  width:100%!important;max-height:none!important;margin-top:12px!important;
+ }
+}
+</style>
