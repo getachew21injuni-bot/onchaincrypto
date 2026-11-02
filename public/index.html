@@ -3847,7 +3847,8 @@ td,th{overflow-wrap:anywhere}
     panel.classList.remove('hidden');
     if (codeField) codeField.value = 'Generating your unique code…';
     referralCodeFor(user).then(code => {
-      if (!code || !codeField || !auth.currentUser || auth.currentUser.uid !== user.uid) return;
+      const activeUser = window.ocFirebaseAuth && window.ocFirebaseAuth.currentUser;
+      if (!code || !codeField || !activeUser || activeUser.uid !== user.uid) return;
       codeField.value = code;
     }).catch(() => {
       if (codeField) codeField.value = 'Your unique code could not be generated. Please refresh and try again.';
