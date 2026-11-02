@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OnChainCrypto | Admin Dashboard</title>
+<title>Onchainspro | Admin Dashboard</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0e11;--panel:#15191e;--line:#2b3139;--text:#eaecef;--muted:#848e9c;--yellow:#f0b90b;--green:#0ecb81;--red:#f6465d}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Arial,sans-serif}header{padding:18px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}header b{color:var(--yellow)}main{max-width:1200px;margin:auto;padding:24px}.muted{color:var(--muted)}.warning{background:#302611;border:1px solid #6d5414;color:#f5d879;padding:14px;border-radius:9px;margin:16px 0}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}.card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:17px}.big{font-size:24px;font-weight:750;margin-top:7px}.layout{display:grid;grid-template-columns:220px 1fr;gap:18px}.side button{display:block;width:100%;text-align:left;margin:3px 0;background:transparent;color:var(--text);border:1px solid transparent;padding:11px;border-radius:7px;cursor:pointer}.side button.active,.side button:hover{border-color:var(--line);background:#242a31;color:var(--yellow)}button,input,select,textarea{font:inherit}button{cursor:pointer;border-radius:7px;padding:9px 12px;border:1px solid var(--line);background:#242a31;color:var(--text)}button.primary{background:var(--yellow);color:#111;border:0;font-weight:700}button:disabled{opacity:.45;cursor:not-allowed}input,select,textarea{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:7px;margin:5px 0 12px}label{display:block;color:var(--muted);font-size:12px}.section{display:none}.section.active{display:block}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.status{display:inline-block;border-radius:5px;padding:3px 7px;background:#302611;color:#f5d879;font-size:11px}.notice{padding:12px;background:#101a25;border:1px solid #263b52;border-radius:8px;margin:12px 0}#authBox{max-width:440px;margin:40px auto}.hide{display:none!important}footer{margin-top:24px;color:var(--muted);font-size:12px}@media(max-width:760px){main{padding:14px}.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.row{grid-template-columns:1fr}header{padding:14px}}
 </style>
 </head>
 <body>
-<header><div><b>◆</b> OnChainCrypto <span class="muted">/ Admin</span></div><div><span id="authState" class="muted">Checking access…</span> <button id="signOut" class="hide">Sign out</button></div></header>
+<header><div><b>◆</b> Onchainspro <span class="muted">/ Admin</span></div><div><span id="authState" class="muted">Checking access…</span> <button id="signOut" class="hide">Sign out</button></div></header>
 <main>
 <div class="warning"><strong>Safety lock:</strong> This admin page does not accept real deposits, approve money transfers, or credit account balances. Do not publish wallet addresses or accept funds until the server-side admin role, transaction verification, and security review are complete. QR codes are not proof of payment.</div>
 <section id="authBox" class="panel">
@@ -38,7 +38,7 @@
 <section id="audit" class="panel section"><h2>Security & audit</h2><ul><li>Only server-assigned Firebase admin claims grant access.</li><li>Every administrative change should be written to an immutable audit trail.</li><li>Never store passwords, private keys, seed phrases, or service-account JSON in the website.</li><li>Revoke the service-account key previously exposed in chat before deploying the backend.</li></ul></section>
 </div></div>
 </div>
-<footer>OnChainCrypto admin interface · secure backend setup required before financial operations.</footer>
+<footer>Onchainspro admin interface · secure backend setup required before financial operations.</footer>
 </main>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
