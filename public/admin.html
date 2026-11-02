@@ -11,6 +11,15 @@
 @media(min-width:900px){.quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:700px){.topbar{height:62px;padding:0 14px}.mobile-menu{display:inline-block}.brand{font-size:14px}.brand small{font-size:9px}.top-actions .hide-mobile{display:none}.layout{display:block}aside{position:fixed;z-index:10;left:0;top:62px;bottom:0;width:min(82vw,300px);overflow:auto;transform:translateX(-105%);transition:transform .2s;box-shadow:20px 0 50px #0008}aside.open{transform:translateX(0)}.main{padding:20px 14px 100px}.heading h1{font-size:23px}.heading p{font-size:13px}.status{font-size:10px}.quick-grid{gap:12px}.quick{min-height:140px;border-radius:22px}.quick .qicon{width:62px;height:62px;border-radius:22px}.quick span:last-child{font-size:16px}.stats{grid-template-columns:1fr}.stat{min-height:145px;padding:21px}.stat .value{font-size:32px}.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:6;display:flex;justify-content:space-around;align-items:center;height:70px;background:#101827f2;border-top:1px solid var(--line);backdrop-filter:blur(12px)}.bottomnav button{border:0;background:none;color:#8e9bb0;display:grid;gap:3px;justify-items:center;font-size:10px}.bottomnav .center{width:58px;height:58px;margin-top:-27px;border-radius:50%;background:linear-gradient(145deg,#3f82ff,#6748e9);border:6px solid #101827;box-shadow:0 0 0 2px #355a9e;font-size:23px;color:white}.content-panel{padding:15px}.notice{margin-bottom:10px}}
 </style>
+<style id="oc-admin-bitcoin-gold-atmosphere">
+:root{--oc-admin-gold:#d9ad55;--oc-admin-btc:#f7931a}
+body{background-image:radial-gradient(ellipse at 12% 0%,rgba(247,147,26,.075),transparent 34%),radial-gradient(ellipse at 90% 12%,rgba(217,173,85,.085),transparent 36%),linear-gradient(180deg,#0b0e11 0%,#101419 58%,#070b11 100%)}
+.topbar{border-bottom-color:rgba(217,173,85,.2)}
+.panel,.card,.stat-card{border-color:color-mix(in srgb,var(--line) 84%,var(--oc-admin-gold) 16%)}
+.logo,.avatar{background:linear-gradient(145deg,#fff0bd,#d9ad55 58%,#98651e);color:#211706;box-shadow:0 0 20px rgba(217,173,85,.18)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--oc-admin-gold);outline-offset:2px}
+</style>
+
 </head>
 <body>
 <header class="topbar">
