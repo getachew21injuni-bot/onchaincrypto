@@ -60,7 +60,13 @@ service cloud.firestore {
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.source == 'admin-demo'
         && request.resource.data.status == 'completed';
-      allow update, delete: if false;
+      // Permit the admin to archive deposit rows from the history view only.
+      allow update: if isAdmin()
+        && resource.data.type == 'deposit'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminHiddenFromHistory','historyClearedAt','historyClearedBy'])
+        && request.resource.data.adminHiddenFromHistory == true
+        && request.resource.data.historyClearedBy == request.auth.token.email;
+      allow delete: if false;
     }
 
     match /demoTransactions/{transactionId} {
@@ -78,7 +84,13 @@ service cloud.firestore {
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.source == 'admin-demo'
         && request.resource.data.status == 'completed';
-      allow update, delete: if false;
+      // Permit the admin to archive deposit rows from the history view only.
+      allow update: if isAdmin()
+        && resource.data.type == 'deposit'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminHiddenFromHistory','historyClearedAt','historyClearedBy'])
+        && request.resource.data.adminHiddenFromHistory == true
+        && request.resource.data.historyClearedBy == request.auth.token.email;
+      allow delete: if false;
     }
 
     // Members may submit/read their own KYC details. They cannot set an
