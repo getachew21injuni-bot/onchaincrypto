@@ -882,7 +882,7 @@ function restoreCachedMarket(){
  try{
   const saved=JSON.parse(localStorage.getItem("oc_market_cache")||"null");
   if(Array.isArray(saved?.data)&&saved.data.length){
-   market=saved.data;window.market=market;
+   market=saved.data;window.market=market;window.ocMarketLastSuccess=saved.time||0;
    $("connection").textContent="Cached data";
    $("apiStatus").textContent="Showing saved prices";
    if(saved.time)$("lastUpdate").textContent=new Date(saved.time).toLocaleTimeString()+" (saved)";
@@ -910,32 +910,14 @@ async function loadMarket(){
   finally{clearTimeout(timer)}
  };
  try{
-  let data=null,provider="";
-  try{
-   const result=await getJSON("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",10000);
-   if(!Array.isArray(result)||!result.length)throw new Error("No CoinGecko prices");
-   data=result.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()}));
-   const extraIds=COINS.filter(c=>!data.some(m=>m.id===c.id)).map(c=>c.id);
-   if(extraIds.length){try{const extra=await getJSON("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(extraIds.join(","))+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",7000);if(Array.isArray(extra))data=data.concat(extra.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()})))}catch(_){}}
-   provider="CoinGecko";
-  }catch(primaryError){
-   try{
-    const tickers=await getJSON("https://api.binance.com/api/v3/ticker/24hr",10000);
-    if(!Array.isArray(tickers))throw new Error("Invalid Binance response");
-    const byPair=new Map(tickers.map(t=>[t.symbol,t]));
-    data=COINS.map(c=>{const t=byPair.get(c.symbol+"USDT");if(!t)return null;return {id:c.id,name:c.name,symbol:c.symbol.toLowerCase(),current_price:Number(t.lastPrice),price_change_percentage_24h:Number(t.priceChangePercent),total_volume:Number(t.quoteVolume),market_cap:null,market_cap_rank:null,image:""}}).filter(c=>c&&Number.isFinite(c.current_price));
-    if(!data.length)throw new Error("No matching Binance prices");
-    provider="Binance public market data";
-   }catch(binanceError){
-    const result=await getJSON("https://api.coincap.io/v2/assets?limit=100",10000);
-    if(!Array.isArray(result?.data)||!result.data.length)throw new Error("All public market providers failed");
-    data=result.data.map(c=>({id:c.id,name:c.name,symbol:(c.symbol||"").toUpperCase(),current_price:Number(c.priceUsd),price_change_percentage_24h:Number(c.changePercent24Hr),total_volume:Number(c.volumeUsd24Hr),market_cap:Number(c.marketCapUsd),market_cap_rank:Number(c.rank),image:""})).filter(c=>c.symbol&&Number.isFinite(c.current_price));
-    if(!data.length)throw new Error("CoinCap returned no valid prices");
-    provider="CoinCap public market data";
-   }
-  }
+  let data=null,provider="CoinGecko";
+  const result=await getJSON("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",12000);
+  if(!Array.isArray(result)||!result.length)throw new Error("CoinGecko returned no live market prices");
+  data=result.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()}));
+  const extraIds=COINS.filter(c=>!data.some(m=>m.id===c.id)).map(c=>c.id);
+  if(extraIds.length){try{const extra=await getJSON("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(extraIds.join(","))+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",8000);if(Array.isArray(extra))data=data.concat(extra.map(c=>({...c,symbol:(c.symbol||"").toUpperCase())))}catch(_){}}
   market=data;window.market=market;
-  const now=Date.now();
+  const now=Date.now();window.ocMarketLastSuccess=now;
   try{localStorage.setItem("oc_market_cache",JSON.stringify({time:now,data:market}))}catch(e){}
   if($("connection"))$("connection").textContent="Live data";
   if($("apiStatus"))$("apiStatus").innerHTML='<span class="green">Connected · '+safe(provider)+'</span>';
@@ -958,9 +940,13 @@ async function loadPriceHistory(){
  if(!coin){$("chartStatus").textContent="Select an asset after market data loads.";return}
  $("chartStatus").textContent="Loading 7-day price history for "+coin.name+"…";
  try{
-  const res=await fetch("https://api.coingecko.com/api/v3/coins/"+encodeURIComponent(coin.id)+"/market_chart?vs_currency=usd&days=7&interval=hourly",{headers:{accept:"application/json"}});
-  if(!res.ok)throw new Error("History provider returned "+res.status);
-  const data=await res.json();
+  const historyController=new AbortController(),historyTimer=setTimeout(()=>historyController.abort(),12000);
+  let res,data;
+  try{
+   res=await fetch("https://api.coingecko.com/api/v3/coins/"+encodeURIComponent(coin.id)+"/market_chart?vs_currency=usd&days=7&interval=hourly",{headers:{accept:"application/json"},signal:historyController.signal});
+   if(!res.ok)throw new Error("CoinGecko history returned "+res.status);
+   data=await res.json();
+  }finally{clearTimeout(historyTimer)}
   if(!Array.isArray(data.prices)||data.prices.length<3)throw new Error("Not enough price points");
   historySeries=data.prices.map(p=>({time:p[0],price:Number(p[1])})).filter(p=>Number.isFinite(p.price));
   drawPriceChart();calculateSignal();
@@ -1048,7 +1034,7 @@ function refreshProfileAccountInfo(){const badge=$("profileAccountStatusBadge"),
 function renderWalletMarket(){const el=$("walletMarketRows");if(!el)return;const q=String($("walletCoinSearch")?.value||"").trim().toLowerCase();const limitValue=String(window.walletCoinExpanded||5);const filter=document.querySelector("#walletCoinFilters [data-wallet-filter].active")?.dataset.walletFilter||"all";let rows=[...market].filter(c=>String(c.name||"").toLowerCase().includes(q)||String(c.symbol||"").toLowerCase().includes(q)).sort((a,b)=>(b.market_cap||0)-(a.market_cap||0));if(filter==="gainers")rows=rows.filter(c=>(c.price_change_percentage_24h||0)>0).sort((a,b)=>(b.price_change_percentage_24h||0)-(a.price_change_percentage_24h||0));if(filter==="losers")rows=rows.filter(c=>(c.price_change_percentage_24h||0)<0).sort((a,b)=>(a.price_change_percentage_24h||0)-(b.price_change_percentage_24h||0));const total=rows.length;rows=rows.slice(0,Number(limitValue)||5);el.innerHTML=rows.length?rows.map(c=>'<tr><td>'+coinAsset(c)+'</td><td>'+money(c.current_price)+'</td><td class="'+((c.price_change_percentage_24h||0)>=0?'green':'red')+'">'+pct(c.price_change_percentage_24h)+'</td><td><button class="secondary" type="button" data-wallet-market-trade="'+safe(c.symbol)+'">Trade</button></td></tr>').join(""):'<tr><td colspan="4" class="empty">No matching coins found. Try another search or filter.</td></tr>';const count=$("walletCoinCount");if(count)count.textContent="Showing "+rows.length+" of "+total+" matching coins";const less=$("walletCoinLess"),more=$("walletCoinMore");if(less)less.disabled=(window.walletCoinExpanded||5)<=5;if(more)more.disabled=rows.length>=total;el.querySelectorAll("[data-wallet-market-trade]").forEach(b=>b.addEventListener("click",()=>{const sel=$("tradeAsset");if(sel)sel.value=b.dataset.walletMarketTrade;showPage("trade");updateTradePreview()}))}
 function renderWallet(){const value=Object.entries(state.holdings).reduce((sum,[sym,qty])=>sum+(Number(qty)||0)*(priceFor(sym)?.current_price||0),0);$("summaryBalance").textContent=usdtMoney(state.balance);$("walletBalance").textContent=usdtMoney(state.balance);$("holdingsValue").textContent=usdtMoney(value);const rows=Object.entries(state.holdings).filter(([sym,qty])=>Number(qty)>0.0000000001&&(! $("hideSmallBalances")?.checked||Number(qty)*(priceFor(sym)?.current_price||0)>=1));$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym,current_price:0};return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+' '+safe(sym.toUpperCase())+'</td><td>'+usdtMoney(Number(qty)*(c.current_price||0))+'</td></tr>'}).join(""):'<tr><td colspan="3" class="empty">No crypto holdings yet. Place a paper trade to see your assets here.</td></tr>';renderActivityHistory();renderTradeHistory();renderPnl();renderWalletMarket()}
 document.addEventListener("change",e=>{if(e.target&&e.target.id==="hideSmallBalances")renderWallet()});
-function showPage(page){if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="wallet")renderWallet();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
+function showPage(page){if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
 let timedPaper=null,timedTimer=null,pendingTimedDirection=null;
 function quickPlan(){const amount=Number($("timedStake")?.value||0);const levels=[{rate:12,min:100,max:5000,duration:30,label:"Level 1"},{rate:15,min:5000,max:10000,duration:60,label:"Level 2"},{rate:18,min:10000,max:25000,duration:90,label:"Level 3"},{rate:21,min:25000,max:50000,duration:120,label:"Level 4"},{rate:24,min:50000,max:100000,duration:180,label:"Level 5"},{rate:27,min:100000,max:1000000,duration:360,label:"Level 6"}];return levels.find((p,i)=>amount>=p.min&&(amount<p.max||i===levels.length-1&&amount<=p.max))||levels[0]}
 function updateQuickEstimate(){const amount=Number($("timedStake")?.value||0),p=quickPlan(),profit=amount*p.rate/100;const planSel=$("timedPlan");if(planSel)planSel.value=String(p.rate);const durationSel=$("timedDuration");if(durationSel)durationSel.value=String(p.duration);const level=$("quickAutoLevel");if(level)level.textContent=p.label+" · "+p.rate+"%";const range=$("quickAutoRange");if(range)range.textContent=p.min.toLocaleString()+"–"+p.max.toLocaleString()+" USDT";const expiry=$("quickAutoDuration");if(expiry)expiry.textContent=p.duration+" seconds";const countdown=$("timedCountdown");if(countdown&&!timedPaper)countdown.textContent=timedFormat(p.duration);const out=$("quickEstimatedProfit");if(out)out.textContent=(Number.isFinite(profit)?profit:0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+" USDT";const note=$("quickPlanNote");if(note)note.textContent=p.rate+"% illustrative plan estimate · not guaranteed";const bal=$("quickAvailableBalance");if(bal)bal.textContent=Number(state.balance||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+" USDT";const confirm=$("timedConfirmBtn");if(confirm)confirm.disabled=!pendingTimedDirection||!!timedPaper}
