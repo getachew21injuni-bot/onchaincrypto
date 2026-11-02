@@ -5531,3 +5531,42 @@ byId("ocVerifyDeleteCode")?.addEventListener("click",async()=>{
   closeProfileAndMenu();
 })();
 </script>
+
+
+<style id="oc-final-clean-login">
+/* Keep the signed-out screen to the welcome heading and the existing login form. */
+body.oc-logged-out #page-register,
+html.oc-auth-pending main>#page-register{
+  display:flex!important;flex-direction:column!important;align-items:center!important;
+  justify-content:center!important;gap:12px!important;width:100%!important;max-width:520px!important;
+  min-height:0!important;margin:0 auto!important;padding:18px!important;background:transparent!important;
+}
+body.oc-logged-out #page-register>.oc-public-auth-hero,
+html.oc-auth-pending #page-register>.oc-public-auth-hero{display:none!important}
+body.oc-logged-out #page-register>.auth-welcome,
+html.oc-auth-pending #page-register>.auth-welcome{
+  display:block!important;width:100%!important;margin:0!important;padding:0 0 4px!important;
+  text-align:center!important;background:transparent!important;border:0!important;box-shadow:none!important;
+}
+body.oc-logged-out #page-register>.content-grid,
+html.oc-auth-pending #page-register>.content-grid{
+  display:block!important;width:100%!important;max-width:480px!important;margin:0!important;padding:0!important;
+  background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;
+}
+body.oc-logged-out #page-register .auth-main-panel,
+html.oc-auth-pending #page-register .auth-main-panel{
+  position:static!important;isolation:auto!important;width:100%!important;max-width:480px!important;
+  min-height:0!important;margin:0!important;padding:18px!important;display:block!important;
+  background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+}
+body.oc-logged-out #page-register .auth-main-panel:before,
+body.oc-logged-out #page-register .auth-main-panel:after,
+html.oc-auth-pending #page-register .auth-main-panel:before,
+html.oc-auth-pending #page-register .auth-main-panel:after{content:none!important;display:none!important}
+body.oc-logged-out #page-register .auth-welcome:before,
+body.oc-logged-out #page-register .auth-welcome:after{content:none!important;display:none!important}
+@media(max-width:680px){
+ body.oc-logged-out #page-register,html.oc-auth-pending main>#page-register{padding:8px!important;gap:10px!important}
+ body.oc-logged-out #page-register .auth-main-panel,html.oc-auth-pending #page-register .auth-main-panel{padding:12px!important}
+}
+</style>
