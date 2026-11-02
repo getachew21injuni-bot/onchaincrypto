@@ -4581,6 +4581,30 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
 })();
 </script>
 
+<style id="oc-buy-sell-form-visibility-fix">
+/* Ensure the amount-entry screen is visible immediately after Order Book Buy/Sell. */
+#page-trade #timedPaperTrade.oc-stage-config{
+ display:block!important;visibility:visible!important;opacity:1!important;
+}
+#page-trade #timedPaperTrade.oc-stage-config>.form-panel{
+ display:block!important;visibility:visible!important;opacity:1!important;
+ height:auto!important;max-height:none!important;overflow:visible!important;
+}
+#page-trade #timedPaperTrade.oc-stage-config>.form-panel .content-grid{
+ display:block!important;visibility:visible!important;opacity:1!important;
+}
+#page-trade #timedPaperTrade.oc-stage-config #timedStake,
+#page-trade #timedPaperTrade.oc-stage-config #timedUpBtn,
+#page-trade #timedPaperTrade.oc-stage-config #timedDownBtn,
+#page-trade #timedPaperTrade.oc-stage-config #timedConfirmBtn,
+#page-trade #timedPaperTrade.oc-stage-config #timedCancelBtn{
+ display:inline-flex!important;visibility:visible!important;opacity:1!important;
+}
+#page-trade #timedPaperTrade.oc-stage-config #timedStake{
+ display:block!important;width:100%!important;min-height:46px!important;
+}
+#page-trade #timedPaperTrade.oc-stage-config .oc-trade-amount-row{display:flex!important}
+</style>
 <style id="oc-customer-sequential-flow-v2">
 /* Keep the trading experience in one modal and reveal only the current step. */
 #timedPaperTrade .form-panel .cards[style*="margin-top:10px"]{display:none!important}
