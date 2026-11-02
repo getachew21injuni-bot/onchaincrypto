@@ -1125,6 +1125,8 @@ function setHeaderMarketStatus(state){const dot=document.querySelector(".header-
 async function loadMarket(){
  if(marketRequestInProgress)return;
  marketRequestInProgress=true;
+ // Show the last saved prices immediately while fresh providers reconnect.
+ if(!market.length)restoreCachedMarket();
  const refreshButtons=[$("refreshBtn"),$("retryBtn"),$("refreshSignalsBtn")].filter(Boolean);
  refreshButtons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent="Refreshing…"});
  $("connection").textContent="Updating";setHeaderMarketStatus("connecting");if($("apiStatus"))$("apiStatus").textContent="Loading CoinGecko and Binance live prices in parallel…";$("marketHint").textContent="Refreshing public market feeds simultaneously…";
@@ -1169,8 +1171,10 @@ async function loadMarket(){
    if(!Array.isArray(result)||!result.length)throw new Error("CoinGecko returned no prices");
    let data=result.map(item=>({...item,symbol:String(item.symbol||"").toUpperCase()}));
    const extraIds=COINS.filter(coin=>!data.some(item=>item.id===coin.id)).map(coin=>coin.id);
-   if(extraIds.length){try{const extra=await fetchJson("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(extraIds.join(","))+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",10000);if(Array.isArray(extra))data=data.concat(extra.map(item=>({...item,symbol:String(item.symbol||"").toUpperCase()})))}catch(_){}}
-   geckoData=data;publishAvailable();return data;
+   geckoData=data;publishAvailable();
+   // Do not hold up the main feed or refresh controls while fetching extra long-tail assets.
+   if(extraIds.length){fetchJson("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(extraIds.join(","))+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",10000).then(extra=>{if(Array.isArray(extra)&&extra.length){geckoData=geckoData.concat(extra.map(item=>({...item,symbol:String(item.symbol||"").toUpperCase()})));publishAvailable()}}).catch(()=>{});}
+   return data;
   })();
   const binanceTask=(async()=>{
    const tickers=await fetchJson("https://api.binance.com/api/v3/ticker/24hr",12000);
@@ -1448,7 +1452,10 @@ $("manageSessionBtn").addEventListener("click",()=>{document.getElementById("ocS
 $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new Date().toISOString(),notice:"This export contains browser-local OnChainCrypto data only; it is not a full server-account export.",profile:JSON.parse(localStorage.getItem("oc_profile")||"{}"),notificationPreferences:JSON.parse(localStorage.getItem("oc_notification_preferences")||"{}"),localData:{}};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&(/onchain|wallet|trade|history|profile|asset/i.test(key))&&!["oc_profile","oc_notification_preferences"].includes(key)){try{data.localData[key]=JSON.parse(localStorage.getItem(key))}catch(_){data.localData[key]=localStorage.getItem(key)}}}const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="onchaincrypto-data-export.json";link.click();URL.revokeObjectURL(url);$("privacyMessage").textContent="Downloaded available browser-local data. This does not include all server records."});
 $("requestDeleteAccountBtn").addEventListener("click",()=>{const ok=window.confirm("Account deletion is permanent. This site cannot delete your Firebase account automatically. Open an email request to support instead?");if(!ok)return;const subject="Account deletion request";const body="Please help me request deletion of my OnChainCrypto account and associated personal data. Please explain any identity checks required.";window.location.href="mailto:onchaincryptosupport@gmail.com?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);$("privacyMessage").textContent="Your email app should open with a deletion request draft. Review and send it; this website has not deleted your account."});
 // Profile saving is handled once by the Firebase module below.
- renderWallet();loadMarket();setInterval(loadMarket,120000);window.addEventListener("resize",()=>{if(historySeries.length&&!$("page-trade").classList.contains("hidden"))drawPriceChart()});
+ renderWallet();loadMarket();setInterval(loadMarket,120000);
+ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&(!window.ocMarketLastSuccess||Date.now()-window.ocMarketLastSuccess>60000))loadMarket()});
+ window.addEventListener("focus",()=>{if(!window.ocMarketLastSuccess||Date.now()-window.ocMarketLastSuccess>60000)loadMarket()});
+ window.addEventListener("resize",()=>{if(historySeries.length&&!$("page-trade").classList.contains("hidden"))drawPriceChart()});
 </script>
 
 <script>
@@ -2881,6 +2888,8 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     if(book) book.style.display=page==='trade'?'':'none';
     if(page==='wallet' && typeof window.renderWallet==='function'){try{window.renderWallet()}catch(_){}}
     if(page==='profile' && typeof window.refreshProfileAccountInfo==='function'){try{window.refreshProfileAccountInfo()}catch(_){}}
+    // The capture-phase router bypasses the legacy page handler, so refresh Market here too.
+    if(page==='markets' && typeof loadMarket==='function' && (!window.ocMarketLastSuccess || Date.now()-window.ocMarketLastSuccess>60000)){loadMarket();}
     if(!opts.keepScroll) window.scrollTo({top:0,behavior:'smooth'});
     if(page==='home' && opts.history) requestAnimationFrame(()=>document.getElementById('homePerformancePanel')?.scrollIntoView({behavior:'smooth',block:'start'}));
   }
