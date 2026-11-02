@@ -5626,3 +5626,40 @@ body.oc-logged-out #page-register .auth-welcome:after{content:none!important;dis
  body.oc-logged-out #page-register .auth-main-panel,html.oc-auth-pending #page-register .auth-main-panel{padding:12px!important}
 }
 </style>
+
+
+<style id="oc-final-global-bitcoin-gold-background">
+/* Final override: one centered BTC + gold brand backdrop across the whole platform. */
+html,body{min-height:100%;background-color:#050b14!important}
+body{
+ background-image:
+  radial-gradient(ellipse at 50% 48%,rgba(188,137,48,.22),transparent 52%),
+  radial-gradient(ellipse at 12% 8%,rgba(18,55,91,.32),transparent 38%),
+  radial-gradient(ellipse at 88% 88%,rgba(137,94,28,.16),transparent 42%),
+  linear-gradient(145deg,#040914 0%,#0a1725 50%,#050a13 100%)!important;
+ background-attachment:fixed!important;
+}
+main{position:relative;isolation:isolate}
+main>.oc-platform-backdrop{
+ position:fixed!important;inset:0!important;z-index:0!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ visibility:visible!important;opacity:.34!important;pointer-events:none!important;
+}
+.oc-platform-backdrop .oc-backdrop-brand{filter:drop-shadow(0 18px 42px #000b)!important}
+.oc-platform-backdrop svg{width:min(48vw,430px)!important;max-height:48vh!important}
+.oc-platform-backdrop .oc-backdrop-wordmark{
+ color:#f4d58b!important;font-size:clamp(30px,5.4vw,60px)!important;
+ text-shadow:0 3px 18px #000,0 0 30px #c18a2b66!important;
+}
+main>section:not(.oc-platform-backdrop){position:relative;z-index:1}
+header,.bottom-nav{background:rgba(3,9,18,.92)!important;backdrop-filter:blur(14px)}
+/* Remove old scattered/animated coin decorations; keep the single centered brand artwork. */
+.oc-floating-coin,.oc-public-coin-stage,.oc-coin-orbit,.oc-public-price-chip{display:none!important}
+#page-home .oc-hero-art:before,#page-home .oc-hero-art:after{content:none!important;display:none!important}
+#page-home .oc-invest-hero{background-image:none!important;background-color:rgba(7,17,30,.56)!important}
+@media(max-width:700px){
+ main>.oc-platform-backdrop{opacity:.25!important}
+ .oc-platform-backdrop svg{width:min(78vw,340px)!important;max-height:34vh!important}
+ .oc-platform-backdrop .oc-backdrop-wordmark{font-size:clamp(26px,8vw,42px)!important}
+}
+</style>
