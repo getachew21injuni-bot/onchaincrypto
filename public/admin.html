@@ -81,7 +81,7 @@ const descriptions={
 'KYC':'Review identity-verification submissions securely. Do not upload identity documents to this preview.',
 'Email':'Prepare account announcements after a verified email service is configured.',
 'Analytics':'View user and platform analytics after data access is configured.',
-'Deposits':'Review deposit requests. This preview does not accept or verify payments.',
+'Deposits':'Review deposit requests, clear reviewed deposit history, and manage user demo wallet balances.',
 'Withdrawals':'Review withdrawal requests. This preview cannot send funds.',
 'Addresses':'Manage deposit address records only after secure wallet infrastructure is configured.',
 'Trades':'Review order history after a trusted trading backend is connected.',
@@ -172,7 +172,7 @@ async function renderRequestQueue(view){
  const queueId='ocRequestQueue';
  try{
   const snap=await getDocs(query(collection(db,collectionName),limit(200)));
-  const requests=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(b.createdAt?.seconds||0).localeCompare(String(a.createdAt?.seconds||0)));
+  const requests=snap.docs.map(d=>({id:d.id,...d.data()})).filter(r=>!r.adminHiddenFromHistory).sort((a,b)=>String(b.createdAt?.seconds||0).localeCompare(String(a.createdAt?.seconds||0)));
   const usersSnap=await getDocs(query(collection(db,'users'),limit(500)));
   const users=new Map(usersSnap.docs.map(d=>[d.id,d.data()]));
   const pending=requests.filter(r=>(r.status||'pending')==='pending').length;
@@ -223,7 +223,7 @@ async function renderDemoFinance(view){
  body.innerHTML='<div class="content-panel"><p class="muted">Loading registered users and demo wallet ledger…</p></div>';
  const assets=['USDT','BTC','ETH','BNB','SOL','XRP','USDC','DOGE','TRX','TON','ADA','AVAX','SHIB','LINK','BCH','SUI','XLM','DOT','LTC','NEAR','UNI','ETC','ICP','APT','FIL','HBAR','ARB','OP','RENDER','ATOM','VET','INJ','MKR','DAI','FDUSD','PAXG','XAUT','XAU'];
  try{
-  const {collection,getDocs,query,limit,doc,writeBatch,serverTimestamp}=window.__ocAdminFirebase;
+  const {collection,getDocs,query,limit,doc,setDoc,writeBatch,serverTimestamp,runTransaction}=window.__ocAdminFirebase;
   const db=window.__ocAdminFirebase.db;
   const [us,usdtSnap,assetSnap]=await Promise.all([
    getDocs(query(collection(db,'users'),limit(200))),
@@ -232,7 +232,7 @@ async function renderDemoFinance(view){
   ]);
   const users=us.docs.map(d=>({id:d.id,...d.data()}));
   const allTx=[...usdtSnap.docs.map(d=>({id:d.id,...d.data(),asset:'USDT',amount:d.data().amountUSDT,balanceAfter:d.data().balanceAfterUSDT})),...assetSnap.docs.map(d=>({id:d.id,...d.data()}))];
-  const txs=allTx.filter(t=>view==='Deposits'?t.type==='deposit':t.type==='withdrawal').sort((a,b)=>String(b.createdAtText||'').localeCompare(String(a.createdAtText||''))).slice(0,100);
+  const txs=allTx.filter(t=>!t.adminHiddenFromHistory&&(view==='Deposits'?t.type==='deposit':t.type==='withdrawal')).sort((a,b)=>String(b.createdAtText||'').localeCompare(String(a.createdAtText||''))).slice(0,100);
   if(!users.length){body.innerHTML='<div class="notice">No registered user profiles were found. A user must complete registration before a demo credit can be assigned.</div>';return;}
   const opts=users.map(u=>'<option value="'+esc(u.id)+'">'+esc((u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id)+' — '+(u.email||u.id))+'</option>').join('');
   const assetOptions=assets.map(a=>'<option value="'+a+'">'+a+'</option>').join('');
@@ -250,9 +250,48 @@ async function renderDemoFinance(view){
    '<label style="display:grid;gap:6px;font-weight:700">AMOUNT<input name="amount" type="number" min="0.00000001" max="1000000000" step="any" required placeholder="Enter quantity for selected coin(s)" style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label>'+
    '<label style="display:grid;gap:6px;font-weight:700">ADMIN NOTE (OPTIONAL)<input name="note" maxlength="200" placeholder="Reason for this demo balance adjustment" style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label>'+
    '<button class="icon-btn" type="submit" style="background:'+(view==='Deposits'?'linear-gradient(90deg,#087b56,#12a879)':'linear-gradient(90deg,#813246,#bd4058)')+';border:0;padding:16px;font-size:16px;font-weight:850;box-shadow:0 8px 22px #0004">'+(view==='Deposits'?'＋ ADD TO USER WALLET':'− CONFIRM DEMO DEDUCTION')+'</button><p id="demoFinanceMessage" class="muted" role="status" aria-live="polite" style="margin:0"></p></form>'+
-   '<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Registered user wallet balances</h3><span class="tag">'+users.length+' profiles</span></div><div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>USDT balance</th><th>Other coin balances</th><th>Status</th></tr></thead><tbody>'+userRows+'</tbody></table></div></div>'+
+   '<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Registered user wallet balances</h3><span class="tag">'+users.length+' profiles</span></div><div style="display:grid;gap:10px;margin:12px 0 16px"><label style="display:grid;gap:6px;font-weight:700">Select user to reset all wallet balances<select id="resetWalletUser" style="width:100%;padding:12px;border-radius:10px;background:#102333;color:white;border:1px solid #526878">'+opts+'</select></label><button id="resetWalletBalanceBtn" class="icon-btn" type="button" style="background:#9a3048;border:0;padding:14px;font-weight:800">Reset selected user wallet to zero</button><p id="resetWalletMessage" class="muted" role="status" aria-live="polite" style="margin:0">Resets USDT and all recorded coin balances. The admin audit log is retained.</p></div><div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>USDT balance</th><th>Other coin balances</th><th>Status</th></tr></thead><tbody>'+userRows+'</tbody></table></div></div>'+
    '<div class="content-panel" style="margin:0"><h3 style="margin-top:0">Recent demo '+(view==='Deposits'?'credits':'deductions')+'</h3><div class="table-wrap"><table><thead><tr><th>Time</th><th>User UID</th><th>Type</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody>'+(txRows||'<tr><td colspan="6">No demo transactions recorded yet.</td></tr>')+'</tbody></table></div></div></div>';
   await renderRequestQueue(view);
+  if(view==='Deposits'){
+   const hp=document.createElement('div');hp.className='content-panel';hp.style.margin='0';
+   hp.innerHTML='<h3 style="margin-top:0">Deposit history maintenance</h3><p class="muted">Archive reviewed deposit requests and demo deposit ledger entries from this Admin history view. Pending requests and wallet balances are unchanged. Archived records remain stored for audit.</p><button id="clearDepositHistoryBtn" class="icon-btn" type="button" style="background:#7c2639;border:0;padding:13px;font-weight:800">Clear reviewed deposit history</button><p id="clearDepositHistoryMessage" class="muted" role="status" aria-live="polite"></p>';
+   body.appendChild(hp);
+   hp.querySelector('#clearDepositHistoryBtn').addEventListener('click',async()=>{
+    const current=window.__ocAdminFirebase?.auth?.currentUser;
+    if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){alert('Verified administrator sign-in required.');return;}
+    if(!confirm('Archive reviewed deposit history? Pending requests and wallet balances remain unchanged. Records are retained for audit.'))return;
+    const btn=hp.querySelector('#clearDepositHistoryBtn'),msg=hp.querySelector('#clearDepositHistoryMessage');btn.disabled=true;msg.textContent='Archiving…';
+    try{
+     const [q1,q2,q3]=await Promise.all([getDocs(collection(db,'depositRequests')),getDocs(collection(db,'demoTransactions')),getDocs(collection(db,'demoAssetTransactions'))]);
+     const refs=[...q1.docs.filter(d=>(d.data().status||'pending')!=='pending'&&!d.data().adminHiddenFromHistory).map(d=>d.ref),...q2.docs.filter(d=>d.data().type==='deposit'&&!d.data().adminHiddenFromHistory).map(d=>d.ref),...q3.docs.filter(d=>d.data().type==='deposit'&&!d.data().adminHiddenFromHistory).map(d=>d.ref)];
+     for(let i=0;i<refs.length;i+=450){const batch=writeBatch(db);for(const ref of refs.slice(i,i+450))batch.update(ref,{adminHiddenFromHistory:true,historyClearedAt:serverTimestamp(),historyClearedBy:current.email});await batch.commit();}
+     await setDoc(doc(collection(db,'adminHistoryClearLogs')),{kind:'deposit-history',archivedRecords:refs.length,createdAt:serverTimestamp(),createdBy:current.uid,createdByEmail:current.email,source:'admin-dashboard'});
+     msg.textContent='Archived '+refs.length+' reviewed deposit records. Pending requests and balances are unchanged.';
+     await renderDemoFinance('Deposits');
+    }catch(err){msg.textContent='Archive failed: '+(err.code||err.message||'unknown error');btn.disabled=false;}
+   });
+  }
+  const resetButton=document.getElementById('resetWalletBalanceBtn');
+  if(resetButton)resetButton.addEventListener('click',async()=>{
+   const current=window.__ocAdminFirebase?.auth?.currentUser,select=document.getElementById('resetWalletUser'),msg=document.getElementById('resetWalletMessage');
+   if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){alert('Verified administrator sign-in required.');return;}
+   const target=users.find(u=>u.id===select.value);if(!target){msg.textContent='Select a registered user.';return;}
+   if(!confirm('Set '+(target.displayName||target.email||target.id)+' USDT and all coin balances to ZERO? This does not delete the account.'))return;
+   resetButton.disabled=true;msg.textContent='Resetting wallet…';
+   try{
+    const userRef=doc(db,'users',target.id),logRef=doc(collection(db,'adminWalletResetLogs'));
+    await runTransaction(db,async tx=>{
+     const snap=await tx.get(userRef);if(!snap.exists())throw Error('User profile not found');
+     const data=snap.data(),beforeAssets={...(data.demoAssetBalances||{})},zeroAssets={};
+     for(const sym of new Set([...Object.keys(beforeAssets),...assets]))zeroAssets[sym]=0;
+     tx.update(userRef,{demoBalanceUSDT:0,demoAssetBalances:zeroAssets,demoBalanceUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:current.email,demoWalletResetAt:serverTimestamp(),demoWalletResetBy:current.email,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:current.email});
+     tx.set(logRef,{uid:target.id,userEmail:target.email||'',beforeUSDT:Number(data.demoBalanceUSDT)||0,beforeAssetBalances:beforeAssets,afterUSDT:0,afterAssetBalances:zeroAssets,createdAt:serverTimestamp(),createdBy:current.uid,createdByEmail:current.email,source:'admin-dashboard'});
+    });
+    msg.textContent='Wallet reset confirmed by Firebase. USDT and all coin balances are zero; audit record saved.';
+    await renderDemoFinance(view);
+   }catch(err){msg.textContent='Wallet reset failed: '+(err.code||err.message||'unknown error');resetButton.disabled=false;}
+  });
   const form=document.getElementById('demoFinanceForm');
   form.addEventListener('submit',async e=>{
    e.preventDefault();
