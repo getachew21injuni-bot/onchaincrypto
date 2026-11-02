@@ -1270,8 +1270,23 @@ async function loadMarket(){
    if(sources.length&&combined.length)cacheAndRender(combined,sources);
   };
   const geckoTask=(async()=>{
-   const result=await fetchJson("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",12000);
-   if(!Array.isArray(result)||!result.length)throw new Error("CoinGecko returned no prices");
+   let result;
+   try{
+    result=await fetchJson("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",12000);
+    if(!Array.isArray(result)||!result.length)throw new Error("CoinGecko markets returned no prices");
+   }catch(primaryError){
+    // The markets endpoint can be rate-limited independently. Fall back to the
+    // lighter simple-price endpoint so the Market page can still populate.
+    const fallbackCoins=COINS.filter(coin=>coin.id!=="gold");
+    const ids=fallbackCoins.map(coin=>coin.id).join(",");
+    const simple=await fetchJson("https://api.coingecko.com/api/v3/simple/price?ids="+encodeURIComponent(ids)+"&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true",12000);
+    result=fallbackCoins.map(coin=>{
+     const price=simple?.[coin.id];
+     if(!price||!(Number(price.usd)>0))return null;
+     return {id:coin.id,name:coin.name,symbol:coin.symbol.toLowerCase(),current_price:Number(price.usd),market_cap:Number(price.usd_market_cap)||0,total_volume:Number(price.usd_24h_vol)||0,price_change_percentage_24h:Number(price.usd_24h_change)||0,image:""};
+    }).filter(Boolean);
+    if(!result.length)throw primaryError;
+   }
    let data=result.map(item=>({...item,symbol:String(item.symbol||"").toUpperCase()}));
    const extraIds=COINS.filter(coin=>!data.some(item=>item.id===coin.id)).map(coin=>coin.id);
    geckoData=data;publishAvailable();
