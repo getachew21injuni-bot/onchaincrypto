@@ -5715,3 +5715,41 @@ header,.bottom-nav{background:rgba(3,9,18,.92)!important;backdrop-filter:blur(14
  text-shadow:0 3px 18px #000,0 0 28px rgba(193,138,43,.36)!important;
 }
 </style>
+
+
+<style id="oc-stronger-foreground-brand">
+/* Make the Onchain identity clear and prominent without covering controls. */
+header{position:relative!important;z-index:30!important}
+header .brand{
+ position:relative!important;z-index:31!important;gap:11px!important;
+ transform:translateZ(0);
+}
+header .brand>span{
+ font-size:clamp(21px,2.1vw,27px)!important;
+ font-weight:950!important;letter-spacing:.65px!important;
+ filter:drop-shadow(0 1px 2px rgba(0,0,0,.85)) drop-shadow(0 0 10px rgba(247,147,26,.3))!important;
+}
+header .header-logo-mark{
+ width:40px!important;height:40px!important;flex-basis:40px!important;
+ box-shadow:inset 0 0 0 2px rgba(255,244,190,.55),0 0 0 2px rgba(247,147,26,.25),0 0 16px rgba(247,147,26,.25)!important;
+}
+header .header-logo-mark:after{font-size:28px!important}
+.auth-brand{
+ font-size:22px!important;letter-spacing:3.5px!important;
+ filter:drop-shadow(0 2px 3px rgba(0,0,0,.9)) drop-shadow(0 0 12px rgba(247,147,26,.35))!important;
+}
+.auth-logo-mark{width:84px!important;height:84px!important}
+.auth-logo-mark:after{font-size:56px!important}
+.oc-platform-backdrop .oc-backdrop-wordmark{
+ font-size:clamp(38px,6.2vw,70px)!important;
+ filter:drop-shadow(0 3px 3px #000) drop-shadow(0 0 18px rgba(247,147,26,.55))!important;
+}
+@media(max-width:700px){
+ header .brand{gap:7px!important}
+ header .brand>span{font-size:20px!important}
+ header .header-logo-mark{width:35px!important;height:35px!important;flex-basis:35px!important}
+ header .header-logo-mark:after{font-size:24px!important}
+ .auth-brand{font-size:20px!important}
+ .oc-platform-backdrop .oc-backdrop-wordmark{font-size:clamp(30px,8.5vw,48px)!important}
+}
+</style>
