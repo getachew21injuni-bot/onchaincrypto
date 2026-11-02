@@ -3708,6 +3708,7 @@ function renderMode(mode){
 }
 function renderUsers(snapshot){
  const host=byId("ocAdminUsersList"),count=byId("ocAdminUserCount");if(!host)return;
+ snapshot.docs.forEach(item=>{const data=item.data()||{};if(data.adminAssigned!==true){void setDoc(doc(db,"users",item.id),{adminAssigned:true},{merge:true}).catch(error=>console.warn("Existing user admin assignment could not be backfilled:",item.id,error.code||error));}});
  const rows=snapshot.docs.map(item=>({uid:item.id,...(item.data()||{})})).sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
  if(count)count.textContent=rows.length+" users";
  host.innerHTML=rows.length?rows.map(user=>{
