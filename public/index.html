@@ -340,6 +340,37 @@ body.oc-logged-out #page-register{display:grid!important}html.oc-auth-pending ma
 @media(max-width:680px){body.oc-logged-out #page-register,html.oc-auth-pending main>#page-register{display:flex!important}}
 </style>
 
+
+<style id="oc-restore-simple-login">
+/* Restore the clean, centered sign-in screen. Keep all existing auth controls and handlers. */
+body.oc-logged-out main,
+html.oc-auth-pending main{display:flex!important;align-items:center!important;justify-content:center!important;min-height:100vh!important;padding:18px!important}
+body.oc-logged-out #page-register,
+html.oc-auth-pending main>#page-register{
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+  gap:12px!important;width:100%!important;max-width:520px!important;min-height:0!important;
+  margin:0 auto!important;padding:18px!important
+}
+body.oc-logged-out #page-register>.oc-public-auth-hero,
+html.oc-auth-pending #page-register>.oc-public-auth-hero{display:none!important}
+body.oc-logged-out #page-register>.auth-welcome,
+html.oc-auth-pending #page-register>.auth-welcome{
+  display:block!important;width:100%!important;margin:0!important;padding:0 0 4px!important;text-align:center!important
+}
+body.oc-logged-out #page-register>.content-grid,
+html.oc-auth-pending #page-register>.content-grid{
+  display:block!important;width:100%!important;max-width:480px!important;margin:0!important
+}
+body.oc-logged-out #page-register .auth-main-panel,
+html.oc-auth-pending #page-register .auth-main-panel{
+  width:100%!important;max-width:480px!important;margin:0!important;padding:22px!important
+}
+@media(max-width:680px){
+  body.oc-logged-out main,html.oc-auth-pending main{padding:14px!important}
+  body.oc-logged-out #page-register,html.oc-auth-pending main>#page-register{padding:8px!important;gap:10px!important}
+  body.oc-logged-out #page-register .auth-main-panel,html.oc-auth-pending #page-register .auth-main-panel{padding:18px!important}
+}
+</style>
 </head>
 <body>
 <header>
