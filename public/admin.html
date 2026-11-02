@@ -92,48 +92,53 @@ const descriptions={
 'Settings':'Admin settings and access controls must be enforced by the server, not only this page.',
 'Support':'Chat directly with customers and manage support conversations.'
 };
-function renderTradeControls(){
- const key='onchaincrypto_demo_trade_controls';
- let saved={};
- try{saved=JSON.parse(localStorage.getItem(key)||'{}')||{};}catch(e){saved={};}
- const demoUsers=Array.isArray(saved.demoUsers)&&saved.demoUsers.length?saved.demoUsers:['Demo account A','Demo account B','Demo account C'];
- const demoCoins=['BTC/USDT','ETH/USDT','BNB/USDT','SOL/USDT','XRP/USDT'];
- document.getElementById('detailBody').innerHTML=`
- <div id="tradeControlsPanel" style="display:grid;gap:16px;max-width:900px">
-  <div style="border:1px solid #27647a;background:linear-gradient(135deg,#12263d,#143a4c);border-radius:20px;padding:22px;box-shadow:0 16px 45px #0003">
-   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div><h3 style="margin:0 0 5px;font-size:21px">⇄ Trade Settings</h3><p class="muted" style="margin:0">Configure transparent outcomes for local paper-trading tests</p></div><span style="border:1px solid #a87826;background:#35270f;color:#fbbf24;padding:5px 9px;border-radius:20px;font-size:11px">DEMO ONLY</span></div>
-   <div style="height:1px;background:#ffffff20;margin:20px 0"></div>
-   <label style="display:grid;gap:8px;font-weight:700">♟ SELECT DEMO USER
-    <select id="demoUserSelect" style="width:100%;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#25495a;color:white">
-     ${demoUsers.map(u=>'<option value="'+String(u).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')+'">'+String(u).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</option>').join('')}
-    </select>
-   </label>
-   <div style="height:1px;background:#ffffff20;margin:20px 0"></div>
-   <h4 style="margin:0 0 12px">⚙ TRADE CONFIGURATION</h4>
-   <label style="display:block;font-weight:700;margin-bottom:8px">Test outcome</label>
-   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-    <label style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #2d9c84;background:#0e6656;border-radius:12px;padding:12px"><input type="radio" name="demoOutcome" value="win" ${saved.outcome!=='loss'?'checked':''}> ↗ Simulate win</label>
-    <label style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #87515a;background:#40262f;border-radius:12px;padding:12px"><input type="radio" name="demoOutcome" value="loss" ${saved.outcome==='loss'?'checked':''}> ↘ Simulate loss</label>
-   </div>
-   <label style="display:block;font-weight:700;margin-bottom:8px" for="demoOutcomePercent">Test percentage</label>
-   <div style="display:flex;align-items:center;gap:10px"><input id="demoOutcomePercent" type="number" min="0.1" max="100" step="0.1" value="${saved.percent??10}" style="flex:1;min-width:0;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#25495a;color:white"><strong>%</strong></div>
-   <p class="muted" style="margin:8px 0 16px">This sets a test scenario for the selected demo account across the demo coin list below. It does not change real user trades, account balances, or live exchange outcomes.</p>
-   <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">${demoCoins.map(c=>'<span style="border:1px solid #416577;background:#193448;padding:7px 10px;border-radius:20px;font-size:12px">'+c+'</span>').join('')}</div>
-   <button id="applyDemoOutcome" class="icon-btn" style="width:100%;padding:14px;background:linear-gradient(90deg,#24b8d2,#20d9dc);border:0;color:#062b3a;font-weight:800">▣ Apply to Demo Coins</button>
-   <p id="demoTradeControlMessage" class="muted" role="status" aria-live="polite" style="margin-bottom:0">Settings are stored in this browser only. No real user list is connected.</p>
-  </div>
-  <div class="content-panel" style="margin-top:0"><h3 style="margin-top:0">Production status</h3><p class="muted">The current repository has no secure server endpoint for reading registered users or applying risk settings. This panel therefore uses demo profiles only. A production take-profit/stop-loss system should use objective market prices, transparent rules, server-side authorization and an auditable risk engine—not forced outcomes for individual customers.</p></div>
- </div>`;
- document.getElementById('applyDemoOutcome').addEventListener('click',()=>{
-  const user=document.getElementById('demoUserSelect').value;
-  const percent=Number(document.getElementById('demoOutcomePercent').value);
-  const outcome=document.querySelector('input[name="demoOutcome"]:checked')?.value||'win';
-  const msg=document.getElementById('demoTradeControlMessage');
-  if(!Number.isFinite(percent)||percent<0.1||percent>100){msg.textContent='Enter a test percentage between 0.1 and 100.';return;}
-  const next={...saved,demoUsers,outcome,percent,selectedDemoUser:user,updatedAt:new Date().toISOString(),mode:'local-paper-trading-test',coins:demoCoins};
-  localStorage.setItem(key,JSON.stringify(next));
-  msg.textContent='Saved '+outcome.toUpperCase()+' test scenario ('+percent+'%) for '+user+' across '+demoCoins.length+' demo pairs in this browser only.';
- });
+async function renderTradeControls(){
+ const body=document.getElementById('detailBody');
+ const api=window.__ocAdminFirebase;
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading registered user profiles from Firebase…</p></div>';
+ if(!api){body.textContent='Firebase admin connection is not ready. Refresh and sign in again.';return;}
+ const {db,collection,getDocs,query,limit,doc,setDoc,serverTimestamp,auth}=api;
+ try{
+  const current=auth.currentUser;
+  if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('Verified administrator sign-in required.');
+  const snap=await getDocs(query(collection(db,'users'),limit(500)));
+  const users=snap.docs.map(d=>({id:d.id,...d.data()})).filter(u=>u.email||u.displayName||u.firstName||u.lastName);
+  if(!users.length){body.innerHTML='<div class="notice">No registered user profiles were found in Firestore yet. Users appear here after their profile is created.</div>';return;}
+  body.innerHTML=`
+   <div id="tradeControlsPanel" style="display:grid;gap:16px;max-width:900px">
+    <div class="content-panel">
+     <h3 style="margin-top:0">Registered user trade controls</h3>
+     <p class="muted">Select an actual registered profile. These controls store account trading permission and a maximum trade amount; they do not force wins or losses or alter market prices.</p>
+     <label style="display:grid;gap:8px;font-weight:700">Select registered user
+      <select id="tradeControlUser" style="width:100%;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#10243a;color:white">
+       ${users.map(u=>'<option value="'+safeText(u.id)+'">'+safeText((u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id)+' — '+(u.email||u.id))+'</option>').join('')}
+      </select>
+     </label>
+     <div style="height:1px;background:#ffffff20;margin:18px 0"></div>
+     <label style="display:flex;align-items:center;gap:10px;font-weight:700"><input id="tradeControlEnabled" type="checkbox" checked> Trading enabled for this account</label>
+     <label style="display:grid;gap:8px;font-weight:700;margin-top:16px">Maximum trade amount (USDT)
+      <input id="tradeControlMax" type="number" min="100" max="1000000" step="1" value="1000000" style="width:100%;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#10243a;color:white">
+     </label>
+     <button id="saveTradeControl" class="icon-btn" style="width:100%;padding:14px;margin-top:18px;background:linear-gradient(90deg,#24b8d2,#20d9dc);border:0;color:#062b3a;font-weight:800">Save trade controls</button>
+     <p id="tradeControlMessage" class="muted" role="status" aria-live="polite">Loading this user's saved settings…</p>
+    </div>
+    <div class="content-panel"><h3 style="margin-top:0">Registered profiles: ${users.length}</h3><p class="muted">Example accounts A, B and C have been removed. Only user profiles returned by Firestore are listed here. Saved settings are account-level records; enforcement in trade execution must also be enabled before these settings can restrict live trades.</p></div>
+   </div>`;
+  const select=body.querySelector('#tradeControlUser'),enabled=body.querySelector('#tradeControlEnabled'),max=body.querySelector('#tradeControlMax'),message=body.querySelector('#tradeControlMessage');
+  const load=async()=>{const u=users.find(x=>x.id===select.value);enabled.checked=u?.tradingEnabled!==false;max.value=Number(u?.maxTradeAmountUSDT||1000000);message.textContent='Current settings loaded for '+(u?.email||u?.displayName||u?.id||'selected user')+'.';};
+  select.addEventListener('change',load);await load();
+  body.querySelector('#saveTradeControl').addEventListener('click',async()=>{
+   const u=users.find(x=>x.id===select.value),amount=Number(max.value);
+   if(!u){message.textContent='Select a registered user.';return;}
+   if(!Number.isFinite(amount)||amount<100||amount>1000000){message.textContent='Maximum trade amount must be between 100 and 1,000,000 USDT.';return;}
+   const button=body.querySelector('#saveTradeControl');button.disabled=true;message.textContent='Saving to Firebase…';
+   try{
+    await setDoc(doc(db,'users',u.id),{tradingEnabled:enabled.checked,maxTradeAmountUSDT:amount,tradeControlUpdatedAt:serverTimestamp(),tradeControlUpdatedBy:current.email},{merge:true});
+    u.tradingEnabled=enabled.checked;u.maxTradeAmountUSDT=amount;message.textContent='Saved to Firebase for '+(u.email||u.displayName||u.id)+'. Note: trade execution enforcement is not yet enabled by this Admin setting.';
+   }catch(e){message.textContent='Could not save settings: '+(e.code||e.message||'permission error');}
+   finally{button.disabled=false;}
+  });
+ }catch(e){body.innerHTML='<div class="notice">Could not load registered users or trade controls: '+safeText(e.code||e.message||'unknown error')+'. Check verified Admin access and Firestore rules.</div>';}
 }
 
 const moduleKey='onchaincrypto_admin_demo_v1';
