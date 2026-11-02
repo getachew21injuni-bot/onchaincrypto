@@ -108,9 +108,19 @@ async function renderTradeControls(){
  if(!api){body.textContent='Firebase admin connection is not ready. Refresh and sign in again.';return;}
  const {db,collection,getDocs,query,limit,doc,setDoc,serverTimestamp,auth}=api;
  try{
-  const current=auth.currentUser;
-  if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('Verified administrator sign-in required.');
-  const snap=await getDocs(query(collection(db,'users'),limit(500)));
+  let current=auth.currentUser;
+  if(!current)throw new Error('Verified administrator sign-in required. Please sign in again.');
+  await current.reload();
+  current=auth.currentUser;
+  if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('Verified administrator sign-in required. Please verify the admin email and sign in again.');
+  // Refresh the Firebase ID token so Firestore rules receive the latest verified-email/admin claims.
+  await current.getIdToken(true);
+  // Bound the read so a stalled network request cannot leave this panel loading forever.
+  let loadTimer;
+  const snap=await Promise.race([
+   getDocs(query(collection(db,'users'),limit(100))),
+   new Promise((_,reject)=>{loadTimer=setTimeout(()=>reject(new Error('User profile request timed out after 15 seconds. Check your connection and Firestore availability, then retry.')),15000);})
+  ]).finally(()=>clearTimeout(loadTimer));
   const users=snap.docs.map(d=>({id:d.id,...d.data()})).filter(u=>u.email||u.displayName||u.firstName||u.lastName);
   if(!users.length){body.innerHTML='<div class="notice">No registered user profiles were found in Firestore yet. Users appear here after their profile is created.</div>';return;}
   body.innerHTML=`
@@ -147,7 +157,11 @@ async function renderTradeControls(){
    }catch(e){message.textContent='Could not save settings: '+(e.code||e.message||'permission error');}
    finally{button.disabled=false;}
   });
- }catch(e){body.innerHTML='<div class="notice">Could not load registered users or trade controls: '+safeText(e.code||e.message||'unknown error')+'. Check verified Admin access and Firestore rules.</div>';}
+ }catch(e){
+  const detail=String(e.code||e.message||'unknown error');
+  body.innerHTML='<div class="notice"><strong>Could not load registered users.</strong><p>'+safeText(detail)+'</p><p>Confirm you are signed in with the verified administrator email and that Firestore is reachable.</p><button type="button" id="retryTradeUsers" class="icon-btn">↻ Retry loading users</button></div>';
+  body.querySelector('#retryTradeUsers')?.addEventListener('click',()=>renderTradeControls());
+ }
 }
 
 const moduleKey='onchaincrypto_admin_demo_v1';
