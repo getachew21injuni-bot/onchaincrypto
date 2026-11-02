@@ -147,10 +147,10 @@ service cloud.firestore {
     match /supportTickets/{ticketId} {
       allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.status == 'open'
-        && request.resource.data.keys().hasOnly(['ownerUid','customerEmail','customerName','subject','status','createdAt','updatedAt','lastMessage'])
+        && request.resource.data.keys().hasOnly(['ownerUid','customerEmail','customerName','subject','status','createdAt','updatedAt','lastMessage','source'])
         && request.resource.data.subject is string && request.resource.data.subject.size() > 0 && request.resource.data.subject.size() <= 100;
       allow get, list: if isAdmin() || (signedIn() && resource.data.ownerUid == request.auth.uid);
-      allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt','lastMessage']) && request.resource.data.status in ['open','in_progress','resolved'];
+      allow update: if (isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt','lastMessage']) && request.resource.data.status in ['open','in_progress','resolved']) || (signedIn() && resource.data.ownerUid == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['updatedAt','lastMessage']));
       allow delete: if false;
       match /messages/{messageId} {
         function ticketOwner() { return signedIn() && get(/databases/$(database)/documents/supportTickets/$(ticketId)).data.ownerUid == request.auth.uid; }
