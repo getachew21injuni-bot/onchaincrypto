@@ -915,7 +915,7 @@ async function loadMarket(){
   if(!Array.isArray(result)||!result.length)throw new Error("CoinGecko returned no live market prices");
   data=result.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()}));
   const extraIds=COINS.filter(c=>!data.some(m=>m.id===c.id)).map(c=>c.id);
-  if(extraIds.length){try{const extra=await getJSON("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(extraIds.join(","))+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",8000);if(Array.isArray(extra))data=data.concat(extra.map(c=>({...c,symbol:(c.symbol||"").toUpperCase())))}catch(_){}}
+  if(extraIds.length){try{const extra=await getJSON("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(extraIds.join(","))+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",8000);if(Array.isArray(extra))data=data.concat(extra.map(c=>({...c,symbol:(c.symbol||"").toUpperCase()})))}catch(_){}}
   market=data;window.market=market;
   const now=Date.now();window.ocMarketLastSuccess=now;
   try{localStorage.setItem("oc_market_cache",JSON.stringify({time:now,data:market}))}catch(e){}
