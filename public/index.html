@@ -372,33 +372,14 @@ html.oc-auth-pending #page-register .auth-main-panel{
 }
 </style>
 <style id="oc-platform-market-atmosphere">
-/* One quiet, shared market atmosphere across every Onchain screen. */
+/* Clean, static platform background. Decorative floating coins are removed. */
 body{background-color:#020817;background-attachment:fixed}
 main{position:relative}
-main>.oc-platform-atmosphere{position:fixed;inset:0;z-index:0;display:block;pointer-events:none;overflow:hidden}
-main>.oc-platform-atmosphere .oc-atmo-coin{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:56px;height:56px;border-radius:50%;border:1px solid #ffffff42;box-shadow:0 8px 28px #0008,inset 0 2px 5px #ffffff42,inset 0 -5px 10px #0006;opacity:.48;animation:ocAtmoGlide 13s ease-in-out infinite;will-change:transform}
-main>.oc-platform-atmosphere .oc-atmo-coin b{display:grid;place-items:center;width:100%;height:34px;font-size:26px;line-height:1;color:#fff;text-shadow:0 1px 3px #0008}
-main>.oc-platform-atmosphere .oc-atmo-coin small{font-size:7px;line-height:1;color:#fff;font-weight:800;letter-spacing:.25px;white-space:nowrap;text-shadow:0 1px 3px #000}
-main>.oc-platform-atmosphere .oc-atmo-coin small em{font-style:normal;color:#d7e8f8;font-weight:600;margin-left:2px}
-main>.oc-platform-atmosphere .btc{left:4%;top:17%;background:linear-gradient(145deg,#ffd889,#f7931a 70%,#a95a08)}
-main>.oc-platform-atmosphere .eth{left:22%;bottom:15%;background:linear-gradient(145deg,#c5d1ff,#627eea 70%,#344b9b);animation-delay:-2s}
-main>.oc-platform-atmosphere .usdt{left:43%;top:8%;background:linear-gradient(145deg,#8af0cd,#26a17b 70%,#12664d);animation-delay:-4s}
-main>.oc-platform-atmosphere .bnb{right:24%;bottom:13%;background:linear-gradient(145deg,#fff0a5,#f3ba2f 70%,#9b6c08);animation-delay:-1s}
-main>.oc-platform-atmosphere .xrp{right:5%;top:20%;background:linear-gradient(145deg,#e3edf7,#788da4 70%,#34495e);animation-delay:-3s}
-main>.oc-platform-market-atmosphere .gold,
-main>.oc-platform-atmosphere .gold{right:44%;bottom:9%;width:66px;height:66px;border:3px solid #ffe7a0;background:radial-gradient(circle at 30% 25%,#fff3b6,#e5b53d 54%,#95620c);box-shadow:0 9px 30px #0008,inset 0 0 0 3px #b77a12,inset 0 0 0 5px #ffedaa;animation-delay:-5s}
-main>.oc-platform-atmosphere .gold b{font-size:25px;color:#553700}
-@keyframes ocAtmoGlide{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(15px,-9px,0)}}
-main>section:not(.oc-platform-atmosphere){position:relative;z-index:1}
+main>section{position:relative;z-index:1}
 header{position:relative;z-index:20}
 #page-home .oc-floating-coins{display:none!important}
-#ocLiveSupport{position:fixed!important;right:18px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:10000;display:flex!important;align-items:center;gap:9px;padding:0;border:0;background:transparent;text-decoration:none;cursor:pointer;animation:ocSupportFloat 5s ease-in-out infinite}
-#ocLiveSupport .oc-support-icon{width:54px;height:54px;flex:0 0 54px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#d69a32,#8757ff);border:2px solid #f4d58b;box-shadow:0 8px 28px #b77a1240,0 0 20px #d69a3225}
-#ocLiveSupport .oc-support-label{padding:9px 13px;border:1px solid #c79b4d66;border-radius:999px;background:#091522eF;color:#f6e5bd;font-size:12px;font-weight:750;letter-spacing:.15px;box-shadow:0 5px 18px #0007;white-space:nowrap}
-@keyframes ocSupportFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-#ocSupportPanel{z-index:10001}
-html.oc-auth-pending main>:not(#page-register):not(.oc-platform-atmosphere),
-body.oc-logged-out main>:not(#page-register):not(.oc-platform-atmosphere){display:none!important}
+html.oc-auth-pending main>:not(#page-register),
+body.oc-logged-out main>:not(#page-register){display:none!important}
 html.oc-auth-pending body>:not(main):not(#ocLiveSupport):not(#ocSupportPanel),
 body.oc-logged-out>:not(main):not(#ocLiveSupport):not(#ocSupportPanel){display:none!important}
 html.oc-auth-pending body>#ocLiveSupport,
@@ -407,20 +388,6 @@ html.oc-auth-pending body>#ocSupportPanel,
 body.oc-logged-out>#ocSupportPanel{display:none!important}
 html.oc-auth-pending body>#ocSupportPanel.open,
 body.oc-logged-out>#ocSupportPanel.open{display:flex!important}
-@media(max-width:700px){
- main>.oc-platform-atmosphere .oc-atmo-coin{width:42px;height:42px;opacity:.34}
- main>.oc-platform-atmosphere .oc-atmo-coin b{height:25px;font-size:19px}
- main>.oc-platform-atmosphere .oc-atmo-coin small{font-size:6px}
- main>.oc-platform-atmosphere .eth{left:19%;bottom:12%}
- main>.oc-platform-atmosphere .usdt{left:40%;top:6%}
- main>.oc-platform-atmosphere .bnb{right:20%;bottom:10%}
- main>.oc-platform-atmosphere .gold{width:50px;height:50px;right:42%;bottom:6%}
- #ocLiveSupport{right:12px!important;bottom:calc(82px + env(safe-area-inset-bottom,0px))!important}
- #ocLiveSupport .oc-support-icon{width:48px;height:48px;flex-basis:48px}
- #ocLiveSupport .oc-support-label{font-size:11px;padding:8px 10px}
- html.oc-auth-pending body>#ocLiveSupport,body.oc-logged-out>#ocLiveSupport{bottom:18px!important}
-}
-@media(prefers-reduced-motion:reduce){main>.oc-platform-atmosphere .oc-atmo-coin,#ocLiveSupport{animation:none!important}}
 </style>
 
 <style id="oc-home-brand-no-person-images">
@@ -432,6 +399,14 @@ body.oc-logged-out>#ocSupportPanel.open{display:flex!important}
 #page-home .oc-brand-wordmark span:nth-child(1){color:#f2c34b}#page-home .oc-brand-wordmark span:nth-child(2){color:#eaf6ff}#page-home .oc-brand-wordmark span:nth-child(3){color:#27d9a2}
 #page-home .oc-brand-tagline{max-width:290px;color:#a9c2d5;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;line-height:1.6}
 @media(max-width:720px){#page-home .oc-brand-stage{min-height:205px;margin-top:4px;padding:16px}#page-home .oc-brand-emblem{width:78px;height:78px;border-radius:22px;font-size:30px}#page-home .oc-brand-wordmark{font-size:clamp(27px,8vw,36px)}}
+</style>
+
+<style id="oc-onchain-btc-gold-brand">
+#page-home .oc-brand-wordmark{gap:2px!important;font-size:clamp(32px,4vw,48px)!important;letter-spacing:-1.7px!important}
+#page-home .oc-brand-wordmark span:nth-child(1){color:#f7931a!important}
+#page-home .oc-brand-wordmark span:nth-child(2){background:linear-gradient(100deg,#fff0a8 0%,#f5c542 45%,#c88a1c 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important}
+header .brand>span{font-weight:950;letter-spacing:-.5px;background:linear-gradient(100deg,#f7931a 0%,#ffc04d 45%,#f6d36b 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important}
+@media(max-width:720px){#page-home .oc-brand-wordmark{font-size:clamp(31px,9vw,39px)!important}}
 </style>
 </head>
 <body>
@@ -447,14 +422,6 @@ body.oc-logged-out>#ocSupportPanel.open{display:flex!important}
   <div class="header-right"><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Guides and account assistance</small></span></button></div></div></div>
 </header>
 <main>
-  <div class="oc-platform-atmosphere" aria-hidden="true">
-    <span class="oc-atmo-coin btc" data-atmo-symbol="BTC"><b>₿</b><small>BTC <em>Live</em></small></span>
-    <span class="oc-atmo-coin eth" data-atmo-symbol="ETH"><b>◆</b><small>ETH <em>Live</em></small></span>
-    <span class="oc-atmo-coin usdt" data-atmo-symbol="USDT"><b>₮</b><small>USDT <em>Live</em></small></span>
-    <span class="oc-atmo-coin bnb" data-atmo-symbol="BNB"><b>◆</b><small>BNB <em>Live</em></small></span>
-    <span class="oc-atmo-coin xrp" data-atmo-symbol="XRP"><b>✕</b><small>XRP <em>Live</em></small></span>
-    <span class="oc-atmo-coin gold" data-atmo-symbol="XAU"><b>Au</b><small>XAU <em>Live</em></small></span>
-  </div>
   <section id="page-home">
  <div class="page-title"><div><h1 id="homeGreeting">OnChainCrypto</h1></div><button class="secondary" type="button" data-go="markets">Explore Markets ↗</button></div>
   
@@ -466,7 +433,7 @@ body.oc-logged-out>#ocSupportPanel.open{display:flex!important}
   </div>
   <div class="oc-hero-art oc-brand-stage" aria-label="OnChainCrypto brand">
    <div class="oc-brand-emblem" aria-hidden="true">OC</div>
-   <div class="oc-brand-wordmark"><span>On</span><span>Chain</span><span>Crypto</span></div>
+   <div class="oc-brand-wordmark"><span>On</span><span>chain</span></div>
    <div class="oc-brand-tagline">Institutional Crypto Intelligence Platform</div>
   </div>
  </section>
