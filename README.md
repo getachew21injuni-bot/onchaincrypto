@@ -1,4 +1,4 @@
-# OnChainCrypto
+# Onchainspro
 
 A static demo website for viewing public crypto-market data and testing simulated trades. **This repository is not a live cryptocurrency exchange.**
 
@@ -51,7 +51,7 @@ If a Firebase service-account private key was ever pasted into a chat, ticket, o
 1. Open [Google Cloud Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts?project=onchaincrypto-d976b).
 2. Select `firebase-adminsdk-fbsvc@onchaincrypto-d976b.iam.gserviceaccount.com` and open **Keys**.
 3. Revoke/delete only the exposed key by its key ID. Do not delete the service account itself.
-4. If needed, create a replacement key and store it only as the GitHub Actions secret `FIREBASE_SERVICE_ACCOUNT_ONCHAINCRYPTO`. Never paste it into chat or commit it to this repository.
+4. If needed, create a replacement key and store it only as the GitHub Actions secret `FIREBASE_SERVICE_ACCOUNT_ONCHAINSPRO`. Never paste it into chat or commit it to this repository.
 
 ## Guides
 
