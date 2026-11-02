@@ -62,11 +62,11 @@
 <div class="stat"><span class="label">Saved User Profiles</span><span class="sicon">♟</span><div class="value" id="liveUsersCount">—</div><div class="trend" id="liveUsersStatus">● Waiting for admin data connection</div></div>
 <div class="stat"><span class="label">Total Demo Wallet Assets (USDT)</span><span class="sicon" style="color:#34d399">◈</span><div class="value" id="liveTotalDemoAssets">—</div><div class="muted" id="liveTotalDemoAssetsStatus">Connecting to demo wallet records</div></div>
 <div class="stat"><span class="label">Pending KYC</span><span class="sicon" style="color:#b197ff">▣</span><div class="value" id="liveKycCount">—</div><div class="muted" id="liveKycStatus">Waiting for secure KYC data</div></div>
-<div class="stat"><span class="label">Deposit Requests</span><span class="sicon" style="color:#68aaff">↓</span><div class="value">Not connected</div><div class="muted">No payment request backend is configured</div></div>
-<div class="stat"><span class="label">Withdrawal Requests</span><span class="sicon" style="color:#fb7185">↑</span><div class="value">Not connected</div><div class="muted">No payout backend is configured</div></div>
+<div class="stat"><span class="label">Deposit Requests</span><span class="sicon" style="color:#68aaff">↓</span><div class="value" id="liveDepositRequests">—</div><div class="muted" id="liveDepositStatus">Connecting to Firestore request queue</div></div>
+<div class="stat"><span class="label">Withdrawal Requests</span><span class="sicon" style="color:#fb7185">↑</span><div class="value" id="liveWithdrawalRequests">—</div><div class="muted" id="liveWithdrawalStatus">Connecting to Firestore request queue</div></div>
 <div class="stat"><span class="label">Dashboard Data</span><span class="sicon" style="color:#fbbf24">◴</span><div class="value" id="dashboardDataStatus">Checking</div><div class="muted" id="dashboardUpdatedAt">Live data status will appear here</div></div>
 </div>
-<div class="notice"><strong>Live connection status:</strong> User profiles and KYC submissions are read from Firestore when administrator permissions allow it. Balances, deposits, withdrawals, wallet addresses, support inbox, email sending and trade controls are not connected to a trusted backend. No real funds or payments can be managed here.</div>
+<div class="notice"><strong>Live connection status:</strong> User profiles and KYC submissions are read from Firestore when administrator permissions allow it. Deposit and withdrawal requests are read from Firestore and can be approved as simulated balance changes only. Blockchain verification and real payouts are not connected; no real funds are managed here.</div>
 </section>
 <section id="detailView" class="content-panel hidden"><div class="panel-head"><h2 id="detailTitle">Section</h2><span class="muted">Admin workspace</span></div><div id="detailBody" class="empty">This section is ready for a secure backend connection. No live records are displayed.</div></section>
 </main>
@@ -160,6 +160,59 @@ function esc(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt
 function getRecords(view){const data=loadAdminData();return Array.isArray(data[view])?data[view]:(seedRecords[view]||[]).map((x,i)=>({...x,id:view.toLowerCase().replace(/[^a-z]/g,'')+'-'+i,createdAt:new Date().toISOString()}));}
 function renderLiveCollection(view){if(window.adminGetLiveCollection)window.adminGetLiveCollection(view);else document.getElementById('detailBody').textContent='Firebase admin data module is not ready. Refresh and sign in again.';}
 
+async function renderRequestQueue(view){
+ const body=document.getElementById('detailBody'),kind=view==='Deposits'?'deposit':'withdraw',collectionName=kind==='deposit'?'depositRequests':'withdrawRequests';
+ const api=window.__ocAdminFirebase;if(!api)return;
+ const {db,collection,getDocs,query,limit,doc,serverTimestamp,runTransaction}=api;
+ const queueId='ocRequestQueue';
+ try{
+  const snap=await getDocs(query(collection(db,collectionName),limit(200)));
+  const requests=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(b.createdAt?.seconds||0).localeCompare(String(a.createdAt?.seconds||0)));
+  const usersSnap=await getDocs(query(collection(db,'users'),limit(500)));
+  const users=new Map(usersSnap.docs.map(d=>[d.id,d.data()]));
+  const pending=requests.filter(r=>(r.status||'pending')==='pending').length;
+  const rows=requests.map(r=>{
+   const u=users.get(r.uid)||{},name=u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||r.email||r.uid||'Unknown';
+   const amount=Number(r.amount||0),asset=String(r.asset||'USDT'),status=String(r.status||'pending');
+   const when=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'—';
+   const details=kind==='deposit'?'TX: '+(r.transactionHash||'—')+' · To: '+(r.depositAddress||'—'):'To: '+(r.destinationAddress||'—');
+   const actions=status==='pending'?'<button class="icon-btn" data-request-action="approve" data-request-id="'+esc(r.id)+'" style="background:#087b56;border:0">Approve to demo balance</button> <button class="icon-btn" data-request-action="reject" data-request-id="'+esc(r.id)+'">Reject</button>':'<span class="tag">'+esc(status==='approved'?'APPROVED · DEMO':status.toUpperCase())+'</span>';
+   return '<tr><td>'+esc(name)+'<br><small class="muted">'+esc(r.email||r.uid||'')+'</small></td><td>'+amount.toLocaleString(undefined,{maximumFractionDigits:8})+' '+esc(asset)+'</td><td>'+esc(r.network||'—')+'</td><td style="max-width:240px;overflow-wrap:anywhere">'+esc(details)+'</td><td>'+esc(when)+'</td><td>'+actions+'</td></tr>';
+  }).join('');
+  const panel=document.createElement('div');panel.id=queueId;panel.className='content-panel';panel.style.margin='0 0 16px';
+  panel.innerHTML='<div class="panel-head"><h3>Live '+(kind==='deposit'?'deposit':'withdrawal')+' requests</h3><span class="tag">'+pending+' pending · '+requests.length+' total</span></div><p class="muted">Firestore request queue · approvals change simulated balances only. Deposits are not blockchain-verified and withdrawals are not paid out.</p><div class="table-wrap"><table style="min-width:900px"><thead><tr><th>User</th><th>Amount</th><th>Network</th><th>Payment / destination details</th><th>Submitted</th><th>Admin action</th></tr></thead><tbody>'+(rows||'<tr><td colspan="6" class="empty">No '+kind+' requests found.</td></tr>')+'</tbody></table></div><p id="ocRequestMessage" class="muted" role="status" aria-live="polite"></p>';
+  const old=document.getElementById(queueId);if(old)old.remove();body.prepend(panel);
+  panel.querySelectorAll('[data-request-action]').forEach(button=>button.addEventListener('click',async()=>{
+   const action=button.dataset.requestAction,id=button.dataset.requestId;
+   if(!id||!['approve','reject'].includes(action))return;
+   const current=auth.currentUser;if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){alert('Verified administrator sign-in required.');return;}
+   const req=requests.find(x=>x.id===id);if(!req)return;
+   if(!confirm(action==='approve'?'Approve this request to the user’s SIMULATED balance? No blockchain payment or payout will occur.':'Reject this request?'))return;
+   button.disabled=true;const msg=document.getElementById('ocRequestMessage');if(msg)msg.textContent='Processing request securely…';
+   try{
+    const requestRef=doc(db,collectionName,id),userRef=doc(db,'users',req.uid);
+    const ledgerRef=doc(collection(db,'demoAssetTransactions')),usdtLedgerRef=doc(collection(db,'demoTransactions'));
+    await runTransaction(db,async tx=>{
+     const rs=await tx.get(requestRef);if(!rs.exists()||(rs.data().status||'pending')!=='pending')throw new Error('request-already-processed');
+     if(action==='reject'){tx.update(requestRef,{status:'rejected',reviewedAt:serverTimestamp(),reviewedBy:current.email});return;}
+     const us=await tx.get(userRef);if(!us.exists())throw new Error('user-profile-not-found');
+     const data=us.data(),asset=String(req.asset||'USDT').toUpperCase(),amount=Number(req.amount);
+     if(!Number.isFinite(amount)||amount<=0)throw new Error('invalid-request-amount');
+     const deposit=kind==='deposit',before=asset==='USDT'?Number(data.demoBalanceUSDT||0):Number((data.demoAssetBalances||{})[asset]||0);
+     const after=Number((before+(deposit?amount:-amount)).toFixed(asset==='USDT'?2:8));
+     if(after<0)throw new Error('insufficient-demo-balance');
+     if(asset==='USDT')tx.update(userRef,{demoBalanceUSDT:after,demoBalanceUpdatedAt:serverTimestamp()});
+     else tx.update(userRef,{demoAssetBalances:{...(data.demoAssetBalances||{}),[asset]:after},demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:current.email});
+     if(asset==='USDT')tx.set(usdtLedgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request demo approval':'Withdrawal request demo approval'),source:'admin-demo',status:'completed'});
+     else tx.set(ledgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request demo approval':'Withdrawal request demo approval'),source:'admin-demo',status:'completed'});
+     tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email});
+    });
+    if(msg)msg.textContent=action==='approve'?'Approved. The simulated wallet balance and demo ledger were updated. No real payment or payout occurred.':'Request rejected.';
+    await renderRequestQueue(view);await window.adminRefreshDashboard();
+   }catch(error){button.disabled=false;if(msg)msg.textContent='Could not process request ('+(error.code||error.message||'error')+'). Check Firestore rules and user profile.';}
+  }));
+ }catch(error){const old=document.getElementById(queueId);if(old)old.remove();const panel=document.createElement('div');panel.className='notice';panel.textContent='Could not load '+kind+' requests from Firestore ('+(error.code||error.message||'error')+'). Check administrator permissions and Firestore rules.';body.prepend(panel);}
+}
 async function renderDemoFinance(view){
  const body=document.getElementById('detailBody');
  body.innerHTML='<div class="content-panel"><p class="muted">Loading registered users and demo wallet ledger…</p></div>';
@@ -376,11 +429,11 @@ document.getElementById('moreBtn').addEventListener('click',()=>showView('Settin
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, limit, doc, setDoc, deleteDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, limit, doc, setDoc, deleteDoc, writeBatch, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"});
 
 const auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
-window.__ocAdminFirebase={auth,db,collection,getDocs,query,limit,doc,setDoc,deleteDoc,writeBatch,serverTimestamp};
+window.__ocAdminFirebase={auth,db,collection,getDocs,query,limit,doc,setDoc,deleteDoc,writeBatch,serverTimestamp,runTransaction};
 const safeText=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 window.adminGetLiveCollection=async function(view){
  const body=byId('detailBody'),isUsers=view==='Users',collectionName=isUsers?'users':'kycSubmissions';
@@ -433,7 +486,7 @@ window.adminGetLiveCollection=async function(view){
  }catch(error){body.innerHTML='<div class="notice"><strong>Could not load live '+(isUsers?'profiles':'KYC submissions')+'.</strong><p>Firebase denied access or Firestore is unavailable ('+safeText(error.code||'unknown error')+'). Check administrator access and Firestore rules.</p></div>';}
 };
 window.adminRefreshDashboard=async function(){
- const users=byId('liveUsersCount'),kyc=byId('liveKycCount'),status=byId('dashboardDataStatus'),updated=byId('dashboardUpdatedAt'),totalAssets=byId('liveTotalDemoAssets'),totalAssetsStatus=byId('liveTotalDemoAssetsStatus');
+ const users=byId('liveUsersCount'),kyc=byId('liveKycCount'),status=byId('dashboardDataStatus'),updated=byId('dashboardUpdatedAt'),totalAssets=byId('liveTotalDemoAssets'),totalAssetsStatus=byId('liveTotalDemoAssetsStatus'),depositCount=byId('liveDepositRequests'),withdrawCount=byId('liveWithdrawalRequests');
  if(!users||!kyc||!status||!updated)return;
  status.textContent='Loading';updated.textContent='Connecting to Firestore…';
  try{
@@ -451,7 +504,7 @@ window.adminRefreshDashboard=async function(){
   users.textContent='—';kyc.textContent='—';status.textContent='Unavailable';updated.textContent='Firestore access failed: '+(error.code||'unknown error');
   if(totalAssets)totalAssets.textContent='Unavailable';
   if(totalAssetsStatus)totalAssetsStatus.textContent='Could not read demo wallet records';
-  byId('liveUsersStatus').textContent='Admin access or Firestore rules need attention';byId('liveKycStatus').textContent='Could not retrieve KYC records';
+  byId('liveUsersStatus').textContent='Admin access or Firestore rules need attention';byId('liveKycStatus').textContent='Could not retrieve KYC records';if(depositCount)depositCount.textContent='Unavailable';if(withdrawCount)withdrawCount.textContent='Unavailable';if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Could not read Firestore requests';if(byId('liveWithdrawalStatus'))byId('liveWithdrawalStatus').textContent='Could not read Firestore requests';
  }
 };
 byId("adminSignIn").addEventListener("click",async()=>{
