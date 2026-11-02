@@ -1296,7 +1296,7 @@ async function loadMarket(){
   })();
   const krakenTask=(async()=>{
    // Kraken's public ticker is an independent, keyless fallback for major assets.
-   const pairs=["XBTUSD","ETHUSD","SOLUSD","XRPUSD","ADAUSD","DOGEUSD","DOTUSD","LTCUSD","BCHUSD","LINKUSD","AVAXUSD","ATOMUSD","TRXUSD","ETCUSD","FILUSD","UNIUSD","AAVEUSD","NEARUSD","SUIUSD","SHIBUSD","XLMUSD","HBARUSD","ICPUSD","APTUSD","MKRUSD"];
+   const pairs=["XBTUSD","ETHUSD","SOLUSD","XRPUSD","ADAUSD","DOGEUSD","DOTUSD","LTCUSD","BCHUSD","LINKUSD","AVAXUSD","ATOMUSD","TRXUSD","ETCUSD","FILUSD","UNIUSD","AAVEUSD","NEARUSD","SUIUSD","SHIBUSD","XLMUSD","HBARUSD","ICPUSD","APTUSD"];
    const response=await fetchJson("https://api.kraken.com/0/public/Ticker?pair="+pairs.join(","),12000);
    if(!response||!response.result||response.error?.length)throw new Error("Kraken returned invalid ticker data");
    const aliases={XBT:"BTC"};
