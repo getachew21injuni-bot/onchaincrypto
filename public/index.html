@@ -300,6 +300,7 @@ body.oc-logged-out #signInForm .oc-password-wrap .field{padding-right:48px}
 body.oc-logged-out #signInForm .oc-password-toggle{display:flex!important;position:absolute;right:5px;top:50%;transform:translateY(-50%);width:38px;height:38px;align-items:center;justify-content:center;background:transparent!important;color:#b8d4ef!important;border:0!important;padding:8px;z-index:2}
 body.oc-logged-out #signInForm .oc-password-toggle svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 </style>
+<style id="oc-withdraw-all-style">.oc-withdraw-amount-wrap{display:flex;align-items:stretch;gap:8px;width:100%}.oc-withdraw-amount-wrap #withdrawAmount{flex:1;min-width:0}.oc-withdraw-all{flex:0 0 auto;min-width:58px;padding:0 14px}</style>
 </head>
 <body>
 <header>
@@ -606,7 +607,7 @@ body.oc-logged-out #signInForm .oc-password-toggle svg{width:21px;height:21px;fi
       <div class="selected-coin"><span id="withdrawCoinIcon" class="coin-icon">₿</span><div><strong id="withdrawCoinName">Bitcoin (BTC)</strong><div class="muted tiny">Selected withdrawal asset</div></div></div>
       <label for="withdrawNetwork">Network</label><select id="withdrawNetwork" class="field"><option value="Bitcoin">Bitcoin</option><option value="Ethereum">Ethereum</option><option value="TRC20">TRON (TRC20)</option><option value="ERC20">Ethereum (ERC20)</option><option value="BEP20">BNB Smart Chain (BEP20)</option><option value="Solana">Solana</option><option value="Polygon">Polygon</option><option value="XRP">XRP Ledger</option></select>
       <label for="withdrawAddress">Destination address</label><input id="withdrawAddress" class="field" placeholder="Paste your receiving address" autocomplete="off" spellcheck="false" aria-describedby="withdrawAddressCheck"><div id="withdrawAddressCheck" class="muted tiny" aria-live="polite"></div>
-      <label for="withdrawAmount">Amount</label><input id="withdrawAmount" class="field" type="number" min="0" step="any" placeholder="Enter amount">
+      <label for="withdrawAmount">Amount</label><div class="oc-withdraw-amount-wrap"><input id="withdrawAmount" class="field" type="number" min="0" step="any" placeholder="Enter amount"><button id="withdrawAllBtn" type="button" class="secondary oc-withdraw-all">All</button></div>
       <div id="withdrawNotice" class="muted tiny" aria-live="polite"></div>
       <button class="primary full" id="withdrawSubmit" type="button" disabled>Continue</button>
       <p class="muted tiny">Verify the coin, network, and address.</p>
@@ -3784,6 +3785,7 @@ function stop(){stops.forEach(f=>f());stops=[]}
 function watch(u){if(admin){stops.push(onSnapshot(collection(db,"depositRequests"),s=>adminRows("ocAdminDeposits",s.docs,"deposit"),e=>{$("ocAdminDeposits").textContent="Could not load deposit requests ("+e.code+")."}));stops.push(onSnapshot(collection(db,"withdrawRequests"),s=>adminRows("ocAdminWithdrawals",s.docs,"withdraw"),e=>{$("ocAdminWithdrawals").textContent="Could not load withdrawal requests ("+e.code+")."}));}}
 setup();
 
+document.getElementById("withdrawAllBtn")?.addEventListener("click",()=>{const symbol=String(asset("withdraw")||"BTC").toUpperCase();const amount=symbol==="USDT"?(Number(state.balance)||0):(Number(state.holdings?.[symbol])||0);const field=document.getElementById("withdrawAmount");if(!field)return;field.value=amount>0?String(Number(amount.toFixed(8))):"";field.dispatchEvent(new Event("input",{bubbles:true}));field.dispatchEvent(new Event("change",{bubbles:true}));});
 function refreshWithdrawRequestButton(){const b=$("withdrawSubmit");if(!b)return;const valid=Number($("withdrawAmount")?.value)>0&&!!$("withdrawAddress")?.value.trim()&&$("withdrawAddressCheck")?.dataset.state==="valid"&&!!$("withdrawNetwork")?.value;b.disabled=!valid;}["withdrawAmount","withdrawAddress","withdrawNetwork"].forEach(id=>$(id)?.addEventListener("input",refreshWithdrawRequestButton));["withdrawAmount","withdrawAddress","withdrawNetwork"].forEach(id=>$(id)?.addEventListener("change",refreshWithdrawRequestButton));refreshWithdrawRequestButton();
 $("withdrawSubmit")?.addEventListener("click",async()=>{const b=$("withdrawSubmit"),m=$("withdrawNotice");b.disabled=true;m.textContent="Submitting…";try{await withdraw();m.textContent="Submitted for admin review. No funds have been sent or deducted."}catch(e){m.textContent="Not submitted: "+(e.message||e.code)}finally{refreshWithdrawRequestButton()}});
 async function processDemoRequest(kind,requestId,decision){
