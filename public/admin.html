@@ -185,7 +185,7 @@ async function renderRequestQueue(view){
   panel.querySelectorAll('[data-request-action]').forEach(button=>button.addEventListener('click',async()=>{
    const action=button.dataset.requestAction,id=button.dataset.requestId;
    if(!id||!['approve','reject'].includes(action))return;
-   const current=auth.currentUser;if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){alert('Verified administrator sign-in required.');return;}
+   const current=window.__ocAdminFirebase?.auth?.currentUser;if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){alert('Verified administrator sign-in required.');return;}
    const req=requests.find(x=>x.id===id);if(!req)return;
    if(!confirm(action==='approve'?'Approve this request to the user’s SIMULATED balance? No blockchain payment or payout will occur.':'Reject this request?'))return;
    button.disabled=true;const msg=document.getElementById('ocRequestMessage');if(msg)msg.textContent='Processing request securely…';
@@ -208,7 +208,7 @@ async function renderRequestQueue(view){
      tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email});
     });
     if(msg)msg.textContent=action==='approve'?'Approved. The simulated wallet balance and demo ledger were updated. No real payment or payout occurred.':'Request rejected.';
-    await renderRequestQueue(view);await window.adminRefreshDashboard();
+    await renderRequestQueue(view);if(typeof window.adminRefreshDashboard==='function')await window.adminRefreshDashboard();
    }catch(error){button.disabled=false;if(msg)msg.textContent='Could not process request ('+(error.code||error.message||'error')+'). Check Firestore rules and user profile.';}
   }));
  }catch(error){const old=document.getElementById(queueId);if(old)old.remove();const panel=document.createElement('div');panel.className='notice';panel.textContent='Could not load '+kind+' requests from Firestore ('+(error.code||error.message||'error')+'). Check administrator permissions and Firestore rules.';body.prepend(panel);}
