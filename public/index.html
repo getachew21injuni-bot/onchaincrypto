@@ -148,7 +148,6 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 @media(max-width:720px){header{flex-wrap:wrap;gap:8px}header .header-right{display:flex;align-items:center;gap:5px;flex-wrap:wrap}#ocBackBtn{padding:7px 8px;min-height:34px}#ocBackBtn span{display:inline}}
 </style>
 
-<style id="oc-single-support-launcher">#ocLiveSupport{display:flex!important}#ocSupportPanel{display:none!important}#ocSupportPanel.open{display:flex!important}</style>
 
 <style id="oc-get-started-landing">
 /* Landing-only styles; the existing OnChainCrypto palette and background remain in use. */
@@ -382,14 +381,8 @@ header{position:relative;z-index:20}
 #page-home .oc-floating-coins{display:none!important}
 html.oc-auth-pending main>:not(#page-register),
 body.oc-logged-out main>:not(#page-register){display:none!important}
-html.oc-auth-pending body>:not(main):not(#ocLiveSupport):not(#ocSupportPanel),
+html.oc-auth-pending body>:not(main),
 body.oc-logged-out>:not(main):not(#ocLiveSupport):not(#ocSupportPanel){display:none!important}
-html.oc-auth-pending body>#ocLiveSupport,
-body.oc-logged-out>#ocLiveSupport{display:flex!important;bottom:24px!important}
-html.oc-auth-pending body>#ocSupportPanel,
-body.oc-logged-out>#ocSupportPanel{display:none!important}
-html.oc-auth-pending body>#ocSupportPanel.open,
-body.oc-logged-out>#ocSupportPanel.open{display:flex!important}
 </style>
 
 <style id="oc-home-brand-no-person-images">
