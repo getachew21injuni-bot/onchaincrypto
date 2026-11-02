@@ -6,7 +6,7 @@ on:
       - onchain-landing-redesign-preview
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: onchain-visual-review-preview
@@ -41,6 +41,26 @@ jobs:
 
       - name: Deploy isolated Firebase Hosting preview (7 days)
         run: firebase hosting:channel:deploy onchain-review --project onchaincrypto-d976b --expires 7d --non-interactive
+
+      - name: Publish the temporary preview link to the branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PREVIEW_URL="$(firebase hosting:channel:open onchain-review --project onchaincrypto-d976b 2>&1 | grep -Eo 'https://[^[:space:]]+' | tail -n 1)"
+          if [ -z "$PREVIEW_URL" ]; then
+            echo "::error::Firebase deployed, but the preview URL could not be retrieved."
+            exit 1
+          fi
+          printf '%s\n' "$PREVIEW_URL" > preview-url.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add preview-url.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish temporary visual preview link"
+            git push
+          fi
+          echo "## Onchain visual preview" >> "$GITHUB_STEP_SUMMARY"
+          echo "$PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Remove temporary credentials
         if: always()
