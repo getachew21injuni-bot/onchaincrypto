@@ -247,6 +247,7 @@ async function renderDemoFinance(view){
    '<button class="icon-btn" type="submit" style="background:'+(view==='Deposits'?'linear-gradient(90deg,#087b56,#12a879)':'linear-gradient(90deg,#813246,#bd4058)')+';border:0;padding:16px;font-size:16px;font-weight:850;box-shadow:0 8px 22px #0004">'+(view==='Deposits'?'＋ ADD TO USER WALLET':'− CONFIRM DEMO DEDUCTION')+'</button><p id="demoFinanceMessage" class="muted" role="status" aria-live="polite" style="margin:0"></p></form>'+
    '<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Registered user wallet balances</h3><span class="tag">'+users.length+' profiles</span></div><div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>USDT balance</th><th>Other coin balances</th><th>Status</th></tr></thead><tbody>'+userRows+'</tbody></table></div></div>'+
    '<div class="content-panel" style="margin:0"><h3 style="margin-top:0">Recent demo '+(view==='Deposits'?'credits':'deductions')+'</h3><div class="table-wrap"><table><thead><tr><th>Time</th><th>User UID</th><th>Type</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody>'+(txRows||'<tr><td colspan="6">No demo transactions recorded yet.</td></tr>')+'</tbody></table></div></div></div>';
+  await renderRequestQueue(view);
   const form=document.getElementById('demoFinanceForm');
   form.addEventListener('submit',async e=>{
    e.preventDefault();
@@ -490,8 +491,13 @@ window.adminRefreshDashboard=async function(){
  if(!users||!kyc||!status||!updated)return;
  status.textContent='Loading';updated.textContent='Connecting to Firestore…';
  try{
-  const results=await Promise.all([getDocs(query(collection(db,'users'),limit(1000))),getDocs(query(collection(db,'kycSubmissions'),limit(100)))]);
-  const u=results[0],k=results[1];users.textContent=u.size===1000?'1000+':String(u.size);
+  const results=await Promise.all([getDocs(query(collection(db,'users'),limit(1000))),getDocs(query(collection(db,'kycSubmissions'),limit(100))),getDocs(query(collection(db,'depositRequests'),limit(500))),getDocs(query(collection(db,'withdrawRequests'),limit(500)))]);
+  const u=results[0],k=results[1],d=results[2],w=results[3];
+  const dp=d.docs.filter(x=>(x.data().status||'pending')==='pending').length,wp=w.docs.filter(x=>(x.data().status||'pending')==='pending').length;
+  if(depositCount)depositCount.textContent=String(dp);if(withdrawCount)withdrawCount.textContent=String(wp);
+  if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Firestore connected · '+d.size+' total request(s)';
+  if(byId('liveWithdrawalStatus'))byId('liveWithdrawalStatus').textContent='Firestore connected · '+w.size+' total request(s)';
+  users.textContent=u.size===1000?'1000+':String(u.size);
   byId('liveUsersStatus').textContent=u.size===1000?'1000 profiles loaded (display capped)':'Live profile records loaded';
   const pending=k.docs.filter(d=>(d.data().status||'pending')==='pending').length;
   kyc.textContent=k.size===100&&pending===k.size?'100+':String(pending);
@@ -504,7 +510,7 @@ window.adminRefreshDashboard=async function(){
   users.textContent='—';kyc.textContent='—';status.textContent='Unavailable';updated.textContent='Firestore access failed: '+(error.code||'unknown error');
   if(totalAssets)totalAssets.textContent='Unavailable';
   if(totalAssetsStatus)totalAssetsStatus.textContent='Could not read demo wallet records';
-  byId('liveUsersStatus').textContent='Admin access or Firestore rules need attention';byId('liveKycStatus').textContent='Could not retrieve KYC records';if(depositCount)depositCount.textContent='Unavailable';if(withdrawCount)withdrawCount.textContent='Unavailable';if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Could not read Firestore requests';if(byId('liveWithdrawalStatus'))byId('liveWithdrawalStatus').textContent='Could not read Firestore requests';
+  byId('liveUsersStatus').textContent='Admin access or Firestore rules need attention';byId('liveKycStatus').textContent='Could not retrieve KYC records';if(depositCount)depositCount.textContent='Unavailable';if(withdrawCount)withdrawCount.textContent='Unavailable';if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Could not read Firestore requests';if(byId('liveWithdrawalStatus'))byId('liveWithdrawalStatus').textContent='Could not read Firestore requests';if(depositCount)depositCount.textContent='Unavailable';if(withdrawCount)withdrawCount.textContent='Unavailable';if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Could not read Firestore requests';if(byId('liveWithdrawalStatus'))byId('liveWithdrawalStatus').textContent='Could not read Firestore requests';
  }
 };
 byId("adminSignIn").addEventListener("click",async()=>{
