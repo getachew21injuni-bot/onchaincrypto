@@ -5646,3 +5646,21 @@ body.oc-logged-out #page-register .auth-welcome:after{content:none!important;dis
  body.oc-logged-out #page-register .auth-main-panel,html.oc-auth-pending #page-register .auth-main-panel{padding:12px!important}
 }
 </style>
+
+<style id="oc-remove-decorative-animated-coins">
+/* Remove decorative floating/spinning coin artwork throughout the platform.
+   Keep functional asset icons and market/wallet coin rows untouched. */
+.oc-floating-coins,
+.oc-floating-coin,
+.oc-public-coin-stage,
+.oc-coin-orbit-track,
+#page-home .oc-coin,
+#page-home .oc-orbit-one,
+#page-home .oc-orbit-two,
+#page-home .oc-coin-orbit,
+#page-home .oc-orbit-a,
+#page-home .oc-orbit-b {
+  display: none !important;
+  animation: none !important;
+}
+</style>
