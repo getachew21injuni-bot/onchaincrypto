@@ -23,7 +23,7 @@ service cloud.firestore {
         ])
       ) || (
         isAdmin()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminAssigned','demoBalanceUSDT','demoBalanceUpdatedAt','demoAssetBalances','demoAssetBalancesUpdatedAt','demoAssetBalancesUpdatedBy','adminUpdatedAt','adminUpdatedBy','accountStatus','tradingEnabled','maxTradeAmountUSDT','tradeControlUpdatedAt','tradeControlUpdatedBy'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminAssigned','demoBalanceUSDT','demoBalanceUpdatedAt','demoAssetBalances','demoAssetBalancesUpdatedAt','demoAssetBalancesUpdatedBy','demoWalletResetAt','demoWalletResetBy','adminUpdatedAt','adminUpdatedBy','accountStatus','tradingEnabled','maxTradeAmountUSDT','tradeControlUpdatedAt','tradeControlUpdatedBy'])
         && (!('adminAssigned' in request.resource.data) || request.resource.data.adminAssigned == true)
         && (!('demoBalanceUSDT' in request.resource.data) || (request.resource.data.demoBalanceUSDT is number && request.resource.data.demoBalanceUSDT >= 0 && request.resource.data.demoBalanceUSDT <= 1000000000))
         && (!('accountStatus' in request.resource.data) || request.resource.data.accountStatus in ['active','suspended'])
@@ -32,6 +32,7 @@ service cloud.firestore {
         && (!('tradeControlUpdatedBy' in request.resource.data) || request.resource.data.tradeControlUpdatedBy == request.auth.token.email)
         && (!('demoAssetBalances' in request.resource.data) || request.resource.data.demoAssetBalances is map)
         && (!('demoAssetBalancesUpdatedBy' in request.resource.data) || request.resource.data.demoAssetBalancesUpdatedBy == request.auth.token.email)
+        && (!('demoWalletResetBy' in request.resource.data) || request.resource.data.demoWalletResetBy == request.auth.token.email)
         && (!('adminUpdatedBy' in request.resource.data) || request.resource.data.adminUpdatedBy == request.auth.token.email)
       );
       allow delete: if false;
@@ -198,10 +199,15 @@ service cloud.firestore {
         && request.resource.data.depositAddress is string && request.resource.data.depositAddress.size() > 0
         && request.resource.data.transactionHash is string && request.resource.data.transactionHash.size() >= 8 && request.resource.data.transactionHash.size() <= 180;
       allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
-      allow update: if isAdmin() && resource.data.status == 'pending'
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reviewedAt','reviewedBy'])
-        && request.resource.data.status in ['approved','rejected']
-        && request.resource.data.reviewedBy == request.auth.token.email;
+      allow update: if isAdmin() && (
+        (resource.data.status == 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reviewedAt','reviewedBy'])
+          && request.resource.data.status in ['approved','rejected']
+          && request.resource.data.reviewedBy == request.auth.token.email)
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminHiddenFromHistory','historyClearedAt','historyClearedBy'])
+          && request.resource.data.adminHiddenFromHistory == true
+          && request.resource.data.historyClearedBy == request.auth.token.email)
+      );
       allow delete: if false;
     }
     // Withdrawal request submission and review. A separate payout process is required.
@@ -218,6 +224,26 @@ service cloud.firestore {
         && request.resource.data.status in ['approved','rejected']
         && request.resource.data.reviewedBy == request.auth.token.email;
       allow delete: if false;
+    }
+
+    match /adminHistoryClearLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.kind == 'deposit-history'
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdByEmail == request.auth.token.email
+        && request.resource.data.source == 'admin-dashboard';
+      allow update, delete: if false;
+    }
+    match /adminWalletResetLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.uid is string
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdByEmail == request.auth.token.email
+        && request.resource.data.afterUSDT == 0
+        && request.resource.data.source == 'admin-dashboard';
+      allow update, delete: if false;
     }
 
     // All other collections remain closed by default.
