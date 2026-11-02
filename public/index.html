@@ -3687,7 +3687,7 @@ body.oc-logged-out #signInForm .oc-password-toggle{right:7px!important}
 <script type="module" id="oc-global-demo-trade-admin">
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, onSnapshot, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
 const app=getApps()[0]||initializeApp(config),auth=getAuth(app),db=getFirestore(app);
 const adminEmails=new Set(["getachew21.inj.uni@gmail.com"]);
@@ -3716,7 +3716,24 @@ function renderUsers(snapshot){
   const created=user.createdAt?new Date(user.createdAt).toLocaleString():"Registration date unavailable";
   const status=String(user.accountStatus||"active");
   return '<article class="list-row" style="align-items:flex-start;gap:12px"><div style="min-width:0;flex:1"><strong>'+escapeHtml(name)+'</strong><div class="muted tiny">'+escapeHtml(user.email||user.phoneNumber||"No contact details")+'</div><div class="muted tiny">UID: '+escapeHtml(user.uid)+'</div><div class="muted tiny">Registered: '+escapeHtml(created)+'</div></div><div><span class="tag">'+escapeHtml(status)+'</span><div class="muted tiny" style="text-align:right">'+(user.adminAssigned===true?"Admin connected":"Profile syncing")+'</div></div></article>';
- }).join(""):'<div class="empty">No registered profiles found yet.</div>';
+ }).join(""):'<div class="empty">No connected user profiles yet. Each existing user must sign in once; new sign-ins and registrations are added automatically.</div>';
+}
+// Ensure every account that signs in has a minimal directory profile.
+// This self-profile write never reads or changes balances.
+async function ensureTradeControlProfile(user){
+ if(!user?.uid)return;
+ const ref=doc(db,"users",user.uid);
+ const existing=await getDoc(ref);
+ const current=existing.exists()?(existing.data()||{}):{};
+ if(existing.exists()&&current.adminAssigned===true)return;
+ await setDoc(ref,{
+  uid:user.uid,adminAssigned:true,
+  email:user.email||current.email||"",
+  phoneNumber:user.phoneNumber||current.phoneNumber||"",
+  displayName:user.displayName||current.displayName||"",
+  createdAt:current.createdAt||user.metadata?.creationTime||new Date().toISOString(),
+  updatedAt:serverTimestamp()
+ },{merge:true});
 }
 function stopWatchers(){if(stopMode){stopMode();stopMode=null;}if(stopUsers){stopUsers();stopUsers=null;}}
 onAuthStateChanged(auth,user=>{
@@ -3724,10 +3741,15 @@ onAuthStateChanged(auth,user=>{
  currentAdmin=!!(user&&user.emailVerified&&adminEmails.has(String(user.email||"").toLowerCase()));
  const nav=byId("ocAdminNavBtn");if(nav)nav.classList.toggle("hidden",!currentAdmin);
  if(!user){window.__ocGlobalDemoTradeMode="market";return;}
+ void ensureTradeControlProfile(user).catch(error=>{
+  console.error("Trade Control profile sync failed:",error?.code||error,error?.message||"");
+  if(currentAdmin&&byId("ocAdminUsersList"))byId("ocAdminUsersList").textContent="Profile sync failed ("+(error?.code||"connection error")+"). Check Firestore rules and sign in again.";
+ });
  stopMode=onSnapshot(doc(db,"platformSettings","demoTradeControl"),snapshot=>{const data=snapshot.exists()?snapshot.data():{};renderMode(data.mode||"market");},error=>{console.error("Global demo mode listener failed:",error);if(byId("ocAdminModeMessage"))byId("ocAdminModeMessage").textContent="Could not read shared settings: "+(error.code||"connection error")+". Check Firestore rules.";});
  if(currentAdmin){
-  stopUsers=onSnapshot(collection(db,"users"),renderUsers,error=>{console.error("Admin user directory listener failed:",error);if(byId("ocAdminUsersList"))byId("ocAdminUsersList").textContent="Could not load users ("+(error.code||"connection error")+"). Check Firestore rules.";});
- }else if(byId("ocAdminUsersList"))byId("ocAdminUsersList").textContent="Sign in with the verified administrator email to view all users.";
+  if(byId("ocAdminUsersList"))byId("ocAdminUsersList").textContent="Loading connected user profiles…";
+  stopUsers=onSnapshot(collection(db,"users"),renderUsers,error=>{console.error("Admin user directory listener failed:",error);if(byId("ocAdminUsersList"))byId("ocAdminUsersList").textContent="Could not load users ("+(error.code||"connection error")+"). Check that the administrator email is verified and Firestore rules are deployed.";});
+ }else if(byId("ocAdminUsersList"))byId("ocAdminUsersList").textContent="Sign in with the verified administrator email to view connected user profiles.";
 });
 document.addEventListener("click",async event=>{
  const button=event.target.closest("[data-admin-demo-mode]");if(!button)return;
