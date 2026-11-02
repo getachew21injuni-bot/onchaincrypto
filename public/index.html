@@ -638,7 +638,6 @@ body.oc-logged-out>#ocSupportPanel.open{display:flex!important}
   </section>
   <section id="page-trade" class="hidden">
     <div class="page-title"><div><h1>Trade</h1><div class="muted"></div></div></div>
-    <div id="ocGlobalDemoModeNotice" class="notice" style="display:none;margin-bottom:14px" aria-live="polite"></div>
     <div class="trade-layout" style="display:block">
       <section class="panel"><div class="chart-area"><div class="page-title"><div><div class="trade-pair-picker"><button type="button" id="tradePairTitle" class="trade-pair-trigger" aria-haspopup="listbox" aria-expanded="false">BTC / USDT <span aria-hidden="true">▾</span></button><div id="tradePairMenu" class="trade-pair-menu hidden"><label class="trade-pair-search-label" for="tradePairSearch">Choose trading pair</label><input id="tradePairSearch" class="search trade-pair-search" type="search" placeholder="Search coin or symbol…" autocomplete="off"><div id="tradePairOptions" class="trade-pair-options" role="listbox" aria-label="Trading pairs"></div></div></div></div></div><div><div class="big" id="tradeCurrentPrice">$—</div><div id="tradeCurrentChange" class="muted">—</div></div></div><div class="chart-wrap"><iframe id="tradingViewChart" class="tv-chart" title="TradingView cryptocurrency candlestick chart" loading="lazy" referrerpolicy="origin" allowfullscreen src="https://www.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCUSDT&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false"></iframe><p class="muted tiny"></p></div><div class="chart-wrap" id="trendOverviewWrap" style="display:none"><div class="muted tiny">7-day trend overview</div><canvas id="priceChart" height="220" aria-label="Recent cryptocurrency price chart"></canvas><div id="chartStatus" class="muted tiny">Loading recent price history…</div></div><div class="signal-box"><div class="section-head"><h3>Live market signal</h3><span class="tag">INDICATOR ONLY</span></div><div id="signalResult">Waiting for price history…</div><p class="muted tiny">Educational price indicator—not financial advice.</p></div><div class="list-row"><span class="muted">Selected asset</span><strong id="tradeAssetName">Bitcoin</strong></div><div class="list-row"><span class="muted">Demo USD available</span><strong id="tradeAvailable">$10,000.00</strong></div></div></section>
     </div>
@@ -964,9 +963,9 @@ body.oc-logged-out>#ocSupportPanel.open{display:flex!important}
   </section>
   <section id="page-admin" class="hidden">
     <div class="page-title"><div><h1>Admin Dashboard</h1><div class="muted">Admin workspace. Secure backend authorization is required.</div></div><span class="tag">BACKEND SETUP REQUIRED</span></div>
-    <div class="notice"><strong>Demo controls only:</strong> These global simulation settings apply to all users’ demo trades. They never affect real deposits, withdrawals or real-money trading. Active mode: <strong id="ocAdminModeStatus">Market-Based</strong>.</div>
-    <section class="panel form-panel" style="margin-bottom:16px">
-      <div class="section-head"><h2>Global Demo Trade Control</h2><span class="tag">ALL USERS</span></div>
+    <section id="adminTradeControl" class="panel form-panel" style="margin-bottom:16px">
+      <div class="section-head"><h2>Trade Control</h2><span class="tag">ALL USERS</span></div>
+      <div class="notice"><strong>Demo controls only:</strong> These global simulation settings apply to all users’ demo trades. They never affect real deposits, withdrawals or real-money trading. Active mode: <strong id="ocAdminModeStatus">Market-Based</strong>.</div>
       <p class="muted tiny">Choose the outcome mode for demo trades started after the setting is published. Every signed-in user receives the setting automatically.</p>
       <div class="content-grid">
         <button type="button" class="secondary" data-admin-demo-mode="market">Market-Based</button>
