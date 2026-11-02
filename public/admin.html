@@ -263,6 +263,7 @@ async function renderDemoFinance(view){
     if(!confirm('Archive reviewed deposit history? Pending requests and wallet balances remain unchanged. Records are retained for audit.'))return;
     const btn=hp.querySelector('#clearDepositHistoryBtn'),msg=hp.querySelector('#clearDepositHistoryMessage');btn.disabled=true;msg.textContent='Archiving…';
     try{
+     await current.getIdToken(true);
      const [q1,q2,q3]=await Promise.all([getDocs(collection(db,'depositRequests')),getDocs(collection(db,'demoTransactions')),getDocs(collection(db,'demoAssetTransactions'))]);
      const refs=[...q1.docs.filter(d=>(d.data().status||'pending')!=='pending'&&!d.data().adminHiddenFromHistory).map(d=>d.ref),...q2.docs.filter(d=>d.data().type==='deposit'&&!d.data().adminHiddenFromHistory).map(d=>d.ref),...q3.docs.filter(d=>d.data().type==='deposit'&&!d.data().adminHiddenFromHistory).map(d=>d.ref)];
      for(let i=0;i<refs.length;i+=450){const batch=writeBatch(db);for(const ref of refs.slice(i,i+450))batch.update(ref,{adminHiddenFromHistory:true,historyClearedAt:serverTimestamp(),historyClearedBy:current.email});await batch.commit();}
@@ -280,6 +281,7 @@ async function renderDemoFinance(view){
    if(!confirm('Set '+(target.displayName||target.email||target.id)+' USDT and all coin balances to ZERO? This does not delete the account.'))return;
    resetButton.disabled=true;msg.textContent='Resetting wallet…';
    try{
+    await current.getIdToken(true);
     const userRef=doc(db,'users',target.id),logRef=doc(collection(db,'adminWalletResetLogs'));
     await runTransaction(db,async tx=>{
      const snap=await tx.get(userRef);if(!snap.exists())throw Error('User profile not found');
