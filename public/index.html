@@ -1127,56 +1127,76 @@ async function loadMarket(){
  marketRequestInProgress=true;
  const refreshButtons=[$("refreshBtn"),$("retryBtn"),$("refreshSignalsBtn")].filter(Boolean);
  refreshButtons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent="Refreshing…"});
- $("connection").textContent="Updating";setHeaderMarketStatus("connecting");if($("apiStatus"))$("apiStatus").textContent="Loading CoinGecko live prices…";$("marketHint").textContent="Refreshing the CoinGecko public market feed…";
+ $("connection").textContent="Updating";setHeaderMarketStatus("connecting");if($("apiStatus"))$("apiStatus").textContent="Loading CoinGecko and Binance live prices in parallel…";$("marketHint").textContent="Refreshing public market feeds simultaneously…";
  const finish=()=>{marketRequestInProgress=false;refreshButtons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.originalText||"Refresh";delete b.dataset.originalText})};
  const fetchJson=async(url,ms=12000)=>{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),ms);try{const res=await fetch(url,{headers:{accept:"application/json"},signal:controller.signal,cache:"no-store"});if(!res.ok)throw new Error("HTTP "+res.status);return await res.json()}finally{clearTimeout(timer)}};
- const cacheAndRender=data=>{
-  if(!Array.isArray(data)||!data.length)throw new Error("CoinGecko returned no market prices");
-  market=data.filter(c=>Number(c.current_price)>0);window.market=market;
+ const mergeBinance=(base,tickers)=>{
+  const merged=new Map((base||[]).map(item=>[String(item.symbol||"").toUpperCase(),item]));
+  const tickerMap=new Map((Array.isArray(tickers)?tickers:[]).map(t=>[t.symbol,t]));
+  for(const coin of COINS){
+   const ticker=tickerMap.get(coin.symbol+"USDT");
+   if(!ticker)continue;
+   const price=Number(ticker.lastPrice),change=Number(ticker.priceChangePercent);
+   if(!(price>0))continue;
+   const previous=merged.get(coin.symbol);
+   merged.set(coin.symbol,{...(previous||{}),id:previous?.id||coin.id,name:previous?.name||coin.name,symbol:coin.symbol,current_price:price,price_change_percentage_24h:Number.isFinite(change)?change:previous?.price_change_percentage_24h,total_volume:Number(ticker.quoteVolume)||previous?.total_volume,market_cap:previous?.market_cap,market_cap_rank:previous?.market_cap_rank,image:previous?.image||""});
+  }
+  return [...merged.values()];
+ };
+ const cacheAndRender=(data,sources)=>{
+  if(!Array.isArray(data)||!data.length)throw new Error("No live market prices returned");
+  market=data.filter(item=>Number(item.current_price)>0);window.market=market;
   if(window.__ocRefreshWalletAssets)window.__ocRefreshWalletAssets();
   const now=Date.now();window.ocMarketLastSuccess=now;
   try{localStorage.setItem("oc_market_cache",JSON.stringify({time:now,data:market}))}catch(e){}
-  const liveIndicator=$("marketLiveIndicator");if(liveIndicator){liveIndicator.className="oc-chart-live is-live";const label=liveIndicator.querySelector("span");if(label)label.textContent="LIVE";liveIndicator.title="Latest available public prices successfully refreshed from CoinGecko";}
-  $("connection").textContent="Live data";setHeaderMarketStatus("live");if($("apiStatus"))$("apiStatus").innerHTML='<span class="green">Connected · CoinGecko</span>';
-  $("lastUpdate").textContent=new Date(now).toLocaleTimeString();$("marketHint").textContent="Latest available public prices from CoinGecko. Updates automatically; provider data may be delayed.";
+  const liveIndicator=$("marketLiveIndicator");if(liveIndicator){liveIndicator.className="oc-chart-live is-live";const label=liveIndicator.querySelector("span");if(label)label.textContent="LIVE";liveIndicator.title="Live public prices refreshed successfully from "+sources.join(" and ");}
+  const sourceLabel=sources.join(" + ");
+  $("connection").textContent="Live data";setHeaderMarketStatus("live");if($("apiStatus"))$("apiStatus").innerHTML='<span class="green">Connected · '+sourceLabel+'</span>';
+  $("lastUpdate").textContent=new Date(now).toLocaleTimeString();$("marketHint").textContent="Latest available public prices from "+sourceLabel+". Feeds refresh in parallel; provider data may be delayed.";
   renderMarket();renderHomeCoinResults();updateTradePreview();renderSignalScanner();
  };
  try{
-  const result=await fetchJson("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",12000);
-  if(!Array.isArray(result)||!result.length)throw new Error("CoinGecko returned no prices");
-  let data=result.map(c=>({...c,symbol:String(c.symbol||"").toUpperCase()}));
-  const extraIds=COINS.filter(c=>!data.some(m=>m.id===c.id)).map(c=>c.id);
-  if(extraIds.length){
-   try{
-    const extra=await fetchJson("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(extraIds.join(","))+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",10000);
-    if(Array.isArray(extra))data=data.concat(extra.map(c=>({...c,symbol:String(c.symbol||"").toUpperCase()})));
-   }catch(_){}
-  }
-  cacheAndRender(data);
+  const [geckoResult,binanceResult]=await Promise.allSettled([
+   (async()=>{
+    const result=await fetchJson("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",12000);
+    if(!Array.isArray(result)||!result.length)throw new Error("CoinGecko returned no prices");
+    let data=result.map(item=>({...item,symbol:String(item.symbol||"").toUpperCase()}));
+    const extraIds=COINS.filter(coin=>!data.some(item=>item.id===coin.id)).map(coin=>coin.id);
+    if(extraIds.length){try{const extra=await fetchJson("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(extraIds.join(","))+"&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",10000);if(Array.isArray(extra))data=data.concat(extra.map(item=>({...item,symbol:String(item.symbol||"").toUpperCase()})))}catch(_){}}
+    return data;
+   })(),
+   fetchJson("https://api.binance.com/api/v3/ticker/24hr",12000)
+  ]);
+  const sources=[],geckoOk=geckoResult.status==="fulfilled",binanceOk=binanceResult.status==="fulfilled"&&Array.isArray(binanceResult.value);
+  let combined=geckoOk?geckoResult.value:(market.length?market:[]);
+  if(geckoOk)sources.push("CoinGecko");
+  if(binanceOk){combined=mergeBinance(combined,binanceResult.value);sources.push("Binance")}
+  if(!sources.length||!combined.length)throw new Error("Both CoinGecko and Binance market feeds are unavailable");
+  cacheAndRender(combined,sources);
  }catch(err){
   const hasCached=market.length>0||restoreCachedMarket();
-  const liveIndicator=$("marketLiveIndicator");if(liveIndicator){liveIndicator.className="oc-chart-live "+(hasCached?"is-stale":"is-offline");const label=liveIndicator.querySelector("span");if(label)label.textContent=hasCached?"STALE":"OFFLINE";liveIndicator.title=hasCached?"Showing saved prices; CoinGecko refresh failed":"CoinGecko live market data is unavailable";}
+  const liveIndicator=$("marketLiveIndicator");if(liveIndicator){liveIndicator.className="oc-chart-live "+(hasCached?"is-stale":"is-offline");const label=liveIndicator.querySelector("span");if(label)label.textContent=hasCached?"STALE":"OFFLINE";liveIndicator.title=hasCached?"Showing saved prices; both live provider refreshes failed":"Live market data is unavailable";}
   $("connection").textContent=hasCached?"Cached data":"Unavailable";setHeaderMarketStatus(hasCached?"stale":"offline");
-  if($("apiStatus"))$("apiStatus").innerHTML=hasCached?'<span class="muted">Saved prices · not live · retrying later</span>':'<span class="red">CoinGecko market data unavailable</span>';
+  if($("apiStatus"))$("apiStatus").innerHTML=hasCached?'<span class="muted">Saved prices · not live · retrying</span>':'<span class="red">CoinGecko and Binance market feeds unavailable</span>';
   if(!hasCached){
-   const unavailable='<tr><td colspan="5" class="empty">CoinGecko live prices are temporarily unavailable. Tap Refresh to try again.</td></tr>';
+   const unavailable='<tr><td colspan="5" class="empty">Live market prices are temporarily unavailable. Tap Refresh to try again.</td></tr>';
    if($("marketRows"))$("marketRows").innerHTML=unavailable;
    if($("homeActivePairs"))$("homeActivePairs").innerHTML='<div class="empty">Live prices are unavailable right now. Open Market and tap Refresh.</div>';
-   if($("marketPulseRows"))$("marketPulseRows").innerHTML='<div class="empty">CoinGecko feed unavailable. Tap Refresh to retry.</div>';
-   if($("marketPulseStatus"))$("marketPulseStatus").textContent="Market feed unavailable";
+   if($("marketPulseRows"))$("marketPulseRows").innerHTML='<div class="empty">Both live feeds are unavailable. Tap Refresh to retry.</div>';
+   if($("marketPulseStatus"))$("marketPulseStatus").textContent="Market feeds unavailable";
    if($("assetCount"))$("assetCount").textContent="0";
    if($("gainersList"))$("gainersList").textContent="Unavailable";
    if($("losersList"))$("losersList").textContent="Unavailable";
    if($("hotList"))$("hotList").textContent="Unavailable";
-   if($("hotCoinResults"))$("hotCoinResults").innerHTML='<div class="empty">CoinGecko live feed is unavailable. Check your connection and tap Refresh.</div>';
+   if($("hotCoinResults"))$("hotCoinResults").innerHTML='<div class="empty">Live market feeds are unavailable. Check your connection and tap Refresh.</div>';
    if($("marketGainers"))$("marketGainers").textContent="Unavailable";
    if($("marketLosers"))$("marketLosers").textContent="Unavailable";
-   if($("topGainer"))$("topGainer").innerHTML='<span class="muted">Market feed unavailable</span>';
-   if($("topLoser"))$("topLoser").innerHTML='<span class="muted">Market feed unavailable</span>';
-   if($("signalRows"))$("signalRows").innerHTML='<tr><td colspan="5" class="empty">Live signals are unavailable until CoinGecko responds. Tap Refresh to retry.</td></tr>';
+   if($("topGainer"))$("topGainer").innerHTML='<span class="muted">Market feeds unavailable</span>';
+   if($("topLoser"))$("topLoser").innerHTML='<span class="muted">Market feeds unavailable</span>';
+   if($("signalRows"))$("signalRows").innerHTML='<tr><td colspan="5" class="empty">Live signals are unavailable until a provider responds. Tap Refresh to retry.</td></tr>';
    if($("signalCountLabel"))$("signalCountLabel").textContent="No live prices loaded";
   }else{renderMarket();renderHomeCoinResults();renderSignalScanner()}
-  $("marketHint").textContent=hasCached?"CoinGecko could not refresh. Saved prices are marked STALE and are not live.":"CoinGecko could not be reached. Check your connection and tap Refresh.";
+  $("marketHint").textContent=hasCached?"Both live feeds could not refresh. Saved prices are marked STALE, not LIVE.":"Neither live market feed could be reached. Check your connection and tap Refresh.";
  }finally{finish()}
 }
 let historySeries=[];
