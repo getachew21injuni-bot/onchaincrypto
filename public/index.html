@@ -21,15 +21,12 @@
   document.documentElement.classList.add("oc-auth-pending");
 </script>
 <style id="oc-auth-pending-gate">
-  /* Fail closed: the login form is the only visible page until Firebase confirms a user. */
-  html.oc-auth-pending body > :not(main),
-  body.oc-logged-out > :not(main) { display:none!important; }
-  html.oc-auth-pending main > :not(#page-register),
-  body.oc-logged-out main > :not(#page-register) { display:none!important; }
-  html.oc-auth-pending main > #page-register,
-  body.oc-logged-out main > #page-register { display:block!important; }
-  html.oc-auth-pending main,
-  body.oc-logged-out main { display:block!important; min-height:100vh; padding-top:24px; }
+  /* Public Home is visible to guests; protected app actions open the dedicated sign-in screen. */
+  html.oc-auth-pending main > :not(#page-home),
+  body.oc-logged-out:not(.oc-auth-screen) main > :not(#page-home) { display:none!important; }
+  html.oc-auth-pending main > #page-home,
+  body.oc-logged-out:not(.oc-auth-screen) main > #page-home { display:block!important; }
+  html.oc-auth-pending main { display:block!important; min-height:100vh; padding-top:24px; }
   html.oc-auth-pending #authChoicePanel,
   html.oc-auth-pending #registerForm,
   html.oc-auth-pending #googleSignInBtn,
@@ -257,18 +254,23 @@ document.addEventListener('DOMContentLoaded',function(){
 #page-trade .chart-area>.signal-box .section-head{padding:0!important}
 </style><style id="oc-hide-numbered-trade-steps">#timedPaperTrade .oc-flow-step{display:none!important}</style>
 <style id="oc-logged-out-lockscreen">
-/* Signed-out visitors see only the authentication panel. */
-body.oc-logged-out > header,
-body.oc-logged-out > footer,
-body.oc-logged-out > #bottomNav,
-body.oc-logged-out > #adminDashboardShortcut,
-body.oc-logged-out > a,
-body.oc-logged-out > nav,
-body.oc-logged-out > aside,
-body.oc-logged-out > .more-menu-wrap { display:none !important; }
-body.oc-logged-out main > section[id^="page-"]:not(#page-register) { display:none !important; }
-body.oc-logged-out main { display:block !important; min-height:100vh; padding-top:24px; }
-body.oc-logged-out #page-register { display:block !important; }
+/* Guest Home remains public; all other platform pages require sign-in. */
+body.oc-logged-out:not(.oc-auth-screen) > header,
+body.oc-logged-out:not(.oc-auth-screen) > #bottomNav { display:block!important; }
+body.oc-logged-out:not(.oc-auth-screen) main > section[id^="page-"]:not(#page-home) { display:none!important; }
+body.oc-logged-out:not(.oc-auth-screen) #page-home { display:block!important; }
+body.oc-logged-out:not(.oc-auth-screen) #page-register { display:none!important; }
+body.oc-logged-out.oc-auth-screen > header,
+body.oc-logged-out.oc-auth-screen > footer,
+body.oc-logged-out.oc-auth-screen > #bottomNav,
+body.oc-logged-out.oc-auth-screen > #adminDashboardShortcut,
+body.oc-logged-out.oc-auth-screen > a,
+body.oc-logged-out.oc-auth-screen > nav,
+body.oc-logged-out.oc-auth-screen > aside,
+body.oc-logged-out.oc-auth-screen > .more-menu-wrap { display:none!important; }
+body.oc-logged-out.oc-auth-screen main > section[id^="page-"]:not(#page-register) { display:none!important; }
+body.oc-logged-out.oc-auth-screen #page-register { display:flex!important; }
+body.oc-logged-out.oc-auth-screen main { display:flex!important; min-height:100vh; padding-top:24px; }
 </style>
 
 <style id="oc-auth-only-screen-tweaks">
@@ -2171,8 +2173,8 @@ async function ocPerformSignOut() {
     window.ocLoggedOut = true;
     window.onchaincryptoCurrentUser = null;
     window.ocPendingPage = null;
-    document.body.classList.add("oc-logged-out");
-    document.body.classList.remove("oc-register-mode");
+    document.body.classList.add("oc-logged-out", "oc-auth-screen");
+  document.body.classList.remove("oc-register-mode");
     window.showPage?.("register");
     window.ocForceSignInScreen?.();
     try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#login"); } catch (_) {}
@@ -2246,15 +2248,16 @@ onAuthStateChanged(auth, (user) => {
    if (typeof window.ocRefreshReferral === "function") window.ocRefreshReferral(user || null);
    if (user) { openHomeAfterAuth(); }
     else {
-      // Any signed-out visitor is restricted to Sign In / Register only.
+      // Signed-out visitors land on public Home; protected actions open Sign In.
       window.ocPendingPage = null;
       window.ocLoggedOut = true;
-      document.documentElement.classList.add("oc-auth-pending");
+      document.documentElement.classList.remove("oc-auth-pending");
       document.body.classList.add("oc-logged-out");
+      document.body.classList.remove("oc-auth-screen", "oc-register-mode");
       window.ocSetAuthScreenVisibility?.(false);
-      try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#login"); } catch (_) {}
-      window.showPage?.("register");
-      window.ocForceSignInScreen?.();
+      document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-home"));
+      window.showPage?.("home");
+      try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search); } catch (_) {}
     }
   const status = document.getElementById("authStatus");
   const signOutBtn = document.getElementById("signOutBtn");
@@ -2282,11 +2285,9 @@ onAuthStateChanged(auth, (user) => {
 
 window.ocSetAuthScreenVisibility = function(signedIn) {
   // Native hidden attributes guarantee protected navigation and pages stay out of view.
-  document.querySelectorAll("body > :not(main)").forEach(node => {
-    if (signedIn) node.removeAttribute("hidden"); else node.setAttribute("hidden", "");
-  });
+  document.querySelectorAll("body > :not(main)").forEach(node => node.removeAttribute("hidden"));
   document.querySelectorAll("main > *").forEach(node => {
-    if (signedIn || node.id === "page-register") node.removeAttribute("hidden");
+    if (signedIn || node.id === "page-home" || node.id === "page-register") node.removeAttribute("hidden");
     else node.setAttribute("hidden", "");
   });
 };
@@ -2333,7 +2334,8 @@ document.addEventListener("click", event => {
   if (target.closest("#page-register") || target.closest("#authChoicePanel") ||
       target.closest("#signInForm") || target.closest("#registerForm") ||
       target.closest("#authPhonePanel") || target.closest("#authPhoneDivider") ||
-      target.closest("#resetPasswordBtn") || target.closest("#googleSignInBtn")) return;
+      target.closest("#resetPasswordBtn") || target.closest("#googleSignInBtn") ||
+      target.closest("#register-nav") || target.closest("#mobileRegisterBtn")) return;
   if (target.closest("button,a,[role=button],[data-page],[data-bottom-page],[data-menu-page]")) {
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -2344,10 +2346,12 @@ document.addEventListener("click", event => {
 window.addEventListener("pageshow", async () => {
   try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
   if (!auth.currentUser && window.ocLoggedOut === true) {
-    document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-register"));
-    window.showPage?.("register");
-    window.ocForceSignInScreen?.();
-    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#login"); } catch (_) {}
+    if (location.hash === "#login") window.ocForceSignInScreen?.();
+    else {
+      document.body.classList.remove("oc-auth-screen");
+      document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-home"));
+      window.showPage?.("home");
+    }
   }
 });
 window.addEventListener("popstate", async () => {
@@ -3020,9 +3024,12 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     e.preventDefault();e.stopImmediatePropagation();
     navigate(page,{history:btn.hasAttribute('data-home-history')});
   },true);
-  // Initialize to the current Home page after repair.
+  // Guests start on public Home; signed-in routing remains unchanged.
   const current=pages().find(s=>!s.classList.contains('hidden'));
-  if(current) navigate(current.id.slice(5),{fromOriginal:true,keepScroll:true});
+  if(window.ocLoggedOut===true){
+    pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-home'));
+    navigate('home',{fromOriginal:true,keepScroll:true});
+  } else if(current) navigate(current.id.slice(5),{fromOriginal:true,keepScroll:true});
 })();
 </script>
 <script id="oc-auto-close-profile-panels">
@@ -3466,12 +3473,12 @@ body.oc-logged-out.oc-register-mode #authSwitchText{display:none!important}
   document.addEventListener("click",function(event){
     const target=event.target instanceof Element?event.target:null;
     if(!target)return;
-    if(target.closest("#showRegisterBtn"))document.body.classList.add("oc-register-mode");
+    if(target.closest("#showRegisterBtn"))document.body.classList.add("oc-register-mode","oc-auth-screen");
     if(target.closest("#registerLoginBtn"))document.body.classList.remove("oc-register-mode");
   },true);
   function enforceLoginOnly(){
     if(window.ocLoggedOut!==true||window.onchaincryptoCurrentUser)return;
-    if(!document.body.classList.contains("oc-register-mode")){
+    if(document.body.classList.contains("oc-auth-screen") && !document.body.classList.contains("oc-register-mode")){
       document.getElementById("authChoicePanel")?.classList.add("hidden");
       document.getElementById("registerForm")?.classList.add("hidden");
       document.getElementById("signInForm")?.classList.remove("hidden");
