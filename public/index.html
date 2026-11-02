@@ -301,6 +301,7 @@ body.oc-logged-out #signInForm .oc-password-toggle{display:flex!important;positi
 body.oc-logged-out #signInForm .oc-password-toggle svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 </style>
 <style id="oc-withdraw-all-style">.oc-withdraw-amount-wrap{display:flex;align-items:stretch;gap:8px;width:100%}.oc-withdraw-amount-wrap #withdrawAmount{flex:1;min-width:0}.oc-withdraw-all{flex:0 0 auto;min-width:58px;padding:0 14px}</style>
+<style id="oc-customer-market-status-cleanup">.header-right .optional:has(#connection){display:none!important}</style>
 </head>
 <body>
 <header>
@@ -312,7 +313,7 @@ body.oc-logged-out #signInForm .oc-password-toggle svg{width:21px;height:21px;fi
     <button data-page="wallet">Wallet</button>
     <button data-page="admin" id="ocAdminNavBtn" class="hidden">Admin</button>
   </nav>
-  <div class="header-right"><span class="muted tiny optional"><span class="status-dot"></span><span id="connection">Market prices</span></span><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Guides and account assistance</small></span></button><button type="button" data-menu-page="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About</strong><small>Platform information</small></span></button></div></div></div>
+  <div class="header-right"><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Guides and account assistance</small></span></button><button type="button" data-menu-page="about" role="menuitem"><span class="menu-symbol" style="color:#42e8ff">ⓘ</span><span><strong>About</strong><small>Platform information</small></span></button></div></div></div>
 </header>
 <main>
   <section id="page-home">
@@ -326,7 +327,7 @@ body.oc-logged-out #signInForm .oc-password-toggle svg{width:21px;height:21px;fi
   </div>
   <div class="oc-hero-art oc-market-visual" aria-label="Illustrative cryptocurrency candlestick chart">
    <div class="oc-chart-window">
-    <div class="oc-chart-top"><div><strong>BTC / USDT</strong><span class="oc-chart-subtitle">Market overview</span></div><span class="oc-chart-live" id="marketLiveIndicator" aria-live="polite" title="Market feed status"><i></i><span>CHECKING</span></span></div>
+    <div class="oc-chart-top"><div><strong>BTC / USDT</strong><span class="oc-chart-subtitle">Market overview</span></div></div>
     <div class="oc-chart-price"><strong>$67,428.50</strong><span class="green">+2.84%</span></div>
     <div class="oc-candlestick-chart" aria-hidden="true">
      <div class="oc-chart-gridline"></div><div class="oc-chart-gridline"></div><div class="oc-chart-gridline"></div>
@@ -406,7 +407,7 @@ body.oc-logged-out #signInForm .oc-password-toggle svg{width:21px;height:21px;fi
 
     <div class="cards">
       <div class="card"><div class="label">Paper trading balance</div><div class="big" id="summaryBalance">$10,000.00</div><div class="muted tiny">Paper trading funds</div></div>
-      <div class="card"><div class="label">Assets tracked</div><div class="big" id="assetCount">—</div><div class="muted tiny">Public market data</div></div>
+      <div class="card"><div class="label">Assets tracked</div><div class="big" id="assetCount">—</div><div class="muted tiny">Market coverage</div></div>
       <div class="card"><div class="label">Top gainer (24h)</div><div class="big green" id="topGainer">—</div><div class="muted tiny" id="topGainerChange">Waiting for data</div></div>
       <div class="card"><div class="label">Top loser (24h)</div><div class="big red" id="topLoser">—</div><div class="muted tiny" id="topLoserChange">Waiting for data</div></div>
     </div>
@@ -441,11 +442,11 @@ body.oc-logged-out #signInForm .oc-password-toggle svg{width:21px;height:21px;fi
       </aside>
     </div>
     <section class="panel signal-scanner">
-      <div class="section-head"><h2>📡 All-Coin Live Momentum Signals</h2><span class="tag">PUBLIC MARKET DATA</span></div>
+      <div class="section-head"><h2>📡 All-Coin Live Momentum Signals</h2><span class="tag">MARKET INSIGHTS</span></div>
       <div class="scanner-intro">Signals use 24-hour price change and volume. Select a coin to view its chart.</div>
       <div class="signal-table-wrap"><table><thead><tr><th>Coin / Pair</th><th>Live Price</th><th>24h Move</th><th>Market Signal</th><th>Volume (24h)</th></tr></thead><tbody id="signalRows"><tr><td colspan="5" class="empty">Waiting for public market data…</td></tr></tbody></table></div>
       <div class="section-head"><span id="signalCountLabel" class="muted tiny">Showing up to 5 coin pairs</span><div class="two-buttons"><button class="secondary" id="signalMoreLessBtn" type="button">More +5</button><button class="secondary" id="refreshSignalsBtn">Refresh signals</button></div></div>
-      <p class="muted tiny">Informational only; public data may be delayed.</p>
+      <p class="muted tiny">Prices and signals are for information only and may change.</p>
     </section>
 <style id="market-discovery-style">
 .market-discovery{background:#f0f0f0;color:#141821;border-radius:22px;padding:16px;margin:0 0 18px;font-family:inherit}
@@ -496,7 +497,7 @@ body.oc-logged-out #signInForm .oc-password-toggle svg{width:21px;height:21px;fi
   if(tab==="gainers")list.sort((a,b)=>Number(b.price_change_percentage_24h||0)-Number(a.price_change_percentage_24h||0));
   else if(tab==="losers")list.sort((a,b)=>Number(a.price_change_percentage_24h||0)-Number(b.price_change_percentage_24h||0));
   else list.sort((a,b)=>Math.abs(Number(b.price_change_percentage_24h||0))-Math.abs(Number(a.price_change_percentage_24h||0)));
-  status.textContent=all.length?"Showing "+list.length+" matching assets from "+all.length+" public market prices.":"Waiting for public market prices. They may be delayed or rate-limited.";
+  status.textContent=all.length?"Showing "+list.length+" matching assets.":"Market prices are loading. Please try again shortly.";
   rows.innerHTML=list.length?list.slice(0,10).map(c=>{const change=Number(c.price_change_percentage_24h||0),up=change>=0,sym=String(c.symbol||"").toUpperCase(),emoji={"BTC":"₿","ETH":"◆","BNB":"◉","SOL":"◎","XRP":"✕","DOGE":"Ð"}[sym]||sym.slice(0,3);return '<div class="md-row"><div class="md-coin"><div class="md-icon">'+esc(emoji)+'</div><div style="min-width:0"><div class="md-name">'+esc(sym)+'</div><div class="md-sub">'+esc(c.name||sym)+' · $'+Number(c.current_price||0).toLocaleString("en-US",{maximumFractionDigits:8})+'</div></div></div><div class="md-change '+(up?"md-up":"md-down")+'">'+(up?"↗ +":"↘ ")+change.toFixed(2)+'%</div></div>';}).join(""):'<div class="md-muted">No matching assets yet. Try another search or wait for prices to load.</div>';
  }
  document.getElementById("discoverySearch")?.addEventListener("input",draw);
@@ -735,7 +736,7 @@ body.oc-logged-out #signInForm .oc-password-toggle svg{width:21px;height:21px;fi
           <details class="oc-financial-topic panel about-section" name="about-topics"><summary><strong>↗ Development Roadmap</strong><span class="profile-menu-chevron">⌄</span></summary><div style="padding:0 16px 16px"><p>We aim to keep improving market analytics, asset coverage, usability, educational resources and platform integrations. Each improvement should make the experience more helpful, understandable and dependable.</p><p class="muted tiny">Our roadmap focuses on expanding learning tools, market insights and the overall user experience as the platform develops.</p></div></details>
           <details class="oc-financial-topic panel about-section" name="about-topics"><summary><strong>⛨ Security and Responsible Development</strong><span class="profile-menu-chevron">⌄</span></summary><div style="padding:0 16px 16px"><p>Protecting users and communicating clearly are important goals. We continue to focus on thoughtful account safeguards, careful platform development and clear information about how each feature works.</p><p class="muted tiny">We value responsible development, transparent communication and steady improvements that support user confidence.</p></div></details>
           <details class="oc-financial-topic panel about-section" name="about-topics"><summary><strong>◉ Platform Status and Availability</strong><span class="profile-menu-chevron">⌄</span></summary><div style="padding:0 16px 16px">
-            <div class="settings-item"><div><strong class="feature-label">Market data</strong><p class="muted tiny">Public data from external providers; availability may vary.</p></div><span class="tag">External data</span></div>
+            <div class="settings-item"><div><strong class="feature-label">Market data</strong><p class="muted tiny">Market prices refresh automatically when available.</p></div><span class="tag">Automatic updates</span></div>
             <div class="settings-item"><div><strong class="feature-label">Trading</strong><p class="muted tiny">Explore interactive trading tools and practise market decisions in a simulated environment.</p></div><span class="tag">Practice mode</span></div>
             <div class="settings-item"><div><strong class="feature-label">Deposits, withdrawals and custody</strong><p class="muted tiny">Real-money processing and custody are not active.</p></div><span class="tag">Inactive</span></div>
             <div class="settings-item"><div><strong class="feature-label">Partnerships and certifications</strong><p class="muted tiny">We will publish details if and when they are verified.</p></div><span class="tag">Unverified</span></div>
@@ -1146,7 +1147,7 @@ async function loadMarket(){
  if(!market.length)restoreCachedMarket();
  const refreshButtons=[$("refreshBtn"),$("retryBtn"),$("refreshSignalsBtn")].filter(Boolean);
  refreshButtons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent="Refreshing…"});
- $("connection").textContent="Updating";setHeaderMarketStatus("connecting");if($("apiStatus"))$("apiStatus").textContent="Loading CoinGecko and Binance live prices in parallel…";$("marketHint").textContent="Refreshing public market feeds simultaneously…";
+ $("connection").textContent="Updating";setHeaderMarketStatus("connecting");if($("apiStatus"))$("apiStatus").textContent="Updating market prices…";$("marketHint").textContent="Updating market prices…";
  const finish=()=>{marketRequestInProgress=false;refreshButtons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.originalText||"Refresh";delete b.dataset.originalText})};
  const fetchJson=async(url,ms=12000)=>{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),ms);try{const res=await fetch(url,{headers:{accept:"application/json"},signal:controller.signal,cache:"no-store"});if(!res.ok)throw new Error("HTTP "+res.status);return await res.json()}finally{clearTimeout(timer)}};
  const mergeBinance=(base,tickers)=>{
@@ -1171,7 +1172,7 @@ async function loadMarket(){
   const liveIndicator=$("marketLiveIndicator");if(liveIndicator){liveIndicator.className="oc-chart-live is-live";const label=liveIndicator.querySelector("span");if(label)label.textContent="LIVE";liveIndicator.title="Live public prices refreshed successfully from "+sources.join(" and ");}
   const sourceLabel=sources.join(" + ");
   $("connection").textContent="Live data";setHeaderMarketStatus("live");if($("apiStatus"))$("apiStatus").innerHTML='<span class="green">Connected · '+sourceLabel+'</span>';
-  $("lastUpdate").textContent=new Date(now).toLocaleTimeString();$("marketHint").textContent="Latest available public prices from "+sourceLabel+". Feeds refresh in parallel; provider data may be delayed.";
+  $("lastUpdate").textContent=new Date(now).toLocaleTimeString();$("marketHint").textContent="Market prices update automatically.";
   renderMarket();renderHomeCoinResults();updateTradePreview();renderSignalScanner();
  };
  try{
@@ -1223,7 +1224,7 @@ async function loadMarket(){
    if($("signalRows"))$("signalRows").innerHTML='<tr><td colspan="5" class="empty">Live signals are unavailable until a provider responds. Tap Refresh to retry.</td></tr>';
    if($("signalCountLabel"))$("signalCountLabel").textContent="No live prices loaded";
   }else{renderMarket();renderHomeCoinResults();renderSignalScanner()}
-  $("marketHint").textContent=hasCached?"Both live feeds could not refresh. Saved prices are marked STALE, not LIVE.":"Neither live market feed could be reached. Check your connection and tap Refresh.";
+  $("marketHint").textContent=hasCached?"Showing the latest available prices. They may not reflect current market conditions.":"Market prices are temporarily unavailable. Please try again shortly.";
  }finally{finish()}
 }
 let historySeries=[];
