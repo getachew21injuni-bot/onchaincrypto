@@ -23,7 +23,8 @@ service cloud.firestore {
         ])
       ) || (
         isAdmin()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['demoBalanceUSDT','demoBalanceUpdatedAt','demoAssetBalances','demoAssetBalancesUpdatedAt','demoAssetBalancesUpdatedBy','adminUpdatedAt','adminUpdatedBy','accountStatus'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminAssigned','demoBalanceUSDT','demoBalanceUpdatedAt','demoAssetBalances','demoAssetBalancesUpdatedAt','demoAssetBalancesUpdatedBy','adminUpdatedAt','adminUpdatedBy','accountStatus'])
+        && (!('adminAssigned' in request.resource.data) || request.resource.data.adminAssigned == true)
         && (!('demoBalanceUSDT' in request.resource.data) || (request.resource.data.demoBalanceUSDT is number && request.resource.data.demoBalanceUSDT >= 0 && request.resource.data.demoBalanceUSDT <= 1000000000))
         && (!('accountStatus' in request.resource.data) || request.resource.data.accountStatus in ['active','suspended'])
         && (!('demoAssetBalances' in request.resource.data) || request.resource.data.demoAssetBalances is map)
