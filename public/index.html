@@ -396,11 +396,11 @@ body.oc-logged-out>#ocSupportPanel.open{display:flex!important}
 #page-home .oc-invest-hero{background-image:radial-gradient(ellipse at 82% 48%,rgba(9,92,110,.34),transparent 42%),linear-gradient(120deg,#03101c 0%,#071b2b 58%,#06111d 100%)!important;background-position:center!important;background-size:cover!important}
 #page-home .oc-brand-stage{display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:13px;min-height:280px;width:100%;padding:20px;text-align:center;border:1px solid rgba(32,217,255,.18);border-radius:18px;background:radial-gradient(ellipse at center,rgba(15,66,83,.34),rgba(3,14,25,.12) 72%)!important}
 #page-home .oc-brand-stage:before,#page-home .oc-brand-stage:after{content:none!important;display:none!important}
-#page-home .oc-brand-emblem{display:grid;place-items:center;width:108px;height:108px;border-radius:28px;border:1px solid rgba(245,189,66,.65);background:linear-gradient(145deg,#f4c84a 0%,#c28b27 48%,#087e78 100%);color:#07121d;font-size:39px;font-weight:950;letter-spacing:-2px;box-shadow:0 12px 35px rgba(0,0,0,.38),0 0 28px rgba(32,217,255,.12)}
+#page-home .oc-brand-emblem{display:grid;place-items:center;width:108px;height:108px;border-radius:28px;border:1px solid rgba(245,189,66,.65);background:radial-gradient(circle at 30% 22%,rgba(255,255,255,.13),transparent 45%),linear-gradient(145deg,#172638,#071522 72%);box-shadow:0 12px 35px rgba(0,0,0,.42),0 0 30px rgba(247,147,26,.16);overflow:hidden}#page-home .oc-brand-emblem svg{display:block;width:100%;height:100%;padding:7px;filter:drop-shadow(0 4px 5px rgba(0,0,0,.4))}
 #page-home .oc-brand-wordmark{display:flex;flex-wrap:wrap;justify-content:center;gap:0;font-size:clamp(27px,3.5vw,42px);font-weight:900;letter-spacing:-1.5px;line-height:1.08}
 #page-home .oc-brand-wordmark span:nth-child(1){color:#f2c34b}#page-home .oc-brand-wordmark span:nth-child(2){color:#eaf6ff}#page-home .oc-brand-wordmark span:nth-child(3){color:#27d9a2}
 #page-home .oc-brand-tagline{max-width:290px;color:#a9c2d5;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;line-height:1.6}
-@media(max-width:720px){#page-home .oc-brand-stage{min-height:205px;margin-top:4px;padding:16px}#page-home .oc-brand-emblem{width:78px;height:78px;border-radius:22px;font-size:30px}#page-home .oc-brand-wordmark{font-size:clamp(27px,8vw,36px)}}
+@media(max-width:720px){#page-home .oc-brand-stage{min-height:205px;margin-top:4px;padding:16px}#page-home .oc-brand-emblem{width:78px;height:78px;border-radius:22px}#page-home .oc-brand-emblem svg{padding:4px}#page-home .oc-brand-wordmark{font-size:clamp(27px,8vw,36px)}}
 </style>
 
 <style id="oc-onchain-btc-gold-brand">
@@ -413,7 +413,7 @@ header .brand>span{font-weight:950;letter-spacing:-.5px;background:linear-gradie
 </head>
 <body>
 <header>
-  <div class="brand"><div class="auth-logo-mark header-logo-mark" aria-hidden="true"><svg viewBox="0 0 120 120" role="img"><defs><linearGradient id="headerLogoGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#42e8ff"/><stop offset="1" stop-color="#3678ff"/></linearGradient></defs><circle cx="60" cy="60" r="51" fill="#071522" stroke="url(#headerLogoGradient)" stroke-width="3"/><path d="M73 35a29 29 0 1 0 0 50" fill="none" stroke="url(#headerLogoGradient)" stroke-width="10" stroke-linecap="round"/><path d="M87 43a21 21 0 1 0 0 34" fill="none" stroke="#42e8ff" stroke-width="8" stroke-linecap="round"/><path d="M45 60h29" stroke="#e8fbff" stroke-width="5" stroke-linecap="round"/><circle cx="88" cy="31" r="5" fill="#42e8ff"/></svg></div> <span>Onchain</span></div>
+  <div class="brand"><div class="auth-logo-mark header-logo-mark" aria-hidden="true"><svg viewBox="0 0 120 120" role="img" aria-label="Bitcoin and gold coins"><defs><linearGradient id="headerGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0a8"/><stop offset=".5" stop-color="#f5c542"/><stop offset="1" stop-color="#b7791f"/></linearGradient><linearGradient id="headerBtc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd08a"/><stop offset=".5" stop-color="#f7931a"/><stop offset="1" stop-color="#b95608"/></linearGradient></defs><circle cx="77" cy="42" r="30" fill="url(#headerGold)" stroke="#fff0b0" stroke-width="2.5"/><circle cx="77" cy="42" r="24" fill="none" stroke="#986417" stroke-width="1.5"/><path d="M65 33h24m-24 9h24m-24 9h24" stroke="#986417" stroke-width="3" stroke-linecap="round"/><circle cx="45" cy="73" r="35" fill="url(#headerBtc)" stroke="#ffe0ad" stroke-width="3"/><circle cx="45" cy="73" r="28" fill="none" stroke="#9e4b09" stroke-width="1.8"/><path d="M39 49v7m12-7v7M39 90v7m12-7v7" stroke="#fff0d8" stroke-width="3.5" stroke-linecap="round"/><path d="M54 59c-2-5-8-7-16-5l-4 38c13 3 23-1 23-9 0-5-3-8-8-9 5-1 8-6 5-11Z" fill="none" stroke="#fff8ec" stroke-width="4" stroke-linejoin="round"/><path d="M40 65h9m-10 13h10" stroke="#fff8ec" stroke-width="3.5" stroke-linecap="round"/></svg></div> <span>Onchain</span></div>
   <nav id="nav">
     <button class="active" data-page="home">Home</button>
     <button data-page="markets">Markets</button>
@@ -434,7 +434,23 @@ header .brand>span{font-weight:950;letter-spacing:-.5px;background:linear-gradie
    <p>Fast, secure, low-cost — everything you need to trade confidently.</p>
   </div>
   <div class="oc-hero-art oc-brand-stage" aria-label="OnChainCrypto brand">
-   <div class="oc-brand-emblem" aria-hidden="true">OC</div>
+   <div class="oc-brand-emblem" aria-hidden="true">
+      <svg viewBox="0 0 120 120" role="img" aria-label="Overlapping Bitcoin and gold coins">
+       <defs>
+        <linearGradient id="ocGoldCoin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2b0"/><stop offset=".42" stop-color="#f4c542"/><stop offset="1" stop-color="#a96c12"/></linearGradient>
+        <linearGradient id="ocBtcCoin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd08a"/><stop offset=".5" stop-color="#f7931a"/><stop offset="1" stop-color="#b95608"/></linearGradient>
+       </defs>
+       <circle cx="76" cy="43" r="31" fill="url(#ocGoldCoin)" stroke="#fff0b0" stroke-width="2.5"/>
+       <circle cx="76" cy="43" r="25" fill="none" stroke="#9b6718" stroke-width="1.5" opacity=".8"/>
+       <path d="M64 33h21m-21 9h21m-21 9h21" stroke="#986417" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+       <circle cx="46" cy="72" r="35" fill="url(#ocBtcCoin)" stroke="#ffe0ad" stroke-width="3"/>
+       <circle cx="46" cy="72" r="28" fill="none" stroke="#9e4b09" stroke-width="1.8" opacity=".75"/>
+       <path d="M40 48v7m12-7v7M40 89v7m12-7v7" stroke="#fff0d8" stroke-width="3.5" stroke-linecap="round"/>
+       <path d="M54 58c-2-5-8-7-16-5l-4 38c13 3 23-1 23-9 0-5-3-8-8-9 5-1 8-6 5-11Z" fill="none" stroke="#fff8ec" stroke-width="4" stroke-linejoin="round"/>
+       <path d="M40 64h9m-10 13h10" stroke="#fff8ec" stroke-width="3.5" stroke-linecap="round"/>
+       <path d="M83 82l5 5 11-13" fill="none" stroke="#f9d56d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+     </div>
    <div class="oc-brand-wordmark"><span>On</span><span>chain</span></div>
    <div class="oc-brand-tagline">Institutional Crypto Intelligence Platform</div>
   </div>
