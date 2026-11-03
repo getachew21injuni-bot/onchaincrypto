@@ -141,13 +141,13 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
  <section class="oc-invest-hero" aria-label="Welcome to Onchain">
   <div class="oc-hero-copy">
    <div class="oc-hero-pill"><span class="oc-pulse-dot"></span> WELCOME TO Onchain</div>
-   <h2>Start Your Journey. <span>Build Your Future</span> with Smart Crypto Investment</h2>
-   <p>A secure platform to explore multiple digital assets, follow market movements, and get support 24/7.</p>
+   <h2>Your Markets. <span>Your Insights.</span> Onchain.</h2>
+   <p>Explore Bitcoin, Ethereum, Gold and leading digital assets. Follow market prices, compare performance and discover useful tools in one streamlined platform.</p>
    <div class="oc-hero-terms" aria-label="Investment terms">
-    <span>INVEST</span><i>•</i><span>TRADE</span><i>•</i><span>GROW</span><i>•</i><span>DISCOVER</span>
+    <span>CRYPTO</span><i>•</i><span>GOLD</span><i>•</i><span>MARKET INSIGHTS</span><i>•</i><span>ASSET TOOLS</span>
    </div>
    <button class="oc-hero-cta" type="button" data-go="markets">Explore Markets <span aria-hidden="true">↗</span></button>
-   <div class="oc-hero-note">Public market insights <b>·</b> Paper trading</div>
+   <div class="oc-hero-note">Crypto <b>·</b> Gold <b>·</b> Market insights</div>
   </div>
   <div class="oc-hero-art" aria-hidden="true">
    <div class="oc-orbit oc-orbit-one"></div><div class="oc-orbit oc-orbit-two"></div>
@@ -584,7 +584,7 @@ ChainCrypto</h3>
   </section>
   <section id="page-register" class="hidden">
     <div class="auth-welcome">
-      <div class="auth-logo-mark" aria-hidden="true"><svg viewBox="0 0 120 120" role="img"><defs><linearGradient id="authLogoGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#42e8ff"/><stop offset="1" stop-color="#3678ff"/></linearGradient></defs><circle cx="60" cy="60" r="51" fill="#071522" stroke="url(#authLogoGradient)" stroke-width="3"/><path d="M73 35a29 29 0 1 0 0 50" fill="none" stroke="url(#authLogoGradient)" stroke-width="10" stroke-linecap="round"/><path d="M87 43a21 21 0 1 0 0 34" fill="none" stroke="#42e8ff" stroke-width="8" stroke-linecap="round"/><path d="M45 60h29" stroke="#e8fbff" stroke-width="5" stroke-linecap="round"/><circle cx="88" cy="31" r="5" fill="#42e8ff"/></svg></div>
+      <div class="auth-logo-mark oc-onchain-round-mark" aria-hidden="true"><span>B</span></div>
       <div class="auth-brand">Onchain<span>CRYPTO</span></div>
       <h1 id="authHeading">Welcome to Onchain</h1>
       <p id="authSubheading">Access your crypto dashboard securely.</p>
@@ -594,7 +594,7 @@ ChainCrypto</h3>
       <section class="panel form-panel auth-main-panel">
         <div id="authModeIntro"><h2>Sign in to your account</h2><p class="muted tiny">Enter your email and password to continue.</p></div>
         
-        <p class="muted tiny">Register with email and password and receive a verification link, or register with a phone number without SMS verification for testing. The phone SMS panel also lets you request and enter a real code when SMS is configured. This uses Firebase Authentication only; Firestore and Cloud Functions are not required for sign-in. Email accounts can receive a verification link. Phone registration can be tested without SMS; real SMS delivery depends on Firebase project settings and limits. Real-money trading and online balances are not enabled.</p>
+        <p class="muted tiny">Create your Onchain account with email or phone. Complete the available verification steps to secure your access.</p>
         <div id="authStatus" class="notice">Checking sign-in status…</div>
         <p id="registerMessage" class="muted tiny" aria-live="polite"></p>
         <button class="secondary full hidden" id="resendEmailVerificationBtn" type="button">✉ Send / resend Gmail verification link</button>
@@ -2945,4 +2945,21 @@ body.oc-logged-out.oc-auth-screen #signInForm .oc-password-toggle {
 body.oc-logged-out.oc-auth-screen #authHeading:after {
   content:none!important;
 }
+</style>
+
+
+<style id="oc-bitnet-fallback-polish">
+/* Keep the GitHub Pages fallback visually aligned with the primary Onchain site. */
+#page-home .oc-invest-hero{border-color:rgba(217,173,85,.32);background:radial-gradient(ellipse at 78% 38%,#19364b 0%,#0b1b2d 42%,#050d19 78%);box-shadow:0 22px 60px rgba(0,0,0,.4)}
+#page-home .oc-hero-copy h2 span{color:#e8bd59;background:linear-gradient(100deg,#f8df91,#e8b83f 60%,#c78c21);-webkit-background-clip:text;background-clip:text;color:transparent}
+#page-home .oc-hero-cta{background:linear-gradient(110deg,#f8df91,#e8b83f 58%,#c78c21);color:#17130a;border:1px solid #f3d47b}
+#page-home .oc-hero-terms{color:#e9d8b2}
+#page-home .oc-hero-terms i{color:#d9ad55}
+#page-home .oc-coin,#page-home .oc-orbit,#page-home .oc-floating-term{display:none!important;animation:none!important}
+#page-register .auth-logo-mark.oc-onchain-round-mark{display:grid;place-items:center;width:66px;height:66px;margin:0 auto 10px;border:1px solid #f4d37d;border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff1bd,#e6b849 55%,#9b6719);color:#17130a;font-size:36px;font-weight:950;box-shadow:0 0 25px rgba(217,173,85,.2)}
+#page-register .auth-welcome{border-color:rgba(217,173,85,.28);background:radial-gradient(ellipse at top,#1b3143 0%,#101820 62%,#0b0e11 100%)}
+#page-register .auth-brand{display:none}
+#page-register .auth-main-panel{border-color:rgba(217,173,85,.28);background:linear-gradient(145deg,#111d2b,#07101c);border-radius:18px;box-shadow:0 22px 60px rgba(0,0,0,.35)}
+#page-register .auth-main-panel input:focus{border-color:#d9ad55;box-shadow:0 0 0 3px rgba(217,173,85,.12);outline:0}
+@media(max-width:700px){#page-home .oc-invest-hero{border-radius:18px}#page-register .auth-welcome{padding:20px 14px}}
 </style>
