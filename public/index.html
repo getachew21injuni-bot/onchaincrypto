@@ -628,6 +628,47 @@ html.oc-light-theme .bottom-nav button.active,
 html.oc-light-theme nav button.active{color:#a86b0c!important}
 </style>
 
+<style id="oc-visitor-phone-showcase">
+/* Visitor-only mobile product showcase. The signed-in dashboard is not affected. */
+#page-public-market .oc-visitor-hero{grid-template-columns:minmax(0,1fr) minmax(320px,.92fr);gap:clamp(20px,4vw,54px);align-items:center}
+#page-public-market .oc-visitor-hero-copy{max-width:600px}
+#page-public-market .oc-visitor-hero-copy h1{font-size:clamp(36px,5vw,62px);line-height:1.04;letter-spacing:-1.8px}
+#page-public-market .oc-visitor-device-brandline{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:11px;padding:10px 11px;border:1px solid #354353;border-radius:10px;background:linear-gradient(100deg,#172330,#101923);color:#a8b6c5;font-size:9px;letter-spacing:1px}
+#page-public-market .oc-visitor-device-brandline strong{color:#f0b90b;font-size:10px;letter-spacing:.3px}
+#page-public-market .oc-visitor-visual{min-height:500px;perspective:1200px}
+#page-public-market .oc-visitor-device{position:relative;width:min(100%,330px);padding:9px;border:1px solid #66717d;border-radius:43px;background:linear-gradient(135deg,#8d969f,#222a33 18%,#080d13 48%,#69727d 78%,#151b22);box-shadow:0 34px 85px #000b,0 0 0 1px #d6e0e733,inset 0 0 0 2px #ffffff20;transform:rotateY(-8deg) rotateX(2deg);transition:transform .35s ease}
+#page-public-market .oc-visitor-device:hover{transform:rotateY(-2deg) rotateX(0) translateY(-4px)}
+#page-public-market .oc-visitor-device-screen{position:relative;overflow:hidden;min-height:475px;border-radius:35px;background:linear-gradient(180deg,#0b111a,#101923 55%,#0b1119)}
+#page-public-market .oc-visitor-device-island{position:absolute;z-index:5;top:17px;left:50%;width:92px;height:24px;transform:translateX(-50%);border-radius:18px;background:#020407;box-shadow:inset 0 1px 2px #ffffff16}
+#page-public-market .oc-visitor-device-status{height:43px;padding:10px 20px 0;display:flex;justify-content:space-between;color:#f2f5f8;font-size:10px;font-weight:800}
+#page-public-market .oc-visitor-phone{width:100%;padding:13px 15px 12px;border:0;border-radius:0;background:transparent;box-shadow:none;transform:none}
+#page-public-market .oc-visitor-phone-top{padding:8px 0 12px;color:#e9eef5;font-size:10px;letter-spacing:1px}
+#page-public-market .oc-visitor-phone-top>span{display:flex;align-items:center;gap:8px}
+#page-public-market .oc-visitor-mini-mark{display:grid;place-items:center;width:23px;height:23px;border-radius:8px;background:linear-gradient(135deg,#f7931a,#f0b90b);color:#101820;font-size:14px}
+#page-public-market .oc-visitor-device-subhead{display:flex;justify-content:space-between;padding:12px 0 4px;color:#8d9aaa;font-size:8px;font-weight:800;letter-spacing:1px}
+#page-public-market .oc-visitor-device-subhead span:first-child{color:#f0b90b}
+#page-public-market .oc-visitor-phone-asset{padding:17px 0 9px}
+#page-public-market .oc-visitor-phone-asset strong{font-size:26px;letter-spacing:-.7px}
+#page-public-market .oc-visitor-phone-asset>span{padding:6px 8px;border-radius:7px;background:#0c342b;color:#20d6a0;font-weight:800}
+#page-public-market .oc-visitor-phone-chart{height:142px;padding:4px 0}
+#page-public-market .oc-visitor-signal{margin-top:7px;padding:10px;background:#111f2b;border-color:#293b4d}
+#page-public-market .oc-visitor-signal small{line-height:1.35}
+#page-public-market .oc-visitor-phone-foot{font-size:7px}
+#page-public-market .oc-visitor-device-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:15px;padding:11px 0 3px;border-top:1px solid #263341;color:#8c9aaa;text-align:center;font-size:8px}
+#page-public-market .oc-visitor-device-nav span{display:grid;gap:4px;justify-items:center}
+#page-public-market .oc-visitor-device-nav b{font-size:16px;font-weight:500}
+#page-public-market .oc-visitor-device-nav .active{color:#f0b90b}
+#page-public-market .oc-visitor-device-side{position:absolute;right:-3px;top:115px;width:3px;height:65px;border-radius:0 3px 3px 0;background:#6f7882}
+@media(max-width:760px){
+ #page-public-market .oc-visitor-hero{grid-template-columns:1fr;gap:12px}
+ #page-public-market .oc-visitor-hero-copy h1{font-size:clamp(34px,10vw,48px)}
+ #page-public-market .oc-visitor-visual{min-height:500px;padding:12px 0 20px}
+ #page-public-market .oc-visitor-device{width:min(88%,330px);transform:none}
+ #page-public-market .oc-visitor-device:hover{transform:translateY(-2px)}
+ #page-public-market .oc-visitor-proof{gap:9px}
+}
+@media(prefers-reduced-motion:reduce){#page-public-market .oc-visitor-device{transition:none}}
+</style>
 </head>
 <body>
 <header>
@@ -650,22 +691,29 @@ html.oc-light-theme nav button.active{color:#a86b0c!important}
       <div class="oc-visitor-kicker"><span></span> ONCHAIN · CRYPTO & GOLD MARKETS</div>
       <h1>Explore crypto and <em>Gold</em> markets with confidence.</h1>
       <p>Discover Bitcoin, Ethereum, BNB, XRP, Gold (XAU) and more. Follow market prices, compare performance and explore market signals before you create an account.</p>
-      <div class="oc-visitor-hero-actions">
-        <button class="primary" type="button" id="ocVisitorHeroSignup">Create your account</button>
-        <button class="secondary" type="button" id="ocVisitorHeroExplore">Explore markets ↓</button>
-      </div>
+
       <div class="oc-visitor-proof"><span>● Public market prices</span><span>◆ Crypto + Gold</span><span>▤ Charts & market insights</span></div>
     </div>
     <div class="oc-visitor-visual" aria-label="Illustrative Onchain market chart and trading signal display">
       <div class="oc-visitor-visual-glow"></div>
-      <div class="oc-visitor-phone">
-        <div class="oc-visitor-phone-top"><span>ONCHAIN MARKETS</span><i></i></div>
+      <div class="oc-visitor-device" role="img" aria-label="Onchain mobile trading interface displayed inside a premium smartphone frame">
+       <div class="oc-visitor-device-island"></div>
+       <div class="oc-visitor-device-screen">
+        <div class="oc-visitor-device-status"><span>9:41</span><span>●●●  ▰</span></div>
+        <div class="oc-visitor-phone">
+        <div class="oc-visitor-phone-top"><span><b class="oc-visitor-mini-mark">O</b> ONCHAIN</span><i></i></div>
+        <div class="oc-visitor-device-subhead"><span>MARKETS</span><span>OVERVIEW</span><span>⋯</span></div>
         <div class="oc-visitor-phone-asset"><div><small>BTC / USDT</small><strong id="ocVisitorHeroPrice">Loading price…</strong></div><span id="ocVisitorHeroChange">Market feed</span></div>
         <div class="oc-visitor-phone-chart">
           <svg viewBox="0 0 420 170" role="img" aria-label="Illustrative market candlestick chart"><defs><linearGradient id="ocVisitorChartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#16d9a0" stop-opacity=".26"/><stop offset="1" stop-color="#16d9a0" stop-opacity="0"/></linearGradient></defs><path d="M0 135H420M0 90H420M0 45H420" stroke="#29435b" stroke-width="1" stroke-dasharray="4 6"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59 207 73 232 49 258 62 282 39 308 48 332 25 356 42 382 15 410 23V170H8Z" fill="url(#ocVisitorChartFill)"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59 207 73 232 49 258 62 282 39 308 48 332 25 356 42 382 15 410 23" fill="none" stroke="#23d6a2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g stroke-width="2"><path d="M35 104V137m-5-23h10" stroke="#16d9a0"/><path d="M84 79v35m-5-25h10" stroke="#16d9a0"/><path d="M132 65v37m-5-25h10" stroke="#16d9a0"/><path d="M181 45v40m-5-25h10" stroke="#16d9a0"/><path d="M232 33v38m-5-22h10" stroke="#16d9a0"/><path d="M282 24v37m-5-22h10" stroke="#16d9a0"/><path d="M332 10v40m-5-25h10" stroke="#16d9a0"/><path d="M382 2v34m-5-20h10" stroke="#16d9a0"/></g></svg>
         </div>
         <div class="oc-visitor-signal"><span class="oc-visitor-signal-dot"></span><div><b>MARKET MOMENTUM</b><small>Illustrative signal interface · not a trade instruction</small></div><strong>ONCHAIN</strong></div>
+        <div class="oc-visitor-device-brandline"><span>ONCHAIN</span><strong>Get Onchain</strong></div>
         <div class="oc-visitor-phone-foot"><span>PRICE</span><span>24H CHANGE</span><span>MARKET WATCH</span></div>
+        <div class="oc-visitor-device-nav"><span class="active"><b>⌂</b>Home</span><span><b>⌁</b>Markets</span><span><b>⇄</b>Trade</span><span><b>◉</b>Wallet</span></div>
+        </div>
+       </div>
+       <div class="oc-visitor-device-side"></div>
       </div>
       <div class="oc-visitor-float-chip oc-chip-btc">₿ <span>BITCOIN</span></div>
       <div class="oc-visitor-float-chip oc-chip-gold">◉ <span>GOLD · XAU</span></div>
