@@ -447,6 +447,17 @@ body.oc-logged-out.oc-auth-screen main>#page-register{display:flex!important}
 @media(max-width:640px){#page-public-market{padding:10px!important}.oc-visitor-hero{grid-template-columns:1fr;padding:19px 15px;gap:10px;border-radius:17px}.oc-visitor-hero h1{font-size:34px;letter-spacing:-1px}.oc-visitor-hero-copy>p{font-size:12px;line-height:1.65}.oc-visitor-proof{gap:9px;font-size:9px}.oc-visitor-visual{min-height:300px;margin-top:5px}.oc-visitor-phone{width:min(100%,370px);transform:none}.oc-visitor-float-chip{padding:7px 9px;font-size:11px}.oc-chip-btc{left:-2px;top:14%}.oc-chip-gold{right:-2px;bottom:12%}.oc-visitor-ticker-panel{grid-template-columns:1fr;gap:10px;padding:12px}.oc-visitor-ticker-label{flex-direction:row;align-items:center;justify-content:space-between}.oc-visitor-section-head{align-items:flex-start;flex-direction:column;gap:10px}.oc-visitor-market-tools{align-items:flex-start;flex-direction:column}.oc-visitor-search{width:100%}.oc-visitor-market-more{align-items:flex-start;flex-direction:column}.oc-visitor-detail{padding:13px}.oc-visitor-detail-stats{grid-template-columns:1fr 1fr}.oc-visitor-detail-stats>div:last-child{grid-column:1/-1}.oc-visitor-chart-wrap{height:300px}.oc-visitor-detail-action{align-items:stretch;flex-direction:column}.oc-visitor-detail-action button{width:100%}.oc-visitor-about{padding:18px 14px;margin-top:35px}.oc-visitor-feature-grid{gap:8px}.oc-visitor-feature-grid article{padding:12px}.oc-visitor-bottom-cta{padding:17px;align-items:flex-start;flex-direction:column}.oc-visitor-bottom-cta button{width:100%}#ocVisitorActions{gap:6px}#ocVisitorActions button{min-width:0;padding:9px 11px;font-size:10px}}
 @media(prefers-reduced-motion:reduce){.oc-visitor-ticker-track{animation:none!important}}
 </style>
+
+<style id="oc-hide-auth-prompts-for-signed-in-users">
+/* Signed-in members should not see guest login/register prompts on private pages. */
+body:not(.oc-logged-out) .mobile-signin-btn,
+body:not(.oc-logged-out) .mobile-register-btn,
+body:not(.oc-logged-out) #signin-nav,
+body:not(.oc-logged-out) #register-nav,
+body:not(.oc-logged-out) #ocVisitorActions {display:none!important}
+/* The welcome/marketing hero belongs to the visitor landing page, not the signed-in Home dashboard. */
+body:not(.oc-logged-out) #page-home > .oc-get-started-hero {display:none!important}
+</style>
 </head>
 <body>
 <header>
