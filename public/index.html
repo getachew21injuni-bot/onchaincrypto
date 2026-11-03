@@ -4674,11 +4674,11 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  }
  function chartUrl(asset){
   const s=String(asset?.symbol||"BTC").toUpperCase();
-  const symbol=s==="XAU"?"OANDA:XAUUSD":s==="BTC"?"BINANCE:BTCUSDT":"BINANCE:"+s+"USDT";
+  const symbol=s==="XAU"?"OANDA:XAUUSD":s==="BTC"?"BINANCE:BTCUSDT":s==="USDT"?"BINANCE:USDTUSDC":s==="USDC"?"BINANCE:USDCUSDT":"BINANCE:"+s+"USDT";
   return "https://s.tradingview.com/widgetembed/?frameElementId=ocVisitorTradingChart&symbol="+encodeURIComponent(symbol)+"&interval=60&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=%23081727&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&locale=en";
  }
  function showDetails(symbol){
-  const known={BTC:"Bitcoin",ETH:"Ethereum",BNB:"BNB",XRP:"XRP",SOL:"Solana",ADA:"Cardano",DOGE:"Dogecoin",TRX:"TRON",XAU:"Gold"};
+  const known={BTC:"Bitcoin",ETH:"Ethereum",USDT:"Tether",BNB:"BNB",XRP:"XRP",USDC:"USDC",SOL:"Solana",ADA:"Cardano",DOGE:"Dogecoin",TRX:"TRON",XAU:"Gold"};
   const a=findAsset(symbol)||{symbol:String(symbol).toUpperCase(),name:known[String(symbol).toUpperCase()]||String(symbol).toUpperCase(),current_price:null,price_change_percentage_24h:null,market_cap:null};
   selectedAsset=a;
   $("ocVisitorDetailName").textContent=a.name;
@@ -4705,7 +4705,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
   const cat=event.target.closest("[data-visitor-category]");if(cat){category=cat.dataset.visitorCategory;limit=6;document.querySelectorAll("[data-visitor-category]").forEach(b=>b.classList.toggle("active",b===cat));renderTable();return}
  });
  $("ocVisitorSearch")?.addEventListener("input",()=>{limit=6;renderTable()});
- $("ocVisitorMarketMore")?.addEventListener("click",()=>{limit=limit>=getAssets().length?6:getAssets().length;renderTable()});
+ $("ocVisitorMarketMore")?.addEventListener("click",()=>{limit=limit>6?6:999999;renderTable()});
  $("ocVisitorDetailClose")?.addEventListener("click",()=>{$("ocVisitorCoinDetail").classList.add("hidden");$("ocVisitorTradingChart").src="about:blank"});
  $("ocVisitorDetailBuy")?.addEventListener("click",()=>openAuth("signup"));
  ["ocVisitorSignup","ocVisitorHeroSignup","ocVisitorAboutSignup","ocVisitorBottomSignup"].forEach(id=>$(id)?.addEventListener("click",()=>openAuth("signup")));
@@ -4806,10 +4806,10 @@ html.oc-light-theme #page-register .auth-main-panel p,html.oc-light-theme #page-
 #page-public-market .oc-visitor-market-tabs button.active{background:#25204b;color:#c8bcff;border:0}
 #page-public-market .oc-visitor-search{background:#111c2d;border-color:#33435a;border-radius:8px}
 #page-public-market .oc-visitor-table-wrap{border:1px solid #29384e;border-radius:12px;background:#101a2b}
-#page-public-market .oc-visitor-table{min-width:650px}
+#page-public-market .oc-visitor-table{min-width:540px}
 #page-public-market .oc-visitor-table th{color:#93a2b8;border-bottom-color:#2b394d}
 #page-public-market .oc-visitor-table td{padding-top:15px;padding-bottom:15px;border-bottom-color:#263448}
-#page-public-market .oc-visitor-table tr:hover{background:#18253a}
+#page-public-market .oc-visitor-table tr:hover{background:#18253a}.oc-visitor-table tr.oc-v-market-row{cursor:pointer}.oc-visitor-table tr.oc-v-market-row:focus-visible{outline:2px solid #d5a84c;outline-offset:-2px}
 #page-public-market .oc-v-row-actions .oc-v-buy{background:#5741d9;border-color:#7564ed;color:#fff}
 #page-public-market .oc-v-row-actions .oc-v-detail{background:#202d42;border-color:#3a4a61;color:#e4eaf3}
 #page-public-market .oc-visitor-detail{border:1px solid #34435a;border-radius:12px;background:#101a2b}
