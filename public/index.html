@@ -821,7 +821,7 @@ header .brand>span:last-child{font-weight:950!important;letter-spacing:-.5px!imp
 
   <section class="oc-visitor-market-section" id="ocVisitorMarkets">
     <div class="oc-visitor-section-head"><div><div class="oc-visitor-kicker">DISCOVER DIGITAL ASSETS</div><h2>Explore every available market</h2><p>Compare prices and 24-hour moves. Select an asset to open its chart and details.</p></div><div class="oc-visitor-feed-status" id="ocVisitorFeedStatus"><i></i><span>Connecting to market data</span></div></div>
-    <div class="oc-visitor-market-tabs" role="tablist" aria-label="Market categories"><button type="button" class="active" data-visitor-category="crypto">Crypto</button><button type="button" data-visitor-category="gold">Gold</button><button type="button" data-visitor-category="stocks" aria-label="Stocks coming soon">Stocks <small>Coming soon</small></button></div>
+    <div class="oc-visitor-market-tabs" role="tablist" aria-label="Market categories"><button type="button" class="active" data-visitor-category="crypto">Crypto</button><button type="button" data-visitor-category="gold">Gold</button><button type="button" data-visitor-category="stocks" aria-label="US stocks">Stocks</button></div>
     <div class="oc-visitor-market-tools"><label class="oc-visitor-search"><span>⌕</span><input id="ocVisitorSearch" type="search" placeholder="Search Bitcoin, BTC, Ethereum…" autocomplete="off"></label><span id="ocVisitorMarketCount">Loading available assets…</span></div>
     <div class="oc-visitor-table-wrap"><table class="oc-visitor-table"><thead><tr><th>Asset</th><th>Price (USD)</th><th>24H</th><th>Market cap</th><th>Explore</th></tr></thead><tbody id="ocVisitorMarketRows"><tr><td colspan="5" class="oc-visitor-empty">Connecting to public market feeds…</td></tr></tbody></table></div>
     <div class="oc-visitor-market-more"><span id="ocVisitorMarketFootnote">Market prices are indicative and may be delayed.</span><button type="button" class="secondary" id="ocVisitorMarketMore">Show more markets</button></div>
@@ -853,7 +853,7 @@ header .brand>span:last-child{font-weight:950!important;letter-spacing:-.5px!imp
     <p class="oc-visitor-roadmap-note">Onchain is building toward this expanded ecosystem. Services marked Planned or In development are future offerings, not currently active. Product availability, supported assets, leverage, rates, liquidity and terms will be confirmed before launch. Digital-asset derivatives and options carry substantial risk; staking and rewards may involve loss of assets.</p>
   </section>
   <div class="oc-visitor-bottom-cta"><div><h2>Ready to explore Onchain?</h2><p>Create an account to access the platform workspace.</p></div><button type="button" class="primary" id="ocVisitorBottomSignup">Sign up</button></div>
-  <p class="oc-visitor-disclaimer">Digital-asset prices can change rapidly. Market information is provided for general information only and is not financial advice. Additional services—including derivatives, options, recurring buys, copy trading, Earn and staking, and NFTs—are part of the Onchain roadmap and will be introduced as they become available. Any advertised rates or leverage targets are proposed plans, not guaranteed offers. Stocks are planned for a future phase.</p>
+  <p class="oc-visitor-disclaimer">Digital-asset prices can change rapidly. Market information is provided for general information only and is not financial advice. Additional services—including derivatives, options, recurring buys, copy trading, Earn and staking, and NFTs—are part of the Onchain roadmap and will be introduced as they become available. Any advertised rates or leverage targets are proposed plans, not guaranteed offers. US stock quotes and charts are available for market information. Data may be delayed; stock purchases are not currently offered through Onchain.</p>
 </section>
 
 <section id="page-home">
@@ -941,6 +941,20 @@ header .brand>span:last-child{font-weight:950!important;letter-spacing:-.5px!imp
       <div class="card"><div class="label">Top gainer (24h)</div><div class="big green" id="topGainer">—</div><div class="muted tiny" id="topGainerChange">Waiting for data</div></div>
       <div class="card"><div class="label">Top loser (24h)</div><div class="big red" id="topLoser">—</div><div class="muted tiny" id="topLoserChange">Waiting for data</div></div>
     </div>
+    <section class="panel oc-signed-in-stocks" id="ocSignedInStocksPanel">
+      <div class="section-head"><div><h2>US Stocks</h2><p class="muted tiny">Apple, Microsoft, NVIDIA, Tesla and other leading US-listed companies</p></div><span class="tag">NASDAQ · NYSE</span></div>
+      <div class="oc-stock-brand-grid">
+        <div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:#111827">A</span><span><b>AAPL</b><small>Apple</small></span></div>
+        <div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:#F25022">▦</span><span><b>MSFT</b><small>Microsoft</small></span></div>
+        <div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:#76B900">N</span><span><b>NVDA</b><small>NVIDIA</small></span></div>
+        <div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:#E82127">T</span><span><b>TSLA</b><small>Tesla</small></span></div>
+        <div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:#FF9900">a</span><span><b>AMZN</b><small>Amazon</small></span></div>
+        <div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:#4285F4">G</span><span><b>GOOGL</b><small>Alphabet</small></span></div>
+        <div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:#0866FF">∞</span><span><b>META</b><small>Meta Platforms</small></span></div>
+      </div>
+      <div class="oc-stock-widget-wrap"><tv-market-overview symbol-sectors='[{"sectionName":"US Stocks","symbols":["NASDAQ:AAPL","NASDAQ:MSFT","NASDAQ:NVDA","NASDAQ:TSLA","NASDAQ:AMZN","NASDAQ:GOOGL","NASDAQ:META"]}]' theme="light" locale="en"></tv-market-overview></div>
+      <p class="oc-stock-note">Quotes and charts powered by TradingView. Market data may be delayed. Onchain does not currently execute stock purchases.</p>
+    </section>
     <section class="panel" id="marketQuickActionsPanel" style="margin-bottom:18px">
       <div class="section-head"><div><h2>Quick Actions</h2></div><span class="tag">ACCOUNT TOOLS</span></div>
       <div class="quick-action-grid">
@@ -4375,6 +4389,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
 })();
 </script>
 \n<script type="module" src="./support-chat.js"></script>\n
+<script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-market-overview.js"></script>
 <script id="oc-public-market-experience-script">
 (function(){
  const $=id=>document.getElementById(id);
@@ -4426,7 +4441,26 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
   const visible=matched.slice(0,limit);
   if(count)count.textContent=category==="stocks"?"Stock-market data is not available yet":("Showing "+visible.length+" of "+matched.length+" available "+(category==="gold"?"Gold market":"crypto assets"));
   const more=$("ocVisitorMarketMore");if(more){more.style.display=category==="stocks"?"none":"";more.disabled=visible.length>=matched.length;more.textContent=visible.length>=matched.length?"All available markets shown":"Show more markets";}
-  if(category==="stocks"){rows.innerHTML='<tr><td colspan="5" class="oc-visitor-empty">Stock-market coverage is coming soon. It is not currently available for trading on Onchain.</td></tr>';return}
+  if(category==="stocks"){
+   const stocks=[
+    {symbol:"AAPL",name:"Apple",color:"#111827",mark:"A"},
+    {symbol:"MSFT",name:"Microsoft",color:"#F25022",mark:"▦"},
+    {symbol:"NVDA",name:"NVIDIA",color:"#76B900",mark:"N"},
+    {symbol:"TSLA",name:"Tesla",color:"#E82127",mark:"T"},
+    {symbol:"AMZN",name:"Amazon",color:"#FF9900",mark:"a"},
+    {symbol:"GOOGL",name:"Alphabet",color:"#4285F4",mark:"G"},
+    {symbol:"META",name:"Meta Platforms",color:"#0866FF",mark:"∞"}
+   ];
+   const stockQuery=($("ocVisitorSearch")?.value||"").trim().toLowerCase();
+   const stockMatches=stocks.filter(x=>!stockQuery||x.symbol.toLowerCase().includes(stockQuery)||x.name.toLowerCase().includes(stockQuery));
+   if(count)count.textContent="Showing "+stockMatches.length+" of "+stocks.length+" US stocks · Quotes by TradingView";
+   if(more)more.style.display="none";
+   if(!stockMatches.length){rows.innerHTML='<tr><td colspan="5" class="oc-visitor-empty">No matching US stocks. Try AAPL, MSFT, NVDA or another ticker.</td></tr>';return}
+   const sectors=[{sectionName:"US Stocks",symbols:stockMatches.map(x=>"NASDAQ:"+x.symbol)}];
+   const brandCards=stockMatches.map(x=>'<div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:'+x.color+'">'+escapeHtml(x.mark)+'</span><span><b>'+escapeHtml(x.symbol)+'</b><small>'+escapeHtml(x.name)+'</small></span></div>').join("");
+   rows.innerHTML='<tr><td colspan="5"><div class="oc-visitor-stocks-panel"><div class="oc-stock-brand-grid">'+brandCards+'</div><div class="oc-stock-widget-wrap"><tv-market-overview symbol-sectors=\''+escapeHtml(JSON.stringify(sectors))+'\' theme="light" locale="en"></tv-market-overview></div><p class="oc-stock-note">Quotes and charts powered by TradingView. Market data may be delayed. Onchain does not currently execute stock purchases.</p></div></td></tr>';
+   return;
+  }
   if(!visible.length){rows.innerHTML='<tr><td colspan="5" class="oc-visitor-empty">'+(matched.length?"No matching assets. Try another search.":"Market data is connecting. Prices will appear when a public provider responds.")+'</td></tr>';return}
   rows.innerHTML=visible.map(a=>{
    const s=String(a.symbol).toUpperCase(),chg=Number(a.price_change_percentage_24h)||0,cap=Number(a.market_cap)||0;
@@ -4637,6 +4671,27 @@ html.oc-light-theme .oc-roadmap-brand-name{color:#172b42}
 @media(max-width:560px){.oc-roadmap-brand-mark{width:44px;height:44px;flex-basis:44px;font-size:27px}.oc-roadmap-brand-name{font-size:18px}.oc-home-roadmap .oc-visitor-products-heading h2{padding-inline:2px}}
 </style>
 
+<style id="oc-us-stocks-market-style">
+.oc-stock-brand-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:9px;padding:14px 16px}
+.oc-stock-brand-card{display:flex;align-items:center;gap:10px;min-width:0;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);color:var(--text)}
+.oc-stock-brand-mark{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border-radius:10px;background:var(--stock-brand);color:#fff;font-size:17px;font-weight:850;line-height:1}
+.oc-stock-brand-card>span:last-child{display:flex;flex-direction:column;min-width:0}
+.oc-stock-brand-card b{font-size:13px;letter-spacing:.2px}
+.oc-stock-brand-card small{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oc-stock-widget-wrap{width:100%;min-height:450px;padding:0 12px 8px;overflow:hidden}
+.oc-stock-widget-wrap tv-market-overview{display:block;width:100%;min-height:440px}
+.oc-stock-note{margin:0;padding:0 16px 16px;color:var(--muted);font-size:11px;line-height:1.5}
+.oc-visitor-stocks-panel{min-width:0;padding:8px 0}
+.oc-visitor-stocks-panel .oc-stock-brand-grid{padding-top:4px}
+.oc-signed-in-stocks{margin-bottom:20px}
+.oc-signed-in-stocks .section-head{align-items:center}
+@media(max-width:600px){
+ .oc-stock-brand-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px}
+ .oc-stock-widget-wrap{padding:0 4px 8px;min-height:420px}
+ .oc-stock-widget-wrap tv-market-overview{min-height:410px}
+ .oc-stock-note{padding:0 12px 14px}
+}
+</style>
 </body>
 </html>
 
