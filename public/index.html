@@ -2699,7 +2699,7 @@ window.ocSetAuthScreenVisibility = function(signedIn) {
   // Native hidden attributes guarantee protected navigation and pages stay out of view.
   document.querySelectorAll("body > :not(main)").forEach(node => node.removeAttribute("hidden"));
   document.querySelectorAll("main > *").forEach(node => {
-    if (signedIn || node.id === "page-home" || node.id === "page-register") node.removeAttribute("hidden");
+    if (signedIn || node.id === "page-public-market" || node.id === "page-register") node.removeAttribute("hidden");
     else node.setAttribute("hidden", "");
   });
 };
