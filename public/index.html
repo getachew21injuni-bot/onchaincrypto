@@ -458,6 +458,73 @@ body:not(.oc-logged-out) #ocVisitorActions {display:none!important}
 /* The welcome/marketing hero belongs to the visitor landing page, not the signed-in Home dashboard. */
 body:not(.oc-logged-out) #page-home > .oc-get-started-hero {display:none!important}
 </style>
+
+<style id="oc-visitor-clean-header">
+/* Visitor landing page: no member navigation; keep the brand and clear account actions. */
+body:has(#page-public-market:not(.hidden)) header {
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  flex-wrap:nowrap!important;
+  gap:12px!important;
+}
+body:has(#page-public-market:not(.hidden)) header #nav {
+  display:none!important;
+}
+body:has(#page-public-market:not(.hidden)) header .brand {
+  justify-self:auto!important;
+  flex:0 1 auto;
+}
+body:has(#page-public-market:not(.hidden)) header .header-right {
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:9px!important;
+  margin-left:auto!important;
+}
+body:has(#page-public-market:not(.hidden)) header #ocVisitorActions {
+  display:flex!important;
+  align-items:center!important;
+  gap:9px!important;
+}
+body:has(#page-public-market:not(.hidden)) header #ocVisitorActions button {
+  min-width:94px!important;
+  min-height:40px!important;
+  padding:10px 15px!important;
+  opacity:1!important;
+  visibility:visible!important;
+  font-size:13px!important;
+  font-weight:750!important;
+}
+body:has(#page-public-market:not(.hidden)) header #ocVisitorActions .primary {
+  background:#d6a84f!important;
+  color:#111820!important;
+  border:1px solid #edc875!important;
+}
+body:has(#page-public-market:not(.hidden)) header #ocVisitorActions .secondary {
+  background:#142a40!important;
+  color:#f3f7fb!important;
+  border:1px solid #55708b!important;
+}
+@media(max-width:600px) {
+  body:has(#page-public-market:not(.hidden)) header {
+    padding:10px 12px!important;
+    min-height:62px!important;
+  }
+  body:has(#page-public-market:not(.hidden)) header .brand {
+    font-size:17px!important;
+  }
+  body:has(#page-public-market:not(.hidden)) header #ocVisitorActions {
+    gap:6px!important;
+  }
+  body:has(#page-public-market:not(.hidden)) header #ocVisitorActions button {
+    min-width:72px!important;
+    padding:9px 10px!important;
+    font-size:11px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <header>
