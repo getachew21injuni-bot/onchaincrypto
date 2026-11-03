@@ -861,7 +861,7 @@ html.oc-light-theme nav button.active{color:#a86b0c!important}
  </section>
 
  <section class="oc-visitor-products oc-home-roadmap" aria-label="Explore the Onchain ecosystem">
-  <div class="oc-visitor-products-heading"><div class="oc-visitor-kicker">WHAT'S NEXT AT ONCHAIN</div><h2>More ways to explore the digital-asset world</h2><p>Our ecosystem is growing beyond markets and trading.</p></div>
+  <div class="oc-visitor-products-heading"><div class="oc-visitor-kicker">WHAT'S NEXT AT ONCHAIN</div><h2>More ways to explore the digital-asset world</h2><div class="oc-roadmap-brand-lockup" aria-label="Onchain brand"><span class="oc-roadmap-brand-mark" aria-hidden="true">B</span><span class="oc-roadmap-brand-name">Onchain</span></div><p>Our ecosystem is growing beyond markets and trading.</p></div>
   <div class="oc-visitor-products-grid">
    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⇌</div><div class="oc-visitor-product-top"><h3>Copy Trading</h3><span>Planned</span></div><p>Discover strategy providers, review transparent performance and choose how you want to follow their trades.</p><small>FOLLOW · LEARN · MANAGE RISK</small></article>
    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">✧</div><div class="oc-visitor-product-top"><h3>Earn &amp; Staking</h3><span>Planned</span></div><p>Explore future flexible and fixed staking options, with a roadmap target of up to 20% APY on selected eligible assets, subject to terms and risk.</p><small>FLEXIBLE · FIXED · REWARDS</small></article>
@@ -4609,6 +4609,20 @@ html.oc-light-theme #page-public-market .oc-visitor-table td{border-bottom-color
 html.oc-light-theme #page-public-market .oc-visitor-table tr:hover{background:#f5f7fb}
 html.oc-light-theme #page-public-market .oc-visitor-ticker-item b{color:#253348}
 html.oc-light-theme #page-public-market .oc-visitor-ticker-item span{color:#65748a}
+</style>
+
+
+<style id="oc-roadmap-brand-mark">
+/* Centered Onchain identity between the roadmap heading and its unchanged subtitle. */
+.oc-home-roadmap .oc-visitor-products-heading{display:flex;flex-direction:column;align-items:center;text-align:center}
+.oc-home-roadmap .oc-visitor-products-heading h2{max-width:100%;margin-inline:auto}
+.oc-roadmap-brand-lockup{display:flex;align-items:center;justify-content:center;gap:11px;margin:14px auto 13px;position:relative;z-index:1}
+.oc-roadmap-brand-mark{width:48px;height:48px;display:grid;place-items:center;flex:0 0 48px;border-radius:50%;border:2px solid #f0b90b;background:radial-gradient(circle at 32% 26%,#27354a 0%,#101a2b 68%,#080e18 100%);box-shadow:0 0 0 4px rgba(240,185,11,.10),0 5px 18px rgba(0,0,0,.25);color:#f0b90b;font-size:29px;font-weight:900;line-height:1;letter-spacing:-2px}
+.oc-roadmap-brand-name{color:var(--text,#eaf6ff);font-size:19px;font-weight:850;letter-spacing:.2px}
+.oc-home-roadmap .oc-visitor-products-heading>p{margin:0 auto;max-width:760px}
+html.oc-light-theme .oc-roadmap-brand-mark{background:radial-gradient(circle at 32% 26%,#fff 0%,#f2f5f9 72%,#e5ebf2 100%);color:#b77b00;border-color:#d99d08}
+html.oc-light-theme .oc-roadmap-brand-name{color:#172b42}
+@media(max-width:560px){.oc-roadmap-brand-mark{width:44px;height:44px;flex-basis:44px;font-size:27px}.oc-roadmap-brand-name{font-size:18px}.oc-home-roadmap .oc-visitor-products-heading h2{padding-inline:2px}}
 </style>
 
 </body>
