@@ -615,8 +615,8 @@ ChainCrypto</h3>
         <p class="muted tiny auth-google-hint">For Google registration, enter your full name above first.</p>
         <form id="signInForm" class="auth-signin-form">
           <h3 style="margin-top:12px">Sign in</h3>
-          <label for="signInEmail">Email or phone number</label><input id="signInEmail" class="field" type="text" autocomplete="username" required placeholder="you@example.com">
-          <label for="signInPassword">Password</label><input id="signInPassword" class="field" type="password" autocomplete="current-password" required placeholder="Enter your password">
+          <label for="signInEmail">Username, email or phone</label><input id="signInEmail" class="field" type="text" inputmode="text" autocomplete="username" autocapitalize="none" required placeholder="Username, email or phone">
+          <label for="signInPassword">Password</label><div class="oc-password-wrap"><input id="signInPassword" class="field" type="password" autocomplete="current-password" required placeholder="Password"><button class="oc-password-toggle" type="button" data-password-target="signInPassword" aria-label="Show password" aria-pressed="false" title="Show password">👁</button></div>
           <div class="auth-options"><label class="auth-check"><input type="checkbox" id="rememberMe"> Remember me</label><label class="auth-check"><input type="checkbox" id="showSignInPassword"> Show password</label></div>
           <button class="primary full auth-submit" type="submit">⚡ Sign In Securely</button>
           <button class="secondary full" id="resetPasswordBtn" type="button">Forgot password?</button>
