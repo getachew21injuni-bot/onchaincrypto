@@ -7378,3 +7378,63 @@ html.oc-auth-pending main > section[id^="page-"]:not(#page-public-market) {
   display:none!important;
 }
 </style>
+
+
+<!-- OC_AUTH_FORM_EXCLUSIVE_ROUTING_V2 -->
+<style id="oc-auth-exclusive-routing-v2">
+/* Last-resort visibility lock: only the selected authentication form can be visible. */
+body.oc-auth-screen.oc-register-mode #page-register #registerForm,
+body.oc-auth-screen:not(.oc-register-mode) #page-register #signInForm {
+  display:block!important; visibility:visible!important; opacity:1!important; pointer-events:auto!important;
+}
+body.oc-auth-screen.oc-register-mode #page-register #signInForm,
+body.oc-auth-screen:not(.oc-register-mode) #page-register #registerForm {
+  display:none!important; visibility:hidden!important; opacity:0!important; pointer-events:none!important;
+}
+</style>
+<script id="oc-auth-exclusive-routing-v2">
+(function(){
+  const byId=id=>document.getElementById(id);
+  function applyMode(mode){
+    const creating=mode==="register";
+    document.body.classList.add("oc-auth-screen");
+    document.body.classList.toggle("oc-register-mode",creating);
+    const register=byId("registerForm"), login=byId("signInForm");
+    const choice=byId("authChoicePanel");
+    choice?.classList.add("hidden");
+    byId("authStatus")?.classList.add("hidden");
+    byId("registerMessage")?.classList.add("hidden");
+    if(register){
+      register.classList.toggle("hidden",!creating);
+      register.querySelectorAll("input,select,textarea,button[type=submit]").forEach(el=>{el.disabled=!creating;});
+    }
+    if(login){
+      login.classList.toggle("hidden",creating);
+      login.querySelectorAll("input,select,textarea,button[type=submit]").forEach(el=>{el.disabled=creating;});
+    }
+    const heading=byId("authHeading"),sub=byId("authSubheading");
+    if(heading)heading.textContent=creating?"Create your Onchain account":"Welcome back to Onchain";
+    if(sub){sub.textContent=creating?"Register to create your personal account.":"Log in to continue to your Onchain account.";sub.classList.remove("hidden");}
+    const google=byId("googleSignInBtn"),googleHint=document.querySelector(".auth-google-hint");
+    google?.classList.toggle("hidden",creating);
+    googleHint?.classList.toggle("hidden",creating);
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  window.ocOpenVisitorAuth=function(mode){
+    const creating=mode==="signup"||mode==="register";
+    if(typeof window.showPage==="function")window.showPage("register");
+    const choice=byId(creating?"authChoiceRegister":"authChoiceLogin");
+    if(choice)choice.click();
+    applyMode(creating?"register":"login");
+    setTimeout(()=>byId(creating?"registerFirstName":"signInEmail")?.focus({preventScroll:true}),80);
+  };
+  document.addEventListener("click",function(event){
+    const button=event.target.closest("button");
+    if(!button)return;
+    let mode=null;
+    if(button.id==="authChoiceRegister"||button.id==="showRegisterBtn")mode="register";
+    if(button.id==="authChoiceLogin"||button.id==="registerLoginBtn")mode="login";
+    if(mode)setTimeout(()=>applyMode(mode),0);
+  },true);
+})();
+</script>
