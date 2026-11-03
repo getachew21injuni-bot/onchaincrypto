@@ -7304,3 +7304,47 @@ body.oc-auth-screen.oc-register-mode #page-register #registerForm {
   pointer-events: auto !important;
 }
 </style>
+
+
+<style id="oc-visitor-auth-entry-final">
+/* Visitors land on the public showcase; authentication opens only after an explicit choice. */
+html.oc-auth-pending main > :not(#page-public-market) { display:none!important; }
+html.oc-auth-pending main > #page-public-market { display:block!important; }
+html.oc-auth-pending main { display:block!important; min-height:100vh; }
+
+/* Signed-out visitors keep the public market page visible until they choose Sign Up or Login. */
+body.oc-logged-out:not(.oc-auth-screen) main > section[id^="page-"]:not(#page-public-market) {
+  display:none!important;
+}
+body.oc-logged-out:not(.oc-auth-screen) #page-public-market {
+  display:block!important;
+}
+body.oc-logged-out:not(.oc-auth-screen) #page-home,
+body.oc-logged-out:not(.oc-auth-screen) #page-register {
+  display:none!important;
+}
+
+/* Once a visitor chooses an action, show only the dedicated authentication page. */
+body.oc-logged-out.oc-auth-screen main > section[id^="page-"]:not(#page-register) {
+  display:none!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register {
+  display:flex!important;
+}
+body.oc-logged-out.oc-auth-screen #registerForm,
+body.oc-logged-out.oc-auth-screen #signInForm {
+  min-width:0;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #registerForm {
+  display:block!important; visibility:visible!important; pointer-events:auto!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #signInForm {
+  display:none!important; visibility:hidden!important; pointer-events:none!important;
+}
+body.oc-logged-out.oc-auth-screen:not(.oc-register-mode) #registerForm {
+  display:none!important; visibility:hidden!important; pointer-events:none!important;
+}
+body.oc-logged-out.oc-auth-screen:not(.oc-register-mode) #signInForm {
+  display:block!important; visibility:visible!important; pointer-events:auto!important;
+}
+</style>
