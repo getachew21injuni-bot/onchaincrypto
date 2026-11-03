@@ -1206,8 +1206,8 @@ html.oc-light-theme nav button.active{color:#a86b0c!important}
           <p class="oc-auth-register-prompt">Don’t have an account? <button type="button" id="authChoiceRegister">Register</button></p>
         </section>
 
-        <div id="authStatus" class="notice">Checking sign-in status…</div>
-        <p id="registerMessage" class="muted tiny" aria-live="polite"></p>
+        <div id="authStatus" class="notice hidden">Checking sign-in status…</div>
+        <p id="registerMessage" class="muted tiny hidden" aria-live="polite"></p>
         <form id="registerForm" class="auth-register-form hidden" aria-label="Create account">
           <h3>Create account</h3>
           <p class="muted tiny">Create your Onchain account.</p>
@@ -2224,7 +2224,7 @@ saveProfileButton?.addEventListener("click", async () => {
     button.textContent = originalLabel || "Save profile";
   }
 });
-const msg = (text) => { const el = document.getElementById("registerMessage"); if (el) el.textContent = text; };
+const msg = (text) => { const el = document.getElementById("registerMessage"); if (el) { el.textContent = text; el.classList.toggle("hidden", !text); } };
 const friendlyError = (error) => {
   const code = error?.code || "";
   const messages = {
@@ -2787,6 +2787,7 @@ window.addEventListener("popstate", async () => {
   if(!signIn||!register)return;
   function setMode(mode){
     const creating=mode==='register';
+    document.getElementById("authStatus")?.classList.remove("hidden");
     if(methodOptions)methodOptions.classList.toggle("hidden",!creating);
     if(phonePanel){phonePanel.classList.add("hidden");phonePanel.open=false;phonePanel.querySelectorAll("input").forEach(el=>el.disabled=true);}
     register.querySelectorAll("input").forEach(el=>{el.disabled=!creating;});
@@ -2816,6 +2817,7 @@ window.addEventListener("popstate", async () => {
   signIn.addEventListener('submit',()=>{try{if(remember?.checked&&email)localStorage.setItem('onchaincryptoRememberEmail',email.value);else localStorage.removeItem('onchaincryptoRememberEmail');}catch(_){}});
   function showAuthChoice(){
     document.getElementById("authChoicePanel")?.classList.remove("hidden");
+    document.getElementById("authStatus")?.classList.add("hidden");
     signIn.classList.add("hidden");register.classList.add("hidden");
     if(google)google.classList.add("hidden");if(googleHint)googleHint.classList.add("hidden");
     if(phonePanel){phonePanel.classList.add("hidden");phonePanel.open=false;phonePanel.querySelectorAll("input").forEach(el=>el.disabled=true);}
