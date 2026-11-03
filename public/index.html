@@ -403,6 +403,46 @@ body.oc-logged-out>:not(main){display:none!important}
 header .brand>span{font-weight:950;letter-spacing:-.5px;background:linear-gradient(100deg,#f7931a 0%,#ffc04d 45%,#f6d36b 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important}
 @media(max-width:720px){#page-home .oc-brand-wordmark{font-size:clamp(31px,9vw,39px)!important}}
 </style>
+
+<style id="oc-public-market-experience">
+#ocVisitorActions{display:none;align-items:center;gap:9px}
+#ocVisitorActions button{min-width:92px}
+#page-public-market{max-width:1420px;margin:0 auto;padding:clamp(14px,2.4vw,30px)!important;color:#eef5ff}
+.oc-visitor-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr);gap:28px;align-items:center;padding:clamp(20px,4vw,52px);border:1px solid rgba(217,173,85,.2);border-radius:24px;background:radial-gradient(ellipse at 80% 50%,rgba(14,103,115,.22),transparent 45%),linear-gradient(120deg,#061321,#0a1c2d 60%,#071321);overflow:hidden}
+.oc-visitor-kicker{font-size:10px;letter-spacing:1.8px;font-weight:850;color:#d7b875;text-transform:uppercase}.oc-visitor-kicker>span{display:inline-block;width:7px;height:7px;margin-right:7px;border-radius:50%;background:#16d9a0;box-shadow:0 0 12px #16d9a0}
+.oc-visitor-hero h1{max-width:680px;margin:16px 0;color:#f7f9fc;font-size:clamp(34px,4.4vw,58px);line-height:1.08;letter-spacing:-1.8px}.oc-visitor-hero h1 em{font-style:normal;background:linear-gradient(95deg,#f7931a,#f5d58b 70%,#c18a32);-webkit-background-clip:text;background-clip:text;color:transparent}
+.oc-visitor-hero-copy>p{max-width:620px;color:#b6c6d8;font-size:15px;line-height:1.8}.oc-visitor-hero-actions,.oc-visitor-about-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}.oc-visitor-hero-actions button{min-height:44px;padding:0 18px}
+.oc-visitor-proof{display:flex;flex-wrap:wrap;gap:15px;margin-top:23px;color:#9eb3c8;font-size:11px}.oc-visitor-proof span:first-child{color:#16d9a0}
+.oc-visitor-visual{min-height:390px;position:relative;display:grid;place-items:center;isolation:isolate}.oc-visitor-visual-glow{position:absolute;width:82%;height:70%;border-radius:50%;background:radial-gradient(ellipse,rgba(12,160,174,.19),transparent 68%);filter:blur(14px);z-index:-1}
+.oc-visitor-phone{width:min(100%,410px);padding:19px 19px 15px;border:1px solid #31516b;border-radius:23px;background:linear-gradient(155deg,#0b1d30,#06111f 75%);box-shadow:0 30px 75px #0008,0 0 40px #11c7d51a;transform:rotateY(-5deg) rotateX(2deg)}
+.oc-visitor-phone-top,.oc-visitor-phone-foot{display:flex;justify-content:space-between;align-items:center;color:#7794ae;font-size:9px;letter-spacing:1.2px}.oc-visitor-phone-top{padding-bottom:16px;border-bottom:1px solid #203a51}.oc-visitor-phone-top i{width:7px;height:7px;border-radius:50%;background:#16d9a0;box-shadow:0 0 10px #16d9a0}
+.oc-visitor-phone-asset{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:19px 0 11px}.oc-visitor-phone-asset>div{display:flex;flex-direction:column;gap:5px}.oc-visitor-phone-asset small{color:#90a6bb;font-size:10px}.oc-visitor-phone-asset strong{font-size:24px;color:#f5f8fc}.oc-visitor-phone-asset>span{font-size:11px;color:#16d9a0}
+.oc-visitor-phone-chart{height:150px}.oc-visitor-phone-chart svg{width:100%;height:100%;overflow:visible}
+.oc-visitor-signal{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px;border:1px solid #1c5d56;border-radius:12px;background:linear-gradient(100deg,#0d2b2d,#0b1b2a)}.oc-visitor-signal-dot{width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:#16d9a0;box-shadow:0 0 12px #16d9a0}.oc-visitor-signal div{display:flex;flex-direction:column;gap:4px;min-width:0}.oc-visitor-signal b{font-size:10px;letter-spacing:1px;color:#b5f4dc}.oc-visitor-signal small{font-size:9px;color:#8ba6b8}.oc-visitor-signal>strong{margin-left:auto;font-size:9px;letter-spacing:1px;color:#d9bd7a}
+.oc-visitor-phone-foot{padding-top:14px;margin-top:13px;border-top:1px solid #203a51;font-size:8px}
+.oc-visitor-float-chip{position:absolute;display:flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid rgba(217,173,85,.32);border-radius:12px;background:#081626eF;box-shadow:0 12px 28px #0007;color:#f4c35e;font-weight:900}.oc-visitor-float-chip span{font-size:9px;letter-spacing:1px;color:#c0cedb}.oc-chip-btc{left:0;top:18%}.oc-chip-gold{right:0;bottom:18%;color:#f2d47c}
+.oc-visitor-ticker-panel{display:grid;grid-template-columns:190px minmax(0,1fr);align-items:center;gap:15px;margin:22px 0;padding:13px 16px;border:1px solid #1d3b55;border-radius:14px;background:rgba(7,20,34,.88);overflow:hidden}.oc-visitor-ticker-label{display:flex;flex-direction:column;gap:4px}.oc-visitor-ticker-label b{font-size:10px;letter-spacing:1.4px;color:#e5c57c}.oc-visitor-ticker-label span{font-size:9px;color:#8199b1}.oc-visitor-ticker-clip{overflow:hidden;min-width:0}.oc-visitor-ticker-track{display:flex;width:max-content;gap:26px;align-items:center;animation:ocVisitorTicker 42s linear infinite}.oc-visitor-ticker-track:hover{animation-play-state:paused}.oc-visitor-ticker-item{display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:11px}.oc-visitor-ticker-item b{color:#eef5ff}.oc-visitor-ticker-item span{color:#a8b8ca}.oc-visitor-ticker-item em{font-style:normal;font-size:10px}.oc-visitor-ticker-empty{color:#91a6bb;font-size:11px}@keyframes ocVisitorTicker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.oc-visitor-market-section{margin-top:38px}.oc-visitor-section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:17px}.oc-visitor-section-head h2,.oc-visitor-about h2{margin:8px 0;font-size:clamp(24px,3vw,34px);letter-spacing:-.7px}.oc-visitor-section-head p{margin:0;color:#91a8bf;font-size:13px}.oc-visitor-feed-status{display:flex;align-items:center;gap:8px;color:#9ab0c4;font-size:10px;white-space:nowrap}.oc-visitor-feed-status i{width:7px;height:7px;border-radius:50%;background:#d9ad55}.oc-visitor-feed-status.is-live i{background:#16d9a0;box-shadow:0 0 10px #16d9a0}.oc-visitor-feed-status.is-stale i{background:#d9ad55}.oc-visitor-feed-status.is-offline i{background:#ff5573}
+.oc-visitor-market-tabs{display:flex;gap:7px;margin-bottom:14px}.oc-visitor-market-tabs button{border:1px solid #23435e;border-radius:9px;background:#091a2b;color:#a9bbce;padding:9px 14px;font-size:11px}.oc-visitor-market-tabs button.active{border-color:#c69b4d;color:#f4d58f;background:#342817}.oc-visitor-market-tabs button small{margin-left:5px;color:#d3b56f;font-size:8px}
+.oc-visitor-market-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;color:#8199b1;font-size:10px}.oc-visitor-search{display:flex;align-items:center;gap:9px;width:min(100%,380px);padding:0 12px;border:1px solid #24425b;border-radius:10px;background:#081829}.oc-visitor-search span{font-size:18px;color:#9bb0c4}.oc-visitor-search input{width:100%;min-width:0;padding:11px 0;border:0;outline:0;background:transparent;color:#eff6ff;font-size:12px}
+.oc-visitor-table-wrap{overflow:auto;border:1px solid #1e3b54;border-radius:14px;background:rgba(5,16,28,.82)}.oc-visitor-table{width:100%;border-collapse:collapse;min-width:690px}.oc-visitor-table th{padding:13px 16px;text-align:left;color:#829bb2;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid #1e3b54}.oc-visitor-table td{padding:13px 16px;border-bottom:1px solid rgba(35,61,83,.65);font-size:12px}.oc-visitor-table tr:last-child td{border-bottom:0}.oc-visitor-table .oc-v-asset{display:flex;align-items:center;gap:10px;min-width:160px}.oc-v-icon{display:grid;place-items:center;width:32px;height:32px;flex:0 0 auto;border-radius:50%;font-weight:900;font-size:12px;background:#243c54;color:#fff}.oc-v-asset-name{display:flex;flex-direction:column;gap:3px}.oc-v-asset-name b{color:#edf4fc}.oc-v-asset-name small{color:#819ab1;font-size:9px}.oc-v-price{font-variant-numeric:tabular-nums;color:#edf4fc;font-weight:700}.oc-v-change{font-variant-numeric:tabular-nums;font-weight:750}.oc-v-change.up{color:#16d9a0}.oc-v-change.down{color:#ff6b82}.oc-v-row-actions{display:flex;gap:7px}.oc-v-row-actions button{padding:7px 10px;border-radius:8px;font-size:10px}.oc-v-row-actions .oc-v-buy{background:#b9832e;color:#10151b;border:1px solid #d3a34f;font-weight:800}.oc-v-row-actions .oc-v-detail{background:#10263a;color:#c3d4e4;border:1px solid #294963}.oc-visitor-empty{text-align:center!important;padding:28px!important;color:#8ea6bd!important}
+.oc-visitor-market-more{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 2px;color:#8199b1;font-size:10px}.oc-visitor-detail{margin-top:22px;padding:19px;border:1px solid rgba(217,173,85,.27);border-radius:16px;background:linear-gradient(145deg,#0a1d30,#061321)}.oc-visitor-detail-head{display:flex;justify-content:space-between;align-items:center;gap:15px}.oc-visitor-detail-head h3{margin:7px 0 3px;font-size:22px}.oc-visitor-detail-head>div>span{color:#8fa7bd;font-size:11px}.oc-visitor-detail-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}.oc-visitor-detail-stats>div{display:flex;flex-direction:column;gap:7px;padding:12px;border:1px solid #1e3b54;border-radius:10px;background:#081827}.oc-visitor-detail-stats small{color:#8ea6bd;font-size:9px}.oc-visitor-detail-stats strong{font-size:15px;color:#f2f6fb}.oc-visitor-chart-wrap{height:390px;overflow:hidden;border:1px solid #1d3b54;border-radius:12px;background:#071321}.oc-visitor-chart-wrap iframe{width:100%;height:100%;border:0}.oc-visitor-detail-action{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-top:13px}.oc-visitor-detail-action p{margin:0;color:#9bb0c3;font-size:11px;line-height:1.6}
+.oc-visitor-about{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,.95fr);gap:35px;align-items:center;margin-top:55px;padding:clamp(20px,3.2vw,38px);border:1px solid rgba(217,173,85,.18);border-radius:20px;background:linear-gradient(120deg,#071625,#0a1d2e)}.oc-visitor-about>div:first-child>p{max-width:650px;color:#a9bbcd;font-size:13px;line-height:1.85}.oc-visitor-about-note{padding-left:12px;border-left:2px solid #c99b48;color:#d4c39e!important;font-size:10px!important}.oc-visitor-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.oc-visitor-feature-grid article{padding:15px;border:1px solid #1f3e57;border-radius:12px;background:#081a2b}.oc-visitor-feature-grid article>b{color:#e5bf6e;font-size:18px}.oc-visitor-feature-grid h3{margin:8px 0 5px;font-size:13px}.oc-visitor-feature-grid p{margin:0;color:#8ea5bb;font-size:10px;line-height:1.6}
+.oc-visitor-bottom-cta{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-top:24px;padding:22px 25px;border:1px solid rgba(217,173,85,.27);border-radius:15px;background:linear-gradient(100deg,#171d26,#142638)}.oc-visitor-bottom-cta h2{margin:0 0 6px;font-size:20px}.oc-visitor-bottom-cta p{margin:0;color:#9eb0c2;font-size:11px}.oc-visitor-disclaimer{margin:17px 3px 6px;color:#6f8499;font-size:9px;line-height:1.7}
+body.oc-logged-out:not(.oc-auth-screen) header #nav,html.oc-auth-pending header #nav{display:none!important}
+body.oc-logged-out:not(.oc-auth-screen) #ocVisitorActions,html.oc-auth-pending #ocVisitorActions{display:flex!important}
+body.oc-logged-out:not(.oc-auth-screen) #refreshBtn,body.oc-logged-out:not(.oc-auth-screen) #ocBackBtn,body.oc-logged-out:not(.oc-auth-screen) #moreMenuBtn,html.oc-auth-pending #refreshBtn,html.oc-auth-pending #ocBackBtn,html.oc-auth-pending #moreMenuBtn{display:none!important}
+body.oc-logged-out:not(.oc-auth-screen) main>section:not(#page-public-market),html.oc-auth-pending main>section:not(#page-public-market){display:none!important}
+body.oc-logged-out:not(.oc-auth-screen) main>#page-public-market,html.oc-auth-pending main>#page-public-market{display:block!important}
+body.oc-logged-out:not(.oc-auth-screen) main,html.oc-auth-pending main{display:block!important;min-height:100vh;padding:18px!important}
+body.oc-logged-out:not(.oc-auth-screen) header,html.oc-auth-pending header{display:flex!important}
+body.oc-logged-out.oc-auth-screen #ocVisitorActions{display:none!important}
+body.oc-logged-out.oc-auth-screen main>section:not(#page-register){display:none!important}
+body.oc-logged-out.oc-auth-screen main>#page-register{display:flex!important}
+@media(max-width:850px){.oc-visitor-hero{grid-template-columns:minmax(0,1fr) minmax(290px,.9fr);gap:15px;padding:22px}.oc-visitor-phone{padding:15px}.oc-visitor-visual{min-height:330px}.oc-visitor-ticker-panel{grid-template-columns:150px minmax(0,1fr)}.oc-visitor-about{grid-template-columns:1fr;gap:22px}}
+@media(max-width:640px){#page-public-market{padding:10px!important}.oc-visitor-hero{grid-template-columns:1fr;padding:19px 15px;gap:10px;border-radius:17px}.oc-visitor-hero h1{font-size:34px;letter-spacing:-1px}.oc-visitor-hero-copy>p{font-size:12px;line-height:1.65}.oc-visitor-proof{gap:9px;font-size:9px}.oc-visitor-visual{min-height:300px;margin-top:5px}.oc-visitor-phone{width:min(100%,370px);transform:none}.oc-visitor-float-chip{padding:7px 9px;font-size:11px}.oc-chip-btc{left:-2px;top:14%}.oc-chip-gold{right:-2px;bottom:12%}.oc-visitor-ticker-panel{grid-template-columns:1fr;gap:10px;padding:12px}.oc-visitor-ticker-label{flex-direction:row;align-items:center;justify-content:space-between}.oc-visitor-section-head{align-items:flex-start;flex-direction:column;gap:10px}.oc-visitor-market-tools{align-items:flex-start;flex-direction:column}.oc-visitor-search{width:100%}.oc-visitor-market-more{align-items:flex-start;flex-direction:column}.oc-visitor-detail{padding:13px}.oc-visitor-detail-stats{grid-template-columns:1fr 1fr}.oc-visitor-detail-stats>div:last-child{grid-column:1/-1}.oc-visitor-chart-wrap{height:300px}.oc-visitor-detail-action{align-items:stretch;flex-direction:column}.oc-visitor-detail-action button{width:100%}.oc-visitor-about{padding:18px 14px;margin-top:35px}.oc-visitor-feature-grid{gap:8px}.oc-visitor-feature-grid article{padding:12px}.oc-visitor-bottom-cta{padding:17px;align-items:flex-start;flex-direction:column}.oc-visitor-bottom-cta button{width:100%}#ocVisitorActions{gap:6px}#ocVisitorActions button{min-width:0;padding:9px 11px;font-size:10px}}
+@media(prefers-reduced-motion:reduce){.oc-visitor-ticker-track{animation:none!important}}
+</style>
 </head>
 <body>
 <header>
@@ -414,10 +454,66 @@ header .brand>span{font-weight:950;letter-spacing:-.5px;background:linear-gradie
     <button data-page="wallet">Wallet</button>
     
   </nav>
-  <div class="header-right"><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Guides and account assistance</small></span></button></div></div></div>
+  <div class="header-right"><div class="oc-visitor-actions" id="ocVisitorActions"><button class="secondary" type="button" id="ocVisitorLogin">Log In</button><button class="primary" type="button" id="ocVisitorSignup">Sign Up</button></div><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Guides and account assistance</small></span></button></div></div></div>
 </header>
 <main>
-  <section id="page-home">
+  
+<section id="page-public-market" class="oc-visitor-market hidden" aria-label="Onchain public market overview">
+  <div class="oc-visitor-hero">
+    <div class="oc-visitor-hero-copy">
+      <div class="oc-visitor-kicker"><span></span> ONCHAIN · CRYPTO & GOLD MARKETS</div>
+      <h1>Explore crypto and <em>Gold</em> markets with confidence.</h1>
+      <p>Discover Bitcoin, Ethereum, BNB, XRP, Gold (XAU) and more. Follow market prices, compare performance and explore market signals before you create an account.</p>
+      <div class="oc-visitor-hero-actions">
+        <button class="primary" type="button" id="ocVisitorHeroSignup">Create your account</button>
+        <button class="secondary" type="button" id="ocVisitorHeroExplore">Explore markets ↓</button>
+      </div>
+      <div class="oc-visitor-proof"><span>● Public market prices</span><span>◆ Crypto + Gold</span><span>▤ Charts & market insights</span></div>
+    </div>
+    <div class="oc-visitor-visual" aria-label="Illustrative Onchain market chart and trading signal display">
+      <div class="oc-visitor-visual-glow"></div>
+      <div class="oc-visitor-phone">
+        <div class="oc-visitor-phone-top"><span>ONCHAIN MARKETS</span><i></i></div>
+        <div class="oc-visitor-phone-asset"><div><small>BTC / USDT</small><strong id="ocVisitorHeroPrice">Loading price…</strong></div><span id="ocVisitorHeroChange">Market feed</span></div>
+        <div class="oc-visitor-phone-chart">
+          <svg viewBox="0 0 420 170" role="img" aria-label="Illustrative market candlestick chart"><defs><linearGradient id="ocVisitorChartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#16d9a0" stop-opacity=".26"/><stop offset="1" stop-color="#16d9a0" stop-opacity="0"/></linearGradient></defs><path d="M0 135H420M0 90H420M0 45H420" stroke="#29435b" stroke-width="1" stroke-dasharray="4 6"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59 207 73 232 49 258 62 282 39 308 48 332 25 356 42 382 15 410 23V170H8Z" fill="url(#ocVisitorChartFill)"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59 207 73 232 49 258 62 282 39 308 48 332 25 356 42 382 15 410 23" fill="none" stroke="#23d6a2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g stroke-width="2"><path d="M35 104V137m-5-23h10" stroke="#16d9a0"/><path d="M84 79v35m-5-25h10" stroke="#16d9a0"/><path d="M132 65v37m-5-25h10" stroke="#16d9a0"/><path d="M181 45v40m-5-25h10" stroke="#16d9a0"/><path d="M232 33v38m-5-22h10" stroke="#16d9a0"/><path d="M282 24v37m-5-22h10" stroke="#16d9a0"/><path d="M332 10v40m-5-25h10" stroke="#16d9a0"/><path d="M382 2v34m-5-20h10" stroke="#16d9a0"/></g></svg>
+        </div>
+        <div class="oc-visitor-signal"><span class="oc-visitor-signal-dot"></span><div><b>MARKET MOMENTUM</b><small>Illustrative signal interface · not a trade instruction</small></div><strong>ONCHAIN</strong></div>
+        <div class="oc-visitor-phone-foot"><span>PRICE</span><span>24H CHANGE</span><span>MARKET WATCH</span></div>
+      </div>
+      <div class="oc-visitor-float-chip oc-chip-btc">₿ <span>BITCOIN</span></div>
+      <div class="oc-visitor-float-chip oc-chip-gold">◉ <span>GOLD · XAU</span></div>
+    </div>
+  </div>
+
+  <section class="oc-visitor-ticker-panel" aria-label="Live hot coin prices">
+    <div class="oc-visitor-ticker-label"><b>MARKET PULSE</b><span>Prices refresh when public feeds respond</span></div>
+    <div class="oc-visitor-ticker-clip"><div id="ocVisitorTickerTrack" class="oc-visitor-ticker-track"><span class="oc-visitor-ticker-empty">Connecting to public market feeds…</span></div></div>
+  </section>
+
+  <section class="oc-visitor-market-section" id="ocVisitorMarkets">
+    <div class="oc-visitor-section-head"><div><div class="oc-visitor-kicker">DISCOVER DIGITAL ASSETS</div><h2>Explore every available market</h2><p>Compare prices and 24-hour moves. Select an asset to open its chart and details.</p></div><div class="oc-visitor-feed-status" id="ocVisitorFeedStatus"><i></i><span>Connecting to market data</span></div></div>
+    <div class="oc-visitor-market-tabs" role="tablist" aria-label="Market categories"><button type="button" class="active" data-visitor-category="crypto">Crypto</button><button type="button" data-visitor-category="gold">Gold</button><button type="button" data-visitor-category="stocks" aria-label="Stocks coming soon">Stocks <small>Coming soon</small></button></div>
+    <div class="oc-visitor-market-tools"><label class="oc-visitor-search"><span>⌕</span><input id="ocVisitorSearch" type="search" placeholder="Search Bitcoin, BTC, Ethereum…" autocomplete="off"></label><span id="ocVisitorMarketCount">Loading available assets…</span></div>
+    <div class="oc-visitor-table-wrap"><table class="oc-visitor-table"><thead><tr><th>Asset</th><th>Price (USD)</th><th>24H</th><th>Market cap</th><th>Explore</th></tr></thead><tbody id="ocVisitorMarketRows"><tr><td colspan="5" class="oc-visitor-empty">Connecting to public market feeds…</td></tr></tbody></table></div>
+    <div class="oc-visitor-market-more"><span id="ocVisitorMarketFootnote">Market prices are indicative and may be delayed.</span><button type="button" class="secondary" id="ocVisitorMarketMore">Show more markets</button></div>
+    <section class="oc-visitor-detail hidden" id="ocVisitorCoinDetail" aria-live="polite">
+      <div class="oc-visitor-detail-head"><div><div class="oc-visitor-kicker">ASSET OVERVIEW</div><h3 id="ocVisitorDetailName">Bitcoin</h3><span id="ocVisitorDetailSymbol">BTC / USD</span></div><button type="button" class="secondary" id="ocVisitorDetailClose" aria-label="Close asset details">✕</button></div>
+      <div class="oc-visitor-detail-stats"><div><small>Current price</small><strong id="ocVisitorDetailPrice">—</strong></div><div><small>24H change</small><strong id="ocVisitorDetailChange">—</strong></div><div><small>Market cap</small><strong id="ocVisitorDetailCap">—</strong></div></div>
+      <div class="oc-visitor-chart-wrap"><iframe id="ocVisitorTradingChart" title="Selected asset price chart" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+      <div class="oc-visitor-detail-action"><p>Want to continue? Create an Onchain account to access the platform’s demo trading workspace.</p><button type="button" class="primary" id="ocVisitorDetailBuy">Buy <span id="ocVisitorBuySymbol">BTC</span></button></div>
+    </section>
+  </section>
+
+  <section class="oc-visitor-about">
+    <div><div class="oc-visitor-kicker">ABOUT ONCHAIN</div><h2>Crypto, Gold and market insights — made easier.</h2><p>Onchain brings digital-asset market discovery, price tracking and trading tools together in one clear experience. Explore BTC, ETH, BNB, XRP, XAU and more, follow market movements and review signals based on public market data.</p><p class="oc-visitor-about-note">The current trading workspace is for simulated/paper trading. Public prices are informational; this is not a live-money exchange or investment advice.</p><div class="oc-visitor-about-actions"><button type="button" class="primary" id="ocVisitorAboutSignup">Join Onchain</button><button type="button" class="secondary" id="ocVisitorAboutExplore">View markets</button></div></div>
+    <div class="oc-visitor-feature-grid"><article><b>◷</b><h3>Market tracking</h3><p>Follow public crypto prices and daily market changes.</p></article><article><b>⌁</b><h3>Market signals</h3><p>Explore momentum insights derived from price and volume data.</p></article><article><b>◉</b><h3>Crypto + Gold</h3><p>Discover supported digital assets and Gold (XAU) market information.</p></article><article><b>▣</b><h3>Simple experience</h3><p>Move from market discovery to the platform with clear account access.</p></article></div>
+  </section>
+  <div class="oc-visitor-bottom-cta"><div><h2>Ready to explore Onchain?</h2><p>Create an account to access the platform workspace.</p></div><button type="button" class="primary" id="ocVisitorBottomSignup">Sign up</button></div>
+  <p class="oc-visitor-disclaimer">Digital-asset prices can change rapidly. Market information is provided for general information only and is not financial advice. Availability of assets and services may vary. Stocks, recurring buys and asset-earning products are not currently available on this platform.</p>
+</section>
+
+<section id="page-home">
  <div class="page-title"><div><h1 id="homeGreeting">Onchain</h1></div><button class="secondary" type="button" data-go="markets">Explore Markets ↗</button></div>
   
  <section class="oc-invest-hero oc-get-started-hero" aria-label="Get started with Onchain">
@@ -1211,7 +1307,7 @@ function restoreCachedMarket(){
    $("connection").textContent="Cached data";setHeaderMarketStatus("stale");
    if($("apiStatus"))$("apiStatus").textContent="Showing saved prices";
    if(saved.time)$("lastUpdate").textContent=new Date(saved.time).toLocaleTimeString()+" (saved)";
-   renderMarket();renderHomeCoinResults();updateTradePreview();
+   renderMarket();renderHomeCoinResults();updateTradePreview();window.ocRenderVisitorMarket?.();
    return true;
   }
  }catch(e){}
@@ -1251,7 +1347,7 @@ async function loadMarket(){
   const sourceLabel=sources.join(" + ");
   $("connection").textContent="Live data";setHeaderMarketStatus("live");if($("apiStatus"))$("apiStatus").innerHTML='<span class="green">Connected · '+sourceLabel+'</span>';
   $("lastUpdate").textContent=new Date(now).toLocaleTimeString();$("marketHint").textContent="Market prices update automatically.";
-  renderMarket();renderHomeCoinResults();updateTradePreview();renderSignalScanner();
+  renderMarket();renderHomeCoinResults();updateTradePreview();renderSignalScanner();window.ocRenderVisitorMarket?.();
  };
  try{
   let geckoData=null,krakenData=null,binanceTickers=null,paprikaData=null;
@@ -1458,7 +1554,7 @@ window.ocApplyAdminDemoBalance=function(amount){const n=Number(amount);if(!Numbe
 window.ocApplyAdminDemoAssets=function(balances){if(!balances||typeof balances!=="object"||Array.isArray(balances))return;let changed=false;for(const [rawSymbol,rawAmount] of Object.entries(balances)){const symbol=String(rawSymbol||"").toUpperCase();const amount=Number(rawAmount);if(!/^[A-Z0-9]{2,12}$/.test(symbol)||!Number.isFinite(amount)||amount<0)continue;state.holdings[symbol]=amount;changed=true;}if(changed){saveState();renderWallet();}};
 function renderWallet(){const pricedHoldings=Object.entries(state.holdings).reduce((out,[sym,qty])=>{const symbol=String(sym).toUpperCase(),amount=Number(qty)||0;if(amount<=0||symbol==="USDT")return out;const price=Number(priceFor(symbol)?.current_price||0);if(price>0){out.value+=amount*price;out.priced++;}else out.unpriced++;return out;},{value:0,priced:0,unpriced:0});const totalValue=(Number(state.balance)||0)+pricedHoldings.value;$("summaryBalance").textContent=usdtMoney(state.balance);$("walletBalance").textContent=usdtMoney(totalValue)+" USDT";$("walletBalanceNote").textContent="Estimated total value in USDT · "+pricedHoldings.priced+" priced coin holding"+(pricedHoldings.priced===1?"":"s")+(pricedHoldings.unpriced?"; "+pricedHoldings.unpriced+" asset price"+(pricedHoldings.unpriced===1?" is":"s are")+" unavailable and excluded":"")+" · demo portfolio";$("holdingsValue").textContent=usdtMoney(pricedHoldings.value);const rows=Object.entries(state.holdings).filter(([sym,qty])=>String(sym).toUpperCase()!=="USDT"&&Number(qty)>0.0000000001&&(! $("hideSmallBalances")?.checked||Number(qty)*(priceFor(sym)?.current_price||0)>=1));$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym,current_price:0},price=Number(c.current_price||0);return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+' '+safe(sym.toUpperCase())+'</td><td>'+(price>0?usdtMoney(Number(qty)*price):"Price unavailable")+'</td></tr>'}).join(''):'<tr><td colspan="3" class="empty">No coin holdings yet. Your USDT balance is shown above.</td></tr>';renderActivityHistory();renderTradeHistory();renderPnl();renderWalletMarket()}
 document.addEventListener("change",e=>{if(e.target&&e.target.id==="hideSmallBalances")renderWallet();if(e.target&&e.target.id==="homeHistoryFilter")renderActivityHistory()});
-function showPage(page){if(window.ocLoggedOut===true && !auth.currentUser)page="register";if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
+function showPage(page){if(window.ocLoggedOut===true && !auth.currentUser && page!=="public-market" && page!=="register")page="register";if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
 window.showPage = showPage;
 let timedPaper=null,timedTimer=null,pendingTimedDirection=null;
 function quickPlan(){const amount=Number($("timedStake")?.value||0)*Number(priceFor(window.__ocTradeFundingCoin||"USDT")?.current_price||1),isGold=($("tradeAsset")?.value||selected)==="XAU",minimum=isGold?500:100;const levels=[{rate:12,min:minimum,max:5000,duration:30,label:"Level 1"},{rate:15,min:5000,max:10000,duration:60,label:"Level 2"},{rate:18,min:10000,max:25000,duration:90,label:"Level 3"},{rate:21,min:25000,max:50000,duration:120,label:"Level 4"},{rate:24,min:50000,max:100000,duration:180,label:"Level 5"},{rate:27,min:100000,max:1000000,duration:360,label:"Level 6"}];return levels.find((p,i)=>amount>=p.min&&(amount<p.max||i===levels.length-1&&amount<=p.max))||levels[0]}
@@ -2315,8 +2411,8 @@ onAuthStateChanged(auth, (user) => {
       document.body.classList.add("oc-logged-out");
       document.body.classList.remove("oc-auth-screen", "oc-register-mode");
       window.ocSetAuthScreenVisibility?.(false);
-      document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-home"));
-      window.showPage?.("home");
+      document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-public-market"));
+      window.showPage?.("public-market");
       try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search); } catch (_) {}
     }
   const status = document.getElementById("authStatus");
@@ -2391,7 +2487,7 @@ document.addEventListener("click", event => {
   const target = event.target instanceof Element ? event.target : null;
   if (!target) return;
   // Keep sign-in/register controls usable; every other app action routes to sign-in.
-  if (target.closest("#page-register") || target.closest("#authChoicePanel") ||
+  if (target.closest("#page-public-market") || target.closest("#ocVisitorActions") || target.closest("#page-register") || target.closest("#authChoicePanel") ||
       target.closest("#signInForm") || target.closest("#registerForm") ||
       target.closest("#authPhonePanel") || target.closest("#authPhoneDivider") ||
       target.closest("#resetPasswordBtn") || target.closest("#googleSignInBtn") ||
@@ -2409,17 +2505,15 @@ window.addEventListener("pageshow", async () => {
     if (location.hash === "#login") window.ocForceSignInScreen?.();
     else {
       document.body.classList.remove("oc-auth-screen");
-      document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-home"));
-      window.showPage?.("home");
+      document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-public-market"));
+      window.showPage?.("public-market");
     }
   }
 });
 window.addEventListener("popstate", async () => {
   try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
   if (!auth.currentUser && window.ocLoggedOut === true) {
-    document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-register"));
-    window.showPage?.("register");
-    try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search + "#login"); } catch (_) {}
+    if(location.hash==="#login"){document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-register"));window.showPage?.("register");}else{document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-public-market"));window.showPage?.("public-market");}
   }
 });
 // Account deletion is handled by the Gmail-confirmed request flow below.
@@ -3937,7 +4031,99 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  window.setInterval(refresh,5000);
 })();
 </script>
-\n<script type="module" src="./support-chat.js"></script>\n</body>
+\n<script type="module" src="./support-chat.js"></script>\n
+<script id="oc-public-market-experience-script">
+(function(){
+ const $=id=>document.getElementById(id);
+ const money=value=>{const n=Number(value);if(!Number.isFinite(n)||n<=0)return "—";return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:n>=1000?2:n>=1?4:8}).format(n)};
+ const compact=value=>{const n=Number(value);if(!n)return "—";return "$"+new Intl.NumberFormat("en-US",{notation:"compact",maximumFractionDigits:2}).format(n)};
+ const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+ const symbols=["BTC","ETH","BNB","XRP","SOL","DOGE","ADA","TRX","LTC","XAU"];
+ let category="crypto",limit=12,selectedAsset=null;
+ const getAssets=()=>Array.isArray(window.market)?window.market.filter(x=>Number(x.current_price)>0):[];
+ const findAsset=sym=>getAssets().find(x=>String(x.symbol).toUpperCase()===String(sym).toUpperCase());
+ const fmtChange=v=>{const n=Number(v)||0;return (n>0?"+":"")+n.toFixed(2)+"%"};
+ const coinMark=sym=>({BTC:"₿",ETH:"◆",BNB:"◆",XRP:"✕",SOL:"≋",DOGE:"Ð",ADA:"●",TRX:"△",LTC:"Ł",XAU:"◉"}[sym]||String(sym||"?").slice(0,3));
+ const priceText=asset=>money(asset?.current_price);
+ function openAuth(mode){
+  document.body.classList.add("oc-auth-screen");
+  document.body.classList.remove("oc-register-mode");
+  if(typeof window.showPage==="function")window.showPage("register");
+  const button=mode==="signup"?$("showRegisterBtn"):$("registerLoginBtn");
+  if(button)button.click();
+  else if(mode==="signup")$("registerForm")?.classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+ }
+ window.ocOpenVisitorAuth=openAuth;
+ function renderTicker(){
+  const track=$("ocVisitorTickerTrack");if(!track)return;
+  const assets=getAssets().sort((a,b)=>(Number(b.total_volume)||0)-(Number(a.total_volume)||0)).slice(0,14);
+  if(!assets.length){track.innerHTML='<span class="oc-visitor-ticker-empty">Public market prices are temporarily unavailable. Reconnecting…</span>';return}
+  const items=assets.map(a=>{const s=String(a.symbol).toUpperCase(),chg=Number(a.price_change_percentage_24h)||0;return '<span class="oc-visitor-ticker-item"><b>'+escapeHtml(s)+'</b><span>'+priceText(a)+'</span><em class="'+(chg>=0?"green":"red")+'">'+fmtChange(chg)+'</em></span>'}).join("");
+  track.innerHTML=items+items;
+ }
+ function renderTable(){
+  const rows=$("ocVisitorMarketRows"),count=$("ocVisitorMarketCount");if(!rows)return;
+  const all=getAssets().filter(a=>category==="gold"?String(a.symbol).toUpperCase()==="XAU":category==="crypto"?String(a.symbol).toUpperCase()!=="XAU":false);
+  const query=($("ocVisitorSearch")?.value||"").trim().toLowerCase();
+  const matched=all.filter(a=>!query||String(a.name).toLowerCase().includes(query)||String(a.symbol).toLowerCase().includes(query));
+  matched.sort((a,b)=>{if(category==="gold")return 0;const ar=Number(a.market_cap_rank)||999999,br=Number(b.market_cap_rank)||999999;return ar-br});
+  const visible=matched.slice(0,limit);
+  if(count)count.textContent=category==="stocks"?"Stock-market data is not available yet":("Showing "+visible.length+" of "+matched.length+" available "+(category==="gold"?"Gold market":"crypto assets"));
+  const more=$("ocVisitorMarketMore");if(more){more.style.display=category==="stocks"?"none":"";more.disabled=visible.length>=matched.length;more.textContent=visible.length>=matched.length?"All available markets shown":"Show more markets";}
+  if(category==="stocks"){rows.innerHTML='<tr><td colspan="5" class="oc-visitor-empty">Stock-market coverage is coming soon. It is not currently available for trading on Onchain.</td></tr>';return}
+  if(!visible.length){rows.innerHTML='<tr><td colspan="5" class="oc-visitor-empty">'+(matched.length?"No matching assets. Try another search.":"Market data is connecting. Prices will appear when a public provider responds.")+'</td></tr>';return}
+  rows.innerHTML=visible.map(a=>{
+   const s=String(a.symbol).toUpperCase(),chg=Number(a.price_change_percentage_24h)||0,cap=Number(a.market_cap)||0;
+   const iconColor=s==="BTC"?"#f7931a":s==="XAU"?"#d4af37":"#25435f";
+   return '<tr><td><div class="oc-v-asset"><span class="oc-v-icon" style="background:'+iconColor+'">'+escapeHtml(coinMark(s))+'</span><span class="oc-v-asset-name"><b>'+escapeHtml(a.name)+'</b><small>'+escapeHtml(s)+(s==="XAU"?" · GOLD":"")+'</small></span></div></td><td class="oc-v-price">'+priceText(a)+'</td><td><span class="oc-v-change '+(chg>=0?"up":"down")+'">'+fmtChange(chg)+'</span></td><td>'+compact(cap)+'</td><td><div class="oc-v-row-actions"><button type="button" class="oc-v-detail" data-visitor-detail="'+escapeHtml(s)+'">Details</button><button type="button" class="oc-v-buy" data-visitor-buy="'+escapeHtml(s)+'">Buy '+escapeHtml(s)+'</button></div></td></tr>';
+  }).join("");
+ }
+ function chartUrl(asset){
+  const s=String(asset?.symbol||"BTC").toUpperCase();
+  const symbol=s==="XAU"?"OANDA:XAUUSD":s==="BTC"?"BINANCE:BTCUSDT":"BINANCE:"+s+"USDT";
+  return "https://s.tradingview.com/widgetembed/?frameElementId=ocVisitorTradingChart&symbol="+encodeURIComponent(symbol)+"&interval=60&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=%23081727&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&locale=en";
+ }
+ function showDetails(symbol){
+  const a=findAsset(symbol);if(!a)return;
+  selectedAsset=a;
+  $("ocVisitorDetailName").textContent=a.name;
+  $("ocVisitorDetailSymbol").textContent=String(a.symbol).toUpperCase()+" / USD";
+  $("ocVisitorDetailPrice").textContent=priceText(a);
+  const change=Number(a.price_change_percentage_24h)||0;
+  $("ocVisitorDetailChange").textContent=fmtChange(change);
+  $("ocVisitorDetailChange").style.color=change>=0?"#16d9a0":"#ff6b82";
+  $("ocVisitorDetailCap").textContent=compact(a.market_cap);
+  $("ocVisitorBuySymbol").textContent=String(a.symbol).toUpperCase();
+  $("ocVisitorTradingChart").src=chartUrl(a);
+  $("ocVisitorCoinDetail").classList.remove("hidden");
+  $("ocVisitorCoinDetail").scrollIntoView({behavior:"smooth",block:"start"});
+ }
+ window.ocRenderVisitorMarket=function(){
+  renderTicker();renderTable();
+  const status=$("ocVisitorFeedStatus");if(status){const live=!!window.ocMarketLastSuccess,stale=!live&&getAssets().length>0;status.classList.toggle("is-live",live);status.classList.toggle("is-stale",stale);status.classList.toggle("is-offline",!live&&!stale);const label=status.querySelector("span");if(label)label.textContent=live?"Public prices connected":stale?"Showing saved prices · not live":"Waiting for public market data";}
+  const btc=findAsset("BTC");if(btc){$("ocVisitorHeroPrice").textContent=priceText(btc);const chg=Number(btc.price_change_percentage_24h)||0;$("ocVisitorHeroChange").textContent=fmtChange(chg)+" · 24H";$("ocVisitorHeroChange").style.color=chg>=0?"#16d9a0":"#ff6b82"}
+  if(selectedAsset){const current=findAsset(selectedAsset.symbol);if(current){$("ocVisitorDetailPrice").textContent=priceText(current);$("ocVisitorDetailChange").textContent=fmtChange(current.price_change_percentage_24h);$("ocVisitorDetailCap").textContent=compact(current.market_cap)}}
+ };
+ document.addEventListener("click",event=>{
+  const detail=event.target.closest("[data-visitor-detail]");if(detail){showDetails(detail.dataset.visitorDetail);return}
+  const buy=event.target.closest("[data-visitor-buy]");if(buy){openAuth("signup");return}
+  const cat=event.target.closest("[data-visitor-category]");if(cat){category=cat.dataset.visitorCategory;limit=12;document.querySelectorAll("[data-visitor-category]").forEach(b=>b.classList.toggle("active",b===cat));renderTable();return}
+ });
+ $("ocVisitorSearch")?.addEventListener("input",()=>{limit=12;renderTable()});
+ $("ocVisitorMarketMore")?.addEventListener("click",()=>{limit+=12;renderTable()});
+ $("ocVisitorDetailClose")?.addEventListener("click",()=>{$("ocVisitorCoinDetail").classList.add("hidden");$("ocVisitorTradingChart").src="about:blank"});
+ $("ocVisitorDetailBuy")?.addEventListener("click",()=>openAuth("signup"));
+ ["ocVisitorSignup","ocVisitorHeroSignup","ocVisitorAboutSignup","ocVisitorBottomSignup"].forEach(id=>$(id)?.addEventListener("click",()=>openAuth("signup")));
+ ["ocVisitorLogin"].forEach(id=>$(id)?.addEventListener("click",()=>openAuth("login")));
+ ["ocVisitorHeroExplore","ocVisitorAboutExplore"].forEach(id=>$(id)?.addEventListener("click",()=>$("ocVisitorMarkets")?.scrollIntoView({behavior:"smooth",block:"start"})));
+ window.addEventListener("load",()=>window.ocRenderVisitorMarket?.());
+ window.addEventListener("market-updated",()=>window.ocRenderVisitorMarket?.());
+ setInterval(()=>window.ocRenderVisitorMarket?.(),30000);
+ window.ocRenderVisitorMarket();
+})();
+</script>
+</body>
 </html>
 
 
