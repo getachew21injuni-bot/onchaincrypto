@@ -7584,3 +7584,42 @@ main > section[id^="page-"]:not(#page-register) .oc-signup-prompt {
     display: none !important;
   }
 </style>
+
+
+<!-- Definitive visitor-action cleanup: keep account entry points on the public landing page only. -->
+<style id="oc-visitor-actions-strict-placement">
+  header #ocVisitorActions,
+  header .oc-visitor-actions { display:none!important; }
+  body.oc-logged-out:not(.oc-auth-screen):has(main > #page-public-market:not(.hidden)) header #ocVisitorActions,
+  html.oc-auth-pending:has(main > #page-public-market:not(.hidden)) header #ocVisitorActions {
+    display:flex!important;
+  }
+  main > section[id^="page-"]:not(#page-public-market):not(#page-register) .oc-visitor-actions,
+  main > section[id^="page-"]:not(#page-public-market):not(#page-register) .oc-landing-actions,
+  main > section[id^="page-"]:not(#page-public-market):not(#page-register) .mobile-signin-btn,
+  main > section[id^="page-"]:not(#page-public-market):not(#page-register) .mobile-register-btn,
+  main > section[id^="page-"]:not(#page-public-market):not(#page-register) .oc-visitor-account-gate,
+  main > section[id^="page-"]:not(#page-public-market):not(#page-register) .oc-login-prompt,
+  main > section[id^="page-"]:not(#page-public-market):not(#page-register) .oc-signup-prompt {
+    display:none!important;
+  }
+</style>
+<script id="oc-visitor-actions-strict-cleanup">
+(function(){
+  const pageSelector = 'main > section[id^="page-"]:not(#page-public-market):not(#page-register)';
+  const removeSelector = [
+    '.oc-visitor-actions','.oc-landing-actions','.mobile-signin-btn',
+    '.mobile-register-btn','.oc-visitor-account-gate','.oc-login-prompt',
+    '.oc-signup-prompt','.oc-visitor-login-cta','.oc-visitor-signup-cta'
+  ].join(',');
+  function clean(){
+    document.querySelectorAll(pageSelector).forEach(page=>{
+      page.querySelectorAll(removeSelector).forEach(el=>el.remove());
+    });
+  }
+  clean();
+  if(window.MutationObserver && document.body){
+    new MutationObserver(clean).observe(document.body,{childList:true,subtree:true});
+  }
+})();
+</script>
