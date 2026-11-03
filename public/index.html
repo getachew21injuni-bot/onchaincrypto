@@ -4572,9 +4572,9 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
   finally{visitorGoldBusy=false;window.ocRenderVisitorMarket?.()}
  }
  const findAsset=sym=>getAssets().find(x=>String(x.symbol).toUpperCase()===String(sym).toUpperCase());
- const fmtChange=v=>{const n=Number(v)||0;return (n>0?"+":"")+n.toFixed(2)+"%"};
+ const fmtChange=v=>{if(v===null||v===undefined||v==="")return "—";const n=Number(v);if(!Number.isFinite(n))return "—";return (n>0?"+":"")+n.toFixed(2)+"%"};
  const coinMark=sym=>({BTC:"₿",ETH:"◆",BNB:"◆",XRP:"✕",SOL:"≋",DOGE:"Ð",ADA:"●",TRX:"△",LTC:"Ł",XAU:"◉"}[sym]||String(sym||"?").slice(0,3));
- const priceText=asset=>money(asset?.current_price);
+ const priceText=asset=>asset?.current_price===null||asset?.current_price===undefined||!Number.isFinite(Number(asset.current_price))||Number(asset.current_price)<=0?"—":money(asset.current_price);
  function openAuth(mode){
   const creating=mode==="signup"||mode==="register";
   document.body.classList.add("oc-auth-screen");
@@ -4669,7 +4669,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
   }
   rows.innerHTML=visible.map(a=>{
    const s=String(a.symbol).toUpperCase(),chg=Number(a.price_change_percentage_24h)||0,cap=Number(a.market_cap)||0;
-   return '<tr><td><div class="oc-v-asset"><span class="oc-v-icon" style="'+visitorCoinStyle(s)+'">'+escapeHtml(coinMark(s))+'</span><span class="oc-v-asset-name"><b>'+escapeHtml(a.name)+'</b><small>'+escapeHtml(s)+(s==="XAU"?" · GOLD":"")+'</small></span></div></td><td class="oc-v-price">'+priceText(a)+'</td><td><span class="oc-v-change '+(chg>=0?"up":"down")+'">'+fmtChange(chg)+'</span></td><td>'+compact(cap)+'</td><td><div class="oc-v-row-actions"><button type="button" class="oc-v-detail" data-visitor-detail="'+escapeHtml(s)+'">Details</button><button type="button" class="oc-v-buy" data-visitor-buy="'+escapeHtml(s)+'">Buy '+escapeHtml(s)+'</button></div></td></tr>';
+   return '<tr><td><div class="oc-v-asset"><span class="oc-v-icon" style="'+visitorCoinStyle(s)+'">'+escapeHtml(coinMark(s))+'</span><span class="oc-v-asset-name"><b>'+escapeHtml(a.name)+'</b><small>'+escapeHtml(s)+(s==="XAU"?" · GOLD":"")+'</small></span></div></td><td class="oc-v-price">'+priceText(a)+'</td><td><span class="oc-v-change '+(chg>=0?"up":"down")+'">'+fmtChange(chg)+'</span></td><td>'+(cap>0?compact(cap):"—")+'</td><td><div class="oc-v-row-actions"><button type="button" class="oc-v-detail" data-visitor-detail="'+escapeHtml(s)+'">Details</button><button type="button" class="oc-v-buy" data-visitor-buy="'+escapeHtml(s)+'">Buy '+escapeHtml(s)+'</button></div></td></tr>';
   }).join("");
  }
  function chartUrl(asset){
@@ -4687,7 +4687,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
   const change=Number(a.price_change_percentage_24h)||0;
   $("ocVisitorDetailChange").textContent=fmtChange(change);
   $("ocVisitorDetailChange").style.color=change>=0?"#16d9a0":"#ff6b82";
-  $("ocVisitorDetailCap").textContent=compact(a.market_cap);
+  $("ocVisitorDetailCap").textContent=Number(a.market_cap)>0?compact(a.market_cap):"—";
   $("ocVisitorBuySymbol").textContent=String(a.symbol).toUpperCase();
   $("ocVisitorTradingChart").src=chartUrl(a);
   $("ocVisitorCoinDetail").classList.remove("hidden");
