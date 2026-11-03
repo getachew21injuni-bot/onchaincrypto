@@ -7623,3 +7623,54 @@ main > section[id^="page-"]:not(#page-register) .oc-signup-prompt {
   }
 })();
 </script>
+
+<style id="oc-visitor-private-area-lock">
+/* Visitors may browse only the public landing/market page and authentication page. */
+html.oc-auth-pending main>section:not(#page-public-market):not(#page-register),
+body.oc-logged-out:not(.oc-auth-screen) main>section:not(#page-public-market):not(#page-register){display:none!important}
+html.oc-auth-pending main>#page-public-market,
+body.oc-logged-out:not(.oc-auth-screen) main>#page-public-market{display:block!important}
+html.oc-auth-pending #nav,
+body.oc-logged-out #nav,
+html.oc-auth-pending .bottom-nav,
+body.oc-logged-out .bottom-nav,
+html.oc-auth-pending .quick-action-grid,
+body.oc-logged-out .quick-action-grid,
+html.oc-auth-pending .quick-actions,
+body.oc-logged-out .quick-actions,
+html.oc-auth-pending #marketQuickActionsPanel,
+body.oc-logged-out #marketQuickActionsPanel,
+html.oc-auth-pending .wallet-actions,
+body.oc-logged-out .wallet-actions,
+html.oc-auth-pending #moreMenu,
+body.oc-logged-out #moreMenu,
+html.oc-auth-pending #refreshBtn,
+body.oc-logged-out #refreshBtn,
+html.oc-auth-pending #ocBackBtn,
+body.oc-logged-out #ocBackBtn{display:none!important}
+body.oc-logged-out.oc-auth-screen main>section:not(#page-register){display:none!important}
+body.oc-logged-out.oc-auth-screen main>#page-register{display:flex!important}
+</style>
+<script id="oc-visitor-private-navigation-lock">
+(function(){
+  const protectedPages=new Set(["home","markets","market","trade","browser","wallet","deposit","withdraw","transfer","convert","history","profile","notifications","financial","kyc","admin","support"]);
+  function guard(){
+    const original=window.showPage;
+    if(typeof original!=="function"||original.__ocVisitorGuarded)return;
+    const wrapped=function(page){
+      const signedIn=!!(window.onchaincryptoCurrentUser||window.ocFirebaseAuth?.currentUser);
+      if(!signedIn && (window.ocLoggedOut===true || document.body.classList.contains("oc-logged-out")) && protectedPages.has(String(page))){
+        document.body.classList.add("oc-auth-screen");
+        return original("register");
+      }
+      return original(page);
+    };
+    wrapped.__ocVisitorGuarded=true;
+    window.showPage=wrapped;
+  }
+  guard();
+  document.addEventListener("DOMContentLoaded",guard,{once:true});
+  const observer=new MutationObserver(guard);
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
