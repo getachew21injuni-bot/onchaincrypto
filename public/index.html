@@ -38,6 +38,12 @@
   html.oc-auth-pending [hidden] { display:none!important; }
 
 /* Floating visitor phone showcase */
+#page-public-market .oc-visitor-floating-signal{position:absolute;top:2%;left:50%;z-index:3;display:flex;align-items:center;gap:9px;padding:10px 15px;border:1px solid rgba(35,210,132,.38);border-radius:999px;background:linear-gradient(110deg,rgba(8,35,39,.96),rgba(7,22,35,.96));box-shadow:0 12px 32px rgba(0,0,0,.42),0 0 24px rgba(35,210,132,.12);white-space:nowrap;transform:translateX(-50%)}
+#page-public-market .oc-visitor-floating-signal>span{width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:#20d685;box-shadow:0 0 12px rgba(32,214,133,.8)}
+#page-public-market .oc-visitor-floating-signal b{font-size:10px;letter-spacing:1.3px;color:#b9f5dc}
+#page-public-market .oc-visitor-floating-signal small{font-size:9px;color:#91adbd}
+@media(max-width:700px){#page-public-market .oc-visitor-floating-signal{top:0;padding:8px 12px;gap:7px}#page-public-market .oc-visitor-floating-signal b{font-size:9px}}
+
 #page-public-market .oc-visitor-visual{animation:ocVisitorPhoneFloat 5.8s ease-in-out infinite}
 #page-public-market .oc-visitor-mini-mark.oc-onchain-round-mark{width:26px;height:26px;min-width:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;padding:0;font-weight:900;color:#17130a;background:radial-gradient(circle at 32% 28%,#fff1b5 0%,#f5c542 48%,#b87908 100%);border:1px solid #ffe08a;box-shadow:0 0 14px rgba(245,197,66,.35)}
 #page-public-market .oc-visitor-phone-chart polyline{stroke-dasharray:520;stroke-dashoffset:520;animation:ocVisitorSignalDraw 3.8s ease-in-out infinite alternate;filter:drop-shadow(0 0 4px rgba(32,214,133,.45))}
@@ -930,7 +936,8 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
 
       <div class="oc-visitor-proof"><span>● Public market prices</span><span>◆ Crypto + Gold</span><span>▤ Charts & market insights</span></div>
     </div>
-    <div class="oc-visitor-visual" aria-label="Illustrative Onchain market chart and trading signal display">
+    <div class="oc-visitor-visual" aria-label="Onchain floating market showcase with signal indicators">
+      <div class="oc-visitor-floating-signal"><span></span><b>ONCHAIN SIGNAL</b><small>Market momentum</small></div>
       <div class="oc-visitor-visual-glow"></div>
       <div class="oc-visitor-device" role="img" aria-label="Onchain mobile trading interface displayed inside a premium smartphone frame">
        <div class="oc-visitor-device-island"></div>
@@ -944,7 +951,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
         <div class="oc-visitor-phone-chart">
           <svg viewBox="0 0 420 170" role="img" aria-label="Illustrative market candlestick chart"><defs><linearGradient id="ocVisitorChartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#16d9a0" stop-opacity=".26"/><stop offset="1" stop-color="#16d9a0" stop-opacity="0"/></linearGradient></defs><path d="M0 135H420M0 90H420M0 45H420" stroke="#29435b" stroke-width="1" stroke-dasharray="4 6"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59 207 73 232 49 258 62 282 39 308 48 332 25 356 42 382 15 410 23V170H8Z" fill="url(#ocVisitorChartFill)"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59" fill="none" stroke="#16d9a0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M181 59L207 73 232 49 258 62 282 39" fill="none" stroke="#ff5573" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M282 39L308 48 332 25 356 42 382 15 410 23" fill="none" stroke="#16d9a0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><g stroke-width="3"><path d="M35 104V137m-5-23h10" stroke="#16d9a0"/><path d="M84 79v35m-5-25h10" stroke="#16d9a0"/><path d="M132 65v37m-5-25h10" stroke="#16d9a0"/><path d="M181 45v40m-5-25h10" stroke="#16d9a0"/><path d="M232 33v38m-5-22h10" stroke="#ff5573"/><path d="M282 24v37m-5-22h10" stroke="#ff5573"/><path d="M332 10v40m-5-25h10" stroke="#16d9a0"/><path d="M382 2v34m-5-20h10" stroke="#16d9a0"/></g></svg>
         </div>
-        <div class="oc-visitor-signal"><span class="oc-visitor-signal-dot"></span><div class="oc-visitor-signal-copy"><b>BTC MARKET SIGNALS</b><small>Live-style market direction indicators</small></div><div class="oc-visitor-signal-pills"><span class="oc-signal-up">▲ UP</span><span class="oc-signal-down">▼ DOWN</span></div></div>
+        <div class="oc-visitor-signal"><span class="oc-visitor-signal-dot"></span><div class="oc-visitor-signal-copy"><b>BTC MARKET SIGNALS</b><small>Market direction indicators</small></div><div class="oc-visitor-signal-pills"><span class="oc-signal-up">▲ UP</span><span class="oc-signal-down">▼ DOWN</span></div></div>
         <div class="oc-visitor-device-brandline"><span>ONCHAIN</span><strong>Get Onchain</strong></div>
         <div class="oc-visitor-phone-foot"><span>PRICE</span><span>24H CHANGE</span><span>MARKET WATCH</span></div>
         <div class="oc-visitor-device-nav"><span class="active"><b>⌂</b>Home</span><span><b>⌁</b>Markets</span><span><b>⇄</b>Trade</span><span><b>◉</b>Wallet</span></div>
