@@ -169,7 +169,7 @@ const moduleNames=['Users','Login History','Notifications','KYC','Email','Analyt
 const seedRecords={
  'Users':[{title:'Sample user A',owner:'demo-a@example.test',amount:'0',status:'Active'},{title:'Sample user B',owner:'demo-b@example.test',amount:'0',status:'Pending'}],
  'Login History':[{title:'Sample sign-in event',owner:'demo-a@example.test',amount:'—',status:'Recorded'}],
- 'Notifications':[{title:'Welcome to Onchain',owner:'All demo users',amount:'—',status:'Draft'}],
+ 'Notifications':[{title:'Welcome to Onchain',owner:'Sample users',amount:'—',status:'Draft'}],
  'KYC':[{title:'Sample review item (no documents)',owner:'Sample user B',amount:'—',status:'Pending'}],
  'Email':[{title:'Sample announcement draft',owner:'Admin',amount:'—',status:'Draft'}],
  'Deposits':[{title:'Sample deposit request',owner:'Sample user A',amount:'100 USDT',status:'Pending'}],
@@ -178,7 +178,7 @@ const seedRecords={
  'Trades':[{title:'BTC/USDT paper trade',owner:'Sample user A',amount:'50 USDT',status:'Open'}],
  'Transfers':[{title:'Sample internal transfer',owner:'Sample user A → Sample user B',amount:'10 USDT',status:'Pending'}],
  'History':[{title:'Sample platform event',owner:'System',amount:'—',status:'Recorded'}],
- 'Assets':[{title:'USDT practice ledger entry',owner:'Demo ledger',amount:'1,000 USDT',status:'Demo only'}],
+ 'Assets':[{title:'USDT practice ledger entry',owner:'Practice ledger',amount:'1,000 USDT',status:'Practice only'}],
  'Settings':[{title:'Paper trading mode',owner:'This browser only',amount:'—',status:'Enabled'}],
  'Support':[{title:'Sample support request',owner:'Sample user A',amount:'—',status:'Open'}]
 };
@@ -231,8 +231,8 @@ async function renderRequestQueue(view){
      if(after<0)throw new Error('insufficient-demo-balance');
      if(asset==='USDT')tx.update(userRef,{demoBalanceUSDT:after,demoBalanceUpdatedAt:serverTimestamp()});
      else tx.update(userRef,{demoAssetBalances:{...(data.demoAssetBalances||{}),[asset]:after},demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:current.email});
-     if(asset==='USDT')tx.set(usdtLedgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request demo approval':'Withdrawal request demo approval'),source:'admin-demo',status:'completed'});
-     else tx.set(ledgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request demo approval':'Withdrawal request demo approval'),source:'admin-demo',status:'completed'});
+     if(asset==='USDT')tx.set(usdtLedgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request practice adjustment':'Withdrawal request practice adjustment'),source:'admin-demo',status:'completed'});
+     else tx.set(ledgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request practice adjustment':'Withdrawal request practice adjustment'),source:'admin-demo',status:'completed'});
      tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email});
     });
     if(msg)msg.textContent=action==='approve'?'Approved. The practice balance and ledger were updated. No real payment or payout occurred.':'Request rejected.';
@@ -278,7 +278,7 @@ async function renderDemoFinance(view){
   await renderRequestQueue(view);
   if(view==='Deposits'){
    const hp=document.createElement('div');hp.className='content-panel';hp.style.margin='0';
-   hp.innerHTML='<h3 style="margin-top:0">Deposit history maintenance</h3><p class="muted">Archive reviewed deposit requests and demo deposit ledger entries from this Admin history view. Pending requests and wallet balances are unchanged. Archived records remain stored for audit.</p><button id="clearDepositHistoryBtn" class="icon-btn" type="button" style="background:#7c2639;border:0;padding:13px;font-weight:800">Clear reviewed deposit history</button><p id="clearDepositHistoryMessage" class="muted" role="status" aria-live="polite"></p>';
+   hp.innerHTML='<h3 style="margin-top:0">Deposit history maintenance</h3><p class="muted">Archive reviewed deposit requests and practice deposit ledger entries from this Admin history view. Pending requests and wallet balances are unchanged. Archived records remain stored for audit.</p><button id="clearDepositHistoryBtn" class="icon-btn" type="button" style="background:#7c2639;border:0;padding:13px;font-weight:800">Clear reviewed deposit history</button><p id="clearDepositHistoryMessage" class="muted" role="status" aria-live="polite"></p>';
    body.appendChild(hp);
    hp.querySelector('#clearDepositHistoryBtn').addEventListener('click',async()=>{
     const current=window.__ocAdminFirebase?.auth?.currentUser;
@@ -357,7 +357,7 @@ async function renderDemoFinance(view){
    }catch(err){msg.textContent='Could not publish wallet update ('+(err.code||err.message||'error')+'). Check admin verification and deploy the updated Firestore rules.';}
    finally{const b=form.querySelector('button[type=submit]');if(b)b.disabled=false;}
   });
- }catch(error){body.innerHTML='<div class="notice"><strong>Could not load demo wallet ledger.</strong><p>Firestore access failed ('+esc(error.code||error.message||'unknown error')+'). Verify admin access and deploy the updated Firestore rules.</p></div>';}
+ }catch(error){body.innerHTML='<div class="notice"><strong>Could not load practice wallet ledger.</strong><p>Firestore access failed ('+esc(error.code||error.message||'unknown error')+'). Verify admin access and deploy the updated Firestore rules.</p></div>';}
 }
 
 async function renderWalletAddresses(){
@@ -469,13 +469,13 @@ function renderModule(view){
  if(view==='Users'||view==='KYC'){renderLiveCollection(view);return;}
  if(view==='Analytics'){
   const data=loadAdminData();const counts=moduleNames.reduce((o,n)=>(o[n]=getRecords(n).length,o),{});
-  body.innerHTML='<div class="content-panel" style="margin:0"><h3>Demo analytics</h3><p class="muted">Counts below are local demo records, not live platform statistics.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">'+moduleNames.filter(n=>!['Analytics','Settings'].includes(n)).map(n=>'<div style="padding:15px;border:1px solid #ffffff20;border-radius:14px"><div class="muted">'+esc(n)+'</div><strong style="font-size:25px">'+counts[n]+'</strong></div>').join('')+'</div></div>';
+  body.innerHTML='<div class="content-panel" style="margin:0"><h3>Workspace analytics</h3><p class="muted">Counts below are local sample records, not live platform statistics.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">'+moduleNames.filter(n=>!['Analytics','Settings'].includes(n)).map(n=>'<div style="padding:15px;border:1px solid #ffffff20;border-radius:14px"><div class="muted">'+esc(n)+'</div><strong style="font-size:25px">'+counts[n]+'</strong></div>').join('')+'</div></div>';
   return;
  }
  if(!moduleNames.includes(view)){body.textContent=descriptions[view]||'Choose a section from the menu.';return;}
  const rows=getRecords(view);
  const actionsAllowed=!['Login History','History','Analytics'].includes(view);
- body.innerHTML='<div style="display:grid;gap:16px"><div style="padding:16px;border:1px solid #8b6b2d;background:#302710;border-radius:14px;color:#f6d98a"><strong>DEMO / LOCAL STORAGE ONLY</strong><div style="font-size:13px;margin-top:5px">These are sample records saved only in this browser. They are not real accounts, verified payments, emails, identity checks, wallet addresses, or live trades.</div></div>'+
+ body.innerHTML='<div style="display:grid;gap:16px"><div style="padding:16px;border:1px solid #8b6b2d;background:#302710;border-radius:14px;color:#f6d98a"><strong>SAMPLE DATA / LOCAL STORAGE ONLY</strong><div style="font-size:13px;margin-top:5px">These are sample records saved only in this browser. They are not real accounts, verified payments, emails, identity checks, wallet addresses, or live trades.</div></div>'+
  (actionsAllowed?'<form id="moduleAddForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;padding:16px;border:1px solid #ffffff20;border-radius:14px"><input name="title" required maxlength="100" placeholder="'+(view==='Email'?'Email subject':view==='Notifications'?'Notification title':'Record title')+'" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><input name="owner" maxlength="100" placeholder="User / recipient / category" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><input name="amount" maxlength="40" placeholder="Amount (optional)" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><button class="icon-btn" type="submit" style="background:#176b73;color:white">＋ Add demo record</button></form>':'')+
  '<label style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="muted">Filter records</span><input id="adminRecordSearch" type="search" placeholder="Search title, user, amount or status…" style="flex:1;min-width:220px;padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><button type="button" id="resetDemoRecords" class="icon-btn">Reset sample data</button></label><div style="overflow:auto;border:1px solid #ffffff20;border-radius:14px"><table style="width:100%;border-collapse:collapse;min-width:600px"><thead><tr style="text-align:left;background:#102333"><th style="padding:12px">Record</th><th style="padding:12px">Owner / details</th><th style="padding:12px">Amount</th><th style="padding:12px">Status</th><th style="padding:12px">Actions</th></tr></thead><tbody id="adminRecordsBody">'+
  (rows.length?rows.map((r,i)=>'<tr style="border-top:1px solid #ffffff16"><td style="padding:12px">'+esc(r.title)+'</td><td style="padding:12px">'+esc(r.owner||'—')+'</td><td style="padding:12px">'+esc(r.amount||'—')+'</td><td style="padding:12px"><span style="border:1px solid #ffffff25;padding:4px 8px;border-radius:14px">'+esc(r.status||'New')+'</span></td><td style="padding:12px;white-space:nowrap">'+(actionsAllowed?'<button type="button" data-record-action="status" data-record-index="'+i+'" class="icon-btn">Change status</button> <button type="button" data-record-action="delete" data-record-index="'+i+'" class="icon-btn">Delete</button>':'<span class="muted">Read only</span>')+'</td></tr>').join(''):'<tr><td colspan="5" style="padding:20px">No records yet. Add a demo record above.</td></tr>')+
@@ -573,12 +573,12 @@ window.adminRefreshDashboard=async function(){
   byId('liveKycStatus').textContent=k.size===100?'Pending count from first 100 KYC records':'Pending submissions from Firestore';
   const demoTotal=u.docs.reduce((sum,d)=>{const data=d.data()||{};const n=Number(data.demoBalanceUSDT||0);return sum+(Number.isFinite(n)&&n>0?n:0);},0);
   if(totalAssets)totalAssets.textContent=demoTotal.toLocaleString(undefined,{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
-  if(totalAssetsStatus)totalAssetsStatus.textContent='Sum of user demo USDT balances; not real customer funds'+(u.size===1000?' (first 1000 profiles only)':'');
+  if(totalAssetsStatus)totalAssetsStatus.textContent='Sum of user practice USDT balances; not real customer funds'+(u.size===1000?' (first 1000 profiles only)':'');
   status.textContent='Connected';updated.textContent='Last updated '+new Date().toLocaleTimeString();
  }catch(error){
   users.textContent='—';kyc.textContent='—';status.textContent='Unavailable';updated.textContent='Firestore access failed: '+(error.code||'unknown error');
   if(totalAssets)totalAssets.textContent='Unavailable';
-  if(totalAssetsStatus)totalAssetsStatus.textContent='Could not read demo wallet records';
+  if(totalAssetsStatus)totalAssetsStatus.textContent='Could not read practice wallet records';
   byId('liveUsersStatus').textContent='Admin access or Firestore rules need attention';byId('liveKycStatus').textContent='Could not retrieve KYC records';if(depositCount)depositCount.textContent='Unavailable';if(withdrawCount)withdrawCount.textContent='Unavailable';if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Could not read Firestore requests';if(byId('liveWithdrawalStatus'))byId('liveWithdrawalStatus').textContent='Could not read Firestore requests';if(depositCount)depositCount.textContent='Unavailable';if(withdrawCount)withdrawCount.textContent='Unavailable';if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Could not read Firestore requests';if(byId('liveWithdrawalStatus'))byId('liveWithdrawalStatus').textContent='Could not read Firestore requests';
  }
 };
