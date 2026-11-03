@@ -95,14 +95,14 @@ function renderTradeControls(){
  const key='onchaincrypto_demo_trade_controls';
  let saved={};
  try{saved=JSON.parse(localStorage.getItem(key)||'{}')||{};}catch(e){saved={};}
- const demoUsers=Array.isArray(saved.demoUsers)&&saved.demoUsers.length?saved.demoUsers:['Demo account A','Demo account B','Demo account C'];
+ const demoUsers=Array.isArray(saved.demoUsers)&&saved.demoUsers.length?saved.demoUsers:['Sample account A','Sample account B','Sample account C'];
  const demoCoins=['BTC/USDT','ETH/USDT','BNB/USDT','SOL/USDT','XRP/USDT'];
  document.getElementById('detailBody').innerHTML=`
  <div id="tradeControlsPanel" style="display:grid;gap:16px;max-width:900px">
   <div style="border:1px solid #27647a;background:linear-gradient(135deg,#12263d,#143a4c);border-radius:20px;padding:22px;box-shadow:0 16px 45px #0003">
-   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div><h3 style="margin:0 0 5px;font-size:21px">⇄ Trade Settings</h3><p class="muted" style="margin:0">Configure transparent outcomes for local paper-trading tests</p></div><span style="border:1px solid #a87826;background:#35270f;color:#fbbf24;padding:5px 9px;border-radius:20px;font-size:11px">DEMO ONLY</span></div>
+   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div><h3 style="margin:0 0 5px;font-size:21px">⇄ Trade Settings</h3><p class="muted" style="margin:0">Configure transparent outcomes for local paper-trading tests</p></div><span style="border:1px solid #a87826;background:#35270f;color:#fbbf24;padding:5px 9px;border-radius:20px;font-size:11px">PAPER TRADING TEST</span></div>
    <div style="height:1px;background:#ffffff20;margin:20px 0"></div>
-   <label style="display:grid;gap:8px;font-weight:700">♟ SELECT DEMO USER
+   <label style="display:grid;gap:8px;font-weight:700">♟ SELECT SAMPLE ACCOUNT
     <select id="demoUserSelect" style="width:100%;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#25495a;color:white">
      ${demoUsers.map(u=>'<option value="'+String(u).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')+'">'+String(u).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</option>').join('')}
     </select>
@@ -116,12 +116,12 @@ function renderTradeControls(){
    </div>
    <label style="display:block;font-weight:700;margin-bottom:8px" for="demoOutcomePercent">Test percentage</label>
    <div style="display:flex;align-items:center;gap:10px"><input id="demoOutcomePercent" type="number" min="0.1" max="100" step="0.1" value="${saved.percent??10}" style="flex:1;min-width:0;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#25495a;color:white"><strong>%</strong></div>
-   <p class="muted" style="margin:8px 0 16px">This sets a test scenario for the selected demo account across the demo coin list below. It does not change real user trades, account balances, or live exchange outcomes.</p>
+   <p class="muted" style="margin:8px 0 16px">This sets a local paper-trading test scenario for the selected sample account across the coin list below. It does not change real user trades, account balances, or live exchange outcomes.</p>
    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">${demoCoins.map(c=>'<span style="border:1px solid #416577;background:#193448;padding:7px 10px;border-radius:20px;font-size:12px">'+c+'</span>').join('')}</div>
-   <button id="applyDemoOutcome" class="icon-btn" style="width:100%;padding:14px;background:linear-gradient(90deg,#24b8d2,#20d9dc);border:0;color:#062b3a;font-weight:800">▣ Apply to Demo Coins</button>
+   <button id="applyDemoOutcome" class="icon-btn" style="width:100%;padding:14px;background:linear-gradient(90deg,#24b8d2,#20d9dc);border:0;color:#062b3a;font-weight:800">▣ Apply to Sample Scenario</button>
    <p id="demoTradeControlMessage" class="muted" role="status" aria-live="polite" style="margin-bottom:0">Settings are stored in this browser only. No real user list is connected.</p>
   </div>
-  <div class="content-panel" style="margin-top:0"><h3 style="margin-top:0">Production status</h3><p class="muted">The current repository has no secure server endpoint for reading registered users or applying risk settings. This panel therefore uses demo profiles only. A production take-profit/stop-loss system should use objective market prices, transparent rules, server-side authorization and an auditable risk engine—not forced outcomes for individual customers.</p></div>
+  <div class="content-panel" style="margin-top:0"><h3 style="margin-top:0">Production status</h3><p class="muted">The current repository has no secure server endpoint for reading registered users or applying risk settings. This panel therefore uses sample profiles only. A production take-profit/stop-loss system should use objective market prices, transparent rules, server-side authorization and an auditable risk engine—not forced outcomes for individual customers.</p></div>
  </div>`;
  document.getElementById('applyDemoOutcome').addEventListener('click',()=>{
   const user=document.getElementById('demoUserSelect').value;
@@ -131,27 +131,27 @@ function renderTradeControls(){
   if(!Number.isFinite(percent)||percent<0.1||percent>100){msg.textContent='Enter a test percentage between 0.1 and 100.';return;}
   const next={...saved,demoUsers,outcome,percent,selectedDemoUser:user,updatedAt:new Date().toISOString(),mode:'local-paper-trading-test',coins:demoCoins};
   localStorage.setItem(key,JSON.stringify(next));
-  msg.textContent='Saved '+outcome.toUpperCase()+' test scenario ('+percent+'%) for '+user+' across '+demoCoins.length+' demo pairs in this browser only.';
+  msg.textContent='Saved '+outcome.toUpperCase()+' test scenario ('+percent+'%) for '+user+' across '+demoCoins.length+' paper-trading pairs in this browser only.';
  });
 }
 
 const moduleKey='onchaincrypto_admin_demo_v1';
 const moduleNames=['Users','Login History','Notifications','KYC','Email','Analytics','Deposits','Withdrawals','Addresses','Trades','Transfers','History','Assets','Settings','Support'];
 const seedRecords={
- 'Users':[{title:'Demo user A',owner:'demo-a@example.test',amount:'0',status:'Active'},{title:'Demo user B',owner:'demo-b@example.test',amount:'0',status:'Pending'}],
- 'Login History':[{title:'Demo sign-in event',owner:'demo-a@example.test',amount:'—',status:'Recorded'}],
- 'Notifications':[{title:'Welcome to Onchain demo',owner:'All demo users',amount:'—',status:'Draft'}],
- 'KYC':[{title:'Demo review item (no documents)',owner:'Demo user B',amount:'—',status:'Pending'}],
- 'Email':[{title:'Demo announcement draft',owner:'Admin',amount:'—',status:'Draft'}],
- 'Deposits':[{title:'Demo deposit request',owner:'Demo user A',amount:'100 USDT',status:'Pending'}],
- 'Withdrawals':[{title:'Demo withdrawal request',owner:'Demo user B',amount:'25 USDT',status:'Pending'}],
- 'Addresses':[{title:'Demo address record',owner:'BTC',amount:'—',status:'Unassigned'}],
- 'Trades':[{title:'BTC/USDT paper trade',owner:'Demo user A',amount:'50 USDT',status:'Open'}],
- 'Transfers':[{title:'Demo internal transfer',owner:'Demo user A → Demo user B',amount:'10 USDT',status:'Pending'}],
- 'History':[{title:'Demo platform event',owner:'System',amount:'—',status:'Recorded'}],
- 'Assets':[{title:'USDT demo ledger entry',owner:'Demo ledger',amount:'1,000 USDT',status:'Demo only'}],
- 'Settings':[{title:'Demo mode',owner:'This browser only',amount:'—',status:'Enabled'}],
- 'Support':[{title:'Demo support request',owner:'Demo user A',amount:'—',status:'Open'}]
+ 'Users':[{title:'Sample user A',owner:'sample-a@example.invalid',amount:'0',status:'Active'},{title:'Sample user B',owner:'sample-b@example.invalid',amount:'0',status:'Pending'}],
+ 'Login History':[{title:'Sample sign-in event',owner:'sample-a@example.invalid',amount:'—',status:'Recorded'}],
+ 'Notifications':[{title:'Welcome to Onchain',owner:'Sample users',amount:'—',status:'Draft'}],
+ 'KYC':[{title:'Sample review item (no documents)',owner:'Sample user B',amount:'—',status:'Pending'}],
+ 'Email':[{title:'Sample announcement draft',owner:'Admin',amount:'—',status:'Draft'}],
+ 'Deposits':[{title:'Sample deposit request',owner:'Sample user A',amount:'100 USDT',status:'Pending'}],
+ 'Withdrawals':[{title:'Sample withdrawal request',owner:'Sample user B',amount:'25 USDT',status:'Pending'}],
+ 'Addresses':[{title:'Sample address record',owner:'BTC',amount:'—',status:'Unassigned'}],
+ 'Trades':[{title:'BTC/USDT paper trade',owner:'Sample user A',amount:'50 USDT',status:'Open'}],
+ 'Transfers':[{title:'Sample internal transfer',owner:'Sample user A → Sample user B',amount:'10 USDT',status:'Pending'}],
+ 'History':[{title:'Sample platform event',owner:'System',amount:'—',status:'Recorded'}],
+ 'Assets':[{title:'USDT practice ledger entry',owner:'Practice ledger',amount:'1,000 USDT',status:'Practice only'}],
+ 'Settings':[{title:'Paper trading mode',owner:'This browser only',amount:'—',status:'Enabled'}],
+ 'Support':[{title:'Sample support request',owner:'Sample user A',amount:'—',status:'Open'}]
 };
 function loadAdminData(){try{return JSON.parse(localStorage.getItem(moduleKey)||'{}')||{};}catch(e){return {};}}
 function saveAdminData(data){localStorage.setItem(moduleKey,JSON.stringify(data));}
@@ -165,13 +165,13 @@ function renderModule(view){
  if(view==='Users'||view==='KYC'){renderLiveCollection(view);return;}
  if(view==='Analytics'){
   const data=loadAdminData();const counts=moduleNames.reduce((o,n)=>(o[n]=getRecords(n).length,o),{});
-  body.innerHTML='<div class="content-panel" style="margin:0"><h3>Demo analytics</h3><p class="muted">Counts below are local demo records, not live platform statistics.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">'+moduleNames.filter(n=>!['Analytics','Settings'].includes(n)).map(n=>'<div style="padding:15px;border:1px solid #ffffff20;border-radius:14px"><div class="muted">'+esc(n)+'</div><strong style="font-size:25px">'+counts[n]+'</strong></div>').join('')+'</div></div>';
+  body.innerHTML='<div class="content-panel" style="margin:0"><h3>Workspace analytics</h3><p class="muted">Counts below are local sample records, not live platform statistics.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">'+moduleNames.filter(n=>!['Analytics','Settings'].includes(n)).map(n=>'<div style="padding:15px;border:1px solid #ffffff20;border-radius:14px"><div class="muted">'+esc(n)+'</div><strong style="font-size:25px">'+counts[n]+'</strong></div>').join('')+'</div></div>';
   return;
  }
  if(!moduleNames.includes(view)){body.textContent=descriptions[view]||'Choose a section from the menu.';return;}
  const rows=getRecords(view);
  const actionsAllowed=!['Login History','History','Analytics'].includes(view);
- body.innerHTML='<div style="display:grid;gap:16px"><div style="padding:16px;border:1px solid #8b6b2d;background:#302710;border-radius:14px;color:#f6d98a"><strong>DEMO / LOCAL STORAGE ONLY</strong><div style="font-size:13px;margin-top:5px">These are sample records saved only in this browser. They are not real accounts, verified payments, emails, identity checks, wallet addresses, or live trades.</div></div>'+
+ body.innerHTML='<div style="display:grid;gap:16px"><div style="padding:16px;border:1px solid #8b6b2d;background:#302710;border-radius:14px;color:#f6d98a"><strong>SAMPLE DATA / LOCAL STORAGE ONLY</strong><div style="font-size:13px;margin-top:5px">These are sample records saved only in this browser. They are not real accounts, verified payments, emails, identity checks, wallet addresses, or live trades.</div></div>'+
  (actionsAllowed?'<form id="moduleAddForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;padding:16px;border:1px solid #ffffff20;border-radius:14px"><input name="title" required maxlength="100" placeholder="'+(view==='Email'?'Email subject':view==='Notifications'?'Notification title':'Record title')+'" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><input name="owner" maxlength="100" placeholder="User / recipient / category" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><input name="amount" maxlength="40" placeholder="Amount (optional)" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><button class="icon-btn" type="submit" style="background:#176b73;color:white">＋ Add demo record</button></form>':'')+
  '<label style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="muted">Filter records</span><input id="adminRecordSearch" type="search" placeholder="Search title, user, amount or status…" style="flex:1;min-width:220px;padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><button type="button" id="resetDemoRecords" class="icon-btn">Reset sample data</button></label><div style="overflow:auto;border:1px solid #ffffff20;border-radius:14px"><table style="width:100%;border-collapse:collapse;min-width:600px"><thead><tr style="text-align:left;background:#102333"><th style="padding:12px">Record</th><th style="padding:12px">Owner / details</th><th style="padding:12px">Amount</th><th style="padding:12px">Status</th><th style="padding:12px">Actions</th></tr></thead><tbody id="adminRecordsBody">'+
  (rows.length?rows.map((r,i)=>'<tr style="border-top:1px solid #ffffff16"><td style="padding:12px">'+esc(r.title)+'</td><td style="padding:12px">'+esc(r.owner||'—')+'</td><td style="padding:12px">'+esc(r.amount||'—')+'</td><td style="padding:12px"><span style="border:1px solid #ffffff25;padding:4px 8px;border-radius:14px">'+esc(r.status||'New')+'</span></td><td style="padding:12px;white-space:nowrap">'+(actionsAllowed?(view==='Deposits'||view==='Withdrawals'?'<button type="button" data-record-action="approve" data-record-index="'+i+'" class="icon-btn" style="background:#0b6b4b">Approve demo</button> <button type="button" data-record-action="reject" data-record-index="'+i+'" class="icon-btn" style="background:#8b2635">Reject demo</button> ':'<button type="button" data-record-action="status" data-record-index="'+i+'" class="icon-btn">Change status</button> ')+'<button type="button" data-record-action="delete" data-record-index="'+i+'" class="icon-btn">Delete demo</button>':'<span class="muted">Read only</span>')+'</td></tr>').join(''):'<tr><td colspan="5" style="padding:20px">No records yet. Add a demo record above.</td></tr>')+
