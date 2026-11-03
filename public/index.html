@@ -967,30 +967,31 @@ html.oc-light-theme nav button.active{color:#a86b0c!important}
       <p class="muted tiny">Prices and signals are for information only and may change.</p>
     </section>
 <style id="market-discovery-style">
-.market-discovery{background:#f0f0f0;color:#141821;border-radius:22px;padding:16px;margin:0 0 18px;font-family:inherit}
+.market-discovery{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:22px;padding:16px;margin:0 0 18px;font-family:inherit}
 .market-discovery *{box-sizing:border-box}
-.market-discovery .md-search{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e4e5eb;border-radius:14px;padding:12px 14px;margin-bottom:16px}
-.market-discovery .md-search input{background:transparent!important;color:#151821!important;border:0!important;box-shadow:none!important;outline:none;width:100%;padding:0!important}
+.market-discovery .md-search{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:16px}
+.market-discovery .md-search input{background:transparent!important;color:var(--text)!important;border:0!important;box-shadow:none!important;outline:none;width:100%;padding:0!important}
+.market-discovery .md-search input::placeholder{color:var(--muted)}
 .market-discovery .md-tabs{display:flex;gap:22px;overflow-x:auto;white-space:nowrap;margin:0 -2px 16px;padding-bottom:8px}
-.market-discovery .md-tabs button{background:transparent;border:0;color:#5f636d;padding:8px 2px;font-weight:650;position:relative}
-.market-discovery .md-tabs button.active{color:#111827}
-.market-discovery .md-tabs button.active:after{content:"";position:absolute;bottom:-3px;left:30%;right:30%;height:3px;background:#eacb31;border-radius:4px}
-.market-discovery .md-card{background:#fff;border-radius:18px;padding:16px;margin-bottom:14px;color:#17191f}
-.market-discovery .md-card h3{font-size:1.08rem;margin:0 0 16px}
-.market-discovery .md-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:13px 0;border-top:1px solid #f0f0f2}
+.market-discovery .md-tabs button{background:transparent;border:0;color:var(--muted);padding:8px 2px;font-weight:650;position:relative}
+.market-discovery .md-tabs button.active{color:var(--text)}
+.market-discovery .md-tabs button.active:after{content:"";position:absolute;bottom:-3px;left:30%;right:30%;height:3px;background:var(--yellow);border-radius:4px}
+.market-discovery .md-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;color:var(--text)}
+.market-discovery .md-card h3{font-size:1.08rem;margin:0 0 16px;color:var(--text)}
+.market-discovery .md-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:13px 0;border-top:1px solid var(--line)}
 .market-discovery .md-coin{display:flex;align-items:center;gap:10px;min-width:0}
-.market-discovery .md-icon{width:40px;height:40px;border-radius:50%;background:#eef1f6;display:grid;place-items:center;font-weight:800;flex-shrink:0}
-.market-discovery .md-name{font-weight:700}
-.market-discovery .md-sub{font-size:.88rem;color:#747985;margin-top:3px}
+.market-discovery .md-icon{width:40px;height:40px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);color:var(--yellow);display:grid;place-items:center;font-weight:800;flex-shrink:0}
+.market-discovery .md-name{font-weight:700;color:var(--text)}
+.market-discovery .md-sub{font-size:.88rem;color:var(--muted);margin-top:3px}
 .market-discovery .md-change{font-size:.88rem;font-weight:700;text-align:right;padding:7px 8px;border-radius:10px}
-.market-discovery .md-up{color:#168653;background:#e9f8ef}
-.market-discovery .md-down{color:#d64a59;background:#fff0f1}
-.market-discovery .md-muted{color:#737985;font-size:.88rem}
+.market-discovery .md-up{color:var(--green);background:rgba(22,217,160,.12)}
+.market-discovery .md-down{color:var(--red);background:rgba(255,85,115,.12)}
+.market-discovery .md-muted{color:var(--muted);font-size:.88rem}
 .market-discovery .md-chips{display:flex;gap:9px;overflow:auto}
-.market-discovery .md-chip{background:#f3f4f7;border-radius:12px;padding:10px 12px;min-width:130px}
-.market-discovery .md-chip strong{display:block;margin-bottom:5px}
-.market-discovery .md-chip span{font-size:.85rem;color:#687080}
-.market-discovery .md-tracker-note{font-size:.82rem;color:#727783;line-height:1.4;margin-top:12px}
+.market-discovery .md-chip{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:130px}
+.market-discovery .md-chip strong{display:block;margin-bottom:5px;color:var(--text)}
+.market-discovery .md-chip span{font-size:.85rem;color:var(--muted)}
+.market-discovery .md-tracker-note{font-size:.82rem;color:var(--muted);line-height:1.4;margin-top:12px}
 @media(min-width:760px){.market-discovery{padding:22px}.market-discovery .md-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.market-discovery .md-card{margin-bottom:0}}
 </style>
 <section class="market-discovery" id="marketDiscovery">
