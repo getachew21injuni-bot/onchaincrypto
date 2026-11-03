@@ -4274,8 +4274,11 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  window.ocOpenVisitorAuth=openAuth;
  function renderTicker(){
   const track=$("ocVisitorTickerTrack");if(!track)return;
-  const assets=getAssets().sort((a,b)=>(Number(b.total_volume)||0)-(Number(a.total_volume)||0)).slice(0,14);
-  if(!assets.length){track.innerHTML='<span class="oc-visitor-ticker-empty">Public market prices are temporarily unavailable. Reconnecting…</span>';return}
+  loadVisitorGoldFallback();
+  const available=getAssets();
+  const hotSymbols=["BTC","ETH","BNB","XRP","XAU"];
+  const assets=hotSymbols.map(symbol=>available.find(asset=>String(asset.symbol).toUpperCase()===symbol)).filter(Boolean);
+  if(!assets.length){track.innerHTML='<span class="oc-visitor-ticker-empty">Live market prices are connecting. Reconnecting…</span>';return}
   const items=assets.map(a=>{const s=String(a.symbol).toUpperCase(),chg=Number(a.price_change_percentage_24h)||0;return '<span class="oc-visitor-ticker-item"><b>'+escapeHtml(s)+'</b><span>'+priceText(a)+'</span><em class="'+(chg>=0?"green":"red")+'">'+fmtChange(chg)+'</em></span>'}).join("");
   track.innerHTML=items+items;
  }
