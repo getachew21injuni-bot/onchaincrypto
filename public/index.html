@@ -6175,3 +6175,115 @@ body.oc-logged-out:not(.oc-auth-screen) #page-wallet .wallet-assets-panel{displa
 })();
 </script>
 
+
+
+<style id="oc-gold-dark-background">
+/* Gold-toned dark mode: a warm gold page canvas with clearly separated dark surfaces. */
+html:not(.oc-light-theme){
+  --bg:#b88b35;
+  --panel:#171c24;
+  --panel2:#252d38;
+  --line:#80612b;
+  --text:#fff8e8;
+  --muted:#d7c18f;
+  --yellow:#f1c35d;
+  color-scheme:dark;
+}
+html:not(.oc-light-theme) body{
+  background:linear-gradient(132deg,#d0a64e 0%,#bd913c 42%,#9a722d 100%)!important;
+  background-attachment:fixed!important;
+  color:#241b0b!important;
+}
+html:not(.oc-light-theme) main{background:transparent!important}
+html:not(.oc-light-theme) header,
+html:not(.oc-light-theme) footer,
+html:not(.oc-light-theme) .bottom-nav{
+  background:linear-gradient(100deg,#17130d 0%,#252016 52%,#17130d 100%)!important;
+  border-color:#80612b!important;
+  color:#fff8e8!important;
+}
+html:not(.oc-light-theme) header .brand,
+html:not(.oc-light-theme) header #nav button,
+html:not(.oc-light-theme) .bottom-nav button{color:#f8e8bf!important}
+html:not(.oc-light-theme) header #nav button.active,
+html:not(.oc-light-theme) header #nav button:hover,
+html:not(.oc-light-theme) .bottom-nav button.active{color:#f1c35d!important}
+html:not(.oc-light-theme) .panel,
+html:not(.oc-light-theme) .card,
+html:not(.oc-light-theme) .mini-card,
+html:not(.oc-light-theme) .form-panel,
+html:not(.oc-light-theme) .more-menu,
+html:not(.oc-light-theme) .modal-content,
+html:not(.oc-light-theme) .profile-menu-section,
+html:not(.oc-light-theme) .oc-visitor-account-gate{
+  background:#171c24!important;
+  color:#fff8e8!important;
+  border-color:#80612b!important;
+}
+html:not(.oc-light-theme) .panel h1,
+html:not(.oc-light-theme) .panel h2,
+html:not(.oc-light-theme) .panel h3,
+html:not(.oc-light-theme) .panel h4,
+html:not(.oc-light-theme) .card h1,
+html:not(.oc-light-theme) .card h2,
+html:not(.oc-light-theme) .card h3,
+html:not(.oc-light-theme) .mini-card h3,
+html:not(.oc-light-theme) .panel strong,
+html:not(.oc-light-theme) .card strong,
+html:not(.oc-light-theme) .form-panel label{color:#fff4d9!important}
+html:not(.oc-light-theme) .panel .muted,
+html:not(.oc-light-theme) .panel .tiny,
+html:not(.oc-light-theme) .card .muted,
+html:not(.oc-light-theme) .card .tiny,
+html:not(.oc-light-theme) .mini-card .muted,
+html:not(.oc-light-theme) .form-panel .muted{color:#d7c18f!important}
+html:not(.oc-light-theme) input,
+html:not(.oc-light-theme) select,
+html:not(.oc-light-theme) textarea,
+html:not(.oc-light-theme) .field,
+html:not(.oc-light-theme) .search{
+  background:#252d38!important;
+  color:#fff8e8!important;
+  border-color:#80612b!important;
+}
+html:not(.oc-light-theme) button.secondary{
+  background:#252d38!important;
+  color:#fff4d9!important;
+  border-color:#80612b!important;
+}
+html:not(.oc-light-theme) .more-menu>button{color:#fff4d9!important}
+html:not(.oc-light-theme) .more-menu small{color:#d7c18f!important}
+html:not(.oc-light-theme) .table-wrap th,
+html:not(.oc-light-theme) th{background:#252d38!important;color:#e8d5a9!important}
+html:not(.oc-light-theme) td,
+html:not(.oc-light-theme) th{border-color:#594622!important}
+html:not(.oc-light-theme) .oc-visitor-hero,
+html:not(.oc-light-theme) .oc-visitor-ticker-panel,
+html:not(.oc-light-theme) .oc-visitor-market-table-wrap,
+html:not(.oc-light-theme) .oc-visitor-product-card,
+html:not(.oc-light-theme) .oc-visitor-about,
+html:not(.oc-light-theme) .oc-visitor-bottom-cta,
+html:not(.oc-light-theme) .oc-visitor-detail{
+  background:#171c24!important;
+  color:#fff8e8!important;
+  border-color:#80612b!important;
+}
+html:not(.oc-light-theme) .oc-visitor-hero h1,
+html:not(.oc-light-theme) .oc-visitor-section-head h2,
+html:not(.oc-light-theme) .oc-visitor-about h2,
+html:not(.oc-light-theme) .oc-visitor-products-heading h2,
+html:not(.oc-light-theme) .oc-visitor-bottom-cta h2,
+html:not(.oc-light-theme) .oc-visitor-detail h3,
+html:not(.oc-light-theme) .oc-visitor-detail strong{color:#fff4d9!important}
+html:not(.oc-light-theme) .oc-visitor-hero-copy>p,
+html:not(.oc-light-theme) .oc-visitor-section-head p,
+html:not(.oc-light-theme) .oc-visitor-about p,
+html:not(.oc-light-theme) .oc-visitor-products-heading>p,
+html:not(.oc-light-theme) .oc-visitor-products-heading>span,
+html:not(.oc-light-theme) .oc-visitor-disclaimer{color:#d7c18f!important}
+html:not(.oc-light-theme) .oc-theme-toggle{
+  background:#252016!important;
+  color:#f1c35d!important;
+  border-color:#a98239!important;
+}
+</style>
