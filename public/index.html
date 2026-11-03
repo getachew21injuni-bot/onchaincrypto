@@ -1200,10 +1200,9 @@ html.oc-light-theme nav button.active{color:#a86b0c!important}
     <div class="content-grid">
       <section class="panel form-panel auth-main-panel">
         <div id="authModeIntro" class="hidden" aria-hidden="true"></div>
-        <section id="authChoicePanel" class="oc-auth-choice" aria-label="Choose how to continue">
-          <button class="primary full oc-auth-choice-button" id="authChoiceGoogle" type="button"><span aria-hidden="true">G</span> Login with Google</button>
-          <button class="secondary full oc-auth-choice-button" id="authChoiceEmail" type="button"><span aria-hidden="true">✉</span> Login with email or phone</button>
-          <p class="oc-auth-register-prompt">Don’t have an account? <button type="button" id="authChoiceRegister">Register</button></p>
+        <section id="authChoicePanel" class="oc-auth-choice" aria-label="Choose an account action">
+          <button class="primary full oc-auth-choice-button" id="authChoiceLogin" type="button">Login</button>
+          <button class="secondary full oc-auth-choice-button" id="authChoiceRegister" type="button">Sign Up</button>
         </section>
 
         <div id="authStatus" class="notice hidden">Checking sign-in status…</div>
@@ -2787,6 +2786,7 @@ window.addEventListener("popstate", async () => {
   if(!signIn||!register)return;
   function setMode(mode){
     const creating=mode==='register';
+    document.getElementById("authChoicePanel")?.classList.add("hidden");
     document.getElementById("authStatus")?.classList.remove("hidden");
     if(methodOptions)methodOptions.classList.toggle("hidden",!creating);
     if(phonePanel){phonePanel.classList.add("hidden");phonePanel.open=false;phonePanel.querySelectorAll("input").forEach(el=>el.disabled=true);}
@@ -2821,13 +2821,12 @@ window.addEventListener("popstate", async () => {
     signIn.classList.add("hidden");register.classList.add("hidden");
     if(google)google.classList.add("hidden");if(googleHint)googleHint.classList.add("hidden");
     if(phonePanel){phonePanel.classList.add("hidden");phonePanel.open=false;phonePanel.querySelectorAll("input").forEach(el=>el.disabled=true);}
-    if(intro)intro.innerHTML='<h2>Welcome to Onchain</h2><p class="muted tiny">Choose a secure way to access your account or create a new one.</p>';
+    if(intro)intro.innerHTML='<h2>Welcome to Onchain</h2><p class="muted tiny">Login to your account or sign up to create one.</p>';
     if(heading)heading.textContent="Welcome to Onchain";
     if(sub)sub.textContent="Your digital asset journey starts here.";
   }
-  document.getElementById("authChoiceGoogle")?.addEventListener("click",()=>{document.getElementById("authChoicePanel")?.classList.add("hidden");if(google)google.classList.remove("hidden");if(googleHint)googleHint.classList.add("hidden");signIn.classList.add("hidden");register.classList.add("hidden");google?.click();});
-  document.getElementById("authChoiceEmail")?.addEventListener("click",()=>{document.getElementById("authChoicePanel")?.classList.add("hidden");setMode("signin");if(google)google.classList.add("hidden");if(googleHint)googleHint.classList.add("hidden");const divider=document.getElementById("authPhoneDivider");divider?.classList.remove("hidden");if(phonePanel){phonePanel.classList.remove("hidden");phonePanel.open=false;phonePanel.querySelectorAll("input").forEach(el=>el.disabled=false);} });
-  document.getElementById("authChoiceRegister")?.addEventListener("click",()=>{document.getElementById("authChoicePanel")?.classList.add("hidden");setMode("register");});
+  document.getElementById("authChoiceLogin")?.addEventListener("click",()=>{setMode("signin");if(googleHint)googleHint.classList.add("hidden");document.getElementById("signInEmail")?.focus();});
+  document.getElementById("authChoiceRegister")?.addEventListener("click",()=>{setMode("register");});
   setMode("signin");
   showAuthChoice();
 })();
