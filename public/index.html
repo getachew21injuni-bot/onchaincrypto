@@ -7149,15 +7149,25 @@ main{width:100%;min-width:0}
 }
 </style>
 <script id="oc-auth-register-separate-route">
+/* The inline links switch forms in place; they do not navigate/reload the page. */
 document.addEventListener("click",function(event){
- const registerLink=event.target.closest("#showRegisterBtn");
- const loginLink=event.target.closest("#registerLoginBtn");
+ const target=event.target instanceof Element?event.target:null;
+ if(!target)return;
+ const registerLink=target.closest("#showRegisterBtn");
+ const loginLink=target.closest("#registerLoginBtn");
  if(!registerLink&&!loginLink)return;
  event.preventDefault();
  event.stopImmediatePropagation();
- const url=new URL(window.location.href);
- url.searchParams.set("auth",registerLink?"register":"login");
- window.location.assign(url.toString());
+ const mode=registerLink?"register":"login";
+ if(typeof window.ocOpenVisitorAuth==="function"){
+   window.ocOpenVisitorAuth(mode);
+ }else{
+   document.body.classList.add("oc-auth-screen");
+   document.body.classList.toggle("oc-register-mode",mode==="register");
+   document.getElementById("authChoicePanel")?.classList.add("hidden");
+   document.getElementById("registerForm")?.classList.toggle("hidden",mode!=="register");
+   document.getElementById("signInForm")?.classList.toggle("hidden",mode==="register");
+ }
 },true);
 </script>
 
