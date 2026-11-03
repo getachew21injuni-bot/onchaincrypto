@@ -734,10 +734,38 @@ html.oc-light-theme nav button.active{color:#a86b0c!important}
 }
 </style>
 
+
+<style id="oc-unified-onchain-b-round-brand">
+.oc-onchain-round-mark{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  flex:0 0 auto;width:44px;height:44px;border-radius:50%!important;
+  border:2px solid #f5c542!important;
+  background:radial-gradient(circle at 32% 25%,#fff2b5 0%,#f5c542 38%,#d99413 72%,#8f5b08 100%)!important;
+  color:#17120a!important;font-family:Inter,Arial,sans-serif!important;
+  font-size:29px!important;font-weight:1000!important;line-height:1!important;
+  letter-spacing:-2px!important;text-shadow:0 1px 0 #fff0a8;
+  box-shadow:0 0 0 3px rgba(245,197,66,.12),0 5px 16px rgba(0,0,0,.24),0 0 22px rgba(245,197,66,.2)!important;
+}
+header .brand{display:flex!important;align-items:center!important;justify-self:start!important;gap:10px!important}
+header .brand .header-logo-mark{width:36px!important;height:36px!important;flex-basis:36px!important;margin:0!important;font-size:24px!important}
+header .brand>span:last-child{font-weight:950!important;letter-spacing:-.5px!important;background:linear-gradient(100deg,#f5c542,#fff0a8 52%,#d99b22)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
+#page-home .oc-brand-emblem.oc-onchain-round-mark{width:108px!important;height:108px!important;border-radius:50%!important;padding:0!important;overflow:visible!important}
+#page-home .oc-brand-emblem.oc-onchain-round-mark span{font-size:76px;letter-spacing:-6px;font-weight:1000;line-height:1;color:#211704}
+#page-home .oc-brand-wordmark{margin-top:2px}
+.auth-welcome .auth-logo-mark.oc-onchain-round-mark{width:94px;height:94px;margin:0 auto 12px;font-size:66px!important}
+.oc-public-auth-brand .oc-auth-brand-mark{width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:29px;font-weight:1000;letter-spacing:-2px;color:#211704;background:radial-gradient(circle at 32% 25%,#fff2b5,#f5c542 42%,#d99413 75%,#8f5b08);border:2px solid #f5c542;box-shadow:0 0 0 3px rgba(245,197,66,.12),0 0 22px rgba(245,197,66,.2)}
+@media(max-width:720px){
+ header .brand{gap:7px!important}
+ header .brand .header-logo-mark{width:32px!important;height:32px!important;flex-basis:32px!important;font-size:21px!important}
+ #page-home .oc-brand-emblem.oc-onchain-round-mark{width:78px!important;height:78px!important}
+ #page-home .oc-brand-emblem.oc-onchain-round-mark span{font-size:55px;letter-spacing:-5px}
+}
+</style>
+
 </head>
 <body>
 <header>
-  <div class="brand"><div class="auth-logo-mark header-logo-mark" aria-hidden="true"><svg viewBox="0 0 120 120" role="img" aria-label="Bitcoin and gold coins"><defs><linearGradient id="headerGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0a8"/><stop offset=".5" stop-color="#f5c542"/><stop offset="1" stop-color="#b7791f"/></linearGradient><linearGradient id="headerBtc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd08a"/><stop offset=".5" stop-color="#f7931a"/><stop offset="1" stop-color="#b95608"/></linearGradient></defs><circle cx="77" cy="42" r="30" fill="url(#headerGold)" stroke="#fff0b0" stroke-width="2.5"/><circle cx="77" cy="42" r="24" fill="none" stroke="#986417" stroke-width="1.5"/><path d="M65 33h24m-24 9h24m-24 9h24" stroke="#986417" stroke-width="3" stroke-linecap="round"/><circle cx="45" cy="73" r="35" fill="url(#headerBtc)" stroke="#ffe0ad" stroke-width="3"/><circle cx="45" cy="73" r="28" fill="none" stroke="#9e4b09" stroke-width="1.8"/><path d="M39 49v7m12-7v7M39 90v7m12-7v7" stroke="#fff0d8" stroke-width="3.5" stroke-linecap="round"/><path d="M54 59c-2-5-8-7-16-5l-4 38c13 3 23-1 23-9 0-5-3-8-8-9 5-1 8-6 5-11Z" fill="none" stroke="#fff8ec" stroke-width="4" stroke-linejoin="round"/><path d="M40 65h9m-10 13h10" stroke="#fff8ec" stroke-width="3.5" stroke-linecap="round"/></svg></div> <span>Onchain</span></div>
+  <div class="brand"><span class="oc-onchain-round-mark header-logo-mark" aria-hidden="true">B</span><span>Onchain</span></div>
   <nav id="nav">
     <button class="active" data-page="home">Home</button>
     <button data-page="markets">Markets</button>
@@ -838,23 +866,7 @@ html.oc-light-theme nav button.active{color:#a86b0c!important}
    <p>Fast, secure, low-cost — everything you need to trade confidently.</p>
   </div>
   <div class="oc-hero-art oc-brand-stage" aria-label="Onchain brand">
-   <div class="oc-brand-emblem" aria-hidden="true">
-      <svg viewBox="0 0 120 120" role="img" aria-label="Overlapping Bitcoin and gold coins">
-       <defs>
-        <linearGradient id="ocGoldCoin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2b0"/><stop offset=".42" stop-color="#f4c542"/><stop offset="1" stop-color="#a96c12"/></linearGradient>
-        <linearGradient id="ocBtcCoin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd08a"/><stop offset=".5" stop-color="#f7931a"/><stop offset="1" stop-color="#b95608"/></linearGradient>
-       </defs>
-       <circle cx="76" cy="43" r="31" fill="url(#ocGoldCoin)" stroke="#fff0b0" stroke-width="2.5"/>
-       <circle cx="76" cy="43" r="25" fill="none" stroke="#9b6718" stroke-width="1.5" opacity=".8"/>
-       <path d="M64 33h21m-21 9h21m-21 9h21" stroke="#986417" stroke-width="3" stroke-linecap="round" opacity=".7"/>
-       <circle cx="46" cy="72" r="35" fill="url(#ocBtcCoin)" stroke="#ffe0ad" stroke-width="3"/>
-       <circle cx="46" cy="72" r="28" fill="none" stroke="#9e4b09" stroke-width="1.8" opacity=".75"/>
-       <path d="M40 48v7m12-7v7M40 89v7m12-7v7" stroke="#fff0d8" stroke-width="3.5" stroke-linecap="round"/>
-       <path d="M54 58c-2-5-8-7-16-5l-4 38c13 3 23-1 23-9 0-5-3-8-8-9 5-1 8-6 5-11Z" fill="none" stroke="#fff8ec" stroke-width="4" stroke-linejoin="round"/>
-       <path d="M40 64h9m-10 13h10" stroke="#fff8ec" stroke-width="3.5" stroke-linecap="round"/>
-       <path d="M83 82l5 5 11-13" fill="none" stroke="#f9d56d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-     </div>
+   <div class="oc-brand-emblem oc-onchain-round-mark" aria-hidden="true"><span>B</span></div>
    <div class="oc-brand-wordmark"><span>On</span><span>chain</span></div>
    <div class="oc-brand-tagline">Institutional Crypto Intelligence Platform</div>
   </div>
@@ -1241,7 +1253,7 @@ html.oc-light-theme nav button.active{color:#a86b0c!important}
   </section>
   <section id="page-register" class="hidden">
     <section class="oc-public-auth-hero" aria-label="Onchain trading platform welcome">
-      <div class="oc-public-auth-brand"><span class="oc-auth-brand-mark">₿</span><span>Onchain</span></div>
+      <div class="oc-public-auth-brand"><span class="oc-auth-brand-mark">B</span><span>Onchain</span></div>
       <div class="oc-public-auth-copy">
         <div class="oc-public-auth-eyebrow"><i></i> DIGITAL ASSET TRADING PLATFORM</div>
         <h2>Take Control of<br><span>Your Crypto Future.</span></h2>
@@ -1259,7 +1271,7 @@ html.oc-light-theme nav button.active{color:#a86b0c!important}
       <div class="oc-public-auth-footnote">Explore digital assets · Trade responsibly</div>
     </section>
         <div class="auth-welcome">
-      <div class="auth-logo-mark" aria-hidden="true"><svg viewBox="0 0 120 120" role="img"><defs><linearGradient id="authLogoGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#42e8ff"/><stop offset="1" stop-color="#3678ff"/></linearGradient></defs><circle cx="60" cy="60" r="51" fill="#071522" stroke="url(#authLogoGradient)" stroke-width="3"/><path d="M73 35a29 29 0 1 0 0 50" fill="none" stroke="url(#authLogoGradient)" stroke-width="10" stroke-linecap="round"/><path d="M87 43a21 21 0 1 0 0 34" fill="none" stroke="#42e8ff" stroke-width="8" stroke-linecap="round"/><path d="M45 60h29" stroke="#e8fbff" stroke-width="5" stroke-linecap="round"/><circle cx="88" cy="31" r="5" fill="#42e8ff"/></svg></div>
+      <div class="auth-logo-mark oc-onchain-round-mark" aria-hidden="true"><span>B</span></div>
       <div class="auth-brand">Onchain</div>
       <h1 id="authHeading">Welcome to Onchain</h1>
       <p id="authSubheading" class="hidden"></p>
