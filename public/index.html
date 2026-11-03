@@ -4559,8 +4559,24 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
  const symbols=["BTC","ETH","BNB","XRP","SOL","DOGE","ADA","TRX","LTC","XAU"];
  let category="crypto",limit=6,selectedAsset=null;
+ const visitorPinnedQuotes=new Map();let visitorQuotesBusy=false,visitorQuotesChecked=0;
  let visitorGoldFallback=null,visitorGoldBusy=false,visitorGoldChecked=0;
  const getAssets=()=>{const source=Array.isArray(window.market)?window.market:[];const assets=source.filter(x=>Number(x.current_price)>0&&String(x.symbol).toUpperCase()!=="XAU");const gold=visitorGoldFallback||source.find(x=>String(x.symbol).toUpperCase()==="XAU"&&Number(x.current_price)>0);if(gold)assets.push(gold);return assets};
+ async function refreshVisitorPinnedQuotes(){
+  if(visitorQuotesBusy||Date.now()-visitorQuotesChecked<60000)return;
+  visitorQuotesBusy=true;visitorQuotesChecked=Date.now();
+  const ids="bitcoin,ethereum,tether,binancecoin,ripple,usd-coin";
+  try{
+   const response=await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+ids+"&order=market_cap_desc&per_page=6&page=1&sparkline=false&price_change_percentage=24h",{headers:{accept:"application/json"},cache:"no-store",signal:AbortSignal.timeout(9000)});
+   if(!response.ok)throw new Error("Pinned market quotes unavailable");
+   const rows=await response.json();
+   if(!Array.isArray(rows))throw new Error("Invalid pinned market quotes");
+   rows.forEach(item=>{const symbol=String(item.symbol||"").toUpperCase();if(!symbol||!(Number(item.current_price)>0))return;visitorPinnedQuotes.set(symbol,{current_price:Number(item.current_price),price_change_percentage_24h:Number.isFinite(Number(item.price_change_percentage_24h))?Number(item.price_change_percentage_24h):null,market_cap:Number(item.market_cap)>0?Number(item.market_cap):null});});
+   renderTable();
+  }catch(error){
+   // The shared market feed remains the fallback; never invent missing values.
+  }finally{visitorQuotesBusy=false}
+ }
  async function loadVisitorGoldFallback(){
   if(visitorGoldBusy||Date.now()-visitorGoldChecked<60000)return;
   visitorGoldBusy=true;visitorGoldChecked=Date.now();
@@ -4669,8 +4685,8 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
    return;
   }
   rows.innerHTML=visible.map(a=>{
-   const s=String(a.symbol).toUpperCase(),rawChange=a.price_change_percentage_24h,chg=Number(rawChange)||0,cap=Number(a.market_cap)||0;
-   return '<tr class="oc-v-market-row" data-visitor-detail="'+escapeHtml(s)+'" tabindex="0" role="button" aria-label="View '+escapeHtml(a.name)+' details"><td><div class="oc-v-asset"><span class="oc-v-icon" style="'+visitorCoinStyle(s)+'">'+escapeHtml(coinMark(s))+'</span><span class="oc-v-asset-name"><b>'+escapeHtml(a.name)+'</b><small>'+escapeHtml(s)+(s==="XAU"?" · GOLD":"")+'</small></span></div></td><td class="oc-v-price">'+priceText(a)+'</td><td><span class="oc-v-change '+(rawChange===null||rawChange===undefined?"":chg>=0?"up":"down")+'">'+fmtChange(rawChange)+'</span></td><td>'+(cap>0?compact(cap):"—")+'</td></tr>';
+   const s=String(a.symbol).toUpperCase(),quote=visitorPinnedQuotes.get(s),rowAsset=quote?{...a,...quote}:a,rawChange=rowAsset.price_change_percentage_24h,chg=Number(rawChange)||0,cap=Number(rowAsset.market_cap)||0;
+   return '<tr class="oc-v-market-row" data-visitor-detail="'+escapeHtml(s)+'" tabindex="0" role="button" aria-label="View '+escapeHtml(a.name)+' details"><td><div class="oc-v-asset"><span class="oc-v-icon" style="'+visitorCoinStyle(s)+'">'+escapeHtml(coinMark(s))+'</span><span class="oc-v-asset-name"><b>'+escapeHtml(a.name)+'</b><small>'+escapeHtml(s)+(s==="XAU"?" · GOLD":"")+'</small></span></div></td><td class="oc-v-price">'+priceText(rowAsset)+'</td><td><span class="oc-v-change '+(rawChange===null||rawChange===undefined?"":chg>=0?"up":"down")+'">'+fmtChange(rawChange)+'</span></td><td>'+(cap>0?compact(cap):"—")+'</td></tr>';
   }).join("");
  }
  function chartUrl(asset){
@@ -4695,7 +4711,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
   $("ocVisitorCoinDetail").scrollIntoView({behavior:"smooth",block:"start"});
  }
  window.ocRenderVisitorMarket=function(){
-  renderTicker();renderTable();
+  refreshVisitorPinnedQuotes();renderTicker();renderTable();
   const status=$("ocVisitorFeedStatus");if(status){const live=!!window.ocMarketLastSuccess,stale=!live&&getAssets().length>0;status.classList.toggle("is-live",live);status.classList.toggle("is-stale",stale);status.classList.toggle("is-offline",!live&&!stale);const label=status.querySelector("span");if(label)label.textContent=live?"Market feed active":stale?"Recent market snapshot":"Explore market overview";}
   const btc=findAsset("BTC");if(btc){$("ocVisitorHeroPrice").textContent=priceText(btc);const chg=Number(btc.price_change_percentage_24h)||0;$("ocVisitorHeroChange").textContent=fmtChange(chg)+" · 24H";$("ocVisitorHeroChange").style.color=chg>=0?"#16d9a0":"#ff6b82"}
   if(selectedAsset){const current=findAsset(selectedAsset.symbol);if(current){$("ocVisitorDetailPrice").textContent=priceText(current);$("ocVisitorDetailChange").textContent=fmtChange(current.price_change_percentage_24h);$("ocVisitorDetailCap").textContent=compact(current.market_cap)}}
