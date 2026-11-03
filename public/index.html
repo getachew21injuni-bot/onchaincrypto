@@ -815,8 +815,8 @@ header .brand>span:last-child{font-weight:950!important;letter-spacing:-.5px!imp
   </div>
 
   <section class="oc-visitor-ticker-panel" aria-label="Live hot coin prices">
-    <div class="oc-visitor-ticker-label"><b>MARKET PULSE</b><span>Prices refresh when public feeds respond</span></div>
-    <div class="oc-visitor-ticker-clip"><div id="ocVisitorTickerTrack" class="oc-visitor-ticker-track"><span class="oc-visitor-ticker-empty">Connecting to public market feeds…</span></div></div>
+    <div class="oc-visitor-ticker-label"><b>MARKET PULSE</b><span>Follow leading digital assets at a glance</span></div>
+    <div class="oc-visitor-ticker-clip"><div id="ocVisitorTickerTrack" class="oc-visitor-ticker-track"><span class="oc-visitor-ticker-empty">Explore crypto market highlights</span></div></div>
     <button type="button" class="oc-visitor-ticker-more" id="ocVisitorTickerMore" aria-expanded="false">More</button>
   </section>
 
@@ -850,7 +850,7 @@ header .brand>span:last-child{font-weight:950!important;letter-spacing:-.5px!imp
      </div>
     <p class="oc-visitor-roadmap-note">Explore the available market information and demo tools. Digital-asset prices can change rapidly; market information is not investment advice. Stock quotes and charts are informational and do not enable stock purchases through Onchain.</p>
   </section>
-  <div class="oc-visitor-bottom-cta"><div><h2>Ready to explore Onchain?</h2><p>Create an account to access the platform workspace.</p></div><button type="button" class="primary" id="ocVisitorBottomSignup">Sign up</button></div>
+  <div class="oc-visitor-bottom-cta"><div><h2>Ready to explore Onchain?</h2><p>Join Onchain to explore markets and get started with the demo workspace.</p></div><button type="button" class="primary" id="ocVisitorBottomSignup">Sign up</button></div>
   <p class="oc-visitor-disclaimer">Digital-asset prices can change rapidly. Market information is provided for general information only and is not financial advice. The trading workspace uses simulated activity and does not execute live-money trades or move real funds. US stock quotes and charts are informational; stock purchases are not offered through Onchain. Market data may be delayed.</p>
 </section>
 
@@ -3777,8 +3777,8 @@ body.oc-trade-overlay-open{overflow:hidden}
   create("kyc","Identity verification","Your identity verification status",identity);
  }
  if(about){
-  const aboutPage=create("about","About","Platform information",about);
-  aboutPage.querySelectorAll("*").forEach(el=>{if(el.children.length===0)el.textContent=el.textContent.replace(/ABOUT Onchain/gi,"ABOUT THE PLATFORM").replace(/Onchain is in development/gi,"The platform is in development").replace(/Follow Onchain/gi,"Follow the platform").replace(/Onchain/gi,"the platform")});
+  const aboutPage=create("about","About","Discover the Onchain platform",about);
+  aboutPage.querySelectorAll("*").forEach(el=>{if(el.children.length===0)el.textContent=el.textContent.replace(/ABOUT Onchain/gi,"ABOUT THE PLATFORM").replace(/Onchain is in development/gi,"Explore crypto, Gold markets and Onchain demo tools").replace(/Follow Onchain/gi,"Follow the platform").replace(/Onchain/gi,"the platform")});
   const hero=aboutPage.querySelector(".about-hero");if(hero){const brandHeading=hero.querySelector("h2");if(brandHeading)brandHeading.remove()}
  }
  // Keep the Profile page limited to account details; move the existing display-currency
