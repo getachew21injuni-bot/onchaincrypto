@@ -7287,3 +7287,20 @@ html .oc-visitor-account-gate{
   border-left:3px solid #f7931a!important;
 }
 </style>
+
+
+<style id="oc-auth-one-form-final-override">
+/* Final authority: never display the registration and sign-in forms together. */
+body.oc-auth-screen:not(.oc-register-mode) #page-register #registerForm,
+body.oc-auth-screen.oc-register-mode #page-register #signInForm {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+body.oc-auth-screen:not(.oc-register-mode) #page-register #signInForm,
+body.oc-auth-screen.oc-register-mode #page-register #registerForm {
+  display: block !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+</style>
