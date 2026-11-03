@@ -7563,3 +7563,24 @@ main > section[id^="page-"]:not(#page-register) .oc-signup-prompt {
 }
 </style>
 
+<!-- Final visitor account-action placement: account buttons belong only on the public landing page. -->
+<style id="oc-account-actions-landing-only">
+  /* Remove repeated Login / Sign Up buttons from Home, Market, Browser, Trade and Wallet. */
+  body.oc-logged-out:not(.oc-auth-screen):has(main > section[id^="page-"]:not(.hidden):not(#page-public-market):not(#page-register)) header #ocVisitorActions,
+  body:not(.oc-logged-out) header #ocVisitorActions,
+  body.oc-auth-screen header #ocVisitorActions,
+  html.oc-auth-pending:has(main > section[id^="page-"]:not(.hidden):not(#page-public-market):not(#page-register)) header #ocVisitorActions {
+    display: none !important;
+  }
+  /* A single pair of account actions is available on the visitor landing page only. */
+  body.oc-logged-out:not(.oc-auth-screen):has(main > #page-public-market:not(.hidden)) header #ocVisitorActions,
+  html.oc-auth-pending:has(main > #page-public-market:not(.hidden)) header #ocVisitorActions {
+    display: flex !important;
+  }
+  /* No inline visitor login gates on the browsing tabs. */
+  main > section[id^="page-"]:not(#page-public-market):not(#page-register) .oc-visitor-account-gate,
+  main > section[id^="page-"]:not(#page-public-market):not(#page-register) .oc-login-prompt,
+  main > section[id^="page-"]:not(#page-public-market):not(#page-register) .oc-signup-prompt {
+    display: none !important;
+  }
+</style>
