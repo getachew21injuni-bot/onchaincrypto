@@ -1870,7 +1870,7 @@ if (supportSendButton) supportSendButton.addEventListener("click", () => {
   const topic = $("supportTopic").value;
   const subject = $("supportSubject").value.trim() || "Support request: " + topic;
   const details = $("supportDetails").value.trim();
-  const body = "Topic: " + topic + "\n\n" + (details || "Please help me with this issue.") + "\n\nPlease do not reply with requests for passwords, verification codes, private keys or recovery phrases.";
+  const body = "Topic: " + topic + " " + (details || "Please help me with this issue.") + "\n\nPlease do not reply with requests for passwords, verification codes, private keys or recovery phrases.";
   $("supportMessage").textContent = "Opening your email app. Review the draft and press Send there. This website has not sent the email itself.";
   window.location.href = "mailto:onchaincryptosupport@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
 });
@@ -6396,3 +6396,35 @@ html:not(.oc-light-theme) .oc-theme-toggle{
   border-color:#a98239!important;
 }
 </style>
+
+
+<style id="oc-auth-form-only-on-login-page">
+/* Keep sign-in and registration forms exclusively on the dedicated Login page. */
+main .auth-welcome,
+main .auth-main-panel,
+main #signInForm,
+main #registerForm,
+main #authChoicePanel,
+main #googleSignInBtn,
+main .auth-google-hint,
+main #authPhoneDivider,
+main #phoneRegistrationPanel,
+main #authModeIntro {
+  display:none !important;
+}
+#page-register .auth-welcome,
+#page-register .auth-main-panel {
+  display:block !important;
+}
+#page-register #signInForm,
+#page-register #registerForm,
+#page-register #authChoicePanel,
+#page-register #googleSignInBtn,
+#page-register .auth-google-hint,
+#page-register #authPhoneDivider,
+#page-register #phoneRegistrationPanel,
+#page-register #authModeIntro {
+  display:initial !important;
+}
+</style>
+
