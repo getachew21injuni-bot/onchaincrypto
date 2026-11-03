@@ -3188,7 +3188,7 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     // after a Wallet/Deposit/Withdraw action. Keep one authoritative visible page.
     pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-'+page));
     document.querySelectorAll('#nav [data-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.page===page||(guest&&page==='public-market'&&btn.dataset.page==='home')));
-    document.querySelectorAll('[data-bottom-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.bottomPage===page));
+    document.querySelectorAll('[data-bottom-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.bottomPage===page||(guest&&page==='public-market'&&btn.dataset.bottomPage==='home')));
     // The order book belongs only to Trade; never let it cover other pages.
     const book=document.getElementById('liveOrderBookPanel');
     if(book) book.style.display=page==='trade'?'':'none';
@@ -6107,7 +6107,7 @@ body.oc-trade-overlay-open{overflow:auto!important}
 html.oc-auth-pending main > section[id^="page-"]:not(#page-public-market),
 body.oc-logged-out:not(.oc-auth-screen) main > section[id^="page-"].hidden{display:none!important}
 html.oc-auth-pending main > #page-public-market,
-body.oc-logged-out:not(.oc-auth-screen) main > section[id^="page-"]:not(.hidden){display:block!important}
+body.oc-logged-out:not(.oc-auth-screen) main > section[id^="page-"]:not(.hidden):not(#page-home):not(#page-register){display:block!important}
 html.oc-auth-pending main,body.oc-logged-out:not(.oc-auth-screen) main{display:block!important;min-height:calc(100vh - 72px)!important;max-width:1440px!important;margin:0 auto!important;padding:22px!important}
 html.oc-auth-pending body > header,
 body.oc-logged-out:not(.oc-auth-screen) > header{display:grid!important}
@@ -6123,13 +6123,14 @@ html.oc-auth-pending #ocVisitorActions{display:flex!important}
 body.oc-logged-out:not(.oc-auth-screen) #moreMenuBtn,
 body.oc-logged-out:not(.oc-auth-screen) #refreshBtn,
 body.oc-logged-out:not(.oc-auth-screen) #ocBackBtn{display:none!important}
+body.oc-logged-out:not(.oc-auth-screen) .oc-visitor-account-gate{display:block!important}
 body.oc-logged-out:not(.oc-auth-screen) #page-trade .form-panel,
 body.oc-logged-out:not(.oc-auth-screen) #page-trade #tradeHistory,
 body.oc-logged-out:not(.oc-auth-screen) #page-trade .performance-panel,
 body.oc-logged-out:not(.oc-auth-screen) #page-trade .level-grid,
 body.oc-logged-out:not(.oc-auth-screen) #page-wallet .wallet-overview,
 body.oc-logged-out:not(.oc-auth-screen) #page-wallet .wallet-assets-panel{display:none!important}
-.oc-visitor-account-gate{margin:18px 0;padding:22px;border:1px solid #2a4561;border-radius:14px;background:linear-gradient(120deg,#10243a,#0b192b);color:#edf6ff}
+.oc-visitor-account-gate{display:none;margin:18px 0;padding:22px;border:1px solid #2a4561;border-radius:14px;background:linear-gradient(120deg,#10243a,#0b192b);color:#edf6ff}
 .oc-visitor-account-gate h2{margin:0 0 8px;font-size:21px}
 .oc-visitor-account-gate p{margin:0 0 14px;color:#a9bdd2;line-height:1.6}
 .oc-visitor-account-gate .gate-actions{display:flex;gap:10px;flex-wrap:wrap}
