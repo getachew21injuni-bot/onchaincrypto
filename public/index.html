@@ -7457,3 +7457,63 @@ body.oc-auth-screen:not(.oc-register-mode) #page-register #registerForm {
   },true);
 })();
 </script>
+
+<!-- Final cleanup: keep login/register UI only on its dedicated page. -->
+<style id="oc-remove-inline-auth-duplicates">
+main > section[id^="page-"]:not(#page-register) .auth-welcome,
+main > section[id^="page-"]:not(#page-register) .auth-main-panel,
+main > section[id^="page-"]:not(#page-register) #signInForm,
+main > section[id^="page-"]:not(#page-register) #registerForm,
+main > section[id^="page-"]:not(#page-register) #authChoicePanel,
+main > section[id^="page-"]:not(#page-register) #googleSignInBtn,
+main > section[id^="page-"]:not(#page-register) .auth-google-hint,
+main > section[id^="page-"]:not(#page-register) #authPhoneDivider,
+main > section[id^="page-"]:not(#page-register) #phoneRegistrationPanel,
+main > section[id^="page-"]:not(#page-register) #authModeIntro,
+main > section[id^="page-"]:not(#page-register) [data-auth-panel],
+main > section[id^="page-"]:not(#page-register) .login-section,
+main > section[id^="page-"]:not(#page-register) .signin-section,
+main > section[id^="page-"]:not(#page-register) .auth-signin-form,
+main > section[id^="page-"]:not(#page-register) .auth-register-form,
+main > section[id^="page-"]:not(#page-register) .oc-visitor-account-gate,
+main > section[id^="page-"]:not(#page-register) .oc-login-prompt,
+main > section[id^="page-"]:not(#page-register) .oc-signup-prompt {
+  display: none !important;
+}
+</style>
+<script id="oc-remove-dynamic-inline-auth-duplicates">
+(function(){
+  const selector = [
+    ".auth-welcome",".auth-main-panel","#signInForm","#registerForm",
+    "#authChoicePanel","#googleSignInBtn",".auth-google-hint",
+    "#authPhoneDivider","#phoneRegistrationPanel","#authModeIntro",
+    "[data-auth-panel]",".login-section",".signin-section",
+    ".auth-signin-form",".auth-register-form",".oc-visitor-account-gate",
+    ".oc-login-prompt",".oc-signup-prompt"
+  ].join(",");
+  function clearInlineAuth(root){
+    if(!root || !root.querySelectorAll) return;
+    root.querySelectorAll('main > section[id^="page-"]:not(#page-register)').forEach(section=>{
+      section.querySelectorAll(selector).forEach(node=>node.remove());
+    });
+  }
+  clearInlineAuth(document);
+  const observer = new MutationObserver(records=>{
+    for(const record of records){
+      for(const node of record.addedNodes){
+        if(node.nodeType===1){
+          if(node.matches?.('main > section[id^="page-"]:not(#page-register)')) clearInlineAuth(document);
+          else if(node.closest?.('main > section[id^="page-"]:not(#page-register)')) {
+            const section=node.closest('main > section[id^="page-"]:not(#page-register)');
+            if(node.matches?.(selector)) node.remove();
+            else node.querySelectorAll?.(selector).forEach(item=>item.remove());
+            if(section) section.querySelectorAll(selector).forEach(item=>item.remove());
+          }
+        }
+      }
+    }
+  });
+  if(document.body) observer.observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
