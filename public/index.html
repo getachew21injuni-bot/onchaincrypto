@@ -189,10 +189,14 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 <script id="oc-get-started-actions">
 document.addEventListener('DOMContentLoaded',function(){
  const openAuth=(mode)=>{
+  if(typeof window.ocOpenVisitorAuth==='function'){
+   window.ocOpenVisitorAuth(mode==='register'?'signup':'login');
+   return;
+  }
+  document.body.classList.add('oc-auth-screen');
+  document.body.classList.toggle('oc-register-mode',mode==='register');
   if(typeof window.showPage==='function')window.showPage('register');
-  const target=mode==='register'?'showRegisterBtn':'registerLoginBtn';
-  const toggle=document.getElementById(target);
-  if(toggle)toggle.click();
+  document.getElementById(mode==='register'?'authChoiceRegister':'authChoiceLogin')?.click();
  };
  const goRegister=()=>openAuth('register');
  const goSignIn=()=>openAuth('signin');
@@ -2887,8 +2891,18 @@ window.addEventListener("popstate", async () => {
     if(heading)heading.textContent="Welcome to Onchain";
     if(sub)sub.textContent="Your digital asset journey starts here.";
   }
-  document.getElementById("authChoiceLogin")?.addEventListener("click",()=>{setMode("signin");if(googleHint)googleHint.classList.add("hidden");document.getElementById("signInEmail")?.focus();});
-  document.getElementById("authChoiceRegister")?.addEventListener("click",()=>{setMode("register");});
+  document.getElementById("authChoiceLogin")?.addEventListener("click",()=>{
+    document.body.classList.add("oc-auth-screen");
+    document.body.classList.remove("oc-register-mode");
+    setMode("signin");
+    if(googleHint)googleHint.classList.add("hidden");
+    document.getElementById("signInEmail")?.focus();
+  });
+  document.getElementById("authChoiceRegister")?.addEventListener("click",()=>{
+    document.body.classList.add("oc-auth-screen","oc-register-mode");
+    setMode("register");
+    document.getElementById("registerFirstName")?.focus();
+  });
   setMode("signin");
   // Start directly on the sign-in form; registration opens its own route.
 })();
@@ -4374,12 +4388,12 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  const coinMark=sym=>({BTC:"₿",ETH:"◆",BNB:"◆",XRP:"✕",SOL:"≋",DOGE:"Ð",ADA:"●",TRX:"△",LTC:"Ł",XAU:"◉"}[sym]||String(sym||"?").slice(0,3));
  const priceText=asset=>money(asset?.current_price);
  function openAuth(mode){
+  const creating=mode==="signup"||mode==="register";
   document.body.classList.add("oc-auth-screen");
-  document.body.classList.remove("oc-register-mode");
+  document.body.classList.toggle("oc-register-mode",creating);
   if(typeof window.showPage==="function")window.showPage("register");
-  const button=mode==="signup"?$("showRegisterBtn"):$("registerLoginBtn");
+  const button=$(creating?"authChoiceRegister":"authChoiceLogin");
   if(button)button.click();
-  else if(mode==="signup")$("registerForm")?.classList.remove("hidden");
   window.scrollTo({top:0,behavior:"smooth"});
  }
  window.ocOpenVisitorAuth=openAuth;
