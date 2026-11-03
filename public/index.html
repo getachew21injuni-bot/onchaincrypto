@@ -939,12 +939,12 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
         <div class="oc-visitor-phone">
         <div class="oc-visitor-phone-top"><span><b class="oc-visitor-mini-mark oc-onchain-round-mark">B</b> ONCHAIN</span><i></i></div>
         <div class="oc-visitor-device-subhead"><span>MARKETS</span><span>OVERVIEW</span><span>⋯</span></div>
-        <div class="oc-visitor-total-balance"><div><small>BTC BALANCE</small></div><strong>0.1842 <em>BTC</em></strong></div>
+        <div class="oc-visitor-total-balance"><div><small>YOUR BTC BALANCE</small><span class="oc-visitor-balance-live">● BTC</span></div><strong>0.1842 <em>BTC</em></strong><small class="oc-visitor-balance-caption">Bitcoin holdings</small></div>
         <div class="oc-visitor-phone-asset"><div><small>BTC / USDT</small><strong id="ocVisitorHeroPrice">$25,478</strong></div><span id="ocVisitorHeroChange">Market overview</span></div>
         <div class="oc-visitor-phone-chart">
-          <svg viewBox="0 0 420 170" role="img" aria-label="Illustrative market candlestick chart"><defs><linearGradient id="ocVisitorChartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#16d9a0" stop-opacity=".26"/><stop offset="1" stop-color="#16d9a0" stop-opacity="0"/></linearGradient></defs><path d="M0 135H420M0 90H420M0 45H420" stroke="#29435b" stroke-width="1" stroke-dasharray="4 6"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59 207 73 232 49 258 62 282 39 308 48 332 25 356 42 382 15 410 23V170H8Z" fill="url(#ocVisitorChartFill)"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59 207 73 232 49 258 62 282 39 308 48 332 25 356 42 382 15 410 23" fill="none" stroke="#23d6a2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g stroke-width="2"><path d="M35 104V137m-5-23h10" stroke="#16d9a0"/><path d="M84 79v35m-5-25h10" stroke="#16d9a0"/><path d="M132 65v37m-5-25h10" stroke="#16d9a0"/><path d="M181 45v40m-5-25h10" stroke="#16d9a0"/><path d="M232 33v38m-5-22h10" stroke="#16d9a0"/><path d="M282 24v37m-5-22h10" stroke="#16d9a0"/><path d="M332 10v40m-5-25h10" stroke="#16d9a0"/><path d="M382 2v34m-5-20h10" stroke="#16d9a0"/></g></svg>
+          <svg viewBox="0 0 420 170" role="img" aria-label="Illustrative market candlestick chart"><defs><linearGradient id="ocVisitorChartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#16d9a0" stop-opacity=".26"/><stop offset="1" stop-color="#16d9a0" stop-opacity="0"/></linearGradient></defs><path d="M0 135H420M0 90H420M0 45H420" stroke="#29435b" stroke-width="1" stroke-dasharray="4 6"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59 207 73 232 49 258 62 282 39 308 48 332 25 356 42 382 15 410 23V170H8Z" fill="url(#ocVisitorChartFill)"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59" fill="none" stroke="#16d9a0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M181 59L207 73 232 49 258 62 282 39" fill="none" stroke="#ff5573" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M282 39L308 48 332 25 356 42 382 15 410 23" fill="none" stroke="#16d9a0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><g stroke-width="3"><path d="M35 104V137m-5-23h10" stroke="#16d9a0"/><path d="M84 79v35m-5-25h10" stroke="#16d9a0"/><path d="M132 65v37m-5-25h10" stroke="#16d9a0"/><path d="M181 45v40m-5-25h10" stroke="#16d9a0"/><path d="M232 33v38m-5-22h10" stroke="#ff5573"/><path d="M282 24v37m-5-22h10" stroke="#ff5573"/><path d="M332 10v40m-5-25h10" stroke="#16d9a0"/><path d="M382 2v34m-5-20h10" stroke="#16d9a0"/></g></svg>
         </div>
-        <div class="oc-visitor-signal"><span class="oc-visitor-signal-dot"></span><div><b>MARKET MOMENTUM</b><small>Follow Bitcoin market momentum</small></div><strong>ONCHAIN</strong></div>
+        <div class="oc-visitor-signal"><span class="oc-visitor-signal-dot"></span><div class="oc-visitor-signal-copy"><b>BTC MARKET SIGNALS</b><small>Live-style market direction indicators</small></div><div class="oc-visitor-signal-pills"><span class="oc-signal-up">▲ UP</span><span class="oc-signal-down">▼ DOWN</span></div></div>
         <div class="oc-visitor-device-brandline"><span>ONCHAIN</span><strong>Get Onchain</strong></div>
         <div class="oc-visitor-phone-foot"><span>PRICE</span><span>24H CHANGE</span><span>MARKET WATCH</span></div>
         <div class="oc-visitor-device-nav"><span class="active"><b>⌂</b>Home</span><span><b>⌁</b>Markets</span><span><b>⇄</b>Trade</span><span><b>◉</b>Wallet</span></div>
@@ -4881,6 +4881,33 @@ html.oc-light-theme .oc-roadmap-brand-name{color:#172b42}
 @media(prefers-reduced-motion:reduce){.oc-visitor-ticker-track,.oc-visitor-ticker-coin,.oc-visitor-ticker-coin:before,.oc-visitor-ticker-coin i{animation:none!important}}
 </style>
 
+
+<style id="oc-visitor-phone-btc-signal-visibility">
+/* Make the BTC holding and both market directions easy to read in the visitor phone. */
+#page-public-market .oc-visitor-total-balance{padding:14px 15px!important;margin:9px 0 7px!important;min-height:91px!important;gap:5px!important;border:1px solid #b47b22!important;background:linear-gradient(135deg,#172b3e,#0d1825)!important;box-shadow:0 0 0 1px rgba(240,185,11,.14),0 8px 20px rgba(0,0,0,.22)!important}
+#page-public-market .oc-visitor-total-balance>div{align-items:center!important}
+#page-public-market .oc-visitor-total-balance small{font-size:10px!important;color:#d7e0ea!important;letter-spacing:1.1px!important}
+#page-public-market .oc-visitor-total-balance strong{display:block!important;font-size:29px!important;line-height:1.1!important;color:#fff!important;letter-spacing:-.7px!important;text-shadow:0 1px 12px rgba(255,255,255,.12)!important}
+#page-public-market .oc-visitor-total-balance em{font-size:14px!important;color:#ffc247!important}
+#page-public-market .oc-visitor-balance-live{font-size:8px!important;color:#16d9a0!important;font-weight:900!important;letter-spacing:.5px!important}
+#page-public-market .oc-visitor-total-balance .oc-visitor-balance-caption{font-size:8px!important;color:#aebdca!important;letter-spacing:.2px!important;font-weight:500!important}
+#page-public-market .oc-visitor-phone-asset{padding:11px 0 6px!important}
+#page-public-market .oc-visitor-phone-asset strong{font-size:27px!important;color:#fff!important}
+#page-public-market .oc-visitor-phone-chart{height:143px!important;padding:2px 0!important}
+#page-public-market .oc-visitor-phone-chart svg{height:100%!important;display:block!important}
+#page-public-market .oc-visitor-phone-chart svg path[stroke="#16d9a0"],#page-public-market .oc-visitor-phone-chart svg path[stroke="#ff5573"]{filter:drop-shadow(0 0 3px currentColor)}
+#page-public-market .oc-visitor-signal{margin-top:5px!important;padding:9px 8px!important;gap:7px!important;border:1px solid #3d5368!important;background:linear-gradient(100deg,#111f2b,#172330)!important;min-height:53px!important}
+#page-public-market .oc-visitor-signal-copy{gap:3px!important;min-width:0!important}
+#page-public-market .oc-visitor-signal b{font-size:9px!important;color:#fff!important;white-space:nowrap!important}
+#page-public-market .oc-visitor-signal small{font-size:7px!important;color:#b8c5d1!important;white-space:nowrap!important}
+#page-public-market .oc-visitor-signal-pills{display:flex!important;flex-direction:column!important;gap:4px!important;margin-left:auto!important}
+#page-public-market .oc-visitor-signal-pills span{font-size:8px!important;font-weight:900!important;letter-spacing:.2px!important;padding:3px 5px!important;border-radius:5px!important;white-space:nowrap!important}
+#page-public-market .oc-signal-up{color:#a8f5d4!important;background:rgba(22,217,160,.17)!important;border:1px solid rgba(22,217,160,.45)!important}
+#page-public-market .oc-signal-down{color:#ffc0ca!important;background:rgba(255,85,115,.16)!important;border:1px solid rgba(255,85,115,.45)!important}
+#page-public-market .oc-visitor-device-brandline,#page-public-market .oc-visitor-phone-foot{display:none!important}
+#page-public-market .oc-visitor-device-nav{margin-top:9px!important;padding-top:8px!important}
+@media(max-width:700px){#page-public-market .oc-visitor-device{width:min(100%,330px)!important}#page-public-market .oc-visitor-device-screen{min-height:475px!important}}
+</style>
 </body>
 </html>
 
