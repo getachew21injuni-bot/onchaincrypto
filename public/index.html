@@ -4595,6 +4595,32 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
   track.innerHTML=items+items;
   if(moreButton&&!moreButton.dataset.bound){moreButton.dataset.bound="1";moreButton.addEventListener("click",()=>{window.ocVisitorTickerExpanded=!window.ocVisitorTickerExpanded;renderTicker()})}
  }
+ function visitorCoinStyle(symbol){
+  const styles={
+   BTC:"background:#f7931a;color:#fff",
+   ETH:"background:#627eea;color:#fff",
+   BNB:"background:#f3ba2f;color:#1e2329",
+   XRP:"background:#23292f;color:#fff;border:1px solid #657786",
+   SOL:"background:linear-gradient(135deg,#9945ff,#14f195);color:#fff",
+   ADA:"background:#0033ad;color:#fff",
+   DOGE:"background:#c2a633;color:#1e2329",
+   TRX:"background:#ef0027;color:#fff",
+   USDT:"background:#26a17b;color:#fff",
+   USDC:"background:#2775ca;color:#fff",
+   XAU:"background:linear-gradient(135deg,#f8e7a1,#b8860b);color:#332400",
+   LTC:"background:#345d9d;color:#fff",
+   LINK:"background:#2a5ada;color:#fff",
+   AVAX:"background:#e84142;color:#fff",
+   DOT:"background:#e6007a;color:#fff",
+   BCH:"background:#8dc351;color:#17210d",
+   TON:"background:#0098ea;color:#fff",
+   XLM:"background:#111827;color:#fff;border:1px solid #8b98a8",
+   SHIB:"background:#f00500;color:#fff",
+   ETC:"background:#328332;color:#fff",
+   POL:"background:#8247e5;color:#fff"
+  };
+  return styles[String(symbol||"").toUpperCase()]||"background:#40566d;color:#fff";
+ }
  function renderTable(){
   const rows=$("ocVisitorMarketRows"),count=$("ocVisitorMarketCount");if(!rows)return;
   const all=getAssets().filter(a=>category==="gold"?String(a.symbol).toUpperCase()==="XAU":category==="crypto"?String(a.symbol).toUpperCase()!=="XAU":false);
@@ -4630,14 +4656,13 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
    const q=($("ocVisitorSearch")?.value||"").trim().toLowerCase();
    const shown=overview.filter(a=>!q||a.symbol.toLowerCase().includes(q)||a.name.toLowerCase().includes(q));
    if(count)count.textContent="Market overview · prices updating";
-   rows.innerHTML=shown.length?shown.map(a=>'<tr><td><div class="oc-v-asset"><span class="oc-v-icon">'+escapeHtml(coinMark(a.symbol))+'</span><span class="oc-v-asset-name"><b>'+escapeHtml(a.name)+'</b><small>'+escapeHtml(a.symbol)+'</small></span></div></td><td class="oc-v-price">—</td><td><span class="oc-v-change">—</span></td><td>—</td><td><span class="oc-visitor-empty">Updating</span></td></tr>').join(""):'<tr><td colspan="5" class="oc-visitor-empty">No matching assets. Try another search.</td></tr>';
+   rows.innerHTML=shown.length?shown.map(a=>'<tr><td><div class="oc-v-asset"><span class="oc-v-icon" style="'+visitorCoinStyle(a.symbol)+'">'+escapeHtml(coinMark(a.symbol))+'</span><span class="oc-v-asset-name"><b>'+escapeHtml(a.name)+'</b><small>'+escapeHtml(a.symbol)+'</small></span></div></td><td class="oc-v-price">—</td><td><span class="oc-v-change">—</span></td><td>—</td><td><span class="oc-visitor-empty">Updating</span></td></tr>').join(""):'<tr><td colspan="5" class="oc-visitor-empty">No matching assets. Try another search.</td></tr>';
    if(more){more.disabled=true;more.textContent="Prices updating"}
    return;
   }
   rows.innerHTML=visible.map(a=>{
    const s=String(a.symbol).toUpperCase(),chg=Number(a.price_change_percentage_24h)||0,cap=Number(a.market_cap)||0;
-   const iconColor=s==="BTC"?"#f7931a":s==="XAU"?"#d4af37":"#25435f";
-   return '<tr><td><div class="oc-v-asset"><span class="oc-v-icon" style="background:'+iconColor+'">'+escapeHtml(coinMark(s))+'</span><span class="oc-v-asset-name"><b>'+escapeHtml(a.name)+'</b><small>'+escapeHtml(s)+(s==="XAU"?" · GOLD":"")+'</small></span></div></td><td class="oc-v-price">'+priceText(a)+'</td><td><span class="oc-v-change '+(chg>=0?"up":"down")+'">'+fmtChange(chg)+'</span></td><td>'+compact(cap)+'</td><td><div class="oc-v-row-actions"><button type="button" class="oc-v-detail" data-visitor-detail="'+escapeHtml(s)+'">Details</button><button type="button" class="oc-v-buy" data-visitor-buy="'+escapeHtml(s)+'">Buy '+escapeHtml(s)+'</button></div></td></tr>';
+   return '<tr><td><div class="oc-v-asset"><span class="oc-v-icon" style="'+visitorCoinStyle(s)+'">'+escapeHtml(coinMark(s))+'</span><span class="oc-v-asset-name"><b>'+escapeHtml(a.name)+'</b><small>'+escapeHtml(s)+(s==="XAU"?" · GOLD":"")+'</small></span></div></td><td class="oc-v-price">'+priceText(a)+'</td><td><span class="oc-v-change '+(chg>=0?"up":"down")+'">'+fmtChange(chg)+'</span></td><td>'+compact(cap)+'</td><td><div class="oc-v-row-actions"><button type="button" class="oc-v-detail" data-visitor-detail="'+escapeHtml(s)+'">Details</button><button type="button" class="oc-v-buy" data-visitor-buy="'+escapeHtml(s)+'">Buy '+escapeHtml(s)+'</button></div></td></tr>';
   }).join("");
  }
  function chartUrl(asset){
