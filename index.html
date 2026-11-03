@@ -2912,3 +2912,37 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('oc-trade-overlay-open')&&!window.__ocTradeIsRunning){document.body.classList.remove('oc-trade-overlay-open');form.classList.add('hidden')}});
 })();
 </script>
+
+
+<!-- Mobile auth cleanup: keep the sign-in experience exclusively on the dedicated Login page. -->
+<style id="oc-mobile-single-login-screen">
+@media (max-width:700px) {
+  main > section[id^="page-"]:not(#page-register) #signInForm,
+  main > section[id^="page-"]:not(#page-register) #registerForm,
+  main > section[id^="page-"]:not(#page-register) #authChoicePanel,
+  main > section[id^="page-"]:not(#page-register) #googleSignInBtn,
+  main > section[id^="page-"]:not(#page-register) .auth-signin-form,
+  main > section[id^="page-"]:not(#page-register) .auth-register-form,
+  main > section[id^="page-"]:not(#page-register) .auth-main-panel,
+  main > section[id^="page-"]:not(#page-register) .auth-welcome,
+  main > section[id^="page-"]:not(#page-register) [data-auth-panel],
+  main > section[id^="page-"]:not(#page-register) .login-section,
+  main > section[id^="page-"]:not(#page-register) .signin-section {
+    display:none!important;
+  }
+}
+/* The dedicated login page retains Google sign-in and the password eye control. */
+body.oc-logged-out.oc-auth-screen #googleSignInBtn {
+  display:flex!important;
+  visibility:visible!important;
+}
+body.oc-logged-out.oc-auth-screen #signInForm {
+  display:block!important;
+}
+body.oc-logged-out.oc-auth-screen #signInForm .oc-password-toggle {
+  display:flex!important;
+}
+body.oc-logged-out.oc-auth-screen #authHeading:after {
+  content:none!important;
+}
+</style>
