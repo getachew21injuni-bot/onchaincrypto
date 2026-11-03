@@ -79,11 +79,8 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 .wallet-overview-top{position:relative;display:flex;justify-content:space-between;align-items:center;gap:16px;z-index:1}.wallet-eyebrow{font-size:12px;font-weight:750;letter-spacing:1.5px;color:#7fa6ce}.wallet-total-line{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px}.wallet-total-line strong{font-size:clamp(30px,4vw,42px);letter-spacing:-1.2px;color:#f2f7ff;font-variant-numeric:tabular-nums}.wallet-currency{padding:8px 12px;border:1px solid #244b77;border-radius:10px;background:#102643;color:#b7d8ff;font-size:13px;font-weight:700}.wallet-usd-note{margin-top:8px;color:#7392b5;font-size:13px}.wallet-orbit{display:grid;place-items:center;width:66px;height:66px;border:1px solid #1268a8;border-radius:20px;background:linear-gradient(145deg,#0c3d68,#0a1c34);color:#39b9ff;font-size:35px;box-shadow:0 0 32px rgba(0,153,255,.12)}.wallet-overview .wallet-action-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:26px 0 0}.wallet-overview .wallet-action{display:flex;align-items:center;justify-content:center;gap:9px;min-height:52px;border-radius:11px;font-weight:750}.wallet-overview .wallet-action.primary{background:linear-gradient(110deg,#1767f2,#2763d9);border:1px solid #3d83ff;color:#fff}.wallet-overview .wallet-action.secondary{background:rgba(14,31,53,.86);border:1px solid #203a59;color:#c2d9f4}.wallet-overview .wallet-action:hover{filter:brightness(1.14);transform:translateY(-1px)}.wallet-summary-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:20px;padding-top:18px;border-top:1px solid rgba(91,145,199,.18)}.wallet-summary-strip>div{display:flex;flex-direction:column;gap:6px}.wallet-summary-strip span{font-size:12px;color:#7998bb}.wallet-summary-strip strong{font-size:14px;color:#e5f1ff}.wallet-summary-strip .wallet-status{display:flex;align-items:center;gap:7px;color:#45d9a2}.wallet-status i{width:7px;height:7px;border-radius:50%;background:#15d69a;box-shadow:0 0 10px #15d69a}.wallet-assets-panel{border-color:#1c314a;background:linear-gradient(145deg,rgba(12,25,43,.98),rgba(8,17,30,.98))}.wallet-assets-heading h2{margin-bottom:5px}.wallet-hide-small{display:flex;align-items:center;gap:8px;color:#87a5c7;font-size:12px;cursor:pointer}.wallet-hide-small input{accent-color:#168cff}.wallet-assets-panel table th{color:#86a8cd}.wallet-assets-panel table tbody tr:hover{background:rgba(25,119,205,.08)}
 @media(max-width:620px){.wallet-overview{padding:21px 16px 16px;border-radius:17px}.wallet-orbit{width:48px;height:48px;font-size:27px;border-radius:15px}.wallet-overview .wallet-action-row{gap:8px}.wallet-overview .wallet-action{min-height:48px;font-size:13px}.wallet-summary-strip{grid-template-columns:1fr;gap:13px}.wallet-summary-strip>div{flex-direction:row;justify-content:space-between;align-items:center}.wallet-hide-small{font-size:11px}}
 
-
 /* Wallet focused layout and expandable asset pickers */
 .wallet-overview{margin-bottom:20px}.wallet-assets-panel{margin-top:0}.coin-picker-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 0;padding:10px 0;border-top:1px solid #18334e}.coin-picker-controls>div{display:flex;gap:7px}.coin-picker-controls button{padding:7px 12px;border-radius:9px}.coin-picker{margin-top:10px}.wallet-hide-small{user-select:none}
-
-
 
 .trade-pair-picker{position:relative;min-width:210px}.trade-pair-trigger{display:inline-flex;align-items:center;gap:10px;background:transparent;color:var(--text);padding:0;margin:0 0 4px;font-size:21px;font-weight:800;letter-spacing:-.3px;border-radius:6px}.trade-pair-trigger:hover,.trade-pair-trigger[aria-expanded="true"]{color:var(--yellow)}.trade-pair-trigger span{font-size:15px;color:var(--yellow)}.trade-pair-menu{position:absolute;z-index:30;top:calc(100% + 9px);left:0;width:min(340px,calc(100vw - 48px));padding:12px;background:#09182a;border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 44px #0009}.trade-pair-search-label{display:block;margin:0 0 7px;color:var(--muted);font-size:12px}.trade-pair-search{width:100%;min-width:0;margin-bottom:9px}.trade-pair-options{max-height:310px;overflow:auto;display:flex;flex-direction:column;gap:4px}.trade-pair-option{width:100%;display:flex;align-items:center;gap:10px;text-align:left;padding:9px;background:transparent;color:var(--text);border:1px solid transparent;border-radius:8px}.trade-pair-option:hover,.trade-pair-option.selected{background:var(--panel2);border-color:var(--yellow)}.trade-pair-option .trade-pair-option-name{display:flex;flex:1;min-width:0;flex-direction:column}.trade-pair-option small{color:var(--muted);font-size:11px;font-weight:400}.trade-pair-option .trade-pair-price{font-size:12px;font-weight:700}.trade-pair-empty{padding:12px;color:var(--muted);font-size:12px}@media(max-width:600px){.trade-pair-trigger{font-size:19px}.trade-pair-menu{width:min(320px,calc(100vw - 36px))}}
 
@@ -147,7 +144,6 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 #ocBackBtn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:36px;padding:7px 10px;font-size:12px;font-weight:700;border-color:#3b82f6;color:#dbeafe}
 @media(max-width:720px){header{flex-wrap:wrap;gap:8px}header .header-right{display:flex;align-items:center;gap:5px;flex-wrap:wrap}#ocBackBtn{padding:7px 8px;min-height:34px}#ocBackBtn span{display:inline}}
 </style>
-
 
 <style id="oc-get-started-landing">
 /* Landing-only styles; the existing Onchain palette and background remain in use. */
@@ -341,7 +337,6 @@ body.oc-logged-out #page-register{display:grid!important}html.oc-auth-pending ma
 @media(max-width:680px){body.oc-logged-out #page-register,html.oc-auth-pending main>#page-register{display:flex!important}}
 </style>
 
-
 <style id="oc-restore-simple-login">
 /* Restore the clean, centered sign-in screen. Keep all existing auth controls and handlers. */
 body.oc-logged-out main,
@@ -524,7 +519,6 @@ body:has(#page-public-market:not(.hidden)) header #ocVisitorActions .secondary {
   }
 }
 </style>
-
 
 <style id="oc-binance-bitcoin-theme">
 :root{
@@ -811,7 +805,6 @@ html.oc-light-theme nav button.active{color:#a86b0c!important}
   })();
   </script>
   <section id="page-markets" class="hidden">
-
 
 <div class="page-title"><div><h1>Market Overview</h1></div>
 <div class="muted tiny">Last update: <span id="lastUpdate">—</span></div></div>
@@ -1164,7 +1157,6 @@ html.oc-light-theme nav button.active{color:#a86b0c!important}
           <button class="secondary full oc-auth-choice-button" id="authChoiceEmail" type="button"><span aria-hidden="true">✉</span> Login with email or phone</button>
           <p class="oc-auth-register-prompt">Don’t have an account? <button type="button" id="authChoiceRegister">Register</button></p>
         </section>
-        
 
         <div id="authStatus" class="notice">Checking sign-in status…</div>
         <p id="registerMessage" class="muted tiny" aria-live="polite"></p>
@@ -1808,7 +1800,6 @@ $("timedDownBtn").addEventListener("click",()=>chooseTimedDirection("down"));
 $("timedConfirmBtn").addEventListener("click",()=>{if(pendingTimedDirection)startTimedPaper(pendingTimedDirection)});
 $("timedCancelBtn").addEventListener("click",()=>{if(timedPaper){$("timedResult").textContent="A running trade cannot be cancelled after confirmation. Wait for expiry.";return}pendingTimedDirection=null;$("timedUpBtn").setAttribute("aria-pressed","false");$("timedDownBtn").setAttribute("aria-pressed","false");$("timedConfirmBtn").disabled=true;$("timedResult").textContent="Trade cancelled. No paper trade was started.";updateQuickEstimate()});
 $("timedStake").addEventListener("input",updateQuickEstimate);
-
 
 // Firebase authentication handlers are initialized in the Firebase module below.
 const supportedCoins=Array.from(new Map([...COINS.map(c=>[c.name,c.symbol,({BTC:"₿",ETH:"Ξ",USDT:"₮",BNB:"◆",SOL:"◎",XRP:"X",USDC:"$",DOGE:"Ð",TRX:"T",TON:"◉",ADA:"₳",AVAX:"▲",SHIB:"🐕",LINK:"⬡",BCH:"Ƀ",SUI:"S",XLM:"✦",DOT:"●",LTC:"Ł",NEAR:"N",UNI:"🦄",ETC:"Ξ",ICP:"∞",APT:"A",FIL:"F",HBAR:"ℏ",ARB:"A",OP:"O",RENDER:"R",ATOM:"⚛",VET:"V",INJ:"I",MKR:"M",AAVE:"A",GRT:"G",ALGO:"A",THETA:"Θ",MANA:"M",SAND:"S",AXS:"A",EOS:"E",ZEC:"ⓩ",XMR:"ɱ",DASH:"D",QNT:"Q",CAKE:"🥞",FLOKI:"F",PEPE:"🐸",BONK:"B",FET:"F",TAO:"τ",JUP:"J",ONDO:"O",SEI:"S",KAS:"K",STX:"S",IMX:"X",WLD:"W",DAI:"◈",FDUSD:"$",PAXG:"Au",XAUT:"Au",XAU:"Au",POL:"⬡"}[c.symbol]||c.symbol.slice(0,1))]),["Gold (XAU/USDT)","XAU","◉"]].map(c=>[c[1],c])).values()).filter(c=>c[1]!=="XAU");
@@ -2737,7 +2728,6 @@ window.addEventListener("popstate", async () => {
 // Account deletion is handled by the Gmail-confirmed request flow below.
 </script>
 
-
 <script>
 (function(){
   const signIn=document.getElementById('signInForm'), register=document.getElementById('registerForm');
@@ -2811,7 +2801,6 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
 .oc-auth-choice:before,.oc-auth-choice:after{content:"";position:absolute;border:1px solid #36d9ff20;border-radius:50%;pointer-events:none}.oc-auth-choice:before{width:360px;height:360px;right:-120px;top:-235px}.oc-auth-choice:after{width:260px;height:260px;right:-70px;top:-185px}
 .oc-auth-choice-button,.oc-auth-register-prompt{position:relative;z-index:1}.oc-auth-choice-button{min-height:52px;margin-top:11px;font-size:15px;display:flex;align-items:center;justify-content:center;gap:10px}.oc-auth-choice-button>span{font-weight:850;font-size:19px}.oc-auth-register-prompt{text-align:center;margin:20px 0 0;color:#a9bfd5}.oc-auth-register-prompt button{background:transparent;color:#20d9ff;padding:4px 6px;font-weight:800}.auth-main-panel{max-width:850px;margin:0 auto}.auth-welcome{position:relative;overflow:hidden;text-align:center;border:1px solid #236078;border-radius:22px;background:radial-gradient(ellipse at 78% 45%,#153e57 0%,#102432 36%,#101820 68%,#0b0e11 100%);box-shadow:0 20px 60px #0005,inset 0 0 40px #25d9ff0b}.auth-welcome:before,.auth-welcome:after{content:"";position:absolute;border:1px solid #36d9ff20;border-radius:50%;pointer-events:none}.auth-welcome:before{width:560px;height:560px;right:-120px;top:-390px}.auth-welcome:after{width:420px;height:420px;right:-45px;top:-330px}.auth-welcome>*{position:relative;z-index:1}.auth-welcome h1{color:#f2f9ff;text-shadow:0 0 26px #20d9ff35}
 </style>
-
 
 <script id="home-performance-and-orderbook-script">
 (function(){
@@ -2986,7 +2975,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  document.addEventListener("visibilitychange",()=>{if(!document.hidden)validatePlan()});
 })();
 </script>
-
 
 <style id="oc-trade-choice-modal-fix">
 #timedUpBtn,#timedDownBtn{transition:filter .12s ease,box-shadow .12s ease,transform .12s ease,outline-color .12s ease;outline:2px solid transparent;outline-offset:2px}
@@ -3551,7 +3539,6 @@ body.oc-trade-overlay-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){#page-trade #timedPaperTrade #timedResultBoard[style*="display: block"]{animation:none}}
 </style>
 
-
 <style id="history-page-compact-styles">
 #homeActivityHistory .history-controls button{width:auto;padding:7px 11px;font-size:12px;white-space:nowrap}
 #homeActivityHistory.oc-history-hidden #homeActivityHistoryRows{display:none!important}
@@ -3714,7 +3701,6 @@ const style=document.createElement("style");style.id="oc-separate-account-pages-
 })();
 </script>
 
-
 <script id="oc-menu-separation-and-no-forced-login">
 window.addEventListener("load",function(){
  const menu=document.getElementById("moreMenu");
@@ -3782,7 +3768,6 @@ window.addEventListener("load",function(){
  document.head.appendChild(style);
 },{once:true});
 </script>
-
 
 <style id="oc-login-first-logout-style">
 body.oc-logged-out #authSwitchText{display:block!important;visibility:visible!important;opacity:1!important;text-align:center;margin-top:14px}
@@ -3942,7 +3927,6 @@ body.oc-logged-out.oc-register-mode #authSwitchText{display:none!important}
 })();
 </script>
 
-
 <style id="oc-quick-actions-more-style">
 #page-home .quick-action.oc-quick-action-hidden{display:none!important}
 #page-home #homeQuickActionsMoreWrap{display:flex;justify-content:center;padding:12px 0 2px}
@@ -3978,7 +3962,6 @@ body.oc-logged-out.oc-register-mode #authSwitchText{display:none!important}
  else setup();
 })();
 </script>
-
 
 <style id="oc-binance-inspired-login-redesign">
 /* Login-only visual refresh. Registration and authenticated pages retain their existing styles. */
@@ -4172,7 +4155,6 @@ const admins=["getachew21.inj.uni@gmail.com"];let admin=false,stops=[];
 function box(title,id){return '<section class="panel form-panel" style="margin:14px 0"><div class="section-head"><h2>'+title+'</h2></div><p class="muted tiny">DEMO SIMULATION ONLY — approvals update simulated balances, never real wallet funds or blockchain transfers.</p><div id="'+id+'" class="muted tiny" style="padding:14px">Loading…</div></section>'}
 function setup(){
  const dep=$("page-deposit"),wd=$("page-withdraw"),ad=$("page-admin");
-
 
  if(ad&&!$("ocAdminDeposits")){const el=document.createElement("div");el.innerHTML=box("Deposit requests · Admin review","ocAdminDeposits")+box("Withdrawal requests · Admin review","ocAdminWithdrawals");ad.querySelector(".cards")?.insertAdjacentElement("beforebegin",el);}
 }
@@ -4420,7 +4402,6 @@ html.oc-light-theme #page-register .auth-main-panel p,html.oc-light-theme #page-
 })();
 </script>
 
-
 <style id="oc-kraken-inspired-visitor-refresh">
 /* Visitor-facing layout: cleaner, market-first presentation inspired by Kraken's information hierarchy. */
 #page-public-market{max-width:1320px;padding:clamp(16px,3vw,38px)!important;color:#f3f6fb}
@@ -4506,9 +4487,6 @@ html.oc-light-theme #page-public-market .oc-visitor-ticker-item span{color:#6574
 
 </body>
 </html>
-
-
-
 
 <style id="oc-register-contact-choice-style">
 .oc-register-contact-choice{margin:10px 0 14px;display:grid;gap:6px}
@@ -4639,7 +4617,6 @@ td,th{overflow-wrap:anywhere}
 }
 </style>
 
-
 <script id="oc-invite-referral-and-auth-gate">
 (function(){
   const $ = id => document.getElementById(id);
@@ -4711,7 +4688,6 @@ td,th{overflow-wrap:anywhere}
   document.addEventListener('DOMContentLoaded', function(){ applyReferral(); });
 })();
 </script>
-
 
 <style id="oc-investment-plan-selector-style">
 #timedPaperTrade .oc-auto-plan-trigger{cursor:pointer;border:1px solid #284d6d;background:linear-gradient(145deg,#102b45,#091626);transition:border-color .15s,transform .15s}
@@ -4839,7 +4815,6 @@ td,th{overflow-wrap:anywhere}
 })();
 </script>
 
-
 <style id="oc-quick-access-vivid-colors">
 /* Distinct Binance-inspired colors for each Home Quick Access action */
 #page-home .quick-action-grid .quick-action{
@@ -4888,7 +4863,6 @@ td,th{overflow-wrap:anywhere}
 @media(max-width:480px){#page-trade .oc-indicative-toggle{gap:5px;padding:6px 8px}#page-trade .oc-indicative-list{max-height:260px}}
 </style>
 
-
 <style id="oc-gold-coin-icon-style">
 #page-home .quick-action[data-gold-trade="true"] .gold-coin-icon{
  display:inline-flex;align-items:center;justify-content:center;
@@ -4907,7 +4881,6 @@ main:has(> #page-withdraw:not(.hidden)) #timedPaperTrade {
   display: none !important;
 }
 </style>
-
 
 <style id="oc-restore-wallet-action-colors">
 /* Restore the familiar action colors across Wallet, Deposit and Withdraw. */
@@ -4941,7 +4914,6 @@ main:has(> #page-withdraw:not(.hidden)) #timedPaperTrade {
 #page-wallet .wallet-action:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 </style>
 
-
 <style id="oc-clean-nontrade-pages">
 /* Keep trading controls and performance panels off Register, Wallet, Deposit and Withdraw. */
 main:has(> #page-register:not(.hidden)) #timedPaperTrade,
@@ -4963,7 +4935,6 @@ main:has(> #page-withdraw:not(.hidden)) #levelMessage {
   display: none !important;
 }
 </style>
-
 
 <style id="oc-hide-trade-level-on-nontrade-pages">
 /* Trading-level UI must never appear in Register, Wallet, Deposit, or Withdraw. */
@@ -4990,7 +4961,6 @@ main:has(> #page-withdraw:not(.hidden)) .oc-workspace-levels {
   display: none !important;
 }
 </style>
-
 
 <style id="oc-remove-unwanted-home-market-browser-panels">
 /* Home: remove the practice-balance and active-coins summary cards only. */
@@ -5045,7 +5015,6 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
     display: none !important;
   }
 </style>
-
 
 <style id="oc-orderbook-buy-sell-actions">
 #liveOrderBookPanel .oc-orderbook-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 4px}
@@ -5468,7 +5437,6 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
 })();
 </script>
 
-
 <style id="oc-password-visibility-toggle">
 .oc-password-wrap{position:relative;display:flex;align-items:center;width:100%;margin:0 0 12px}
 .oc-password-wrap>.field{width:100%;padding-right:48px!important;margin-bottom:0!important}
@@ -5504,7 +5472,6 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  }
 })();
 </script>
-
 
 <style id="oc-functional-wallet-convert-styles">
 #page-home [data-go="convert"]{--action-color:#a78bfa!important}
@@ -5729,7 +5696,6 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
 })();
 </script>
 
-
 <style id="oc-trade-amount-inline-all">
 #timedPaperTrade .oc-trade-amount-row{position:relative;display:flex;align-items:center;width:100%;gap:0}
 #timedPaperTrade .oc-trade-amount-row #timedStake{width:100%;flex:1;min-width:0;padding-right:76px;margin:0}
@@ -5770,8 +5736,6 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  validate();
 })();
 </script>
-
-
 
 <script type="module" id="oc-account-security-and-guidance">
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
@@ -6031,7 +5995,6 @@ byId("ocVerifyDeleteCode")?.addEventListener("click",async()=>{
 });
 </script>
 
-
 <style id="oc-withdraw-address-check-style">
 #withdrawAddressCheck{min-height:18px;margin-top:5px}
 #withdrawAddressCheck[data-state="valid"]{color:var(--green)}
@@ -6135,7 +6098,6 @@ byId("ocVerifyDeleteCode")?.addEventListener("click",async()=>{
 })();
 </script>
 
-
 <style id="oc-final-clean-login">
 /* Keep the signed-out screen to the welcome heading and the existing login form. */
 body.oc-logged-out #page-register,
@@ -6192,7 +6154,6 @@ body.oc-logged-out #page-register .auth-welcome:after{content:none!important;dis
 }
 </style>
 
-
 <style id="oc-keep-orderbook-visible-during-quick-trade">
 /* Buy/Sell opens Quick Trade inline below the Order Book; do not cover the book. */
 body.oc-trade-overlay-open:after{display:none!important;content:none!important}
@@ -6209,7 +6170,6 @@ body.oc-trade-overlay-open{overflow:auto!important}
  }
 }
 </style>
-
 
 <style id="oc-visitor-explore-layout">
 /* Guests can browse public sections; account-only areas remain masked. */
@@ -6250,41 +6210,10 @@ body.oc-logged-out:not(.oc-auth-screen) #page-wallet .wallet-assets-panel{displa
 }
 </style>
 <script id="oc-visitor-explore-layout-script">
-(function(){
- function gate(title,copy){
-  const el=document.createElement("section");
-  el.className="oc-visitor-account-gate";
-  el.innerHTML='<h2>'+title+'</h2><p>'+copy+'</p><div class="gate-actions"><button type="button" class="primary" data-oc-gate-signup>Sign Up</button><button type="button" class="secondary" data-oc-gate-login>Log In</button></div>';
-  return el;
- }
- function prepare(){
-  const trade=document.getElementById("page-trade");
-  if(trade&&!trade.querySelector("[data-oc-trade-visitor-gate]")){
-   const box=gate("Explore the trading workspace","View public market charts and trading information. Sign in to use your personal demo balance and place simulated orders.");
-   box.dataset.ocTradeVisitorGate="1";
-   const chart=trade.querySelector(".trade-layout");
-   if(chart)chart.insertAdjacentElement("afterend",box);else trade.prepend(box);
-  }
-  const wallet=document.getElementById("page-wallet");
-  if(wallet&&!wallet.querySelector("[data-oc-wallet-visitor-gate]")){
-   const box=gate("Your wallet, when you sign in","Your personal balances, asset holdings and wallet actions are private. Sign in or create an account to access your wallet.");
-   box.dataset.ocWalletVisitorGate="1";
-   wallet.insertBefore(box,wallet.firstChild);
-  }
- }
- document.addEventListener("click",function(e){
-  const signup=e.target.closest("[data-oc-gate-signup]");
-  const login=e.target.closest("[data-oc-gate-login]");
-  if(signup){e.preventDefault();document.getElementById("ocVisitorSignup")?.click();}
-  if(login){e.preventDefault();document.getElementById("ocVisitorLogin")?.click();}
- });
- prepare();
- const observer=new MutationObserver(prepare);
- observer.observe(document.body,{childList:true,subtree:true});
-})();
+/* Visitors can browse public sections without inline login panels. Account actions
+   still open the dedicated Login / Sign Up page through the header controls. */
+document.querySelectorAll(".oc-visitor-account-gate").forEach(el=>el.remove());
 </script>
-
-
 
 <style id="oc-gold-dark-background">
 /* Gold-toned dark mode: a warm gold page canvas with clearly separated dark surfaces. */
@@ -6397,7 +6326,6 @@ html:not(.oc-light-theme) .oc-theme-toggle{
 }
 </style>
 
-
 <style id="oc-auth-form-only-on-login-page">
 /* Keep sign-in and registration forms exclusively on the dedicated Login page. */
 main .auth-welcome,
@@ -6428,3 +6356,33 @@ main #authModeIntro {
 }
 </style>
 
+<style id="oc-login-page-only-final">
+/* Sign-in and registration UI belongs only on the dedicated Login page. */
+main .auth-welcome,
+main .auth-main-panel,
+main #signInForm,
+main #registerForm,
+main #authChoicePanel,
+main #googleSignInBtn,
+main .auth-google-hint,
+main #authPhoneDivider,
+main #phoneRegistrationPanel,
+main #authModeIntro,
+main .oc-visitor-account-gate {
+  display:none !important;
+}
+#page-register .auth-welcome,
+#page-register .auth-main-panel {
+  display:block !important;
+}
+#page-register #signInForm,
+#page-register #registerForm,
+#page-register #authChoicePanel,
+#page-register #googleSignInBtn,
+#page-register .auth-google-hint,
+#page-register #authPhoneDivider,
+#page-register #phoneRegistrationPanel,
+#page-register #authModeIntro {
+  display:block !important;
+}
+</style>
