@@ -4908,6 +4908,78 @@ html.oc-light-theme .oc-roadmap-brand-name{color:#172b42}
 #page-public-market .oc-visitor-device-nav{margin-top:9px!important;padding-top:8px!important}
 @media(max-width:700px){#page-public-market .oc-visitor-device{width:min(100%,330px)!important}#page-public-market .oc-visitor-device-screen{min-height:475px!important}}
 </style>
+
+<style id="oc-independent-auth-form-style">
+/* Present registration and login as two distinct, one-at-a-time screens. */
+body.oc-logged-out.oc-auth-screen #authChoicePanel,
+body.oc-logged-out.oc-auth-screen #authStatus{display:none!important}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel{width:min(100%,560px)!important;max-width:560px!important;margin:0 auto!important;display:block!important}
+body.oc-logged-out.oc-auth-screen #registerForm,
+body.oc-logged-out.oc-auth-screen #signInForm{width:100%;max-width:500px;margin:0 auto!important;padding:clamp(18px,4vw,28px)!important;border:1px solid #29485d!important;border-radius:18px!important;background:linear-gradient(145deg,#142638,#0d1722)!important;box-shadow:0 18px 48px #0005!important}
+body.oc-logged-out.oc-auth-screen #registerForm.hidden,
+body.oc-logged-out.oc-auth-screen #signInForm.hidden{display:none!important}
+body.oc-logged-out.oc-auth-screen #registerForm:not(.hidden),
+body.oc-logged-out.oc-auth-screen #signInForm:not(.hidden){display:block!important}
+body.oc-logged-out.oc-auth-screen #authHeading{font-size:clamp(25px,5vw,34px)}
+body.oc-logged-out.oc-auth-screen #registerForm h3,
+body.oc-logged-out.oc-auth-screen #signInForm h3{margin:0 0 12px;font-size:23px}
+body.oc-logged-out.oc-auth-screen #registerForm .auth-switch,
+body.oc-logged-out.oc-auth-screen #signInForm .auth-switch{text-align:center;margin-top:18px}
+@media(max-width:600px){
+ body.oc-logged-out.oc-auth-screen #page-register .content-grid{display:block!important;width:100%!important}
+ body.oc-logged-out.oc-auth-screen #registerForm,
+ body.oc-logged-out.oc-auth-screen #signInForm{padding:17px!important}
+}
+</style>
+<script id="oc-independent-auth-form-routing">
+(function(){
+ const $=id=>document.getElementById(id);
+ function showAuth(mode){
+  const creating=mode==="register";
+  document.body.classList.add("oc-auth-screen");
+  document.body.classList.toggle("oc-register-mode",creating);
+  if(typeof window.showPage==="function")window.showPage("register");
+  // Reuse the existing Firebase-auth mode handlers, while opening the exact form
+  // requested by the visitor rather than showing an account-choice screen.
+  const choice=$(creating?"authChoiceRegister":"authChoiceLogin");
+  if(choice)choice.click();
+  const register=$("registerForm"),login=$("signInForm");
+  $("authChoicePanel")?.classList.add("hidden");
+  $("authStatus")?.classList.add("hidden");
+  $("registerMessage")?.classList.add("hidden");
+  register?.classList.toggle("hidden",!creating);
+  login?.classList.toggle("hidden",creating);
+  register?.querySelectorAll("input").forEach(el=>el.disabled=!creating);
+  login?.querySelectorAll("input").forEach(el=>el.disabled=creating);
+  const phone=$("phoneRegistrationPanel");
+  if(phone){phone.classList.add("hidden");phone.open=false;phone.querySelectorAll("input").forEach(el=>el.disabled=true);}
+  const heading=$("authHeading"),sub=$("authSubheading");
+  if(heading)heading.textContent=creating?"Create your Onchain account":"Welcome back to Onchain";
+  if(sub){sub.textContent=creating?"Register to create your personal account.":"Log in to continue to your Onchain account.";sub.classList.remove("hidden");}
+  window.scrollTo({top:0,behavior:"smooth"});
+  setTimeout(()=>{(creating?$("registerFirstName"):$("signInEmail"))?.focus({preventScroll:true});},80);
+ }
+ const routes={
+  "#ocVisitorSignup":"register","#ocVisitorHeroSignup":"register",
+  "#ocVisitorAboutSignup":"register","#ocVisitorBottomSignup":"register",
+  "#landingGetStarted":"register","#mobileRegisterBtn":"register","#register-nav":"register",
+  "#ocVisitorLogin":"login","#landingSignIn":"login","#mobileSignInBtn":"login","#signin-nav":"login"
+ };
+ document.addEventListener("click",event=>{
+  const target=event.target instanceof Element?event.target:null;
+  if(!target)return;
+  for(const [selector,mode] of Object.entries(routes)){
+   if(target.closest(selector)){
+    event.preventDefault();event.stopImmediatePropagation();showAuth(mode);return;
+   }
+  }
+ },true);
+ // Ensure the links between the two distinct forms always switch cleanly.
+ $("showRegisterBtn")?.addEventListener("click",()=>showAuth("register"),true);
+ $("registerLoginBtn")?.addEventListener("click",()=>showAuth("login"),true);
+})();
+</script>
+
 </body>
 </html>
 
