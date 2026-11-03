@@ -4630,7 +4630,13 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  }
  function renderTable(){
   const rows=$("ocVisitorMarketRows"),count=$("ocVisitorMarketCount");if(!rows)return;
-  const all=getAssets().filter(a=>category==="gold"?String(a.symbol).toUpperCase()==="XAU":category==="crypto"?String(a.symbol).toUpperCase()!=="XAU":false);
+  const sourceAssets=getAssets();
+  const pinned=["BTC","ETH","BNB","XRP","SOL","ADA","DOGE","TRX"];
+  const all=category==="gold"
+    ? sourceAssets.filter(a=>String(a.symbol).toUpperCase()==="XAU")
+    : category==="crypto"
+      ? pinned.map(sym=>sourceAssets.find(a=>String(a.symbol).toUpperCase()===sym)||({symbol:sym,name:({BTC:"Bitcoin",ETH:"Ethereum",BNB:"BNB",XRP:"XRP",SOL:"Solana",ADA:"Cardano",DOGE:"Dogecoin",TRX:"TRON"})[sym],current_price:null,price_change_percentage_24h:null,market_cap:null,market_cap_rank:pinned.indexOf(sym)+1}))
+      : [];
   const query=($("ocVisitorSearch")?.value||"").trim().toLowerCase();
   const matched=all.filter(a=>!query||String(a.name).toLowerCase().includes(query)||String(a.symbol).toLowerCase().includes(query));
   matched.sort((a,b)=>{if(category==="gold")return 0;const ar=Number(a.market_cap_rank)||999999,br=Number(b.market_cap_rank)||999999;return ar-br});
@@ -4658,13 +4664,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
    return;
   }
   if(!visible.length){
-   if(matched.length){rows.innerHTML='<tr><td colspan="5" class="oc-visitor-empty">No matching assets. Try another search.</td></tr>';return}
-   const overview=category==="gold"?[{symbol:"XAU",name:"Gold"}]:[{symbol:"BTC",name:"Bitcoin"},{symbol:"ETH",name:"Ethereum"},{symbol:"BNB",name:"BNB"},{symbol:"XRP",name:"XRP"},{symbol:"SOL",name:"Solana"},{symbol:"ADA",name:"Cardano"},{symbol:"DOGE",name:"Dogecoin"},{symbol:"TRX",name:"TRON"}];
-   const q=($("ocVisitorSearch")?.value||"").trim().toLowerCase();
-   const shown=overview.filter(a=>!q||a.symbol.toLowerCase().includes(q)||a.name.toLowerCase().includes(q));
-   if(count)count.textContent="Market overview · prices updating";
-   rows.innerHTML=shown.length?shown.map(a=>'<tr><td><div class="oc-v-asset"><span class="oc-v-icon" style="'+visitorCoinStyle(a.symbol)+'">'+escapeHtml(coinMark(a.symbol))+'</span><span class="oc-v-asset-name"><b>'+escapeHtml(a.name)+'</b><small>'+escapeHtml(a.symbol)+'</small></span></div></td><td class="oc-v-price">—</td><td><span class="oc-v-change">—</span></td><td>—</td><td><span class="oc-visitor-empty">Updating</span></td></tr>').join(""):'<tr><td colspan="5" class="oc-visitor-empty">No matching assets. Try another search.</td></tr>';
-   if(more){more.disabled=true;more.textContent="Prices updating"}
+   rows.innerHTML='<tr><td colspan="5" class="oc-visitor-empty">No matching assets. Try another search.</td></tr>';
    return;
   }
   rows.innerHTML=visible.map(a=>{
@@ -4678,7 +4678,8 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
   return "https://s.tradingview.com/widgetembed/?frameElementId=ocVisitorTradingChart&symbol="+encodeURIComponent(symbol)+"&interval=60&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=%23081727&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&locale=en";
  }
  function showDetails(symbol){
-  const a=findAsset(symbol);if(!a)return;
+  const known={BTC:"Bitcoin",ETH:"Ethereum",BNB:"BNB",XRP:"XRP",SOL:"Solana",ADA:"Cardano",DOGE:"Dogecoin",TRX:"TRON",XAU:"Gold"};
+  const a=findAsset(symbol)||{symbol:String(symbol).toUpperCase(),name:known[String(symbol).toUpperCase()]||String(symbol).toUpperCase(),current_price:null,price_change_percentage_24h:null,market_cap:null};
   selectedAsset=a;
   $("ocVisitorDetailName").textContent=a.name;
   $("ocVisitorDetailSymbol").textContent=String(a.symbol).toUpperCase()+" / USD";
