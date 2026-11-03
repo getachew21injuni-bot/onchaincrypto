@@ -100,7 +100,7 @@ function renderTradeControls(){
  document.getElementById('detailBody').innerHTML=`
  <div id="tradeControlsPanel" style="display:grid;gap:16px;max-width:900px">
   <div style="border:1px solid #27647a;background:linear-gradient(135deg,#12263d,#143a4c);border-radius:20px;padding:22px;box-shadow:0 16px 45px #0003">
-   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div><h3 style="margin:0 0 5px;font-size:21px">⇄ Trade Settings</h3><p class="muted" style="margin:0">Configure transparent outcomes for local paper-trading tests</p></div><span style="border:1px solid #a87826;background:#35270f;color:#fbbf24;padding:5px 9px;border-radius:20px;font-size:11px">DEMO ONLY</span></div>
+   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div><h3 style="margin:0 0 5px;font-size:21px">⇄ Trade Settings</h3><p class="muted" style="margin:0">Configure transparent outcomes for local paper-trading tests</p></div><span style="border:1px solid #a87826;background:#35270f;color:#fbbf24;padding:5px 9px;border-radius:20px;font-size:11px">PAPER TRADING TEST</span></div>
    <div style="height:1px;background:#ffffff20;margin:20px 0"></div>
    <label style="display:grid;gap:8px;font-weight:700">♟ SELECT SAMPLE ACCOUNT
     <select id="demoUserSelect" style="width:100%;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#25495a;color:white">
@@ -138,8 +138,8 @@ function renderTradeControls(){
 const moduleKey='onchaincrypto_admin_demo_v1';
 const moduleNames=['Users','Login History','Notifications','KYC','Email','Analytics','Deposits','Withdrawals','Addresses','Trades','Transfers','History','Assets','Settings','Support'];
 const seedRecords={
- 'Users':[{title:'Sample user A',owner:'demo-a@example.test',amount:'0',status:'Active'},{title:'Sample user B',owner:'demo-b@example.test',amount:'0',status:'Pending'}],
- 'Login History':[{title:'Sample sign-in event',owner:'demo-a@example.test',amount:'—',status:'Recorded'}],
+ 'Users':[{title:'Sample user A',owner:'sample-a@example.invalid',amount:'0',status:'Active'},{title:'Sample user B',owner:'sample-b@example.invalid',amount:'0',status:'Pending'}],
+ 'Login History':[{title:'Sample sign-in event',owner:'sample-a@example.invalid',amount:'—',status:'Recorded'}],
  'Notifications':[{title:'Welcome to Onchain',owner:'Sample users',amount:'—',status:'Draft'}],
  'KYC':[{title:'Sample review item (no documents)',owner:'Sample user B',amount:'—',status:'Pending'}],
  'Email':[{title:'Sample announcement draft',owner:'Admin',amount:'—',status:'Draft'}],
