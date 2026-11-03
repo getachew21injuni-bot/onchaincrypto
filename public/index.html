@@ -458,7 +458,7 @@ body.oc-logged-out.oc-auth-screen main>#page-register{display:flex!important}
     <button data-page="wallet">Wallet</button>
     
   </nav>
-  <div class="header-right"><div class="oc-visitor-actions" id="ocVisitorActions"><button class="primary" type="button" id="ocVisitorSignup">Sign Up</button><button class="secondary" type="button" id="ocVisitorLogin">Log In</button></div><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Guides and account assistance</small></span></button></div></div></div>
+  <div class="header-right"><button class="secondary oc-theme-toggle" id="ocThemeToggle" type="button" aria-label="Switch to light mode" title="Switch display mode"><span aria-hidden="true">☼</span><small>Light</small></button><div class="oc-visitor-actions" id="ocVisitorActions"><button class="primary" type="button" id="ocVisitorSignup">Sign Up</button><button class="secondary" type="button" id="ocVisitorLogin">Log In</button></div><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Help and Guidance</strong><small>Guides and account assistance</small></span></button></div></div></div>
 </header>
 <main>
   
@@ -4164,6 +4164,68 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  window.ocRenderVisitorMarket();
 })();
 </script>
+ 
+<style id="oc-display-mode-toggle">
+.oc-theme-toggle{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;min-width:62px;min-height:38px;padding:6px 9px!important;border:1px solid rgba(180,198,220,.28)!important;border-radius:11px!important;background:rgba(17,34,54,.78)!important;color:#f4c35e!important;font-size:17px!important}
+.oc-theme-toggle small{font-size:10px;font-weight:800;color:inherit}
+.oc-theme-toggle:hover{filter:brightness(1.12)}
+html.oc-light-theme,html.oc-light-theme body{background:#f3f6fb!important;color:#17283b!important;color-scheme:light}
+html.oc-light-theme body{background-image:none!important}
+html.oc-light-theme header{background:rgba(255,255,255,.96)!important;border-color:#dce5ef!important;box-shadow:0 5px 22px rgba(25,45,70,.07)!important}
+html.oc-light-theme header .brand,html.oc-light-theme header #nav button{color:#20364d!important}
+html.oc-light-theme header #nav button.active{background:#e9f1fa!important;color:#b97818!important}
+html.oc-light-theme .oc-theme-toggle{background:#fff!important;border-color:#d6e0eb!important;color:#a86b0c!important}
+html.oc-light-theme .panel,html.oc-light-theme .card,html.oc-light-theme .content-grid,html.oc-light-theme .auth-main-panel,html.oc-light-theme .more-menu,html.oc-light-theme .modal-content{background:#fff!important;color:#1b2e43!important;border-color:#dce5ef!important;box-shadow:0 8px 28px rgba(25,45,70,.07)!important}
+html.oc-light-theme h1,html.oc-light-theme h2,html.oc-light-theme h3,html.oc-light-theme h4,html.oc-light-theme .label,html.oc-light-theme .big,html.oc-light-theme label{color:#172b42!important}
+html.oc-light-theme p,html.oc-light-theme .muted,html.oc-light-theme .tiny,html.oc-light-theme small{color:#62758b}
+html.oc-light-theme input,html.oc-light-theme select,html.oc-light-theme textarea,html.oc-light-theme .field{background:#fff!important;color:#1a2c40!important;border-color:#cbd8e6!important}
+html.oc-light-theme button.secondary{background:#edf3f9!important;color:#29425d!important;border-color:#d3dfeb!important}
+html.oc-light-theme table{color:#20364d!important}
+html.oc-light-theme th{color:#52677e!important;background:#edf3f9!important}
+html.oc-light-theme td{border-color:#e1e8f0!important}
+html.oc-light-theme .more-menu button{color:#243950!important}
+html.oc-light-theme #page-public-market{color:#1b3047!important}
+html.oc-light-theme .oc-visitor-hero{background:radial-gradient(ellipse at 80% 50%,rgba(14,103,115,.08),transparent 45%),linear-gradient(120deg,#fff,#f1f6fb 65%,#fff)!important;border-color:#dce5ef!important}
+html.oc-light-theme .oc-visitor-hero h1,html.oc-light-theme .oc-visitor-section-head h2,html.oc-light-theme .oc-visitor-about h2,html.oc-light-theme .oc-visitor-products-heading h2,html.oc-light-theme .oc-visitor-bottom-cta h2{color:#172b42!important}
+html.oc-light-theme .oc-visitor-hero-copy>p,html.oc-light-theme .oc-visitor-section-head p,html.oc-light-theme .oc-visitor-about p,html.oc-light-theme .oc-visitor-products-heading>p,html.oc-light-theme .oc-visitor-products-heading>span{color:#5d7187!important}
+html.oc-light-theme .oc-visitor-ticker-panel,html.oc-light-theme .oc-visitor-market-table-wrap,html.oc-light-theme .oc-visitor-product-card,html.oc-light-theme .oc-visitor-bottom-cta{background:#fff!important;border-color:#dce5ef!important;box-shadow:0 7px 24px rgba(25,45,70,.05)}
+html.oc-light-theme .oc-visitor-ticker-item b,html.oc-light-theme .oc-visitor-market-table,html.oc-light-theme .oc-visitor-product-top h3{color:#20364d!important}
+html.oc-light-theme .oc-visitor-ticker-item span,html.oc-light-theme .oc-visitor-product-card p{color:#62758b!important}
+html.oc-light-theme .oc-visitor-market-table th{background:#edf3f9!important;color:#536a82!important}
+html.oc-light-theme .oc-visitor-roadmap-note,html.oc-light-theme .oc-visitor-disclaimer{color:#657a90!important}
+html.oc-light-theme .oc-visitor-detail{background:#fff!important;border-color:#dce5ef!important;color:#20364d!important}
+html.oc-light-theme .oc-visitor-detail h3,html.oc-light-theme .oc-visitor-detail strong{color:#20364d!important}
+html.oc-light-theme #page-register .auth-welcome,html.oc-light-theme #page-register .auth-main-panel{color:#1c3046!important}
+html.oc-light-theme #page-register .auth-main-panel h1,html.oc-light-theme #page-register .auth-main-panel h2,html.oc-light-theme #page-register .auth-main-panel h3{color:#1c3046!important}
+html.oc-light-theme #page-register .auth-main-panel p,html.oc-light-theme #page-register .auth-main-panel .muted{color:#62758b!important}
+@media(max-width:560px){.oc-theme-toggle{min-width:40px!important;padding:6px!important}.oc-theme-toggle small{display:none}}
+</style>
+<script id="oc-persistent-display-mode">
+(function(){
+ const key="onchain_display_mode";
+ const root=document.documentElement;
+ const button=document.getElementById("ocThemeToggle");
+ function apply(mode){
+  const light=mode==="light";
+  root.classList.toggle("oc-light-theme",light);
+  if(button){
+   button.innerHTML=light?'<span aria-hidden="true">◐</span><small>Dark</small>':'<span aria-hidden="true">☼</span><small>Light</small>';
+   button.setAttribute("aria-label",light?"Switch to dark mode":"Switch to light mode");
+   button.title=light?"Switch to dark mode":"Switch to light mode";
+   button.setAttribute("aria-pressed",light?"true":"false");
+  }
+ }
+ let saved="dark";
+ try{saved=localStorage.getItem(key)||"dark"}catch(e){}
+ apply(saved);
+ if(button)button.addEventListener("click",function(){
+  const next=root.classList.contains("oc-light-theme")?"dark":"light";
+  apply(next);
+  try{localStorage.setItem(key,next)}catch(e){}
+ });
+})();
+</script>
+
 </body>
 </html>
 
