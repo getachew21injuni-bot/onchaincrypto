@@ -2828,7 +2828,7 @@ window.addEventListener("popstate", async () => {
   document.getElementById("authChoiceLogin")?.addEventListener("click",()=>{setMode("signin");if(googleHint)googleHint.classList.add("hidden");document.getElementById("signInEmail")?.focus();});
   document.getElementById("authChoiceRegister")?.addEventListener("click",()=>{setMode("register");});
   setMode("signin");
-  showAuthChoice();
+  // Start directly on the sign-in form; registration opens its own route.
 })();
 
 $("marketShowMore")?.addEventListener("click",()=>{window.marketRowsExpanded=(window.marketRowsExpanded||5)+5;renderMarket()});
@@ -2840,7 +2840,7 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
  const params=new URLSearchParams(window.location.search),mode=(params.get("auth")||"").toLowerCase();
  if(mode!=="login"&&mode!=="register")return;
  window.showPage?.("register");
- const open=()=>document.getElementById(mode==="register"?"authChoiceRegister":"authChoicePanel")?.click();
+ const open=()=>document.getElementById(mode==="register"?"authChoiceRegister":"authChoiceLogin")?.click();
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",open,{once:true});else setTimeout(open,0);
 })();
 </script>
@@ -6674,3 +6674,43 @@ body.oc-logged-out.oc-auth-screen #authHeading:after {
   content:none!important;
 }
 </style>
+
+
+<style id="oc-centered-scrollable-auth">
+html,body{max-width:100%;overflow-x:hidden}
+body{overflow-y:auto!important}
+main{width:100%;min-width:0}
+#page-register{width:100%;max-width:100%;min-width:0;margin:0 auto;padding:clamp(12px,3vw,28px) 12px 36px}
+#page-register .oc-public-auth-hero{display:none!important}
+#page-register .auth-welcome{width:min(100%,460px);margin:8px auto 14px;padding:14px 18px}
+#page-register .auth-logo-mark{width:46px;height:46px;margin:0 auto 6px}
+#page-register .auth-logo-mark svg{width:46px;height:46px}
+#page-register .auth-brand{display:none}
+#page-register .auth-welcome h1{font-size:clamp(21px,5vw,28px);margin:4px 0}
+#page-register .content-grid{display:block!important;width:100%;max-width:460px;margin:0 auto}
+#page-register .auth-main-panel{width:100%;max-width:460px;min-width:0;margin:0 auto;padding:clamp(16px,4vw,24px);overflow:visible}
+#page-register .auth-main-panel form{width:100%;min-width:0}
+#page-register .auth-main-panel input,#page-register .auth-main-panel select{width:100%;max-width:100%;min-width:0}
+#page-register .oc-password-wrap{width:100%;min-width:0}
+#page-register .auth-switch{text-align:center;white-space:normal;overflow-wrap:anywhere}
+@media(max-width:700px){
+ body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+ main{padding:10px!important}
+ #page-register{padding:10px 8px calc(28px + env(safe-area-inset-bottom))}
+ #page-register .auth-welcome{margin:4px auto 10px;padding:12px}
+ #page-register .auth-main-panel{padding:16px 14px}
+ #page-register .auth-main-panel button{max-width:100%;white-space:normal}
+}
+</style>
+<script id="oc-auth-register-separate-route">
+document.addEventListener("click",function(event){
+ const registerLink=event.target.closest("#showRegisterBtn");
+ const loginLink=event.target.closest("#registerLoginBtn");
+ if(!registerLink&&!loginLink)return;
+ event.preventDefault();
+ event.stopImmediatePropagation();
+ const url=new URL(window.location.href);
+ url.searchParams.set("auth",registerLink?"register":"login");
+ window.location.assign(url.toString());
+},true);
+</script>
