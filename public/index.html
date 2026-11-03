@@ -1708,6 +1708,7 @@ async function loadMarket(){
    else if(paprikaData)sources.push("CoinPaprika");
    else if(krakenData)sources.push("Kraken");
    if(binanceTickers){combined=mergeBinance(combined,binanceTickers);sources.push("Binance")}
+   if(binanceTickers&&!sources.length)sources.push("Binance");
    if(sources.length&&combined.length)cacheAndRender(combined,sources);
   };
   const geckoTask=(async()=>{
@@ -4428,7 +4429,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  function renderTicker(){
   const track=$("ocVisitorTickerTrack");if(!track)return;
   const assets=getAssets().sort((a,b)=>(Number(b.total_volume)||0)-(Number(a.total_volume)||0)).slice(0,14);
-  if(!assets.length){track.innerHTML='<span class="oc-visitor-ticker-empty">Public market prices are temporarily unavailable. Reconnecting…</span>';return}
+  if(!assets.length){track.innerHTML='<span class="oc-visitor-ticker-empty">MARKET OVERVIEW&nbsp; · &nbsp;BTC&nbsp; · &nbsp;ETH&nbsp; · &nbsp;BNB&nbsp; · &nbsp;XRP&nbsp; · &nbsp;SOL&nbsp; · &nbsp;GOLD (XAU)&nbsp; · &nbsp;US STOCKS&nbsp; · &nbsp;Prices updating</span>';return}
   const items=assets.map(a=>{const s=String(a.symbol).toUpperCase(),chg=Number(a.price_change_percentage_24h)||0;return '<span class="oc-visitor-ticker-item"><b>'+escapeHtml(s)+'</b><span>'+priceText(a)+'</span><em class="'+(chg>=0?"green":"red")+'">'+fmtChange(chg)+'</em></span>'}).join("");
   track.innerHTML=items+items;
  }
@@ -4461,7 +4462,16 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
    rows.innerHTML='<tr><td colspan="5"><div class="oc-visitor-stocks-panel"><div class="oc-stock-brand-grid">'+brandCards+'</div><div class="oc-stock-widget-wrap"><tv-market-overview symbol-sectors=\''+escapeHtml(JSON.stringify(sectors))+'\' theme="light" locale="en"></tv-market-overview></div><p class="oc-stock-note">Quotes and charts powered by TradingView. Market data may be delayed. Onchain does not currently execute stock purchases.</p></div></td></tr>';
    return;
   }
-  if(!visible.length){rows.innerHTML='<tr><td colspan="5" class="oc-visitor-empty">'+(matched.length?"No matching assets. Try another search.":"Market data is connecting. Prices will appear when a public provider responds.")+'</td></tr>';return}
+  if(!visible.length){
+   if(matched.length){rows.innerHTML='<tr><td colspan="5" class="oc-visitor-empty">No matching assets. Try another search.</td></tr>';return}
+   const overview=category==="gold"?[{symbol:"XAU",name:"Gold"}]:[{symbol:"BTC",name:"Bitcoin"},{symbol:"ETH",name:"Ethereum"},{symbol:"BNB",name:"BNB"},{symbol:"XRP",name:"XRP"},{symbol:"SOL",name:"Solana"},{symbol:"ADA",name:"Cardano"},{symbol:"DOGE",name:"Dogecoin"},{symbol:"TRX",name:"TRON"}];
+   const q=($("ocVisitorSearch")?.value||"").trim().toLowerCase();
+   const shown=overview.filter(a=>!q||a.symbol.toLowerCase().includes(q)||a.name.toLowerCase().includes(q));
+   if(count)count.textContent="Market overview · prices updating";
+   rows.innerHTML=shown.length?shown.map(a=>'<tr><td><div class="oc-v-asset"><span class="oc-v-icon">'+escapeHtml(coinMark(a.symbol))+'</span><span class="oc-v-asset-name"><b>'+escapeHtml(a.name)+'</b><small>'+escapeHtml(a.symbol)+'</small></span></div></td><td class="oc-v-price">—</td><td><span class="oc-v-change">—</span></td><td>—</td><td><span class="oc-visitor-empty">Updating</span></td></tr>').join(""):'<tr><td colspan="5" class="oc-visitor-empty">No matching assets. Try another search.</td></tr>';
+   if(more){more.disabled=true;more.textContent="Prices updating"}
+   return;
+  }
   rows.innerHTML=visible.map(a=>{
    const s=String(a.symbol).toUpperCase(),chg=Number(a.price_change_percentage_24h)||0,cap=Number(a.market_cap)||0;
    const iconColor=s==="BTC"?"#f7931a":s==="XAU"?"#d4af37":"#25435f";
