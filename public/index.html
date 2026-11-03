@@ -4571,7 +4571,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
    if(!response.ok)throw new Error("Pinned market quotes unavailable");
    const rows=await response.json();
    if(!Array.isArray(rows))throw new Error("Invalid pinned market quotes");
-   rows.forEach(item=>{const symbol=String(item.symbol||"").toUpperCase();if(!symbol||!(Number(item.current_price)>0))return;visitorPinnedQuotes.set(symbol,{current_price:Number(item.current_price),price_change_percentage_24h:Number.isFinite(Number(item.price_change_percentage_24h))?Number(item.price_change_percentage_24h):null,market_cap:Number(item.market_cap)>0?Number(item.market_cap):null});});
+   rows.forEach(item=>{const symbol=String(item.symbol||"").toUpperCase();if(!symbol||!(Number(item.current_price)>0))return;const change=item.price_change_percentage_24h,cap=item.market_cap;visitorPinnedQuotes.set(symbol,{current_price:Number(item.current_price),price_change_percentage_24h:change!==null&&change!==undefined&&Number.isFinite(Number(change))?Number(change):null,market_cap:cap!==null&&cap!==undefined&&Number(cap)>0?Number(cap):null});});
    renderTable();
   }catch(error){
    // The shared market feed remains the fallback; never invent missing values.
