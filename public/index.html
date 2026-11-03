@@ -279,6 +279,8 @@ body.oc-logged-out.oc-auth-screen > .more-menu-wrap { display:none!important; }
 body.oc-logged-out.oc-auth-screen main > section[id^="page-"]:not(#page-register) { display:none!important; }
 body.oc-logged-out.oc-auth-screen #page-register { display:flex!important; }
 body.oc-logged-out.oc-auth-screen main { display:flex!important; min-height:100vh; padding-top:24px; }
+/* Keep administrator controls out of customer account and support navigation. Admins use the separately protected /admin.html sign-in page. */
+#adminDashboardShortcut, #ocAdminNavBtn, .admin-nav, #admin-login-link { display:none!important; }
 </style>
 
 <style id="oc-auth-only-screen-tweaks">
