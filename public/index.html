@@ -1650,7 +1650,7 @@ async function loadMarket(){
    return data;
   })();
   const binanceTask=(async()=>{
-   const tickers=await fetchJson("https://api.binance.com/api/v3/ticker/24hr",12000);
+   const tickers=await fetchJson("https://data-api.binance.vision/api/v3/ticker/24hr",12000);
    if(!Array.isArray(tickers))throw new Error("Binance returned invalid ticker data");
    binanceTickers=tickers;publishAvailable();return tickers;
   })();
