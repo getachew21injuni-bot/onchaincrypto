@@ -1870,7 +1870,7 @@ if (supportSendButton) supportSendButton.addEventListener("click", () => {
   const topic = $("supportTopic").value;
   const subject = $("supportSubject").value.trim() || "Support request: " + topic;
   const details = $("supportDetails").value.trim();
-  const body = "Topic: " + topic + " " + (details || "Please help me with this issue.") + "\n\nPlease do not reply with requests for passwords, verification codes, private keys or recovery phrases.";
+  const body = "Topic: " + topic + " " + (details || "Please help me with this issue.") + " Please do not reply with requests for passwords, verification codes, private keys or recovery phrases.";
   $("supportMessage").textContent = "Opening your email app. Review the draft and press Send there. This website has not sent the email itself.";
   window.location.href = "mailto:onchaincryptosupport@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
 });
@@ -6424,7 +6424,7 @@ main #authModeIntro {
 #page-register #authPhoneDivider,
 #page-register #phoneRegistrationPanel,
 #page-register #authModeIntro {
-  display:initial !important;
+  display:block !important;
 }
 </style>
 
