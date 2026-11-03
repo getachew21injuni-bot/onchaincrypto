@@ -1194,7 +1194,7 @@ html.oc-light-theme nav button.active{color:#a86b0c!important}
         <div class="auth-welcome">
       <div class="auth-logo-mark" aria-hidden="true"><svg viewBox="0 0 120 120" role="img"><defs><linearGradient id="authLogoGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#42e8ff"/><stop offset="1" stop-color="#3678ff"/></linearGradient></defs><circle cx="60" cy="60" r="51" fill="#071522" stroke="url(#authLogoGradient)" stroke-width="3"/><path d="M73 35a29 29 0 1 0 0 50" fill="none" stroke="url(#authLogoGradient)" stroke-width="10" stroke-linecap="round"/><path d="M87 43a21 21 0 1 0 0 34" fill="none" stroke="#42e8ff" stroke-width="8" stroke-linecap="round"/><path d="M45 60h29" stroke="#e8fbff" stroke-width="5" stroke-linecap="round"/><circle cx="88" cy="31" r="5" fill="#42e8ff"/></svg></div>
       <div class="auth-brand">Onchain</div>
-      <h1 id="authHeading">Welcome back to Onchain</h1>
+      <h1 id="authHeading">Welcome to Onchain</h1>
       <p id="authSubheading" class="hidden"></p>
     </div>
     <div class="content-grid">
@@ -1223,7 +1223,7 @@ html.oc-light-theme nav button.active{color:#a86b0c!important}
         <p class="muted tiny auth-google-hint">Enter your full name above to register with Google.</p>
         <form id="signInForm" class="auth-signin-form hidden">
           <h3 style="margin-top:12px">Sign in</h3>
-          <label for="signInEmail">Username or email</label><input id="signInEmail" class="field" type="text" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="Username or email">
+          <label for="signInEmail">Username, email or phone</label><input id="signInEmail" class="field" type="text" inputmode="text" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="Username, email or phone">
           <label for="signInPassword">Password</label><div class="oc-password-wrap"><input id="signInPassword" class="field" type="password" autocomplete="current-password" required placeholder="Password"><button class="oc-password-toggle" type="button" data-password-target="signInPassword" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
           <div class="auth-options"><label class="auth-check"><input type="checkbox" id="rememberMe"> Remember me</label><label class="auth-check"><input type="checkbox" id="showSignInPassword"> Show password</label></div>
           <button class="primary full auth-submit" type="submit">Get Started</button>
@@ -6638,5 +6638,39 @@ html:not(.oc-light-theme) .oc-visitor-account-gate{
 }
 html:not(.oc-light-theme) .oc-theme-toggle{
   background:#202630!important;color:#f0b90b!important;border-color:#465364!important;
+}
+</style>
+
+
+<!-- Mobile auth cleanup: keep the sign-in experience exclusively on the dedicated Login page. -->
+<style id="oc-mobile-single-login-screen">
+@media (max-width:700px) {
+  main > section[id^="page-"]:not(#page-register) #signInForm,
+  main > section[id^="page-"]:not(#page-register) #registerForm,
+  main > section[id^="page-"]:not(#page-register) #authChoicePanel,
+  main > section[id^="page-"]:not(#page-register) #googleSignInBtn,
+  main > section[id^="page-"]:not(#page-register) .auth-signin-form,
+  main > section[id^="page-"]:not(#page-register) .auth-register-form,
+  main > section[id^="page-"]:not(#page-register) .auth-main-panel,
+  main > section[id^="page-"]:not(#page-register) .auth-welcome,
+  main > section[id^="page-"]:not(#page-register) [data-auth-panel],
+  main > section[id^="page-"]:not(#page-register) .login-section,
+  main > section[id^="page-"]:not(#page-register) .signin-section {
+    display:none!important;
+  }
+}
+/* The dedicated login page retains Google sign-in and the password eye control. */
+body.oc-logged-out.oc-auth-screen #googleSignInBtn {
+  display:flex!important;
+  visibility:visible!important;
+}
+body.oc-logged-out.oc-auth-screen #signInForm {
+  display:block!important;
+}
+body.oc-logged-out.oc-auth-screen #signInForm .oc-password-toggle {
+  display:flex!important;
+}
+body.oc-logged-out.oc-auth-screen #authHeading:after {
+  content:none!important;
 }
 </style>
