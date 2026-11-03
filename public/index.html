@@ -36,6 +36,15 @@
   html.oc-auth-pending #signInForm { display:block!important; }
   body.oc-logged-out [hidden],
   html.oc-auth-pending [hidden] { display:none!important; }
+
+/* Floating visitor phone showcase */
+#page-public-market .oc-visitor-visual{animation:ocVisitorPhoneFloat 5.8s ease-in-out infinite}
+#page-public-market .oc-visitor-mini-mark.oc-onchain-round-mark{width:26px;height:26px;min-width:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;padding:0;font-weight:900;color:#17130a;background:radial-gradient(circle at 32% 28%,#fff1b5 0%,#f5c542 48%,#b87908 100%);border:1px solid #ffe08a;box-shadow:0 0 14px rgba(245,197,66,.35)}
+#page-public-market .oc-visitor-phone-chart polyline{stroke-dasharray:520;stroke-dashoffset:520;animation:ocVisitorSignalDraw 3.8s ease-in-out infinite alternate;filter:drop-shadow(0 0 4px rgba(32,214,133,.45))}
+#page-public-market .oc-visitor-signal{border-color:rgba(35,210,132,.35)}
+@keyframes ocVisitorPhoneFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes ocVisitorSignalDraw{to{stroke-dashoffset:0}}
+@media(prefers-reduced-motion:reduce){#page-public-market .oc-visitor-visual,#page-public-market .oc-visitor-phone-chart polyline{animation:none!important}}
 </style>
 <style>
 :root{--bg:#06101f;--panel:#0b1b30;--panel2:#102641;--line:#1b4263;--text:#eaf6ff;--muted:#91abc5;--yellow:#20d9ff;--green:#16d9a0;--red:#ff5573;--blue:#438dff}
@@ -928,14 +937,14 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
        <div class="oc-visitor-device-screen">
         <div class="oc-visitor-device-status"><span>9:41</span><span>●●●  ▰</span></div>
         <div class="oc-visitor-phone">
-        <div class="oc-visitor-phone-top"><span><b class="oc-visitor-mini-mark">O</b> ONCHAIN</span><i></i></div>
+        <div class="oc-visitor-phone-top"><span><b class="oc-visitor-mini-mark oc-onchain-round-mark">B</b> ONCHAIN</span><i></i></div>
         <div class="oc-visitor-device-subhead"><span>MARKETS</span><span>OVERVIEW</span><span>⋯</span></div>
         <div class="oc-visitor-total-balance"><div><small>BTC BALANCE</small></div><strong>0.1842 <em>BTC</em></strong></div>
         <div class="oc-visitor-phone-asset"><div><small>BTC / USDT</small><strong id="ocVisitorHeroPrice">Explore BTC</strong></div><span id="ocVisitorHeroChange">Market overview</span></div>
         <div class="oc-visitor-phone-chart">
           <svg viewBox="0 0 420 170" role="img" aria-label="Illustrative market candlestick chart"><defs><linearGradient id="ocVisitorChartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#16d9a0" stop-opacity=".26"/><stop offset="1" stop-color="#16d9a0" stop-opacity="0"/></linearGradient></defs><path d="M0 135H420M0 90H420M0 45H420" stroke="#29435b" stroke-width="1" stroke-dasharray="4 6"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59 207 73 232 49 258 62 282 39 308 48 332 25 356 42 382 15 410 23V170H8Z" fill="url(#ocVisitorChartFill)"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59 207 73 232 49 258 62 282 39 308 48 332 25 356 42 382 15 410 23" fill="none" stroke="#23d6a2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g stroke-width="2"><path d="M35 104V137m-5-23h10" stroke="#16d9a0"/><path d="M84 79v35m-5-25h10" stroke="#16d9a0"/><path d="M132 65v37m-5-25h10" stroke="#16d9a0"/><path d="M181 45v40m-5-25h10" stroke="#16d9a0"/><path d="M232 33v38m-5-22h10" stroke="#16d9a0"/><path d="M282 24v37m-5-22h10" stroke="#16d9a0"/><path d="M332 10v40m-5-25h10" stroke="#16d9a0"/><path d="M382 2v34m-5-20h10" stroke="#16d9a0"/></g></svg>
         </div>
-        <div class="oc-visitor-signal"><span class="oc-visitor-signal-dot"></span><div><b>MARKET MOMENTUM</b><small>Market insights · for information only</small></div><strong>ONCHAIN</strong></div>
+        <div class="oc-visitor-signal"><span class="oc-visitor-signal-dot"></span><div><b>MARKET MOMENTUM</b><small>Follow Bitcoin market momentum</small></div><strong>ONCHAIN</strong></div>
         <div class="oc-visitor-device-brandline"><span>ONCHAIN</span><strong>Get Onchain</strong></div>
         <div class="oc-visitor-phone-foot"><span>PRICE</span><span>24H CHANGE</span><span>MARKET WATCH</span></div>
         <div class="oc-visitor-device-nav"><span class="active"><b>⌂</b>Home</span><span><b>⌁</b>Markets</span><span><b>⇄</b>Trade</span><span><b>◉</b>Wallet</span></div>
