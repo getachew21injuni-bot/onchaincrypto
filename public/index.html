@@ -4041,7 +4041,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  const symbols=["BTC","ETH","BNB","XRP","SOL","DOGE","ADA","TRX","LTC","XAU"];
  let category="crypto",limit=12,selectedAsset=null;
  let visitorGoldFallback=null,visitorGoldBusy=false,visitorGoldChecked=0;
- const getAssets=()=>{const assets=Array.isArray(window.market)?window.market.filter(x=>Number(x.current_price)>0):[];if(!assets.some(x=>String(x.symbol).toUpperCase()==="XAU")&&visitorGoldFallback)assets.push(visitorGoldFallback);return assets};
+ const getAssets=()=>{const source=Array.isArray(window.market)?window.market:[];const assets=source.filter(x=>Number(x.current_price)>0&&String(x.symbol).toUpperCase()!=="XAU");const gold=visitorGoldFallback||source.find(x=>String(x.symbol).toUpperCase()==="XAU"&&Number(x.current_price)>0);if(gold)assets.push(gold);return assets};
  async function loadVisitorGoldFallback(){
   if(visitorGoldBusy||Date.now()-visitorGoldChecked<60000)return;
   visitorGoldBusy=true;visitorGoldChecked=Date.now();
