@@ -1029,7 +1029,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
  </section>
 
  <section class="oc-visitor-products oc-home-roadmap" aria-label="Explore the Onchain ecosystem">
-  <div class="oc-visitor-products-heading"><div class="oc-visitor-kicker">YOUR ONCHAIN STARTING POINT</div><h2>Everything begins with discovery</h2><div class="oc-roadmap-brand-lockup" aria-label="Onchain brand"><span class="oc-roadmap-brand-mark" aria-hidden="true">B</span><span class="oc-roadmap-brand-name">Onchain</span></div><p>Explore the market, learn the tools and make each visit count.</p></div>
+  <div class="oc-visitor-products-heading"><div class="oc-visitor-kicker">YOUR ONCHAIN INVESTMENT STARTING POINT</div><h2>Discover markets. Build your investment strategy.</h2><div class="oc-roadmap-brand-lockup" aria-label="Onchain brand"><span class="oc-roadmap-brand-mark" aria-hidden="true">B</span><span class="oc-roadmap-brand-name">Onchain</span></div><p>Explore crypto and Gold markets, compare digital assets and develop your portfolio strategy with confidence.</p></div>
   <div class="oc-visitor-products-grid">
     <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">◈</div><div class="oc-visitor-product-top"><h3>Explore Markets</h3><span>Discover</span></div><p>Follow crypto, Gold and selected US stock market information with charts and daily price moves.</p><small>CRYPTO · GOLD · STOCKS</small></article>
     <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⇄</div><div class="oc-visitor-product-top"><h3>Copy Trading</h3><span>Copy strategies</span></div><p>Copy Trading lets users choose experienced traders to follow and, when the feature is available, automatically mirror their trades in their own accounts. Review each trader’s strategy, risk and available controls before copying.</p><small>FOLLOW · COPY · MANAGE</small></article>
@@ -7674,3 +7674,46 @@ body.oc-logged-out.oc-auth-screen main>#page-register{display:flex!important}
   observer.observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
+
+
+<style id="oc-onchain-investment-heading-gold-emphasis">
+#page-home .oc-home-roadmap .oc-visitor-products-heading{
+  position:relative;isolation:isolate;text-align:center;
+  padding:30px 22px 26px;margin:0 auto 22px;
+  border:1px solid rgba(214,164,39,.38);border-radius:22px;
+  background:linear-gradient(135deg,rgba(255,249,226,.96),rgba(255,255,255,.97) 48%,rgba(255,242,199,.92));
+  box-shadow:0 12px 34px rgba(151,103,13,.12),inset 0 1px 0 rgba(255,255,255,.95);
+}
+#page-home .oc-home-roadmap .oc-visitor-kicker{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:9px 18px;margin:0 auto 13px;border-radius:999px;
+  color:#392400!important;background:linear-gradient(100deg,#f7d36c,#e7ad24,#f8df91)!important;
+  border:1px solid #d59b16;font-weight:900;letter-spacing:.13em;
+  font-size:clamp(11px,1.25vw,14px);text-shadow:0 1px 0 rgba(255,255,255,.5);
+}
+#page-home .oc-home-roadmap .oc-visitor-products-heading h2{
+  max-width:900px;margin:0 auto 14px!important;
+  color:#17130b!important;font-size:clamp(27px,4vw,43px)!important;
+  line-height:1.12!important;font-weight:950!important;letter-spacing:-.035em;
+  text-wrap:balance;
+}
+#page-home .oc-home-roadmap .oc-roadmap-brand-lockup{
+  justify-content:center;gap:12px;margin:10px auto 12px;
+}
+#page-home .oc-home-roadmap .oc-roadmap-brand-name{
+  color:#9a6909!important;font-size:clamp(34px,5vw,52px)!important;
+  font-weight:1000!important;letter-spacing:-.045em!important;
+  text-shadow:0 2px 0 rgba(255,255,255,.9),0 5px 18px rgba(179,126,16,.18);
+}
+#page-home .oc-home-roadmap .oc-roadmap-brand-mark{
+  box-shadow:0 5px 16px rgba(173,119,9,.25);
+}
+#page-home .oc-home-roadmap .oc-visitor-products-heading p{
+  max-width:760px;margin:0 auto!important;color:#4b3b1c!important;
+  font-size:clamp(15px,1.7vw,19px)!important;font-weight:600;line-height:1.55;
+}
+@media(max-width:600px){
+ #page-home .oc-home-roadmap .oc-visitor-products-heading{padding:22px 14px 20px;border-radius:17px}
+ #page-home .oc-home-roadmap .oc-visitor-kicker{letter-spacing:.07em;padding:8px 12px}
+}
+</style>
