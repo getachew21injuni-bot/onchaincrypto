@@ -4430,7 +4430,8 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
   const track=$("ocVisitorTickerTrack");if(!track)return;
   const assets=getAssets().sort((a,b)=>(Number(b.total_volume)||0)-(Number(a.total_volume)||0)).slice(0,14);
   if(!assets.length){track.innerHTML='<span class="oc-visitor-ticker-empty">MARKET OVERVIEW&nbsp; · &nbsp;BTC&nbsp; · &nbsp;ETH&nbsp; · &nbsp;BNB&nbsp; · &nbsp;XRP&nbsp; · &nbsp;SOL&nbsp; · &nbsp;GOLD (XAU)&nbsp; · &nbsp;US STOCKS&nbsp; · &nbsp;Prices updating</span>';return}
-  const items=assets.map(a=>{const s=String(a.symbol).toUpperCase(),chg=Number(a.price_change_percentage_24h)||0;return '<span class="oc-visitor-ticker-item"><b>'+escapeHtml(s)+'</b><span>'+priceText(a)+'</span><em class="'+(chg>=0?"green":"red")+'">'+fmtChange(chg)+'</em></span>'}).join("");
+  const brand={BTC:{mark:"₿",color:"#f7931a"},ETH:{mark:"◆",color:"#627eea"},BNB:{mark:"◆",color:"#f3ba2f"},XRP:{mark:"✕",color:"#23292f"},SOL:{mark:"≋",color:"#9945ff"},DOGE:{mark:"Ð",color:"#c2a633"},ADA:{mark:"●",color:"#3468d4"},TRX:{mark:"△",color:"#eb0029"},LTC:{mark:"Ł",color:"#345d9d"},XAU:{mark:"◉",color:"#d4af37"},USDT:{mark:"₮",color:"#26a17b"},USDC:{mark:"＄",color:"#2775ca"},LINK:{mark:"⬡",color:"#2a5ada"},AVAX:{mark:"▲",color:"#e84142"},DOT:{mark:"●",color:"#e6007a"},TON:{mark:"◈",color:"#0098ea"}};
+  const items=assets.map(a=>{const sym=String(a.symbol).toUpperCase(),chg=Number(a.price_change_percentage_24h)||0,brandInfo=brand[sym]||{mark:sym.slice(0,2),color:"#52718f"};return '<span class="oc-visitor-ticker-item"><span class="oc-visitor-ticker-coin" style="--oc-coin-color:'+brandInfo.color+'"><i>'+brandInfo.mark+'</i></span><span class="oc-visitor-ticker-copy"><b>'+escapeHtml(sym)+'</b><strong>'+priceText(a)+'</strong><em class="'+(chg>=0?"green":"red")+'">'+fmtChange(chg)+'</em></span></span>'}).join("");
   track.innerHTML=items+items;
  }
  function renderTable(){
@@ -4702,6 +4703,25 @@ html.oc-light-theme .oc-roadmap-brand-name{color:#172b42}
  .oc-stock-note{padding:0 12px 14px}
 }
 </style>
+
+<style id="oc-visitor-market-pulse-motion">
+/* Visitor-only market pulse: continuous horizontal ticker with rotating coin medallions. */
+.oc-visitor-ticker-panel{grid-template-columns:190px minmax(0,1fr);min-height:82px}
+.oc-visitor-ticker-track{gap:30px;animation:ocVisitorTicker 34s linear infinite;will-change:transform}
+.oc-visitor-ticker-item{gap:10px;padding:5px 2px;min-width:128px}
+.oc-visitor-ticker-coin{position:relative;display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border:1px solid color-mix(in srgb,var(--oc-coin-color) 72%,white 28%);border-radius:50%;background:color-mix(in srgb,var(--oc-coin-color) 19%,#081829);color:var(--oc-coin-color);box-shadow:0 0 15px color-mix(in srgb,var(--oc-coin-color) 22%,transparent);animation:ocVisitorCoinSpin 8s linear infinite}
+.oc-visitor-ticker-coin:before{content:"";position:absolute;inset:-4px;border:1px dashed color-mix(in srgb,var(--oc-coin-color) 72%,transparent);border-radius:50%;animation:ocVisitorCoinSpin 12s linear infinite reverse}
+.oc-visitor-ticker-coin i{font-style:normal;font-size:19px;font-weight:900;line-height:1;animation:ocVisitorCoinCounterSpin 8s linear infinite}
+.oc-visitor-ticker-copy{display:flex;flex-direction:column;align-items:flex-start;gap:2px;line-height:1.15}
+.oc-visitor-ticker-copy b{font-size:10px;letter-spacing:.45px;color:#eef5ff}
+.oc-visitor-ticker-copy strong{font-size:11px;font-weight:750;color:#fff;font-variant-numeric:tabular-nums}
+.oc-visitor-ticker-copy em{font-size:9px;font-style:normal;font-weight:700}
+@keyframes ocVisitorCoinSpin{to{transform:rotate(360deg)}}
+@keyframes ocVisitorCoinCounterSpin{to{transform:rotate(-360deg)}}
+@media(max-width:680px){.oc-visitor-ticker-panel{grid-template-columns:1fr;gap:9px;padding:11px 12px}.oc-visitor-ticker-label{flex-direction:row;align-items:center;justify-content:space-between}.oc-visitor-ticker-label span{font-size:8px}.oc-visitor-ticker-track{gap:22px;animation-duration:30s}.oc-visitor-ticker-item{min-width:118px}.oc-visitor-ticker-coin{width:34px;height:34px;flex-basis:34px}}
+@media(prefers-reduced-motion:reduce){.oc-visitor-ticker-track,.oc-visitor-ticker-coin,.oc-visitor-ticker-coin:before,.oc-visitor-ticker-coin i{animation:none!important}}
+</style>
+
 </body>
 </html>
 
