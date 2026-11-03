@@ -817,6 +817,7 @@ header .brand>span:last-child{font-weight:950!important;letter-spacing:-.5px!imp
   <section class="oc-visitor-ticker-panel" aria-label="Live hot coin prices">
     <div class="oc-visitor-ticker-label"><b>MARKET PULSE</b><span>Prices refresh when public feeds respond</span></div>
     <div class="oc-visitor-ticker-clip"><div id="ocVisitorTickerTrack" class="oc-visitor-ticker-track"><span class="oc-visitor-ticker-empty">Connecting to public market feeds…</span></div></div>
+    <button type="button" class="oc-visitor-ticker-more" id="ocVisitorTickerMore" aria-expanded="false">More</button>
   </section>
 
   <section class="oc-visitor-market-section" id="ocVisitorMarkets">
@@ -4428,11 +4429,20 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  window.ocOpenVisitorAuth=openAuth;
  function renderTicker(){
   const track=$("ocVisitorTickerTrack");if(!track)return;
-  const assets=getAssets().sort((a,b)=>(Number(b.total_volume)||0)-(Number(a.total_volume)||0)).slice(0,14);
+  const allAssets=getAssets().sort((a,b)=>(Number(b.total_volume)||0)-(Number(a.total_volume)||0));
+  const preferred=["ETH","USDT","SOL","LINK","BTC"];
+  const bySymbol=new Map(allAssets.map(a=>[String(a.symbol).toUpperCase(),a]));
+  const ordered=preferred.map(sym=>bySymbol.get(sym)).filter(Boolean);
+  allAssets.forEach(a=>{if(!ordered.includes(a))ordered.push(a)});
+  const assets=ordered.slice(0,14),expanded=!!window.ocVisitorTickerExpanded;
+  const shown=expanded?assets:assets.slice(0,4);
+  const moreButton=$("ocVisitorTickerMore");
+  if(moreButton){moreButton.style.display=assets.length>4?"inline-flex":"none";moreButton.textContent=expanded?"Less":"More";moreButton.setAttribute("aria-expanded",String(expanded));}
   if(!assets.length){track.innerHTML='<span class="oc-visitor-ticker-empty">MARKET OVERVIEW&nbsp; · &nbsp;BTC&nbsp; · &nbsp;ETH&nbsp; · &nbsp;BNB&nbsp; · &nbsp;XRP&nbsp; · &nbsp;SOL&nbsp; · &nbsp;GOLD (XAU)&nbsp; · &nbsp;US STOCKS&nbsp; · &nbsp;Prices updating</span>';return}
-  const brand={BTC:{mark:"₿",color:"#f7931a"},ETH:{mark:"◆",color:"#627eea"},BNB:{mark:"◆",color:"#f3ba2f"},XRP:{mark:"✕",color:"#23292f"},SOL:{mark:"≋",color:"#9945ff"},DOGE:{mark:"Ð",color:"#c2a633"},ADA:{mark:"●",color:"#3468d4"},TRX:{mark:"△",color:"#eb0029"},LTC:{mark:"Ł",color:"#345d9d"},XAU:{mark:"◉",color:"#d4af37"},USDT:{mark:"₮",color:"#26a17b"},USDC:{mark:"＄",color:"#2775ca"},LINK:{mark:"⬡",color:"#2a5ada"},AVAX:{mark:"▲",color:"#e84142"},DOT:{mark:"●",color:"#e6007a"},TON:{mark:"◈",color:"#0098ea"}};
-  const items=assets.map(a=>{const sym=String(a.symbol).toUpperCase(),chg=Number(a.price_change_percentage_24h)||0,brandInfo=brand[sym]||{mark:sym.slice(0,2),color:"#52718f"};return '<span class="oc-visitor-ticker-item"><span class="oc-visitor-ticker-coin" style="--oc-coin-color:'+brandInfo.color+'"><i>'+brandInfo.mark+'</i></span><span class="oc-visitor-ticker-copy"><b>'+escapeHtml(sym)+'</b><strong>'+priceText(a)+'</strong><em class="'+(chg>=0?"green":"red")+'">'+fmtChange(chg)+'</em></span></span>'}).join("");
+  const brand={BTC:{mark:"₿",color:"#f7931a",logo:"https://bitnetspro.com/images/bitnet/token/btc.svg"},ETH:{mark:"◆",color:"#627eea",logo:"https://bitnetspro.com/images/bitnet/token/eth.svg"},BNB:{mark:"◆",color:"#f3ba2f"},XRP:{mark:"✕",color:"#23292f"},SOL:{mark:"≋",color:"#9945ff",logo:"https://bitnetspro.com/images/bitnet/token/sol.svg"},DOGE:{mark:"Ð",color:"#c2a633"},ADA:{mark:"●",color:"#3468d4"},TRX:{mark:"△",color:"#eb0029"},LTC:{mark:"Ł",color:"#345d9d"},XAU:{mark:"◉",color:"#d4af37"},USDT:{mark:"₮",color:"#26a17b",logo:"https://bitnetspro.com/images/bitnet/token/usdt.svg"},USDC:{mark:"＄",color:"#2775ca"},LINK:{mark:"⬡",color:"#2a5ada",logo:"https://bitnetspro.com/images/bitnet/token/link.svg"},AVAX:{mark:"▲",color:"#e84142"},DOT:{mark:"●",color:"#e6007a"},TON:{mark:"◈",color:"#0098ea"}};
+  const items=shown.map(a=>{const sym=String(a.symbol).toUpperCase(),chg=Number(a.price_change_percentage_24h)||0,brandInfo=brand[sym]||{mark:sym.slice(0,2),color:"#52718f"},mark=brandInfo.logo?'<img src="'+brandInfo.logo+'" alt="'+escapeHtml(sym)+'" loading="lazy">':'<i>'+brandInfo.mark+'</i>';return '<span class="oc-visitor-ticker-item"><span class="oc-visitor-ticker-coin" style="--oc-coin-color:'+brandInfo.color+'">'+mark+'</span><span class="oc-visitor-ticker-copy"><b>'+escapeHtml(sym)+' <small>'+escapeHtml(a.name||sym)+'</small></b><strong>'+priceText(a)+'</strong><em class="'+(chg>=0?"green":"red")+'">'+fmtChange(chg)+'</em></span></span>'}).join("");
   track.innerHTML=items+items;
+  if(moreButton&&!moreButton.dataset.bound){moreButton.dataset.bound="1";moreButton.addEventListener("click",()=>{window.ocVisitorTickerExpanded=!window.ocVisitorTickerExpanded;renderTicker()})}
  }
  function renderTable(){
   const rows=$("ocVisitorMarketRows"),count=$("ocVisitorMarketCount");if(!rows)return;
@@ -4706,9 +4716,14 @@ html.oc-light-theme .oc-roadmap-brand-name{color:#172b42}
 
 <style id="oc-visitor-market-pulse-motion">
 /* Visitor-only market pulse: continuous horizontal ticker with rotating coin medallions. */
-.oc-visitor-ticker-panel{grid-template-columns:190px minmax(0,1fr);min-height:82px}
+.oc-visitor-ticker-panel{grid-template-columns:190px minmax(0,1fr) auto;min-height:82px}
 .oc-visitor-ticker-track{gap:30px;animation:ocVisitorTicker 34s linear infinite;will-change:transform}
-.oc-visitor-ticker-item{gap:10px;padding:5px 2px;min-width:128px}
+.oc-visitor-ticker-item{gap:10px;padding:5px 2px;min-width:150px}
+.oc-visitor-ticker-copy b{display:flex;align-items:baseline;gap:5px}
+.oc-visitor-ticker-copy b small{font-size:9px;font-weight:500;color:#91a8bf}
+.oc-visitor-ticker-coin img{width:22px;height:22px;object-fit:contain;display:block}
+.oc-visitor-ticker-more{border:1px solid #c69b4d;border-radius:8px;background:#342817;color:#f4d58f;padding:8px 12px;font-size:11px;font-weight:800;cursor:pointer}
+.oc-visitor-ticker-more:hover{background:#4a371e}
 .oc-visitor-ticker-coin{position:relative;display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border:1px solid color-mix(in srgb,var(--oc-coin-color) 72%,white 28%);border-radius:50%;background:color-mix(in srgb,var(--oc-coin-color) 19%,#081829);color:var(--oc-coin-color);box-shadow:0 0 15px color-mix(in srgb,var(--oc-coin-color) 22%,transparent);animation:ocVisitorCoinSpin 8s linear infinite}
 .oc-visitor-ticker-coin:before{content:"";position:absolute;inset:-4px;border:1px dashed color-mix(in srgb,var(--oc-coin-color) 72%,transparent);border-radius:50%;animation:ocVisitorCoinSpin 12s linear infinite reverse}
 .oc-visitor-ticker-coin i{font-style:normal;font-size:19px;font-weight:900;line-height:1;animation:ocVisitorCoinCounterSpin 8s linear infinite}
@@ -4718,7 +4733,7 @@ html.oc-light-theme .oc-roadmap-brand-name{color:#172b42}
 .oc-visitor-ticker-copy em{font-size:9px;font-style:normal;font-weight:700}
 @keyframes ocVisitorCoinSpin{to{transform:rotate(360deg)}}
 @keyframes ocVisitorCoinCounterSpin{to{transform:rotate(-360deg)}}
-@media(max-width:680px){.oc-visitor-ticker-panel{grid-template-columns:1fr;gap:9px;padding:11px 12px}.oc-visitor-ticker-label{flex-direction:row;align-items:center;justify-content:space-between}.oc-visitor-ticker-label span{font-size:8px}.oc-visitor-ticker-track{gap:22px;animation-duration:30s}.oc-visitor-ticker-item{min-width:118px}.oc-visitor-ticker-coin{width:34px;height:34px;flex-basis:34px}}
+@media(max-width:680px){.oc-visitor-ticker-panel{grid-template-columns:minmax(0,1fr) auto;gap:9px;padding:11px 12px}.oc-visitor-ticker-label{grid-column:1/-1}.oc-visitor-ticker-clip{grid-column:1}.oc-visitor-ticker-more{grid-column:2;grid-row:2}.oc-visitor-ticker-label{flex-direction:row;align-items:center;justify-content:space-between}.oc-visitor-ticker-label span{font-size:8px}.oc-visitor-ticker-track{gap:22px;animation-duration:30s}.oc-visitor-ticker-item{min-width:118px}.oc-visitor-ticker-coin{width:34px;height:34px;flex-basis:34px}}
 @media(prefers-reduced-motion:reduce){.oc-visitor-ticker-track,.oc-visitor-ticker-coin,.oc-visitor-ticker-coin:before,.oc-visitor-ticker-coin i{animation:none!important}}
 </style>
 
