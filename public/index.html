@@ -675,6 +675,61 @@ html.oc-light-theme nav button.active{color:#a86b0c!important}
 }
 @media(prefers-reduced-motion:reduce){#page-public-market .oc-visitor-device{transition:none}}
 </style>
+
+<script id="oc-android-device-detect">
+  // Scope the visitor showcase alignment adjustment to Android phones only.
+  if (/Android/i.test(navigator.userAgent || "")) {
+    document.documentElement.classList.add("oc-android");
+  }
+</script>
+<style id="oc-android-visitor-centering">
+@media (max-width: 760px) {
+  html.oc-android #page-public-market {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  html.oc-android #page-public-market .oc-visitor-hero {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-items: stretch;
+    padding: 22px 12px !important;
+    gap: 10px;
+  }
+  html.oc-android #page-public-market .oc-visitor-visual {
+    display: flex !important;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    padding: 12px 0 18px;
+  }
+  html.oc-android #page-public-market .oc-visitor-device {
+    display: block;
+    width: min(88%, 330px);
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0 auto;
+    transform: none !important;
+  }
+  html.oc-android #page-public-market .oc-visitor-device-screen {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  html.oc-android #page-public-market .oc-visitor-float-chip {
+    max-width: 42%;
+    box-sizing: border-box;
+  }
+}
+</style>
+
 </head>
 <body>
 <header>
