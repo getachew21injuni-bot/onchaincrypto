@@ -533,6 +533,7 @@ body:has(#page-public-market:not(.hidden)) header #ocVisitorActions .secondary {
     <button class="active" data-page="home">Home</button>
     <button data-page="markets">Markets</button>
     <button data-page="trade">Trade</button>
+    <button data-page="browser">Browser</button>
     <button data-page="wallet">Wallet</button>
     
   </nav>
@@ -1661,7 +1662,7 @@ window.ocApplyAdminDemoBalance=function(amount){const n=Number(amount);if(!Numbe
 window.ocApplyAdminDemoAssets=function(balances){if(!balances||typeof balances!=="object"||Array.isArray(balances))return;let changed=false;for(const [rawSymbol,rawAmount] of Object.entries(balances)){const symbol=String(rawSymbol||"").toUpperCase();const amount=Number(rawAmount);if(!/^[A-Z0-9]{2,12}$/.test(symbol)||!Number.isFinite(amount)||amount<0)continue;state.holdings[symbol]=amount;changed=true;}if(changed){saveState();renderWallet();}};
 function renderWallet(){const pricedHoldings=Object.entries(state.holdings).reduce((out,[sym,qty])=>{const symbol=String(sym).toUpperCase(),amount=Number(qty)||0;if(amount<=0||symbol==="USDT")return out;const price=Number(priceFor(symbol)?.current_price||0);if(price>0){out.value+=amount*price;out.priced++;}else out.unpriced++;return out;},{value:0,priced:0,unpriced:0});const totalValue=(Number(state.balance)||0)+pricedHoldings.value;$("summaryBalance").textContent=usdtMoney(state.balance);$("walletBalance").textContent=usdtMoney(totalValue)+" USDT";$("walletBalanceNote").textContent="Estimated total value in USDT · "+pricedHoldings.priced+" priced coin holding"+(pricedHoldings.priced===1?"":"s")+(pricedHoldings.unpriced?"; "+pricedHoldings.unpriced+" asset price"+(pricedHoldings.unpriced===1?" is":"s are")+" unavailable and excluded":"")+" · demo portfolio";$("holdingsValue").textContent=usdtMoney(pricedHoldings.value);const rows=Object.entries(state.holdings).filter(([sym,qty])=>String(sym).toUpperCase()!=="USDT"&&Number(qty)>0.0000000001&&(! $("hideSmallBalances")?.checked||Number(qty)*(priceFor(sym)?.current_price||0)>=1));$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym,current_price:0},price=Number(c.current_price||0);return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+' '+safe(sym.toUpperCase())+'</td><td>'+(price>0?usdtMoney(Number(qty)*price):"Price unavailable")+'</td></tr>'}).join(''):'<tr><td colspan="3" class="empty">No coin holdings yet. Your USDT balance is shown above.</td></tr>';renderActivityHistory();renderTradeHistory();renderPnl();renderWalletMarket()}
 document.addEventListener("change",e=>{if(e.target&&e.target.id==="hideSmallBalances")renderWallet();if(e.target&&e.target.id==="homeHistoryFilter")renderActivityHistory()});
-function showPage(page){if(window.ocLoggedOut===true && !auth.currentUser && page!=="public-market" && page!=="register")page="register";if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
+function showPage(page){if(window.ocLoggedOut===true && !auth.currentUser && !["public-market","home","markets","trade","browser","wallet","register"].includes(page))page="register";if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
 window.showPage = showPage;
 let timedPaper=null,timedTimer=null,pendingTimedDirection=null;
 function quickPlan(){const amount=Number($("timedStake")?.value||0)*Number(priceFor(window.__ocTradeFundingCoin||"USDT")?.current_price||1),isGold=($("tradeAsset")?.value||selected)==="XAU",minimum=isGold?500:100;const levels=[{rate:12,min:minimum,max:5000,duration:30,label:"Level 1"},{rate:15,min:5000,max:10000,duration:60,label:"Level 2"},{rate:18,min:10000,max:25000,duration:90,label:"Level 3"},{rate:21,min:25000,max:50000,duration:120,label:"Level 4"},{rate:24,min:50000,max:100000,duration:180,label:"Level 5"},{rate:27,min:100000,max:1000000,duration:360,label:"Level 6"}];return levels.find((p,i)=>amount>=p.min&&(amount<p.max||i===levels.length-1&&amount<=p.max))||levels[0]}
@@ -1671,6 +1672,7 @@ function drawTimedTradeGraph(samples,entry){
  const canvas=$("timedTradeChart");if(!canvas)return;const w=Math.max(280,canvas.clientWidth||600),h=190,dpr=window.devicePixelRatio||1;canvas.width=w*dpr;canvas.height=h*dpr;const ctx=canvas.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);const vals=samples.map(p=>Number(p.price)).filter(v=>Number.isFinite(v)&&v>0);ctx.fillStyle="#91a7bd";ctx.font="11px Arial";if(!vals.length){ctx.fillText("Waiting for public price samples…",14,28);return}const min=Math.min(...vals,entry),max=Math.max(...vals,entry),range=max-min||Math.max(Math.abs(entry)*0.00002,0.00000001),left=48,right=12,top=22,bottom=25,x=i=>left+(w-left-right)*(samples.length<2?0:i/(samples.length-1)),y=v=>top+(h-top-bottom)*(1-(v-min)/range);ctx.strokeStyle="#26384b";ctx.lineWidth=1;for(let i=0;i<4;i++){const yy=top+(h-top-bottom)*i/3;ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(w-right,yy);ctx.stroke();const value=max-(max-min)*i/3;ctx.fillStyle="#91a7bd";ctx.fillText(value.toLocaleString("en-US",{maximumFractionDigits:Math.abs(value)<1?6:2}),3,yy+4)}ctx.strokeStyle="#f0b90b";ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(left,y(entry));ctx.lineTo(w-right,y(entry));ctx.stroke();ctx.setLineDash([]);const latest=vals[vals.length-1];ctx.strokeStyle=latest>=entry?"#0ecb81":"#f6465d";ctx.lineWidth=2.5;ctx.beginPath();samples.forEach((p,i)=>{if(i===0)ctx.moveTo(x(i),y(p.price));else ctx.lineTo(x(i),y(p.price))});ctx.stroke();ctx.fillStyle=ctx.strokeStyle;samples.forEach((p,i)=>{if(i===samples.length-1){ctx.beginPath();ctx.arc(x(i),y(p.price),3.5,0,Math.PI*2);ctx.fill()}});ctx.fillStyle="#f0b90b";ctx.fillText("Entry "+money(entry),left,12);ctx.fillStyle="#91a7bd";ctx.fillText("Latest "+money(latest),Math.max(left,w-145),h-6)
 }
 function startTimedPaper(direction){
+ if(window.ocLoggedOut===true&&!window.onchaincryptoCurrentUser){document.body.classList.add("oc-auth-screen");window.showPage?.("register");return}
  if(timedPaper){$("timedResult").textContent="Your trade is already running. Wait for the result before starting another.";return}
  const sym=$("tradeAsset").value||selected,c=priceFor(sym),stake=Number($("timedStake").value),funding=window.__ocTradeFundingCoin||"USDT",fundingPrice=Number(priceFor(funding)?.current_price||1),stakeUsd=stake*fundingPrice,duration=Number($("timedDuration").value);
  if(!c||!Number.isFinite(Number(c.current_price))||Number(c.current_price)<=0){$("timedResult").textContent="Market price unavailable. Refresh market data and try again.";return}
@@ -3171,7 +3173,12 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
   };
 
   function navigate(page, opts={}){
-
+    const guest=window.ocLoggedOut===true&&!window.onchaincryptoCurrentUser;
+    if(guest){
+      if(page==="home")page="public-market";
+      if(!["public-market","markets","trade","browser","wallet","register"].includes(page))page="register";
+      document.body.classList.toggle("oc-auth-screen",page==="register");
+    }
     const target=document.getElementById('page-'+page);
     if(!target) return;
     const currentPage=pages().find(section=>!section.classList.contains('hidden'));
@@ -3180,7 +3187,7 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     // Do not call the legacy page router here: its old listeners could re-open Trade
     // after a Wallet/Deposit/Withdraw action. Keep one authoritative visible page.
     pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-'+page));
-    document.querySelectorAll('#nav [data-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.page===page));
+    document.querySelectorAll('#nav [data-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.page===page||(guest&&page==='public-market'&&btn.dataset.page==='home')));
     document.querySelectorAll('[data-bottom-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.bottomPage===page));
     // The order book belongs only to Trade; never let it cover other pages.
     const book=document.getElementById('liveOrderBookPanel');
@@ -3236,8 +3243,8 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
   // Guests start on public Home; signed-in routing remains unchanged.
   const current=pages().find(s=>!s.classList.contains('hidden'));
   if(window.ocLoggedOut===true){
-    pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-home'));
-    navigate('home',{fromOriginal:true,keepScroll:true});
+    pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-public-market'));
+    navigate('public-market',{fromOriginal:true,keepScroll:true});
   } else if(current) navigate(current.id.slice(5),{fromOriginal:true,keepScroll:true});
 })();
 </script>
@@ -6093,3 +6100,77 @@ body.oc-trade-overlay-open{overflow:auto!important}
  }
 }
 </style>
+
+
+<style id="oc-visitor-explore-layout">
+/* Guests can browse public sections; account-only areas remain masked. */
+html.oc-auth-pending main > section[id^="page-"]:not(#page-public-market),
+body.oc-logged-out:not(.oc-auth-screen) main > section[id^="page-"].hidden{display:none!important}
+html.oc-auth-pending main > #page-public-market,
+body.oc-logged-out:not(.oc-auth-screen) main > section[id^="page-"]:not(.hidden){display:block!important}
+html.oc-auth-pending main,body.oc-logged-out:not(.oc-auth-screen) main{display:block!important;min-height:calc(100vh - 72px)!important;max-width:1440px!important;margin:0 auto!important;padding:22px!important}
+html.oc-auth-pending body > header,
+body.oc-logged-out:not(.oc-auth-screen) > header{display:grid!important}
+html.oc-auth-pending body > #bottomNav,
+body.oc-logged-out:not(.oc-auth-screen) > #bottomNav{display:grid!important}
+html.oc-auth-pending body > footer,
+body.oc-logged-out:not(.oc-auth-screen) > footer{display:block!important}
+html.oc-auth-pending body > :not(header):not(main):not(footer):not(#bottomNav),
+body.oc-logged-out:not(.oc-auth-screen) > :not(header):not(main):not(footer):not(#bottomNav){display:none!important}
+body.oc-logged-out:not(.oc-auth-screen) #nav{display:flex!important}
+body.oc-logged-out:not(.oc-auth-screen) #ocVisitorActions,
+html.oc-auth-pending #ocVisitorActions{display:flex!important}
+body.oc-logged-out:not(.oc-auth-screen) #moreMenuBtn,
+body.oc-logged-out:not(.oc-auth-screen) #refreshBtn,
+body.oc-logged-out:not(.oc-auth-screen) #ocBackBtn{display:none!important}
+body.oc-logged-out:not(.oc-auth-screen) #page-trade .form-panel,
+body.oc-logged-out:not(.oc-auth-screen) #page-trade #tradeHistory,
+body.oc-logged-out:not(.oc-auth-screen) #page-trade .performance-panel,
+body.oc-logged-out:not(.oc-auth-screen) #page-trade .level-grid,
+body.oc-logged-out:not(.oc-auth-screen) #page-wallet .wallet-overview,
+body.oc-logged-out:not(.oc-auth-screen) #page-wallet .wallet-assets-panel{display:none!important}
+.oc-visitor-account-gate{margin:18px 0;padding:22px;border:1px solid #2a4561;border-radius:14px;background:linear-gradient(120deg,#10243a,#0b192b);color:#edf6ff}
+.oc-visitor-account-gate h2{margin:0 0 8px;font-size:21px}
+.oc-visitor-account-gate p{margin:0 0 14px;color:#a9bdd2;line-height:1.6}
+.oc-visitor-account-gate .gate-actions{display:flex;gap:10px;flex-wrap:wrap}
+.oc-visitor-account-gate button{min-height:42px}
+@media(max-width:700px){
+ html.oc-auth-pending main,body.oc-logged-out:not(.oc-auth-screen) main{padding:14px!important}
+ body.oc-logged-out:not(.oc-auth-screen) #nav{display:none!important}
+}
+</style>
+<script id="oc-visitor-explore-layout-script">
+(function(){
+ function gate(title,copy){
+  const el=document.createElement("section");
+  el.className="oc-visitor-account-gate";
+  el.innerHTML='<h2>'+title+'</h2><p>'+copy+'</p><div class="gate-actions"><button type="button" class="primary" data-oc-gate-signup>Sign Up</button><button type="button" class="secondary" data-oc-gate-login>Log In</button></div>';
+  return el;
+ }
+ function prepare(){
+  const trade=document.getElementById("page-trade");
+  if(trade&&!trade.querySelector("[data-oc-trade-visitor-gate]")){
+   const box=gate("Explore the trading workspace","View public market charts and trading information. Sign in to use your personal demo balance and place simulated orders.");
+   box.dataset.ocTradeVisitorGate="1";
+   const chart=trade.querySelector(".trade-layout");
+   if(chart)chart.insertAdjacentElement("afterend",box);else trade.prepend(box);
+  }
+  const wallet=document.getElementById("page-wallet");
+  if(wallet&&!wallet.querySelector("[data-oc-wallet-visitor-gate]")){
+   const box=gate("Your wallet, when you sign in","Your personal balances, asset holdings and wallet actions are private. Sign in or create an account to access your wallet.");
+   box.dataset.ocWalletVisitorGate="1";
+   wallet.insertBefore(box,wallet.firstChild);
+  }
+ }
+ document.addEventListener("click",function(e){
+  const signup=e.target.closest("[data-oc-gate-signup]");
+  const login=e.target.closest("[data-oc-gate-login]");
+  if(signup){e.preventDefault();document.getElementById("ocVisitorSignup")?.click();}
+  if(login){e.preventDefault();document.getElementById("ocVisitorLogin")?.click();}
+ });
+ prepare();
+ const observer=new MutationObserver(prepare);
+ observer.observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
