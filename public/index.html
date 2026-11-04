@@ -2195,7 +2195,7 @@ function startTimedPaper(direction){
  },1000);
 }
 function finishedSymbolSafe(){return timedPaper?.symbol||$("tradeAsset")?.value||selected}
-function chooseTimedDirection(direction){pendingTimedDirection=direction;$("timedUpBtn").setAttribute("aria-pressed",String(direction==="up"));$("timedDownBtn").setAttribute("aria-pressed",String(direction==="down"));$("timedConfirmBtn").disabled=!!timedPaper;const result=$("timedResult");if(result)result.textContent=(direction==="up"?"BUY":"SELL")+" selected. Review amount, plan and expiry, then confirm."}
+function chooseTimedDirection(direction){pendingTimedDirection=direction;$("timedUpBtn").setAttribute("aria-pressed",String(direction==="up"));$("timedDownBtn").setAttribute("aria-pressed",String(direction==="down"));$("timedConfirmBtn").disabled=!!timedPaper;const result=$("timedResult");if(result)result.textContent=(direction==="up"?"BUY":"SELL")+" selected. Review amount, plan and expiry, then confirm.";requestAnimationFrame(()=>{const form=$("timedPaperTrade"),next=$("timedConfirmBtn");if(form&&next&&form.classList.contains("oc-stage-config")){const top=next.getBoundingClientRect().top-form.getBoundingClientRect().top+form.scrollTop-90;form.scrollTo({top:Math.max(0,top),behavior:"smooth"})}})}
 $("timedUpBtn").addEventListener("click",()=>chooseTimedDirection("up"));
 $("timedDownBtn").addEventListener("click",()=>chooseTimedDirection("down"));
 $("timedConfirmBtn").addEventListener("click",()=>{if(pendingTimedDirection)startTimedPaper(pendingTimedDirection)});
@@ -5387,7 +5387,57 @@ file?.addEventListener("change",async()=>{receiptData="";receiptName="";const ch
 $("depositNetwork")?.addEventListener("change",validate);window.addEventListener("oc-wallet-addresses-updated",validate);
 document.querySelectorAll('[data-quick-coin="deposit"]').forEach(b=>b.addEventListener("click",()=>setTimeout(validate,0)));
 submit?.addEventListener("click",async()=>{const v=currentAddress(),a=Number(amount.value),txHash=hash.value.trim();if(!user){notice.textContent="Please sign in first.";return;}if(!(a>0&&Number.isFinite(a))||txHash.length<8||!receiptData||!v.address){notice.textContent="Complete the amount, transaction hash and screenshot, and select a configured deposit address.";return;}submit.disabled=true;submit.textContent="Submitting…";notice.textContent="Sending your deposit request to admin review…";try{await addDoc(collection(db,"depositRequests"),{uid:user.uid,email:user.email||"",asset:v.asset,network:v.network,amount:a,depositAddress:v.address,transactionHash:txHash,receiptImage:receiptData,receiptFileName:receiptName,status:"pending",createdAt:serverTimestamp()});amount.value="";hash.value="";file.value="";receiptData="";receiptName="";preview.textContent="No screenshot selected.";notice.textContent="Deposit request submitted. Admin can review your payment screenshot and transaction details. Funds are not credited automatically.";}catch(error){notice.textContent="Could not submit ("+(error.code||error.message||"error")+"). Check the selected network and try again.";}finally{submit.textContent="Submit deposit request";validate();}});
-</script></body>
+</script>
+<script id="oc-forward-step-navigation">
+(function(){
+ if(window.__ocForwardStepNavigation)return;window.__ocForwardStepNavigation=true;
+ const $=id=>document.getElementById(id);
+ function forwardTo(el,container){
+  if(!el)return;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   if(container&&container.scrollHeight>container.clientHeight){
+    const top=el.getBoundingClientRect().top-container.getBoundingClientRect().top+container.scrollTop-76;
+    container.scrollTo({top:Math.max(0,top),behavior:"smooth"});
+   }else el.scrollIntoView({behavior:"smooth",block:"start"});
+  }));
+ }
+ function chooseCoin(kind,symbol){
+  const list=window.supportedCoins;
+  if(kind==="deposit"){window.selectedDepositCoin=symbol;if(typeof window.updateSelectedCoin==="function")window.updateSelectedCoin("deposit");}
+  else{window.selectedWithdrawCoin=symbol;if(typeof window.updateSelectedCoin==="function")window.updateSelectedCoin("withdraw");}
+  const search=$(kind+"CoinSearch");if(search)search.value="";
+  if(typeof window.drawCoinPicker==="function")window.drawCoinPicker(kind,"");
+  forwardTo($(kind+"Network"),null);
+ }
+ document.addEventListener("click",e=>{
+  const t=e.target instanceof Element?e.target:null;if(!t)return;
+  const quick=t.closest("[data-quick-coin]");
+  if(quick){const kind=quick.dataset.quickCoin,symbol=String(quick.dataset.asset||"").toUpperCase();if(["deposit","withdraw"].includes(kind)&&symbol){chooseCoin(kind,symbol);}}
+  const picked=t.closest("#depositCoinList [data-coin],#withdrawCoinList [data-coin]");
+  if(picked){const kind=picked.closest("#depositCoinList")?"deposit":"withdraw";setTimeout(()=>forwardTo($(kind+"Network"),null),40);}
+  if(t.closest("#copyDepositAddress"))return;
+  if(t.closest("#showDepositQr"))setTimeout(()=>forwardTo($("depositProofTitle"),null),80);
+ },false);
+ $("depositNetwork")?.addEventListener("change",()=>setTimeout(()=>forwardTo($("depositAddress")?.closest(".address-box"),null),40));
+ $("withdrawNetwork")?.addEventListener("change",()=>setTimeout(()=>forwardTo($("withdrawAddress"),null),40));
+ $("withdrawAddress")?.addEventListener("blur",()=>{if($("withdrawAddress").value.trim())forwardTo($("withdrawAmount"),null)});
+ $("withdrawAmount")?.addEventListener("blur",()=>{if(Number($("withdrawAmount").value)>0)forwardTo($("withdrawSubmit"),null)});
+ const receiptPreview=$("depositReceiptPreview");
+ if(receiptPreview&&window.MutationObserver)new MutationObserver(()=>{
+  if(receiptPreview.textContent.includes("Screenshot ready"))forwardTo($("depositSubmitRequest"),null);
+ }).observe(receiptPreview,{childList:true,subtree:true,characterData:true});
+ const form=$("timedPaperTrade");
+ $("timedConfirmBtn")?.addEventListener("click",()=>setTimeout(()=>{
+  if(form&&form.classList.contains("oc-stage-running"))forwardTo($("timedCountdown")?.closest(".cards")||$("timedTradeChart"),form);
+ },160));
+ const countdown=$("timedCountdown");
+ if(countdown&&window.MutationObserver)new MutationObserver(()=>{
+  if(form?.classList.contains("oc-stage-complete"))forwardTo($("timedResultBoard"),form);
+ }).observe(countdown,{childList:true,subtree:true,characterData:true});
+})();
+</script>
+
+</body>
 </html>
 
 <style id="oc-register-contact-choice-style">
