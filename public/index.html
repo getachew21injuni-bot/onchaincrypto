@@ -1034,6 +1034,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
    <button class="quick-action" style="--action-color:#eabf38" type="button" data-go="markets"><span class="action-icon">▥</span><strong>Markets</strong><small>View live coin prices</small></button>
    <button class="quick-action" style="--action-color:#a78bfa" type="button" data-go="history" data-home-history="true"><span class="action-icon">◷</span><strong>History</strong><small>7-day performance</small></button>
    <button class="quick-action" style="--action-color:#00cce8" type="button" data-go="wallet"><span class="action-icon">◉</span><strong>Wallet</strong><small>View assets and balance</small></button>
+   <button class="quick-action oc-copy-trading-auth-only" style="--action-color:#b58cff" type="button" data-go="copytrading"><span class="action-icon">⇄</span><strong>Copy Trading</strong><small>Compare trader strategies</small></button>
   </div>
  </section>
 
@@ -1083,35 +1084,64 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
   })();
   </script>
   <section id="page-copytrading" class="hidden">
-    <div class="page-title"><div><h1>Copy Traders</h1><div class="muted tiny">Explore strategy examples and manage your followed traders.</div></div><span class="tag">STRATEGY DISCOVERY</span></div>
+    <div class="page-title"><div><h1>Copy Traders</h1><div class="muted tiny">Compare strategy styles, sample performance and risk before choosing who to follow.</div></div><span class="tag">TRADER DISCOVERY</span></div>
     <section class="panel" style="margin-bottom:16px">
-      <div class="section-head"><div><h2>Discover traders</h2><div class="muted tiny">Illustrative strategy profiles for learning and comparison.</div></div><span class="tag">EXAMPLE PROFILES</span></div>
-      <p class="muted tiny">These profiles are examples, not verified traders or historical performance records. Following saves a watchlist on this device. It does not copy trades, place orders or move funds.</p>
+      <div class="section-head"><div><h2>Explore trader strategies</h2><div class="muted tiny">Three detailed sample profiles to help you understand the information to compare.</div></div><span class="tag">ILLUSTRATIVE PROFILES</span></div>
+      <p class="oc-copy-demo-note">Sample figures below are illustrative examples only — they are not real trader accounts, verified results, or a promise of future returns.</p>
       <div class="cards" id="ocCopyTraderCards">
-        <article class="card oc-copy-profile"><div class="label">BTC trend strategy</div><div class="big">Trend follower</div><p class="muted tiny">Studies Bitcoin market direction and momentum. Style: active · Risk focus: high volatility.</p>
-          <details class="oc-copy-details"><summary>View trader details &amp; performance</summary><div class="oc-copy-metrics"><div><span>Capital under management</span><strong>Not provided</strong></div><div><span>Current holdings</span><strong>Not connected</strong></div><div><span>Total PnL</span><strong>Not verified</strong></div><div><span>30-day return</span><strong>Not verified</strong></div><div><span>Win rate</span><strong>Not available</strong></div><div><span>Maximum drawdown</span><strong>Not available</strong></div><div><span>Completed trades</span><strong>Not recorded</strong></div><div><span>Average holding time</span><strong>Active style · duration unavailable</strong></div></div>
-          <div class="oc-copy-chart"><strong>PnL history</strong><div class="oc-copy-chart-empty">Verified performance history is not connected yet. A PnL chart will appear when reliable trader records are available.</div></div>
-          <p class="muted tiny">Markets: Bitcoin · Approach: trend and momentum research · Risk: high volatility. No verified trader identity or live portfolio is connected.</p>
-          <button type="button" class="secondary" data-copy-follow="btc-trend">Follow trader</button></details></article>
-        <article class="card oc-copy-profile"><div class="label">Gold market strategy</div><div class="big">Gold observer</div><p class="muted tiny">Studies XAU price structure and broader market drivers. Style: swing · Risk focus: event volatility.</p>
-          <details class="oc-copy-details"><summary>View trader details &amp; performance</summary><div class="oc-copy-metrics"><div><span>Capital under management</span><strong>Not provided</strong></div><div><span>Current holdings</span><strong>Not connected</strong></div><div><span>Total PnL</span><strong>Not verified</strong></div><div><span>30-day return</span><strong>Not verified</strong></div><div><span>Win rate</span><strong>Not available</strong></div><div><span>Maximum drawdown</span><strong>Not available</strong></div><div><span>Completed trades</span><strong>Not recorded</strong></div><div><span>Average holding time</span><strong>Swing style · duration unavailable</strong></div></div>
-          <div class="oc-copy-chart"><strong>PnL history</strong><div class="oc-copy-chart-empty">Verified performance history is not connected yet. A PnL chart will appear when reliable trader records are available.</div></div>
-          <p class="muted tiny">Markets: Gold (XAU) · Approach: price structure and market-driver research · Risk: event volatility. No verified trader identity or live portfolio is connected.</p>
-          <button type="button" class="secondary" data-copy-follow="gold-swing">Follow trader</button></details></article>
-        <article class="card oc-copy-profile"><div class="label">Multi-asset strategy</div><div class="big">Market researcher</div><p class="muted tiny">Compares selected crypto assets and market conditions. Style: diversified research · Risk focus: correlation.</p>
-          <details class="oc-copy-details"><summary>View trader details &amp; performance</summary><div class="oc-copy-metrics"><div><span>Capital under management</span><strong>Not provided</strong></div><div><span>Current holdings</span><strong>Not connected</strong></div><div><span>Total PnL</span><strong>Not verified</strong></div><div><span>30-day return</span><strong>Not verified</strong></div><div><span>Win rate</span><strong>Not available</strong></div><div><span>Maximum drawdown</span><strong>Not available</strong></div><div><span>Completed trades</span><strong>Not recorded</strong></div><div><span>Average holding time</span><strong>Research style · duration unavailable</strong></div></div>
-          <div class="oc-copy-chart"><strong>PnL history</strong><div class="oc-copy-chart-empty">Verified performance history is not connected yet. A PnL chart will appear when reliable trader records are available.</div></div>
-          <p class="muted tiny">Markets: selected crypto assets · Approach: diversified market research · Risk: correlation and market volatility. No verified trader identity or live portfolio is connected.</p>
-          <button type="button" class="secondary" data-copy-follow="multi-asset">Follow trader</button></details></article>
+        <article class="card oc-copy-profile">
+          <div class="oc-copy-profile-top"><div><div class="label">BTC · CRYPTO</div><div class="big">Bitcoin Trend</div></div><span class="oc-copy-risk oc-risk-high">High risk</span></div>
+          <p class="muted tiny">Momentum-led strategy focused on Bitcoin trend direction, breakouts and active position management.</p>
+          <div class="oc-copy-highlight"><div><span>Example capital</span><strong>$250,000</strong></div><div><span>Example total PnL</span><strong class="green">+$18,450</strong></div></div>
+          <div class="oc-copy-metrics">
+            <div><span>Illustrative 30-day return</span><strong class="green">+7.4%</strong></div><div><span>Illustrative win rate</span><strong>64%</strong></div>
+            <div><span>Example max drawdown</span><strong>12.8%</strong></div><div><span>Example closed trades</span><strong>428</strong></div>
+            <div><span>Typical holding period</span><strong>2–5 days</strong></div><div><span>Markets followed</span><strong>BTC / USDT</strong></div>
+          </div>
+          <details class="oc-copy-details"><summary>Strategy, risk &amp; trading approach</summary><p>Looks for established trends and momentum confirmation. Positions may be opened and closed frequently. Fast market reversals can cause substantial losses.</p><ul class="oc-copy-list"><li>Style: active trend following</li><li>Risk focus: high volatility and sudden reversals</li><li>Suitable review: check drawdown, holding time and position sizing</li></ul></details>
+          <button type="button" class="secondary oc-copy-follow-btn" data-copy-follow="btc-trend">Follow strategy</button>
+        </article>
+        <article class="card oc-copy-profile">
+          <div class="oc-copy-profile-top"><div><div class="label">GOLD · XAU</div><div class="big">Gold Swing</div></div><span class="oc-copy-risk oc-risk-medium">Medium–high risk</span></div>
+          <p class="muted tiny">Swing approach tracking XAU price structure, macroeconomic events and major support or resistance zones.</p>
+          <div class="oc-copy-highlight"><div><span>Example capital</span><strong>$180,000</strong></div><div><span>Example total PnL</span><strong class="green">+$9,720</strong></div></div>
+          <div class="oc-copy-metrics">
+            <div><span>Illustrative 30-day return</span><strong class="green">+5.4%</strong></div><div><span>Illustrative win rate</span><strong>59%</strong></div>
+            <div><span>Example max drawdown</span><strong>8.6%</strong></div><div><span>Example closed trades</span><strong>216</strong></div>
+            <div><span>Typical holding period</span><strong>3–10 days</strong></div><div><span>Markets followed</span><strong>XAU / USDT</strong></div>
+          </div>
+          <details class="oc-copy-details"><summary>Strategy, risk &amp; trading approach</summary><p>Studies gold price structure and scheduled economic events. Volatility can increase sharply around central-bank decisions, inflation releases and geopolitical news.</p><ul class="oc-copy-list"><li>Style: swing trading and market-structure research</li><li>Risk focus: event gaps and rapid price changes</li><li>Suitable review: check event exposure and drawdown history</li></ul></details>
+          <button type="button" class="secondary oc-copy-follow-btn" data-copy-follow="gold-swing">Follow strategy</button>
+        </article>
+        <article class="card oc-copy-profile">
+          <div class="oc-copy-profile-top"><div><div class="label">MULTI-ASSET · CRYPTO</div><div class="big">Diversified Markets</div></div><span class="oc-copy-risk oc-risk-medium">Medium risk</span></div>
+          <p class="muted tiny">Diversified research across selected digital assets, balancing trend opportunities with exposure limits.</p>
+          <div class="oc-copy-highlight"><div><span>Example capital</span><strong>$420,000</strong></div><div><span>Example total PnL</span><strong class="green">+$21,840</strong></div></div>
+          <div class="oc-copy-metrics">
+            <div><span>Illustrative 30-day return</span><strong class="green">+5.2%</strong></div><div><span>Illustrative win rate</span><strong>62%</strong></div>
+            <div><span>Example max drawdown</span><strong>9.4%</strong></div><div><span>Example closed trades</span><strong>684</strong></div>
+            <div><span>Typical holding period</span><strong>1–4 days</strong></div><div><span>Markets followed</span><strong>BTC · ETH · majors</strong></div>
+          </div>
+          <details class="oc-copy-details"><summary>Strategy, risk &amp; trading approach</summary><p>Compares selected crypto assets and may spread exposure across several markets. Correlations can rise during broad market sell-offs, so diversification does not remove risk.</p><ul class="oc-copy-list"><li>Style: diversified market research</li><li>Risk focus: correlation and broad market drawdowns</li><li>Suitable review: check asset concentration and simultaneous positions</li></ul></details>
+          <button type="button" class="secondary oc-copy-follow-btn" data-copy-follow="multi-asset">Follow strategy</button>
+        </article>
       </div>
     </section>
     <section class="panel">
-      <div class="section-head"><div><h2>Your followed traders</h2><div class="muted tiny">Your local strategy watchlist.</div></div><button type="button" class="secondary" id="ocCopyTraderRefresh">Refresh list</button></div>
-      <div id="ocCopyTraderFollowing" class="empty">You have not followed any traders yet.</div>
+      <div class="section-head"><div><h2>Your followed strategies</h2><div class="muted tiny">Saved to your browser on this device.</div></div><button type="button" class="secondary" id="ocCopyTraderRefresh">Refresh list</button></div>
+      <div id="ocCopyTraderFollowing" class="empty">You have not followed any strategies yet.</div>
     </section>
-    <section class="panel" style="margin-top:16px">
-      <h2>How this works</h2>
-      <p class="muted tiny">You can follow and compare these example strategies for research. Automatic trade copying, trader verification, live performance statistics and real-money execution are not currently connected.</p>
+    <section class="panel oc-copy-requirements" style="margin-top:16px">
+      <div class="section-head"><div><h2>What you need before copy trading</h2><div class="muted tiny">Prepare these items before any live copy-trading service becomes available.</div></div></div>
+      <div class="oc-copy-requirement-grid">
+        <div><b>1. Onchain account</b><p>Create an account and keep your sign-in details secure.</p></div>
+        <div><b>2. Identity checks</b><p>Complete any required identity and eligibility checks when the service launches in your region.</p></div>
+        <div><b>3. Available funds</b><p>Choose an amount you can afford to lose and understand any minimum allocation and fees before confirming.</p></div>
+        <div><b>4. Choose risk limits</b><p>Review the trader’s strategy, drawdown, assets, leverage (if any), and set limits where supported.</p></div>
+        <div><b>5. Read the terms</b><p>Understand how copying starts and stops, how fees work, and how withdrawals are handled.</p></div>
+        <div><b>6. Confirm execution access</b><p>Live copying requires an approved trading connection and a working order-execution service.</p></div>
+      </div>
+      <p class="muted tiny" style="margin:8px 18px 16px">Following a strategy saves it to your local watchlist. Automatic trade execution is not currently connected.</p>
     </section>
   </section>
   <section id="page-markets" class="hidden">
@@ -5332,16 +5362,33 @@ body.oc-logged-out.oc-auth-screen #page-register #resetPasswordBtn{
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 </style>
 <style id="oc-copy-trader-due-diligence">
-.oc-copy-profile{min-width:0}
-.oc-copy-details{margin-top:12px;border-top:1px solid var(--border,rgba(255,255,255,.12));padding-top:10px}
-.oc-copy-details summary{cursor:pointer;font-weight:650;color:var(--text,#fff);padding:7px 0}
-.oc-copy-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
-.oc-copy-metrics>div{min-width:0;padding:10px;border:1px solid var(--border,rgba(255,255,255,.12));border-radius:9px;background:rgba(127,127,127,.06)}
-.oc-copy-metrics span{display:block;font-size:11px;color:var(--muted,#999);margin-bottom:5px}
+#page-copytrading .oc-copy-profile{min-width:0;display:flex;flex-direction:column;gap:10px}
+#page-copytrading .oc-copy-profile-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+#page-copytrading .oc-copy-profile .big{font-size:21px;line-height:1.2;margin:5px 0}
+.oc-copy-risk{display:inline-flex;align-items:center;white-space:nowrap;padding:5px 8px;border-radius:999px;font-size:10px;font-weight:800;border:1px solid}
+.oc-risk-high{color:#ffb0b9;border-color:#a94d60;background:#55212d}
+.oc-risk-medium{color:#f8d98b;border-color:#85652d;background:#3c301b}
+.oc-copy-demo-note{margin:12px 18px;padding:11px 13px;border:1px solid #85652d;border-radius:9px;background:#302713;color:#f7dda0;font-size:12px;line-height:1.55}
+.oc-copy-highlight{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.oc-copy-highlight>div{padding:11px;border:1px solid rgba(217,173,85,.35);border-radius:10px;background:linear-gradient(145deg,rgba(217,173,85,.10),rgba(127,127,127,.04))}
+.oc-copy-highlight span,.oc-copy-metrics span{display:block;font-size:10px;color:var(--muted);margin-bottom:5px}
+.oc-copy-highlight strong{display:block;font-size:18px;line-height:1.2;overflow-wrap:anywhere}
+.oc-copy-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.oc-copy-metrics>div{min-width:0;padding:9px;border:1px solid var(--line);border-radius:8px;background:rgba(127,127,127,.05)}
 .oc-copy-metrics strong{display:block;font-size:12px;overflow-wrap:anywhere}
-.oc-copy-chart{margin:10px 0 12px;padding:12px;border:1px solid var(--border,rgba(255,255,255,.12));border-radius:9px}
-.oc-copy-chart-empty{min-height:78px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted,#999);font-size:12px;padding:10px;border-bottom:1px dashed var(--border,rgba(255,255,255,.2))}
-@media(max-width:480px){.oc-copy-metrics{grid-template-columns:1fr}}
+.oc-copy-details{border-top:1px solid var(--line);padding-top:9px}
+.oc-copy-details summary{cursor:pointer;font-weight:750;color:var(--text);padding:5px 0}
+.oc-copy-details p,.oc-copy-list{font-size:12px;line-height:1.6;color:var(--muted)}
+.oc-copy-list{padding-left:18px}
+.oc-copy-follow-btn{width:100%;margin-top:auto}
+.oc-copy-requirement-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:14px 18px}
+.oc-copy-requirement-grid>div{padding:13px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.oc-copy-requirement-grid b{font-size:13px;color:var(--text)}
+.oc-copy-requirement-grid p{margin:6px 0 0;font-size:12px;line-height:1.55;color:var(--muted)}
+@media(max-width:900px){#page-copytrading #ocCopyTraderCards{grid-template-columns:repeat(2,minmax(0,1fr))}.oc-copy-requirement-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){#page-copytrading #ocCopyTraderCards,.oc-copy-requirement-grid{grid-template-columns:1fr}.oc-copy-demo-note{margin:12px}.oc-copy-highlight strong{font-size:17px}}
+  html.oc-auth-pending .oc-copy-trading-auth-only,
+  body.oc-logged-out .oc-copy-trading-auth-only{display:none!important}
 </style>
 
 <script id="oc-copy-trader-watchlist">
