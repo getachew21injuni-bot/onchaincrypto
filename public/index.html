@@ -1216,7 +1216,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
       <section class="panel">
         <div class="section-head"><h2>Markets</h2><input class="search" id="marketSearch" placeholder="Search coin or symbol…"></div>
         <div class="section-head"><div class="tabs" id="marketTabs"><button class="active" data-filter="all">All</button><button data-filter="gainers">Gainers</button><button data-filter="losers">Losers</button><button data-filter="hot">Hot</button><button data-filter="watchlist">★ Watchlist</button></div><span class="muted tiny" id="marketHint">Public prices</span></div>
-        <div class="table-wrap"><table><thead><tr><th>Asset / Pair</th><th>Price (USD)</th><th>24h Change</th><th>Market Cap</th><th>Watch</th></tr></thead><tbody id="marketRows"><tr><td colspan="5" class="empty">Loading market data…</td></tr></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>Asset / Pair</th><th>Price (USD)</th><th>24h Change</th><th>Market Cap</th><th>Watch</th></tr></thead><tbody id="marketRows"><tr><td colspan="5" class="empty">Connecting to live prices…</td></tr></tbody></table></div>
         <div class="market-list-controls"><span class="muted tiny" id="marketListCount">Showing top 5 coins</span><div><button class="secondary" type="button" id="marketShowLess" disabled>Less</button> <button class="primary" type="button" id="marketShowMore">More +5</button></div></div>
         <div class="section-head"><span></span><button class="secondary" id="retryBtn">Refresh</button></div>
       </section>
@@ -1929,8 +1929,8 @@ async function loadMarket(){
  // Show the last saved prices immediately while fresh providers reconnect.
  if(!market.length)restoreCachedMarket();
  const refreshButtons=[$("refreshBtn"),$("retryBtn"),$("refreshSignalsBtn")].filter(Boolean);
- refreshButtons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent="Refreshing…"});
- $("connection").textContent="Updating";setHeaderMarketStatus("connecting");if($("apiStatus"))$("apiStatus").textContent="Updating market prices…";$("marketHint").textContent="Updating market prices…";
+ refreshButtons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent=b.dataset.originalText});
+ $("connection").textContent="Connecting";setHeaderMarketStatus("connecting");if($("apiStatus"))$("apiStatus").textContent="";$("marketHint").textContent="Connecting to live prices…";
  const finish=()=>{marketRequestInProgress=false;refreshButtons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.originalText||"Refresh";delete b.dataset.originalText})};
  const fetchJson=async(url,ms=12000)=>{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),ms);try{const res=await fetch(url,{headers:{accept:"application/json"},signal:controller.signal,cache:"no-store"});if(!res.ok)throw new Error("HTTP "+res.status);return await res.json()}finally{clearTimeout(timer)}};
  const mergeBinance=(base,tickers)=>{
@@ -2039,27 +2039,27 @@ async function loadMarket(){
  }catch(err){
   const hasCached=market.length>0||restoreCachedMarket();
   const liveIndicator=$("marketLiveIndicator");if(liveIndicator){liveIndicator.className="oc-chart-live "+(hasCached?"is-stale":"is-offline");const label=liveIndicator.querySelector("span");if(label)label.textContent=hasCached?"STALE":"OFFLINE";liveIndicator.title=hasCached?"Showing saved prices; all live provider refreshes failed":"Live market data is unavailable";}
-  $("connection").textContent=hasCached?"Cached data":"Unavailable";setHeaderMarketStatus(hasCached?"stale":"offline");
-  if($("apiStatus"))$("apiStatus").innerHTML=hasCached?'<span class="muted">Saved prices · not live · retrying</span>':'<span class="red">All public market feeds unavailable</span>';
+  $("connection").textContent=hasCached?"Cached data":"Reconnecting";setHeaderMarketStatus(hasCached?"stale":"connecting");
+  if($("apiStatus"))$("apiStatus").textContent="";
   if(!hasCached){
-   const unavailable='<tr><td colspan="5" class="empty">Live market prices are temporarily unavailable. Tap Refresh to try again.</td></tr>';
+   const unavailable='<tr><td colspan="5" class="empty">Market prices are reconnecting automatically…</td></tr>';
    if($("marketRows"))$("marketRows").innerHTML=unavailable;
-   if($("homeActivePairs"))$("homeActivePairs").innerHTML='<div class="empty">Live prices are unavailable right now. Open Market and tap Refresh.</div>';
-   if($("marketPulseRows"))$("marketPulseRows").innerHTML='<div class="empty">Live feeds are unavailable. Tap Refresh to retry.</div>';
+   if($("homeActivePairs"))$("homeActivePairs").innerHTML='<div class="empty">Connecting to live market prices…</div>';
+   if($("marketPulseRows"))$("marketPulseRows").innerHTML='<div class="empty">Market data is reconnecting automatically…</div>';
    if($("marketPulseStatus"))$("marketPulseStatus").textContent="Market feeds unavailable";
    if($("assetCount"))$("assetCount").textContent="0";
    if($("gainersList"))$("gainersList").textContent="Unavailable";
    if($("losersList"))$("losersList").textContent="Unavailable";
    if($("hotList"))$("hotList").textContent="Unavailable";
-   if($("hotCoinResults"))$("hotCoinResults").innerHTML='<div class="empty">Live market feeds are unavailable. Check your connection and tap Refresh.</div>';
+   if($("hotCoinResults"))$("hotCoinResults").innerHTML='<div class="empty">Waiting for live market prices…</div>';
    if($("marketGainers"))$("marketGainers").textContent="Unavailable";
    if($("marketLosers"))$("marketLosers").textContent="Unavailable";
    if($("topGainer"))$("topGainer").innerHTML='<span class="muted">Market feeds unavailable</span>';
    if($("topLoser"))$("topLoser").innerHTML='<span class="muted">Market feeds unavailable</span>';
-   if($("signalRows"))$("signalRows").innerHTML='<tr><td colspan="5" class="empty">Live signals are unavailable until a provider responds. Tap Refresh to retry.</td></tr>';
+   if($("signalRows"))$("signalRows").innerHTML='<tr><td colspan="5" class="empty">Signals will appear automatically when live prices reconnect.</td></tr>';
    if($("signalCountLabel"))$("signalCountLabel").textContent="No live prices loaded";
   }else{renderMarket();renderHomeCoinResults();renderSignalScanner()}
-  $("marketHint").textContent=hasCached?"Showing the latest available prices. They may not reflect current market conditions.":"Market prices are temporarily unavailable. Please try again shortly.";
+  $("marketHint").textContent=hasCached?"Showing saved prices while live data reconnects.":"Live prices are reconnecting automatically.";
  }finally{finish()}
 }
 let historySeries=[];
@@ -2324,10 +2324,10 @@ $("requestDeleteAccountBtn").addEventListener("click",()=>{const ok=window.confi
   let socket=null,retryTimer=null,retryDelay=3000,lastMessageAt=0,lastPaintAt=0,lastCacheAt=0,attempt=0;
   const status=(state,message)=>{
     const indicator=document.getElementById("marketLiveIndicator");
-    if(indicator){indicator.className="oc-chart-live "+(state==="live"?"is-live":state==="offline"?"is-offline":"is-stale");const label=indicator.querySelector("span");if(label)label.textContent=state==="live"?"LIVE":state==="offline"?"OFFLINE":"RECONNECTING";indicator.title=message;}
+    if(indicator){indicator.className="oc-chart-live "+(state==="live"?"is-live":"is-stale");const label=indicator.querySelector("span");if(label)label.textContent=state==="live"?"LIVE":state==="offline"?"OFFLINE":"RECONNECTING";indicator.title=message;}
     if(typeof setHeaderMarketStatus==="function")setHeaderMarketStatus(state==="live"?"live":state==="offline"?"offline":"connecting");
-    const connection=document.getElementById("connection");if(connection)connection.textContent=state==="live"?"Live data":state==="offline"?"Unavailable":"Reconnecting";
-    const api=document.getElementById("apiStatus");if(api)api.textContent=message;
+    const connection=document.getElementById("connection");if(connection)connection.textContent=state==="live"?"Live data":"Reconnecting";
+    const api=document.getElementById("apiStatus");if(api)api.textContent="";
   };
   function publish(ticker){
     const symbol=String(ticker.s||"").toUpperCase();
