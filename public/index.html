@@ -1510,11 +1510,44 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
   <section id="page-financial" class="hidden"><div class="page-title"><div><h1>⇵ Financial</h1><div class="muted">Wallet actions, transfers and transaction activity.</div></div><span class="tag">FINANCIAL</span></div><div id="financialPageContent"></div></section>
   <section id="page-kyc" class="hidden"><div class="page-title"><div><h1>✓ Identity Verification</h1><div class="muted">Review identity verification status and requirements.</div></div><span class="tag">IDENTITY</span></div><div id="kycPageContent"></div></section>
   <section id="page-browser" class="hidden">
-    <div class="page-title"><div><h1>Browser Search</h1><div class="muted">Search the web or open Onchain resources.</div></div><span class="tag">WEB BROWSER</span></div>
-    <section class="panel browser-search-panel"><div class="browser-search-heading"><div class="browser-search-icon">⌕</div><div><h2>What would you like to find?</h2><p class="muted">Enter a search term and press Go.</p></div></div>
-    <form id="browserSearchForm" class="browser-search-form"><input id="browserSearchInput" class="search" type="search" placeholder="Search the web…" autocomplete="off" aria-label="Search the web"><button class="primary" type="submit">Go ↗</button></form>
-    <div class="browser-link-grid"><a href="https://www.google.com/" target="_blank" rel="noopener noreferrer"><span>G</span><strong>Google</strong><small>Search the web</small></a><a href="https://www.bing.com/" target="_blank" rel="noopener noreferrer"><span>↗</span><strong>Bing</strong><small>Web search</small></a><a href="https://duckduckgo.com/" target="_blank" rel="noopener noreferrer"><span>◈</span><strong>DuckDuckGo</strong><small>Private search</small></a><a href="https://getachew21injuni-bot.github.io/onchaincrypto/" target="_blank" rel="noopener noreferrer"><span>◆</span><strong>Onchain</strong><small>Open platform home</small></a></div>
-    <p class="muted tiny">Search opens Google in a new tab. Never share passwords, recovery phrases, or payment details.</p></section>
+    <div class="page-title"><div><h1>OnChainCrypto Browser</h1><div class="muted">Explore the latest OnChainCrypto platform and browse the wider web.</div></div><span class="tag">EXPLORE</span></div>
+    <section class="panel browser-search-panel">
+      <div class="browser-search-heading"><div class="browser-search-icon">⌕</div><div><h2>Your world. Your markets.</h2><p class="muted">Search anything, or enter a website address to open it directly.</p></div></div>
+      <form id="browserSearchForm" class="browser-search-form">
+        <input id="browserSearchInput" class="search" type="search" placeholder="Search anything or enter a website address…" autocomplete="off" aria-label="Search the web or enter a website address" required>
+        <select id="browserSearchEngine" class="search" aria-label="Choose search engine" style="max-width:150px;min-width:120px"><option value="google">Google</option><option value="bing">Bing</option><option value="duckduckgo">DuckDuckGo</option></select>
+        <button class="primary" type="submit">Go ↗</button>
+      </form>
+      <div class="browser-link-grid">
+        <a href="https://www.google.com/" target="_blank" rel="noopener noreferrer"><span>G</span><strong>Google</strong><small>Search the web</small></a>
+        <a href="https://www.bing.com/" target="_blank" rel="noopener noreferrer"><span>B</span><strong>Bing</strong><small>Explore websites and answers</small></a>
+        <a href="https://duckduckgo.com/" target="_blank" rel="noopener noreferrer"><span>◈</span><strong>DuckDuckGo</strong><small>Private web search</small></a>
+        <a href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer"><span>W</span><strong>Wikipedia</strong><small>Explore knowledge</small></a>
+      </div>
+    </section>
+    <section class="panel browser-search-panel">
+      <div class="browser-search-heading"><div class="browser-search-icon">◆</div><div><h2>Discover OnChainCrypto</h2><p class="muted">The latest platform tools are one step away.</p></div></div>
+      <div class="browser-link-grid">
+        <a href="#" data-page="markets"><span>◈</span><strong>Explore Markets</strong><small>Crypto, gold and stock market information</small></a>
+        <a href="#" data-page="trade"><span>⇄</span><strong>Trading Workspace</strong><small>Open the platform trading tools</small></a>
+        <a href="#" data-page="wallet"><span>▣</span><strong>Wallet</strong><small>View your wallet and asset options</small></a>
+        <a href="#" data-page="deposit"><span>↓</span><strong>Deposit</strong><small>Open deposit options and requests</small></a>
+        <a href="#" data-page="withdraw"><span>↑</span><strong>Withdraw</strong><small>Open withdrawal options</small></a>
+        <a href="#" data-page="history"><span>◷</span><strong>Activity & History</strong><small>Review recorded account activity</small></a>
+        <a href="#" data-page="kyc"><span>✓</span><strong>Verification</strong><small>View identity verification</small></a>
+        <a href="#" data-page="support"><span>?</span><strong>Help & Support</strong><small>Find platform guidance and assistance</small></a>
+      </div>
+    </section>
+    <section class="panel browser-search-panel">
+      <div class="browser-search-heading"><div class="browser-search-icon">↗</div><div><h2>Popular places to explore</h2><p class="muted">Open independent websites in a separate tab.</p></div></div>
+      <div class="browser-link-grid">
+        <a href="https://www.coingecko.com/" target="_blank" rel="noopener noreferrer"><span>₿</span><strong>CoinGecko</strong><small>Crypto market research</small></a>
+        <a href="https://coinmarketcap.com/" target="_blank" rel="noopener noreferrer"><span>◉</span><strong>CoinMarketCap</strong><small>Digital asset information</small></a>
+        <a href="https://www.tradingview.com/" target="_blank" rel="noopener noreferrer"><span>⌁</span><strong>TradingView</strong><small>Charts and market analysis</small></a>
+        <a href="https://finance.yahoo.com/" target="_blank" rel="noopener noreferrer"><span>Y</span><strong>Yahoo Finance</strong><small>Financial news and markets</small></a>
+      </div>
+      <p class="muted tiny">External websites open in a new tab. Some sites do not allow embedding inside another platform. Never enter your OnChainCrypto password, wallet recovery phrase or payment details on an unfamiliar website.</p>
+    </section>
   </section>
   <section id="page-register" class="hidden">
     <section class="oc-public-auth-hero" aria-label="Onchain trading platform welcome">
@@ -3264,7 +3297,7 @@ window.addEventListener("popstate", async () => {
 
 $("marketShowMore")?.addEventListener("click",()=>{window.marketRowsExpanded=(window.marketRowsExpanded||5)+5;renderMarket()});
 $("marketShowLess")?.addEventListener("click",()=>{window.marketRowsExpanded=5;renderMarket()});
-$("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q=$("browserSearchInput")?.value.trim();if(!q)return;window.open("https://www.google.com/search?q="+encodeURIComponent(q),"_blank","noopener,noreferrer")});
+$("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const field=$("browserSearchInput"),raw=field?.value.trim();if(!raw)return;let destination="";const looksLikeAddress=/^(https?:\/\/)?([\w-]+\.)+[a-z]{2,}([/:?#][^\s]*)?$/i.test(raw);if(looksLikeAddress){try{const candidate=new URL(/^https?:\/\//i.test(raw)?raw:"https://"+raw);if(candidate.protocol==="http:"||candidate.protocol==="https:")destination=candidate.href}catch(_){destination=""}}if(!destination){const engine=$("browserSearchEngine")?.value||"google";const bases={google:"https://www.google.com/search?q=",bing:"https://www.bing.com/search?q=",duckduckgo:"https://duckduckgo.com/?q="};destination=(bases[engine]||bases.google)+encodeURIComponent(raw)}window.open(destination,"_blank","noopener,noreferrer")});
 </script>
 <script id="oc-auth-deep-links">
 (function(){
