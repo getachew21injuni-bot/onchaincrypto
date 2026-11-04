@@ -5667,6 +5667,61 @@ html.oc-auth-pending #nav [data-page="browser"],
 body.oc-logged-out:not(.oc-auth-screen) #nav [data-page="markets"],
 body.oc-logged-out:not(.oc-auth-screen) #nav [data-page="browser"]{display:inline-flex!important}
 </style>
+
+<style id="oc-auth-border-text-visibility">
+/* Auth form: border and text styling only; preserve structure, controls and behaviour. */
+#page-register .auth-main-panel{
+  border:1.5px solid rgba(255,255,255,.88)!important;
+  box-shadow:0 0 0 1px rgba(247,147,26,.28),0 0 22px rgba(247,147,26,.16),0 22px 58px rgba(0,0,0,.42)!important;
+}
+#page-register .auth-main-panel h1,
+#page-register .auth-main-panel h2,
+#page-register .auth-main-panel h3,
+#page-register .auth-main-panel label,
+#page-register .auth-main-panel .auth-heading,
+#page-register .auth-main-panel .oc-auth-choice-button{
+  color:#fff!important;
+  text-shadow:0 0 10px rgba(255,255,255,.16),0 0 14px rgba(247,147,26,.12);
+}
+#page-register .auth-main-panel label .yellow,
+#page-register .auth-main-panel .oc-register-contact-choice label{
+  color:#f4c76b!important;
+}
+#page-register .auth-main-panel input.field,
+#page-register .auth-main-panel select.field,
+#page-register .auth-main-panel textarea.field{
+  color:#fff!important;
+  border:1.5px solid rgba(255,255,255,.78)!important;
+  background:#080d16!important;
+  box-shadow:inset 0 0 0 1px rgba(247,147,26,.12),0 0 12px rgba(247,147,26,.08)!important;
+}
+#page-register .auth-main-panel input.field::placeholder,
+#page-register .auth-main-panel textarea.field::placeholder{
+  color:#c4cbd5!important;opacity:1!important;
+}
+#page-register .auth-main-panel input.field:focus,
+#page-register .auth-main-panel select.field:focus,
+#page-register .auth-main-panel textarea.field:focus{
+  border-color:#f7931a!important;
+  outline:2px solid rgba(247,147,26,.2)!important;
+  box-shadow:0 0 0 3px rgba(247,147,26,.13),0 0 18px rgba(247,147,26,.2)!important;
+}
+#page-register .auth-main-panel .muted,
+#page-register .auth-main-panel p{
+  color:#e0e5ed!important;
+}
+#page-register .auth-main-panel .oc-auth-choice-button,
+#page-register .auth-main-panel button.full{
+  border-color:rgba(255,255,255,.82)!important;
+  text-shadow:0 0 10px rgba(255,255,255,.16);
+}
+html.oc-light-theme #page-register .auth-main-panel input.field,
+html.oc-light-theme #page-register .auth-main-panel select.field,
+html.oc-light-theme #page-register .auth-main-panel textarea.field{
+  color:#fff!important;background:#080d16!important;border-color:#f4c76b!important;
+}
+</style>
+
 </body>
 </html>
 
