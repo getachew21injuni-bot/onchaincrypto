@@ -1063,7 +1063,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
    
   </section>
  <section class="panel">
-  <div class="section-head"><div><h2>Active Coin Pairs</h2><div class="muted tiny">Prices update when data is available.</div></div><button class="secondary" type="button" data-go="markets">View all</button></div>
+  <div class="section-head"><div><h2>Active Coin Pairs</h2><div class="muted tiny">Live market connection · automatic updates 24/7</div></div><button class="secondary" type="button" data-go="markets">View all</button></div>
   <div id="homeActivePairs" class="table-wrap"><table><thead><tr><th>Coin / Pair</th><th>Price (USDT approx.</th><th>24h Change</th><th>Action</th></tr></thead><tbody><tr><td colspan="4" class="empty">Waiting for public market prices…</td></tr></tbody></table></div>
   
  </section>
@@ -2309,6 +2309,73 @@ $("requestDeleteAccountBtn").addEventListener("click",()=>{const ok=window.confi
  document.addEventListener("visibilitychange",()=>{if(!document.hidden&&(!window.ocMarketLastSuccess||Date.now()-window.ocMarketLastSuccess>60000))loadMarket()});
  window.addEventListener("focus",()=>{if(!window.ocMarketLastSuccess||Date.now()-window.ocMarketLastSuccess>60000)loadMarket()});
  window.addEventListener("resize",()=>{if(historySeries.length&&!$("page-trade").classList.contains("hidden"))drawPriceChart()});
+
+</script>
+
+<script id="oc-market-live-stream">
+/* Continuous public crypto ticker stream for Home and Market, with reconnect + polling fallback. */
+(function(){
+  if(window.__ocMarketStreamStarted)return;
+  window.__ocMarketStreamStarted=true;
+  const assets=COINS.filter(coin=>coin.symbol&&coin.symbol!=="USDT"&&coin.symbol!=="XAU");
+  const streams=assets.map(coin=>coin.symbol.toLowerCase()+"usdt@ticker");
+  if(!streams.length)return;
+  const endpoint="wss://stream.binance.com:9443/stream?streams="+streams.join("/");
+  let socket=null,retryTimer=null,retryDelay=3000,lastMessageAt=0,lastPaintAt=0,lastCacheAt=0,attempt=0;
+  const status=(state,message)=>{
+    const indicator=document.getElementById("marketLiveIndicator");
+    if(indicator){indicator.className="oc-chart-live "+(state==="live"?"is-live":state==="offline"?"is-offline":"is-stale");const label=indicator.querySelector("span");if(label)label.textContent=state==="live"?"LIVE":state==="offline"?"OFFLINE":"RECONNECTING";indicator.title=message;}
+    if(typeof setHeaderMarketStatus==="function")setHeaderMarketStatus(state==="live"?"live":state==="offline"?"offline":"connecting");
+    const connection=document.getElementById("connection");if(connection)connection.textContent=state==="live"?"Live data":state==="offline"?"Unavailable":"Reconnecting";
+    const api=document.getElementById("apiStatus");if(api)api.textContent=message;
+  };
+  function publish(ticker){
+    const symbol=String(ticker.s||"").toUpperCase();
+    if(!symbol.endsWith("USDT"))return;
+    const asset=symbol.slice(0,-4),price=Number(ticker.c),change=Number(ticker.P),volume=Number(ticker.q);
+    if(!(price>0)||!Number.isFinite(price))return;
+    const meta=assets.find(coin=>coin.symbol===asset);if(!meta)return;
+    let item=market.find(coin=>String(coin.symbol||"").toUpperCase()===asset);
+    if(!item){item={id:meta.id,name:meta.name,symbol:asset,current_price:price,image:""};market.push(item);}
+    item.current_price=price;
+    if(Number.isFinite(change))item.price_change_percentage_24h=change;
+    if(Number.isFinite(volume))item.total_volume=volume;
+    window.market=market;
+    const now=Date.now();lastMessageAt=now;window.ocMarketLastSuccess=now;
+    status("live","Connected · Binance live prices");
+    const updated=document.getElementById("lastUpdate");if(updated)updated.textContent=new Date(now).toLocaleTimeString();
+    const hint=document.getElementById("marketHint");if(hint)hint.textContent="Live market prices update automatically, 24/7 while connected.";
+    if(now-lastPaintAt>=1800){
+      lastPaintAt=now;
+      try{renderMarket();renderHomeCoinResults();updateTradePreview();renderSignalScanner();window.ocRenderVisitorMarket?.();}catch(error){console.warn("Live market display refresh delayed:",error);}
+    }
+    if(now-lastCacheAt>=15000){
+      lastCacheAt=now;
+      try{localStorage.setItem("oc_market_cache",JSON.stringify({time:now,data:market}));}catch(_){}
+    }
+  }
+  function connect(){
+    if(!navigator.onLine){status("offline","Internet connection unavailable · automatic retry enabled");scheduleReconnect();return;}
+    try{
+      socket=new WebSocket(endpoint);
+      socket.onopen=()=>{attempt=0;retryDelay=3000;status("connecting","Live feed connected · waiting for first price update");};
+      socket.onmessage=event=>{
+        try{const packet=JSON.parse(event.data),ticker=packet.data||packet;if(ticker&&ticker.s)publish(ticker);}catch(_){}
+      };
+      socket.onerror=()=>{try{socket.close();}catch(_){}};
+      socket.onclose=()=>{status(market.length?"connecting":"offline","Live feed reconnecting · automatic market refresh remains active");scheduleReconnect();};
+    }catch(_){status(market.length?"connecting":"offline","Live feed unavailable · automatic market refresh remains active");scheduleReconnect();}
+  }
+  function scheduleReconnect(){
+    if(retryTimer)return;
+    const delay=Math.min(30000,retryDelay);
+    retryTimer=setTimeout(()=>{retryTimer=null;retryDelay=Math.min(30000,retryDelay*2);attempt++;connect();},delay);
+  }
+  window.addEventListener("online",()=>{if(!socket||socket.readyState===WebSocket.CLOSED)connect();});
+  window.addEventListener("offline",()=>status("offline","Internet connection unavailable · automatic retry enabled"));
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden&&(!socket||socket.readyState!==WebSocket.OPEN)){if(retryTimer){clearTimeout(retryTimer);retryTimer=null;}connect();}});
+  connect();
+})();
 </script>
 
 <script>
