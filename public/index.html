@@ -5533,6 +5533,108 @@ submit?.addEventListener("click",async()=>{const v=currentAddress(),a=Number(amo
 })();
 </script>
 
+
+<style id="oc-visitor-support-bot-style">
+#ocVisitorSupportBot{position:fixed;right:24px;bottom:92px;z-index:9998;font-family:inherit;color:var(--text,#eef2f8)}
+#ocVisitorSupportBot *{box-sizing:border-box}
+#ocSupportBotLauncher{position:relative;width:78px;height:88px;border:0;background:transparent;padding:0;cursor:pointer;filter:drop-shadow(0 10px 18px rgba(0,0,0,.34));animation:ocBotFloat 3.6s ease-in-out infinite}
+#ocSupportBotLauncher:focus-visible,#ocSupportBotSend:focus-visible,#ocSupportBotClose:focus-visible{outline:3px solid #f0b90b;outline-offset:4px;border-radius:18px}
+#ocSupportBotLauncher svg{width:100%;height:100%;overflow:visible}
+#ocSupportBotLauncher .oc-bot-shadow{transform-origin:center;animation:ocBotShadow 3.6s ease-in-out infinite}
+#ocSupportBotLauncher .oc-bot-eye{animation:ocBotBlink 5.2s infinite}
+#ocSupportBotLauncher:after{content:"";position:absolute;right:-1px;top:4px;width:12px;height:12px;border-radius:50%;background:#0ecb81;border:2px solid #101820;box-shadow:0 0 12px rgba(14,203,129,.7)}
+#ocSupportBotPanel{position:absolute;right:0;bottom:98px;width:min(360px,calc(100vw - 32px));height:min(500px,calc(100vh - 150px));display:none;flex-direction:column;overflow:hidden;border:1px solid rgba(240,185,11,.34);border-radius:20px;background:var(--panel,#151c28);box-shadow:0 22px 70px rgba(0,0,0,.48)}
+#ocSupportBotPanel[data-open="true"]{display:flex;animation:ocSupportPop .18s ease-out}
+.oc-support-bot-head{display:flex;align-items:center;gap:11px;padding:15px 16px;background:linear-gradient(120deg,#172a3c,#20233a);border-bottom:1px solid rgba(255,255,255,.09)}
+.oc-support-bot-avatar{width:42px;height:42px;flex:0 0 42px;border-radius:14px;background:linear-gradient(145deg,#f7d36b,#a56d25);display:grid;place-items:center;box-shadow:inset 0 1px 5px rgba(255,255,255,.55)}
+.oc-support-bot-avatar svg{width:38px;height:38px}
+.oc-support-bot-head-copy{min-width:0;flex:1}.oc-support-bot-head-copy strong{display:block;font-size:14px}.oc-support-bot-head-copy small{display:block;color:#aebdcb;font-size:11px;margin-top:3px}
+#ocSupportBotClose{border:0;background:rgba(255,255,255,.09);color:#fff;border-radius:9px;width:32px;height:32px;font-size:20px;cursor:pointer}
+#ocSupportBotMessages{flex:1;overflow:auto;padding:15px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.oc-support-bot-msg{max-width:88%;padding:10px 12px;border-radius:13px;font-size:12px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.oc-support-bot-msg.bot{align-self:flex-start;background:var(--panel2,#202b39);border:1px solid var(--line,rgba(255,255,255,.1))}
+.oc-support-bot-msg.user{align-self:flex-end;background:rgba(240,185,11,.16);border:1px solid rgba(240,185,11,.32)}
+.oc-support-bot-quick{display:flex;gap:7px;flex-wrap:wrap;padding:0 14px 12px}
+.oc-support-bot-quick button{border:1px solid var(--line,rgba(255,255,255,.15));background:transparent;color:var(--text,#eef2f8);border-radius:18px;padding:7px 10px;font-size:11px;cursor:pointer}
+.oc-support-bot-quick button:hover{border-color:#f0b90b}
+.oc-support-bot-compose{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line,rgba(255,255,255,.1));background:var(--panel,#151c28)}
+#ocSupportBotInput{flex:1;min-width:0;border:1px solid var(--line,rgba(255,255,255,.15));border-radius:12px;padding:11px 12px;background:var(--panel2,#202b39);color:var(--text,#eef2f8);font:inherit;font-size:12px}
+#ocSupportBotSend{border:0;border-radius:11px;background:#f0b90b;color:#171717;font-weight:800;padding:0 15px;cursor:pointer}
+.oc-support-bot-foot{font-size:10px;color:var(--muted,#8d9aaa);padding:0 14px 11px}
+@keyframes ocBotFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes ocBotShadow{0%,100%{transform:scale(1);opacity:.35}50%{transform:scale(.84);opacity:.2}}
+@keyframes ocBotBlink{0%,45%,48%,100%{transform:scaleY(1)}46.5%{transform:scaleY(.12)}}
+@keyframes ocSupportPop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:600px){#ocVisitorSupportBot{right:13px;bottom:82px}#ocSupportBotLauncher{width:68px;height:78px}#ocSupportBotPanel{bottom:88px;width:min(350px,calc(100vw - 26px));height:min(470px,calc(100vh - 125px))}}
+@media(prefers-reduced-motion:reduce){#ocSupportBotLauncher,#ocSupportBotLauncher .oc-bot-shadow,#ocSupportBotLauncher .oc-bot-eye{animation:none}#ocSupportBotPanel[data-open="true"]{animation:none}}
+</style>
+<div id="ocVisitorSupportBot" aria-label="Onchain visitor customer support">
+ <section id="ocSupportBotPanel" role="dialog" aria-label="Onchain customer support chat" aria-modal="false" data-open="false">
+  <header class="oc-support-bot-head">
+   <div class="oc-support-bot-avatar" aria-hidden="true">
+    <svg viewBox="0 0 48 48" fill="none"><path d="M9 25v-4C9 12 15.7 6 24 6s15 6 15 15v4" stroke="#26384a" stroke-width="4.5" stroke-linecap="round"/><rect x="5" y="20" width="9" height="15" rx="4" fill="#26384a"/><rect x="34" y="20" width="9" height="15" rx="4" fill="#26384a"/><rect x="12" y="14" width="24" height="25" rx="9" fill="#f4f6f8" stroke="#26384a" stroke-width="2"/><circle cx="19" cy="25" r="2.3" fill="#19b987"/><circle cx="29" cy="25" r="2.3" fill="#19b987"/><path d="M19 32c2.8 2.4 7.2 2.4 10 0" stroke="#26384a" stroke-width="2" stroke-linecap="round"/><path d="M37 33l4 4" stroke="#26384a" stroke-width="2.5" stroke-linecap="round"/><circle cx="42" cy="38" r="2.5" fill="#f0b90b"/></svg>
+   </div>
+   <div class="oc-support-bot-head-copy"><strong>Onchain Support</strong><small>Visitor help · Automated guide</small></div>
+   <button type="button" id="ocSupportBotClose" aria-label="Close support chat">×</button>
+  </header>
+  <div id="ocSupportBotMessages" aria-live="polite"><div class="oc-support-bot-msg bot">Hello! 👋 Welcome to Onchain. I can guide you around the platform and help with common questions. What would you like to know?</div></div>
+  <div class="oc-support-bot-quick" id="ocSupportBotQuick">
+   <button type="button" data-topic="account">Create an account</button><button type="button" data-topic="deposit">Crypto deposits</button><button type="button" data-topic="withdraw">Withdrawals</button><button type="button" data-topic="markets">Markets &amp; charts</button><button type="button" data-topic="security">Account security</button>
+  </div>
+  <form class="oc-support-bot-compose" id="ocSupportBotForm"><input id="ocSupportBotInput" maxlength="300" autocomplete="off" placeholder="Type your question…" aria-label="Type your support question"><button id="ocSupportBotSend" type="submit">Send</button></form>
+  <div class="oc-support-bot-foot">Never share passwords, verification codes, private keys or recovery phrases.</div>
+ </section>
+ <button type="button" id="ocSupportBotLauncher" aria-label="Open Onchain customer support" aria-expanded="false" aria-controls="ocSupportBotPanel">
+  <svg viewBox="0 0 90 100" role="img" aria-label="Floating friendly Onchain support robot wearing a curved headset">
+   <defs><linearGradient id="ocBotGold" x1="10%" y1="0%" x2="90%" y2="100%"><stop stop-color="#ffe9a3"/><stop offset=".48" stop-color="#f0b90b"/><stop offset="1" stop-color="#c47a16"/></linearGradient><linearGradient id="ocBotFace" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#cbd8e5"/></linearGradient></defs>
+   <ellipse class="oc-bot-shadow" cx="45" cy="93" rx="23" ry="4" fill="#000" opacity=".3"/>
+   <path d="M19 45V35C19 17 30 7 45 7s26 10 26 28v10" stroke="#26384a" stroke-width="8" stroke-linecap="round" fill="none"/>
+   <path d="M19 45V35C19 17 30 7 45 7s26 10 26 28v10" stroke="url(#ocBotGold)" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+   <rect x="9" y="38" width="15" height="27" rx="7" fill="#26384a"/><rect x="66" y="38" width="15" height="27" rx="7" fill="#26384a"/>
+   <rect x="12" y="41" width="9" height="19" rx="4.5" fill="url(#ocBotGold)"/><rect x="69" y="41" width="9" height="19" rx="4.5" fill="url(#ocBotGold)"/>
+   <path d="M45 64v7" stroke="#26384a" stroke-width="5" stroke-linecap="round"/><path d="M31 72h28l8 12H23z" fill="#26384a"/><path d="M36 73h18l5 8H31z" fill="url(#ocBotGold)"/>
+   <rect x="20" y="27" width="50" height="43" rx="17" fill="url(#ocBotFace)" stroke="#26384a" stroke-width="3"/>
+   <path d="M26 34q19-13 38 0" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".85"/>
+   <g class="oc-bot-eye"><circle cx="35" cy="46" r="4" fill="#13ad82"/><circle cx="55" cy="46" r="4" fill="#13ad82"/></g>
+   <path d="M36 56q9 8 18 0" stroke="#26384a" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+   <path d="M68 62l8 7" stroke="#26384a" stroke-width="3" stroke-linecap="round"/><circle cx="78" cy="71" r="4" fill="#f0b90b" stroke="#26384a" stroke-width="2"/>
+   <circle cx="63" cy="32" r="3" fill="#fff" opacity=".9"/>
+  </svg>
+ </button>
+</div>
+<script id="oc-visitor-support-bot-script">
+(function(){
+ const root=document.getElementById("ocVisitorSupportBot"),launcher=document.getElementById("ocSupportBotLauncher"),panel=document.getElementById("ocSupportBotPanel"),close=document.getElementById("ocSupportBotClose"),messages=document.getElementById("ocSupportBotMessages"),form=document.getElementById("ocSupportBotForm"),input=document.getElementById("ocSupportBotInput");
+ if(!root||!launcher||!panel||!messages||!form||!input)return;
+ const answers={
+  account:"To get started, choose Create account or Register on the Onchain page and follow the sign-up steps. Use an email or phone number you can access. Never share your password or verification code with anyone.",
+  deposit:"To request a crypto deposit, sign in, open Wallet or Deposit, choose an asset and supported network, and use only the address shown for that exact network. After sending, submit the amount, transaction hash and payment screenshot. The request awaits admin verification; a screenshot alone does not confirm payment or credit a balance.",
+  withdraw:"Open Wallet or Withdraw after signing in, choose the asset and network, and carefully check the destination address. Withdrawal requests may require admin review. Do not assume a request is paid until the platform confirms the payout.",
+  markets:"Visitors can explore public market information, asset details and available charts without signing in. Market data availability can vary; charts and signals are informational and are not investment advice.",
+  security:"Use a unique password, secure your email account and enable available sign-in protections. Onchain support will never ask for your password, one-time code, private key or recovery phrase.",
+  broker:"The stock chart and order ticket do not mean a live brokerage is connected. Real stock orders remain unavailable until a brokerage provider has approved and activated the connection.",
+  support:"You can contact the Onchain support team at onchaincryptosupport@gmail.com. Include a short description of the issue, but never include passwords, one-time codes, private keys or recovery phrases."
+ };
+ function add(text,kind){const node=document.createElement("div");node.className="oc-support-bot-msg "+kind;node.textContent=text;messages.appendChild(node);messages.scrollTop=messages.scrollHeight;}
+ function reply(q){
+  const v=q.toLowerCase();
+  if(/account|register|sign.?up|create/.test(v))return answers.account;
+  if(/deposit|fund|payment|transaction|receipt|btc|bitcoin|usdt|crypto/.test(v))return answers.deposit;
+  if(/withdraw|cash.?out|send out|payout/.test(v))return answers.withdraw;
+  if(/market|price|chart|coin|gold|stock|trade|broker|buy|sell/.test(v))return /stock|broker|order/.test(v)?answers.broker:answers.markets;
+  if(/security|safe|password|code|private key|recovery/.test(v))return answers.security;
+  if(/human|agent|person|contact|support|email|ticket/.test(v))return answers.support;
+  return "I can help with account registration, crypto deposits, withdrawals, markets, stock trading status and account security. Try one of the topic buttons, or contact our team at onchaincryptosupport@gmail.com for personal assistance.";
+ }
+ function send(q){const value=String(q||"").trim();if(!value)return;add(value,"user");add(reply(value),"bot");}
+ function setOpen(open){panel.dataset.open=open?"true":"false";launcher.setAttribute("aria-expanded",String(open));launcher.setAttribute("aria-label",open?"Close Onchain customer support":"Open Onchain customer support");if(open)setTimeout(()=>input.focus(),80);}
+ launcher.addEventListener("click",()=>setOpen(panel.dataset.open!=="true"));close.addEventListener("click",()=>setOpen(false));
+ form.addEventListener("submit",e=>{e.preventDefault();const q=input.value;input.value="";send(q);});
+ root.querySelectorAll("[data-topic]").forEach(b=>b.addEventListener("click",()=>{const topic=b.dataset.topic;add(b.textContent.trim(),"user");add(answers[topic]||answers.support,"bot");}));
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&panel.dataset.open==="true")setOpen(false);});
+})();
+</script>
+
 </body>
 </html>
 
