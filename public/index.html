@@ -5402,11 +5402,8 @@ submit?.addEventListener("click",async()=>{const v=currentAddress(),a=Number(amo
   }));
  }
  function chooseCoin(kind,symbol){
-  const list=window.supportedCoins;
-  if(kind==="deposit"){window.selectedDepositCoin=symbol;if(typeof window.updateSelectedCoin==="function")window.updateSelectedCoin("deposit");}
-  else{window.selectedWithdrawCoin=symbol;if(typeof window.updateSelectedCoin==="function")window.updateSelectedCoin("withdraw");}
-  const search=$(kind+"CoinSearch");if(search)search.value="";
-  if(typeof window.drawCoinPicker==="function")window.drawCoinPicker(kind,"");
+  const option=$(kind+"CoinList")?.querySelector('[data-coin="'+CSS.escape(symbol)+'"]');
+  if(option)option.click();
   forwardTo($(kind+"Network"),null);
  }
  document.addEventListener("click",e=>{
