@@ -8288,7 +8288,7 @@ body.oc-logged-out.oc-auth-screen main>#page-register{display:flex!important}
     if(typeof original!=="function"||original.__ocVisitorGuarded)return;
     const wrapped=function(page){
       const signedIn=!!(window.onchaincryptoCurrentUser||window.ocFirebaseAuth?.currentUser);
-      if(!signedIn && (window.ocLoggedOut===true || document.body.classList.contains("oc-logged-out"))){
+      if(!signedIn){
         if(page==="markets"||page==="market"){
           document.body.classList.remove("oc-auth-screen");
           const result=original("public-market");
