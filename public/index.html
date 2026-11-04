@@ -1034,7 +1034,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
    <button class="quick-action" style="--action-color:#eabf38" type="button" data-go="markets"><span class="action-icon">▥</span><strong>Markets</strong><small>View live coin prices</small></button>
    <button class="quick-action" style="--action-color:#a78bfa" type="button" data-go="history" data-home-history="true"><span class="action-icon">◷</span><strong>History</strong><small>7-day performance</small></button>
    <button class="quick-action" style="--action-color:#00cce8" type="button" data-go="wallet"><span class="action-icon">◉</span><strong>Wallet</strong><small>View assets and balance</small></button>
-   <button class="quick-action" style="--action-color:#b58cff" type="button" data-go="copytrading"><span class="action-icon">⇄</span><strong>Copy Trading</strong><small>Compare trader strategies</small></button>
+   <button class="quick-action oc-copy-trading-auth-only" style="--action-color:#b58cff" type="button" data-go="copytrading"><span class="action-icon">⇄</span><strong>Copy Trading</strong><small>Compare trader strategies</small></button>
   </div>
  </section>
 
@@ -1042,6 +1042,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
   <div class="oc-visitor-products-heading"><div class="oc-visitor-kicker">YOUR ONCHAIN INVESTMENT STARTING POINT</div><h2>Discover markets. Build your investment strategy.</h2><div class="oc-roadmap-brand-lockup" aria-label="Onchain brand"><span class="oc-roadmap-brand-mark" aria-hidden="true">B</span><span class="oc-roadmap-brand-name">Onchain</span></div><p>Explore crypto and Gold markets, compare digital assets and develop your portfolio strategy with confidence.</p></div>
   <div class="oc-visitor-products-grid">
     <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">◈</div><div class="oc-visitor-product-top"><h3>Explore Markets</h3><span>Discover</span></div><p>Follow crypto, Gold and selected US stock market information with charts and daily price moves.</p><small>CRYPTO · GOLD · STOCKS</small><button type="button" class="secondary" data-go="markets" style="margin-top:14px;width:100%">Open markets</button></article>
+    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⇄</div><div class="oc-visitor-product-top"><h3>Copy Trading</h3><span>Trader strategies</span></div><p>Browse trader profiles, compare strategy styles, follow traders and manage your watchlist. Review risk before making decisions.</p><small>DISCOVER · FOLLOW · REVIEW</small><button type="button" class="secondary" data-go="copytrading" style="margin-top:14px;width:100%">Explore copy traders</button></article>
     <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⌁</div><div class="oc-visitor-product-top"><h3>Track Your Activity</h3><span>Overview</span></div><p>Review your portfolio overview, seven-day practice performance and recorded account activity.</p><small>PORTFOLIO · HISTORY · INSIGHTS</small><button type="button" class="secondary" data-go="history" data-home-history="true" style="margin-top:14px;width:100%">View activity</button></article>
    </div>
   <p class="oc-visitor-roadmap-note">Explore market insights, discover leading assets and explore the Onchain platform.</p>
@@ -1140,7 +1141,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
         <div><b>5. Read the terms</b><p>Understand how copying starts and stops, how fees work, and how withdrawals are handled.</p></div>
         <div><b>6. Confirm execution access</b><p>Live copying requires an approved trading connection and a working order-execution service.</p></div>
       </div>
-      <p class="oc-copy-status-note"><strong>Current Onchain status:</strong> You can explore profiles and save a local watchlist. Automatic trade copying, live trader statistics, allocation, and order execution are not enabled yet. Following a strategy does not place trades or move funds.</p>
+      <p class="muted tiny" style="margin:8px 18px 16px">Following a strategy saves it to your local watchlist. Automatic trade execution is not currently connected.</p>
     </section>
   </section>
   <section id="page-markets" class="hidden">
@@ -5384,9 +5385,10 @@ body.oc-logged-out.oc-auth-screen #page-register #resetPasswordBtn{
 .oc-copy-requirement-grid>div{padding:13px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
 .oc-copy-requirement-grid b{font-size:13px;color:var(--text)}
 .oc-copy-requirement-grid p{margin:6px 0 0;font-size:12px;line-height:1.55;color:var(--muted)}
-.oc-copy-status-note{margin:0 18px 18px;padding:13px 14px;border-left:3px solid var(--yellow);background:rgba(217,173,85,.08);color:var(--text);font-size:12px;line-height:1.6}
 @media(max-width:900px){#page-copytrading #ocCopyTraderCards{grid-template-columns:repeat(2,minmax(0,1fr))}.oc-copy-requirement-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){#page-copytrading #ocCopyTraderCards,.oc-copy-requirement-grid{grid-template-columns:1fr}.oc-copy-demo-note{margin:12px}.oc-copy-highlight strong{font-size:17px}}
+  html.oc-auth-pending .oc-copy-trading-auth-only,
+  body.oc-logged-out .oc-copy-trading-auth-only{display:none!important}
 </style>
 
 <script id="oc-copy-trader-watchlist">
