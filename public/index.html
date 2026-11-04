@@ -9354,3 +9354,170 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-password-toggle {
   }
 }
 </style>
+
+
+<style id="oc-clean-onchain-auth-board">
+/* One clear authentication form at a time; preserve the existing Firebase form handlers. */
+body.oc-logged-out.oc-auth-screen,
+html.oc-auth-pending body {
+  background:linear-gradient(145deg,#f5f2e9 0%,#eef2f6 52%,#f8f6ef 100%)!important;
+  color:#111820!important;
+}
+body.oc-logged-out.oc-auth-screen main {
+  min-height:100vh!important;
+  padding:clamp(14px,3vw,34px)!important;
+  background:transparent!important;
+  color:#111820!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register {
+  width:min(100%,620px)!important;
+  max-width:620px!important;
+  margin:0 auto!important;
+  padding:clamp(14px,3vw,26px)!important;
+  color:#111820!important;
+}
+/* Remove the duplicate Login / Register buttons above the actual form.
+   Their existing click handlers remain available to the form-routing code. */
+body.oc-logged-out.oc-auth-screen #page-register #authChoicePanel {
+  display:none!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register>.auth-welcome,
+body.oc-logged-out.oc-auth-screen #page-register>.oc-public-auth-hero {
+  display:none!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register>.content-grid {
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel {
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:clamp(20px,4vw,34px)!important;
+  color:#111820!important;
+  background:linear-gradient(150deg,#fff 0%,#fffdf8 100%)!important;
+  border:1.5px solid #d8b45b!important;
+  border-radius:18px!important;
+  box-shadow:0 14px 38px rgba(20,30,43,.10),0 3px 12px rgba(184,139,43,.09)!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm {
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  color:#111820!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.hidden,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm.hidden {
+  display:none!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm:not(.hidden),
+body.oc-logged-out.oc-auth-screen #page-register #signInForm:not(.hidden) {
+  display:block!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm h3,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm h3 {
+  margin:0 0 8px!important;
+  color:#101820!important;
+  font-size:clamp(23px,3vw,28px)!important;
+  font-weight:900!important;
+  letter-spacing:-.35px!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm>p,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm>p {
+  color:#4b5563!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm label,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm label,
+body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel label {
+  display:block!important;
+  margin:14px 0 7px!important;
+  color:#151a20!important;
+  font-size:14px!important;
+  font-weight:800!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel input:not([type=checkbox]),
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel select {
+  width:100%!important;
+  min-height:51px!important;
+  padding:12px 14px!important;
+  color:#111820!important;
+  background:#fff!important;
+  border:1px solid #c7cdd5!important;
+  border-radius:9px!important;
+  font-size:15px!important;
+  box-shadow:none!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel input::placeholder {
+  color:#697382!important;
+  opacity:1!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel input:focus,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel select:focus {
+  border-color:#bd8d2e!important;
+  outline:3px solid rgba(216,180,91,.18)!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm .oc-register-contact-choice,
+body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel:not(.hidden) {
+  margin-top:14px!important;
+  padding:13px!important;
+  color:#111820!important;
+  background:#fff9e9!important;
+  border:1px solid #e2c77f!important;
+  border-radius:11px!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .oc-register-method-help,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel .muted,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel .tiny {
+  color:#505b68!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel button[type=submit],
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel button.auth-submit {
+  width:100%!important;
+  min-height:53px!important;
+  margin-top:18px!important;
+  color:#17130a!important;
+  background:linear-gradient(105deg,#f5d77c 0%,#e7b746 58%,#d4a03a 100%)!important;
+  border:1px solid #c28e27!important;
+  border-radius:10px!important;
+  font-size:16px!important;
+  font-weight:900!important;
+  box-shadow:0 6px 15px rgba(170,125,32,.16)!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #googleSignInBtn:not(.hidden),
+body.oc-logged-out.oc-auth-screen #page-register .auth-google-btn:not(.hidden),
+body.oc-logged-out.oc-auth-screen #page-register #resetPasswordBtn {
+  width:100%!important;
+  min-height:48px!important;
+  color:#111820!important;
+  background:#fff!important;
+  border:1px solid #c7cdd5!important;
+  border-radius:9px!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-switch {
+  margin:18px 0 0!important;
+  color:#3f4955!important;
+  text-align:center!important;
+  font-weight:650!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-switch button {
+  color:#805700!important;
+  font-weight:900!important;
+  text-decoration:underline!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .oc-password-toggle {
+  color:#111820!important;
+}
+@media(max-width:600px) {
+  body.oc-logged-out.oc-auth-screen main {padding:10px!important}
+  body.oc-logged-out.oc-auth-screen #page-register {padding:8px!important}
+  body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel {padding:19px 15px!important}
+}
+</style>
