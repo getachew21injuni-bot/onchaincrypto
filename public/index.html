@@ -217,6 +217,8 @@ document.addEventListener('DOMContentLoaded',function(){
  const goSignIn=()=>openAuth('signin');
  document.getElementById('landingGetStarted')?.addEventListener('click',goRegister);
  document.getElementById('landingSignIn')?.addEventListener('click',goSignIn);
+ document.getElementById('ocHomeCreateAccount')?.addEventListener('click',goRegister);
+ document.getElementById('ocHomeLogin')?.addEventListener('click',goSignIn);
  document.getElementById('mobileRegisterBtn')?.addEventListener('click',goRegister);
  document.getElementById('mobileSignInBtn')?.addEventListener('click',goSignIn);
 });
@@ -912,7 +914,51 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
 </style>
 <style id="oc-hide-wallet-from-visitors">body.oc-visitor-mode #nav [data-page="wallet"],body.oc-visitor-mode #bottomNav [data-bottom-page="wallet"],body.oc-visitor-mode [data-page="wallet"],body.oc-visitor-mode [data-go="wallet"]{display:none!important}body.oc-visitor-mode #bottomNav{grid-template-columns:repeat(4,minmax(0,1fr))!important;justify-items:stretch;gap:4px}body.oc-visitor-mode #bottomNav>button{width:100%;min-width:0;justify-content:center}</style>
 
-<style id="oc-stock-crypto-quick-style">.oc-stock-brand-card{cursor:pointer;transition:border-color .18s,transform .18s,background .18s}.oc-stock-brand-card:hover,.oc-stock-brand-card.selected,.oc-stock-brand-card[aria-pressed="true"]{border-color:var(--oc-gold,#d9ad55);background:rgba(217,173,85,.09);transform:translateY(-1px)}.oc-stock-brand-card:focus-visible{outline:2px solid var(--oc-gold,#d9ad55);outline-offset:3px}.oc-stock-order-summary a{color:var(--oc-gold,#e5bd67);text-decoration:none}.oc-crypto-quick-picks{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}.oc-crypto-quick-picks button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:8px 13px;font-weight:700}.oc-crypto-quick-picks button:hover{border-color:var(--yellow);color:var(--yellow)}</style><style id="oc-deposit-proof-style">.deposit-proof-panel{margin-top:14px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}.deposit-proof-panel h3{margin:0 0 8px}.deposit-proof-panel label{display:block;margin:12px 0 6px;font-weight:650}.deposit-proof-panel input[type=file]{width:100%;padding:10px}#depositReceiptPreview img{display:block;max-width:180px;max-height:180px;object-fit:contain;border-radius:10px;margin-top:8px}#depositSubmitRequest{width:100%;margin-top:12px}</style></head>
+<style id="oc-stock-crypto-quick-style">.oc-stock-brand-card{cursor:pointer;transition:border-color .18s,transform .18s,background .18s}.oc-stock-brand-card:hover,.oc-stock-brand-card.selected,.oc-stock-brand-card[aria-pressed="true"]{border-color:var(--oc-gold,#d9ad55);background:rgba(217,173,85,.09);transform:translateY(-1px)}.oc-stock-brand-card:focus-visible{outline:2px solid var(--oc-gold,#d9ad55);outline-offset:3px}.oc-stock-order-summary a{color:var(--oc-gold,#e5bd67);text-decoration:none}.oc-crypto-quick-picks{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}.oc-crypto-quick-picks button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:8px 13px;font-weight:700}.oc-crypto-quick-picks button:hover{border-color:var(--yellow);color:var(--yellow)}</style><style id="oc-deposit-proof-style">.deposit-proof-panel{margin-top:14px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}.deposit-proof-panel h3{margin:0 0 8px}.deposit-proof-panel label{display:block;margin:12px 0 6px;font-weight:650}.deposit-proof-panel input[type=file]{width:100%;padding:10px}#depositReceiptPreview img{display:block;max-width:180px;max-height:180px;object-fit:contain;border-radius:10px;margin-top:8px}#depositSubmitRequest{width:100%;margin-top:12px}</style>
+<style id="oc-home-promo-and-simple-auth-layout">
+#page-home .oc-home-promo-hero{grid-template-columns:minmax(0,1.08fr) minmax(280px,.92fr);gap:18px;min-height:450px}
+#page-home .oc-home-promo-hero .oc-hero-copy{max-width:620px}
+#page-home .oc-home-promo-hero .oc-public-auth-brand{font-size:20px;letter-spacing:1.5px}
+#page-home .oc-home-promo-hero .oc-public-auth-copy{margin-top:22px;max-width:600px}
+#page-home .oc-home-promo-hero .oc-public-auth-copy h2{font-size:clamp(32px,4vw,53px);line-height:1.08}
+#page-home .oc-home-promo-hero .oc-public-auth-copy p{max-width:540px;color:#e2eaf4}
+#page-home .oc-home-promo-hero .oc-public-auth-copy p strong{color:#fff}
+#page-home .oc-home-promo-hero .oc-public-auth-copy .oc-public-auth-subline{color:#f3d38c}
+#page-home .oc-home-promo-hero .oc-public-auth-trust{margin-top:15px}
+#page-home .oc-home-promo-hero .oc-public-coin-stage{height:285px;max-width:540px;margin:0 auto}
+#page-home .oc-home-promo-hero .oc-brand-wordmark{margin-top:-4px}
+#page-home .oc-home-promo-hero .oc-brand-tagline{margin-top:4px}
+#page-home .oc-home-promo-hero .oc-landing-actions{margin-top:19px}
+#page-home .oc-home-promo-hero .oc-hero-cta{margin-top:0}
+#page-register{display:block!important;max-width:560px;min-height:0;margin:0 auto;padding:24px!important}
+#page-register>.auth-welcome{margin:0 0 12px!important;text-align:center!important}
+#page-register>.content-grid{display:block!important;width:100%;margin:0}
+#page-register .auth-main-panel{width:100%;max-width:560px;margin:0 auto}
+@media(max-width:680px){
+ #page-home .oc-home-promo-hero{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-height:0;padding:22px 17px 12px}
+ #page-home .oc-home-promo-hero .oc-public-auth-brand{font-size:18px}
+ #page-home .oc-home-promo-hero .oc-public-auth-copy{margin-top:15px}
+ #page-home .oc-home-promo-hero .oc-public-auth-copy h2{font-size:clamp(29px,8vw,40px)}
+ #page-home .oc-home-promo-hero .oc-public-auth-copy p{font-size:13px;line-height:1.6}
+ #page-home .oc-home-promo-hero .oc-public-auth-trust{gap:6px;margin-top:11px}
+ #page-home .oc-home-promo-hero .oc-public-auth-trust span{padding:6px 8px;font-size:9px}
+ #page-home .oc-home-promo-hero .oc-public-coin-stage{height:185px;max-width:430px}
+ #page-home .oc-home-promo-hero .oc-coin-main-btc{width:78px;height:78px;left:calc(50% - 58px);top:22px;font-size:42px}
+ #page-home .oc-home-promo-hero .oc-coin-main-gold{width:70px;height:70px;left:calc(50% + 5px);top:62px;font-size:27px}
+ #page-home .oc-home-promo-hero .oc-coin-small-eth{width:32px;height:32px;left:13%;top:32px;font-size:18px}
+ #page-home .oc-home-promo-hero .oc-coin-small-usdt{width:31px;height:31px;right:13%;top:17px;font-size:18px}
+ #page-home .oc-home-promo-hero .oc-coin-small-sol{width:28px;height:28px;left:22%;bottom:7px;font-size:16px}
+ #page-home .oc-home-promo-hero .oc-coin-small-link{width:27px;height:27px;right:19%;bottom:5px;font-size:15px}
+ #page-home .oc-home-promo-hero .oc-orbit-a{width:220px;height:95px}
+ #page-home .oc-home-promo-hero .oc-orbit-b{width:185px;height:130px}
+ #page-home .oc-home-promo-hero .oc-public-price-chip{padding:5px 7px}
+ #page-home .oc-home-promo-hero .btc-chip{left:0;top:0}
+ #page-home .oc-home-promo-hero .gold-chip{right:0;top:75px}
+ #page-home .oc-home-promo-hero .eth-chip{left:3%;bottom:0}
+ #page-register{padding:14px!important}
+}
+</style>
+</head>
 <body>
 <header>
   <div class="brand"><span class="oc-onchain-round-mark header-logo-mark" aria-hidden="true">B</span><span>Onchain</span></div>
@@ -1009,14 +1055,26 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
 <section id="page-home">
  <div class="page-title"><div><h1 id="homeGreeting">Onchain</h1></div></div>
   
- <section class="oc-invest-hero oc-get-started-hero" aria-label="Get started with Onchain">
+ <section class="oc-invest-hero oc-get-started-hero oc-home-promo-hero" aria-label="OnChainCrypto digital asset trading platform">
   <div class="oc-hero-copy">
-   <div class="oc-hero-pill"><span class="oc-pulse-dot"></span> WELCOME TO Onchain</div>
-   <h2>Take Control of Your <span>Crypto Future</span></h2>
-   <p>Explore crypto and Gold markets, compare asset values and discover the tools available across Onchain.</p>
+   <div class="oc-public-auth-brand"><span class="oc-auth-brand-mark">B</span><span>OnChainCrypto</span></div>
+   <div class="oc-public-auth-copy">
+    <div class="oc-public-auth-eyebrow"><i></i> DIGITAL ASSET TRADING PLATFORM</div>
+    <h2>Take Control of<br><span>Your Crypto Future.</span></h2>
+    <p>Join millions of users trading <strong>Bitcoin</strong>, <strong>Ethereum</strong>, and <strong>350+ cryptocurrencies</strong>.</p>
+    <p class="oc-public-auth-subline">Fast, secure, and easy to use. Explore Bitcoin and gold markets with OnChainCrypto.</p>
+    <div class="oc-public-auth-trust"><span>◈ Identity verification</span><span>⌁ Account security</span><span>↗ Global markets</span></div>
+   </div>
+   <div class="oc-landing-actions"><button type="button" class="oc-hero-cta" id="ocHomeCreateAccount">Create free account <span>→</span></button><button type="button" class="secondary oc-landing-signin" id="ocHomeLogin">Login</button></div>
   </div>
-  <div class="oc-hero-art oc-brand-stage" aria-label="Onchain brand">
-   <div class="oc-brand-emblem oc-onchain-round-mark" aria-hidden="true"><span>B</span></div>
+  <div class="oc-hero-art oc-home-promo-art" aria-label="Bitcoin, gold and digital asset illustrations">
+   <div class="oc-public-coin-stage">
+    <div class="oc-coin-orbit oc-orbit-a"></div><div class="oc-coin-orbit oc-orbit-b"></div>
+    <div class="oc-floating-coin oc-coin-main-btc"><span>₿</span></div><div class="oc-floating-coin oc-coin-main-gold"><span>Au</span></div>
+    <div class="oc-floating-coin oc-coin-small-eth"><span>◆</span></div><div class="oc-floating-coin oc-coin-small-usdt"><span>₮</span></div>
+    <div class="oc-floating-coin oc-coin-small-sol"><span>◎</span></div><div class="oc-floating-coin oc-coin-small-link"><span>⬡</span></div>
+    <div class="oc-public-price-chip btc-chip"><b>₿ BTC</b><span>Bitcoin</span></div><div class="oc-public-price-chip gold-chip"><b>Au XAU</b><span>Gold</span></div><div class="oc-public-price-chip eth-chip"><b>◆ ETH</b><span>Ethereum</span></div>
+   </div>
    <div class="oc-brand-wordmark"><span>On</span><span>chain</span></div>
    <div class="oc-brand-tagline">Crypto &amp; Gold Market Explorer</div>
   </div>
@@ -1564,24 +1622,6 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
     </section>
   </section>
   <section id="page-register" class="hidden">
-    <section class="oc-public-auth-hero" aria-label="Onchain trading platform welcome">
-      <div class="oc-public-auth-brand"><span class="oc-auth-brand-mark">B</span><span>OnChainCrypto</span></div>
-      <div class="oc-public-auth-copy">
-        <div class="oc-public-auth-eyebrow"><i></i> DIGITAL ASSET TRADING PLATFORM</div>
-        <h2>Take Control of<br><span>Your Crypto Future.</span></h2>
-        <p>Join millions of users trading <strong>Bitcoin</strong>, <strong>Ethereum</strong>, and <strong>350+ cryptocurrencies</strong>.</p>
-        <p class="oc-public-auth-subline">Fast, secure, and easy to use. Explore Bitcoin and gold markets with OnChainCrypto.</p>
-        <div class="oc-public-auth-trust"><span>◈ Identity verification</span><span>⌁ Account security</span><span>↗ Global markets</span></div>
-      </div>
-      <div class="oc-public-coin-stage" aria-label="Floating cryptocurrency coins">
-        <div class="oc-coin-orbit oc-orbit-a"></div><div class="oc-coin-orbit oc-orbit-b"></div>
-        <div class="oc-floating-coin oc-coin-main-btc"><span>₿</span></div><div class="oc-floating-coin oc-coin-main-gold"><span>Au</span></div>
-        <div class="oc-floating-coin oc-coin-small-eth"><span>◆</span></div><div class="oc-floating-coin oc-coin-small-usdt"><span>₮</span></div>
-        <div class="oc-floating-coin oc-coin-small-sol"><span>◎</span></div><div class="oc-floating-coin oc-coin-small-link"><span>⬡</span></div>
-        <div class="oc-public-price-chip btc-chip"><b>₿ BTC</b><span>Bitcoin</span></div><div class="oc-public-price-chip gold-chip"><b>Au XAU</b><span>Gold</span></div><div class="oc-public-price-chip eth-chip"><b>◆ ETH</b><span>Ethereum</span></div>
-      </div>
-      <div class="oc-public-auth-footnote">Explore digital assets · Trade responsibly</div>
-    </section>
         <div class="auth-welcome">
       <div class="auth-logo-mark oc-onchain-round-mark" aria-hidden="true"><span>B</span></div>
       <div class="auth-brand">Onchain</div>
