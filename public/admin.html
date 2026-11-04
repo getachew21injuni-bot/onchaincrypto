@@ -207,18 +207,18 @@ async function renderRequestQueue(view){
    const when=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'—';
    const details=kind==='deposit'?'TX: '+(r.transactionHash||'—')+' · To: '+(r.depositAddress||'—'):'To: '+(r.destinationAddress||'—');
    const receipt=kind==='deposit'&&typeof r.receiptImage==='string'&&r.receiptImage.length<=760000&&r.receiptImage.startsWith('data:image/jpeg;base64,')?'<a href="'+r.receiptImage+'" target="_blank" rel="noopener noreferrer" title="Open full payment screenshot"><img src="'+r.receiptImage+'" alt="Customer payment receipt" style="display:block;width:88px;height:88px;object-fit:cover;border-radius:8px;border:1px solid #526878;margin-top:8px"><small>View receipt · '+esc(r.receiptFileName||'Screenshot')+'</small></a>':'';
-   const actions=status==='pending'?'<button class="icon-btn" data-request-action="approve" data-request-id="'+esc(r.id)+'" style="background:#087b56;border:0">Approve practice balance</button> <button class="icon-btn" data-request-action="reject" data-request-id="'+esc(r.id)+'">Reject</button>':'<span class="tag">'+esc(status==='approved'?'APPROVED · PRACTICE':status.toUpperCase())+'</span>';
+   const actions=status==='pending'?(kind==='deposit'?'<button class="icon-btn" data-request-action="confirm" data-request-id="'+esc(r.id)+'" style="background:#087b56;border:0">Confirm funds received</button> ':'')+'<button class="icon-btn" data-request-action="approve" data-request-id="'+esc(r.id)+'" style="background:#35475b;border:0">Approve practice balance</button> <button class="icon-btn" data-request-action="reject" data-request-id="'+esc(r.id)+'">Reject</button>':'<span class="tag">'+esc(status==='approved'?'APPROVED · PRACTICE':status==='confirmed_received'?'PAYMENT CONFIRMED · NOT CREDITED':status.toUpperCase())+'</span>';
    return '<tr><td>'+esc(name)+'<br><small class="muted">'+esc(r.email||r.uid||'')+'</small></td><td>'+amount.toLocaleString(undefined,{maximumFractionDigits:8})+' '+esc(asset)+'</td><td>'+esc(r.network||'—')+'</td><td style="max-width:240px;overflow-wrap:anywhere">'+esc(details)+receipt+'</td><td>'+esc(when)+'</td><td>'+actions+'</td></tr>';
   }).join('');
   const panel=document.createElement('div');panel.id=queueId;panel.className='content-panel';panel.style.margin='0 0 16px';
-  panel.innerHTML='<div class="panel-head"><h3>Live '+(kind==='deposit'?'deposit':'withdrawal')+' requests</h3><span class="tag">'+pending+' pending · '+requests.length+' total</span></div><p class="muted">Firestore request queue · approvals change simulated balances only. Deposits are not blockchain-verified and withdrawals are not paid out.</p><div class="table-wrap"><table style="min-width:900px"><thead><tr><th>User</th><th>Amount</th><th>Network</th><th>Payment / destination details</th><th>Submitted</th><th>Admin action</th></tr></thead><tbody>'+(rows||'<tr><td colspan="6" class="empty">No '+kind+' requests found.</td></tr>')+'</tbody></table></div><p id="ocRequestMessage" class="muted" role="status" aria-live="polite"></p>';
+  panel.innerHTML='<div class="panel-head"><h3>Live '+(kind==='deposit'?'deposit':'withdrawal')+' requests</h3><span class="tag">'+pending+' pending · '+requests.length+' total</span></div><p class="muted">Firestore request queue · verify deposits on the correct blockchain explorer before confirming receipt. Receipt confirmation does not credit a wallet; practice-balance approval is separate. Withdrawals are not paid out.</p><div class="table-wrap"><table style="min-width:900px"><thead><tr><th>User</th><th>Amount</th><th>Network</th><th>Payment / destination details</th><th>Submitted</th><th>Admin action</th></tr></thead><tbody>'+(rows||'<tr><td colspan="6" class="empty">No '+kind+' requests found.</td></tr>')+'</tbody></table></div><p id="ocRequestMessage" class="muted" role="status" aria-live="polite"></p>';
   const old=document.getElementById(queueId);if(old)old.remove();body.prepend(panel);
   panel.querySelectorAll('[data-request-action]').forEach(button=>button.addEventListener('click',async()=>{
    const action=button.dataset.requestAction,id=button.dataset.requestId;
-   if(!id||!['approve','reject'].includes(action))return;
+   if(!id||!['approve','reject','confirm'].includes(action))return;
    const current=window.__ocAdminFirebase?.auth?.currentUser;if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){alert('Verified administrator sign-in required.');return;}
    const req=requests.find(x=>x.id===id);if(!req)return;
-   if(!confirm(action==='approve'?'Approve this request to the user’s SIMULATED balance? No blockchain payment or payout will occur.':'Reject this request?'))return;
+   if(!confirm(action==='confirm'?'Have you independently verified this transaction on the correct blockchain explorer, including asset, network, destination address and amount? This confirms receipt only; it does not credit a wallet.':action==='approve'?'Approve this request to the user’s SIMULATED balance? No blockchain payment or payout will occur.':'Reject this request?'))return;
    button.disabled=true;const msg=document.getElementById('ocRequestMessage');if(msg)msg.textContent='Processing request securely…';
    try{
     const requestRef=doc(db,collectionName,id),userRef=doc(db,'users',req.uid);
@@ -226,6 +226,7 @@ async function renderRequestQueue(view){
     await runTransaction(db,async tx=>{
      const rs=await tx.get(requestRef);if(!rs.exists()||(rs.data().status||'pending')!=='pending')throw new Error('request-already-processed');
      if(action==='reject'){tx.update(requestRef,{status:'rejected',reviewedAt:serverTimestamp(),reviewedBy:current.email});return;}
+     if(action==='confirm'){if(kind!=='deposit')throw new Error('confirmation-only-for-deposits');tx.update(requestRef,{status:'confirmed_received',confirmedAt:serverTimestamp(),confirmedBy:current.email,reviewedAt:serverTimestamp(),reviewedBy:current.email});return;}
      const us=await tx.get(userRef);if(!us.exists())throw new Error('user-profile-not-found');
      const data=us.data(),asset=String(req.asset||'USDT').toUpperCase(),amount=Number(req.amount);
      if(!Number.isFinite(amount)||amount<=0)throw new Error('invalid-request-amount');
@@ -238,7 +239,7 @@ async function renderRequestQueue(view){
      else tx.set(ledgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request practice adjustment':'Withdrawal request practice adjustment'),source:'admin-demo',status:'completed'});
      tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email});
     });
-    if(msg)msg.textContent=action==='approve'?'Approved. The practice balance and ledger were updated. No real payment or payout occurred.':'Request rejected.';
+    if(msg)msg.textContent=action==='confirm'?'Payment marked received after manual blockchain verification. No wallet balance was credited.':action==='approve'?'Approved. The practice balance and ledger were updated. No real payment or payout occurred.':'Request rejected.';
     await renderRequestQueue(view);if(typeof window.adminRefreshDashboard==='function')await window.adminRefreshDashboard();
    }catch(error){button.disabled=false;if(msg)msg.textContent='Could not process request ('+(error.code||error.message||'error')+'). Check Firestore rules and user profile.';}
   }));
