@@ -1565,12 +1565,12 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
   </section>
   <section id="page-register" class="hidden">
     <section class="oc-public-auth-hero" aria-label="Onchain trading platform welcome">
-      <div class="oc-public-auth-brand"><span class="oc-auth-brand-mark">B</span><span>Onchain</span></div>
+      <div class="oc-public-auth-brand"><span class="oc-auth-brand-mark">B</span><span>OnChainCrypto</span></div>
       <div class="oc-public-auth-copy">
         <div class="oc-public-auth-eyebrow"><i></i> DIGITAL ASSET TRADING PLATFORM</div>
         <h2>Take Control of<br><span>Your Crypto Future.</span></h2>
-        <p>Explore <strong>Bitcoin</strong>, <strong>Ethereum</strong>, gold, and other supported digital assets from one platform.</p>
-        <p class="oc-public-auth-subline">Explore markets. Manage your wallet. Trade with clarity.</p>
+        <p>Join millions of users trading <strong>Bitcoin</strong>, <strong>Ethereum</strong>, and <strong>350+ cryptocurrencies</strong>.</p>
+        <p class="oc-public-auth-subline">Fast, secure, and easy to use. Explore Bitcoin and gold markets with OnChainCrypto.</p>
         <div class="oc-public-auth-trust"><span>◈ Identity verification</span><span>⌁ Account security</span><span>↗ Global markets</span></div>
       </div>
       <div class="oc-public-coin-stage" aria-label="Floating cryptocurrency coins">
@@ -1593,7 +1593,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
         <div id="authModeIntro" class="hidden" aria-hidden="true"></div>
         <section id="authChoicePanel" class="oc-auth-choice" aria-label="Choose an account action">
           <button class="primary full oc-auth-choice-button" id="authChoiceLogin" type="button">Login</button>
-          <button class="secondary full oc-auth-choice-button" id="authChoiceRegister" type="button" aria-label="Create account">Create account</button>
+          <button class="secondary full oc-auth-choice-button" id="authChoiceRegister" type="button" aria-label="Register">Register</button>
         </section>
 
         <div id="authStatus" class="notice hidden">Checking sign-in status…</div>
@@ -3254,8 +3254,8 @@ window.addEventListener("popstate", async () => {
   if(!signIn||!register)return;
   function setMode(mode){
     const creating=mode==='register';
-    document.getElementById("authChoicePanel")?.classList.add("hidden");
-    document.getElementById("authStatus")?.classList.remove("hidden");
+    document.getElementById("authChoicePanel")?.classList.remove("hidden");
+    document.getElementById("authStatus")?.classList.add("hidden");
     if(methodOptions)methodOptions.classList.toggle("hidden",!creating);
     if(phonePanel){phonePanel.classList.add("hidden");phonePanel.open=false;phonePanel.querySelectorAll("input").forEach(el=>el.disabled=true);}
     register.querySelectorAll("input").forEach(el=>{el.disabled=!creating;});
@@ -3267,7 +3267,7 @@ window.addEventListener("popstate", async () => {
     if(switchText)switchText.classList.toggle('hidden',creating);
     if(registerSwitch)registerSwitch.classList.toggle('hidden',!creating);
     if(intro)intro.innerHTML=creating?'<h2>Create your account</h2><p class="muted tiny">Join with your name and either email or phone.</p>':'';
-    if(heading)heading.textContent=creating?'Create your Onchain account':'Welcome back to Onchain';
+    if(heading)heading.textContent=creating?'Create your OnChainCrypto account':'Welcome back to OnChainCrypto';
     if(sub){sub.textContent=creating?'Set up your account to continue.':'';sub.classList.toggle('hidden',!creating);}
   }
   document.getElementById('showRegisterBtn')?.addEventListener('click',()=>setMode('register'));
@@ -8877,4 +8877,130 @@ body.oc-auth-screen #page-register #registerForm .oc-register-contact-choice .oc
   body.oc-auth-screen #page-register #signInForm input:not([type=checkbox]),
   body.oc-auth-screen #page-register #registerForm input:not([type=checkbox]){min-height:48px!important}
 }
+</style>
+
+
+<style id="oc-auth-matching-login-register-final">
+/* Unified BTC + gold authentication board. Existing Firebase forms and handlers remain intact. */
+body.oc-logged-out.oc-auth-screen{background:#05080d!important;color:#101820!important}
+body.oc-logged-out.oc-auth-screen main{display:block!important;min-height:100vh!important;padding:18px!important}
+body.oc-logged-out.oc-auth-screen #page-register{
+ display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto!important;
+ gap:18px!important;width:min(100%,1160px)!important;max-width:1160px!important;min-height:0!important;
+ margin:0 auto!important;padding:0 0 28px!important
+}
+body.oc-logged-out.oc-auth-screen #page-register>.oc-public-auth-hero{
+ grid-column:1!important;grid-row:1!important;display:grid!important;
+ grid-template-columns:minmax(0,1fr) minmax(260px,.8fr)!important;align-items:center!important;
+ gap:22px!important;min-height:310px!important;padding:28px clamp(18px,4vw,44px)!important;
+ overflow:hidden!important;border:1px solid rgba(244,194,65,.7)!important;border-radius:22px!important;
+ background:radial-gradient(circle at 82% 55%,rgba(227,166,31,.2),transparent 34%),linear-gradient(115deg,#070b11,#101722 58%,#070b11)!important;
+ box-shadow:0 0 34px rgba(242,185,49,.13),inset 0 0 28px rgba(255,255,255,.025)!important
+}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-brand{grid-column:1!important;color:#fff!important;font-size:clamp(22px,3vw,34px)!important;letter-spacing:.2px!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-auth-brand-mark{background:linear-gradient(145deg,#fff2bd,#f2bd3e 55%,#a96d12)!important;color:#17130a!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-copy{grid-column:1!important;grid-row:2!important;max-width:620px!important;margin:12px 0 0!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-eyebrow{color:#f3c95e!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-copy h2{color:#fff!important;font-size:clamp(31px,4vw,52px)!important;line-height:1.08!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-copy h2 span{background:linear-gradient(90deg,#fff0b5,#f3bd3d,#fff4d0)!important;-webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-copy p{color:#e3e7ed!important;font-size:clamp(14px,1.4vw,17px)!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-copy p strong{color:#fff!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-copy .oc-public-auth-subline{color:#f4d37c!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-trust span{color:#f4e6c2!important;border-color:rgba(244,194,65,.35)!important;background:rgba(244,194,65,.08)!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-coin-stage{
+ grid-column:2!important;grid-row:1/span 3!important;display:block!important;min-height:250px!important;
+ height:250px!important;margin:0!important
+}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-footnote{display:none!important}
+body.oc-logged-out.oc-auth-screen #page-register>.auth-welcome{display:none!important}
+body.oc-logged-out.oc-auth-screen #page-register>.content-grid{grid-column:1!important;grid-row:2!important;width:100%!important;max-width:none!important;margin:0!important}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel{
+ width:100%!important;max-width:none!important;margin:0!important;padding:clamp(16px,3vw,30px)!important;
+ color:#111820!important;background:linear-gradient(145deg,#fff,#f6f8fb)!important;
+ border:2px solid #e9b83d!important;border-radius:22px!important;
+ box-shadow:0 16px 48px rgba(0,0,0,.38),0 0 26px rgba(239,185,54,.13)!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #authChoicePanel,
+body.oc-logged-out.oc-auth-screen #page-register #authChoicePanel.hidden{
+ display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;
+ padding:5px!important;margin:0 0 22px!important;background:#f1f3f6!important;
+ border:1px solid #d4d9e0!important;border-radius:14px!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #authChoicePanel button{
+ min-height:56px!important;border:1px solid #d6dbe2!important;border-radius:11px!important;
+ background:#fff!important;color:#15191f!important;font-size:19px!important;font-weight:850!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #authChoiceLogin,
+body.oc-logged-out.oc-auth-screen #page-register #authChoiceRegister{
+ background:linear-gradient(110deg,#fff0b4,#f7d66d)!important;color:#15120a!important;
+ border:1px solid #e5ad27!important;box-shadow:0 4px 13px rgba(194,139,20,.13)!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #authStatus{display:none!important}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm{
+ width:100%!important;max-width:none!important;margin:0!important;padding:0!important;
+ color:#111820!important;background:transparent!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm.hidden,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.hidden{display:none!important}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm:not(.hidden),
+body.oc-logged-out.oc-auth-screen #page-register #registerForm:not(.hidden){display:block!important}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm h3,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm h3{
+ display:block!important;color:#101820!important;font-size:22px!important;font-weight:900!important;margin:0 0 14px!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm label,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm label,
+body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel label{
+ display:block!important;color:#202733!important;font-size:14px!important;font-weight:800!important;margin:13px 0 7px!important
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel input:not([type=checkbox]),
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel select{
+ display:block!important;width:100%!important;min-height:54px!important;padding:12px 15px!important;
+ color:#111820!important;background:#fff!important;border:1.5px solid #b9c1cc!important;
+ border-radius:11px!important;font-size:16px!important
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel input::placeholder{color:#606b79!important;opacity:1!important}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel input:focus,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel select:focus{
+ border-color:#d9a52e!important;outline:3px solid rgba(217,165,46,.16)!important
+}
+body.oc-logged-out.oc-auth-screen #page-register .oc-password-toggle{color:#202733!important}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel button.primary,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel button.auth-submit{
+ display:block!important;width:100%!important;min-height:58px!important;margin-top:18px!important;
+ color:#15120a!important;background:linear-gradient(100deg,#f8dc78,#f3bd32 55%,#e6a91c)!important;
+ border:1px solid #d99d17!important;border-radius:12px!important;font-size:19px!important;font-weight:900!important;
+ box-shadow:0 7px 18px rgba(189,137,19,.2)!important
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel button.secondary{
+ color:#172033!important;background:#fff!important;border:1px solid #cbd2dc!important
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel .auth-switch,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel p,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel .muted,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel .tiny{color:#3d4652!important}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel .auth-switch{margin-top:18px!important;text-align:center!important;font-size:16px!important;font-weight:700!important}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel .auth-switch button{color:#a66b05!important;font-weight:900!important;text-decoration:underline!important}
+body.oc-logged-out.oc-auth-screen #page-register #googleSignInBtn:not(.hidden){display:block!important;width:100%!important;min-height:52px!important;margin:12px 0!important}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm .oc-register-contact-choice{
+ display:grid!important;padding:14px!important;border:1px solid #e2bd62!important;border-radius:12px!important;background:#fff9e8!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm .oc-register-method-help{color:#4a5360!important}
+body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel:not(.hidden){
+ display:block!important;margin-top:12px!important;padding:15px!important;background:#fff9e8!important;border:1px solid #e2bd62!important;border-radius:12px!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel summary{color:#202733!important;font-weight:850!important}
+@media(max-width:760px){
+ body.oc-logged-out.oc-auth-screen main{padding:10px!important}
+ body.oc-logged-out.oc-auth-screen #page-register>.oc-public-auth-hero{
+  grid-template-columns:1fr!important;gap:6px!important;min-height:0!important;padding:20px 17px!important
+ }
+ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-brand{grid-column:1!important}
+ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-copy{grid-column:1!important;grid-row:2!important;margin-top:8px!important}
+ body.oc-logged-out.oc-auth-screen #page-register .oc-public-coin-stage{grid-column:1!important;grid-row:3!important;width:100%!important;max-width:400px!important;height:190px!important;min-height:190px!important}
+ body.oc-logged-out.oc-auth-screen #page-register>.content-grid{grid-row:2!important}
+ body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel{padding:15px!important}
+}
+@media(prefers-reduced-motion:reduce){body.oc-logged-out.oc-auth-screen #page-register *{animation:none!important}}
 </style>
