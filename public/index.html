@@ -1039,9 +1039,9 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
  <section class="oc-visitor-products oc-home-roadmap" aria-label="Explore the Onchain ecosystem">
   <div class="oc-visitor-products-heading"><div class="oc-visitor-kicker">YOUR ONCHAIN INVESTMENT STARTING POINT</div><h2>Discover markets. Build your investment strategy.</h2><div class="oc-roadmap-brand-lockup" aria-label="Onchain brand"><span class="oc-roadmap-brand-mark" aria-hidden="true">B</span><span class="oc-roadmap-brand-name">Onchain</span></div><p>Explore crypto and Gold markets, compare digital assets and develop your portfolio strategy with confidence.</p></div>
   <div class="oc-visitor-products-grid">
-    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">◈</div><div class="oc-visitor-product-top"><h3>Explore Markets</h3><span>Discover</span></div><p>Follow crypto, Gold and selected US stock market information with charts and daily price moves.</p><small>CRYPTO · GOLD · STOCKS</small></article>
-    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⇄</div><div class="oc-visitor-product-top"><h3>Copy Trading</h3><span>Copy strategies</span></div><p>Explore trader strategies, compare approaches and learn how copy trading works. Review strategy information and risk carefully before making your own decisions.</p><small>FOLLOW · COPY · MANAGE</small></article>
-    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⌁</div><div class="oc-visitor-product-top"><h3>Track Your Activity</h3><span>Overview</span></div><p>Review your account activity, portfolio overview and recorded performance.</p><small>PORTFOLIO · HISTORY · INSIGHTS</small></article>
+    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">◈</div><div class="oc-visitor-product-top"><h3>Explore Markets</h3><span>Discover</span></div><p>Follow crypto, Gold and selected US stock market information with charts and daily price moves.</p><small>CRYPTO · GOLD · STOCKS</small><button type="button" class="secondary" data-go="markets" style="margin-top:14px;width:100%">Open markets</button></article>
+    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⇄</div><div class="oc-visitor-product-top"><h3>Copy Trading</h3><span>Trader strategies</span></div><p>Browse trader profiles, compare strategy styles, follow traders and manage your watchlist. Review risk before making decisions.</p><small>DISCOVER · FOLLOW · REVIEW</small><button type="button" class="secondary" data-go="copytrading" style="margin-top:14px;width:100%">Explore copy traders</button></article>
+    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⌁</div><div class="oc-visitor-product-top"><h3>Track Your Activity</h3><span>Overview</span></div><p>Review your portfolio overview, seven-day paper-trading performance and recorded account activity.</p><small>PORTFOLIO · HISTORY · INSIGHTS</small><button type="button" class="secondary" data-go="history" data-home-history="true" style="margin-top:14px;width:100%">View activity</button></article>
    </div>
   <p class="oc-visitor-roadmap-note">Explore market insights, discover leading assets and explore the Onchain platform.</p>
  </section>
@@ -1081,6 +1081,26 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
     });
   })();
   </script>
+  <section id="page-copytrading" class="hidden">
+    <div class="page-title"><div><h1>Copy Traders</h1><div class="muted tiny">Explore strategy examples and manage your followed traders.</div></div><span class="tag">STRATEGY DISCOVERY</span></div>
+    <section class="panel" style="margin-bottom:16px">
+      <div class="section-head"><div><h2>Discover traders</h2><div class="muted tiny">Illustrative strategy profiles for learning and comparison.</div></div><span class="tag">EXAMPLE PROFILES</span></div>
+      <p class="muted tiny">These profiles are examples, not verified traders or historical performance records. Following saves a watchlist on this device. It does not copy trades, place orders or move funds.</p>
+      <div class="cards" id="ocCopyTraderCards">
+        <article class="card"><div class="label">BTC trend strategy</div><div class="big">Trend follower</div><p class="muted tiny">Studies Bitcoin market direction and momentum. Style: active · Risk focus: high volatility.</p><button type="button" class="secondary" data-copy-follow="btc-trend">Follow trader</button></article>
+        <article class="card"><div class="label">Gold market strategy</div><div class="big">Gold observer</div><p class="muted tiny">Studies XAU price structure and broader market drivers. Style: swing · Risk focus: event volatility.</p><button type="button" class="secondary" data-copy-follow="gold-swing">Follow trader</button></article>
+        <article class="card"><div class="label">Multi-asset strategy</div><div class="big">Market researcher</div><p class="muted tiny">Compares selected crypto assets and market conditions. Style: diversified research · Risk focus: correlation.</p><button type="button" class="secondary" data-copy-follow="multi-asset">Follow trader</button></article>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="section-head"><div><h2>Your followed traders</h2><div class="muted tiny">Your local strategy watchlist.</div></div><button type="button" class="secondary" id="ocCopyTraderRefresh">Refresh list</button></div>
+      <div id="ocCopyTraderFollowing" class="empty">You have not followed any traders yet.</div>
+    </section>
+    <section class="panel" style="margin-top:16px">
+      <h2>How this works</h2>
+      <p class="muted tiny">You can follow and compare these example strategies for research. Automatic trade copying, trader verification, live performance statistics and real-money execution are not currently connected.</p>
+    </section>
+  </section>
   <section id="page-markets" class="hidden">
 
 <div class="page-title"><div><h1>Market Overview</h1></div>
@@ -2064,7 +2084,7 @@ window.ocApplyAdminDemoBalance=function(amount){const n=Number(amount);if(!Numbe
 window.ocApplyAdminDemoAssets=function(balances){if(!balances||typeof balances!=="object"||Array.isArray(balances))return;let changed=false;for(const [rawSymbol,rawAmount] of Object.entries(balances)){const symbol=String(rawSymbol||"").toUpperCase();const amount=Number(rawAmount);if(!/^[A-Z0-9]{2,12}$/.test(symbol)||!Number.isFinite(amount)||amount<0)continue;state.holdings[symbol]=amount;changed=true;}if(changed){saveState();renderWallet();}};
 function renderWallet(){const pricedHoldings=Object.entries(state.holdings).reduce((out,[sym,qty])=>{const symbol=String(sym).toUpperCase(),amount=Number(qty)||0;if(amount<=0||symbol==="USDT")return out;const price=Number(priceFor(symbol)?.current_price||0);if(price>0){out.value+=amount*price;out.priced++;}else out.unpriced++;return out;},{value:0,priced:0,unpriced:0});const totalValue=(Number(state.balance)||0)+pricedHoldings.value;$("summaryBalance").textContent=usdtMoney(state.balance);$("walletBalance").textContent=usdtMoney(totalValue)+" USDT";$("walletBalanceNote").textContent="Estimated total value in USDT · "+pricedHoldings.priced+" priced coin holding"+(pricedHoldings.priced===1?"":"s")+(pricedHoldings.unpriced?"; "+pricedHoldings.unpriced+" asset price"+(pricedHoldings.unpriced===1?" is":"s are")+" unavailable and excluded":"")+" · paper-trading portfolio";$("holdingsValue").textContent=usdtMoney(pricedHoldings.value);const rows=Object.entries(state.holdings).filter(([sym,qty])=>String(sym).toUpperCase()!=="USDT"&&Number(qty)>0.0000000001&&(! $("hideSmallBalances")?.checked||Number(qty)*(priceFor(sym)?.current_price||0)>=1));$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym,current_price:0},price=Number(c.current_price||0);return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+' '+safe(sym.toUpperCase())+'</td><td>'+(price>0?usdtMoney(Number(qty)*price):"Price unavailable")+'</td></tr>'}).join(''):'<tr><td colspan="3" class="empty">No coin holdings yet. Your USDT balance is shown above.</td></tr>';renderActivityHistory();renderTradeHistory();renderPnl();renderWalletMarket()}
 document.addEventListener("change",e=>{if(e.target&&e.target.id==="hideSmallBalances")renderWallet();if(e.target&&e.target.id==="homeHistoryFilter")renderActivityHistory()});
-function showPage(page){if(window.ocLoggedOut===true && !auth.currentUser && !["public-market","home","markets","trade","browser","wallet","register"].includes(page))page="register";if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
+function showPage(page){if(window.ocLoggedOut===true && !auth.currentUser && !["public-market","home","markets","trade","browser","wallet","register","copytrading"].includes(page))page="register";if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
 window.showPage = showPage;
 let timedPaper=null,timedTimer=null,pendingTimedDirection=null;
 function quickPlan(){const amount=Number($("timedStake")?.value||0)*Number(priceFor(window.__ocTradeFundingCoin||"USDT")?.current_price||1),isGold=($("tradeAsset")?.value||selected)==="XAU",minimum=isGold?500:100;const levels=[{rate:12,min:minimum,max:5000,duration:30,label:"Level 1"},{rate:15,min:5000,max:10000,duration:60,label:"Level 2"},{rate:18,min:10000,max:25000,duration:90,label:"Level 3"},{rate:21,min:25000,max:50000,duration:120,label:"Level 4"},{rate:24,min:50000,max:100000,duration:180,label:"Level 5"},{rate:27,min:100000,max:1000000,duration:360,label:"Level 6"}];return levels.find((p,i)=>amount>=p.min&&(amount<p.max||i===levels.length-1&&amount<=p.max))||levels[0]}
@@ -5129,6 +5149,33 @@ body.oc-logged-out.oc-auth-screen #page-register #resetPasswordBtn{
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 </style>
 
+<script id="oc-copy-trader-watchlist">
+(function(){
+ const key="oc_copy_trader_watchlist_v1";
+ const profiles={
+  "btc-trend":{name:"BTC trend strategy",style:"Active trend research",risk:"High volatility"},
+  "gold-swing":{name:"Gold market strategy",style:"Swing research",risk:"Event volatility"},
+  "multi-asset":{name:"Multi-asset strategy",style:"Diversified market research",risk:"Correlation risk"}
+ };
+ const read=()=>{try{const v=JSON.parse(localStorage.getItem(key)||"[]");return Array.isArray(v)?v:[]}catch(e){return[]}};
+ const save=v=>{try{localStorage.setItem(key,JSON.stringify(v))}catch(e){}};
+ function render(){
+  const host=document.getElementById("ocCopyTraderFollowing");if(!host)return;
+  const list=read();
+  host.innerHTML=list.length?list.map(id=>{const p=profiles[id];if(!p)return"";return '<div class="list-row"><div><strong>'+p.name+'</strong><div class="muted tiny">'+p.style+' · '+p.risk+'</div><div class="muted tiny">Example profile · watchlist only</div></div><button type="button" class="secondary" data-copy-unfollow="'+id+'">Unfollow</button></div>'}).join(""):'<div class="empty">You have not followed any traders yet.</div>';
+  document.querySelectorAll("[data-copy-follow]").forEach(btn=>{const followed=list.includes(btn.dataset.copyFollow);btn.textContent=followed?"Following":"Follow trader";btn.disabled=followed});
+ }
+ document.addEventListener("click",e=>{
+  const follow=e.target.closest("[data-copy-follow]");
+  const unfollow=e.target.closest("[data-copy-unfollow]");
+  if(follow){const id=follow.dataset.copyFollow;if(!profiles[id])return;const list=read();if(!list.includes(id)){list.push(id);save(list);if(typeof recordActivity==="function")recordActivity("activity","Followed "+profiles[id].name,"Added an example strategy to your local watchlist.","Watchlist updated");}render();}
+  if(unfollow){const id=unfollow.dataset.copyUnfollow;save(read().filter(x=>x!==id));if(typeof recordActivity==="function"&&profiles[id])recordActivity("activity","Unfollowed "+profiles[id].name,"Removed an example strategy from your local watchlist.","Watchlist updated");render();}
+ });
+ document.getElementById("ocCopyTraderRefresh")?.addEventListener("click",render);
+ document.addEventListener("click",e=>{if(e.target.closest('[data-go="copytrading"]'))setTimeout(render,0)});
+ render();
+})();
+</script>
 </body>
 </html>
 
