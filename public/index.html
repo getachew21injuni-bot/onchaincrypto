@@ -8647,3 +8647,49 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-footnote{
  #page-register #registerForm .field,#page-register #registerContactMethod,#page-register #phoneRegistrationPanel .field{min-height:49px}
 }
 </style>
+
+<style id="oc-dedicated-registration-and-readable-headings">
+/* Keep the single registration experience on its dedicated auth screen only. */
+body:not(.oc-auth-screen) #page-register,
+body:not(.oc-auth-screen) #registerForm,
+body:not(.oc-auth-screen) #phoneRegistrationPanel,
+body:not(.oc-auth-screen) #emailCodePanel{display:none!important}
+body.oc-auth-screen #page-register:not(.hidden){display:block!important}
+
+/* Distinguish page titles from normal body copy with a clear contrast surface. */
+#page-home .page-title h1,#page-markets .page-title h1,
+#page-trade .page-title h1,#page-copytrading .page-title h1,
+#page-wallet .page-title h1,#page-browser .page-title h1{
+ display:inline-block;padding:8px 14px;margin:0 0 9px;
+ color:#fff!important;font-weight:850!important;
+ background:linear-gradient(110deg,#17394f,#102536);
+ border:1px solid rgba(220,178,95,.42);border-left:4px solid #dcb25f;
+ border-radius:10px;line-height:1.25
+}
+#page-home .section-head h2,#page-home .panel h2,
+#page-markets .section-head h2,#page-markets .panel h2,
+#page-trade .section-head h2,#page-trade .panel h2,
+#page-copytrading .section-head h2,#page-copytrading .panel h2,
+#page-wallet .section-head h2,#page-wallet .panel h2,
+#page-browser .section-head h2,#page-browser .panel h2{
+ display:inline-block;padding:6px 11px;margin:0 0 9px;
+ color:#f8e7c2!important;font-weight:780!important;
+ background:rgba(220,178,95,.13);
+ border:1px solid rgba(220,178,95,.28);border-radius:8px
+}
+#page-home p,#page-markets p,#page-trade p,#page-copytrading p,
+#page-wallet p,#page-browser p{
+ color:#c4cfda;font-weight:450!important;line-height:1.55
+}
+#page-home .muted,#page-markets .muted,#page-trade .muted,
+#page-copytrading .muted,#page-wallet .muted,#page-browser .muted{
+ color:#b8c5d2
+}
+@media(max-width:600px){
+ #page-home .page-title h1,#page-markets .page-title h1,
+ #page-trade .page-title h1,#page-copytrading .page-title h1,
+ #page-wallet .page-title h1,#page-browser .page-title h1{
+  padding:7px 10px;font-size:21px!important
+ }
+}
+</style>
