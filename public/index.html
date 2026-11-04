@@ -1512,17 +1512,18 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
   <section id="page-browser" class="hidden">
     <div class="page-title"><div><h1>OnChainCrypto Browser</h1><div class="muted">Explore the latest OnChainCrypto platform and browse the wider web.</div></div><span class="tag">EXPLORE</span></div>
     <section class="panel browser-search-panel">
-      <div class="browser-search-heading"><div class="browser-search-icon">⌕</div><div><h2>Your world. Your markets.</h2><p class="muted">Search anything, or enter a website address to open it directly.</p></div></div>
-      <form id="browserSearchForm" class="browser-search-form">
-        <input id="browserSearchInput" class="search" type="search" placeholder="Search anything or enter a website address…" autocomplete="off" aria-label="Search the web or enter a website address" required>
-        <select id="browserSearchEngine" class="search" aria-label="Choose search engine" style="max-width:150px;min-width:120px"><option value="google">Google</option><option value="bing">Bing</option><option value="duckduckgo">DuckDuckGo</option></select>
-        <button class="primary" type="submit">Go ↗</button>
-      </form>
+      <div class="browser-search-heading"><div class="browser-search-icon">◆</div><div><h2>Explore OnChainCrypto</h2><p class="muted">Jump straight into the latest market and platform pages.</p></div></div>
       <div class="browser-link-grid">
-        <a href="https://www.google.com/" target="_blank" rel="noopener noreferrer"><span>G</span><strong>Google</strong><small>Search the web</small></a>
-        <a href="https://www.bing.com/" target="_blank" rel="noopener noreferrer"><span>B</span><strong>Bing</strong><small>Explore websites and answers</small></a>
-        <a href="https://duckduckgo.com/" target="_blank" rel="noopener noreferrer"><span>◈</span><strong>DuckDuckGo</strong><small>Private web search</small></a>
-        <a href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer"><span>W</span><strong>Wikipedia</strong><small>Explore knowledge</small></a>
+        <a href="#" data-page="markets"><span>▥</span><strong>US Stocks</strong><small>Explore Apple, Microsoft, NVIDIA, Tesla and more</small></a>
+        <a href="#" data-page="copytrading"><span>⇄</span><strong>Copy Trading</strong><small>Discover trader strategies and followed traders</small></a>
+        <a href="#" data-page="markets"><span>🔥</span><strong>Hot Coins</strong><small>Active coins, top gainers, losers and volume</small></a>
+        <a href="#" data-page="markets"><span>◈</span><strong>Crypto Markets</strong><small>Explore coin prices, pairs and market signals</small></a>
+        <a href="#" data-page="trade"><span>↗</span><strong>Trading Workspace</strong><small>Open crypto and gold trading tools</small></a>
+        <a href="#" data-page="wallet"><span>▣</span><strong>Wallet</strong><small>View wallet balances and supported assets</small></a>
+        <a href="#" data-page="deposit"><span>↓</span><strong>Deposit</strong><small>Open deposit options and requests</small></a>
+        <a href="#" data-page="withdraw"><span>↑</span><strong>Withdraw</strong><small>Open withdrawal options</small></a>
+        <a href="#" data-page="history"><span>◷</span><strong>Activity & History</strong><small>Review recorded account activity</small></a>
+        <a href="#" data-page="support"><span>?</span><strong>Help & Support</strong><small>Find platform guidance and assistance</small></a>
       </div>
     </section>
     <section class="panel browser-search-panel">
@@ -3297,7 +3298,7 @@ window.addEventListener("popstate", async () => {
 
 $("marketShowMore")?.addEventListener("click",()=>{window.marketRowsExpanded=(window.marketRowsExpanded||5)+5;renderMarket()});
 $("marketShowLess")?.addEventListener("click",()=>{window.marketRowsExpanded=5;renderMarket()});
-$("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const field=$("browserSearchInput"),raw=field?.value.trim();if(!raw)return;let destination="";const looksLikeAddress=/^(https?:\/\/)?([\w-]+\.)+[a-z]{2,}([/:?#][^\s]*)?$/i.test(raw);if(looksLikeAddress){try{const candidate=new URL(/^https?:\/\//i.test(raw)?raw:"https://"+raw);if(candidate.protocol==="http:"||candidate.protocol==="https:")destination=candidate.href}catch(_){destination=""}}if(!destination){const engine=$("browserSearchEngine")?.value||"google";const bases={google:"https://www.google.com/search?q=",bing:"https://www.bing.com/search?q=",duckduckgo:"https://duckduckgo.com/?q="};destination=(bases[engine]||bases.google)+encodeURIComponent(raw)}window.open(destination,"_blank","noopener,noreferrer")});
+$("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const field=$("browserSearchInput"),raw=field?.value.trim();if(!raw)return;let destination="";const looksLikeAddress=/^(https?:\/\/)?([\w-]+\.)+[a-z]{2,}([/:?#][^\s]*)?$/i.test(raw);if(looksLikeAddress){try{const candidate=new URL(/^https?:\/\//i.test(raw)?raw:"https://"+raw);if(candidate.protocol==="http:"||candidate.protocol==="https:")destination=candidate.href}catch(_){destination=""}}if(!destination){const engine=$("browserSearchEngine")?.value||"google";const bases={google:"https://www.google.com/search?q=",bing:"https://www.bing.com/search?q=",brave:"https://search.brave.com/search?q="};destination=(bases[engine]||bases.google)+encodeURIComponent(raw)}window.open(destination,"_blank","noopener,noreferrer")});
 </script>
 <script id="oc-auth-deep-links">
 (function(){
