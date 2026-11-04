@@ -9560,3 +9560,83 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-password-toggle {
   },true);
 })();
 </script>
+
+
+<style id="oc-auth-no-rectangular-board">
+/* Keep the form itself clean: no enclosing rectangular card, border, or shadow. */
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm {
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel {
+  padding:clamp(12px,2.5vw,24px)!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel:before,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel:after {
+  display:none!important;
+  content:none!important;
+}
+</style>
+
+<script id="oc-final-exclusive-auth-switch">
+(function(){
+  const $=id=>document.getElementById(id);
+  const registerTriggers=[
+    "#showRegisterBtn","#authChoiceRegister","#register-nav","#mobileRegisterBtn",
+    "#ocVisitorSignup","#ocVisitorHeroSignup","#ocVisitorAboutSignup","#ocVisitorBottomSignup"
+  ].join(",");
+  const loginTriggers=[
+    "#registerLoginBtn","#showSignInBtn","#authChoiceLogin","#signin-nav","#mobileSignInBtn"
+  ].join(",");
+  function switchAuth(mode){
+    const creating=mode==="register";
+    document.body.classList.add("oc-auth-screen");
+    document.body.classList.toggle("oc-register-mode",creating);
+    if(typeof window.showPage==="function") window.showPage("register");
+    const login=$("signInForm"), register=$("registerForm");
+    const choice=$("authChoicePanel"), status=$("authStatus");
+    const methodOptions=$("registrationMethodOptions"), phone=$("phoneRegistrationPanel");
+    choice?.classList.add("hidden");
+    status?.classList.add("hidden");
+    login?.classList.toggle("hidden",creating);
+    register?.classList.toggle("hidden",!creating);
+    login?.querySelectorAll("input,select,textarea,button").forEach(el=>{el.disabled=creating;});
+    register?.querySelectorAll("input,select,textarea,button").forEach(el=>{el.disabled=!creating;});
+    if(methodOptions) methodOptions.classList.toggle("hidden",!creating);
+    if(phone){
+      phone.classList.add("hidden");
+      phone.open=false;
+      phone.querySelectorAll("input,select,textarea,button").forEach(el=>{el.disabled=true;});
+    }
+    const heading=$("authHeading"), sub=$("authSubheading");
+    if(heading) heading.textContent=creating?"Create your Onchain account":"Welcome back to OnChainCrypto";
+    if(sub){
+      sub.textContent=creating?"Set up your account to continue.":"";
+      sub.classList.toggle("hidden",!creating);
+    }
+    if(creating){
+      const method=$("registerContactMethod");
+      if(method) method.value="email";
+      const email=$("registerEmail");
+      if(email){email.disabled=false;email.required=true;}
+    }
+    window.scrollTo({top:0,behavior:"smooth"});
+    setTimeout(()=>$(creating?"registerFirstName":"signInEmail")?.focus({preventScroll:true}),60);
+  }
+  document.addEventListener("click",function(event){
+    const target=event.target instanceof Element?event.target:null;
+    if(!target) return;
+    if(target.closest(registerTriggers)){
+      event.preventDefault();event.stopImmediatePropagation();switchAuth("register");return;
+    }
+    if(target.closest(loginTriggers)){
+      event.preventDefault();event.stopImmediatePropagation();switchAuth("login");
+    }
+  },true);
+})();
+</script>
