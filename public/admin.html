@@ -49,6 +49,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <button data-view="Withdrawals"><span class="ico">↑</span>Withdrawals</button>
 <button data-view="Addresses"><span class="ico">▰</span>Addresses</button>
 <button data-view="Trades"><span class="ico">⇄</span>Trades</button>
+<button data-view="Brokerage"><span class="ico">▣</span>Brokerage</button>
 <button data-view="Trade Controls"><span class="ico">⚖</span>Trade Controls</button>
 <button data-view="Assets"><span class="ico">◉</span>Assets</button>
 <button data-view="Support"><span class="ico">☏</span>Support <span class="pill" style="background:#1d6b53">Inbox</span></button>
@@ -94,6 +95,7 @@ const descriptions={
 'Withdrawals':'Review withdrawal requests. This preview cannot send funds.',
 'Addresses':'Manage deposit address records only after secure wallet infrastructure is configured.',
 'Trades':'Review order history after a trusted trading backend is connected.',
+'Brokerage':'Review Alpaca brokerage eligibility requests. Approval does not activate live order routing.',
 'Trade Controls':'Configure transparent paper-trading take-profit and stop-loss thresholds for testing. These settings are local to this browser and do not control user trades.',
 'Assets':'Adjust practice coin balances to a selected user wallet or view the supported asset balances.',
 'Transfers':'Review transfer requests after server-side authorization is implemented.',
@@ -204,8 +206,9 @@ async function renderRequestQueue(view){
    const amount=Number(r.amount||0),asset=String(r.asset||'USDT'),status=String(r.status||'pending');
    const when=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'—';
    const details=kind==='deposit'?'TX: '+(r.transactionHash||'—')+' · To: '+(r.depositAddress||'—'):'To: '+(r.destinationAddress||'—');
+   const receipt=kind==='deposit'&&typeof r.receiptImage==='string'&&r.receiptImage.length<=760000&&r.receiptImage.startsWith('data:image/jpeg;base64,')?'<a href="'+r.receiptImage+'" target="_blank" rel="noopener noreferrer" title="Open full payment screenshot"><img src="'+r.receiptImage+'" alt="Customer payment receipt" style="display:block;width:88px;height:88px;object-fit:cover;border-radius:8px;border:1px solid #526878;margin-top:8px"><small>View receipt · '+esc(r.receiptFileName||'Screenshot')+'</small></a>':'';
    const actions=status==='pending'?'<button class="icon-btn" data-request-action="approve" data-request-id="'+esc(r.id)+'" style="background:#087b56;border:0">Approve practice balance</button> <button class="icon-btn" data-request-action="reject" data-request-id="'+esc(r.id)+'">Reject</button>':'<span class="tag">'+esc(status==='approved'?'APPROVED · PRACTICE':status.toUpperCase())+'</span>';
-   return '<tr><td>'+esc(name)+'<br><small class="muted">'+esc(r.email||r.uid||'')+'</small></td><td>'+amount.toLocaleString(undefined,{maximumFractionDigits:8})+' '+esc(asset)+'</td><td>'+esc(r.network||'—')+'</td><td style="max-width:240px;overflow-wrap:anywhere">'+esc(details)+'</td><td>'+esc(when)+'</td><td>'+actions+'</td></tr>';
+   return '<tr><td>'+esc(name)+'<br><small class="muted">'+esc(r.email||r.uid||'')+'</small></td><td>'+amount.toLocaleString(undefined,{maximumFractionDigits:8})+' '+esc(asset)+'</td><td>'+esc(r.network||'—')+'</td><td style="max-width:240px;overflow-wrap:anywhere">'+esc(details)+receipt+'</td><td>'+esc(when)+'</td><td>'+actions+'</td></tr>';
   }).join('');
   const panel=document.createElement('div');panel.id=queueId;panel.className='content-panel';panel.style.margin='0 0 16px';
   panel.innerHTML='<div class="panel-head"><h3>Live '+(kind==='deposit'?'deposit':'withdrawal')+' requests</h3><span class="tag">'+pending+' pending · '+requests.length+' total</span></div><p class="muted">Firestore request queue · approvals change simulated balances only. Deposits are not blockchain-verified and withdrawals are not paid out.</p><div class="table-wrap"><table style="min-width:900px"><thead><tr><th>User</th><th>Amount</th><th>Network</th><th>Payment / destination details</th><th>Submitted</th><th>Admin action</th></tr></thead><tbody>'+(rows||'<tr><td colspan="6" class="empty">No '+kind+' requests found.</td></tr>')+'</tbody></table></div><p id="ocRequestMessage" class="muted" role="status" aria-live="polite"></p>';
@@ -489,7 +492,33 @@ function renderModule(view){
  body.querySelectorAll('[data-record-action]').forEach(btn=>btn.addEventListener('click',()=>{const data=loadAdminData();data[view]=getRecords(view);const i=Number(btn.dataset.recordIndex);if(!data[view][i])return;if(btn.dataset.recordAction==='delete'){data[view].splice(i,1);}else{const cycle=['New','Pending','In review','Approved (demo)','Rejected (demo)','Completed (demo)'];const current=data[view][i].status||'New';data[view][i].status=cycle[(cycle.indexOf(current)+1+cycle.length)%cycle.length];}saveAdminData(data);renderModule(view);const msg=document.getElementById('moduleMessage');if(msg)msg.textContent='Demo record updated locally. No real transaction or account was changed.';}));
  document.getElementById('exportDemoRecords').addEventListener('click',()=>{const csv=[['Record','Owner','Amount','Status'],...getRecords(view).map(r=>[r.title,r.owner,r.amount,r.status])].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=view.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-demo.csv';a.click();URL.revokeObjectURL(url);});
 }
-function showView(view){const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your Onchain administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent='';if(view==='Trade Controls')renderTradeControls();else if(!isHome)renderModule(view);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
+async function renderBrokerageRequests(){
+ const body=document.getElementById('detailBody'),api=window.__ocAdminFirebase;
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading brokerage requests…</p></div>';
+ if(!api){body.textContent='Firebase admin connection is not ready.';return;}
+ const {db,collection,getDocs,query,limit,doc,setDoc,serverTimestamp,auth}=api;
+ try{
+  let current=auth.currentUser;if(!current)throw new Error('Verified administrator sign-in required.');
+  await current.reload();current=auth.currentUser;
+  if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('Verified administrator sign-in required.');
+  await current.getIdToken(true);
+  const snap=await getDocs(query(collection(db,'brokerConnectionRequests'),limit(200))),rows=snap.docs.map(d=>({id:d.id,...d.data()}));
+  if(!rows.length){body.innerHTML='<div class="notice">No brokerage connection requests have been submitted.</div>';return;}
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  body.innerHTML='<div class="content-panel"><h3 style="margin-top:0">Brokerage connection requests</h3><p class="muted">Review customer eligibility. Marking a request eligible does not connect Alpaca or enable orders; provider authorization and secure server-side integration are still required.</p><div class="table-wrap"><table style="min-width:850px"><thead><tr><th>Customer</th><th>Provider</th><th>Submitted</th><th>Review status</th><th>Admin note</th><th>Action</th></tr></thead><tbody>'+rows.map(r=>{
+  const when=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'—',state=String(r.reviewStatus||'pending');
+  return '<tr><td>'+esc(r.fullName||'Customer')+'<br><small class="muted">'+esc(r.email||r.uid)+'</small></td><td>'+esc(r.provider||'Alpaca Broker API')+'</td><td>'+esc(when)+'</td><td><select data-broker-status="'+esc(r.id)+'" style="min-width:150px;padding:9px;border-radius:8px;background:#102333;color:white;border:1px solid #526878"><option value="pending" '+(state==='pending'?'selected':'')+'>Pending</option><option value="reviewing" '+(state==='reviewing'?'selected':'')+'>Reviewing</option><option value="eligible" '+(state==='eligible'?'selected':'')+'>Eligibility approved</option><option value="needs_info" '+(state==='needs_info'?'selected':'')+'>Needs information</option><option value="rejected" '+(state==='rejected'?'selected':'')+'>Not approved</option></select></td><td><input data-broker-note="'+esc(r.id)+'" maxlength="300" value="'+esc(r.adminNote||'')+'" placeholder="Optional note" style="min-width:180px;padding:9px;border-radius:8px;background:#102333;color:white;border:1px solid #526878"></td><td><button class="icon-btn" data-broker-save="'+esc(r.id)+'" style="background:#087b56;border:0">Save review</button></td></tr>';
+ }).join('')+'</tbody></table></div><p id="ocBrokerageAdminMessage" class="muted" role="status"></p></div>';
+ body.querySelectorAll('[data-broker-save]').forEach(btn=>btn.addEventListener('click',async()=>{
+  const id=btn.dataset.brokerSave,select=body.querySelector('[data-broker-status="'+id+'"]'),note=body.querySelector('[data-broker-note="'+id+'"]'),reviewStatus=select?.value||'pending';
+  if(!['pending','reviewing','eligible','needs_info','rejected'].includes(reviewStatus))return;
+  btn.disabled=true;btn.textContent='Saving…';
+  try{await setDoc(doc(db,'brokerConnectionRequests',id),{reviewStatus,adminNote:String(note?.value||'').slice(0,300),reviewedAt:serverTimestamp(),reviewedBy:current.email},{merge:true});const m=document.getElementById('ocBrokerageAdminMessage');if(m)m.textContent='Review saved. Customer status updates on refresh.';btn.textContent='Saved';}
+  catch(error){btn.disabled=false;btn.textContent='Save review';const m=document.getElementById('ocBrokerageAdminMessage');if(m)m.textContent='Could not save review: '+(error.code||error.message||'error');}
+ }));
+ }catch(error){body.innerHTML='<div class="notice">Could not load brokerage requests: '+String(error.code||error.message||'error').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))+'</div>';}
+}
+function showView(view){const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your Onchain administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent='';if(view==='Trade Controls')renderTradeControls();else if(view==='Brokerage')renderBrokerageRequests();else if(!isHome)renderModule(view);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
 document.getElementById('menuToggle').addEventListener('click',()=>sidebar.classList.toggle('open'));
 document.getElementById('refreshBtn').addEventListener('click',()=>{const active=document.querySelector('[data-view].active')?.dataset.view||'Dashboard';showView(active);const b=document.getElementById('refreshBtn');b.textContent='✓ Refreshed';setTimeout(()=>b.textContent='↻ Refresh',1200);});

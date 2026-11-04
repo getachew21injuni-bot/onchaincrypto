@@ -911,7 +911,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
 }
 </style>
 
-</head>
+<style id="oc-stock-crypto-quick-style">.oc-stock-brand-card{cursor:pointer;transition:border-color .18s,transform .18s,background .18s}.oc-stock-brand-card:hover,.oc-stock-brand-card.selected,.oc-stock-brand-card[aria-pressed="true"]{border-color:var(--oc-gold,#d9ad55);background:rgba(217,173,85,.09);transform:translateY(-1px)}.oc-stock-brand-card:focus-visible{outline:2px solid var(--oc-gold,#d9ad55);outline-offset:3px}.oc-stock-order-summary a{color:var(--oc-gold,#e5bd67);text-decoration:none}.oc-crypto-quick-picks{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}.oc-crypto-quick-picks button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:8px 13px;font-weight:700}.oc-crypto-quick-picks button:hover{border-color:var(--yellow);color:var(--yellow)}</style><style id="oc-deposit-proof-style">.deposit-proof-panel{margin-top:14px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}.deposit-proof-panel h3{margin:0 0 8px}.deposit-proof-panel label{display:block;margin:12px 0 6px;font-weight:650}.deposit-proof-panel input[type=file]{width:100%;padding:10px}#depositReceiptPreview img{display:block;max-width:180px;max-height:180px;object-fit:contain;border-radius:10px;margin-top:8px}#depositSubmitRequest{width:100%;margin-top:12px}</style></head>
 <body>
 <header>
   <div class="brand"><span class="oc-onchain-round-mark header-logo-mark" aria-hidden="true">B</span><span>Onchain</span></div>
@@ -1127,23 +1127,23 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
     <section class="panel oc-signed-in-stocks" id="ocSignedInStocksPanel">
       <div class="section-head"><div><h2>US Stocks</h2><p class="muted tiny">Apple, Microsoft, NVIDIA, Tesla and other leading US-listed companies</p></div><span class="tag">NASDAQ · NYSE</span></div>
       <div class="oc-stock-brand-grid">
-        <div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:#111827">A</span><span><b>AAPL</b><small>Apple</small></span></div>
-        <div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:#F25022">▦</span><span><b>MSFT</b><small>Microsoft</small></span></div>
-        <div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:#76B900">N</span><span><b>NVDA</b><small>NVIDIA</small></span></div>
-        <div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:#E82127">T</span><span><b>TSLA</b><small>Tesla</small></span></div>
-        <div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:#FF9900">a</span><span><b>AMZN</b><small>Amazon</small></span></div>
-        <div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:#4285F4">G</span><span><b>GOOGL</b><small>Alphabet</small></span></div>
-        <div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:#0866FF">∞</span><span><b>META</b><small>Meta Platforms</small></span></div>
+        <div class="oc-stock-brand-card" role="button" tabindex="0" data-stock-pick="AAPL" aria-label="Select Apple (AAPL)"><span class="oc-stock-brand-mark" style="--stock-brand:#111827">A</span><span><b>AAPL</b><small>Apple</small></span></div>
+        <div class="oc-stock-brand-card" role="button" tabindex="0" data-stock-pick="MSFT" aria-label="Select Microsoft (MSFT)"><span class="oc-stock-brand-mark" style="--stock-brand:#F25022">▦</span><span><b>MSFT</b><small>Microsoft</small></span></div>
+        <div class="oc-stock-brand-card" role="button" tabindex="0" data-stock-pick="NVDA" aria-label="Select NVIDIA (NVDA)"><span class="oc-stock-brand-mark" style="--stock-brand:#76B900">N</span><span><b>NVDA</b><small>NVIDIA</small></span></div>
+        <div class="oc-stock-brand-card" role="button" tabindex="0" data-stock-pick="TSLA" aria-label="Select Tesla (TSLA)"><span class="oc-stock-brand-mark" style="--stock-brand:#E82127">T</span><span><b>TSLA</b><small>Tesla</small></span></div>
+        <div class="oc-stock-brand-card" role="button" tabindex="0" data-stock-pick="AMZN" aria-label="Select Amazon (AMZN)"><span class="oc-stock-brand-mark" style="--stock-brand:#FF9900">a</span><span><b>AMZN</b><small>Amazon</small></span></div>
+        <div class="oc-stock-brand-card" role="button" tabindex="0" data-stock-pick="GOOGL" aria-label="Select Alphabet (GOOGL)"><span class="oc-stock-brand-mark" style="--stock-brand:#4285F4">G</span><span><b>GOOGL</b><small>Alphabet</small></span></div>
+        <div class="oc-stock-brand-card" role="button" tabindex="0" data-stock-pick="META" aria-label="Select Meta Platforms (META)"><span class="oc-stock-brand-mark" style="--stock-brand:#0866FF">∞</span><span><b>META</b><small>Meta Platforms</small></span></div>
       </div>
       <div class="oc-stock-widget-wrap"><tv-market-overview symbol-sectors='[{"sectionName":"US Stocks","symbols":["NASDAQ:AAPL","NASDAQ:MSFT","NASDAQ:NVDA","NASDAQ:TSLA","NASDAQ:AMZN","NASDAQ:GOOGL","NASDAQ:META"]}]' theme="light" locale="en"></tv-market-overview></div>
       <div class="oc-stock-brokerage" id="ocStockBrokerageWorkspace">
         <div>
-          <div class="oc-stock-brokerage-head"><h3>Stock trading</h3><span class="oc-stock-brokerage-status">BROKER CONNECTION PENDING</span></div>
+          <div class="oc-stock-brokerage-head"><h3>Stock trading</h3><span class="oc-stock-brokerage-status" id="ocStockBrokerStatus">BROKER CONNECTION PENDING</span></div>
           <label for="ocStockOrderSymbol" class="muted tiny">Select company</label>
           <select id="ocStockOrderSymbol" class="field" aria-label="Select a stock">
             <option value="AAPL">Apple · AAPL</option><option value="MSFT">Microsoft · MSFT</option><option value="NVDA">NVIDIA · NVDA</option><option value="TSLA">Tesla · TSLA</option><option value="AMZN">Amazon · AMZN</option><option value="GOOGL">Alphabet · GOOGL</option><option value="META">Meta Platforms · META</option>
           </select>
-          <iframe id="ocStockOrderChart" class="oc-stock-chart-frame" title="Selected stock market chart" loading="lazy" referrerpolicy="origin" src="https://www.tradingview.com/widgetembed/?symbol=NASDAQ%3AAAPL&interval=D&theme=dark&style=1&locale=en&hide_top_toolbar=true&allow_symbol_change=false&save_image=false"></iframe>
+          <iframe id="ocStockOrderChart" class="oc-stock-chart-frame" title="Selected stock market chart" loading="lazy" referrerpolicy="origin" src="https://www.tradingview.com/widgetembed/?symbol=NASDAQ%3AAAPL&interval=D&theme=dark&style=1&locale=en&hide_top_toolbar=true&allow_symbol_change=false&save_image=false"></iframe><div class="oc-stock-order-summary"><span id="ocStockSelectedLabel">Selected stock · AAPL</span><strong><a id="ocStockSignalLink" href="https://www.tradingview.com/symbols/NASDAQ-AAPL/technicals/" target="_blank" rel="noopener noreferrer">View AAPL technical signals ↗</a></strong></div>
         </div>
         <div class="oc-stock-ticket">
           <div class="oc-stock-brokerage-head"><h3>Order ticket</h3><span class="tag">US EQUITIES</span></div>
@@ -1153,6 +1153,8 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
           <div class="oc-stock-order-summary"><span>Order</span><strong id="ocStockOrderSummary">Buy · 1 AAPL</strong></div>
           <div class="oc-stock-order-summary"><span>Market price / total</span><strong>Available after broker connection</strong></div>
           <p class="oc-stock-broker-note">Connect your approved brokerage account to receive an executable quote, review fees and place real orders. No order will be submitted before that connection is active.</p>
+          <button type="button" class="oc-stock-submit" id="ocRequestBrokerConnection">Request brokerage connection</button>
+          <p class="muted tiny" id="ocBrokerRequestMessage" role="status" aria-live="polite">Broker eligibility review and secure provider authorization are separate steps. Real orders stay unavailable until the approved broker integration is active.</p>
           <button type="button" class="oc-stock-submit" disabled aria-disabled="true">Trading access not connected</button>
         </div>
       </div>
@@ -1165,19 +1167,25 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
       const shares=document.getElementById("ocStockOrderShares");
       const summary=document.getElementById("ocStockOrderSummary");
       const sideButtons=[...document.querySelectorAll("[data-stock-side]")];
+      const signalLink=document.getElementById("ocStockSignalLink"),selectedLabel=document.getElementById("ocStockSelectedLabel");
+      const stockTiles=[...document.querySelectorAll("[data-stock-pick]")];
       if(!symbol||!chart||!shares||!summary)return;
       let side="buy";
       function update(){
         const ticker=symbol.value;
+        if(signalLink){signalLink.href="https://www.tradingview.com/symbols/NASDAQ-"+encodeURIComponent(ticker)+"/technicals/";signalLink.textContent="View "+ticker+" technical signals ↗";}
+        if(selectedLabel)selectedLabel.textContent="Selected stock · "+ticker;
+        stockTiles.forEach(tile=>{const active=tile.dataset.stockPick===ticker;tile.setAttribute("aria-pressed",String(active));tile.classList.toggle("selected",active);});
         const quantity=Number(shares.value);
         const safeQuantity=Number.isFinite(quantity)&&quantity>0?quantity:0;
         summary.textContent=(side==="buy"?"Buy":"Sell")+" · "+(safeQuantity?String(safeQuantity):"—")+" "+ticker;
       }
-      symbol.addEventListener("change",function(){
-        const ticker=symbol.value;
-        chart.src="https://www.tradingview.com/widgetembed/?symbol=NASDAQ%3A"+encodeURIComponent(ticker)+"&interval=D&theme=dark&style=1&locale=en&hide_top_toolbar=true&allow_symbol_change=false&save_image=false";
-        update();
-      });
+      function selectStock(ticker){
+        if(![...symbol.options].some(option=>option.value===ticker))return;
+        symbol.value=ticker;chart.src="https://www.tradingview.com/widgetembed/?symbol=NASDAQ%3A"+encodeURIComponent(ticker)+"&interval=D&theme=dark&style=1&locale=en&hide_top_toolbar=true&allow_symbol_change=false&save_image=false";update();
+      }
+      symbol.addEventListener("change",()=>selectStock(symbol.value));
+      stockTiles.forEach(tile=>{const pick=()=>selectStock(tile.dataset.stockPick);tile.addEventListener("click",pick);tile.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();pick();}});});
       shares.addEventListener("input",update);
       sideButtons.forEach(function(button){button.addEventListener("click",function(){
         side=button.dataset.stockSide;
@@ -1365,7 +1373,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
   <section id="page-deposit" class="hidden">
     <div class="page-title"><div><h1>↓ Deposit crypto</h1><div class="muted">Choose a coin and use a verified address.</div></div><span class="tag">Address setup required</span></div>
     <section class="panel form-panel">
-      <label for="depositCoinSearch">Search coins</label><input id="depositCoinSearch" class="field" placeholder="Search Bitcoin, Ethereum, XRP…" autocomplete="off">
+      <div class="oc-crypto-quick-picks" aria-label="Popular deposit assets"><span class="muted tiny">Popular assets</span><button type="button" data-quick-coin="deposit" data-asset="BTC">₿ BTC</button><button type="button" data-quick-coin="deposit" data-asset="ETH">Ξ ETH</button><button type="button" data-quick-coin="deposit" data-asset="USDT">₮ USDT</button><button type="button" data-quick-coin="deposit" data-asset="USDC">USDC</button><button type="button" data-quick-coin="deposit" data-asset="SOL">◎ SOL</button></div><label for="depositCoinSearch">Search coins</label><input id="depositCoinSearch" class="field" placeholder="Search Bitcoin, Ethereum, XRP…" autocomplete="off">
       <div class="coin-list-controls coin-picker-controls"><span class="muted tiny" id="depositCoinCount">Showing 6 coins</span><div><button class="secondary" type="button" id="depositCoinLess" disabled>Less</button> <button class="primary" type="button" id="depositCoinMore">More +6</button></div></div>
       <div id="depositCoinList" class="coin-picker" role="listbox" aria-label="Deposit coin list"></div>
       <div class="divider"></div>
@@ -1373,12 +1381,23 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
       <label for="depositNetwork">Network</label><select id="depositNetwork" class="field"><option value="Bitcoin">Bitcoin</option><option value="Ethereum">Ethereum</option><option value="TRC20">TRON (TRC20)</option><option value="ERC20">Ethereum (ERC20)</option><option value="BEP20">BNB Smart Chain (BEP20)</option><option value="Solana">Solana</option><option value="Polygon">Polygon</option><option value="XRP">XRP Ledger</option></select>
       <div class="address-box"><div class="muted tiny">Your deposit address</div><div id="depositAddress" class="address-value">Deposit address not configured</div><div class="two-buttons"><button id="copyDepositAddress" class="secondary" type="button" disabled>▢ Copy address</button><button id="showDepositQr" class="secondary" type="button" disabled>▦ Show QR</button></div><div id="depositQr" class="qr-area"><span class="muted tiny">No deposit address available</span></div></div>
       <p id="depositHelp" class="muted tiny">Deposits unavailable</p>
+      <div class="divider"></div>
+      <section class="deposit-proof-panel" aria-labelledby="depositProofTitle">
+        <h3 id="depositProofTitle">Submit deposit payment</h3>
+        <p class="muted tiny">After sending crypto to the address above, submit the amount, transaction hash and a screenshot of your payment. Your request will appear in the admin Deposits queue for review.</p>
+        <label for="depositAmount">Amount sent</label><input id="depositAmount" class="field" type="number" min="0" step="any" inputmode="decimal" placeholder="Enter amount sent">
+        <label for="depositTransactionHash">Transaction ID / hash</label><input id="depositTransactionHash" class="field" type="text" maxlength="180" placeholder="Paste your transaction hash">
+        <label for="depositReceiptFile">Payment screenshot</label><input id="depositReceiptFile" class="field" type="file" accept="image/*">
+        <div id="depositReceiptPreview" class="muted tiny" aria-live="polite">No screenshot selected. JPG, PNG or WEBP image.</div>
+        <button type="button" id="depositSubmitRequest" class="primary" disabled>Submit deposit request</button>
+        <p id="depositRequestNotice" class="muted tiny" role="status" aria-live="polite">Sign in and complete all fields to submit.</p>
+      </section>
     </section>
   </section>
   <section id="page-withdraw" class="hidden">
     <div class="page-title"><div><h1>↑ Withdraw crypto</h1><div class="muted">Choose a coin, network, and destination address.</div></div><span class="tag">Secure withdrawal setup</span></div>
     <section class="panel form-panel">
-      <label for="withdrawCoinSearch">Search coins</label><input id="withdrawCoinSearch" class="field" placeholder="Search Bitcoin, Ethereum, XRP…" autocomplete="off">
+      <div class="oc-crypto-quick-picks" aria-label="Popular withdrawal assets"><span class="muted tiny">Popular assets</span><button type="button" data-quick-coin="withdraw" data-asset="BTC">₿ BTC</button><button type="button" data-quick-coin="withdraw" data-asset="ETH">Ξ ETH</button><button type="button" data-quick-coin="withdraw" data-asset="USDT">₮ USDT</button><button type="button" data-quick-coin="withdraw" data-asset="USDC">USDC</button><button type="button" data-quick-coin="withdraw" data-asset="SOL">◎ SOL</button></div><label for="withdrawCoinSearch">Search coins</label><input id="withdrawCoinSearch" class="field" placeholder="Search Bitcoin, Ethereum, XRP…" autocomplete="off">
       <div class="coin-list-controls coin-picker-controls"><span class="muted tiny" id="withdrawCoinCount">Showing 6 coins</span><div><button class="secondary" type="button" id="withdrawCoinLess" disabled>Less</button> <button class="primary" type="button" id="withdrawCoinMore">More +6</button></div></div>
       <div id="withdrawCoinList" class="coin-picker" role="listbox" aria-label="Withdrawal coin list"></div>
       <div class="selected-coin"><span id="withdrawCoinIcon" class="coin-icon">₿</span><div><strong id="withdrawCoinName">Bitcoin (BTC)</strong><div class="muted tiny">Selected withdrawal asset</div></div></div>
@@ -5267,7 +5286,41 @@ body.oc-logged-out.oc-auth-screen #page-register #resetPasswordBtn{
  render();
 })();
 </script>
-</body>
+<script>(function(){document.querySelectorAll("[data-quick-coin]").forEach(button=>button.addEventListener("click",()=>{const kind=button.dataset.quickCoin,symbol=button.dataset.asset;if(kind==="deposit"){selectedDepositCoin=symbol;updateSelectedCoin("deposit");drawCoinPicker("deposit",document.getElementById("depositCoinSearch")?.value||"");}else{selectedWithdrawCoin=symbol;updateSelectedCoin("withdraw");drawCoinPicker("withdraw",document.getElementById("withdrawCoinSearch")?.value||"");}}));})();</script><script type="module" id="oc-broker-connection-module">
+import {initializeApp,getApps} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc,serverTimestamp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
+const app=getApps()[0]||initializeApp(config),auth=getAuth(app),db=getFirestore(app),button=document.getElementById("ocRequestBrokerConnection"),message=document.getElementById("ocBrokerRequestMessage"),status=document.getElementById("ocStockBrokerStatus");
+let user=null,existing=null;
+function render(data){existing=data||null;if(!data){if(button){button.disabled=!user;button.textContent="Request brokerage connection";}if(status)status.textContent="BROKER CONNECTION PENDING";return;}const state=String(data.reviewStatus||"pending"),labels={pending:"REQUEST RECEIVED",reviewing:"UNDER ADMIN REVIEW",eligible:"ELIGIBILITY APPROVED · SETUP PENDING",rejected:"REQUEST NOT APPROVED",needs_info:"MORE INFORMATION REQUIRED"};if(status)status.textContent=labels[state]||"REQUEST RECEIVED";if(button){button.disabled=true;button.textContent=state==="eligible"?"Broker setup pending":"Request submitted";}if(message)message.textContent=state==="eligible"?"Eligibility approved by Onchain admin. Secure Alpaca authorization and server-side order integration are still required before trading.":state==="rejected"?"Your request was not approved. Contact support if you need more information.":state==="needs_info"?"Please contact support to provide the requested information.":"Your Alpaca brokerage request is with the Onchain admin for review.";}
+onAuthStateChanged(auth,async current=>{user=current||null;if(button)button.disabled=!user||!!existing;if(!user){if(message)message.textContent="Sign in to request a brokerage connection.";if(status)status.textContent="SIGN-IN REQUIRED";return;}try{const snap=await getDoc(doc(db,"brokerConnectionRequests",user.uid));render(snap.exists()?snap.data():null);}catch(error){if(message)message.textContent="Could not load your request. Refresh and try again.";console.warn("Broker request:",error.code||error.message);}});
+button?.addEventListener("click",async()=>{if(!user){if(message)message.textContent="Please sign in first.";return;}if(existing)return;button.disabled=true;button.textContent="Submitting…";try{const ref=doc(db,"brokerConnectionRequests",user.uid),snap=await getDoc(ref);if(snap.exists()){render(snap.data());return;}await setDoc(ref,{uid:user.uid,email:user.email||"",fullName:user.displayName||"",provider:"Alpaca Broker API",reviewStatus:"pending",createdAt:serverTimestamp()});render({reviewStatus:"pending"});}catch(error){button.disabled=false;button.textContent="Request brokerage connection";if(message)message.textContent="Request failed ("+(error.code||"connection error")+"). Please try again.";}});</script><script type="module" id="oc-deposit-request-module">
+import {initializeApp,getApps} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import {getFirestore,collection,addDoc,serverTimestamp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
+const app=getApps()[0]||initializeApp(config),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id);
+const amount=$("depositAmount"),hash=$("depositTransactionHash"),file=$("depositReceiptFile"),preview=$("depositReceiptPreview"),submit=$("depositSubmitRequest"),notice=$("depositRequestNotice");
+let user=null,receiptData="",receiptName="";
+function currentAddress(){const network=$("depositNetwork")?.value||"",asset=String($("depositCoinName")?.textContent.match(/\(([^)]+)\)/)?.[1]||"").toUpperCase();return {asset,network,address:window.ONCHAINSPRO_DEPOSIT_ADDRESSES?.[asset]?.[network]||""};}
+function validate(){const a=Number(amount?.value),v=currentAddress();submit.disabled=!user||!(a>0&&Number.isFinite(a))||hash.value.trim().length<8||!receiptData||!v.address||!v.asset||!v.network;}
+onAuthStateChanged(auth,u=>{user=u||null;if(notice&&!user)notice.textContent="Sign in to submit a deposit request.";validate();});
+async function compressImage(source){
+ const image=new Image(),url=URL.createObjectURL(source);
+ try{await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error("Could not read this image. Choose a JPG, PNG or WEBP screenshot."));image.src=url;});
+  const scale=Math.min(1,1100/Math.max(image.naturalWidth,image.naturalHeight)),canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
+  const ctx=canvas.getContext("2d");if(!ctx)throw new Error("Image processing is not supported in this browser.");ctx.drawImage(image,0,0,canvas.width,canvas.height);
+  let quality=.78,data=canvas.toDataURL("image/jpeg",quality);while(data.length>760000&&quality>.38){quality-=.08;data=canvas.toDataURL("image/jpeg",quality);}
+  if(data.length>760000)throw new Error("Screenshot is too large. Choose a smaller or cropped screenshot.");return data;
+ }finally{URL.revokeObjectURL(url);}
+}
+file?.addEventListener("change",async()=>{receiptData="";receiptName="";const chosen=file.files?.[0];if(!chosen){preview.textContent="No screenshot selected.";validate();return;}if(!chosen.type.startsWith("image/")){file.value="";preview.textContent="Please choose an image screenshot.";validate();return;}preview.textContent="Preparing screenshot securely…";submit.disabled=true;try{receiptData=await compressImage(chosen);receiptName=String(chosen.name||"payment-screenshot").slice(0,120);preview.innerHTML='<img alt="Payment screenshot preview" src="'+receiptData+'"><span class="muted tiny">Screenshot ready to submit.</span>';}catch(error){preview.textContent=error.message;receiptData="";file.value="";}validate();});
+[amount,hash].forEach(el=>{el?.addEventListener("input",validate);el?.addEventListener("change",validate);});
+$("depositNetwork")?.addEventListener("change",validate);window.addEventListener("oc-wallet-addresses-updated",validate);
+document.querySelectorAll('[data-quick-coin="deposit"]').forEach(b=>b.addEventListener("click",()=>setTimeout(validate,0)));
+submit?.addEventListener("click",async()=>{const v=currentAddress(),a=Number(amount.value),txHash=hash.value.trim();if(!user){notice.textContent="Please sign in first.";return;}if(!(a>0&&Number.isFinite(a))||txHash.length<8||!receiptData||!v.address){notice.textContent="Complete the amount, transaction hash and screenshot, and select a configured deposit address.";return;}submit.disabled=true;submit.textContent="Submitting…";notice.textContent="Sending your deposit request to admin review…";try{await addDoc(collection(db,"depositRequests"),{uid:user.uid,email:user.email||"",asset:v.asset,network:v.network,amount:a,depositAddress:v.address,transactionHash:txHash,receiptImage:receiptData,receiptFileName:receiptName,status:"pending",createdAt:serverTimestamp()});amount.value="";hash.value="";file.value="";receiptData="";receiptName="";preview.textContent="No screenshot selected.";notice.textContent="Deposit request submitted. Admin can review your payment screenshot and transaction details. Funds are not credited automatically.";}catch(error){notice.textContent="Could not submit ("+(error.code||error.message||"error")+"). Check the selected network and try again.";}finally{submit.textContent="Submit deposit request";validate();}});
+</script></body>
 </html>
 
 <style id="oc-register-contact-choice-style">

@@ -205,11 +205,14 @@ service cloud.firestore {
     match /depositRequests/{requestId} {
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid
         && request.resource.data.status == 'pending'
-        && request.resource.data.keys().hasOnly(['uid','email','asset','network','amount','depositAddress','transactionHash','status','createdAt'])
+        && request.resource.data.keys().hasOnly(['uid','email','asset','network','amount','depositAddress','transactionHash','receiptImage','receiptFileName','status','createdAt'])
         && request.resource.data.asset is string && request.resource.data.network is string
         && request.resource.data.amount is number && request.resource.data.amount > 0 && request.resource.data.amount <= 1000000000
         && request.resource.data.depositAddress is string && request.resource.data.depositAddress.size() > 0
-        && request.resource.data.transactionHash is string && request.resource.data.transactionHash.size() >= 8 && request.resource.data.transactionHash.size() <= 180;
+        && request.resource.data.transactionHash is string && request.resource.data.transactionHash.size() >= 8 && request.resource.data.transactionHash.size() <= 180
+        && request.resource.data.receiptImage is string && request.resource.data.receiptImage.size() <= 760000
+        && request.resource.data.receiptImage.matches('^data:image/jpeg;base64,.*')
+        && request.resource.data.receiptFileName is string && request.resource.data.receiptFileName.size() <= 120;
       allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
       allow update: if isAdmin() && (
         (resource.data.status == 'pending'
@@ -234,6 +237,23 @@ service cloud.firestore {
       allow update: if isAdmin() && resource.data.status == 'pending'
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reviewedAt','reviewedBy'])
         && request.resource.data.status in ['approved','rejected']
+        && request.resource.data.reviewedBy == request.auth.token.email;
+      allow delete: if false;
+    }
+
+    match /brokerConnectionRequests/{uid} {
+      allow create: if owns(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.provider == 'Alpaca Broker API'
+        && request.resource.data.reviewStatus == 'pending'
+        && request.resource.data.keys().hasOnly(['uid','email','fullName','provider','reviewStatus','createdAt']);
+      allow get: if owns(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reviewStatus','adminNote','reviewedAt','reviewedBy'])
+        && request.resource.data.reviewStatus in ['pending','reviewing','eligible','needs_info','rejected']
+        && request.resource.data.adminNote is string
+        && request.resource.data.adminNote.size() <= 300
         && request.resource.data.reviewedBy == request.auth.token.email;
       allow delete: if false;
     }
@@ -263,4 +283,4 @@ service cloud.firestore {
       allow read, write: if false;
     }
   }
-}
+})
