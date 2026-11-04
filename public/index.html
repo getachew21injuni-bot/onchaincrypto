@@ -9763,3 +9763,103 @@ body.oc-logged-out.oc-auth-screen #page-register .auth-check span {
   font-size:14px!important;
 }
 </style>
+
+
+<style id="oc-registration-clear-visibility">
+/* Registration form readability only; preserve the transparent page layout. */
+body.oc-auth-screen #page-register #registerForm {
+  display:block;
+  width:100%;
+  max-width:560px;
+  margin:0 auto;
+  padding:clamp(10px,2vw,20px) 0;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+body.oc-auth-screen #page-register #registerForm h3 {
+  color:#fff!important;
+  font-size:clamp(23px,4vw,29px)!important;
+  font-weight:900!important;
+  line-height:1.25!important;
+  margin:0 0 8px!important;
+  text-align:left;
+}
+body.oc-auth-screen #page-register #registerForm > p {
+  color:#e3edf7!important;
+  font-size:15px!important;
+  line-height:1.55!important;
+  margin:0 0 20px!important;
+}
+body.oc-auth-screen #page-register #registerForm label,
+body.oc-auth-screen #page-register #registerForm .oc-register-contact-choice label {
+  display:block!important;
+  color:#fff!important;
+  font-size:15px!important;
+  font-weight:800!important;
+  line-height:1.45!important;
+  margin:15px 0 7px!important;
+  text-shadow:0 1px 3px #0008;
+}
+body.oc-auth-screen #page-register #registerForm input:not([type=checkbox]),
+body.oc-auth-screen #page-register #registerForm select {
+  display:block!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-height:49px!important;
+  padding:12px 14px!important;
+  background:#fff!important;
+  color:#101820!important;
+  -webkit-text-fill-color:#101820!important;
+  border:2px solid #d5b45f!important;
+  border-radius:9px!important;
+  font-size:16px!important;
+  font-weight:600!important;
+  line-height:1.4!important;
+  opacity:1!important;
+  outline:none!important;
+}
+body.oc-auth-screen #page-register #registerForm input::placeholder {
+  color:#596879!important;
+  -webkit-text-fill-color:#596879!important;
+  opacity:1!important;
+  font-weight:500!important;
+}
+body.oc-auth-screen #page-register #registerForm input:focus,
+body.oc-auth-screen #page-register #registerForm select:focus {
+  border-color:#00d9a0!important;
+  box-shadow:0 0 0 3px rgba(0,217,160,.2)!important;
+}
+body.oc-auth-screen #page-register #registerForm .oc-register-contact-choice {
+  margin:14px 0 16px!important;
+  padding:12px!important;
+  border:1px solid rgba(217,173,85,.65)!important;
+  border-radius:10px!important;
+  background:rgba(5,19,32,.72)!important;
+}
+body.oc-auth-screen #page-register #registerForm button[type=submit],
+body.oc-auth-screen #page-register #registerForm .primary {
+  min-height:50px!important;
+  width:100%!important;
+  font-size:16px!important;
+  font-weight:900!important;
+  letter-spacing:.2px;
+}
+body.oc-auth-screen #page-register #registerSwitchText,
+body.oc-auth-screen #page-register #registerSwitchText button {
+  color:#fff!important;
+  font-size:15px!important;
+  font-weight:800!important;
+}
+@media(max-width:600px) {
+  body.oc-auth-screen #page-register #registerForm {
+    padding:8px 0 18px!important;
+  }
+  body.oc-auth-screen #page-register #registerForm input:not([type=checkbox]),
+  body.oc-auth-screen #page-register #registerForm select {
+    min-height:50px!important;
+    font-size:16px!important;
+  }
+}
+</style>
