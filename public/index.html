@@ -1593,7 +1593,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
         <div id="authModeIntro" class="hidden" aria-hidden="true"></div>
         <section id="authChoicePanel" class="oc-auth-choice" aria-label="Choose an account action">
           <button class="primary full oc-auth-choice-button" id="authChoiceLogin" type="button">Login</button>
-          <button class="secondary full oc-auth-choice-button" id="authChoiceRegister" type="button">Sign Up</button>
+          <button class="secondary full oc-auth-choice-button" id="authChoiceRegister" type="button" aria-label="Create account">Create account</button>
         </section>
 
         <div id="authStatus" class="notice hidden">Checking sign-in status…</div>
@@ -8691,5 +8691,96 @@ body.oc-auth-screen #page-register:not(.hidden){display:block!important}
  #page-wallet .page-title h1,#page-browser .page-title h1{
   padding:7px 10px;font-size:21px!important
  }
+}
+</style>
+
+
+<style id="oc-login-board-black-text-visibility">
+/* Login and registration: improve readability only; preserve existing structure and handlers. */
+body.oc-auth-screen #page-register .auth-welcome{
+  max-width:980px;margin:0 auto 18px;padding:18px 22px;
+  text-align:center;background:linear-gradient(135deg,#ffffff 0%,#edf3fa 100%);
+  border:1px solid #cbd5e1;border-top:4px solid #d6a644;border-radius:16px;
+  box-shadow:0 8px 24px rgba(13,30,50,.10)
+}
+body.oc-auth-screen #page-register .auth-welcome .auth-brand,
+body.oc-auth-screen #page-register .auth-welcome h1{
+  color:#101820!important;-webkit-text-fill-color:#101820!important;
+  background:none!important;text-shadow:none!important;font-weight:900!important
+}
+body.oc-auth-screen #page-register .auth-welcome p{color:#263445!important}
+body.oc-auth-screen #page-register .auth-main-panel{
+  background:#fff!important;color:#111827!important;border:1px solid #cbd5e1!important;
+  border-top:4px solid #d6a644!important;border-radius:16px!important;
+  box-shadow:0 14px 34px rgba(10,25,45,.13)!important
+}
+body.oc-auth-screen #page-register .auth-main-panel h3,
+body.oc-auth-screen #page-register .auth-main-panel label,
+body.oc-auth-screen #page-register .auth-main-panel .auth-switch,
+body.oc-auth-screen #page-register .auth-main-panel .auth-google-hint{
+  color:#111827!important;font-weight:750!important
+}
+body.oc-auth-screen #page-register .auth-main-panel p,
+body.oc-auth-screen #page-register .auth-main-panel .muted,
+body.oc-auth-screen #page-register #registerForm>p,
+body.oc-auth-screen #page-register #signInForm>p{
+  color:#374151!important;opacity:1!important
+}
+body.oc-auth-screen #page-register .auth-main-panel input:not([type="checkbox"]),
+body.oc-auth-screen #page-register .auth-main-panel select{
+  color:#111827!important;background:#fff!important;border:1.5px solid #9ca3af!important;
+  border-radius:9px!important
+}
+body.oc-auth-screen #page-register .auth-main-panel input::placeholder{
+  color:#667085!important;opacity:1!important
+}
+body.oc-auth-screen #page-register .auth-main-panel input:focus,
+body.oc-auth-screen #page-register .auth-main-panel select:focus{
+  border-color:#245fc2!important;outline:3px solid rgba(36,95,194,.16)!important
+}
+body.oc-auth-screen #page-register #authChoicePanel{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+  padding:14px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:13px
+}
+body.oc-auth-screen #page-register #authChoicePanel button{
+  min-height:50px;font-size:16px!important;font-weight:850!important;
+  border-radius:10px!important
+}
+body.oc-auth-screen #page-register #authChoiceRegister{
+  color:#111827!important;background:#f4c766!important;border:1px solid #bd8b25!important;
+  box-shadow:0 4px 12px rgba(150,103,18,.16)
+}
+body.oc-auth-screen #page-register #authChoiceLogin{
+  color:#fff!important;background:#173b59!important;border:1px solid #173b59!important
+}
+body.oc-auth-screen #page-register .auth-main-panel button.primary{
+  color:#fff!important;background:#173b59!important;font-weight:850!important
+}
+body.oc-auth-screen #page-register .auth-main-panel button.secondary{
+  color:#172033!important;background:#e8eef5!important;border:1px solid #b8c4d2!important
+}
+body.oc-auth-screen #page-register .auth-main-panel .auth-switch button{
+  color:#174f91!important;font-weight:850!important;text-decoration:underline!important
+}
+body.oc-auth-screen #page-register #registerForm .oc-register-contact-choice{
+  background:#f3f6fa!important;border:1px solid #cbd5e1!important
+}
+body.oc-auth-screen #page-register #registerForm .oc-register-contact-choice label,
+body.oc-auth-screen #page-register #registerForm .oc-register-contact-choice .oc-register-method-help{
+  color:#172033!important
+}
+body.oc-auth-screen #page-register #phoneRegistrationPanel{
+  background:#f3f6fa!important;color:#111827!important;border:1px solid #cbd5e1!important
+}
+body.oc-auth-screen #page-register #phoneRegistrationPanel summary,
+body.oc-auth-screen #page-register #phoneRegistrationPanel h3,
+body.oc-auth-screen #page-register #phoneRegistrationPanel label,
+body.oc-auth-screen #page-register #phoneRegistrationPanel .muted{
+  color:#172033!important
+}
+@media(max-width:560px){
+ body.oc-auth-screen #page-register .auth-welcome{padding:14px;margin-bottom:12px}
+ body.oc-auth-screen #page-register #authChoicePanel{gap:8px;padding:10px}
+ body.oc-auth-screen #page-register #authChoicePanel button{font-size:14px!important}
 }
 </style>
