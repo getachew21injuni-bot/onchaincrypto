@@ -9187,3 +9187,59 @@ body.oc-logged-out:not(.oc-auth-screen) #page-register,
 body.oc-logged-out.oc-auth-screen #page-register.hidden,
 #page-register.hidden { display:none!important; }
 </style>
+
+
+<style id="oc-auth-integrated-onchain-style">
+/* Login and registration blend into the Onchain page instead of sitting inside a boxed card. */
+body.oc-logged-out #page-register .auth-main-panel,
+html.oc-auth-pending #page-register .auth-main-panel {
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  padding:clamp(10px,2vw,22px) 0!important;
+  position:relative;
+}
+body.oc-logged-out #page-register .auth-main-panel:before,
+html.oc-auth-pending #page-register .auth-main-panel:before {
+  content:"";
+  position:absolute;
+  inset:-24px -34px;
+  z-index:-1;
+  pointer-events:none;
+  background:radial-gradient(ellipse at 50% 10%,rgba(20,125,160,.12),transparent 68%);
+}
+body.oc-logged-out #page-register .auth-main-panel>h2,
+body.oc-logged-out #page-register .auth-main-panel #authModeIntro h2 {
+  color:#f4f7fb;
+  letter-spacing:-.45px;
+  text-shadow:0 2px 18px rgba(24,185,220,.12);
+}
+body.oc-logged-out #page-register .auth-main-panel #authModeIntro p {
+  color:#aebdca;
+}
+body.oc-logged-out #page-register .auth-switch {
+  color:#b8c5d2;
+}
+body.oc-logged-out #page-register .auth-switch button {
+  color:#e4bd70!important;
+}
+body.oc-logged-out #page-register .auth-submit {
+  background:linear-gradient(105deg,#f6d58b 0%,#d9ad55 52%,#b77b2b 100%)!important;
+  color:#17120a!important;
+  border:0!important;
+  box-shadow:0 8px 24px rgba(217,173,85,.17)!important;
+}
+body.oc-logged-out #page-register .auth-google-btn {
+  background:rgba(10,25,43,.42)!important;
+  color:#edf4fb!important;
+  border:1px solid rgba(170,190,211,.22)!important;
+  box-shadow:none!important;
+}
+@media(max-width:680px){
+  body.oc-logged-out #page-register .auth-main-panel,
+  html.oc-auth-pending #page-register .auth-main-panel {padding:8px 0!important}
+  body.oc-logged-out #page-register .auth-main-panel:before,
+  html.oc-auth-pending #page-register .auth-main-panel:before {inset:-12px -8px}
+}
+</style>
