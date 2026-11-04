@@ -654,5 +654,45 @@ onAuthStateChanged(auth,async user=>{
 });
 </script>
 <script type="module" src="./support-admin.js"></script>
+
+<script id="oc-admin-forward-step-navigation">
+(function(){
+ "use strict";
+ if(window.__ocAdminForwardNavigation)return;
+ window.__ocAdminForwardNavigation=true;
+ function forward(el){
+  if(!el||el.disabled||!el.getClientRects().length)return;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   const r=el.getBoundingClientRect();if(r.top<=innerHeight*.72)return;
+   const d=r.top-innerHeight*.68;if(d>0)scrollBy({top:d,behavior:"smooth"});
+  }));
+ }
+ const sequences={
+  demoFinanceForm:["uid","asset","amount","note"],
+  walletAddressForm:["asset","network","depositAddress","qrCodeUrl","qrImageFile","withdrawalAddress"],
+  moduleAddForm:["title","owner","amount"]
+ };
+ function next(el){
+  const form=el.closest("form");if(!form||!sequences[form.id])return null;
+  const names=sequences[form.id],i=names.indexOf(el.name||el.id);
+  for(let n=i+1;n<names.length;n++){
+   const target=form.querySelector('[name="'+names[n]+'"],#'+names[n]);
+   if(target&&!target.disabled&&target.getClientRects().length)return target;
+  }
+  return form.querySelector('button[type="submit"]');
+ }
+ function advance(el){
+  if(!el||el.disabled)return;
+  if(el.type==="file"&&!(el.files&&el.files.length))return;
+  if(el.required&&!el.checkValidity())return;
+  if(el.tagName==="SELECT"&&!el.value)return;
+  if(el.type!=="file"&&!String(el.value||"").trim())return;
+  forward(next(el));
+ }
+ document.addEventListener("blur",e=>{if(e.target instanceof HTMLElement)advance(e.target)},true);
+ document.addEventListener("change",e=>{if(e.target instanceof HTMLElement&&(e.target.matches("select")||e.target.type==="file"))advance(e.target)},true);
+})();
+</script>
+
 </body>
 </html>
