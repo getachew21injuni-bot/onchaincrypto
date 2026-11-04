@@ -9243,3 +9243,114 @@ body.oc-logged-out #page-register .auth-google-btn {
   html.oc-auth-pending #page-register .auth-main-panel:before {inset:-12px -8px}
 }
 </style>
+
+
+<style id="oc-simple-black-auth-forms">
+/* Simple, clean Login and Register forms: no decorative cards or promo artwork. */
+body.oc-logged-out.oc-auth-screen,
+html.oc-auth-pending body {
+  background:#f7f8fa!important;
+  color:#17191d!important;
+}
+body.oc-logged-out.oc-auth-screen main {
+  background:#f7f8fa!important;
+  color:#17191d!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register {
+  display:block!important;
+  max-width:620px!important;
+  margin:0 auto!important;
+  padding:28px 22px 48px!important;
+  color:#17191d!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register>.oc-public-auth-hero,
+body.oc-logged-out.oc-auth-screen #page-register>.auth-welcome {
+  display:none!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register>.content-grid {
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel {
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  color:#17191d!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel:before,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel:after {
+  display:none!important;
+  content:none!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm,
+body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel,
+body.oc-logged-out.oc-auth-screen #page-register #authChoicePanel {
+  color:#17191d!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm h3,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm h3,
+body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel h3,
+body.oc-logged-out.oc-auth-screen #page-register label,
+body.oc-logged-out.oc-auth-screen #page-register p,
+body.oc-logged-out.oc-auth-screen #page-register .muted,
+body.oc-logged-out.oc-auth-screen #page-register .tiny,
+body.oc-logged-out.oc-auth-screen #page-register .oc-register-method-help,
+body.oc-logged-out.oc-auth-screen #page-register .auth-switch,
+body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel summary {
+  color:#17191d!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .yellow,
+body.oc-logged-out.oc-auth-screen #page-register .auth-switch button {
+  color:#9b6900!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register input:not([type=checkbox]),
+body.oc-logged-out.oc-auth-screen #page-register select {
+  color:#17191d!important;
+  background:#fff!important;
+  border:1px solid #cbd0d8!important;
+  border-radius:8px!important;
+  box-shadow:none!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register input::placeholder {
+  color:#737b87!important;
+  opacity:1!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel button.primary,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel button.auth-submit {
+  color:#17130a!important;
+  background:linear-gradient(100deg,#f5d77c,#e9b83f)!important;
+  border:0!important;
+  border-radius:8px!important;
+  box-shadow:none!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel button.secondary,
+body.oc-logged-out.oc-auth-screen #page-register #googleSignInBtn {
+  color:#17191d!important;
+  background:#fff!important;
+  border:1px solid #cbd0d8!important;
+  border-radius:8px!important;
+  box-shadow:none!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .oc-password-toggle {
+  color:#17191d!important;
+}
+@media(max-width:600px) {
+  body.oc-logged-out.oc-auth-screen #page-register {
+    padding:20px 16px 36px!important;
+  }
+}
+</style>
