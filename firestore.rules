@@ -211,7 +211,8 @@ service cloud.firestore {
         && request.resource.data.depositAddress is string && request.resource.data.depositAddress.size() > 0
         && request.resource.data.transactionHash is string && request.resource.data.transactionHash.size() >= 8 && request.resource.data.transactionHash.size() <= 180
         && request.resource.data.receiptImage is string && request.resource.data.receiptImage.size() <= 760000
-        && request.resource.data.receiptImage.matches('^data:image/jpeg;base64,[A-Za-z0-9+/]+=*
+        && request.resource.data.receiptImage.matches('^data:image/jpeg;base64,.*')
+        && request.resource.data.receiptFileName is string && request.resource.data.receiptFileName.size() <= 120;
       allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
       allow update: if isAdmin() && (
         (resource.data.status == 'pending'
