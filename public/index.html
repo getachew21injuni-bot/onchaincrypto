@@ -9560,7 +9560,10 @@ body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel:after {
   ].join(",");
   function switchAuth(mode){
     const creating=mode==="register";
-    document.body.classList.add("oc-auth-screen");
+    // An explicit Login/Register choice must release the startup-only auth gate.
+    // Otherwise its !important rule keeps #registerForm hidden while Firebase is pending.
+    document.documentElement.classList.remove("oc-auth-pending");
+    document.body.classList.add("oc-logged-out","oc-auth-screen");
     document.body.classList.toggle("oc-register-mode",creating);
     if(typeof window.showPage==="function") window.showPage("register");
     const login=$("signInForm"), register=$("registerForm");
