@@ -5041,6 +5041,94 @@ body.oc-logged-out.oc-auth-screen #signInForm .auth-switch{text-align:center;mar
 })();
 </script>
 
+
+<style id="oc-readable-light-black-type">
+/* Clean, readable light interface with restrained multicolour headings. */
+:root{
+ --bg:#f4f6f9;--panel:#ffffff;--panel2:#eef2f7;--line:#d8e0e9;
+ --text:#17191d;--muted:#5d6877;--yellow:#b77908;--green:#087f55;
+ --red:#c53246;--blue:#245fc2;
+ color-scheme:light;
+}
+html,body{background:#f4f6f9!important;color:#17191d!important}
+body{background:linear-gradient(180deg,#f8fafc 0%,#eef2f7 100%)!important;color:#17191d!important}
+body :where(p,li,label,span,small,strong,b,em,td,th,dt,dd,summary,figcaption){text-shadow:none}
+body :where(p,li,label,td,dd,.muted,.label,.tiny,.card .label,.quick-action small){color:#252a32}
+body :where(h1,h2,h3,h4,.page-title h1,.section-head h2,.panel h2){
+ color:#15191f;
+}
+.page-title h1,.section-head h2,#page-home h1,#page-home h2,
+#page-public-market h1,#page-public-market h2,
+#page-register .auth-welcome h1{
+ background:linear-gradient(100deg,#111827 0%,#245fc2 34%,#087f55 68%,#a56a08 100%);
+ -webkit-background-clip:text;background-clip:text;color:transparent!important;
+}
+header{background:rgba(255,255,255,.96)!important;border-bottom:1px solid #dce3eb!important;box-shadow:0 3px 14px rgba(20,35,55,.06)}
+.brand{color:#17191d!important;text-shadow:none!important}
+.brand b{color:#fff!important}
+nav button{color:#465264!important}
+nav button.active,nav button:hover{color:#245fc2!important}
+.card,.panel,.performance-stats>div,.level-card,.faq-item,
+.settings-group,.profile-menu-section,.resource-card{
+ background:#fff!important;color:#17191d!important;border-color:#d8e0e9!important;
+ box-shadow:0 5px 18px rgba(22,35,52,.045);
+}
+.card :where(*),.panel :where(*),.settings-group :where(*),
+.profile-menu-section :where(*),.resource-card :where(*){
+ text-shadow:none;
+}
+.card .label,.performance-stats .big,.level-card span,
+.profile-menu-copy small,.settings-item p,.faq-answer{color:#4b5665!important}
+.quick-action{background:linear-gradient(145deg,#fff,#f1f5fa)!important;color:#17191d!important;border-color:#d6e0eb!important}
+.quick-action strong{color:#17191d!important}
+.quick-action small{color:#596575!important}
+.bottom-nav{background:rgba(255,255,255,.97)!important;border-top:1px solid #d8e0e9!important;box-shadow:0 -4px 16px rgba(20,35,55,.06)}
+.bottom-nav button{color:#526071!important}
+.bottom-nav button.active{color:#245fc2!important;text-shadow:none!important}
+.more-menu{background:#fff!important;color:#17191d!important;border-color:#d8e0e9!important;box-shadow:0 14px 38px rgba(0,0,0,.15)!important}
+.more-menu>button{color:#17191d!important}
+.more-menu small,.menu-support-intro{color:#596575!important}
+.menu-section-label{color:#8a5b08!important}
+.faq-item summary{color:#17191d!important}
+.faq-item summary:hover,.faq-chevron{color:#245fc2!important}
+.search,input,select,textarea,.field{
+ background:#fff!important;color:#17191d!important;border-color:#cbd5e1!important;
+}
+input::placeholder,textarea::placeholder{color:#778292!important;opacity:1}
+table th{color:#4b5665!important}
+table td{color:#202630!important}
+th,td{border-bottom-color:#e1e6ed!important}
+.secondary,.resource-action{background:#edf2f7!important;color:#202630!important;border-color:#cbd5e1!important}
+.primary{color:#fff!important}
+.buy{color:#fff!important}
+.sell{color:#fff!important}
+.green{color:#087f55!important}.red{color:#c53246!important}.yellow{color:#9a6508!important}
+.notice{background:#fff7df!important;color:#664900!important;border-color:#e8cf8c!important}
+#page-register .auth-welcome h1{color:#15191f!important}
+#page-register .auth-welcome p{color:#4b5665!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-brand{color:#17191d!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-copy h2{color:#17191d!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-copy p{color:#3f4a59!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-trust span{color:#344253!important;background:#fff!important;border-color:#d8e0e9!important}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel{
+ background:#fff!important;border:1px solid #d8e0e9!important;
+ box-shadow:0 18px 48px rgba(20,35,55,.10)!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel h3,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel label{color:#202630!important}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel input,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel select{
+ background:#fff!important;color:#17191d!important;border-color:#cbd5e1!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel input::placeholder{color:#778292!important}
+body.oc-logged-out.oc-auth-screen #page-register .auth-google-btn,
+body.oc-logged-out.oc-auth-screen #page-register #resetPasswordBtn{
+ background:#f1f4f8!important;color:#202630!important;border:1px solid #d5dde7!important;
+}
+#page-public-market .oc-visitor-hero-copy :where(h1,h2,p){text-shadow:none}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+
 </body>
 </html>
 
