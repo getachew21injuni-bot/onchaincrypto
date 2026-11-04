@@ -9524,42 +9524,7 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-password-toggle {
 
 
 <!-- Keep the in-form Register link wired directly to the registration form. -->
-<script id="oc-final-login-register-switch">
-(function(){
-  document.addEventListener("click",function(event){
-    const target=event.target instanceof Element?event.target:null;
-    if(!target || !target.closest("#showRegisterBtn")) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    document.body.classList.add("oc-auth-screen","oc-register-mode");
-    if(typeof window.showPage==="function") window.showPage("register");
-    const login=document.getElementById("signInForm");
-    const register=document.getElementById("registerForm");
-    const choice=document.getElementById("authChoicePanel");
-    const status=document.getElementById("authStatus");
-    const methodOptions=document.getElementById("registrationMethodOptions");
-    const phonePanel=document.getElementById("phoneRegistrationPanel");
-    choice?.classList.add("hidden");
-    status?.classList.add("hidden");
-    methodOptions?.classList.remove("hidden");
-    login?.classList.add("hidden");
-    register?.classList.remove("hidden");
-    login?.querySelectorAll("input").forEach(el=>el.disabled=true);
-    register?.querySelectorAll("input").forEach(el=>el.disabled=false);
-    const method=document.getElementById("registerContactMethod");
-    if(method) method.value="email";
-    const email=document.getElementById("registerEmail");
-    if(email){email.disabled=false;email.required=true;}
-    if(phonePanel){phonePanel.classList.add("hidden");phonePanel.open=false;phonePanel.querySelectorAll("input").forEach(el=>el.disabled=true);}
-    const heading=document.getElementById("authHeading");
-    const sub=document.getElementById("authSubheading");
-    if(heading) heading.textContent="Create your Onchain account";
-    if(sub){sub.textContent="Register to create your personal account.";sub.classList.remove("hidden");}
-    window.scrollTo({top:0,behavior:"smooth"});
-    setTimeout(()=>document.getElementById("registerFirstName")?.focus({preventScroll:true}),80);
-  },true);
-})();
-</script>
+
 
 
 <style id="oc-auth-no-rectangular-board">
