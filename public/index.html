@@ -5533,6 +5533,88 @@ submit?.addEventListener("click",async()=>{const v=currentAddress(),a=Number(amo
 })();
 </script>
 
+
+<style id="oc-visitor-support-bot-style">
+#ocVisitorSupportBot{position:fixed;right:22px;bottom:calc(24px + env(safe-area-inset-bottom));z-index:9998;font-family:inherit;color:#f4f7fb}
+#ocVisitorSupportBot *{box-sizing:border-box}
+#ocVisitorSupportBot .oc-support-launch{display:flex;align-items:center;gap:10px;border:1px solid rgba(232,190,103,.55);border-radius:999px;padding:7px 14px 7px 7px;background:linear-gradient(145deg,#13243b,#071426);color:#fff;box-shadow:0 10px 32px rgba(0,0,0,.38),0 0 24px rgba(217,173,85,.14);cursor:pointer}
+#ocVisitorSupportBot .oc-support-avatar{width:48px;height:48px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle at 35% 25%,#fff0c8,#d9ad55 52%,#94621e);border:2px solid #f5dfaa;box-shadow:0 0 0 3px rgba(217,173,85,.13);flex:none}
+#ocVisitorSupportBot .oc-support-avatar svg{width:39px;height:39px;display:block}
+#ocVisitorSupportBot .oc-support-launch-copy{display:grid;text-align:left;gap:2px}
+#ocVisitorSupportBot .oc-support-launch-copy strong{font-size:13px;letter-spacing:.1px}
+#ocVisitorSupportBot .oc-support-launch-copy small{font-size:10px;color:#cbd7e6}
+#ocVisitorSupportBot .oc-support-dot{width:8px;height:8px;border-radius:50%;background:#35d49a;box-shadow:0 0 9px #35d49a;margin-left:3px}
+#ocVisitorSupportBot .oc-support-panel{position:absolute;right:0;bottom:68px;width:min(360px,calc(100vw - 28px));height:min(510px,calc(100dvh - 115px));min-height:390px;display:none;flex-direction:column;overflow:hidden;border:1px solid rgba(217,173,85,.4);border-radius:19px;background:#081525;box-shadow:0 22px 70px rgba(0,0,0,.55)}
+#ocVisitorSupportBot.is-open .oc-support-panel{display:flex}
+#ocVisitorSupportBot .oc-support-head{display:flex;align-items:center;gap:10px;padding:14px;background:linear-gradient(110deg,#152c48,#0b1a2d);border-bottom:1px solid rgba(255,255,255,.09)}
+#ocVisitorSupportBot .oc-support-head .oc-support-avatar{width:40px;height:40px}
+#ocVisitorSupportBot .oc-support-head .oc-support-avatar svg{width:33px;height:33px}
+#ocVisitorSupportBot .oc-support-headcopy{flex:1;min-width:0}
+#ocVisitorSupportBot .oc-support-headcopy strong{display:block;font-size:13px}
+#ocVisitorSupportBot .oc-support-headcopy small{font-size:10px;color:#b9c9dc}
+#ocVisitorSupportBot .oc-support-close{border:0;background:transparent;color:#dce7f4;font-size:22px;cursor:pointer;padding:4px 8px}
+#ocVisitorSupportBot .oc-support-messages{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+#ocVisitorSupportBot .oc-support-msg{max-width:88%;padding:10px 12px;border-radius:13px;font-size:12px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+#ocVisitorSupportBot .oc-support-msg.bot{align-self:flex-start;background:#142943;color:#edf4fc;border:1px solid rgba(255,255,255,.07);border-top-left-radius:4px}
+#ocVisitorSupportBot .oc-support-msg.user{align-self:flex-end;background:linear-gradient(120deg,#d9ad55,#f0d18c);color:#201808;border-top-right-radius:4px}
+#ocVisitorSupportBot .oc-support-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 10px}
+#ocVisitorSupportBot .oc-support-suggestions button{border:1px solid rgba(217,173,85,.45);border-radius:999px;background:#0d2035;color:#f1d79d;font-size:10px;padding:7px 9px;cursor:pointer}
+#ocVisitorSupportBot .oc-support-register{margin:0 12px 10px;border:0;border-radius:10px;padding:10px;background:linear-gradient(110deg,#f0d18c,#c89437);color:#201707;font-weight:850;cursor:pointer}
+#ocVisitorSupportBot .oc-support-compose{display:flex;gap:7px;padding:10px;border-top:1px solid rgba(255,255,255,.09);background:#0a192a}
+#ocVisitorSupportBot .oc-support-compose input{flex:1;min-width:0;border:1px solid #344a62;border-radius:10px;background:#10243a;color:#fff;padding:10px;font:inherit;font-size:12px}
+#ocVisitorSupportBot .oc-support-compose button{border:0;border-radius:10px;padding:0 14px;background:#d9ad55;color:#201707;font-weight:850;cursor:pointer}
+#ocVisitorSupportBot .oc-support-note{text-align:center;color:#8192a8;font-size:9px;padding:0 8px 8px}
+@media(max-width:560px){#ocVisitorSupportBot{right:12px;bottom:calc(14px + env(safe-area-inset-bottom))}#ocVisitorSupportBot .oc-support-launch{padding:6px 11px 6px 6px}#ocVisitorSupportBot .oc-support-avatar{width:44px;height:44px}#ocVisitorSupportBot .oc-support-panel{bottom:62px;width:min(350px,calc(100vw - 24px));height:min(500px,calc(100dvh - 95px))}}
+@media(prefers-reduced-motion:no-preference){#ocVisitorSupportBot .oc-support-launch{animation:ocSupportFloat 3.8s ease-in-out infinite}@keyframes ocSupportFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}}
+body:not(.oc-logged-out) #ocVisitorSupportBot{display:none!important}
+</style>
+<div id="ocVisitorSupportBot" aria-live="polite">
+ <section class="oc-support-panel" role="dialog" aria-label="Onchain customer support" aria-modal="false">
+  <header class="oc-support-head">
+   <span class="oc-support-avatar" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M7 25v-4a17 17 0 0 1 34 0v4" stroke="#17253a" stroke-width="5" stroke-linecap="round"/><path d="M7 22h5a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-1a4 4 0 0 1-4-4zM41 22h-5a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4h1a4 4 0 0 0 4-4z" fill="#17253a" stroke="#e9c879" stroke-width="1.5"/><path d="M16 23c1.5-5 14.5-5 16 0v10c0 5-4 8-8 8s-8-3-8-8z" fill="#f1c98b" stroke="#17253a" stroke-width="2"/><path d="M20 30h.1M28 30h.1" stroke="#17253a" stroke-width="3" stroke-linecap="round"/><path d="M21 35q3 2 6 0" stroke="#9c542e" stroke-width="1.7" stroke-linecap="round"/><path d="M24 40v3" stroke="#17253a" stroke-width="2" stroke-linecap="round"/></svg></span>
+   <span class="oc-support-headcopy"><strong>Onchain Support</strong><small>Welcome · Here to help</small></span>
+   <button class="oc-support-close" type="button" aria-label="Close support chat">×</button>
+  </header>
+  <div class="oc-support-messages" id="ocSupportMessages"></div>
+  <div class="oc-support-suggestions">
+   <button type="button" data-question="How do I create an Onchain account?">Create account</button>
+   <button type="button" data-question="How do crypto deposits work?">Crypto deposits</button>
+   <button type="button" data-question="How do I use markets and trading?">Markets & trading</button>
+  </div>
+  <button type="button" class="oc-support-register">Create your Onchain account</button>
+  <form class="oc-support-compose" id="ocSupportForm"><input id="ocSupportInput" type="text" maxlength="500" placeholder="Type your question…" aria-label="Your question" autocomplete="off"><button type="submit">Send</button></form>
+  <div class="oc-support-note">Automated help · Never share passwords or verification codes</div>
+ </section>
+ <button class="oc-support-launch" type="button" aria-label="Open Onchain customer support">
+  <span class="oc-support-avatar" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M7 25v-4a17 17 0 0 1 34 0v4" stroke="#17253a" stroke-width="5" stroke-linecap="round"/><path d="M7 22h5a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-1a4 4 0 0 1-4-4zM41 22h-5a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4h1a4 4 0 0 0 4-4z" fill="#17253a" stroke="#e9c879" stroke-width="1.5"/><path d="M16 23c1.5-5 14.5-5 16 0v10c0 5-4 8-8 8s-8-3-8-8z" fill="#f1c98b" stroke="#17253a" stroke-width="2"/><path d="M20 30h.1M28 30h.1" stroke="#17253a" stroke-width="3" stroke-linecap="round"/><path d="M21 35q3 2 6 0" stroke="#9c542e" stroke-width="1.7" stroke-linecap="round"/><path d="M24 40v3" stroke="#17253a" stroke-width="2" stroke-linecap="round"/></svg></span>
+  <span class="oc-support-launch-copy"><strong>Need help?</strong><small>Chat with Onchain Support</small></span><i class="oc-support-dot"></i>
+ </button>
+</div>
+<script id="oc-visitor-support-bot-script">
+(()=>{const root=document.getElementById("ocVisitorSupportBot");if(!root||root.dataset.ready)return;root.dataset.ready="1";
+const panel=root.querySelector(".oc-support-panel"),messages=root.querySelector("#ocSupportMessages"),input=root.querySelector("#ocSupportInput");
+const add=(text,who="bot")=>{const el=document.createElement("div");el.className="oc-support-msg "+who;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight};
+const answers=[
+ {keys:["register","sign up","create account","new account","join"],reply:"Welcome to Onchain! To get started, choose “Create your Onchain account” below. You can register with the available sign-up options and then complete the account steps shown on screen."},
+ {keys:["login","log in","sign in","password","forgot"],reply:"Welcome back! Open the Login page and enter your registered email, phone or username with your password. If you cannot access your account, use the password-reset option on the sign-in screen."},
+ {keys:["deposit","fund","receive","btc","bitcoin","ethereum","usdt","crypto"],reply:"You can review the crypto deposit options in Wallet → Deposit. Choose an asset and network, then use only the address displayed for that exact network. Submit your transaction details and receipt for review. A deposit is successful only after the funds are verified and approved; a submitted receipt alone does not confirm payment."},
+ {keys:["withdraw","withdrawal","send crypto"],reply:"Open Wallet → Withdraw, choose the asset and supported network, and carefully check the destination address. Availability depends on the configured wallet service and review process. Never send funds to an address for a different network."},
+ {keys:["market","price","coin","chart","bitcoin price","gold","xau"],reply:"Explore Markets to browse available crypto and gold market information. Select an asset to view its chart and details. Market data availability can vary."},
+ {keys:["trade","buy","sell","stock","broker","alpaca","order"],reply:"You can explore the trading screens and market charts. Stock orders require an approved, active brokerage connection; a visible Buy or Sell ticket does not mean a real order can be executed. Practice features must not be confused with live trading."},
+ {keys:["security","kyc","verify","verification","identity"],reply:"Account verification helps protect your account. Open the verification section after signing in and follow the instructions shown. Never share your password, one-time code or private keys with anyone."},
+ {keys:["support","contact","human","agent","help"],reply:"I’m the Onchain automated support assistant. I can guide you through registration, wallet, deposits, withdrawals and markets. For an account-specific issue, please sign in and use the platform’s Help and Guidance support option."}
+];
+const respond=q=>{const v=q.toLowerCase();const hit=answers.find(a=>a.keys.some(k=>v.includes(k)));add(hit?hit.reply:"Thanks for reaching out! I’m happy to help. You can ask me about creating an account, logging in, crypto deposits, withdrawals, security, markets or trading. For anything account-specific, sign in and contact support through Help and Guidance.")};
+const open=()=>{root.classList.add("is-open");if(!messages.dataset.greeted){add("Hello and welcome to Onchain! 👋 It’s great to have you here. I’m your support assistant. What can I help you with today?");messages.dataset.greeted="1"}};
+root.querySelector(".oc-support-launch").addEventListener("click",()=>root.classList.contains("is-open")?(root.classList.remove("is-open")):open());
+root.querySelector(".oc-support-close").addEventListener("click",()=>root.classList.remove("is-open"));
+root.querySelectorAll("[data-question]").forEach(b=>b.addEventListener("click",()=>{const q=b.dataset.question;add(q,"user");respond(q)}));
+root.querySelector("#ocSupportForm").addEventListener("submit",e=>{e.preventDefault();const q=input.value.trim();if(!q)return;add(q,"user");input.value="";respond(q);input.focus()});
+root.querySelector(".oc-support-register").addEventListener("click",()=>{root.classList.remove("is-open");if(typeof window.showPage==="function")window.showPage("register");else document.getElementById("page-register")?.scrollIntoView({behavior:"smooth",block:"start"})});
+setTimeout(()=>{if(document.body.classList.contains("oc-logged-out")){root.querySelector(".oc-support-launch-copy small").textContent="Welcome! Ask us anything";}},900);
+})();
+</script>
+
 </body>
 </html>
 
