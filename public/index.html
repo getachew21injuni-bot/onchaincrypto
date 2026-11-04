@@ -1087,9 +1087,21 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
       <div class="section-head"><div><h2>Discover traders</h2><div class="muted tiny">Illustrative strategy profiles for learning and comparison.</div></div><span class="tag">EXAMPLE PROFILES</span></div>
       <p class="muted tiny">These profiles are examples, not verified traders or historical performance records. Following saves a watchlist on this device. It does not copy trades, place orders or move funds.</p>
       <div class="cards" id="ocCopyTraderCards">
-        <article class="card"><div class="label">BTC trend strategy</div><div class="big">Trend follower</div><p class="muted tiny">Studies Bitcoin market direction and momentum. Style: active · Risk focus: high volatility.</p><button type="button" class="secondary" data-copy-follow="btc-trend">Follow trader</button></article>
-        <article class="card"><div class="label">Gold market strategy</div><div class="big">Gold observer</div><p class="muted tiny">Studies XAU price structure and broader market drivers. Style: swing · Risk focus: event volatility.</p><button type="button" class="secondary" data-copy-follow="gold-swing">Follow trader</button></article>
-        <article class="card"><div class="label">Multi-asset strategy</div><div class="big">Market researcher</div><p class="muted tiny">Compares selected crypto assets and market conditions. Style: diversified research · Risk focus: correlation.</p><button type="button" class="secondary" data-copy-follow="multi-asset">Follow trader</button></article>
+        <article class="card oc-copy-profile"><div class="label">BTC trend strategy</div><div class="big">Trend follower</div><p class="muted tiny">Studies Bitcoin market direction and momentum. Style: active · Risk focus: high volatility.</p>
+          <details class="oc-copy-details"><summary>View trader details &amp; performance</summary><div class="oc-copy-metrics"><div><span>Capital under management</span><strong>Not provided</strong></div><div><span>Current holdings</span><strong>Not connected</strong></div><div><span>Total PnL</span><strong>Not verified</strong></div><div><span>30-day return</span><strong>Not verified</strong></div><div><span>Win rate</span><strong>Not available</strong></div><div><span>Maximum drawdown</span><strong>Not available</strong></div><div><span>Completed trades</span><strong>Not recorded</strong></div><div><span>Average holding time</span><strong>Active style · duration unavailable</strong></div></div>
+          <div class="oc-copy-chart"><strong>PnL history</strong><div class="oc-copy-chart-empty">Verified performance history is not connected yet. A PnL chart will appear when reliable trader records are available.</div></div>
+          <p class="muted tiny">Markets: Bitcoin · Approach: trend and momentum research · Risk: high volatility. No verified trader identity or live portfolio is connected.</p>
+          <button type="button" class="secondary" data-copy-follow="btc-trend">Follow trader</button></details></article>
+        <article class="card oc-copy-profile"><div class="label">Gold market strategy</div><div class="big">Gold observer</div><p class="muted tiny">Studies XAU price structure and broader market drivers. Style: swing · Risk focus: event volatility.</p>
+          <details class="oc-copy-details"><summary>View trader details &amp; performance</summary><div class="oc-copy-metrics"><div><span>Capital under management</span><strong>Not provided</strong></div><div><span>Current holdings</span><strong>Not connected</strong></div><div><span>Total PnL</span><strong>Not verified</strong></div><div><span>30-day return</span><strong>Not verified</strong></div><div><span>Win rate</span><strong>Not available</strong></div><div><span>Maximum drawdown</span><strong>Not available</strong></div><div><span>Completed trades</span><strong>Not recorded</strong></div><div><span>Average holding time</span><strong>Swing style · duration unavailable</strong></div></div>
+          <div class="oc-copy-chart"><strong>PnL history</strong><div class="oc-copy-chart-empty">Verified performance history is not connected yet. A PnL chart will appear when reliable trader records are available.</div></div>
+          <p class="muted tiny">Markets: Gold (XAU) · Approach: price structure and market-driver research · Risk: event volatility. No verified trader identity or live portfolio is connected.</p>
+          <button type="button" class="secondary" data-copy-follow="gold-swing">Follow trader</button></details></article>
+        <article class="card oc-copy-profile"><div class="label">Multi-asset strategy</div><div class="big">Market researcher</div><p class="muted tiny">Compares selected crypto assets and market conditions. Style: diversified research · Risk focus: correlation.</p>
+          <details class="oc-copy-details"><summary>View trader details &amp; performance</summary><div class="oc-copy-metrics"><div><span>Capital under management</span><strong>Not provided</strong></div><div><span>Current holdings</span><strong>Not connected</strong></div><div><span>Total PnL</span><strong>Not verified</strong></div><div><span>30-day return</span><strong>Not verified</strong></div><div><span>Win rate</span><strong>Not available</strong></div><div><span>Maximum drawdown</span><strong>Not available</strong></div><div><span>Completed trades</span><strong>Not recorded</strong></div><div><span>Average holding time</span><strong>Research style · duration unavailable</strong></div></div>
+          <div class="oc-copy-chart"><strong>PnL history</strong><div class="oc-copy-chart-empty">Verified performance history is not connected yet. A PnL chart will appear when reliable trader records are available.</div></div>
+          <p class="muted tiny">Markets: selected crypto assets · Approach: diversified market research · Risk: correlation and market volatility. No verified trader identity or live portfolio is connected.</p>
+          <button type="button" class="secondary" data-copy-follow="multi-asset">Follow trader</button></details></article>
       </div>
     </section>
     <section class="panel">
@@ -5147,6 +5159,18 @@ body.oc-logged-out.oc-auth-screen #page-register #resetPasswordBtn{
 }
 #page-public-market .oc-visitor-hero-copy :where(h1,h2,p){text-shadow:none}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+<style id="oc-copy-trader-due-diligence">
+.oc-copy-profile{min-width:0}
+.oc-copy-details{margin-top:12px;border-top:1px solid var(--border,rgba(255,255,255,.12));padding-top:10px}
+.oc-copy-details summary{cursor:pointer;font-weight:650;color:var(--text,#fff);padding:7px 0}
+.oc-copy-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.oc-copy-metrics>div{min-width:0;padding:10px;border:1px solid var(--border,rgba(255,255,255,.12));border-radius:9px;background:rgba(127,127,127,.06)}
+.oc-copy-metrics span{display:block;font-size:11px;color:var(--muted,#999);margin-bottom:5px}
+.oc-copy-metrics strong{display:block;font-size:12px;overflow-wrap:anywhere}
+.oc-copy-chart{margin:10px 0 12px;padding:12px;border:1px solid var(--border,rgba(255,255,255,.12));border-radius:9px}
+.oc-copy-chart-empty{min-height:78px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted,#999);font-size:12px;padding:10px;border-bottom:1px dashed var(--border,rgba(255,255,255,.2))}
+@media(max-width:480px){.oc-copy-metrics{grid-template-columns:1fr}}
 </style>
 
 <script id="oc-copy-trader-watchlist">
