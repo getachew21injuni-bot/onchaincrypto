@@ -8784,3 +8784,97 @@ body.oc-auth-screen #page-register #phoneRegistrationPanel .muted{
  body.oc-auth-screen #page-register #authChoicePanel button{font-size:14px!important}
 }
 </style>
+
+
+<style id="oc-auth-login-register-matching-white-gold-board">
+/* Matching login and registration boards: bright white surfaces, BTC blue + gold accents, dark readable text. */
+body.oc-auth-screen #page-register .auth-main-panel{
+  width:100%!important;max-width:460px!important;
+  padding:clamp(18px,3vw,27px)!important;
+  color:#111827!important;
+  background:linear-gradient(145deg,#fff 0%,#f8fbff 72%,#fffaf0 100%)!important;
+  border:1.5px solid #d7b65f!important;
+  border-top:5px solid #d7b65f!important;
+  border-radius:17px!important;
+  box-shadow:0 18px 48px rgba(13,32,56,.16),0 0 0 3px rgba(36,95,194,.055)!important;
+}
+body.oc-auth-screen #page-register #signInForm,
+body.oc-auth-screen #page-register #registerForm{
+  color:#111827!important;
+}
+body.oc-auth-screen #page-register #signInForm h3,
+body.oc-auth-screen #page-register #registerForm h3{
+  color:#101820!important;font-weight:900!important;
+}
+body.oc-auth-screen #page-register #signInForm label,
+body.oc-auth-screen #page-register #registerForm label,
+body.oc-auth-screen #page-register #signInForm p,
+body.oc-auth-screen #page-register #registerForm p,
+body.oc-auth-screen #page-register #signInForm .muted,
+body.oc-auth-screen #page-register #registerForm .muted,
+body.oc-auth-screen #page-register .auth-main-panel .auth-switch{
+  color:#263445!important;opacity:1!important;font-weight:650;
+}
+body.oc-auth-screen #page-register #signInForm input:not([type=checkbox]),
+body.oc-auth-screen #page-register #registerForm input:not([type=checkbox]),
+body.oc-auth-screen #page-register #signInForm select,
+body.oc-auth-screen #page-register #registerForm select{
+  display:block!important;width:100%!important;min-height:49px!important;
+  color:#111827!important;background:#fff!important;
+  border:1.5px solid #aebdce!important;border-radius:10px!important;
+  font-size:15px!important;font-weight:650!important;opacity:1!important;
+}
+body.oc-auth-screen #page-register #signInForm input::placeholder,
+body.oc-auth-screen #page-register #registerForm input::placeholder{
+  color:#536174!important;opacity:1!important;font-weight:550!important;
+}
+body.oc-auth-screen #page-register #signInForm input:focus,
+body.oc-auth-screen #page-register #registerForm input:focus,
+body.oc-auth-screen #page-register #signInForm select:focus,
+body.oc-auth-screen #page-register #registerForm select:focus{
+  border-color:#245fc2!important;outline:3px solid rgba(36,95,194,.14)!important;
+  box-shadow:0 0 0 3px rgba(215,182,95,.16)!important;
+}
+body.oc-auth-screen #page-register #signInForm button[type=submit],
+body.oc-auth-screen #page-register #signInForm .auth-submit,
+body.oc-auth-screen #page-register #registerForm button[type=submit],
+body.oc-auth-screen #page-register #registerForm .auth-submit{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:100%!important;min-height:51px!important;margin-top:12px!important;
+  color:#111827!important;
+  background:linear-gradient(105deg,#f8e4a7 0%,#e9bf59 55%,#d9a536 100%)!important;
+  border:1px solid #bd8b25!important;border-radius:11px!important;
+  font-size:16px!important;font-weight:900!important;
+  box-shadow:0 7px 18px rgba(166,119,30,.19)!important;
+}
+body.oc-auth-screen #page-register #signInForm .auth-switch button,
+body.oc-auth-screen #page-register #registerForm .auth-switch button{
+  color:#174f91!important;font-weight:850!important;text-decoration:underline!important;
+}
+body.oc-auth-screen #page-register #authChoicePanel{
+  background:linear-gradient(135deg,#f5f8fc,#fffaf0)!important;
+  border:1px solid #d7b65f!important;border-radius:13px!important;
+}
+body.oc-auth-screen #page-register #authChoiceLogin,
+body.oc-auth-screen #page-register #authChoiceRegister{
+  min-height:49px!important;font-weight:900!important;
+}
+body.oc-auth-screen #page-register #authChoiceRegister{
+  color:#111827!important;background:#f4cf78!important;border:1px solid #bd8b25!important;
+}
+body.oc-auth-screen #page-register #authChoiceLogin{
+  color:#fff!important;background:#173b59!important;border:1px solid #173b59!important;
+}
+body.oc-auth-screen #page-register #registerForm .oc-register-contact-choice{
+  background:#f3f6fa!important;border:1px solid #d7b65f!important;
+}
+body.oc-auth-screen #page-register #registerForm .oc-register-contact-choice label,
+body.oc-auth-screen #page-register #registerForm .oc-register-contact-choice .oc-register-method-help{
+  color:#263445!important;
+}
+@media(max-width:560px){
+  body.oc-auth-screen #page-register .auth-main-panel{padding:17px 14px!important}
+  body.oc-auth-screen #page-register #signInForm input:not([type=checkbox]),
+  body.oc-auth-screen #page-register #registerForm input:not([type=checkbox]){min-height:48px!important}
+}
+</style>
