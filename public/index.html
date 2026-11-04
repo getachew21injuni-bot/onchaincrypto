@@ -4685,7 +4685,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
    return;
   }
   rows.innerHTML=visible.map(a=>{
-   const s=String(a.symbol).toUpperCase(),quote=visitorPinnedQuotes.get(s),rowAsset=quote?{...a,...quote}:a,rawChange=rowAsset.price_change_percentage_24h,chg=Number(rawChange)||0,cap=Number(rowAsset.market_cap)||0,volume=Number(rowAsset.total_volume)||0;
+   const s=String(a.symbol).toUpperCase(),quote=visitorPinnedQuotes.get(s),rowAsset=quote?{...a,...quote,current_price:Number(quote.current_price)>0?quote.current_price:a.current_price,price_change_percentage_24h:quote.price_change_percentage_24h??a.price_change_percentage_24h,market_cap:Number(quote.market_cap)>0?quote.market_cap:a.market_cap,total_volume:Number(quote.total_volume)>0?quote.total_volume:a.total_volume}:a,rawChange=rowAsset.price_change_percentage_24h,chg=Number(rawChange)||0,cap=Number(rowAsset.market_cap)||0,volume=Number(rowAsset.total_volume)||0;
    return '<tr class="oc-v-market-row" data-visitor-detail="'+escapeHtml(s)+'" tabindex="0" role="button" aria-label="View '+escapeHtml(a.name)+' details"><td><div class="oc-v-asset"><span class="oc-v-icon" style="'+visitorCoinStyle(s)+'">'+escapeHtml(coinMark(s))+'</span><span class="oc-v-asset-name"><b>'+escapeHtml(a.name)+'</b><small>'+escapeHtml(s)+(s==="XAU"?" · GOLD":"")+'</small></span></div></td><td class="oc-v-price">'+priceText(rowAsset)+'</td><td><span class="oc-v-change '+(rawChange===null||rawChange===undefined?"":chg>=0?"up":"down")+'">'+fmtChange(rawChange)+'</span></td><td>'+(volume>0?compact(volume):"—")+'</td><td>'+(cap>0?compact(cap):"—")+'</td></tr>';
   }).join("");
  }
