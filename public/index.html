@@ -9693,3 +9693,70 @@ body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel:not(.hi
   }
 }
 </style>
+
+
+<style id="oc-auth-readable-text">
+/* Improve contrast and readability across both exclusive authentication forms. */
+body.oc-logged-out.oc-auth-screen #page-register #authHeading,
+body.oc-logged-out.oc-auth-screen #page-register .auth-brand,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel h3,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm h3,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm h3 {
+  color:#ffffff!important;
+  font-weight:850!important;
+  text-shadow:0 2px 16px rgba(0,0,0,.55)!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel label,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm label,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm label,
+body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel label {
+  color:#ffffff!important;
+  font-size:15px!important;
+  font-weight:750!important;
+  line-height:1.5!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel p,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel .muted,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel .tiny,
+body.oc-logged-out.oc-auth-screen #page-register .oc-register-method-help,
+body.oc-logged-out.oc-auth-screen #page-register #authSubheading {
+  color:#d5e4f2!important;
+  font-size:14px!important;
+  line-height:1.55!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel .yellow,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel label .yellow {
+  color:#ffd66b!important;
+  font-weight:800!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel input:not([type=checkbox]),
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel select {
+  color:#101820!important;
+  font-size:16px!important;
+  font-weight:600!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel input::placeholder {
+  color:#526273!important;
+  opacity:1!important;
+  font-weight:500!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-switch,
+body.oc-logged-out.oc-auth-screen #page-register .auth-switch button {
+  color:#ffffff!important;
+  font-size:15px!important;
+  font-weight:800!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-switch button {
+  color:#ffdc83!important;
+  text-decoration:underline!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel button {
+  font-weight:800!important;
+  letter-spacing:.15px;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-check,
+body.oc-logged-out.oc-auth-screen #page-register .auth-check span {
+  color:#f3f7fc!important;
+  font-size:14px!important;
+}
+</style>
