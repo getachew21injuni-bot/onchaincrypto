@@ -1591,7 +1591,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
           <p class="muted tiny">Create your Onchain account.</p>
           <label for="registerFirstName">First name <span class="yellow">(required)</span></label><input id="registerFirstName" class="field" maxlength="50" autocomplete="given-name" required placeholder="Enter your first name">
           <label for="registerLastName">Last name <span class="yellow">(required)</span></label><input id="registerLastName" class="field" maxlength="50" autocomplete="family-name" required placeholder="Enter your last name">
-          <label for="registerEmail">Email address</label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com"><div id="emailCodePanel" class="hidden"><label for="registerEmailCode">Gmail verification code</label><input id="registerEmailCode" class="field" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="Enter 6-digit code"><p class="muted tiny">Check your inbox and spam folder. Code expires in 10 minutes.</p><button id="resendEmailCodeBtn" class="secondary full" type="button">Send code again</button></div><div class="oc-register-contact-choice"><label for="registerContactMethod">Choose email or phone</label><select id="registerContactMethod" class="field" aria-label="Choose email or phone"><option value="email">✉ Email</option><option value="phone">☎ Phone</option></select></div>
+          <div class="oc-register-contact-choice"><label for="registerContactMethod">How would you like to register?</label><select id="registerContactMethod" class="field" aria-label="Choose email or phone"><option value="email">✉ Email address</option><option value="phone">☎ Phone number</option></select><p class="oc-register-method-help">Choose one method. You can switch at any time.</p></div><label for="registerEmail">Email address</label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com"><div id="emailCodePanel" class="hidden"><label for="registerEmailCode">Gmail verification code</label><input id="registerEmailCode" class="field" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="Enter 6-digit code"><p class="muted tiny">Check your inbox and spam folder. Code expires in 10 minutes.</p><button id="resendEmailCodeBtn" class="secondary full" type="button">Send code again</button></div>
           <p class="muted tiny">No email link needed. To register by phone, use SMS below.</p>
           <label for="registerPassword">Password <span class="yellow">(required)</span></label><div class="oc-password-wrap"><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="Create a password (8+ characters)"><button class="oc-password-toggle" type="button" data-password-target="registerPassword" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
           <label for="referralCode">Referral code <span class="muted tiny">(optional)</span></label><input id="referralCode" class="field" maxlength="40" autocomplete="off" placeholder="Enter referral code if you have one">
@@ -8536,5 +8536,52 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-footnote{
   body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-copy h2{
     font-size:clamp(30px,8vw,42px)!important;line-height:1.12!important;
   }
+}
+</style>
+
+
+<style id="oc-registration-readable-contrast">
+/* Clear, high-contrast registration controls in Onchain's navy, white and gold palette. */
+#page-register .auth-main-panel{color:#f7f9fc}
+#page-register #registerForm h3{color:#fff;font-size:22px;letter-spacing:-.25px;margin:0 0 5px}
+#page-register #registerForm>p,
+#page-register #registerForm .muted,
+#page-register #registerForm .oc-register-method-help,
+#page-register #emailCodePanel p{color:#cbd6e4!important;opacity:1}
+#page-register #registerForm label,
+#page-register #emailCodePanel label,
+#page-register #phoneRegistrationPanel label{display:block;color:#f4f6fa!important;font-size:13px;font-weight:750;letter-spacing:.12px;margin:13px 0 6px}
+#page-register #registerForm .oc-register-contact-choice{display:grid;gap:7px;margin:4px 0 16px;padding:13px 14px 12px;border:1px solid rgba(217,173,85,.48);border-radius:13px;background:linear-gradient(135deg,rgba(217,173,85,.12),rgba(8,22,39,.72))}
+#page-register #registerForm .oc-register-contact-choice label{margin:0;color:#ffe3a3!important;font-size:14px}
+#page-register #registerForm .oc-register-method-help{margin:0;font-size:12px;line-height:1.45}
+#page-register #registerContactMethod,
+#page-register #registerForm .field,
+#page-register #phoneRegistrationPanel .field{
+ width:100%;min-height:48px;padding:11px 13px;border:1px solid #71839a!important;border-radius:9px;
+ background:#f8fafc!important;color:#101c2d!important;font-size:16px;font-weight:550;opacity:1;
+}
+#page-register #registerContactMethod{min-height:52px;border:2px solid #d9ad55!important;background:#fffaf0!important;color:#172235!important;font-weight:750;cursor:pointer}
+#page-register #registerContactMethod option{background:#fff;color:#172235}
+#page-register #registerForm .field::placeholder,
+#page-register #phoneRegistrationPanel .field::placeholder{color:#596a7e!important;opacity:1}
+#page-register #registerForm .field:focus,
+#page-register #registerContactMethod:focus,
+#page-register #phoneRegistrationPanel .field:focus{outline:3px solid rgba(247,147,26,.35)!important;outline-offset:2px;border-color:#f0b84d!important}
+#page-register #registerForm .yellow{color:#ffd27a!important}
+#page-register #registerForm .auth-switch,
+#page-register #registerForm .auth-switch button{color:#e5edf7!important}
+#page-register #registerForm .auth-switch button{color:#ffd27a!important;text-decoration:underline;text-underline-offset:3px}
+#page-register #registerForm button.primary{min-height:50px;font-size:15px;font-weight:800}
+#page-register #phoneRegistrationPanel{margin-top:12px;padding:15px;border:1px solid rgba(217,173,85,.42);border-radius:13px;background:#0a1a2d;color:#f7f9fc}
+#page-register #phoneRegistrationPanel summary{color:#ffe3a3;font-weight:800;cursor:pointer;padding:4px 0 9px}
+#page-register #phoneRegistrationPanel h3{color:#fff;font-size:18px}
+#page-register #phoneRegistrationPanel .muted{color:#cbd6e4!important}
+#page-register #phoneRegistrationPanel button.secondary{color:#fff;background:#183451;border:1px solid #71839a}
+#page-register #registerForm.oc-phone-mode>*:not(.oc-register-contact-choice){display:none!important}
+#page-register #registerForm.oc-phone-mode .oc-register-contact-choice{display:grid!important}
+@media(max-width:560px){
+ #page-register .auth-main-panel{padding:18px!important}
+ #page-register #registerForm .oc-register-contact-choice{padding:12px}
+ #page-register #registerForm .field,#page-register #registerContactMethod,#page-register #phoneRegistrationPanel .field{min-height:49px}
 }
 </style>
