@@ -9640,3 +9640,91 @@ body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel:after {
   },true);
 })();
 </script>
+
+
+<style id="oc-auth-use-platform-background">
+/* Authentication uses the same deep navy/blue canvas as the OnChainCrypto platform. */
+body.oc-logged-out.oc-auth-screen,
+html.oc-auth-pending body {
+  background-color:#020a12!important;
+  background-image:
+    radial-gradient(ellipse at 12% 8%,rgba(0,208,135,.14),transparent 32%),
+    radial-gradient(ellipse at 88% 18%,rgba(0,126,255,.15),transparent 36%),
+    linear-gradient(180deg,#020a12 0%,#04111c 48%,#020811 100%)!important;
+  background-attachment:fixed!important;
+  color:#eaf6ff!important;
+}
+body.oc-logged-out.oc-auth-screen main {
+  background:transparent!important;
+  color:#eaf6ff!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register {
+  background:transparent!important;
+  color:#eaf6ff!important;
+}
+/* No enclosing card: the form sits directly on the platform canvas. */
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm {
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel {
+  padding:clamp(14px,3vw,26px) 0!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm h3,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm h3,
+body.oc-logged-out.oc-auth-screen #page-register #authHeading {
+  color:#f4f8ff!important;
+  text-shadow:0 2px 18px rgba(0,126,255,.18);
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm>p,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm>p,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel .muted,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel .tiny,
+body.oc-logged-out.oc-auth-screen #page-register .oc-register-method-help {
+  color:#a9bfd4!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm label,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm label,
+body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel label {
+  color:#eaf3ff!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel input:not([type=checkbox]),
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel select {
+  background:#f8fbff!important;
+  color:#111820!important;
+  border:1px solid #41617d!important;
+  border-radius:9px!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel input::placeholder {
+  color:#657487!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-switch {
+  color:#c5d5e6!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-switch button {
+  color:#f2c96b!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #googleSignInBtn:not(.hidden),
+body.oc-logged-out.oc-auth-screen #page-register .auth-google-btn:not(.hidden),
+body.oc-logged-out.oc-auth-screen #page-register #resetPasswordBtn {
+  color:#eaf6ff!important;
+  background:#0b1b30!important;
+  border:1px solid #31516d!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm .oc-register-contact-choice,
+body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel:not(.hidden) {
+  background:rgba(8,25,42,.72)!important;
+  border:1px solid rgba(217,173,85,.42)!important;
+  border-radius:10px!important;
+}
+@media(max-width:600px) {
+  body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel {
+    padding:12px 0!important;
+  }
+}
+</style>
