@@ -9960,34 +9960,41 @@ body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel:not(.hi
 <script id="oc-final-auth-form-switch">
 (function(){
  const $=id=>document.getElementById(id);
+ function setVisible(el,visible){
+   if(!el)return;
+   el.classList.toggle("hidden",!visible);
+   el.hidden=!visible;
+   el.style.setProperty("display",visible?"block":"none","important");
+ }
  function openForm(mode){
    const creating=mode==="register"||mode==="signup";
-   document.body.classList.add("oc-auth-screen");
+   document.documentElement.classList.remove("oc-auth-pending");
+   document.body.classList.add("oc-logged-out","oc-auth-screen");
    document.body.classList.toggle("oc-register-mode",creating);
    if(typeof window.showPage==="function")window.showPage("register");
-   $("authChoicePanel")?.classList.add("hidden");
-   $("authStatus")?.classList.add("hidden");
-   $("registerMessage")?.classList.add("hidden");
-   $("registerForm")?.classList.toggle("hidden",!creating);
-   $("signInForm")?.classList.toggle("hidden",creating);
-   $("googleSignInBtn")?.classList.toggle("hidden",creating);
-   $("authPhoneDivider")?.classList.add("hidden");
-   document.querySelector(".auth-google-hint")?.classList.add("hidden");
+   setVisible($("authChoicePanel"),false);
+   setVisible($("authStatus"),false);
+   setVisible($("registerMessage"),false);
+   setVisible($("registerForm"),creating);
+   setVisible($("signInForm"),!creating);
+   setVisible($("googleSignInBtn"),false);
+   setVisible($("authPhoneDivider"),false);
+   setVisible(document.querySelector(".auth-google-hint"),false);
    const phone=$("phoneRegistrationPanel");
-   if(phone){phone.classList.add("hidden");phone.open=false;}
+   if(phone){phone.classList.add("hidden");phone.hidden=true;phone.style.setProperty("display","none","important");phone.open=false;}
    const reg=$("registerForm"),login=$("signInForm");
    reg?.querySelectorAll("input,select,textarea,button").forEach(el=>el.disabled=!creating);
    login?.querySelectorAll("input,select,textarea,button").forEach(el=>el.disabled=creating);
    const method=$("registerContactMethod");
    if(method){
-     if(creating && !method.value)method.value="email";
+     if(creating&&!method.value)method.value="email";
      method.dispatchEvent(new Event("change",{bubbles:true}));
    }
    const heading=$("authHeading"),sub=$("authSubheading");
    if(heading)heading.textContent=creating?"Create your OnChainCrypto account":"Welcome back to OnChainCrypto";
-   if(sub){sub.textContent=creating?"Complete the form below to create your account.":"Sign in to continue to your account.";sub.classList.remove("hidden");}
+   if(sub){sub.textContent=creating?"Complete the form below to create your account.":"Sign in to continue to your account.";sub.classList.remove("hidden");sub.hidden=false;}
    const focus=creating?"registerFirstName":"signInEmail";
-   setTimeout(()=>$(focus)?.focus({preventScroll:true}),80);
+   requestAnimationFrame(()=>$(focus)?.focus({preventScroll:true}));
    window.scrollTo({top:0,behavior:"smooth"});
  }
  window.ocOpenVisitorAuth=function(mode){openForm(mode);};
@@ -9998,7 +10005,7 @@ body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel:not(.hi
    if(!button)return;
    const id=button.id;
    const signupIds=["landingGetStarted","ocHomeCreateAccount","ocVisitorSignup","ocVisitorHeroSignup","ocVisitorAboutSignup","ocVisitorBottomSignup","mobileRegisterBtn","register-nav","authChoiceRegister","showRegisterBtn"];
-   const loginIds=["landingSignIn","ocHomeLogin","mobileSignInBtn","signin-nav","authChoiceLogin","registerLoginBtn","showSignInBtn"];
+   const loginIds=["landingSignIn","ocHomeLogin","ocVisitorLogin","ocVisitorHeroLogin","mobileSignInBtn","signin-nav","authChoiceLogin","registerLoginBtn","showSignInBtn"];
    if(signupIds.includes(id)){
      event.preventDefault();event.stopImmediatePropagation();openForm("register");return;
    }
