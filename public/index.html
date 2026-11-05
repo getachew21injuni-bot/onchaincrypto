@@ -1302,7 +1302,78 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
     <p class="oc-visitor-roadmap-note">Explore markets, compare supported assets and discover the tools available across Onchain.</p>
   </section>
   <div class="oc-visitor-bottom-cta"><div><h2>Ready to explore Onchain?</h2><p>Create your account to explore markets, use asset tools and access your personal Onchain workspace.</p></div><button type="button" class="primary" id="ocVisitorBottomSignup">Sign up</button></div>
-  
+
+  <style id="oc-visitor-platform-overview">
+    #page-public-market .oc-platform-overview{margin:clamp(42px,6vw,82px) auto 18px;max-width:1180px;color:#edf5ff}
+    #page-public-market .oc-platform-overview *{box-sizing:border-box}
+    #page-public-market .oc-platform-overview .oc-platform-eyebrow{color:#e8b95c;font-size:11px;font-weight:850;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+    #page-public-market .oc-platform-overview h2{margin:0;color:#fff;font-size:clamp(26px,4vw,38px);line-height:1.14;font-weight:900;letter-spacing:-.7px;text-shadow:0 2px 15px #0009}
+    #page-public-market .oc-platform-overview .oc-platform-lead{max-width:720px;margin:12px 0 0;color:#aebed2;font-size:15px;line-height:1.75}
+    #page-public-market .oc-platform-highlights{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:28px 0 58px}
+    #page-public-market .oc-platform-highlight{padding:19px 17px;border:1px solid #263b55;border-radius:14px;background:linear-gradient(145deg,#10243a,#091522)}
+    #page-public-market .oc-platform-highlight strong{display:block;color:#fff;font-size:16px;font-weight:850;margin-bottom:7px}
+    #page-public-market .oc-platform-highlight span{display:block;color:#9eb2c9;font-size:13px;line-height:1.55}
+    #page-public-market .oc-platform-section-head{margin-bottom:22px}
+    #page-public-market .oc-platform-products{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 0 58px}
+    #page-public-market .oc-platform-product{min-height:190px;padding:22px;border:1px solid #263b55;border-radius:15px;background:linear-gradient(150deg,#10243a,#091522)}
+    #page-public-market .oc-platform-product .oc-platform-icon{display:grid;place-items:center;width:39px;height:39px;margin-bottom:18px;border-radius:12px;background:#d9a94318;color:#efc46d;font-size:21px}
+    #page-public-market .oc-platform-product h3{margin:0 0 9px;color:#fff;font-size:17px;font-weight:850}
+    #page-public-market .oc-platform-product p{margin:0;color:#aebed2;font-size:13px;line-height:1.7}
+    #page-public-market .oc-platform-product small{display:block;margin-top:16px;color:#e8b95c;font-size:10px;font-weight:850;letter-spacing:1.2px}
+    #page-public-market .oc-platform-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 58px}
+    #page-public-market .oc-platform-step{padding:20px 17px;border-top:2px solid #d5a744;background:linear-gradient(180deg,#10243a,#091522);border-radius:0 0 13px 13px}
+    #page-public-market .oc-platform-step .step-no{color:#e8b95c;font-size:11px;font-weight:900;letter-spacing:1.5px}
+    #page-public-market .oc-platform-step h3{margin:12px 0 8px;color:#fff;font-size:16px;font-weight:850}
+    #page-public-market .oc-platform-step p{margin:0;color:#aebed2;font-size:13px;line-height:1.65}
+    #page-public-market .oc-platform-final-cta{display:flex;align-items:center;justify-content:space-between;gap:22px;margin:0 0 30px;padding:clamp(22px,4vw,34px);border:1px solid #3d4b5c;border-radius:17px;background:linear-gradient(110deg,#172b40,#101b2a 65%,#2a2114)}
+    #page-public-market .oc-platform-final-cta p{margin:9px 0 0;color:#b4c2d3;font-size:14px;line-height:1.6}
+    #page-public-market .oc-platform-final-cta button{flex:0 0 auto;min-height:46px;padding:0 22px}
+    @media(max-width:850px){#page-public-market .oc-platform-highlights{grid-template-columns:repeat(2,minmax(0,1fr))}#page-public-market .oc-platform-products{grid-template-columns:repeat(2,minmax(0,1fr))}#page-public-market .oc-platform-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:560px){#page-public-market .oc-platform-highlights,#page-public-market .oc-platform-products,#page-public-market .oc-platform-steps{grid-template-columns:1fr;gap:10px}#page-public-market .oc-platform-highlight{padding:16px}#page-public-market .oc-platform-product{min-height:0;padding:19px}#page-public-market .oc-platform-final-cta{align-items:flex-start;flex-direction:column}#page-public-market .oc-platform-final-cta button{width:100%}}
+  </style>
+  <section class="oc-platform-overview" aria-label="Onchain platform features and services">
+    <div class="oc-platform-eyebrow">THE ONCHAIN EXPERIENCE</div>
+    <h2>Trade, explore and manage your markets</h2>
+    <p class="oc-platform-lead">Discover crypto, Gold and selected US stock market information alongside practical tools for exploring strategies, tracking activity and managing your Onchain account.</p>
+
+    <div class="oc-platform-highlights">
+      <div class="oc-platform-highlight"><strong>Markets in one place</strong><span>Explore crypto, Gold and selected US stock market information.</span></div>
+      <div class="oc-platform-highlight"><strong>Market insights</strong><span>Follow price movements, charts, market research and active coin pairs.</span></div>
+      <div class="oc-platform-highlight"><strong>Trading tools</strong><span>Explore trading screens, order-book information and practice-trading tools.</span></div>
+      <div class="oc-platform-highlight"><strong>Account overview</strong><span>Review your assets, account activity and portfolio information in one workspace.</span></div>
+    </div>
+
+    <div class="oc-platform-section-head">
+      <div class="oc-platform-eyebrow">PRODUCTS & TOOLS</div>
+      <h2>Explore the Onchain platform</h2>
+      <p class="oc-platform-lead">A connected set of market discovery and account tools for your crypto and investment journey.</p>
+    </div>
+    <div class="oc-platform-products">
+      <article class="oc-platform-product"><div class="oc-platform-icon">₿</div><h3>Crypto & Gold Markets</h3><p>Explore supported digital assets, Bitcoin, Ethereum and Gold market information with charts and price movements.</p><small>CRYPTO · XAU · MARKET DATA</small></article>
+      <article class="oc-platform-product"><div class="oc-platform-icon">▥</div><h3>US Stock Trading</h3><p>Discover selected US-listed stocks, follow market information and review available charts and research.</p><small>US STOCKS · WATCHLIST · RESEARCH</small></article>
+      <article class="oc-platform-product"><div class="oc-platform-icon">⇄</div><h3>Practice Trading</h3><p>Explore the trading interface, review market direction and practise using the available simulated trading tools.</p><small>MARKET VIEW · PRACTICE TOOLS</small></article>
+      <article class="oc-platform-product"><div class="oc-platform-icon">◎</div><h3>Copy Trading Discovery</h3><p>Browse trader strategy profiles, compare approaches and review risk information before deciding who to follow.</p><small>DISCOVER · COMPARE · FOLLOW</small></article>
+      <article class="oc-platform-product"><div class="oc-platform-icon">▱</div><h3>Wallet & Assets</h3><p>Review your asset overview, supported coin information and account activity from your personal workspace.</p><small>ASSETS · BALANCE · ACTIVITY</small></article>
+      <article class="oc-platform-product"><div class="oc-platform-icon">⌕</div><h3>Market Research</h3><p>Explore market insights, active coin pairs, momentum signals and useful information across supported markets.</p><small>INSIGHTS · SIGNALS · MARKETS</small></article>
+    </div>
+
+    <div class="oc-platform-section-head">
+      <div class="oc-platform-eyebrow">GET STARTED</div>
+      <h2>Your Onchain journey in four steps</h2>
+      <p class="oc-platform-lead">Create an account, get familiar with the platform and explore its tools at your own pace.</p>
+    </div>
+    <div class="oc-platform-steps">
+      <article class="oc-platform-step"><span class="step-no">STEP 01</span><h3>Create your account</h3><p>Register with your details and complete the account verification steps presented during sign-up.</p></article>
+      <article class="oc-platform-step"><span class="step-no">STEP 02</span><h3>Explore markets</h3><p>Discover crypto, Gold and selected US stock information, charts and market research.</p></article>
+      <article class="oc-platform-step"><span class="step-no">STEP 03</span><h3>Explore trading tools</h3><p>Review the trading interface and use the available practice-trading features to learn how the tools work.</p></article>
+      <article class="oc-platform-step"><span class="step-no">STEP 04</span><h3>Track your activity</h3><p>Visit your account workspace to review assets, portfolio information and recent activity.</p></article>
+    </div>
+
+    <div class="oc-platform-final-cta">
+      <div><div class="oc-platform-eyebrow">START WITH ONCHAIN</div><h2>Ready to explore your markets?</h2><p>Create your Onchain account and discover the tools available across the platform.</p></div>
+      <button type="button" class="primary" id="ocVisitorAboutSignup">Create account <span aria-hidden="true">→</span></button>
+    </div>
+  </section>
 </section>
 
 <section id="page-home">
