@@ -6242,10 +6242,10 @@ body:not(.oc-auth-screen) main :is(button.primary,.primary){
   const wanted=new Set([
     "Quick Actions","Active Coin Pairs","📡 All-Coin Live Momentum Signals",
     "All-Coin Live Momentum Signals","US Stocks","Order Book",
-    "Explore Onchain","Market research","Your Assets"
+    "Explore Onchain","Market research","Your Assets","Markets","Stock trading"
   ]);
   function apply(){
-    document.querySelectorAll("h2").forEach(function(el){
+    document.querySelectorAll("h1,h2,h3").forEach(function(el){
       if(wanted.has((el.textContent||"").trim())) el.classList.add("oc-unified-section-title");
     });
   }
