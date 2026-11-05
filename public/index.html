@@ -10234,3 +10234,48 @@ body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #signInForm {
   },false);
 })();
 </script>
+
+
+<style id="oc-registration-white-black-theme">
+/* Registration-only contrast theme; login and the platform canvas stay unchanged. */
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) {
+  background:#ffffff!important;
+  color:#111820!important;
+  padding:clamp(18px,3vw,28px)!important;
+  border:1px solid #d8e0e8!important;
+  border-radius:14px!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.16)!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden),
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) h3,
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) p,
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) label,
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) .muted,
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) .tiny,
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) .yellow,
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) .auth-switch,
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) .auth-switch button {
+  color:#111820!important;
+  text-shadow:none!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) input:not([type=checkbox]),
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) select {
+  background:#ffffff!important;
+  color:#111820!important;
+  border:1px solid #aebbc8!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) input::placeholder {
+  color:#667482!important;
+  opacity:1!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) .oc-register-contact-choice {
+  background:#f1f4f7!important;
+  border:1px solid #d4dce4!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) button {
+  color:#111820!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) .oc-password-toggle svg {
+  stroke:#111820!important;
+}
+</style>
