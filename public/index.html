@@ -6014,7 +6014,7 @@ submit?.addEventListener("click",async()=>{const v=currentAddress(),a=Number(amo
 #ocVisitorSupportBot .oc-support-headcopy{flex:1;min-width:0}
 #ocVisitorSupportBot .oc-support-headcopy strong{display:block;font-size:13px}
 #ocVisitorSupportBot .oc-support-headcopy small{font-size:10px;color:#b9c9dc}
-#ocVisitorSupportBot .oc-support-close{border:0;background:transparent;color:#dce7f4;font-size:22px;cursor:pointer;padding:4px 8px}
+#ocVisitorSupportBot .oc-support-head{position:relative;min-height:68px;padding-right:58px}#ocVisitorSupportBot .oc-support-close{position:absolute;top:12px;right:12px;z-index:5;display:grid!important;place-items:center;width:38px;height:38px;min-width:38px;min-height:38px;margin:0;padding:0!important;border:1px solid rgba(255,255,255,.55)!important;border-radius:50%!important;background:#d9ad55!important;color:#101a28!important;font-family:Arial,sans-serif!important;font-size:29px!important;font-weight:900!important;line-height:1!important;opacity:1!important;visibility:visible!important;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.35)}#ocVisitorSupportBot .oc-support-close:hover{background:#f0d18c!important;color:#071426!important}#ocVisitorSupportBot .oc-support-close:focus-visible{outline:3px solid #fff;outline-offset:2px}
 #ocVisitorSupportBot .oc-support-messages{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
 #ocVisitorSupportBot .oc-support-msg{max-width:88%;padding:10px 12px;border-radius:13px;font-size:12px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
 #ocVisitorSupportBot .oc-support-msg.bot{align-self:flex-start;background:#142943;color:#edf4fc;border:1px solid rgba(255,255,255,.07);border-top-left-radius:4px}
@@ -6028,8 +6028,8 @@ submit?.addEventListener("click",async()=>{const v=currentAddress(),a=Number(amo
 #ocVisitorSupportBot .oc-support-note{text-align:center;color:#8192a8;font-size:9px;padding:0 8px 8px}
 @media(max-width:560px){#ocVisitorSupportBot{right:12px;bottom:calc(14px + env(safe-area-inset-bottom))}#ocVisitorSupportBot .oc-support-launch{padding:6px 11px 6px 6px}#ocVisitorSupportBot .oc-support-avatar{width:44px;height:44px}#ocVisitorSupportBot .oc-support-panel{bottom:62px;width:min(350px,calc(100vw - 24px));height:min(500px,calc(100dvh - 95px))}}
 @media(prefers-reduced-motion:no-preference){#ocVisitorSupportBot .oc-support-launch{animation:ocSupportFloat 3.8s ease-in-out infinite}@keyframes ocSupportFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}}
-body:not(.oc-logged-out) #ocVisitorSupportBot{display:none!important}
-body.oc-logged-out:not(.oc-auth-screen) #ocVisitorSupportBot{display:block!important}
+body.oc-auth-screen #ocVisitorSupportBot{display:none!important}
+#oc-visitor-support-bot{display:none!important}
 </style>
 <div id="ocVisitorSupportBot" aria-live="polite">
  <section class="oc-support-panel" role="dialog" aria-label="Onchain customer support" aria-modal="false">
@@ -6054,7 +6054,7 @@ body.oc-logged-out:not(.oc-auth-screen) #ocVisitorSupportBot{display:block!impor
  </button>
 </div>
 <script id="oc-visitor-support-bot-guest-visibility">
-(()=>{const sync=()=>{const root=document.getElementById("ocVisitorSupportBot");if(!root||!document.body)return;if(root.parentElement!==document.body)document.body.appendChild(root);root.style.display=document.body.classList.contains("oc-logged-out")&&!document.body.classList.contains("oc-auth-screen")?"block":"none"};sync();if(document.body&&window.MutationObserver)new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:["class"]});})();
+(()=>{const sync=()=>{const root=document.getElementById("ocVisitorSupportBot");if(!root||!document.body)return;if(root.parentElement!==document.body)document.body.appendChild(root);root.style.display=!document.body.classList.contains("oc-auth-screen")?"block":"none"};sync();if(document.body&&window.MutationObserver)new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:["class"]});})();
 </script>
 <script id="oc-visitor-support-bot-script">
 (()=>{const root=document.getElementById("ocVisitorSupportBot");if(!root||root.dataset.ready)return;root.dataset.ready="1";
