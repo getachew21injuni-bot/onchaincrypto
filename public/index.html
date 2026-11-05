@@ -1725,17 +1725,45 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
         <div id="authStatus" class="notice hidden">Checking sign-in status…</div>
         <p id="registerMessage" class="muted tiny hidden" aria-live="polite"></p>
         <p class="muted tiny auth-google-hint">Enter your full name above to register with Google.</p>
-        <form id="registerForm" class="auth-register-form hidden" aria-label="Create account">
-          <h3>Create account</h3>
-          <p class="muted tiny">Create your Onchain account.</p>
-          <label for="registerFirstName">First name <span class="yellow">(required)</span></label><input id="registerFirstName" class="field" maxlength="50" autocomplete="given-name" required placeholder="Enter your first name">
-          <label for="registerLastName">Last name <span class="yellow">(required)</span></label><input id="registerLastName" class="field" maxlength="50" autocomplete="family-name" required placeholder="Enter your last name">
-          <div class="oc-register-contact-choice"><label for="registerContactMethod">How would you like to register?</label><select id="registerContactMethod" class="field" aria-label="Choose email or phone"><option value="email">✉ Email address</option><option value="phone">☎ Phone number</option></select><p class="oc-register-method-help">Choose one method. You can switch at any time.</p></div><label for="registerEmail">Email address</label><input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="you@example.com"><div id="emailCodePanel" class="hidden"><label for="registerEmailCode">Gmail verification code</label><input id="registerEmailCode" class="field" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="Enter 6-digit code"><p class="muted tiny">Check your inbox and spam folder. Code expires in 10 minutes.</p><button id="resendEmailCodeBtn" class="secondary full" type="button">Send code again</button></div>
-          <p class="muted tiny">No email link needed. To register by phone, use SMS below.</p>
-          <label for="registerPassword">Password <span class="yellow">(required)</span></label><div class="oc-password-wrap"><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="Create a password (8+ characters)"><button class="oc-password-toggle" type="button" data-password-target="registerPassword" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
-          <label for="referralCode">Referral code <span class="muted tiny">(optional)</span></label><input id="referralCode" class="field" maxlength="40" autocomplete="off" placeholder="Enter referral code if you have one">
-          <button class="primary full" type="submit">⚡ Create account</button>
-          <p class="auth-switch">Already have an account? <button type="button" id="registerLoginBtn">Login</button></p>
+        <form id="registerForm" class="auth-register-form hidden oc-register-redesign" aria-label="Create account">
+          <div class="oc-reg-form-heading">
+            <span class="oc-reg-eyebrow">GET STARTED</span>
+            <h3>Create your account</h3>
+            <p>Enter your details to join OnChainCrypto.</p>
+          </div>
+          <div class="oc-reg-section-title"><span>01</span><strong>Personal information</strong></div>
+          <div class="oc-reg-name-grid">
+            <div class="oc-reg-field"><label for="registerFirstName">First name <span>(required)</span></label><input id="registerFirstName" class="field" maxlength="50" autocomplete="given-name" required placeholder="Your first name"></div>
+            <div class="oc-reg-field"><label for="registerLastName">Last name <span>(required)</span></label><input id="registerLastName" class="field" maxlength="50" autocomplete="family-name" required placeholder="Your last name"></div>
+          </div>
+          <div class="oc-reg-section-title"><span>02</span><strong>Contact details</strong></div>
+          <div class="oc-register-contact-choice">
+            <label for="registerContactMethod">Choose registration method</label>
+            <select id="registerContactMethod" class="field" aria-label="Choose email or phone"><option value="email">✉ Email address</option><option value="phone">☎ Phone number</option></select>
+            <p class="oc-register-method-help">Select how you want to register.</p>
+          </div>
+          <div class="oc-reg-field">
+            <label for="registerEmail">Email address</label>
+            <input id="registerEmail" class="field" type="email" autocomplete="email" required placeholder="name@example.com">
+          </div>
+          <div id="emailCodePanel" class="hidden oc-reg-verification">
+            <label for="registerEmailCode">6-digit email verification code</label>
+            <input id="registerEmailCode" class="field" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="Enter your 6-digit code">
+            <p class="muted tiny">Check your inbox and spam folder. The code expires in 10 minutes.</p>
+            <button id="resendEmailCodeBtn" class="secondary full" type="button">Send a new code</button>
+          </div>
+          <p class="oc-reg-note">No email link is required. Phone registration uses SMS verification.</p>
+          <div class="oc-reg-section-title"><span>03</span><strong>Secure your account</strong></div>
+          <div class="oc-reg-field">
+            <label for="registerPassword">Create password <span>(required · 8+ characters)</span></label>
+            <div class="oc-password-wrap"><input id="registerPassword" class="field" type="password" minlength="8" autocomplete="new-password" required placeholder="Create a strong password"><button class="oc-password-toggle" type="button" data-password-target="registerPassword" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+          </div>
+          <div class="oc-reg-field oc-reg-referral">
+            <label for="referralCode">Referral code <span>(optional)</span></label>
+            <input id="referralCode" class="field" maxlength="40" autocomplete="off" placeholder="Enter a referral code">
+          </div>
+          <button class="primary full oc-reg-submit" type="submit"><span>Create account</span><span aria-hidden="true">→</span></button>
+          <p class="auth-switch">Already have an account? <button type="button" id="registerLoginBtn">Log in</button></p>
         </form>
         <button class="secondary full auth-google-btn hidden" id="googleSignInBtn" type="button"><span aria-hidden="true">🌐</span> Continue with Google</button>
         <form id="signInForm" class="auth-signin-form hidden">
@@ -10099,3 +10127,116 @@ body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel:not(.hi
  },true);
 })();
 </script>
+
+<style id="oc-complete-registration-redesign">
+/* Complete registration form redesign. IDs and form submission behavior are preserved. */
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel {
+  width:min(100% - 28px,680px)!important;max-width:680px!important;
+  margin:18px auto 30px!important;padding:clamp(18px,4vw,34px)!important;
+  background:#f8fbff!important;color:#152438!important;border:1px solid #dbe6f2!important;
+  border-radius:20px!important;box-shadow:0 18px 55px rgba(0,0,0,.28)!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign {
+  width:100%!important;max-width:none!important;margin:0!important;padding:0!important;
+  color:#152438!important;background:transparent!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-google-hint {
+  color:#52657a!important;background:#edf4fb!important;border:1px solid #d9e5f0!important;
+  border-radius:10px!important;padding:10px 13px!important;margin:0 0 16px!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .oc-reg-form-heading {margin:0 0 24px!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-reg-eyebrow {
+  display:inline-block;color:#0b9364!important;font-size:11px!important;font-weight:900!important;
+  letter-spacing:1.5px!important;margin-bottom:8px!important
+}
+body.oc-logged-out.oc-auth-screen #page-register .oc-reg-form-heading h3 {
+  margin:0 0 6px!important;color:#14283d!important;font-size:clamp(25px,4vw,31px)!important;
+  font-weight:850!important;text-shadow:none!important
+}
+body.oc-logged-out.oc-auth-screen #page-register .oc-reg-form-heading p {
+  margin:0!important;color:#607187!important;font-size:14px!important
+}
+body.oc-logged-out.oc-auth-screen #page-register .oc-reg-section-title {
+  display:flex!important;align-items:center!important;gap:10px!important;
+  margin:22px 0 13px!important;padding-bottom:10px!important;border-bottom:1px solid #e0e8f0!important;
+  color:#20364c!important
+}
+body.oc-logged-out.oc-auth-screen #page-register .oc-reg-section-title>span {
+  display:grid;place-items:center;width:26px;height:26px;border-radius:8px;
+  color:#fff;background:#183d63;font-size:11px;font-weight:900
+}
+body.oc-logged-out.oc-auth-screen #page-register .oc-reg-section-title strong {font-size:14px!important;font-weight:850!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-reg-name-grid {
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important
+}
+body.oc-logged-out.oc-auth-screen #page-register .oc-reg-field {min-width:0!important;margin:0 0 14px!important}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign label {
+  display:block!important;margin:0 0 7px!important;color:#253b51!important;
+  font-size:13px!important;font-weight:800!important;text-shadow:none!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign label span {
+  color:#7b8da0!important;font-size:11px!important;font-weight:650!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign input:not([type=checkbox]),
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign select {
+  display:block!important;box-sizing:border-box!important;width:100%!important;min-width:0!important;
+  min-height:49px!important;padding:12px 14px!important;border:1px solid #cbd8e5!important;
+  border-radius:10px!important;background:#fff!important;color:#17283a!important;
+  -webkit-text-fill-color:#17283a!important;font-size:15px!important;font-weight:550!important;
+  box-shadow:0 2px 5px rgba(25,55,85,.04)!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign input::placeholder {
+  color:#8998a8!important;-webkit-text-fill-color:#8998a8!important;opacity:1!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign input:focus,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign select:focus {
+  border-color:#168e69!important;outline:3px solid rgba(22,142,105,.13)!important;box-shadow:none!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign .oc-register-contact-choice {
+  margin:0 0 16px!important;padding:14px!important;background:#edf4fa!important;
+  border:1px solid #d7e3ee!important;border-radius:12px!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign .oc-register-contact-choice label {margin-bottom:8px!important}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign .oc-register-method-help {
+  margin:7px 0 0!important;color:#65788b!important;font-size:12px!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign .oc-reg-note {
+  margin:0!important;padding:10px 12px!important;border-radius:9px!important;
+  background:#eef6f3!important;color:#41695c!important;font-size:12px!important;line-height:1.5!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign .oc-reg-verification {
+  margin:0 0 14px!important;padding:14px!important;background:#fff9e9!important;
+  border:1px solid #f0dca8!important;border-radius:12px!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign .oc-reg-verification p {
+  color:#75623a!important;font-size:12px!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign .oc-password-wrap {
+  position:relative!important;display:flex!important;align-items:center!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign .oc-password-wrap input {padding-right:52px!important}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign .oc-password-toggle {
+  position:absolute!important;right:8px!important;top:50%!important;transform:translateY(-50%)!important;
+  color:#4c6075!important;background:transparent!important;border:0!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign .oc-reg-submit {
+  display:flex!important;align-items:center!important;justify-content:center!important;gap:12px!important;
+  min-height:54px!important;margin-top:20px!important;border:0!important;border-radius:11px!important;
+  color:#fff!important;background:linear-gradient(110deg,#159b68,#087d55)!important;
+  font-size:16px!important;font-weight:850!important;box-shadow:0 8px 18px rgba(8,125,85,.2)!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign .auth-switch {
+  margin:18px 0 0!important;text-align:center!important;color:#566a7f!important;
+  font-size:13px!important;font-weight:600!important
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.oc-register-redesign .auth-switch button {
+  color:#087dba!important;font-weight:850!important;text-decoration:none!important
+}
+@media(max-width:560px) {
+  body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel {
+    width:calc(100% - 20px)!important;margin:10px auto 22px!important;
+    padding:18px 15px!important;border-radius:15px!important
+  }
+  body.oc-logged-out.oc-auth-screen #page-register .oc-reg-name-grid {grid-template-columns:1fr!important;gap:0!important}
+}
+</style>
