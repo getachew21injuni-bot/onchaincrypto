@@ -10506,3 +10506,94 @@ body.oc-logged-out.oc-auth-screen #page-register #googleSignInBtn.hidden{display
   else start();
 })();
 </script>
+
+
+<!-- OnChainCrypto unified mobile auth screen: final visibility and form-switch layer. -->
+<style id="oc-auth-mobile-unified-final">
+body.oc-logged-out.oc-auth-screen{background:#f3f6fa!important;color:#171b22!important}
+body.oc-logged-out.oc-auth-screen main{display:flex!important;align-items:flex-start!important;justify-content:center!important;min-height:100svh!important;padding:clamp(14px,4vw,34px)!important;background:transparent!important}
+body.oc-logged-out.oc-auth-screen #page-register{display:block!important;visibility:visible!important;opacity:1!important;width:min(100%,520px)!important;max-width:520px!important;min-height:0!important;margin:0 auto!important;padding:0!important}
+body.oc-logged-out.oc-auth-screen #page-register>.oc-public-auth-hero{display:none!important}
+body.oc-logged-out.oc-auth-screen #page-register>.auth-welcome{display:block!important;text-align:center!important;margin:8px 0 18px!important}
+body.oc-logged-out.oc-auth-screen #page-register .auth-welcome h1{color:#111827!important;font-size:clamp(25px,6vw,32px)!important;font-weight:900!important}
+body.oc-logged-out.oc-auth-screen #page-register .content-grid{display:block!important;width:100%!important;margin:0!important}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:clamp(18px,5vw,28px)!important;background:#fff!important;color:#171b22!important;border:1px solid #d7dee8!important;border-radius:16px!important;box-shadow:0 12px 36px rgba(16,35,58,.09)!important}
+body.oc-logged-out.oc-auth-screen #page-register #authChoicePanel{display:none!important}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm{width:100%!important;margin:0!important;padding:0!important;background:transparent!important;color:#171b22!important}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm.hidden,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.hidden{display:none!important}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm:not(.hidden),
+body.oc-logged-out.oc-auth-screen #page-register #registerForm:not(.hidden){display:block!important;visibility:visible!important;opacity:1!important}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm h3,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm h3{display:block!important;margin:0 0 16px!important;color:#111827!important;font-size:23px!important;font-weight:900!important}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm label,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm label,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm .tiny{color:#273244!important}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm input:not([type=checkbox]),
+body.oc-logged-out.oc-auth-screen #page-register #registerForm input:not([type=checkbox]),
+body.oc-logged-out.oc-auth-screen #page-register #registerForm select{width:100%!important;min-height:49px!important;padding:12px 14px!important;background:#fff!important;color:#111827!important;border:1px solid #c7d0dc!important;border-radius:9px!important;font-size:16px!important}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm input::placeholder,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm input::placeholder{color:#687586!important;opacity:1!important}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm .primary,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm button[type=submit]{width:100%!important;min-height:50px!important;background:#102f4c!important;color:#fff!important;border:0!important;border-radius:9px!important;font-weight:850!important}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm .secondary,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm .secondary{width:100%!important;min-height:46px!important;background:#edf2f7!important;color:#172033!important;border:1px solid #cbd5e1!important}
+body.oc-logged-out.oc-auth-screen #page-register .auth-switch{text-align:center!important;margin:18px 0 0!important;color:#344054!important}
+body.oc-logged-out.oc-auth-screen #page-register .auth-switch button{color:#155fbd!important;font-weight:850!important;text-decoration:underline!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-password-wrap{position:relative!important;display:flex!important;align-items:center!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-password-wrap .field{padding-right:50px!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-password-toggle{position:absolute!important;right:5px!important;top:50%!important;transform:translateY(-50%)!important;display:flex!important;align-items:center!important;justify-content:center!important;width:40px!important;height:40px!important;background:transparent!important;color:#344054!important;border:0!important;padding:8px!important}
+body.oc-logged-out.oc-auth-screen #page-register .oc-password-toggle svg{width:21px!important;height:21px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important}
+body.oc-logged-out.oc-auth-screen #page-register .auth-google-btn{width:100%!important;margin-top:10px!important;background:#fff!important;color:#172033!important;border:1px solid #cbd5e1!important}
+@media(max-width:560px){body.oc-logged-out.oc-auth-screen main{padding:12px!important}body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel{padding:18px 15px!important}}
+</style>
+<script id="oc-auth-mobile-unified-final-router">
+(function(){
+  function setVisible(el,show){
+    if(!el)return;
+    el.classList.toggle('hidden',!show);
+    el.hidden=!show;
+    el.style.setProperty('display',show?'block':'none','important');
+    el.style.setProperty('visibility',show?'visible':'hidden','important');
+  }
+  function setMode(mode){
+    const creating=mode==='register';
+    document.documentElement.classList.remove('oc-auth-pending');
+    document.body.classList.add('oc-logged-out','oc-auth-screen');
+    document.body.classList.toggle('oc-register-mode',creating);
+    if(typeof window.showPage==='function')window.showPage('register');
+    const page=document.getElementById('page-register');
+    if(page){page.classList.remove('hidden');page.hidden=false;page.style.setProperty('display','block','important');}
+    setVisible(document.getElementById('authChoicePanel'),false);
+    setVisible(document.getElementById('registerForm'),creating);
+    setVisible(document.getElementById('signInForm'),!creating);
+    setVisible(document.getElementById('authStatus'),false);
+    setVisible(document.getElementById('registerMessage'),false);
+    setVisible(document.querySelector('#page-register .auth-google-hint'),false);
+    const google=document.getElementById('googleSignInBtn');
+    if(google){google.classList.toggle('hidden',creating);google.hidden=creating;google.style.setProperty('display',creating?'none':'flex','important');}
+    const phone=document.getElementById('phoneRegistrationPanel');
+    if(phone&&!creating){phone.open=false;phone.classList.add('hidden');phone.hidden=true;phone.style.setProperty('display','none','important');}
+    const heading=document.getElementById('authHeading');
+    if(heading)heading.textContent=creating?'Create your OnChainCrypto account':'Welcome back to OnChainCrypto';
+  }
+  document.addEventListener('click',function(event){
+    const target=event.target instanceof Element?event.target:null;
+    if(!target)return;
+    if(target.closest('#showRegisterBtn,#authChoiceRegister,#landingGetStarted,#ocHomeCreateAccount,#ocVisitorSignup,#ocVisitorHeroSignup,#ocVisitorAboutSignup,#ocVisitorBottomSignup,#mobileRegisterBtn,#register-nav')){
+      setTimeout(function(){setMode('register');},0);
+    }else if(target.closest('#registerLoginBtn,#authChoiceLogin,#showSignInBtn,#landingSignIn,#ocHomeLogin,#ocVisitorLogin,#ocVisitorHeroLogin,#mobileSignInBtn,#signin-nav')){
+      setTimeout(function(){setMode('login');},0);
+    }
+  },true);
+  function observe(){
+    if(document.body.classList.contains('oc-auth-screen'))setMode(document.body.classList.contains('oc-register-mode')?'register':'login');
+    const observer=new MutationObserver(function(){
+      if(document.body.classList.contains('oc-auth-screen'))setMode(document.body.classList.contains('oc-register-mode')?'register':'login');
+    });
+    observer.observe(document.body,{attributes:true,attributeFilter:['class']});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',observe,{once:true});else observe();
+})();
+</script>
