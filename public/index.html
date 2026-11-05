@@ -958,6 +958,90 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
  #page-register{padding:14px!important}
 }
 </style>
+
+<style id="oc-normal-auth-form-design">
+/* Clean, readable auth card while retaining the dark Onchain page around it. */
+#page-register .auth-main-panel{
+  width:min(100%,620px)!important;
+  margin:12px auto 28px!important;
+  padding:clamp(18px,3vw,30px)!important;
+  background:rgba(244,248,252,.97)!important;
+  border:1px solid rgba(255,255,255,.72)!important;
+  border-radius:16px!important;
+  box-shadow:0 18px 48px rgba(0,0,0,.24)!important;
+  color:#142235!important;
+}
+#page-register .auth-main-panel h2,
+#page-register .auth-main-panel h3,
+#page-register .auth-main-panel label,
+#page-register .auth-main-panel .auth-switch,
+#page-register .auth-main-panel .oc-register-method-help{
+  color:#17283b!important;
+}
+#page-register .auth-main-panel .muted,
+#page-register .auth-main-panel .auth-google-hint{
+  color:#526477!important;
+}
+#page-register .auth-main-panel .auth-google-hint{
+  display:block!important;
+  margin:0 0 14px!important;
+  padding:11px 13px!important;
+  background:#e9f1fa!important;
+  border:1px solid #d2dfed!important;
+  border-radius:9px!important;
+  font-size:13px!important;
+}
+#page-register .auth-main-panel #registerForm,
+#page-register .auth-main-panel #signInForm{
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+#page-register .auth-main-panel #registerForm label,
+#page-register .auth-main-panel #signInForm label{
+  display:block!important;
+  margin:12px 0 6px!important;
+  color:#17283b!important;
+  font-weight:650!important;
+}
+#page-register .auth-main-panel .field{
+  width:100%!important;
+  min-height:46px!important;
+  background:#fff!important;
+  color:#142235!important;
+  border:1px solid #b9c9da!important;
+  border-radius:8px!important;
+  padding:11px 13px!important;
+  box-shadow:inset 0 1px 2px rgba(18,42,68,.05)!important;
+}
+#page-register .auth-main-panel .field::placeholder{color:#7a8999!important;opacity:1!important}
+#page-register .auth-main-panel .field:focus{
+  outline:2px solid rgba(48,128,220,.2)!important;
+  border-color:#367fd0!important;
+}
+#page-register .auth-main-panel .oc-register-contact-choice{
+  margin:14px 0!important;
+  padding:12px!important;
+  background:#edf3f9!important;
+  border:1px solid #d2dfed!important;
+  border-radius:9px!important;
+}
+#page-register .auth-main-panel .oc-password-wrap{position:relative}
+#page-register .auth-main-panel .oc-password-wrap .field{padding-right:50px!important}
+#page-register .auth-main-panel .auth-switch{margin:16px 0 0!important;text-align:center!important}
+#page-register .auth-main-panel .auth-switch button{
+  color:#1768bd!important;font-weight:700!important;text-decoration:underline!important;
+}
+#page-register .auth-welcome{text-align:center!important}
+#page-register .auth-welcome h1{color:#fff!important}
+#page-register .auth-welcome .auth-brand{color:#fff!important}
+@media(max-width:640px){
+  #page-register .auth-main-panel{margin:8px auto 24px!important;padding:17px!important;border-radius:13px!important}
+}
+</style>
 </head>
 <body>
 <header>
@@ -1640,6 +1724,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
 
         <div id="authStatus" class="notice hidden">Checking sign-in status…</div>
         <p id="registerMessage" class="muted tiny hidden" aria-live="polite"></p>
+        <p class="muted tiny auth-google-hint">Enter your full name above to register with Google.</p>
         <form id="registerForm" class="auth-register-form hidden" aria-label="Create account">
           <h3>Create account</h3>
           <p class="muted tiny">Create your Onchain account.</p>
@@ -1653,7 +1738,6 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
           <p class="auth-switch">Already have an account? <button type="button" id="registerLoginBtn">Login</button></p>
         </form>
         <button class="secondary full auth-google-btn hidden" id="googleSignInBtn" type="button"><span aria-hidden="true">🌐</span> Continue with Google</button>
-        <p class="muted tiny auth-google-hint">Enter your full name above to register with Google.</p>
         <form id="signInForm" class="auth-signin-form hidden">
           <h3 style="margin-top:12px">Sign in</h3>
           <label for="signInEmail">Username, email or phone</label><input id="signInEmail" class="field" type="text" inputmode="text" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="Username, email or phone">
@@ -9979,7 +10063,7 @@ body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel:not(.hi
    setVisible($("signInForm"),!creating);
    setVisible($("googleSignInBtn"),false);
    setVisible($("authPhoneDivider"),false);
-   setVisible(document.querySelector(".auth-google-hint"),false);
+   setVisible(document.querySelector(".auth-google-hint"),creating);
    const phone=$("phoneRegistrationPanel");
    if(phone){phone.classList.add("hidden");phone.hidden=true;phone.style.setProperty("display","none","important");phone.open=false;}
    const reg=$("registerForm"),login=$("signInForm");
