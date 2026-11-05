@@ -2039,6 +2039,21 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
       <p class="muted tiny">Existing profiles and new profiles are listed automatically when their account profile is created or refreshed.</p>
       <div id="ocAdminUsersList" class="notice">Waiting for administrator access…</div>
     </section>
+    <section id="ocAdminSupportInbox" class="panel form-panel" style="margin-bottom:16px">
+      <div class="section-head"><h2>Customer Support Inbox</h2><span class="tag">PRIVATE MESSAGES</span></div>
+      <p class="muted tiny">Read customer requests and reply directly inside Onchain. Conversations are stored in Firebase; no external email inbox is required.</p>
+      <div id="ocAdminSupportTicketList" class="muted tiny">Waiting for verified administrator access…</div>
+      <div id="ocAdminSupportConversation" class="panel" style="padding:12px;margin-top:12px">
+        <p class="muted tiny">Select a customer conversation to read and reply.</p>
+      </div>
+      <label for="ocAdminSupportReplyText">Admin reply</label>
+      <textarea id="ocAdminSupportReplyText" class="field" rows="3" maxlength="3000" placeholder="Write a reply to the customer."></textarea>
+      <div class="two-buttons">
+        <button id="ocAdminSupportReplySend" class="primary" type="button">Send reply</button>
+        <button id="ocAdminSupportResolve" class="secondary" type="button">Mark resolved</button>
+      </div>
+      <p id="ocAdminSupportStatus" class="muted tiny" aria-live="polite"></p>
+    </section>
     <div class="cards">
       <div class="card"><div class="label">Market data</div><div class="big" id="adminMarketStatus">Checking…</div><div class="muted tiny">Public market API</div></div>
       <div class="card"><div class="label">practice activity</div><div class="big" id="adminTxCount">0</div><div class="muted tiny">This browser only</div></div>
@@ -2068,12 +2083,12 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
   </section>
 
   <section id="page-support" class="hidden">
-    <div class="page-title"><div><h1>Help and Guidance</h1><div class="muted">Clear guidance, account help and assistance.</div></div><span class="tag">HELP CENTER</span></div><section class="panel" style="margin-bottom:16px"><div class="section-head"><h2>Quick Support</h2><span class="muted tiny">Choose what you need</span></div><div class="content-grid"><button type="button" class="secondary" data-support-action="ticket">✉ New ticket <span class="muted tiny">Contact the support team</span></button><button type="button" class="secondary" data-support-action="faq">❔ FAQ <span class="muted tiny">Common questions and answers</span></button><button type="button" class="secondary" data-support-action="guide">☷ Guide <span class="muted tiny">Learn your way around</span></button><a class="secondary" href="mailto:onchaincryptosupport@gmail.com?subject=Onchain%20Support" style="text-decoration:none;text-align:center;padding:12px">✉ Contact <span class="muted tiny">Email support</span></a></div></section>
-    <div class="notice"><strong>Support email:</strong> <a href="mailto:onchaincryptosupport@gmail.com" style="color:inherit;font-weight:800">onchaincryptosupport@gmail.com</a><br><span class="tiny">For assistance, email our support team at the address shown. Response availability depends on the support mailbox setup.</span></div>
+    <div class="page-title"><div><h1>Help and Guidance</h1><div class="muted">Clear guidance, account help and assistance.</div></div><span class="tag">HELP CENTER</span></div><section class="panel" style="margin-bottom:16px"><div class="section-head"><h2>Quick Support</h2><span class="muted tiny">Choose what you need</span></div><div class="content-grid"><button type="button" class="secondary" data-support-action="ticket">✉ New ticket <span class="muted tiny">Contact the support team</span></button><button type="button" class="secondary" data-support-action="faq">❔ FAQ <span class="muted tiny">Common questions and answers</span></button><button type="button" class="secondary" data-support-action="guide">☷ Guide <span class="muted tiny">Learn your way around</span></button><a class="secondary" href="#page-support" data-oc-open-support style="text-decoration:none;text-align:center;padding:12px">✉ Contact <span class="muted tiny">Email support</span></a></div></section>
+    <div class="notice"><strong>Support email:</strong> <a href="#page-support" data-oc-open-support style="color:inherit;font-weight:800">support@onchainspro.com</a><br><span class="tiny">For assistance, email our support team at the address shown. Response availability depends on the support mailbox setup.</span></div>
     <div class="content-grid">
       <section class="panel form-panel" id="support-ticket-section">
         <h2>✉ New support ticket</h2>
-        <p class="muted">Open your email app with a draft support request, then send it.</p>
+        <p class="muted">Send a private support request to the Onchain team. Replies stay in your Onchain account.</p>
         <label for="supportTopic">What do you need help with?</label>
         <select id="supportTopic" class="field">
           <option>Account registration</option><option>Sign-in problem</option><option>Email verification link</option><option>Password reset</option><option>Website issue</option><option>Other question</option>
@@ -2082,9 +2097,19 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
         <input id="supportSubject" class="field" maxlength="120" placeholder="Briefly describe the problem">
         <label for="supportDetails">Message</label>
         <textarea id="supportDetails" class="field" rows="5" maxlength="3000" placeholder="Describe what happened. Do not include your password, verification code, private key or recovery phrase."></textarea>
-        <button class="primary full" id="sendSupportEmail" type="button">Open email to Support</button>
-        <p id="supportMessage" class="muted tiny" aria-live="polite">Your email app opens; this site does not send or store messages.</p>
-        <a class="secondary full" href="mailto:onchaincryptosupport@gmail.com?subject=Onchain%20Support" style="display:block;text-align:center;text-decoration:none;margin-top:10px">Email support directly</a>
+        <button class="primary full" id="sendSupportEmail" type="button">Send support request</button>
+        <p id="supportMessage" class="muted tiny" aria-live="polite">Sign in to submit a request and view replies. Your support conversation is stored securely in Onchain.</p>
+        <div id="ocMySupportTickets" style="margin-top:18px;border-top:1px solid var(--line);padding-top:16px">
+      <div class="section-head"><h2>My support conversations</h2><span class="muted tiny">Private inbox</span></div>
+      <div id="ocMySupportTicketList" class="muted tiny">Sign in to view your support conversations.</div>
+      <div id="ocMySupportConversation" class="panel" style="padding:12px;margin-top:12px">
+        <p class="muted tiny">Select a conversation to read replies.</p>
+      </div>
+      <label for="ocSupportReplyText">Reply to support</label>
+      <textarea id="ocSupportReplyText" class="field" rows="3" maxlength="3000" placeholder="Write a reply. Never include passwords, codes or wallet recovery phrases."></textarea>
+      <button id="ocSupportReplySend" class="secondary full" type="button">Send reply</button>
+      <p id="ocSupportReplyStatus" class="muted tiny" aria-live="polite"></p>
+    </div>
     
     <section class="panel" style="margin-bottom:16px">
       <div class="section-head"><h2>🤝 Help &amp; Resources</h2><span class="muted tiny">Guides, safety and platform information</span></div>
@@ -2143,7 +2168,7 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
         <div class="faq-category" data-faq-group="technical"><h3>🧰 Technical Support</h3>
           <details class="faq-item"><summary><strong>I cannot register or sign in. What should I do?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Check your internet connection and sign-in details, then use password reset if needed. If you contact support, share the error message and page name, while keeping passwords and verification codes private.</div></details>
           <details class="faq-item"><summary><strong>Market prices or charts are not loading. Why?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Refresh the Markets page and check your connection. Price updates depend on public data providers, so a short delay may occur. Contact support if the chart remains unavailable.</div></details>
-          <details class="faq-item"><summary><strong>How do I contact technical support?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Choose New Support Request or Contact Support to reach onchaincryptosupport@gmail.com. Email availability depends on the support mailbox being active.</div></details>
+          <details class="faq-item"><summary><strong>How do I contact technical support?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Sign in and open Help and Guidance to send a private support request. Replies appear in your Onchain account.</div></details>
         </div>
         <p id="faqNoResults" class="muted tiny hidden">No FAQs match your search. Try another keyword or select All.</p>
       </section>
@@ -2665,20 +2690,20 @@ function ensureMoreMenuContent(){if(!moreMenu||moreMenu.querySelector("button"))
 function setMoreMenuOpen(open){if(!moreMenu||!moreMenuBtn)return;ensureMoreMenuContent();moreMenu.classList.toggle("hidden",!open);moreMenu.style.setProperty("display",open?"block":"none","important");moreMenu.style.setProperty("visibility",open?"visible":"hidden","important");moreMenu.style.setProperty("opacity",open?"1":"0","important");moreMenu.style.setProperty("pointer-events",open?"auto":"none","important");moreMenu.style.setProperty("z-index","99999","important");moreMenuBtn.setAttribute("aria-expanded",String(open));moreMenu.setAttribute("aria-hidden",String(!open));}
 moreMenuBtn?.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();setMoreMenuOpen(moreMenuBtn.getAttribute("aria-expanded")!=="true");});
 document.addEventListener("click",event=>{const btn=event.target.closest("[data-menu-page]");if(!btn||!moreMenu?.contains(btn))return;const page=btn.dataset.menuPage;setMoreMenuOpen(false);showPage(page);});
-document.querySelectorAll("[data-menu-action]").forEach(btn=>btn.addEventListener("click",()=>{const action=btn.dataset.menuAction;moreMenu.classList.add("hidden");moreMenuBtn.setAttribute("aria-expanded","false");if(action==="contact"){window.location.href="mailto:onchaincryptosupport@gmail.com?subject=Onchain%20Support";return}if(action==="about"){alert("Onchain provides public crypto market information and a practice interface. Real deposits, withdrawals and live exchange orders are not connected.");}}));
+document.querySelectorAll("[data-menu-action]").forEach(btn=>btn.addEventListener("click",()=>{const action=btn.dataset.menuAction;moreMenu.classList.add("hidden");moreMenuBtn.setAttribute("aria-expanded","false");if(action==="contact"){window.location.href="#page-support" data-oc-open-support;return}if(action==="about"){alert("Onchain provides public crypto market information and a practice interface. Real deposits, withdrawals and live exchange orders are not connected.");}}));
 const resourceContent={
  trading:{title:"📈 Trading tutorials",body:"<p>Learn the basics before placing any trade. This site currently provides a practice interface, not live exchange execution.</p><ol class=\"resource-detail-list\"><li>Learn market orders, limit orders and order-book basics.</li><li>Review price charts, timeframes and volume.</li><li>Understand position sizing, volatility and risk limits.</li><li>Practice with simulated trades and review your results.</li></ol>",actions:[{label:"Open Trade",page:"trade"}]},
  security:{title:"🛡️ Security center",body:"<ul class=\"resource-detail-list\"><li>Use a unique, strong password and keep your email secure.</li><li>Never share verification codes, private keys or recovery phrases.</li><li>Check the website address before signing in.</li><li>Sign out on shared devices and report suspicious activity.</li></ul>",actions:[{label:"Open Settings",page:"settings"}]},
  fees:{title:"🧾 Fees and limits",body:"<p>There is no verified live trading fee schedule or operational withdrawal fee schedule configured on this prototype. No fee should be assumed from this page. Before real trading is enabled, the operator must publish confirmed maker/taker fees, withdrawal/network fees, minimums and limits.</p>",actions:[{label:"Open Wallet",page:"wallet"},{label:"Open Settings",page:"settings"}]},
  status:{title:"🟢 System status",body:"<p>Live service monitoring is not connected yet, so this page cannot confirm overall platform availability. The website can display public market data when its data provider is reachable. Authentication and other Firebase services depend on their own configuration.</p><p>For a current issue, contact support and include the page and error message.</p>",actions:[{label:"Open Settings",page:"settings"}]},
  api:{title:"⌘ API documentation",body:"<p>Public developer API access is not currently published or enabled for this platform. Do not use private keys or credentials from the browser. API endpoints, authentication, rate limits and developer keys must be configured before external integrations are supported.</p>",actions:[{label:"Open Settings",page:"profile"}]},
- community:{title:"👥 Community forum",body:"<p>The community forum is not connected yet. For now, use the support email to ask questions. A public community link can be added after an official forum is created.</p>",actions:[{label:"Email Support",email:true}]},
+ community:{title:"👥 Community forum",body:"<p>The community forum is not connected yet. For now, use the support email to ask questions. A public community link can be added after an official forum is created.</p>",actions:[{label:"Contact Support",page:"support"}]},
  deposit:{title:"📥 Deposit guide",body:"<ol class=\"resource-detail-list\"><li>Open Deposit and choose the correct coin and network.</li><li>Only use a deposit address verified by the platform operator.</li><li>Make sure the sending and receiving networks match before sending.</li><li>Check the minimum deposit and required confirmations first.</li></ol><p><strong>Important:</strong> real deposits are not enabled on this prototype and deposit addresses may not be configured. Do not send funds to this site.</p>",actions:[{label:"Open Deposit",page:"deposit"}]},
  withdraw:{title:"📤 Withdraw guide",body:"<ol class=\"resource-detail-list\"><li>Open Withdraw and select the correct asset and network.</li><li>Verify the destination address and network carefully.</li><li>Review fees, minimums and limits before confirming.</li><li>Never share a password, verification code or recovery phrase.</li></ol><p>Real withdrawals are not enabled on this prototype.</p>",actions:[{label:"Open Withdraw",page:"withdraw"}]},
  transfer:{title:"🔁 Transfer funds",body:"<p>Use a transfer only after verifying the source wallet, destination wallet, asset and amount. Transfers between wallets may be irreversible depending on the service.</p><p>Internal transfer functionality is currently a placeholder and is not enabled for real funds.</p>",actions:[{label:"Open Transfer",page:"transfer"}]},
  wallet:{title:"👛 Wallet management",body:"<ul class=\"resource-detail-list\"><li>Review your asset list and displayed balances.</li><li>Confirm the asset and network before using any wallet address.</li><li>Keep account credentials and wallet recovery information private.</li></ul><p>Balances shown by this prototype may be simulated; it does not provide crypto custody.</p>",actions:[{label:"Open Wallet",page:"wallet"}]}
 };
-function showResource(key){const item=resourceContent[key];if(!item)return;const panel=document.getElementById("resource-detail");document.getElementById("resource-detail-title").textContent=item.title;document.getElementById("resource-detail-body").innerHTML=item.body;const actions=document.getElementById("resource-detail-actions");actions.innerHTML="";(item.actions||[]).forEach(a=>{const el=document.createElement(a.email?"a":"button");el.className="resource-action";el.textContent=a.label;if(a.email){el.href="mailto:onchaincryptosupport@gmail.com?subject=Onchain%20Support"}else{el.type="button";el.addEventListener("click",()=>{showPage(a.page);if(a.page==="support")window.scrollTo({top:0,behavior:"smooth"})})}actions.appendChild(el)});panel.classList.remove("hidden");panel.scrollIntoView({behavior:"smooth",block:"start"})}
+function showResource(key){const item=resourceContent[key];if(!item)return;const panel=document.getElementById("resource-detail");document.getElementById("resource-detail-title").textContent=item.title;document.getElementById("resource-detail-body").innerHTML=item.body;const actions=document.getElementById("resource-detail-actions");actions.innerHTML="";(item.actions||[]).forEach(a=>{const el=document.createElement(a.email?"a":"button");el.className="resource-action";el.textContent=a.label;if(a.email){el.href="#page-support" data-oc-open-support}else{el.type="button";el.addEventListener("click",()=>{showPage(a.page);if(a.page==="support")window.scrollTo({top:0,behavior:"smooth"})})}actions.appendChild(el)});panel.classList.remove("hidden");panel.scrollIntoView({behavior:"smooth",block:"start"})}
 document.querySelectorAll("[data-resource]").forEach(btn=>btn.addEventListener("click",()=>showResource(btn.dataset.resource)));
 document.getElementById("resource-detail-close")?.addEventListener("click",()=>document.getElementById("resource-detail").classList.add("hidden"));
 let activeFaqCategory="all";
@@ -2688,15 +2713,7 @@ document.querySelectorAll("[data-faq-category]").forEach(button=>button.addEvent
 document.getElementById("mobileRegisterBtn")?.addEventListener("click",()=>{showPage("register");document.getElementById("showRegisterBtn")?.click();});
 document.getElementById("signin-nav")?.addEventListener("click",()=>{showPage("register");document.getElementById("signInEmail")?.focus();});
 document.getElementById("admin-login-link")?.addEventListener("click",()=>{showPage("register");document.getElementById("signInEmail")?.focus();document.getElementById("registerMessage").textContent="Sign in with your authorized administrator account. Admin controls remain disabled until secure backend authorization is deployed.";});
-const supportSendButton = $("sendSupportEmail");
-if (supportSendButton) supportSendButton.addEventListener("click", () => {
-  const topic = $("supportTopic").value;
-  const subject = $("supportSubject").value.trim() || "Support request: " + topic;
-  const details = $("supportDetails").value.trim();
-  const body = "Topic: " + topic + " " + (details || "Please help me with this issue.") + " Please do not reply with requests for passwords, verification codes, private keys or recovery phrases.";
-  $("supportMessage").textContent = "Opening your email app. Review the draft and press Send there. This website has not sent the email itself.";
-  window.location.href = "mailto:onchaincryptosupport@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-});
+// Support requests are submitted and answered inside Onchain by the in-app support module.
 document.querySelectorAll("#marketTabs button").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.filter;document.querySelectorAll("#marketTabs button").forEach(x=>x.classList.toggle("active",x===b));renderMarket()}));
 $("refreshSignalsBtn")?.addEventListener("click",loadMarket);
 $("marketSearch").addEventListener("input",renderMarket);$("refreshBtn").addEventListener("click",loadMarket);$("retryBtn").addEventListener("click",loadMarket);$("tradeAsset").addEventListener("change",()=>{selected=$("tradeAsset").value;updateTradePreview();if(typeof updateQuickEstimate==="function")updateQuickEstimate();if(selected)updateTradingViewChart(selected);if(!$("page-trade").classList.contains("hidden")&&selected)loadPriceHistory()});
@@ -2734,7 +2751,7 @@ $("securityInfoBtn")?.addEventListener("click",()=>{showPage("settings");$("chan
 $("changePasswordBtn").addEventListener("click",()=>{document.getElementById("ocPasswordChangePanel")?.scrollIntoView({behavior:"smooth",block:"center"});document.getElementById("ocPasswordOld")?.focus();});
 $("manageSessionBtn").addEventListener("click",()=>{document.getElementById("ocSessionPanel")?.scrollIntoView({behavior:"smooth",block:"center"});});
 $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new Date().toISOString(),notice:"This export contains browser-local Onchain data only; it is not a full server-account export.",profile:JSON.parse(localStorage.getItem("oc_profile")||"{}"),notificationPreferences:JSON.parse(localStorage.getItem("oc_notification_preferences")||"{}"),localData:{}};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&(/onchain|wallet|trade|history|profile|asset/i.test(key))&&!["oc_profile","oc_notification_preferences"].includes(key)){try{data.localData[key]=JSON.parse(localStorage.getItem(key))}catch(_){data.localData[key]=localStorage.getItem(key)}}}const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="onchaincrypto-data-export.json";link.click();URL.revokeObjectURL(url);$("privacyMessage").textContent="Downloaded available browser-local data. This does not include all server records."});
-$("requestDeleteAccountBtn").addEventListener("click",()=>{const ok=window.confirm("Account deletion is permanent. This site cannot delete your Firebase account automatically. Open an email request to support instead?");if(!ok)return;const subject="Account deletion request";const body="Please help me request deletion of my Onchain account and associated personal data. Please explain any identity checks required.";window.location.href="mailto:onchaincryptosupport@gmail.com?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);$("privacyMessage").textContent="Your email app should open with a deletion request draft. Review and send it; this website has not deleted your account."});
+$("requestDeleteAccountBtn").addEventListener("click",()=>{const ok=window.confirm("Account deletion is permanent. This site cannot delete your Firebase account automatically. Open an email request to support instead?");if(!ok)return;const subject="Account deletion request";const body="Please help me request deletion of my Onchain account and associated personal data. Please explain any identity checks required.";window.showPage?.("support");const supportSubjectField=document.getElementById("supportSubject"),supportDetailsField=document.getElementById("supportDetails");if(supportSubjectField)supportSubjectField.value=subject;if(supportDetailsField)supportDetailsField.value=body;$("privacyMessage").textContent="Your email app should open with a deletion request draft. Review and send it; this website has not deleted your account."});
 // Profile saving is handled once by the Firebase module below.
  renderWallet();loadMarket();setInterval(loadMarket,120000);
  document.addEventListener("visibilitychange",()=>{if(!document.hidden&&(!window.ocMarketLastSuccess||Date.now()-window.ocMarketLastSuccess>60000))loadMarket()});
@@ -6176,7 +6193,7 @@ html.oc-light-theme #page-register .auth-main-panel textarea.field{
       <button type="button" data-oc-support-topic="trade">Trading</button>
     </div>
     <form id="oc-visitor-support-form"><input id="oc-visitor-support-input" maxlength="500" autocomplete="off" placeholder="Type your question…" aria-label="Type your support question"><button id="oc-visitor-support-send" type="submit">Send</button></form>
-    <div id="oc-visitor-support-foot">Never share passwords, verification codes or recovery phrases. <a href="mailto:onchaincryptosupport@gmail.com?subject=Onchain%20Support">Email support</a></div>
+    <div id="oc-visitor-support-foot">Never share passwords, verification codes or recovery phrases. <a href="#page-support" data-oc-open-support>Email support</a></div>
   </section>
   <button id="oc-visitor-support-launch" type="button" aria-label="Open customer support" aria-expanded="false">✦</button>
 </div>
@@ -6207,7 +6224,7 @@ html.oc-light-theme #page-register .auth-main-panel textarea.field{
   else if(/trade|buy|sell|market|price/.test(t))key="trade";
   else if(/secure|security|password|scam|private key/.test(t))key="security";
   add(answers[key]);
-  if(key==="general")add("For personal assistance, email onchaincryptosupport@gmail.com. Please include a short description of the issue, but no passwords, codes or wallet secrets.");
+  if(key==="general")add("For personal assistance, sign in and open Help and Guidance to send a private support request. Please never share passwords, codes or wallet secrets.");
  }
  function setOpen(open){panel.hidden=!open;launch.setAttribute("aria-expanded",String(open));if(open)input.focus();}
  launch.addEventListener("click",()=>setOpen(panel.hidden));
@@ -6338,6 +6355,137 @@ body:not(.oc-auth-screen) main :is(button.primary,.primary){
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",apply,{once:true});
   else apply();
 })();
+</script>
+
+
+<script type="module" id="oc-in-app-support">
+import {getApps,initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import {getFirestore,collection,doc,addDoc,updateDoc,onSnapshot,query,where,serverTimestamp,writeBatch} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
+const app=getApps().find(item=>item.name==="[DEFAULT]")||initializeApp(config),auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
+const adminEmails=["getachew21.inj.uni@gmail.com","getachew21.INJ.UNI@gmail.com"];
+let currentUser=null,isAdmin=false,customerTicketsUnsub=null,adminTicketsUnsub=null,customerMessagesUnsub=null,adminMessagesUnsub=null,selectedCustomerTicket=null,selectedAdminTicket=null;
+const timeValue=value=>{if(value?.toDate)return value.toDate().getTime();const n=new Date(value||0).getTime();return Number.isFinite(n)?n:0};
+const dateLabel=value=>timeValue(value)?new Date(timeValue(value)).toLocaleString():"Just now";
+function setText(id,value){const el=byId(id);if(el)el.textContent=value;}
+function goToLogin(){if(typeof window.ocOpenVisitorLogin==="function")window.ocOpenVisitorLogin();else if(typeof window.showPage==="function")window.showPage("register");}
+function makeButton(label,detail,status,active,onClick){
+ const button=document.createElement("button");button.type="button";button.className="secondary full";button.style.textAlign="left";button.style.margin="7px 0";button.style.borderColor=active?"var(--yellow)":"";
+ const title=document.createElement("strong");title.textContent=label||"Support request";button.appendChild(title);
+ const sub=document.createElement("div");sub.className="muted tiny";sub.textContent=(detail||"")+(status?" · "+status.replace("_"," "):"");button.appendChild(sub);
+ button.addEventListener("click",onClick);return button;
+}
+function renderMessages(host,snapshot,adminView){
+ if(!host)return;host.replaceChildren();
+ const rows=snapshot.docs.map(item=>({id:item.id,...(item.data()||{})})).sort((a,b)=>timeValue(a.createdAt)-timeValue(b.createdAt));
+ if(!rows.length){const empty=document.createElement("p");empty.className="muted tiny";empty.textContent="No messages in this conversation yet.";host.appendChild(empty);return;}
+ rows.forEach(row=>{
+  const card=document.createElement("div");card.style.cssText="padding:10px 12px;margin:8px 0;border-radius:10px;background:"+(row.senderRole==="admin"?"#123b36":"#142943")+";border:1px solid var(--line);";
+  const head=document.createElement("div");head.className="muted tiny";head.textContent=(row.senderRole==="admin"?"Onchain Support":(row.senderName||"Customer"))+" · "+dateLabel(row.createdAt);card.appendChild(head);
+  const body=document.createElement("div");body.style.cssText="white-space:pre-wrap;overflow-wrap:anywhere;margin-top:5px";body.textContent=row.text||"";card.appendChild(body);host.appendChild(card);
+ });
+ host.scrollTop=host.scrollHeight;
+}
+function watchMessages(ticket,host,adminView){
+ const key=adminView?"admin":"customer";
+ if(key==="admin"){if(adminMessagesUnsub)adminMessagesUnsub();}else{if(customerMessagesUnsub)customerMessagesUnsub();}
+ if(!ticket||!host)return;
+ const unsub=onSnapshot(collection(db,"supportTickets",ticket.id,"messages"),snapshot=>renderMessages(host,snapshot,adminView),error=>{
+  host.textContent="Could not load this conversation. "+(error.code||"Check your connection.");
+ });
+ if(key==="admin")adminMessagesUnsub=unsub;else customerMessagesUnsub=unsub;
+}
+function renderTicketList(host,tickets,activeId,select){
+ if(!host)return;host.replaceChildren();
+ if(!tickets.length){host.textContent="No support conversations yet.";return;}
+ tickets.sort((a,b)=>timeValue(b.updatedAt||b.createdAt)-timeValue(a.updatedAt||a.createdAt));
+ tickets.forEach(ticket=>{
+  const button=makeButton(ticket.subject||"Support request",(ticket.customerName||ticket.customerEmail||"Customer")+" · "+dateLabel(ticket.updatedAt||ticket.createdAt),ticket.status,ticket.id===activeId,()=>select(ticket));
+  host.appendChild(button);
+ });
+}
+function watchCustomerTickets(){
+ if(customerTicketsUnsub)customerTicketsUnsub();
+ if(!currentUser)return;
+ const q=query(collection(db,"supportTickets"),where("ownerUid","==",currentUser.uid));
+ customerTicketsUnsub=onSnapshot(q,snapshot=>{
+  const rows=snapshot.docs.map(item=>({id:item.id,...(item.data()||{})}));
+  renderTicketList(byId("ocMySupportTicketList"),rows,selectedCustomerTicket?.id,ticket=>{
+   selectedCustomerTicket=ticket;watchMessages(ticket,byId("ocMySupportConversation"),false);
+  });
+  if(selectedCustomerTicket&&!rows.some(row=>row.id===selectedCustomerTicket.id)){selectedCustomerTicket=null;setText("ocMySupportConversation","Select a conversation to read replies.");}
+ },error=>setText("ocMySupportTicketList","Could not load your support inbox ("+(error.code||"connection error")+")."));
+}
+function watchAdminTickets(){
+ if(adminTicketsUnsub)adminTicketsUnsub();
+ if(!isAdmin)return;
+ adminTicketsUnsub=onSnapshot(collection(db,"supportTickets"),snapshot=>{
+  const rows=snapshot.docs.map(item=>({id:item.id,...(item.data()||{})}));
+  renderTicketList(byId("ocAdminSupportTicketList"),rows,selectedAdminTicket?.id,ticket=>{
+   selectedAdminTicket=ticket;setText("ocAdminSupportStatus","Conversation: "+(ticket.subject||"Support request")+" · "+(ticket.customerEmail||ticket.ownerUid));
+   watchMessages(ticket,byId("ocAdminSupportConversation"),true);
+  });
+  if(selectedAdminTicket&&!rows.some(row=>row.id===selectedAdminTicket.id)){selectedAdminTicket=null;setText("ocAdminSupportConversation","Select a customer conversation to read and reply.");}
+ },error=>setText("ocAdminSupportTicketList","Could not load support inbox ("+(error.code||"connection error")+")."));
+}
+byId("sendSupportEmail")?.addEventListener("click",async()=>{
+ if(!currentUser){setText("supportMessage","Please sign in before sending a private support request.");goToLogin();return;}
+ const topic=byId("supportTopic")?.value||"General support",subject=byId("supportSubject")?.value.trim()||topic,details=byId("supportDetails")?.value.trim()||"";
+ if(!details){setText("supportMessage","Please describe the issue before sending.");byId("supportDetails")?.focus();return;}
+ const finalSubject=(topic+": "+subject).slice(0,100),button=byId("sendSupportEmail");button.disabled=true;setText("supportMessage","Sending your request securely…");
+ try{
+  const ticketRef=doc(collection(db,"supportTickets")),messageRef=doc(collection(db,"supportTickets",ticketRef.id,"messages")),batch=writeBatch(db);
+  batch.set(ticketRef,{ownerUid:currentUser.uid,customerEmail:currentUser.email||"",customerName:currentUser.displayName||"",subject:finalSubject,status:"open",createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:details,source:"in-app"});
+  batch.set(messageRef,{senderUid:currentUser.uid,senderRole:"customer",senderName:currentUser.displayName||currentUser.email||"Customer",text:details,createdAt:serverTimestamp()});
+  await batch.commit();byId("supportSubject").value="";byId("supportDetails").value="";setText("supportMessage","Your support request is saved. You can read replies in My support conversations below.");
+ }catch(error){console.error("In-app support ticket submission failed:",error);setText("supportMessage","Could not send your request ("+(error.code||"connection error")+"). Please try again.");}
+ finally{button.disabled=false;}
+});
+async function sendReply(adminView){
+ if(!currentUser){goToLogin();return;}
+ const ticket=adminView?selectedAdminTicket:selectedCustomerTicket,area=byId(adminView?"ocAdminSupportReplyText":"ocSupportReplyText"),button=byId(adminView?"ocAdminSupportReplySend":"ocSupportReplySend"),statusId=adminView?"ocAdminSupportStatus":"ocSupportReplyStatus";
+ const message=area?.value.trim()||"";
+ if(!ticket){setText(statusId,"Select a support conversation first.");return;}
+ if(!message){setText(statusId,"Write a reply before sending.");area?.focus();return;}
+ button.disabled=true;setText(statusId,"Sending reply…");
+ try{
+  const messageRef=doc(collection(db,"supportTickets",ticket.id,"messages")),batch=writeBatch(db),ticketRef=doc(db,"supportTickets",ticket.id);
+  batch.set(messageRef,{senderUid:currentUser.uid,senderRole:adminView?"admin":"customer",senderName:adminView?"Onchain Support":(currentUser.displayName||currentUser.email||"Customer"),text:message,createdAt:serverTimestamp()});
+  batch.update(ticketRef,adminView?{lastMessage:message,updatedAt:serverTimestamp(),status:"in_progress"}:{lastMessage:message,updatedAt:serverTimestamp()});
+  await batch.commit();area.value="";setText(statusId,"Reply sent inside Onchain.");
+ }catch(error){console.error("In-app support reply failed:",error);setText(statusId,"Could not send reply ("+(error.code||"connection error")+").");}
+ finally{button.disabled=false;}
+}
+byId("ocSupportReplySend")?.addEventListener("click",()=>sendReply(false));
+byId("ocAdminSupportReplySend")?.addEventListener("click",()=>sendReply(true));
+byId("ocAdminSupportResolve")?.addEventListener("click",async()=>{
+ if(!isAdmin||!selectedAdminTicket){setText("ocAdminSupportStatus","Select a customer conversation first.");return;}
+ const button=byId("ocAdminSupportResolve");button.disabled=true;
+ try{await updateDoc(doc(db,"supportTickets",selectedAdminTicket.id),{status:"resolved",updatedAt:serverTimestamp()});setText("ocAdminSupportStatus","Conversation marked resolved.");}
+ catch(error){setText("ocAdminSupportStatus","Could not update status ("+(error.code||"connection error")+").");}
+ finally{button.disabled=false;}
+});
+document.addEventListener("click",event=>{
+ const link=event.target instanceof Element?event.target.closest("[data-oc-open-support],a[href='#page-support']"):null;
+ if(!link)return;event.preventDefault();
+ if(!currentUser){goToLogin();return;}
+ if(typeof window.showPage==="function")window.showPage("support");
+});
+onAuthStateChanged(auth,user=>{
+ currentUser=user||null;isAdmin=!!(user&&user.emailVerified&&adminEmails.includes(String(user.email||"").trim()));
+ if(customerTicketsUnsub){customerTicketsUnsub();customerTicketsUnsub=null;}
+ if(adminTicketsUnsub){adminTicketsUnsub();adminTicketsUnsub=null;}
+ if(customerMessagesUnsub){customerMessagesUnsub();customerMessagesUnsub=null;}
+ if(adminMessagesUnsub){adminMessagesUnsub();adminMessagesUnsub=null;}
+ const formButton=byId("sendSupportEmail");
+ if(formButton)formButton.disabled=!user;
+ setText("supportMessage",user?"Your private support requests and replies stay in your Onchain account.":"Sign in to submit a support request and view your replies.");
+ setText("ocMySupportTicketList",user?"Loading your support conversations…":"Sign in to view your support conversations.");
+ const adminPanel=byId("ocAdminSupportInbox");if(adminPanel)adminPanel.classList.toggle("hidden",!isAdmin);
+ setText("ocAdminSupportTicketList",isAdmin?"Loading customer conversations…":"Waiting for verified administrator access…");
+ if(user){watchCustomerTickets();if(isAdmin)watchAdminTickets();}
+});
 </script>
 
 </body>
