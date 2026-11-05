@@ -5956,6 +5956,85 @@ html.oc-light-theme #page-register .auth-main-panel textarea.field{
 }
 </style>
 
+
+<!-- Visitor-side OnChainCrypto Support Assistant -->
+<style id="oc-visitor-support-bot-style">
+#oc-visitor-support-bot{position:fixed;right:22px;bottom:92px;z-index:99990;font-family:inherit}
+#oc-visitor-support-bot[hidden]{display:none!important}
+#oc-visitor-support-launch{width:58px;height:58px;border:0;border-radius:50%;background:linear-gradient(135deg,#0ecb81,#087e62);color:#041b16;font-size:25px;font-weight:900;box-shadow:0 8px 28px rgba(0,0,0,.38);cursor:pointer}
+#oc-visitor-support-panel{position:absolute;right:0;bottom:70px;width:min(360px,calc(100vw - 28px));height:470px;max-height:calc(100vh - 150px);display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(14,203,129,.45);border-radius:18px;background:#071522;color:#edf7f5;box-shadow:0 18px 55px rgba(0,0,0,.55)}
+#oc-visitor-support-panel[hidden]{display:none!important}
+#oc-visitor-support-head{display:flex;align-items:center;justify-content:space-between;padding:15px 16px;background:linear-gradient(120deg,#0b352c,#10283b);border-bottom:1px solid rgba(255,255,255,.1)}
+#oc-visitor-support-head strong{display:block;font-size:15px;color:#fff}
+#oc-visitor-support-head small{display:block;margin-top:3px;color:#b8d7ce;font-size:11px}
+#oc-visitor-support-close{border:0;background:transparent;color:#fff;font-size:23px;cursor:pointer}
+#oc-visitor-support-messages{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.oc-support-bubble{max-width:91%;padding:10px 12px;border-radius:13px;background:#142b3c;color:#e9f3f8;font-size:13px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.oc-support-bubble.oc-user{align-self:flex-end;background:#0b6e53;color:#fff}
+#oc-visitor-support-quick{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 10px}
+#oc-visitor-support-quick button{border:1px solid rgba(14,203,129,.45);border-radius:18px;background:#102d2a;color:#c9f7e4;padding:7px 10px;font-size:11px;cursor:pointer}
+#oc-visitor-support-form{display:flex;gap:7px;padding:10px;border-top:1px solid rgba(255,255,255,.1);background:#091b29}
+#oc-visitor-support-input{min-width:0;flex:1;border:1px solid #365064;border-radius:10px;background:#fff;color:#101820;padding:11px;font-size:13px}
+#oc-visitor-support-send{border:0;border-radius:10px;background:#0ecb81;color:#052219;padding:0 14px;font-weight:800;cursor:pointer}
+#oc-visitor-support-foot{padding:0 12px 9px;background:#091b29;color:#9eb5c4;font-size:10px;text-align:center}
+#oc-visitor-support-foot a{color:#72e6b7}
+@media(max-width:480px){#oc-visitor-support-bot{right:14px;bottom:82px}#oc-visitor-support-panel{position:fixed;right:10px;bottom:150px;width:calc(100vw - 20px);height:min(470px,calc(100dvh - 175px))}}
+</style>
+<div id="oc-visitor-support-bot" hidden>
+  <section id="oc-visitor-support-panel" aria-label="OnChainCrypto Support Assistant" hidden>
+    <header id="oc-visitor-support-head"><div><strong>OnChainCrypto Support</strong><small>Visitor help · Instant answers</small></div><button id="oc-visitor-support-close" type="button" aria-label="Close support">×</button></header>
+    <div id="oc-visitor-support-messages" aria-live="polite"><div class="oc-support-bubble">Welcome to OnChainCrypto! 👋 I can help with getting started, accounts, KYC, deposits, withdrawals and trading. What would you like to know?</div></div>
+    <div id="oc-visitor-support-quick">
+      <button type="button" data-oc-support-topic="account">Create an account</button>
+      <button type="button" data-oc-support-topic="kyc">Identity checks</button>
+      <button type="button" data-oc-support-topic="deposit">Deposits</button>
+      <button type="button" data-oc-support-topic="withdraw">Withdrawals</button>
+      <button type="button" data-oc-support-topic="trade">Trading</button>
+    </div>
+    <form id="oc-visitor-support-form"><input id="oc-visitor-support-input" maxlength="500" autocomplete="off" placeholder="Type your question…" aria-label="Type your support question"><button id="oc-visitor-support-send" type="submit">Send</button></form>
+    <div id="oc-visitor-support-foot">Never share passwords, verification codes or recovery phrases. <a href="mailto:onchaincryptosupport@gmail.com?subject=OnChainCrypto%20Support">Email support</a></div>
+  </section>
+  <button id="oc-visitor-support-launch" type="button" aria-label="Open customer support" aria-expanded="false">✦</button>
+</div>
+<script id="oc-visitor-support-bot">
+(function(){
+ const root=document.getElementById("oc-visitor-support-bot");
+ if(!root||root.dataset.ready==="1")return;root.dataset.ready="1";
+ const panel=document.getElementById("oc-visitor-support-panel"),launch=document.getElementById("oc-visitor-support-launch");
+ const messages=document.getElementById("oc-visitor-support-messages"),input=document.getElementById("oc-visitor-support-input");
+ const answers={
+ account:"To get started, choose Register on the website. Enter your name and choose email or phone registration, then follow the on-screen verification steps. Already registered? Choose Login. Keep your password private.",
+ kyc:"If identity verification is requested, open your account's verification area and follow the instructions. Use accurate details and submit only through the secure OnChainCrypto form. Never send identity documents or verification codes by chat or email.",
+ deposit:"Sign in and open Wallet, then choose Deposit and select the asset and network. Check that the network matches your sending wallet exactly before transferring. A deposit is not complete until the required network confirmations and platform review are finished. If you are unsure, do not send funds.",
+ withdraw:"Sign in and open Wallet, then choose Withdraw. Confirm the asset, network and destination address carefully. A withdrawal may require account checks and review. Never share your password, private key or recovery phrase.",
+ trade:"Open Markets to review available market information. Practice trading is for learning and does not place live exchange orders or move blockchain assets. Review the order details and risks before using any trading feature.",
+ copy:"Trader discovery lets you compare strategy descriptions and risk measures and save strategies to your watchlist. Following a strategy does not automatically copy trades; automatic execution is not currently connected.",
+ security:"Use a unique password and keep your sign-in details private. OnChainCrypto support will never need your password, one-time verification code, private key or recovery phrase.",
+ general:"I can help with account setup, identity checks, deposits, withdrawals, wallets, markets and practice trading. Choose one of the topics below or type your question."
+ };
+ function add(text,who){const node=document.createElement("div");node.className="oc-support-bubble"+(who==="user"?" oc-user":"");node.textContent=text;messages.appendChild(node);messages.scrollTop=messages.scrollHeight;}
+ function reply(q){
+  const t=String(q||"").toLowerCase();let key="general";
+  if(/register|sign up|create account|new account|login|log in|password|email|phone/.test(t))key="account";
+  else if(/kyc|identity|verify|verification|document/.test(t))key="kyc";
+  else if(/deposit|receive|send crypto|fund wallet/.test(t))key="deposit";
+  else if(/withdraw|cash out/.test(t))key="withdraw";
+  else if(/copy trad|follow trader|strategy|trader discovery/.test(t))key="copy";
+  else if(/trade|buy|sell|market|price/.test(t))key="trade";
+  else if(/secure|security|password|scam|private key/.test(t))key="security";
+  add(answers[key]);
+  if(key==="general")add("For personal assistance, email onchaincryptosupport@gmail.com. Please include a short description of the issue, but no passwords, codes or wallet secrets.");
+ }
+ function setOpen(open){panel.hidden=!open;launch.setAttribute("aria-expanded",String(open));if(open)input.focus();}
+ launch.addEventListener("click",()=>setOpen(panel.hidden));
+ document.getElementById("oc-visitor-support-close").addEventListener("click",()=>setOpen(false));
+ document.getElementById("oc-visitor-support-form").addEventListener("submit",e=>{e.preventDefault();const q=input.value.trim();if(!q)return;add(q,"user");input.value="";reply(q);});
+ document.getElementById("oc-visitor-support-quick").addEventListener("click",e=>{const b=e.target.closest("[data-oc-support-topic]");if(!b)return;const key=b.dataset.ocSupportTopic;add(b.textContent,"user");add(answers[key]||answers.general);});
+ function syncVisibility(){const guest=document.body.classList.contains("oc-logged-out");root.hidden=!guest;if(!guest)setOpen(false);}
+ const observer=new MutationObserver(syncVisibility);observer.observe(document.body,{attributes:true,attributeFilter:["class"]});syncVisibility();
+})();
+</script>
+
 </body>
 </html>
 
