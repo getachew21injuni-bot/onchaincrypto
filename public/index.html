@@ -10404,7 +10404,9 @@ body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm 
 body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm .auth-switch{
   grid-column:1/-1;
 }
-body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm>label{display:block!important;margin:14px 0 6px!important;font-size:14px!important;font-weight:800!important}\nbody.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm>input{display:block!important;margin:0 0 8px!important}\nbody.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm h3{
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm>label{display:block!important;margin:14px 0 6px!important;font-size:14px!important;font-weight:800!important}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm>input{display:block!important;margin:0 0 8px!important}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm h3{
   margin:0!important;color:#111827!important;font-size:27px!important;font-weight:900!important;
 }
 body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm p,
@@ -10437,3 +10439,70 @@ body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm 
  body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm>*{grid-column:1/-1!important}
 }
 </style>
+
+
+<!-- Emergency auth visibility guard: keep the existing Firebase forms, repair page visibility only. -->
+<style id="oc-auth-blank-page-guard">
+body.oc-logged-out.oc-auth-screen main{display:block!important;visibility:visible!important;opacity:1!important;min-height:100vh!important}
+body.oc-logged-out.oc-auth-screen #page-register{display:block!important;visibility:visible!important;opacity:1!important;width:100%!important;min-height:70vh!important}
+body.oc-logged-out.oc-auth-screen #page-register .content-grid,
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel{display:block!important;visibility:visible!important;opacity:1!important}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm:not(.hidden),
+body.oc-logged-out.oc-auth-screen #page-register #signInForm:not(.hidden){display:block!important;visibility:visible!important;opacity:1!important}
+body.oc-logged-out.oc-auth-screen #page-register #authChoicePanel.hidden{display:none!important}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.hidden,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm.hidden,
+body.oc-logged-out.oc-auth-screen #page-register #googleSignInBtn.hidden{display:none!important}
+</style>
+<script id="oc-auth-blank-page-guard-script">
+(function(){
+  function syncAuthPage(){
+    const body=document.body;
+    if(!body||!body.classList.contains('oc-auth-screen'))return;
+    const creating=body.classList.contains('oc-register-mode');
+    const page=document.getElementById('page-register');
+    const register=document.getElementById('registerForm');
+    const login=document.getElementById('signInForm');
+    const choices=document.getElementById('authChoicePanel');
+    const google=document.getElementById('googleSignInBtn');
+    if(page){page.classList.remove('hidden');page.hidden=false;page.style.setProperty('display','block','important');page.style.setProperty('visibility','visible','important')}
+    if(choices){choices.classList.add('hidden');choices.hidden=true;choices.style.setProperty('display','none','important')}
+    if(register){
+      register.classList.toggle('hidden',!creating);register.hidden=!creating;
+      register.style.setProperty('display',creating?'block':'none','important');
+      register.style.setProperty('visibility',creating?'visible':'hidden','important');
+      register.querySelectorAll('input,select,textarea,button').forEach(el=>el.disabled=!creating);
+    }
+    if(login){
+      login.classList.toggle('hidden',creating);login.hidden=creating;
+      login.style.setProperty('display',creating?'none':'block','important');
+      login.style.setProperty('visibility',creating?'hidden':'visible','important');
+      login.querySelectorAll('input,select,textarea,button').forEach(el=>el.disabled=creating);
+    }
+    if(google){google.classList.add('hidden');google.hidden=true;google.style.setProperty('display','none','important')}
+    const hint=document.querySelector('#page-register .auth-google-hint');
+    if(hint){hint.classList.add('hidden');hint.hidden=true;hint.style.setProperty('display','none','important')}
+    const heading=document.getElementById('authHeading');
+    if(heading)heading.textContent=creating?'Create your OnChainCrypto account':'Welcome back to OnChainCrypto';
+  }
+  function start(){
+    syncAuthPage();
+    const observer=new MutationObserver(syncAuthPage);
+    observer.observe(document.body,{attributes:true,attributeFilter:['class']});
+    document.addEventListener('click',function(event){
+      const target=event.target instanceof Element?event.target:null;
+      if(!target)return;
+      if(target.closest('#authChoiceRegister,#showRegisterBtn')){
+        document.body.classList.add('oc-auth-screen','oc-register-mode');
+        setTimeout(syncAuthPage,0);
+      }else if(target.closest('#authChoiceLogin,#registerLoginBtn,#showSignInBtn')){
+        document.body.classList.add('oc-auth-screen');
+        document.body.classList.remove('oc-register-mode');
+        setTimeout(syncAuthPage,0);
+      }
+    },true);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
+  else start();
+})();
+</script>
