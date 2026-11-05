@@ -10176,3 +10176,61 @@ body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm 
   }
 }
 </style>
+
+
+<style id="oc-direct-registration-entry">
+/* Sign Up/Register always shows the registration form, never the Google action. */
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden) {
+  display:block!important;visibility:visible!important;opacity:1!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #googleSignInBtn,
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register .auth-google-btn,
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register .auth-google-hint {
+  display:none!important;visibility:hidden!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #authChoicePanel,
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #signInForm {
+  display:none!important;
+}
+</style>
+<script id="oc-direct-registration-entry">
+(function(){
+  const signupSelectors=[
+    "#landingGetStarted","#ocHomeCreateAccount","#ocVisitorSignup",
+    "#ocVisitorHeroSignup","#ocVisitorAboutSignup","#ocVisitorBottomSignup",
+    "#mobileRegisterBtn","#register-nav","#authChoiceRegister","#showRegisterBtn"
+  ].join(",");
+  const loginSelectors=[
+    "#landingSignIn","#ocHomeLogin","#ocVisitorLogin","#ocVisitorHeroLogin",
+    "#mobileSignInBtn","#signin-nav","#authChoiceLogin","#registerLoginBtn","#showSignInBtn"
+  ].join(",");
+  function open(mode){
+    if(typeof window.ocOpenVisitorAuth==="function"){
+      window.ocOpenVisitorAuth(mode);
+      return;
+    }
+    document.body.classList.add("oc-logged-out","oc-auth-screen");
+    const creating=mode==="register";
+    document.body.classList.toggle("oc-register-mode",creating);
+    document.getElementById("authChoicePanel")?.classList.add("hidden");
+    document.getElementById("registerForm")?.classList.toggle("hidden",!creating);
+    document.getElementById("signInForm")?.classList.toggle("hidden",creating);
+    document.getElementById("googleSignInBtn")?.classList.add("hidden");
+    document.querySelector(".auth-google-hint")?.classList.add("hidden");
+    window.showPage?.("register");
+  }
+  document.addEventListener("click",function(event){
+    const target=event.target instanceof Element?event.target:null;
+    if(!target)return;
+    if(target.closest(signupSelectors)){
+      event.preventDefault();
+      open("register");
+      return;
+    }
+    if(target.closest(loginSelectors)){
+      event.preventDefault();
+      open("login");
+    }
+  },false);
+})();
+</script>
