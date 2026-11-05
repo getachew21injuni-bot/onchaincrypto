@@ -10597,3 +10597,68 @@ body.oc-logged-out.oc-auth-screen #page-register .auth-google-btn{width:100%!imp
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',observe,{once:true});else observe();
 })();
 </script>
+
+
+<!-- Visitor-side navigation and authentication recovery -->
+<style id="oc-visitor-navigation-recovery">
+/* Visitors can browse the public market, markets and practice-trade screens. */
+body.oc-logged-out:not(.oc-auth-screen) main > section[id^="page-"]:not(#page-public-market):not(#page-markets):not(#page-trade){display:none!important}
+body.oc-logged-out:not(.oc-auth-screen) main > #page-public-market:not(.hidden),
+body.oc-logged-out:not(.oc-auth-screen) main > #page-markets:not(.hidden),
+body.oc-logged-out:not(.oc-auth-screen) main > #page-trade:not(.hidden){display:block!important}
+html.oc-auth-pending main > section[id^="page-"]:not(#page-public-market):not(#page-markets):not(#page-trade){display:none!important}
+html.oc-auth-pending main > #page-public-market:not(.hidden),
+html.oc-auth-pending main > #page-markets:not(.hidden),
+html.oc-auth-pending main > #page-trade:not(.hidden){display:block!important}
+</style>
+<script id="oc-visitor-auth-click-recovery">
+(function(){
+  const signup='#landingGetStarted,#ocHomeCreateAccount,#ocVisitorSignup,#ocVisitorHeroSignup,#ocVisitorAboutSignup,#ocVisitorBottomSignup,#mobileRegisterBtn,#register-nav,#authChoiceRegister,#showRegisterBtn';
+  const login='#landingSignIn,#ocHomeLogin,#ocVisitorLogin,#ocVisitorHeroLogin,#mobileSignInBtn,#signin-nav,#authChoiceLogin,#registerLoginBtn,#showSignInBtn';
+  function show(el,on,display){
+    if(!el)return;
+    el.classList.toggle('hidden',!on);
+    el.hidden=!on;
+    el.style.setProperty('display',on?(display||'block'):'none','important');
+    el.style.setProperty('visibility',on?'visible':'hidden','important');
+    el.style.setProperty('pointer-events',on?'auto':'none','important');
+  }
+  function route(mode){
+    const creating=mode==='register';
+    document.documentElement.classList.remove('oc-auth-pending');
+    document.body.classList.add('oc-logged-out','oc-auth-screen');
+    document.body.classList.toggle('oc-register-mode',creating);
+    document.querySelectorAll('main>section[id^="page-"]').forEach(p=>show(p,p.id==='page-register'));
+    const page=document.getElementById('page-register');
+    if(page)page.style.setProperty('display','block','important');
+    show(document.getElementById('authChoicePanel'),false);
+    show(document.getElementById('authStatus'),false);
+    show(document.getElementById('registerMessage'),false);
+    show(document.getElementById('registerForm'),creating);
+    show(document.getElementById('signInForm'),!creating);
+    show(document.getElementById('googleSignInBtn'),!creating,'flex');
+    show(document.querySelector('#page-register .auth-google-hint'),false);
+    const phone=document.getElementById('phoneRegistrationPanel');
+    if(phone){phone.open=false;show(phone,false);phone.querySelectorAll('input,select,button').forEach(x=>x.disabled=true);}
+    document.getElementById('registerForm')?.querySelectorAll('input,select,button').forEach(x=>x.disabled=!creating);
+    document.getElementById('signInForm')?.querySelectorAll('input,select,button').forEach(x=>x.disabled=creating);
+    const h=document.getElementById('authHeading');
+    const sub=document.getElementById('authSubheading');
+    if(h)h.textContent=creating?'Create your OnChainCrypto account':'Welcome back to OnChainCrypto';
+    if(sub){sub.textContent=creating?'Complete the form below to create your account.':'Sign in to continue to your account.';show(sub,true);}
+    const method=document.getElementById('registerContactMethod');
+    if(method&&creating){if(!method.value)method.value='email';method.dispatchEvent(new Event('change',{bubbles:true}));}
+    const focus=document.getElementById(creating?'registerFirstName':'signInEmail');
+    if(focus)requestAnimationFrame(()=>focus.focus({preventScroll:true}));
+    window.scrollTo({top:0,behavior:'auto'});
+  }
+  // Window capture runs before older document-level handlers that may cancel clicks.
+  window.addEventListener('click',function(event){
+    const target=event.target instanceof Element?event.target:null;
+    if(!target)return;
+    const sign=target.closest(signup),log=target.closest(login);
+    if(sign){event.preventDefault();event.stopImmediatePropagation();route('register');}
+    else if(log){event.preventDefault();event.stopImmediatePropagation();route('login');}
+  },true);
+})();
+</script>
