@@ -1317,15 +1317,7 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
   </div>
  </section>
 
- <section class="oc-visitor-products oc-home-roadmap" aria-label="Explore the Onchain ecosystem">
-  <div class="oc-visitor-products-heading"><div class="oc-visitor-kicker">YOUR ONCHAIN INVESTMENT STARTING POINT</div><h2>Discover markets. Build your investment strategy.</h2><div class="oc-roadmap-brand-lockup" aria-label="Onchain brand"><span class="oc-roadmap-brand-mark" aria-hidden="true">B</span><span class="oc-roadmap-brand-name">Onchain</span></div><p>Explore crypto and Gold markets, compare digital assets and develop your portfolio strategy with confidence.</p></div>
-  <div class="oc-visitor-products-grid">
-    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">◈</div><div class="oc-visitor-product-top"><h3>Explore Markets</h3><span>Discover</span></div><p>Follow crypto, Gold and selected US stock market information with charts and daily price moves.</p><small>CRYPTO · GOLD · STOCKS</small><button type="button" class="secondary" data-go="markets" style="margin-top:14px;width:100%">Open markets</button></article>
-    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⇄</div><div class="oc-visitor-product-top"><h3>Copy Trading</h3><span>Trader strategies</span></div><p>Browse trader profiles, compare strategy styles, follow traders and manage your watchlist. Review risk before making decisions.</p><small>DISCOVER · FOLLOW · REVIEW</small><button type="button" class="secondary" data-go="copytrading" style="margin-top:14px;width:100%">Explore copy traders</button></article>
-    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⌁</div><div class="oc-visitor-product-top"><h3>Track Your Activity</h3><span>Overview</span></div><p>Review your portfolio overview, seven-day practice performance and recorded account activity.</p><small>PORTFOLIO · HISTORY · INSIGHTS</small><button type="button" class="secondary" data-go="history" data-home-history="true" style="margin-top:14px;width:100%">View activity</button></article>
-   </div>
-  <p class="oc-visitor-roadmap-note">Explore market insights, discover leading assets and explore the Onchain platform.</p>
- </section>
+
 
  <section class="panel" style="margin-bottom:18px">
   <div class="section-head"><div><h2>Quick Actions</h2><div class="muted tiny">Go directly to the tools you use most.</div></div><span class="tag">QUICK ACCESS</span></div>
@@ -1365,6 +1357,16 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
   <div class="section-head"><div><h2>Active Coin Pairs</h2><div class="muted tiny">Live market connection · automatic updates 24/7</div></div><button class="secondary" type="button" data-go="markets">View all</button></div>
   <div id="homeActivePairs" class="table-wrap"><table><thead><tr><th>Coin / Pair</th><th>Price (USDT approx.</th><th>24h Change</th><th>Action</th></tr></thead><tbody><tr><td colspan="4" class="empty">Waiting for public market prices…</td></tr></tbody></table></div>
   
+ </section>
+
+ <section class="oc-visitor-products oc-home-roadmap" aria-label="Explore the Onchain ecosystem">
+  <div class="oc-visitor-products-heading"><div class="oc-visitor-kicker">YOUR ONCHAIN INVESTMENT STARTING POINT</div><h2>Discover markets. Build your investment strategy.</h2><div class="oc-roadmap-brand-lockup" aria-label="Onchain brand"><span class="oc-roadmap-brand-mark" aria-hidden="true">B</span><span class="oc-roadmap-brand-name">Onchain</span></div><p>Explore crypto and Gold markets, compare digital assets and develop your portfolio strategy with confidence.</p></div>
+  <div class="oc-visitor-products-grid">
+    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">◈</div><div class="oc-visitor-product-top"><h3>Explore Markets</h3><span>Discover</span></div><p>Follow crypto, Gold and selected US stock market information with charts and daily price moves.</p><small>CRYPTO · GOLD · STOCKS</small><button type="button" class="secondary" data-go="markets" style="margin-top:14px;width:100%">Open markets</button></article>
+    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⇄</div><div class="oc-visitor-product-top"><h3>Copy Trading</h3><span>Trader strategies</span></div><p>Browse trader profiles, compare strategy styles, follow traders and manage your watchlist. Review risk before making decisions.</p><small>DISCOVER · FOLLOW · REVIEW</small><button type="button" class="secondary" data-go="copytrading" style="margin-top:14px;width:100%">Explore copy traders</button></article>
+    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⌁</div><div class="oc-visitor-product-top"><h3>Track Your Activity</h3><span>Overview</span></div><p>Review your portfolio overview, seven-day practice performance and recorded account activity.</p><small>PORTFOLIO · HISTORY · INSIGHTS</small><button type="button" class="secondary" data-go="history" data-home-history="true" style="margin-top:14px;width:100%">View activity</button></article>
+   </div>
+  <p class="oc-visitor-roadmap-note">Explore market insights, discover leading assets and explore the Onchain platform.</p>
  </section>
 </section>
   <section id="page-history" class="hidden">
@@ -5731,12 +5733,12 @@ body.oc-logged-out.oc-auth-screen #page-register #resetPasswordBtn{
   const host=document.getElementById("ocCopyTraderFollowing");if(!host)return;
   const list=read();
   host.innerHTML=list.length?list.map(id=>{const p=profiles[id];if(!p)return"";return '<div class="list-row"><div><strong>'+p.name+'</strong><div class="muted tiny">'+p.style+' · '+p.risk+'</div><div class="muted tiny">Example profile · watchlist only</div></div><button type="button" class="secondary" data-copy-unfollow="'+id+'">Unfollow</button></div>'}).join(""):'<div class="empty">You have not followed any traders yet.</div>';
-  document.querySelectorAll("[data-copy-follow]").forEach(btn=>{const followed=list.includes(btn.dataset.copyFollow);btn.textContent=followed?"Following":"Follow trader";btn.disabled=followed});
+  document.querySelectorAll("[data-copy-follow]").forEach(btn=>{const followed=list.includes(btn.dataset.copyFollow);btn.textContent=followed?"Unfollow":"Follow trader";btn.setAttribute("aria-pressed",followed?"true":"false");btn.disabled=false;});
  }
  document.addEventListener("click",e=>{
   const follow=e.target.closest("[data-copy-follow]");
   const unfollow=e.target.closest("[data-copy-unfollow]");
-  if(follow){const id=follow.dataset.copyFollow;if(!profiles[id])return;const list=read();if(!list.includes(id)){list.push(id);save(list);if(typeof recordActivity==="function")recordActivity("activity","Followed "+profiles[id].name,"Added an example strategy to your local watchlist.","Watchlist updated");}render();}
+  if(follow){const id=follow.dataset.copyFollow;if(!profiles[id])return;const list=read();const isFollowed=list.includes(id);save(isFollowed?list.filter(x=>x!==id):[...list,id]);if(typeof recordActivity==="function")recordActivity("activity",(isFollowed?"Unfollowed ":"Followed ")+profiles[id].name,isFollowed?"Removed an example strategy from your local watchlist.":"Added an example strategy to your local watchlist.","Watchlist updated");render();}
   if(unfollow){const id=unfollow.dataset.copyUnfollow;save(read().filter(x=>x!==id));if(typeof recordActivity==="function"&&profiles[id])recordActivity("activity","Unfollowed "+profiles[id].name,"Removed an example strategy from your local watchlist.","Watchlist updated");render();}
  });
  document.getElementById("ocCopyTraderRefresh")?.addEventListener("click",render);
