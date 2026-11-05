@@ -10100,3 +10100,79 @@ body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel:not(.hi
 })();
 </script>
 
+
+<style id="oc-simple-registration-white-theme">
+/* Visual update for the simple registration form only. */
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register .content-grid {
+  width:min(100% - 24px,760px)!important;
+  max-width:760px!important;
+  margin-left:auto!important;margin-right:auto!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register .auth-main-panel {
+  box-sizing:border-box!important;
+  width:100%!important;max-width:720px!important;
+  margin:18px auto 30px!important;
+  padding:clamp(20px,3.5vw,30px)!important;
+  background:#fff!important;color:#111820!important;
+  border:1px solid #dce4ec!important;border-radius:16px!important;
+  box-shadow:0 14px 38px rgba(0,0,0,.22)!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm {
+  width:100%!important;max-width:660px!important;margin:0 auto!important;
+  padding:8px 0!important;background:transparent!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm h3 {
+  color:#101820!important;font-size:clamp(26px,3.5vw,32px)!important;
+  font-weight:900!important;text-shadow:none!important;line-height:1.2!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm > p,
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm .muted,
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm .tiny,
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register .auth-main-panel #registerForm .oc-register-method-help {
+  color:#384657!important;font-size:14px!important;font-weight:600!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm label,
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm .oc-register-contact-choice label {
+  color:#111820!important;font-size:15px!important;font-weight:850!important;
+  line-height:1.45!important;text-shadow:none!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm label .yellow {
+  color:#a66b00!important;font-weight:850!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm input:not([type=checkbox]),
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm select {
+  background:#fff!important;color:#101820!important;
+  -webkit-text-fill-color:#101820!important;border:1.5px solid #c7d1dc!important;
+  border-radius:9px!important;font-size:16px!important;font-weight:650!important;
+  min-height:51px!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm input::placeholder {
+  color:#687789!important;-webkit-text-fill-color:#687789!important;opacity:1!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm .oc-register-contact-choice {
+  background:#f2f6fa!important;border:1px solid #d5dfe9!important;
+  border-radius:11px!important;padding:14px!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm #emailCodePanel:not(.hidden) {
+  background:#fff8e8!important;border:1px solid #e8d7aa!important;
+  border-radius:10px!important;padding:13px!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm .auth-switch {
+  color:#273548!important;font-weight:750!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm .auth-switch button {
+  color:#075eaa!important;font-weight:900!important;
+}
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm button[type=submit],
+body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register #registerForm .primary {
+  min-height:54px!important;font-size:17px!important;font-weight:900!important;
+}
+@media(max-width:600px) {
+  body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register .content-grid {
+    width:calc(100% - 16px)!important;
+  }
+  body.oc-logged-out.oc-auth-screen.oc-register-mode #page-register .auth-main-panel {
+    margin:10px auto 22px!important;padding:18px 14px!important;
+  }
+}
+</style>
