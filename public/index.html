@@ -6181,6 +6181,7 @@ html.oc-light-theme #page-register .auth-main-panel textarea.field{
 </script>
 
 
+<style id="oc-guest-support-single-widget">body.oc-logged-out #oc-support-button,body.oc-logged-out #oc-chat{display:none!important}</style>
 <style id="oc-platform-readable-hierarchy">
 :root{--oc-ink:#28251f;--oc-muted:#766f63;--oc-gold:#d9ad55;--oc-border:#e8dcc7}
 html body{color:var(--oc-ink)}
@@ -6213,7 +6214,7 @@ main>section:not(#page-register) :is(button.secondary,.secondary){font-weight:55
   visible($("authChoicePanel"),false);visible($("authStatus"),false);visible($("registerMessage"),false);
   visible($("registerForm"),create);visible($("signInForm"),!create);visible($("googleSignInBtn"),!create,"flex");
   visible(document.querySelector(".auth-google-hint"),false);visible($("authPhoneDivider"),false);
-  const phone=$("phoneRegistrationPanel");if(phone){phone.open=false;visible(phone,false)}
+  const phone=$("phoneRegistrationPanel");if(phone){phone.open=false;phone.classList.add("hidden");phone.removeAttribute("hidden");phone.style.removeProperty("display");phone.querySelectorAll("input,select,textarea,button").forEach(el=>el.disabled=true)}
   $("registerForm")?.querySelectorAll("input,select,textarea,button").forEach(el=>el.disabled=!create);
   $("signInForm")?.querySelectorAll("input,select,textarea,button").forEach(el=>el.disabled=create);
   const method=$("registerContactMethod");if(method&&create){if(!method.value)method.value="email";method.dispatchEvent(new Event("change",{bubbles:true}))}
