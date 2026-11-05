@@ -205,7 +205,7 @@ header{height:72px;border-bottom:1px solid #17334e;display:grid;grid-template-co
 document.addEventListener('DOMContentLoaded',function(){
  const openAuth=(mode)=>{
   if(typeof window.ocOpenVisitorAuth==='function'){
-   window.ocOpenVisitorAuth(mode==='register'?'signup':'login');
+   window.ocOpenVisitorAuth(mode==='register'?'register':'login');
    return;
   }
   document.body.classList.add('oc-auth-screen');
@@ -10192,7 +10192,7 @@ body.oc-logged-out.oc-auth-screen #page-register #resetPasswordBtn {
     const trigger=el.closest('#landingGetStarted,#ocHomeCreateAccount,#ocVisitorSignup,#ocVisitorHeroSignup,#ocVisitorAboutSignup,#ocVisitorBottomSignup');
     if(!trigger)return;
     event.preventDefault();
-    if(typeof window.ocOpenVisitorAuth==='function'){window.ocOpenVisitorAuth('signup');return;}
+    if(typeof window.ocOpenVisitorAuth==='function'){window.ocOpenVisitorAuth('register');return;}
     document.documentElement.classList.remove('oc-auth-pending');
     document.body.classList.add('oc-logged-out','oc-auth-screen','oc-register-mode');
     if(typeof window.showPage==='function')window.showPage('register');
