@@ -6154,6 +6154,55 @@ main>section:not(#page-register) :is(button.secondary,.secondary){font-weight:55
 </style>
 
 
+
+<!-- Platform-wide vivid text styling: preserves layout, controls and authentication form colors. -->
+<style id="oc-platform-vivid-text-theme">
+:root{
+  --text:#f2f8ff;
+  --muted:#b2c5dc;
+  --yellow:#39d9ff;
+  --green:#25e0a4;
+  --red:#ff6682;
+  --blue:#62a5ff;
+}
+body:not(.oc-auth-screen){
+  color:#dce9f8;
+}
+body:not(.oc-auth-screen) main :is(h1,h2,h3,h4,.section-title,.section-head strong,.card-title,.quick-action strong){
+  color:#f5faff!important;
+  font-weight:800;
+  text-shadow:0 0 14px rgba(75,166,255,.12);
+}
+body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.section-head small,.quick-action small,.description,.helper-text){
+  color:#b8cbe0;
+}
+body:not(.oc-auth-screen) main a,
+body:not(.oc-auth-screen) main .text-link,
+body:not(.oc-auth-screen) main button.link,
+body:not(.oc-auth-screen) header nav button.active,
+body:not(.oc-auth-screen) .bottom-nav button.active{
+  color:#55c8ff!important;
+}
+body:not(.oc-auth-screen) main :is(.positive,.profit,.success,.status-success,.text-green){
+  color:#35e5ad!important;
+}
+body:not(.oc-auth-screen) main :is(.negative,.loss,.danger,.status-danger,.text-red){
+  color:#ff718b!important;
+}
+body:not(.oc-auth-screen) main :is(.warning,.status-warning,.text-amber){
+  color:#ffd16b!important;
+}
+body:not(.oc-auth-screen) main :is(.price,.amount,.balance,.stat-value,.big,.metric-value){
+  color:#f2f8ff;
+}
+body:not(.oc-auth-screen) :is(header,.bottom-nav) button{
+  text-shadow:0 0 10px rgba(76,169,255,.10);
+}
+body:not(.oc-auth-screen) main :is(button.primary,.primary){
+  color:#ffffff!important;
+}
+</style>
+
 </body>
 </html>
 
