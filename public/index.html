@@ -9863,3 +9863,81 @@ body.oc-auth-screen #page-register #registerSwitchText button {
   }
 }
 </style>
+
+
+<!-- OnChain BTC-inspired registration polish -->
+<style id="oc-btc-registration-theme">
+/* Registration/login: keep the existing transparent platform layout; use BTC orange,
+   clean white fields, blue outlines and green primary actions. */
+body.oc-logged-out.oc-auth-screen #page-register #registerForm,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm {
+  max-width:560px!important;margin:0 auto!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm h3,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm h3 {
+  color:#fff!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm h3:before {
+  content:"₿";display:inline-grid;place-items:center;width:32px;height:32px;
+  margin-right:10px;border-radius:50%;vertical-align:middle;
+  color:#fff;background:linear-gradient(145deg,#ffc65c,#f7931a);
+  box-shadow:0 3px 14px #f7931a55;font-size:21px;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm label,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm label {
+  color:#f4f8ff!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm input:not([type=checkbox]),
+body.oc-logged-out.oc-auth-screen #page-register #registerForm select,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm input:not([type=checkbox]),
+body.oc-logged-out.oc-auth-screen #page-register #signInForm select {
+  background:#fff!important;color:#101820!important;
+  -webkit-text-fill-color:#101820!important;border:2px solid #397bd6!important;
+  border-radius:10px!important;box-shadow:0 2px 9px #001a3325!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm input:focus,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm select:focus,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm input:focus,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm select:focus {
+  border-color:#16b978!important;outline:3px solid #16b97830!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm button[type=submit],
+body.oc-logged-out.oc-auth-screen #page-register #registerForm .primary,
+body.oc-logged-out.oc-auth-screen #page-register #signInForm button[type=submit],
+body.oc-logged-out.oc-auth-screen #page-register #signInForm .primary {
+  color:#fff!important;background:linear-gradient(110deg,#16a765,#0b8f58)!important;
+  border:1px solid #087b4b!important;border-radius:10px!important;
+  box-shadow:0 7px 18px #07945b38!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-switch button,
+body.oc-logged-out.oc-auth-screen #page-register #registerSwitchText button {
+  color:#76b7ff!important;text-decoration:underline!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #registerForm .oc-register-contact-choice,
+body.oc-logged-out.oc-auth-screen #page-register #phoneRegistrationPanel:not(.hidden) {
+  background:#0b2740!important;border:1px solid #f7931a88!important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #googleSignInBtn:not(.hidden),
+body.oc-logged-out.oc-auth-screen #page-register .auth-google-btn:not(.hidden),
+body.oc-logged-out.oc-auth-screen #page-register #resetPasswordBtn {
+  color:#eaf4ff!important;background:#102b46!important;border:1px solid #397bd6!important;
+}
+</style>
+<script id="oc-btc-auth-entry-routing">
+(function(){
+  function openRegistration(event){
+    const el=event.target instanceof Element?event.target:null;
+    if(!el)return;
+    const trigger=el.closest('#landingGetStarted,#ocHomeCreateAccount,#ocVisitorSignup,#ocVisitorHeroSignup,#ocVisitorAboutSignup,#ocVisitorBottomSignup');
+    if(!trigger)return;
+    event.preventDefault();
+    if(typeof window.ocOpenVisitorAuth==='function'){window.ocOpenVisitorAuth('signup');return;}
+    document.documentElement.classList.remove('oc-auth-pending');
+    document.body.classList.add('oc-logged-out','oc-auth-screen','oc-register-mode');
+    if(typeof window.showPage==='function')window.showPage('register');
+    document.getElementById('authChoiceRegister')?.click();
+    document.getElementById('showRegisterBtn')?.click();
+  }
+  document.addEventListener('click',openRegistration,true);
+})();
+</script>
