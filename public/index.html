@@ -1471,6 +1471,43 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
       <div class="card"><div class="label">Top gainer (24h)</div><div class="big green" id="topGainer">—</div><div class="muted tiny" id="topGainerChange">Waiting for data</div></div>
       <div class="card"><div class="label">Top loser (24h)</div><div class="big red" id="topLoser">—</div><div class="muted tiny" id="topLoserChange">Waiting for data</div></div>
     </div>
+    <section class="panel" id="marketQuickActionsPanel" style="margin-bottom:18px">
+      <div class="section-head"><div><h2>Quick Actions</h2></div><span class="tag">ACCOUNT TOOLS</span></div>
+      <div class="quick-action-grid">
+        <button class="quick-action" style="--action-color:#00d7a0" type="button" data-go="deposit"><span class="action-icon">⇩</span><strong>Deposit Funds</strong><small>Add funds to your account</small></button>
+        <button class="quick-action" style="--action-color:#ff5573" type="button" data-go="withdraw"><span class="action-icon">⇧</span><strong>Withdraw</strong><small>Send funds to your wallet</small></button>
+        <button class="quick-action" style="--action-color:#a78bfa" type="button" data-go="transfer"><span class="action-icon">⇄</span><strong>Transfer</strong><small>Move between accounts</small></button>
+        <button class="quick-action" style="--action-color:#159cff" type="button" data-go="trade"><span class="action-icon">↗</span><strong>Start Trading</strong><small>Explore the trading screen</small></button>
+        <button class="quick-action quick-action-extra" style="display:none;--action-color:#00cce8" style="--action-color:#00cce8" type="button" data-go="convert"><span class="action-icon">⟳</span><strong>Convert</strong><small>Swap asset views</small></button>
+        <button class="quick-action quick-action-extra" style="display:none;--action-color:#f5b51b" style="--action-color:#f5b51b" type="button" data-go="wallet"><span class="action-icon">◷</span><strong>History</strong><small>View wallet transactions</small></button>
+        <button class="quick-action quick-action-extra" style="display:none;--action-color:#ec4899" style="--action-color:#ec4899" type="button" data-go="markets"><span class="action-icon">▥</span><strong>Market</strong><small>Explore coin prices</small></button>
+        <button class="quick-action quick-action-extra" style="display:none;--action-color:#8b7bff" style="--action-color:#8b7bff" type="button" data-go="profile"><span class="action-icon">✦</span><strong>More</strong><small>Profile, settings and KYC</small></button>
+      </div>
+      <div class="market-list-controls" style="margin-top:12px"><span class="muted tiny" id="quickActionCount">Showing 4 quick actions</span><div><button class="primary" type="button" id="quickActionMore">More actions ↓</button><button class="secondary" type="button" id="quickActionLess" style="display:none">Less</button></div></div>
+      <label for="homeCoinSearch" style="display:block;margin-top:16px">Search coins</label>
+      <input class="search" id="homeCoinSearch" placeholder="Search Bitcoin, Ethereum, BTC…" autocomplete="off" style="width:100%;max-width:none">
+      <div id="homeCoinResults" class="coin-picker" role="listbox" aria-label="Search results for coins on the home page"><div class="empty">Coins appear when market data loads.</div></div><div class="market-list-controls"><span class="muted tiny" id="homeCoinCount">Showing top 5 coins</span><div><button class="secondary" type="button" id="homeCoinLess" disabled>Less</button> <button class="primary" type="button" id="homeCoinMore">More +5</button></div></div>
+    </section>
+    <section class="panel" id="marketRecentActivity" hidden aria-hidden="true" style="display:none!important" style="margin-bottom:18px"><div class="section-head"><div><h2>Recent Activity</h2><div class="muted tiny">Recent trades and account activity</div></div><select id="marketActivityFilter" class="field" style="max-width:155px"><option value="all">All activity</option><option value="trade">Trades</option><option value="deposit">Deposits</option><option value="withdraw">Withdrawals</option><option value="activity">Other actions</option></select></div><div id="marketActivityRows"><div class="empty">Your recent activity will appear here.</div></div><p class="muted tiny">Activity stays in this browser. No real deposits or withdrawals.</p></section><div class="content-grid">
+      <section class="panel">
+        <div class="section-head"><h2>Markets</h2><input class="search" id="marketSearch" placeholder="Search coin or symbol…"></div>
+        <div class="section-head"><div class="tabs" id="marketTabs"><button class="active" data-filter="all">All</button><button data-filter="gainers">Gainers</button><button data-filter="losers">Losers</button><button data-filter="hot">Hot</button><button data-filter="watchlist">★ Watchlist</button></div><span class="muted tiny" id="marketHint">Public prices</span></div>
+        <div class="table-wrap"><table><thead><tr><th>Asset / Pair</th><th>Price (USD)</th><th>24h Change</th><th>Market Cap</th><th>Watch</th></tr></thead><tbody id="marketRows"><tr><td colspan="5" class="empty">Connecting to live prices…</td></tr></tbody></table></div>
+        <div class="market-list-controls"><span class="muted tiny" id="marketListCount">Showing top 5 coins</span><div><button class="secondary" type="button" id="marketShowLess" disabled>Less</button> <button class="primary" type="button" id="marketShowMore">More +5</button></div></div>
+        <div class="section-head"><span></span><button class="secondary" id="retryBtn">Refresh</button></div>
+      </section>
+      <aside>
+        <section class="panel"><div class="section-head"><h2>🔥 Hot Coins</h2><span class="muted tiny">24h volume</span></div><div class="hot-coin-tabs" role="tablist" aria-label="Hot coin categories"><button type="button" class="hot-coin-tab active" data-hot-tab="active" role="tab" aria-selected="true">Active</button><button type="button" class="hot-coin-tab" data-hot-tab="gainers" role="tab" aria-selected="false">Top Gainers</button><button type="button" class="hot-coin-tab" data-hot-tab="losers" role="tab" aria-selected="false">Top Losers</button><button type="button" class="hot-coin-tab" data-hot-tab="volume" role="tab" aria-selected="false">Hot by Volume</button></div><div id="hotCoinResults" class="hot-coin-results" role="tabpanel" aria-live="polite">Loading market data…</div></section>
+        
+      </aside>
+    </div>
+    <section class="panel signal-scanner">
+      <div class="section-head"><h2>📡 All-Coin Live Momentum Signals</h2><span class="tag">MARKET INSIGHTS</span></div>
+      <div class="scanner-intro">Signals use 24-hour price change and volume. Select a coin to view its chart.</div>
+      <div class="signal-table-wrap"><table><thead><tr><th>Coin / Pair</th><th>Live Price</th><th>24h Move</th><th>Market Signal</th><th>Volume (24h)</th></tr></thead><tbody id="signalRows"><tr><td colspan="5" class="empty">Waiting for public market data…</td></tr></tbody></table></div>
+      <div class="section-head"><span id="signalCountLabel" class="muted tiny">Showing up to 5 coin pairs</span><div class="two-buttons"><button class="secondary" id="signalMoreLessBtn" type="button">More +5</button><button class="secondary" id="refreshSignalsBtn">Refresh signals</button></div></div>
+      <p class="muted tiny">Explore market signals and recent price movements.</p>
+    </section>
     <section class="panel oc-signed-in-stocks" id="ocSignedInStocksPanel">
       <div class="section-head"><div><h2>US Stocks</h2><p class="muted tiny">Apple, Microsoft, NVIDIA, Tesla and other leading US-listed companies</p></div><span class="tag">NASDAQ · NYSE</span></div>
       <div class="oc-stock-brand-grid">
@@ -1542,43 +1579,6 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
       update();
     })();
     </script>
-    <section class="panel" id="marketQuickActionsPanel" style="margin-bottom:18px">
-      <div class="section-head"><div><h2>Quick Actions</h2></div><span class="tag">ACCOUNT TOOLS</span></div>
-      <div class="quick-action-grid">
-        <button class="quick-action" style="--action-color:#00d7a0" type="button" data-go="deposit"><span class="action-icon">⇩</span><strong>Deposit Funds</strong><small>Add funds to your account</small></button>
-        <button class="quick-action" style="--action-color:#ff5573" type="button" data-go="withdraw"><span class="action-icon">⇧</span><strong>Withdraw</strong><small>Send funds to your wallet</small></button>
-        <button class="quick-action" style="--action-color:#a78bfa" type="button" data-go="transfer"><span class="action-icon">⇄</span><strong>Transfer</strong><small>Move between accounts</small></button>
-        <button class="quick-action" style="--action-color:#159cff" type="button" data-go="trade"><span class="action-icon">↗</span><strong>Start Trading</strong><small>Explore the trading screen</small></button>
-        <button class="quick-action quick-action-extra" style="display:none;--action-color:#00cce8" style="--action-color:#00cce8" type="button" data-go="convert"><span class="action-icon">⟳</span><strong>Convert</strong><small>Swap asset views</small></button>
-        <button class="quick-action quick-action-extra" style="display:none;--action-color:#f5b51b" style="--action-color:#f5b51b" type="button" data-go="wallet"><span class="action-icon">◷</span><strong>History</strong><small>View wallet transactions</small></button>
-        <button class="quick-action quick-action-extra" style="display:none;--action-color:#ec4899" style="--action-color:#ec4899" type="button" data-go="markets"><span class="action-icon">▥</span><strong>Market</strong><small>Explore coin prices</small></button>
-        <button class="quick-action quick-action-extra" style="display:none;--action-color:#8b7bff" style="--action-color:#8b7bff" type="button" data-go="profile"><span class="action-icon">✦</span><strong>More</strong><small>Profile, settings and KYC</small></button>
-      </div>
-      <div class="market-list-controls" style="margin-top:12px"><span class="muted tiny" id="quickActionCount">Showing 4 quick actions</span><div><button class="primary" type="button" id="quickActionMore">More actions ↓</button><button class="secondary" type="button" id="quickActionLess" style="display:none">Less</button></div></div>
-      <label for="homeCoinSearch" style="display:block;margin-top:16px">Search coins</label>
-      <input class="search" id="homeCoinSearch" placeholder="Search Bitcoin, Ethereum, BTC…" autocomplete="off" style="width:100%;max-width:none">
-      <div id="homeCoinResults" class="coin-picker" role="listbox" aria-label="Search results for coins on the home page"><div class="empty">Coins appear when market data loads.</div></div><div class="market-list-controls"><span class="muted tiny" id="homeCoinCount">Showing top 5 coins</span><div><button class="secondary" type="button" id="homeCoinLess" disabled>Less</button> <button class="primary" type="button" id="homeCoinMore">More +5</button></div></div>
-    </section>
-    <section class="panel" id="marketRecentActivity" hidden aria-hidden="true" style="display:none!important" style="margin-bottom:18px"><div class="section-head"><div><h2>Recent Activity</h2><div class="muted tiny">Recent trades and account activity</div></div><select id="marketActivityFilter" class="field" style="max-width:155px"><option value="all">All activity</option><option value="trade">Trades</option><option value="deposit">Deposits</option><option value="withdraw">Withdrawals</option><option value="activity">Other actions</option></select></div><div id="marketActivityRows"><div class="empty">Your recent activity will appear here.</div></div><p class="muted tiny">Activity stays in this browser. No real deposits or withdrawals.</p></section><div class="content-grid">
-      <section class="panel">
-        <div class="section-head"><h2>Markets</h2><input class="search" id="marketSearch" placeholder="Search coin or symbol…"></div>
-        <div class="section-head"><div class="tabs" id="marketTabs"><button class="active" data-filter="all">All</button><button data-filter="gainers">Gainers</button><button data-filter="losers">Losers</button><button data-filter="hot">Hot</button><button data-filter="watchlist">★ Watchlist</button></div><span class="muted tiny" id="marketHint">Public prices</span></div>
-        <div class="table-wrap"><table><thead><tr><th>Asset / Pair</th><th>Price (USD)</th><th>24h Change</th><th>Market Cap</th><th>Watch</th></tr></thead><tbody id="marketRows"><tr><td colspan="5" class="empty">Connecting to live prices…</td></tr></tbody></table></div>
-        <div class="market-list-controls"><span class="muted tiny" id="marketListCount">Showing top 5 coins</span><div><button class="secondary" type="button" id="marketShowLess" disabled>Less</button> <button class="primary" type="button" id="marketShowMore">More +5</button></div></div>
-        <div class="section-head"><span></span><button class="secondary" id="retryBtn">Refresh</button></div>
-      </section>
-      <aside>
-        <section class="panel"><div class="section-head"><h2>🔥 Hot Coins</h2><span class="muted tiny">24h volume</span></div><div class="hot-coin-tabs" role="tablist" aria-label="Hot coin categories"><button type="button" class="hot-coin-tab active" data-hot-tab="active" role="tab" aria-selected="true">Active</button><button type="button" class="hot-coin-tab" data-hot-tab="gainers" role="tab" aria-selected="false">Top Gainers</button><button type="button" class="hot-coin-tab" data-hot-tab="losers" role="tab" aria-selected="false">Top Losers</button><button type="button" class="hot-coin-tab" data-hot-tab="volume" role="tab" aria-selected="false">Hot by Volume</button></div><div id="hotCoinResults" class="hot-coin-results" role="tabpanel" aria-live="polite">Loading market data…</div></section>
-        
-      </aside>
-    </div>
-    <section class="panel signal-scanner">
-      <div class="section-head"><h2>📡 All-Coin Live Momentum Signals</h2><span class="tag">MARKET INSIGHTS</span></div>
-      <div class="scanner-intro">Signals use 24-hour price change and volume. Select a coin to view its chart.</div>
-      <div class="signal-table-wrap"><table><thead><tr><th>Coin / Pair</th><th>Live Price</th><th>24h Move</th><th>Market Signal</th><th>Volume (24h)</th></tr></thead><tbody id="signalRows"><tr><td colspan="5" class="empty">Waiting for public market data…</td></tr></tbody></table></div>
-      <div class="section-head"><span id="signalCountLabel" class="muted tiny">Showing up to 5 coin pairs</span><div class="two-buttons"><button class="secondary" id="signalMoreLessBtn" type="button">More +5</button><button class="secondary" id="refreshSignalsBtn">Refresh signals</button></div></div>
-      <p class="muted tiny">Explore market signals and recent price movements.</p>
-    </section>
 <style id="market-discovery-style">
 .market-discovery{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:22px;padding:16px;margin:0 0 18px;font-family:inherit}
 .market-discovery *{box-sizing:border-box}
