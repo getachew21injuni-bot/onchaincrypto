@@ -5315,8 +5315,6 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  $("ocVisitorMarketMore")?.addEventListener("click",()=>{limit=limit>6?6:999999;renderTable()});
  $("ocVisitorDetailClose")?.addEventListener("click",()=>{$("ocVisitorCoinDetail").classList.add("hidden");$("ocVisitorTradingChart").src="about:blank"});
  $("ocVisitorDetailBuy")?.addEventListener("click",()=>openAuth("signup"));
- ["ocVisitorSignup","ocVisitorHeroSignup","ocVisitorAboutSignup","ocVisitorBottomSignup"].forEach(id=>$(id)?.addEventListener("click",()=>openAuth("signup")));
- ["ocVisitorLogin","ocVisitorHeroLogin"].forEach(id=>$(id)?.addEventListener("click",()=>openAuth("login")));
  ["ocVisitorHeroExplore","ocVisitorAboutExplore"].forEach(id=>$(id)?.addEventListener("click",()=>$("ocVisitorMarkets")?.scrollIntoView({behavior:"smooth",block:"start"})));
  window.addEventListener("load",()=>{window.ocRenderVisitorMarket?.();void loadVisitorGoldFallback()});
  window.addEventListener("market-updated",()=>window.ocRenderVisitorMarket?.());
