@@ -1294,15 +1294,15 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
   
  <section class="oc-invest-hero oc-get-started-hero oc-home-promo-hero" aria-label="OnChainCrypto digital asset trading platform">
   <div class="oc-hero-copy">
-   <div class="oc-public-auth-brand"><span class="oc-auth-brand-mark">B</span><span>OnChainCrypto</span></div>
+   <div class="oc-public-auth-brand oc-home-brand-lockup"><span class="oc-auth-brand-mark oc-home-bitcoin-mark" aria-hidden="true">B</span><span>Onchain</span><small>CRYPTO · GOLD · INVESTMENTS</small></div>
    <div class="oc-public-auth-copy">
-    <div class="oc-public-auth-eyebrow"><i></i> DIGITAL ASSET TRADING PLATFORM</div>
-    <h2>Take Control of<br><span>Your Crypto Future.</span></h2>
-    <p>Join millions of users trading <strong>Bitcoin</strong>, <strong>Ethereum</strong>, and <strong>350+ cryptocurrencies</strong>.</p>
-    <p class="oc-public-auth-subline">Fast, secure, and easy to use. Explore Bitcoin and gold markets with OnChainCrypto.</p>
-    <div class="oc-public-auth-trust"><span>◈ Identity verification</span><span>⌁ Account security</span><span>↗ Global markets</span></div>
+    <div class="oc-public-auth-eyebrow"><i></i> YOUR ONCHAIN INVESTMENT STARTING POINT</div>
+    <h2>Discover markets.<br><span>Build your investment strategy.</span></h2>
+    <p>Explore <strong>Bitcoin</strong>, leading cryptocurrencies and <strong>Gold</strong>. Compare digital assets, follow market movements and discover opportunities across markets.</p>
+    <p class="oc-public-auth-subline">A clear starting point for market research, portfolio planning and informed investment decisions.</p>
+    <div class="oc-public-auth-trust"><span>₿ Crypto assets</span><span>Au Gold markets</span><span>↗ Portfolio insights</span></div>
    </div>
-   <div class="oc-landing-actions"><button type="button" class="oc-hero-cta" id="ocHomeCreateAccount">Create free account <span>→</span></button><button type="button" class="secondary oc-landing-signin" id="ocHomeLogin">Login</button></div>
+   <div class="oc-landing-actions"><button type="button" class="oc-hero-cta" id="ocHomeCreateAccount">Create your account <span>→</span></button><button type="button" class="secondary oc-landing-signin" id="ocHomeLogin">Log in</button></div>
   </div>
   <div class="oc-hero-art oc-home-promo-art" aria-label="Bitcoin, gold and digital asset illustrations">
    <div class="oc-public-coin-stage">
@@ -1312,8 +1312,8 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
     <div class="oc-floating-coin oc-coin-small-sol"><span>◎</span></div><div class="oc-floating-coin oc-coin-small-link"><span>⬡</span></div>
     <div class="oc-public-price-chip btc-chip"><b>₿ BTC</b><span>Bitcoin</span></div><div class="oc-public-price-chip gold-chip"><b>Au XAU</b><span>Gold</span></div><div class="oc-public-price-chip eth-chip"><b>◆ ETH</b><span>Ethereum</span></div>
    </div>
-   <div class="oc-brand-wordmark"><span>On</span><span>chain</span></div>
-   <div class="oc-brand-tagline">Crypto &amp; Gold Market Explorer</div>
+   <div class="oc-brand-wordmark"><span>Onchain</span></div>
+   <div class="oc-brand-tagline">Explore · Compare · Plan your portfolio</div>
   </div>
  </section>
 
@@ -6201,6 +6201,21 @@ body:not(.oc-auth-screen) :is(header,.bottom-nav) button{
 body:not(.oc-auth-screen) main :is(button.primary,.primary){
   color:#ffffff!important;
 }
+</style>
+
+
+<style id="oc-home-investment-hero-finish">
+#page-home .oc-home-brand-lockup{display:grid;grid-template-columns:54px auto;grid-template-rows:auto auto;align-items:center;justify-content:start;column-gap:13px;row-gap:1px;margin:0 0 26px;color:#fff4dc;letter-spacing:1.2px}
+#page-home .oc-home-brand-lockup .oc-home-bitcoin-mark{grid-row:1 / span 2;width:54px;height:54px;font-size:30px;font-weight:950;border:2px solid #ffe2a0;background:radial-gradient(circle at 30% 22%,#fff4c9 0%,#ffc247 30%,#f7931a 65%,#a94d08 100%);color:#fff9e8;text-shadow:0 2px 5px #8a3e00;box-shadow:0 0 0 5px #f7931a18,0 0 28px #f7931a88,inset 0 2px 7px #fff8b8}
+#page-home .oc-home-brand-lockup>span:nth-child(2){font-size:clamp(25px,3vw,34px);font-weight:950;line-height:1.05;color:#f8fbff;letter-spacing:.3px}
+#page-home .oc-home-brand-lockup small{font-size:9px;font-weight:850;letter-spacing:1.8px;color:#e7bd67}
+#page-home .oc-public-auth-copy h2{max-width:680px}
+#page-home .oc-public-auth-copy h2 span{background:linear-gradient(100deg,#f5bd42,#fff0b5 48%,#f7931a);-webkit-background-clip:text;background-clip:text;color:transparent}
+#page-home .oc-public-auth-trust span{border-color:#d9ad5555;background:linear-gradient(120deg,#f7931a14,#f5bd420c);color:#f3dba8}
+#page-home .oc-home-promo-art .oc-brand-wordmark{color:#fff4d6;text-shadow:0 0 24px #f7931a55}
+#page-home .oc-home-promo-art .oc-brand-tagline{color:#e6c987}
+@media(max-width:700px){#page-home .oc-home-brand-lockup{margin-bottom:18px}#page-home .oc-home-brand-lockup .oc-home-bitcoin-mark{width:48px;height:48px;font-size:27px}}
+@media(prefers-reduced-motion:reduce){#page-home .oc-floating-coin{animation:none!important}}
 </style>
 
 </body>
