@@ -5832,6 +5832,7 @@ submit?.addEventListener("click",async()=>{const v=currentAddress(),a=Number(amo
 @media(max-width:560px){#ocVisitorSupportBot{right:12px;bottom:calc(14px + env(safe-area-inset-bottom))}#ocVisitorSupportBot .oc-support-launch{padding:6px 11px 6px 6px}#ocVisitorSupportBot .oc-support-avatar{width:44px;height:44px}#ocVisitorSupportBot .oc-support-panel{bottom:62px;width:min(350px,calc(100vw - 24px));height:min(500px,calc(100dvh - 95px))}}
 @media(prefers-reduced-motion:no-preference){#ocVisitorSupportBot .oc-support-launch{animation:ocSupportFloat 3.8s ease-in-out infinite}@keyframes ocSupportFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}}
 body:not(.oc-logged-out) #ocVisitorSupportBot{display:none!important}
+body.oc-logged-out:not(.oc-auth-screen) #ocVisitorSupportBot{display:block!important}
 </style>
 <div id="ocVisitorSupportBot" aria-live="polite">
  <section class="oc-support-panel" role="dialog" aria-label="Onchain customer support" aria-modal="false">
@@ -5855,6 +5856,9 @@ body:not(.oc-logged-out) #ocVisitorSupportBot{display:none!important}
   <span class="oc-support-launch-copy"><strong>Need help?</strong><small>Chat with Onchain Support</small></span><i class="oc-support-dot"></i>
  </button>
 </div>
+<script id="oc-visitor-support-bot-guest-visibility">
+(()=>{const sync=()=>{const root=document.getElementById("ocVisitorSupportBot");if(!root||!document.body)return;if(root.parentElement!==document.body)document.body.appendChild(root);root.style.display=document.body.classList.contains("oc-logged-out")&&!document.body.classList.contains("oc-auth-screen")?"block":"none"};sync();if(document.body&&window.MutationObserver)new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:["class"]});})();
+</script>
 <script id="oc-visitor-support-bot-script">
 (()=>{const root=document.getElementById("ocVisitorSupportBot");if(!root||root.dataset.ready)return;root.dataset.ready="1";
 const panel=root.querySelector(".oc-support-panel"),messages=root.querySelector("#ocSupportMessages"),input=root.querySelector("#ocSupportInput");
