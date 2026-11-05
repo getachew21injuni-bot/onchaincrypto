@@ -1211,6 +1211,11 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
   text-shadow:0 2px 14px rgba(0,0,0,.85),0 0 10px rgba(255,255,255,.12)!important;
 }
 </style>
+
+<style id="oc-hide-admin-entrypoints">
+/* Keep administrator navigation out of the customer-facing interface. The separate admin page and its controls remain intact. */
+#adminDashboardShortcut,#ocAdminNavBtn,.admin-nav,#admin-login-link{display:none!important}
+</style>
 </head>
 <body>
 <header>
