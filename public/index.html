@@ -5,15 +5,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b0e11">
-<meta name="description" content="OnChainCrypto — explore cryptocurrency and Gold markets, live market information, interactive charts and digital-asset tools.">
+<meta name="description" content="Onchain — explore cryptocurrency and Gold markets, live market information, interactive charts and digital-asset tools.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="OnChainCrypto">
-<meta property="og:title" content="OnChainCrypto | Crypto & Gold Markets">
-<meta property="og:description" content="Explore cryptocurrency and Gold markets, market insights, interactive charts and digital-asset tools with OnChainCrypto.">
+<meta property="og:site_name" content="Onchain">
+<meta property="og:title" content="Onchain | Crypto & Gold Markets">
+<meta property="og:description" content="Explore cryptocurrency and Gold markets, market insights, interactive charts and digital-asset tools with Onchain.">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="OnChainCrypto | Crypto & Gold Markets">
-<meta name="twitter:description" content="Explore cryptocurrency and Gold markets, market insights, interactive charts and digital-asset tools with OnChainCrypto.">
-<title>OnChainCrypto | Crypto &amp; Gold Markets</title>
+<meta name="twitter:title" content="Onchain | Crypto & Gold Markets">
+<meta name="twitter:description" content="Explore cryptocurrency and Gold markets, market insights, interactive charts and digital-asset tools with Onchain.">
+<title>Onchain | Crypto &amp; Gold Markets</title>
 <script id="oc-fail-closed-auth-startup">
   // Until Firebase restores and confirms a session, treat every visit as signed out.
   // This prevents deep links and the home page from flashing protected app content.
@@ -1292,7 +1292,7 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
 <section id="page-home">
  <div class="page-title"><div><h1 id="homeGreeting">Onchain</h1></div></div>
   
- <section class="oc-invest-hero oc-get-started-hero oc-home-promo-hero" aria-label="OnChainCrypto digital asset trading platform">
+ <section class="oc-invest-hero oc-get-started-hero oc-home-promo-hero" aria-label="Onchain digital asset trading platform">
   <div class="oc-hero-copy">
    <div class="oc-public-auth-brand oc-home-brand-lockup"><span class="oc-auth-brand-mark oc-home-bitcoin-mark" aria-hidden="true">B</span><span>Onchain</span><small>CRYPTO · GOLD · INVESTMENTS</small></div>
    <div class="oc-public-auth-copy">
@@ -2065,7 +2065,7 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
       <section class="panel form-panel" id="support-guide-section" style="margin-top:16px"><h2>☷ Quick Guide</h2><div class="list-row"><div><strong>1. Create or access your account</strong><div class="muted tiny">Choose Register, enter your name and email, and follow the on-screen steps to create your personal account.</div></div></div><div class="list-row"><div><strong>2. Explore markets and charts</strong><div class="muted tiny">Explore Markets for public price information, then open Trade to practise decisions in the simulated environment.</div></div></div><div class="list-row"><div><strong>3. Review your wallet carefully</strong><div class="muted tiny">Use the Wallet to review your simulated balances and explore the available asset screens. Live transfers and exchange execution will be introduced when the required secure services are connected.</div></div></div><div class="list-row"><div><strong>4. Get help safely</strong><div class="muted tiny">Tell our support team which page you were using and describe the message you saw. Keep passwords, verification codes, private keys and recovery phrases private.</div></div></div></section>
   </section>
 </main>
-<footer style="padding:18px 20px 92px;text-align:center;color:#7e9bbd;border-top:1px solid #17334e;background:#040b17">OnChainCrypto</footer><nav class="bottom-nav" id="bottomNav" aria-label="Main navigation"><button type="button" class="active" data-bottom-page="home"><span>⌂</span>Home</button><button type="button" data-bottom-page="markets"><span>↗</span>Markets</button><button type="button" data-bottom-page="trade"><span>⇄</span>Trade</button><button type="button" data-bottom-page="browser"><span>◎</span>Browser</button><button type="button" data-bottom-page="wallet"><span>▱</span>Wallet</button></nav>
+<footer style="padding:18px 20px 92px;text-align:center;color:#7e9bbd;border-top:1px solid #17334e;background:#040b17">Onchain</footer><nav class="bottom-nav" id="bottomNav" aria-label="Main navigation"><button type="button" class="active" data-bottom-page="home"><span>⌂</span>Home</button><button type="button" data-bottom-page="markets"><span>↗</span>Markets</button><button type="button" data-bottom-page="trade"><span>⇄</span>Trade</button><button type="button" data-bottom-page="browser"><span>◎</span>Browser</button><button type="button" data-bottom-page="wallet"><span>▱</span>Wallet</button></nav>
 <a href="./admin.html" id="adminDashboardShortcut" class="hidden" style="position:fixed;right:14px;bottom:86px;z-index:30;background:#111c30;color:#eaf6ff;border:1px solid #2b4263;border-radius:12px;padding:10px 13px;text-decoration:none;font-size:12px;box-shadow:0 6px 22px #0005">⚙ Admin dashboard</a>
 <script>
 const COINS = [
@@ -3565,7 +3565,7 @@ window.addEventListener("popstate", async () => {
     if(switchText)switchText.classList.toggle('hidden',creating);
     if(registerSwitch)registerSwitch.classList.toggle('hidden',!creating);
     if(intro)intro.innerHTML=creating?'<h2>Create your account</h2><p class="muted tiny">Join with your name and either email or phone.</p>':'';
-    if(heading)heading.textContent=creating?'Create your OnChainCrypto account':'Welcome back to OnChainCrypto';
+    if(heading)heading.textContent=creating?'Create your Onchain account':'Welcome back to Onchain';
     if(sub){sub.textContent=creating?'Set up your account to continue.':'';sub.classList.toggle('hidden',!creating);}
   }
   document.getElementById('showRegisterBtn')?.addEventListener('click',()=>setMode('register'));
@@ -4454,7 +4454,7 @@ body.oc-trade-overlay-open{overflow:hidden}
  }
  if(about){
   const aboutPage=create("about","About","Discover the Onchain platform",about);
-  aboutPage.querySelectorAll("*").forEach(el=>{if(el.children.length===0)el.textContent=el.textContent.replace(/ABOUT Onchain/gi,"ABOUT THE PLATFORM").replace(/Onchain is in development/gi,"Explore crypto, Gold markets and market insights").replace(/Follow Onchain/gi,"Follow OnChainCrypto").replace(/Onchain/gi,"OnChainCrypto")});
+  aboutPage.querySelectorAll("*").forEach(el=>{if(el.children.length===0)el.textContent=el.textContent.replace(/ABOUT Onchain/gi,"ABOUT THE PLATFORM").replace(/Onchain is in development/gi,"Explore crypto, Gold markets and market insights").replace(/Follow Onchain/gi,"Follow Onchain").replace(/Onchain/gi,"Onchain")});
   const hero=aboutPage.querySelector(".about-hero");if(hero){const brandHeading=hero.querySelector("h2");if(brandHeading)brandHeading.remove()}
  }
  // Keep the Profile page limited to account details; move the existing display-currency
@@ -4895,7 +4895,7 @@ body.oc-logged-out #signInForm .oc-password-toggle{right:7px!important}
 </style>
 
 <style id="oc-auth-onchain-polish">
-/* Login and registration: one refined OnChainCrypto visual language */
+/* Login and registration: one refined Onchain visual language */
 body.oc-logged-out #page-register .content-grid{
   border:1px solid rgba(240,185,11,.24)!important;
   border-radius:26px!important;
@@ -6055,7 +6055,7 @@ html.oc-light-theme #page-register .auth-main-panel textarea.field{
 </style>
 
 
-<!-- Visitor-side OnChainCrypto Support Assistant -->
+<!-- Visitor-side Onchain Support Assistant -->
 <style id="oc-visitor-support-bot-style">
 #oc-visitor-support-bot{position:fixed;right:22px;bottom:92px;z-index:99990;font-family:inherit}
 #oc-visitor-support-bot[hidden]{display:none!important}
@@ -6079,9 +6079,9 @@ html.oc-light-theme #page-register .auth-main-panel textarea.field{
 @media(max-width:480px){#oc-visitor-support-bot{right:14px;bottom:82px}#oc-visitor-support-panel{position:fixed;right:10px;bottom:150px;width:calc(100vw - 20px);height:min(470px,calc(100dvh - 175px))}}
 </style>
 <div id="oc-visitor-support-bot" hidden>
-  <section id="oc-visitor-support-panel" aria-label="OnChainCrypto Support Assistant" hidden>
-    <header id="oc-visitor-support-head"><div><strong>OnChainCrypto Support</strong><small>Visitor help · Instant answers</small></div><button id="oc-visitor-support-close" type="button" aria-label="Close support">×</button></header>
-    <div id="oc-visitor-support-messages" aria-live="polite"><div class="oc-support-bubble">Welcome to OnChainCrypto! 👋 I can help with getting started, accounts, KYC, deposits, withdrawals and trading. What would you like to know?</div></div>
+  <section id="oc-visitor-support-panel" aria-label="Onchain Support Assistant" hidden>
+    <header id="oc-visitor-support-head"><div><strong>Onchain Support</strong><small>Visitor help · Instant answers</small></div><button id="oc-visitor-support-close" type="button" aria-label="Close support">×</button></header>
+    <div id="oc-visitor-support-messages" aria-live="polite"><div class="oc-support-bubble">Welcome to Onchain! 👋 I can help with getting started, accounts, KYC, deposits, withdrawals and trading. What would you like to know?</div></div>
     <div id="oc-visitor-support-quick">
       <button type="button" data-oc-support-topic="account">Create an account</button>
       <button type="button" data-oc-support-topic="kyc">Identity checks</button>
@@ -6090,7 +6090,7 @@ html.oc-light-theme #page-register .auth-main-panel textarea.field{
       <button type="button" data-oc-support-topic="trade">Trading</button>
     </div>
     <form id="oc-visitor-support-form"><input id="oc-visitor-support-input" maxlength="500" autocomplete="off" placeholder="Type your question…" aria-label="Type your support question"><button id="oc-visitor-support-send" type="submit">Send</button></form>
-    <div id="oc-visitor-support-foot">Never share passwords, verification codes or recovery phrases. <a href="mailto:onchaincryptosupport@gmail.com?subject=OnChainCrypto%20Support">Email support</a></div>
+    <div id="oc-visitor-support-foot">Never share passwords, verification codes or recovery phrases. <a href="mailto:onchaincryptosupport@gmail.com?subject=Onchain%20Support">Email support</a></div>
   </section>
   <button id="oc-visitor-support-launch" type="button" aria-label="Open customer support" aria-expanded="false">✦</button>
 </div>
@@ -6102,12 +6102,12 @@ html.oc-light-theme #page-register .auth-main-panel textarea.field{
  const messages=document.getElementById("oc-visitor-support-messages"),input=document.getElementById("oc-visitor-support-input");
  const answers={
  account:"To get started, choose Register on the website. Enter your name and choose email or phone registration, then follow the on-screen verification steps. Already registered? Choose Login. Keep your password private.",
- kyc:"If identity verification is requested, open your account's verification area and follow the instructions. Use accurate details and submit only through the secure OnChainCrypto form. Never send identity documents or verification codes by chat or email.",
+ kyc:"If identity verification is requested, open your account's verification area and follow the instructions. Use accurate details and submit only through the secure Onchain form. Never send identity documents or verification codes by chat or email.",
  deposit:"Sign in and open Wallet, then choose Deposit and select the asset and network. Check that the network matches your sending wallet exactly before transferring. A deposit is not complete until the required network confirmations and platform review are finished. If you are unsure, do not send funds.",
  withdraw:"Sign in and open Wallet, then choose Withdraw. Confirm the asset, network and destination address carefully. A withdrawal may require account checks and review. Never share your password, private key or recovery phrase.",
  trade:"Open Markets to review available market information. Practice trading is for learning and does not place live exchange orders or move blockchain assets. Review the order details and risks before using any trading feature.",
  copy:"Trader discovery lets you compare strategy descriptions and risk measures and save strategies to your watchlist. Following a strategy does not automatically copy trades; automatic execution is not currently connected.",
- security:"Use a unique password and keep your sign-in details private. OnChainCrypto support will never need your password, one-time verification code, private key or recovery phrase.",
+ security:"Use a unique password and keep your sign-in details private. Onchain support will never need your password, one-time verification code, private key or recovery phrase.",
  general:"I can help with account setup, identity checks, deposits, withdrawals, wallets, markets and practice trading. Choose one of the topics below or type your question."
  };
  function add(text,who){const node=document.createElement("div");node.className="oc-support-bubble"+(who==="user"?" oc-user":"");node.textContent=text;messages.appendChild(node);messages.scrollTop=messages.scrollHeight;}
@@ -9856,7 +9856,7 @@ body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel:after {
 
 <!-- oc-final-exclusive-auth-switch replaced by unified authentication routing. -->
 <style id="oc-auth-use-platform-background">
-/* Authentication uses the same deep navy/blue canvas as the OnChainCrypto platform. */
+/* Authentication uses the same deep navy/blue canvas as the Onchain platform. */
 body.oc-logged-out.oc-auth-screen,
 html.oc-auth-pending body {
   background-color:#020a12!important;
@@ -10450,7 +10450,7 @@ body.oc-logged-out.oc-auth-screen #page-register #googleSignInBtn.hidden{display
     const hint=document.querySelector('#page-register .auth-google-hint');
     if(hint){hint.classList.add('hidden');hint.hidden=true;hint.style.setProperty('display','none','important')}
     const heading=document.getElementById('authHeading');
-    if(heading)heading.textContent=creating?'Create your OnChainCrypto account':'Welcome back to OnChainCrypto';
+    if(heading)heading.textContent=creating?'Create your Onchain account':'Welcome back to Onchain';
   }
   function start(){
     syncAuthPage();
@@ -10475,7 +10475,7 @@ body.oc-logged-out.oc-auth-screen #page-register #googleSignInBtn.hidden{display
 </script>
 
 
-<!-- OnChainCrypto unified mobile auth screen: final visibility and form-switch layer. -->
+<!-- Onchain unified mobile auth screen: final visibility and form-switch layer. -->
 <style id="oc-auth-mobile-unified-final">
 body.oc-logged-out.oc-auth-screen{background:#f3f6fa!important;color:#171b22!important}
 body.oc-logged-out.oc-auth-screen main{display:flex!important;align-items:flex-start!important;justify-content:center!important;min-height:100svh!important;padding:clamp(14px,4vw,34px)!important;background:transparent!important}
@@ -10587,7 +10587,7 @@ html.oc-auth-pending main > #page-trade:not(.hidden){display:block!important}
     }
     const heading = $('authHeading');
     const subheading = $('authSubheading');
-    if(heading) heading.textContent = creating ? 'Create your OnChainCrypto account' : 'Welcome back to OnChainCrypto';
+    if(heading) heading.textContent = creating ? 'Create your Onchain account' : 'Welcome back to Onchain';
     if(subheading){
       subheading.textContent = creating ? 'Complete the form below to create your account.' : 'Sign in to continue to your account.';
       visible(subheading, true);
