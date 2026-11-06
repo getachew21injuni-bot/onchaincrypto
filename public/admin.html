@@ -480,9 +480,9 @@ function renderAdminActivity(view){
   body.innerHTML='<div class="content-panel" style="margin:0"><div class="panel-head"><h3>'+ (view==='Login History'?'Recent sign-ins and registrations':'Live account notifications') +'</h3><span class="tag">LIVE</span></div><p class="muted">Latest 250 events · refreshes automatically · device and timezone only; no GPS or raw IP address.</p><div class="table-wrap"><table><thead><tr><th>Account</th><th>Event</th><th>When</th><th>Device</th><th>Browser</th><th>Timezone</th></tr></thead><tbody>'+filtered.map(r=>{
    const dt=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'Pending timestamp';
    const label=String(r.eventType||'activity').replace(/_/g,' ');
-   return '<tr><td>'+safeText(r.email||r.uid||'Unknown')+'</td><td><span class="tag">'+safeText(label)+'</span></td><td>'+safeText(dt)+'</td><td>'+safeText(r.device||'—')+'</td><td>'+safeText(r.browser||'—')+'</td><td>'+safeText(r.timezone||'—')+'</td></tr>';
+   return '<tr><td>'+esc(r.email||r.uid||'Unknown')+'</td><td><span class="tag">'+esc(label)+'</span></td><td>'+esc(dt)+'</td><td>'+esc(r.device||'—')+'</td><td>'+esc(r.browser||'—')+'</td><td>'+esc(r.timezone||'—')+'</td></tr>';
   }).join('')+'</tbody></table></div></div>';
- },error=>{body.innerHTML='<div class="notice">Activity feed unavailable: '+safeText(error.code||error.message||'permission error')+'. Check Firestore rules and administrator verification.</div>';});
+ },error=>{body.innerHTML='<div class="notice">Activity feed unavailable: '+esc(error.code||error.message||'permission error')+'. Check Firestore rules and administrator verification.</div>';});
 }
 function renderModule(view){
  const body=document.getElementById('detailBody');
