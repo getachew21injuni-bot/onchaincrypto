@@ -2951,7 +2951,7 @@ async function saveBasicUserProfile(user) {
     displayName: names,
     firstName: existingProfile.firstName || localProfile.firstName || names.split(" ")[0] || "",
     lastName: existingProfile.lastName || localProfile.lastName || names.split(" ").slice(1).join(" ") || "",
-    referralCode: await window.ocReferralCodeFor(user),
+    referralCode: await Promise.resolve(window.ocReferralCodeFor(user)).catch(() => String(existingProfile.referralCode || localProfile.referralCode || "")),
     referredByCode: String(existingProfile.referredByCode || existingProfile.referralCode || localProfile.referredByCode || localProfile.referralCode || "").trim().replace(/[^a-z0-9_-]/gi, "").slice(0, 40),
     createdAt: existingProfile.createdAt || localProfile.createdAt || user.metadata?.creationTime || new Date().toISOString(),
     updatedAt: serverTimestamp()
@@ -2961,8 +2961,29 @@ async function saveBasicUserProfile(user) {
     try { localStorage.setItem("oc_profile_" + user.uid, JSON.stringify({ ...profile, updatedAt: new Date().toISOString() })); } catch (_) {}
     return { ok: true, profile };
   } catch (error) {
-    console.error("Account profile could not be saved to Firestore:", error?.code || error, error?.message || "");
-    throw error;
+    // If an optional profile field is rejected, still create the minimal
+    // users/{uid} record used by the live Admin → Trade Control directory.
+    console.error("Full account profile sync failed; trying the Admin directory record:", error?.code || error, error?.message || "");
+    const directoryProfile = {
+      uid: user.uid,
+      adminAssigned: true,
+      email: user.email || existingProfile.email || localProfile.email || "",
+      phoneNumber: user.phoneNumber || existingProfile.phoneNumber || localProfile.phone || "",
+      displayName: names,
+      firstName: existingProfile.firstName || localProfile.firstName || names.split(" ")[0] || "",
+      lastName: existingProfile.lastName || localProfile.lastName || names.split(" ").slice(1).join(" ") || "",
+      referredByCode: String(existingProfile.referredByCode || localProfile.referredByCode || "").trim().replace(/[^a-z0-9_-]/gi, "").slice(0, 40),
+      createdAt: existingProfile.createdAt || localProfile.createdAt || user.metadata?.creationTime || new Date().toISOString(),
+      updatedAt: serverTimestamp()
+    };
+    try {
+      await setDoc(profileRef, directoryProfile, { merge: true });
+      try { localStorage.setItem("oc_profile_" + user.uid, JSON.stringify({ ...directoryProfile, updatedAt: new Date().toISOString() })); } catch (_) {}
+      return { ok: true, profile: directoryProfile, directoryOnly: true };
+    } catch (directoryError) {
+      console.error("Admin directory profile could not be saved:", directoryError?.code || directoryError, directoryError?.message || "");
+      throw directoryError;
+    }
   }
 }
 
