@@ -2266,7 +2266,7 @@ if(localStorage.getItem("oc_demo_credit_10000_v1")==="granted"){
  try{const activity=JSON.parse(localStorage.getItem("oc_activity_history")||"[]");localStorage.setItem("oc_activity_history",JSON.stringify(activity.filter(a=>a.id&&!String(a.id).startsWith("demo-credit-10000-")&&a.title!=="$10,000 Demo Credit").slice(0,1000)))}catch(e){}
  localStorage.removeItem("oc_demo_credit_10000_v1");
 }
-// One-time cleanup of old browser-only practice credits and practice trade history.
+// One-time cleanup of old browser-only balance credits and trade history.
 // This does not touch Firebase customer profiles, KYC records or transaction collections.
 if(localStorage.getItem("oc_practice_cleanup_v2")!=="done"){
  state.balance=0;
@@ -3640,7 +3640,7 @@ onAuthStateChanged(auth, (user) => {
   window.onchaincryptoCurrentUser = user || null;
   if (user) { window.ocLoggedOut = false; window.__ocSignedOutHistoryBoundary=false; document.documentElement.classList.remove("oc-auth-pending"); document.body.classList.remove("oc-logged-out"); window.ocSetAuthScreenVisibility?.(true); void (async () => {
     await loadSavedUserProfile(user);
-    // Legacy cloud practice credits are no longer copied into customer wallet views.
+    // Legacy cloud credits are no longer copied into customer wallet views.
     try { await saveBasicUserProfile(user); }
     catch (error) {
       console.error("Signed-in profile sync failed:", error?.code || error, error?.message || "");
@@ -7232,7 +7232,7 @@ main:has(> #page-withdraw:not(.hidden)) .oc-workspace-levels {
 </style>
 
 <style id="oc-remove-unwanted-home-market-browser-panels">
-/* Home: remove the practice-balance and active-coins summary cards only. */
+/* Home: remove the balance and active-coins summary cards only. */
 #page-home .cards .card:has(#homeSummaryBalance),
 #page-home .cards .card:has(#homeActiveCoinCount) {
   display: none !important;
@@ -11016,7 +11016,7 @@ body.oc-logged-out.oc-auth-screen #page-register .auth-google-btn{width:100%!imp
 
 <!-- Visitor-side navigation and authentication recovery -->
 <style id="oc-visitor-navigation-recovery">
-/* Visitors can browse the public market, markets and practice-trade screens. */
+/* Visitors can browse the public market, markets and trade screens. */
 body.oc-logged-out:not(.oc-auth-screen) main > section[id^="page-"]:not(#page-public-market):not(#page-markets):not(#page-trade){display:none!important}
 body.oc-logged-out:not(.oc-auth-screen) main > #page-public-market:not(.hidden),
 body.oc-logged-out:not(.oc-auth-screen) main > #page-markets:not(.hidden),
