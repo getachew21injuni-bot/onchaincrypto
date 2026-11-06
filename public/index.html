@@ -6531,6 +6531,13 @@ document.addEventListener("click",event=>{
  if(!link)return;event.preventDefault();
  if(!currentUser){goToLogin();return;}
  if(typeof window.showPage==="function")window.showPage("support");
+ const openRequestForm=()=>{
+  const form=byId("support-ticket-section"),subject=byId("supportSubject");
+  if(form)form.scrollIntoView({behavior:"smooth",block:"start"});
+  if(subject)subject.focus({preventScroll:true});
+ };
+ if(typeof window.requestAnimationFrame==="function")window.requestAnimationFrame(()=>window.requestAnimationFrame(openRequestForm));
+ else openRequestForm();
 });
 onAuthStateChanged(auth,user=>{
  currentUser=user||null;isAdmin=!!(user&&user.emailVerified&&adminEmails.includes(String(user.email||"").trim()));
