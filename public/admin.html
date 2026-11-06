@@ -96,7 +96,7 @@ const descriptions={
 'Addresses':'Manage deposit address records only after secure wallet infrastructure is configured.',
 'Trades':'Review order history after a trusted trading backend is connected.',
 'Brokerage':'Review Alpaca brokerage eligibility requests. Approval does not activate live order routing.',
-'Trade Controls':'Configure transparent paper-trading take-profit and stop-loss thresholds for testing. These settings are local to this browser and do not control user trades.',
+'Trade Controls':'Manage practice-trading permissions and maximum practice order sizes for every saved Onchain user profile. Settings are saved to the shared account record.',
 'Assets':'Adjust practice coin balances to a selected user wallet or view the supported asset balances.',
 'Transfers':'Review transfer requests after server-side authorization is implemented.',
 'History':'View platform event history after the audit-log backend is connected.',
@@ -108,7 +108,7 @@ async function renderTradeControls(){
  const api=window.__ocAdminFirebase;
  body.innerHTML='<div class="content-panel"><p class="muted">Loading users…</p></div>';
  if(!api){body.textContent='Firebase admin connection is not ready. Refresh and sign in again.';return;}
- const {db,collection,getDocs,query,limit,doc,setDoc,serverTimestamp,auth}=api;
+ const {db,collection,getDocs,doc,setDoc,serverTimestamp,auth}=api;
  try{
   let current=auth.currentUser;
   if(!current)throw new Error('Verified administrator sign-in required. Please sign in again.');
@@ -120,10 +120,10 @@ async function renderTradeControls(){
   // Bound the read so a stalled network request cannot leave this panel loading forever.
   let loadTimer;
   const snap=await Promise.race([
-   getDocs(query(collection(db,'users'),limit(100))),
+   getDocs(collection(db,'users')),
    new Promise((_,reject)=>{loadTimer=setTimeout(()=>reject(new Error('User profile request timed out after 15 seconds. Check your connection and Firestore availability, then retry.')),15000);})
   ]).finally(()=>clearTimeout(loadTimer));
-  const users=snap.docs.map(d=>({id:d.id,...d.data()})).filter(u=>u.email||u.displayName||u.firstName||u.lastName);
+  const users=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
   if(!users.length){body.innerHTML='<div class="notice">No registered user profiles were found in Firestore yet. Users appear here after their profile is created.</div>';return;}
   body.innerHTML=`
    <div id="tradeControlsPanel" style="display:grid;gap:16px;max-width:900px">
@@ -143,7 +143,7 @@ async function renderTradeControls(){
      <button id="saveTradeControl" class="icon-btn" style="width:100%;padding:14px;margin-top:18px;background:linear-gradient(90deg,#24b8d2,#20d9dc);border:0;color:#062b3a;font-weight:800">Save trade controls</button>
      <p id="tradeControlMessage" class="muted" role="status" aria-live="polite">Loading this user's saved settings…</p>
     </div>
-    <div class="content-panel"><h3 style="margin-top:0">Registered profiles: ${users.length}</h3><p class="muted">Example accounts A, B and C have been removed. Only user profiles returned by Firestore are listed here. Saved settings are account-level records; enforcement in trade execution must also be enabled before these settings can restrict live trades.</p></div>
+    <div class="content-panel"><h3 style="margin-top:0">Registered profiles: ${users.length}</h3><p class="muted">Example accounts A, B and C have been removed. Every Firestore user profile is listed here without filtering by email, name, trading activity, or account status. Saved settings are account-level records; enforcement in trade execution must also be enabled before these settings can restrict live trades.</p></div>
    </div>`;
   const select=body.querySelector('#tradeControlUser'),enabled=body.querySelector('#tradeControlEnabled'),max=body.querySelector('#tradeControlMax'),message=body.querySelector('#tradeControlMessage');
   const load=async()=>{const u=users.find(x=>x.id===select.value);enabled.checked=u?.tradingEnabled!==false;max.value=Number(u?.maxTradeAmountUSDT||1000000);message.textContent='Current settings loaded for '+(u?.email||u?.displayName||u?.id||'selected user')+'.';};
