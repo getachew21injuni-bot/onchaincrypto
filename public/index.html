@@ -6146,7 +6146,7 @@ root.querySelector(".oc-support-close").addEventListener("click",()=>root.classL
 root.querySelectorAll("[data-question]").forEach(b=>b.addEventListener("click",()=>{const q=b.dataset.question;add(q,"user");respond(q)}));
 root.querySelector("#ocSupportForm").addEventListener("submit",e=>{e.preventDefault();const q=input.value.trim();if(!q)return;add(q,"user");input.value="";respond(q);input.focus()});
 root.querySelector(".oc-support-register").addEventListener("click",()=>{root.classList.remove("is-open");if(typeof window.showPage==="function")window.showPage("register");else document.getElementById("page-register")?.scrollIntoView({behavior:"smooth",block:"start"})});
-setTimeout(()=>{if(document.body.classList.contains("oc-logged-out")){root.querySelector(".oc-support-launch-copy small").textContent="Welcome! Ask us anything";}},900);
+
 })();
 </script>
 
