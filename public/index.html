@@ -11233,3 +11233,96 @@ html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(.warning,.status-wa
 html body:not(.oc-auth-screen) :is(button,a,[role="button"],input,select,textarea):focus-visible{outline:2px solid #e5ad32!important;outline-offset:2px!important}
 </style>
 
+
+<style id="oc-unified-visitor-inspired-platform-theme">
+/* One coherent visitor-inspired design for every signed-in app section.
+   Public visitor showcase and login/register screens keep their own styling. */
+html:not(.oc-light-theme) body:not(.oc-auth-screen){
+  --bg:#020817;--panel:#071a30;--panel2:#0b2542;--line:#17456d;
+  --text:#f4f8ff;--muted:#b4c6dc;--blue:#36a4ff;--yellow:#75c8ff;
+  background:
+    radial-gradient(ellipse at 8% 5%,rgba(0,112,220,.34),transparent 34%),
+    radial-gradient(ellipse at 92% 12%,rgba(0,75,170,.28),transparent 35%),
+    radial-gradient(ellipse at 50% 78%,rgba(0,130,190,.13),transparent 48%),
+    linear-gradient(180deg,#020817 0%,#06172b 52%,#020817 100%)!important;
+  background-attachment:fixed!important;color:var(--text)!important;
+}
+html.oc-light-theme body:not(.oc-auth-screen){
+  --bg:#f5f9ff;--panel:#ffffff;--panel2:#edf4fc;--line:#cbdcf0;
+  --text:#14243a;--muted:#526780;--blue:#1769c2;--yellow:#155ca8;
+  background:
+    radial-gradient(ellipse at 8% 4%,rgba(45,145,255,.13),transparent 32%),
+    radial-gradient(ellipse at 92% 10%,rgba(36,112,220,.09),transparent 34%),
+    linear-gradient(180deg,#f8fbff 0%,#f1f6fd 55%,#f8fbff 100%)!important;
+  background-attachment:fixed!important;color:var(--text)!important;
+}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main>section:not(#page-public-market),
+html.oc-light-theme body:not(.oc-auth-screen) main>section:not(#page-public-market){
+  color:var(--text)!important;background:transparent!important;
+}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(h1,h2,h3,h4,h5,h6,.page-title,.section-title,.section-head strong,.card-title){
+  color:#f5f9ff!important;font-weight:800!important;text-shadow:0 0 22px rgba(43,151,255,.12)!important;
+}
+html.oc-light-theme body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(h1,h2,h3,h4,h5,h6,.page-title,.section-title,.section-head strong,.card-title){
+  color:#102b4a!important;text-shadow:none!important;
+}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(p,li,label,dt,dd,figcaption,.description,.helper-text,.section-subtitle,.muted,.tiny,small,.hint){
+  color:#bdcce0!important;
+}
+html.oc-light-theme body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(p,li,label,dt,dd,figcaption,.description,.helper-text,.section-subtitle,.muted,.tiny,small,.hint){
+  color:#4a6079!important;
+}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(strong,b,.big,.amount,.balance,.price,.stat-value,.metric-value){color:#f5f9ff!important}
+html.oc-light-theme body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(strong,b,.big,.amount,.balance,.price,.stat-value,.metric-value){color:#142b46!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(.panel,.card,.mini-card,.form-panel,.stat-card,.trade-card,.wallet-card,.market-card,.chart-card,.table-wrap,.settings-group,.faq-item,.level-card,.profile-menu-section,.more-menu,.resource-card,.quick-action,.performance-stats>div,.notice,.settings-item,.profile-menu-link,.order-card,.history-card){
+  background:linear-gradient(145deg,rgba(10,34,59,.97),rgba(5,20,37,.98))!important;
+  color:#f1f7ff!important;border:1px solid rgba(54,139,211,.34)!important;
+  box-shadow:0 12px 32px rgba(0,0,0,.16),inset 0 1px rgba(255,255,255,.035)!important;
+}
+html.oc-light-theme body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(.panel,.card,.mini-card,.form-panel,.stat-card,.trade-card,.wallet-card,.market-card,.chart-card,.table-wrap,.settings-group,.faq-item,.level-card,.profile-menu-section,.more-menu,.resource-card,.quick-action,.performance-stats>div,.notice,.settings-item,.profile-menu-link,.order-card,.history-card){
+  background:rgba(255,255,255,.96)!important;color:#172b43!important;
+  border:1px solid #d3e1f1!important;box-shadow:0 8px 24px rgba(25,80,135,.07)!important;
+}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(input,select,textarea,.field,.search){
+  background:#041426!important;color:#f5f9ff!important;border:1px solid #315a7d!important;
+}
+html.oc-light-theme body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(input,select,textarea,.field,.search){
+  background:#fff!important;color:#172b43!important;border:1px solid #b9cde3!important;
+}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(input,textarea)::placeholder{color:#9db2ca!important;opacity:1!important}
+html.oc-light-theme body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(input,textarea)::placeholder{color:#647a93!important;opacity:1!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(th){background:#102d4b!important;color:#d8edff!important}
+html.oc-light-theme body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(th){background:#e7f0fa!important;color:#183b60!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(td){color:#e1edfa!important;border-color:#244563!important}
+html.oc-light-theme body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(td){color:#263d57!important;border-color:#d8e3ef!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) :is(header,footer,.bottom-nav){
+  color:#f4f8ff!important;background:rgba(2,12,27,.94)!important;border-color:#17456d!important;
+  box-shadow:0 8px 30px rgba(0,0,0,.12);
+}
+html.oc-light-theme body:not(.oc-auth-screen) :is(header,footer,.bottom-nav){
+  color:#172b43!important;background:rgba(255,255,255,.96)!important;border-color:#d3e1f1!important;
+  box-shadow:0 8px 24px rgba(25,80,135,.06);
+}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) .brand{color:#f7fbff!important;text-shadow:0 0 22px rgba(36,151,255,.3)!important}
+html.oc-light-theme body:not(.oc-auth-screen) .brand{color:#12375d!important;text-shadow:none!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) :is(header nav button,.bottom-nav button){color:#b7c9dd!important}
+html.oc-light-theme body:not(.oc-auth-screen) :is(header nav button,.bottom-nav button){color:#526780!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) :is(header nav button.active,.bottom-nav button.active){color:#69bdff!important;font-weight:850!important;text-shadow:0 0 14px rgba(54,164,255,.25)!important}
+html.oc-light-theme body:not(.oc-auth-screen) :is(header nav button.active,.bottom-nav button.active){color:#155fae!important;font-weight:850!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main>section:not(#page-public-market) a{color:#79c4ff!important}
+html.oc-light-theme body:not(.oc-auth-screen) main>section:not(#page-public-market) a{color:#155fae!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(button.secondary,.secondary,.resource-action){background:#102d4b!important;color:#edf7ff!important;border-color:#38648a!important}
+html.oc-light-theme body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(button.secondary,.secondary,.resource-action){background:#eaf2fb!important;color:#183b60!important;border-color:#b9cde3!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(button.primary,.primary,.btn-primary,.oc-primary-btn){
+  color:#061426!important;background:linear-gradient(110deg,#55c8ff,#3688ef)!important;border:1px solid #65caff!important;
+  box-shadow:0 6px 22px rgba(30,142,255,.25)!important;
+}
+html.oc-light-theme body:not(.oc-auth-screen) main>section:not(#page-public-market) :is(button.primary,.primary,.btn-primary,.oc-primary-btn){
+  color:#fff!important;background:linear-gradient(110deg,#176fc5,#348fe7)!important;border:1px solid #176fc5!important;
+}
+html body:not(.oc-auth-screen) :is(button,a,[role="button"],input,select,textarea):focus-visible{outline:2px solid #55baff!important;outline-offset:3px!important}
+@media(max-width:700px){
+ html:not(.oc-light-theme) body:not(.oc-auth-screen) .bottom-nav{background:rgba(2,12,27,.97)!important}
+ html.oc-light-theme body:not(.oc-auth-screen) .bottom-nav{background:rgba(255,255,255,.98)!important}
+}
+</style>
