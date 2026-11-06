@@ -11157,3 +11157,79 @@ body.oc-logged-out.oc-auth-screen>header #ocForwardBtn{display:inline-flex!impor
   syncButtons();
 })();
 </script>
+
+
+<style id="oc-platform-global-contrast-audit">
+/* Platform-wide accessible contrast pass. Keeps layout and app behaviour unchanged. */
+html.oc-light-theme body:not(.oc-auth-screen){
+  color:#182230!important;
+  --text:#182230;--muted:#536174;--panel:#ffffff;--panel2:#f1f5f9;
+  --line:#cbd5e1;--yellow:#946200;--green:#087a50;--red:#bd3045;--blue:#205db5;
+}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(h1,h2,h3,h4,h5,h6,.page-title,.section-title,.section-head strong,.card-title){
+  color:#111827!important;font-weight:800!important;text-shadow:none!important;
+}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(p,li,label,dt,dd,figcaption,.description,.helper-text,.section-subtitle,.muted,.tiny,small){
+  color:#3d4a5c!important;text-shadow:none!important;
+}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(strong,b,.big,.amount,.balance,.price,.stat-value,.metric-value){
+  color:#172235!important;
+}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(.panel,.card,.mini-card,.form-panel,.stat-card,.trade-card,.wallet-card,.market-card,.chart-card,.table-wrap,.settings-group,.faq-item,.level-card,.profile-menu-section,.more-menu,.resource-card,.oc-copy-profile,.oc-visitor-product-card,.oc-visitor-about,.oc-visitor-detail,.oc-visitor-account-gate){
+  background:#fff!important;color:#182230!important;border-color:#cbd5e1!important;
+}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(.panel,.card,.mini-card,.form-panel,.stat-card,.trade-card,.wallet-card,.market-card,.chart-card,.table-wrap,.settings-group,.faq-item,.level-card,.profile-menu-section,.more-menu,.resource-card,.oc-copy-profile,.oc-visitor-product-card,.oc-visitor-about,.oc-visitor-detail,.oc-visitor-account-gate) :is(h1,h2,h3,h4,h5,h6,strong,b,label,summary){
+  color:#172235!important;
+}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(.panel,.card,.mini-card,.form-panel,.stat-card,.trade-card,.wallet-card,.market-card,.chart-card,.table-wrap,.settings-group,.faq-item,.level-card,.profile-menu-section,.more-menu,.resource-card,.oc-copy-profile,.oc-visitor-product-card,.oc-visitor-about,.oc-visitor-detail,.oc-visitor-account-gate) :is(p,li,small,.muted,.tiny,span:not(.positive):not(.negative):not(.green):not(.red):not(.yellow)){
+  color:#435166;
+}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(input,select,textarea,.field,.search){
+  background:#fff!important;color:#172235!important;border-color:#aebccc!important;
+}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(input,textarea)::placeholder{color:#657386!important;opacity:1!important}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(th){background:#eaf0f6!important;color:#26364b!important}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(td){color:#263244!important;border-color:#d7e0e9!important}
+html.oc-light-theme body:not(.oc-auth-screen) :is(header,footer,.bottom-nav){color:#182230!important}
+html.oc-light-theme body:not(.oc-auth-screen) :is(header nav button,.bottom-nav button){color:#35445a!important}
+html.oc-light-theme body:not(.oc-auth-screen) :is(header nav button.active,.bottom-nav button.active){color:#174ea6!important;font-weight:800!important}
+html.oc-light-theme body:not(.oc-auth-screen) main a{color:#1558b0!important}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(button.secondary,.secondary,.resource-action){background:#edf2f7!important;color:#1d2b3d!important;border-color:#aebccc!important}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(button.primary,.primary,.btn-primary,.oc-primary-btn){color:#111827!important}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(.positive,.profit,.success,.status-success,.text-green,.green){color:#087a50!important}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(.negative,.loss,.danger,.status-danger,.text-red,.red){color:#b4233a!important}
+html.oc-light-theme body:not(.oc-auth-screen) main :is(.warning,.status-warning,.text-amber,.yellow){color:#805600!important}
+
+html:not(.oc-light-theme) body:not(.oc-auth-screen){
+  color:#e8edf5!important;
+  --text:#e8edf5;--muted:#b3bfce;--panel:#171d27;--panel2:#202a37;
+  --line:#435064;--yellow:#ffd166;--green:#39d9a0;--red:#ff788d;--blue:#75b7ff;
+}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(h1,h2,h3,h4,h5,h6,.page-title,.section-title,.section-head strong,.card-title){
+  color:#f7f9fc!important;font-weight:800!important;text-shadow:none!important;
+}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(p,li,label,dt,dd,figcaption,.description,.helper-text,.section-subtitle,.muted,.tiny,small){
+  color:#c2ccda!important;text-shadow:none!important;
+}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(strong,b,.big,.amount,.balance,.price,.stat-value,.metric-value){color:#f4f7fb!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(.panel,.card,.mini-card,.form-panel,.stat-card,.trade-card,.wallet-card,.market-card,.chart-card,.table-wrap,.settings-group,.faq-item,.level-card,.profile-menu-section,.more-menu,.resource-card,.oc-copy-profile,.oc-visitor-product-card,.oc-visitor-about,.oc-visitor-detail,.oc-visitor-account-gate){
+  background:#171d27!important;color:#e8edf5!important;border-color:#435064!important;
+}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(.panel,.card,.mini-card,.form-panel,.stat-card,.trade-card,.wallet-card,.market-card,.chart-card,.table-wrap,.settings-group,.faq-item,.level-card,.profile-menu-section,.more-menu,.resource-card,.oc-copy-profile,.oc-visitor-product-card,.oc-visitor-about,.oc-visitor-detail,.oc-visitor-account-gate) :is(h1,h2,h3,h4,h5,h6,strong,b,label,summary){color:#f7f9fc!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(.panel,.card,.mini-card,.form-panel,.stat-card,.trade-card,.wallet-card,.market-card,.chart-card,.table-wrap,.settings-group,.faq-item,.level-card,.profile-menu-section,.more-menu,.resource-card,.oc-copy-profile,.oc-visitor-product-card,.oc-visitor-about,.oc-visitor-detail,.oc-visitor-account-gate) :is(p,li,small,.muted,.tiny,span:not(.positive):not(.negative):not(.green):not(.red):not(.yellow)){color:#c2ccda}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(input,select,textarea,.field,.search){background:#0d131c!important;color:#f3f6fa!important;border-color:#536176!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(input,textarea)::placeholder{color:#aab6c5!important;opacity:1!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(th){background:#263243!important;color:#f2c75c!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(td){color:#e3eaf3!important;border-color:#3c4859!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) :is(header,footer,.bottom-nav){color:#edf2f8!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) :is(header nav button,.bottom-nav button){color:#d5deea!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) :is(header nav button.active,.bottom-nav button.active){color:#ffd166!important;font-weight:800!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main a{color:#8fc5ff!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(button.secondary,.secondary,.resource-action){background:#263243!important;color:#f0f4fa!important;border-color:#58677b!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(button.primary,.primary,.btn-primary,.oc-primary-btn){color:#101820!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(.positive,.profit,.success,.status-success,.text-green,.green){color:#49e0aa!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(.negative,.loss,.danger,.status-danger,.text-red,.red){color:#ff8799!important}
+html:not(.oc-light-theme) body:not(.oc-auth-screen) main :is(.warning,.status-warning,.text-amber,.yellow){color:#ffd477!important}
+html body:not(.oc-auth-screen) :is(button,a,[role="button"],input,select,textarea):focus-visible{outline:2px solid #e5ad32!important;outline-offset:2px!important}
+</style>
+
