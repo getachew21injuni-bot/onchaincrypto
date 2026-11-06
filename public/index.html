@@ -4193,11 +4193,11 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     const currentPage=pages().find(section=>!section.classList.contains('hidden'));
     const currentName=currentPage?.id?.slice(5);
     if(currentName && currentName!==page && !opts.noStack && !window.__ocHandlingPopstate){pageStack.push(currentName);if(pageStack.length>30)pageStack.shift();}
-    if(currentName && currentName!==page && !opts.noStack){
+    if(currentName && currentName!==page && !opts.noStack && !window.__ocHandlingPopstate){
       const authMode=page==="register"?(document.body.classList.contains("oc-register-mode")?"register":"login"):null;
       const routeUrl=location.pathname+location.search+(page==="register"?(authMode==="register"?"#register":"#login"):"#"+page);
       try{const ocIndex=Number(history.state?.ocIndex||0)+1;history.pushState({ocAppRoute:true,ocPage:page,ocAuthMode,ocIndex},"",routeUrl);window.__ocAppHistoryMaxIndex=ocIndex;}catch(error){console.warn("Navigation history could not be updated:",error);}
-      window.__ocAppHistoryDepth=(window.__ocAppHistoryDepth||0)+1;
+      window.__ocAppHistoryDepth=Number(history.state?.ocIndex||0);
       window.__ocAppCanForward=false;
     }
     // Do not call the legacy page router here: its old listeners could re-open Trade
