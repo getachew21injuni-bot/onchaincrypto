@@ -3529,7 +3529,15 @@ onAuthStateChanged(auth, (user) => {
       window.ocSetAuthScreenVisibility?.(false);
       document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-public-market"));
       window.showPage?.("public-market");
-      try { history.replaceState({ocSignedOut:true}, "", location.pathname + location.search); } catch (_) {}
+      try {
+        const keepLogoutBoundary=window.__ocSignedOutHistoryBoundary===true||history.state?.ocSignedOutBoundary===true;
+        if(keepLogoutBoundary){
+          window.__ocSignedOutHistoryBoundary=true;
+          history.replaceState({ocAppRoute:true,ocPage:"public-market",ocAuthMode:null,ocIndex:0,ocSignedOutBoundary:true,ocLogoutBoundary:true},"",location.pathname+location.search);
+        }else{
+          history.replaceState({ocSignedOut:true},"",location.pathname+location.search);
+        }
+      } catch (_) {}
     }
   const status = document.getElementById("authStatus");
   const signOutBtn = document.getElementById("signOutBtn");
@@ -3619,9 +3627,12 @@ document.addEventListener("click", event => {
 window.addEventListener("pageshow", async () => {
   try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
   if (!auth.currentUser && window.ocLoggedOut === true) {
-    if (location.hash === "#login") window.ocForceSignInScreen?.();
-    else {
-      document.body.classList.remove("oc-auth-screen");
+    if (location.hash === "#login" || location.hash === "#register") {
+      document.body.classList.add("oc-auth-screen");
+      document.body.classList.toggle("oc-register-mode",location.hash==="#register");
+      window.ocForceSignInScreen?.();
+    } else {
+      document.body.classList.remove("oc-auth-screen","oc-register-mode");
       document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-public-market"));
       window.showPage?.("public-market");
     }
@@ -10936,6 +10947,8 @@ body.oc-logged-out.oc-auth-screen>header #ocForwardBtn{display:inline-flex!impor
 </style>
 <script id="oc-browser-and-platform-history">
 (function(){
+  // Restore the logout boundary after a page reload from the current history entry.
+  if(history.state?.ocSignedOutBoundary===true)window.__ocSignedOutHistoryBoundary=true;
   const header=document.querySelector("body>header .header-right");
   const back=document.getElementById("ocBackBtn");
   if(!header||!back)return;
