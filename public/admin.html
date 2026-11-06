@@ -132,7 +132,7 @@ async function renderTradeControls(){
      <p class="muted">Select an actual registered profile. These controls store account trading permission and a maximum trade amount; they do not force wins or losses or alter market prices.</p>
      <label style="display:grid;gap:8px;font-weight:700">Select registered user
       <select id="tradeControlUser" style="width:100%;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#10243a;color:white">
-       ${users.map(u=>'<option value="'+safeText(u.id)+'">'+safeText((u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id)+' — '+(u.email||u.id))+'</option>').join('')}
+       ${users.map(u=>'<option value="'+esc(u.id)+'">'+esc((u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id)+' — '+(u.email||u.id))+'</option>').join('')}
       </select>
      </label>
      <div style="height:1px;background:#ffffff20;margin:18px 0"></div>
@@ -161,7 +161,7 @@ async function renderTradeControls(){
   });
  }catch(e){
   const detail=String(e.code||e.message||'unknown error');
-  body.innerHTML='<div class="notice"><strong>Could not load registered users.</strong><p>'+safeText(detail)+'</p><p>Confirm you are signed in with the verified administrator email and that Firestore is reachable.</p><button type="button" id="retryTradeUsers" class="icon-btn">↻ Retry loading users</button></div>';
+  body.innerHTML='<div class="notice"><strong>Could not load registered users.</strong><p>'+esc(detail)+'</p><p>Confirm you are signed in with the verified administrator email and that Firestore is reachable.</p><button type="button" id="retryTradeUsers" class="icon-btn">↻ Retry loading users</button></div>';
   body.querySelector('#retryTradeUsers')?.addEventListener('click',()=>renderTradeControls());
  }
 }
