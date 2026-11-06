@@ -6454,6 +6454,45 @@ onAuthStateChanged(auth,user=>{
   }
 </style>
 
+
+<style id="oc-visitor-feature-grid-glow-contrast">
+  /* Match the four About Onchain feature tiles to the black-and-gold glowing cards */
+  #page-public-market .oc-visitor-feature-grid article{
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(145deg,#05070b 0%,#090d13 58%,#10151d 100%)!important;
+    border:1px solid rgba(231,184,82,.42)!important;
+    border-radius:14px;
+    box-shadow:0 8px 24px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.035);
+    transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+  }
+  #page-public-market .oc-visitor-feature-grid article:hover{
+    transform:translateY(-3px);
+    border-color:rgba(244,194,91,.9)!important;
+    box-shadow:0 10px 30px rgba(0,0,0,.5),0 0 20px rgba(225,171,61,.17),inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  #page-public-market .oc-visitor-feature-grid article>b{
+    display:inline-grid;
+    place-items:center;
+    width:36px;height:36px;
+    border-radius:11px;
+    color:#080b10!important;
+    background:linear-gradient(145deg,#ffe39a,#dca83d)!important;
+    border:1px solid rgba(255,232,173,.9);
+    box-shadow:0 0 8px rgba(255,199,82,.48),0 0 20px rgba(255,184,55,.2),inset 0 1px 0 rgba(255,255,255,.65);
+  }
+  #page-public-market .oc-visitor-feature-grid h3{
+    color:#fff!important;
+    font-weight:850;
+    text-shadow:0 0 10px rgba(220,235,255,.22),0 1px 2px #000;
+  }
+  #page-public-market .oc-visitor-feature-grid p{color:#c5cfdb!important}
+  @media(prefers-reduced-motion:reduce){
+    #page-public-market .oc-visitor-feature-grid article{transition:none}
+    #page-public-market .oc-visitor-feature-grid article:hover{transform:none}
+  }
+</style>
+
 </body>
 </html>
 
