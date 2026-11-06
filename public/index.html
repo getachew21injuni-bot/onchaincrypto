@@ -2031,11 +2031,11 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
         <button type="button" class="sell" data-admin-demo-mode="lose">↘ Set Loss Outcome</button>
       </div>
       <p id="ocAdminModeMessage" class="muted tiny" aria-live="polite">Connecting to shared settings…</p>
-    </section>
-    <section class="panel" style="margin-bottom:16px">
-      <div class="section-head"><h2>All Registered Users</h2><strong id="ocAdminUserCount">Loading…</strong></div>
-      <p class="muted tiny">Existing profiles and new profiles are listed automatically when their account profile is created or refreshed.</p>
+      <div class="divider" style="margin:18px 0"></div>
+      <div class="section-head"><h3>Registered users · Individual practice controls</h3><strong id="ocAdminUserCount">Loading…</strong></div>
+      <p class="muted tiny">Manage practice-trading access and the maximum practice order size for each connected profile. These settings do not affect real funds.</p>
       <div id="ocAdminUsersList" class="notice">Waiting for administrator access…</div>
+      <p id="ocAdminUserControlMessage" class="muted tiny" aria-live="polite"></p>
     </section>
     <section id="ocAdminSupportInbox" class="panel form-panel" style="margin-bottom:16px">
       <div class="section-head"><h2>Customer Support Inbox</h2><span class="tag">PRIVATE MESSAGES</span></div>
@@ -5134,12 +5134,14 @@ function renderUsers(snapshot){
  snapshot.docs.forEach(item=>{const data=item.data()||{};if(data.adminAssigned!==true){void setDoc(doc(db,"users",item.id),{adminAssigned:true},{merge:true}).catch(error=>console.warn("Existing user admin assignment could not be backfilled:",item.id,error.code||error));}});
  const rows=snapshot.docs.map(item=>({uid:item.id,...(item.data()||{})})).sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
  if(count)count.textContent=rows.length+" users";
+ host.classList.remove("notice");
  host.innerHTML=rows.length?rows.map(user=>{
   const name=String(user.displayName||[user.firstName,user.lastName].filter(Boolean).join(" ")||"Unnamed user");
   const created=user.createdAt?new Date(user.createdAt).toLocaleString():"Registration date unavailable";
-  const status=String(user.accountStatus||"active");
-  return '<article class="list-row" style="align-items:flex-start;gap:12px"><div style="min-width:0;flex:1"><strong>'+escapeHtml(name)+'</strong><div class="muted tiny">'+escapeHtml(user.email||user.phoneNumber||"No contact details")+'</div><div class="muted tiny">UID: '+escapeHtml(user.uid)+'</div><div class="muted tiny">Registered: '+escapeHtml(created)+'</div></div><div><span class="tag">'+escapeHtml(status)+'</span><div class="muted tiny" style="text-align:right">'+(user.adminAssigned===true?"Admin connected":"Profile syncing")+'</div></div></article>';
- }).join(""):'<div class="empty">No connected user profiles yet. Each existing user must sign in once; new sign-ins and registrations are added automatically.</div>';
+  const status=String(user.accountStatus||"active"),enabled=user.tradingEnabled!==false;
+  const maxAmount=Number(user.maxTradeAmountUSDT??1000),uid=escapeHtml(user.uid);
+  return '<article class="list-row" data-user-control-row="'+uid+'" style="display:block;margin:10px 0;padding:14px;border:1px solid var(--border-color,rgba(128,128,128,.25));border-radius:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div style="min-width:0;flex:1"><strong>'+escapeHtml(name)+'</strong><div class="muted tiny">'+escapeHtml(user.email||user.phoneNumber||"No contact details")+'</div><div class="muted tiny">UID: '+uid+'</div><div class="muted tiny">Registered: '+escapeHtml(created)+'</div></div><span class="tag">'+escapeHtml(status)+'</span></div><div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:12px"><label style="display:flex;gap:8px;align-items:center;margin:0"><input type="checkbox" data-user-trading-enabled '+(enabled?"checked":"")+'> Practice trading enabled</label><label style="display:flex;gap:8px;align-items:center;margin:0">Max practice order (USDT)<input type="number" min="100" max="1000000" step="1" value="'+(Number.isFinite(maxAmount)?maxAmount:1000)+'" data-user-max-trade style="width:125px"></label><button type="button" class="secondary" data-save-user-trade-control>Save user settings</button></div><div class="muted tiny" style="margin-top:6px">Current setting: '+(enabled?"Enabled":"Disabled")+' · Max: '+(Number.isFinite(maxAmount)?maxAmount.toLocaleString():"1,000")+' USDT</div></article>';
+ }).join(""):'<div class="empty">No Firestore user profiles found yet. Existing accounts appear after each user signs in once; new registrations are added when their profile is saved.</div>';
 }
 // Ensure every account that signs in has a minimal directory profile.
 // This self-profile write never reads or changes balances.
@@ -5173,6 +5175,25 @@ onAuthStateChanged(auth,user=>{
   if(byId("ocAdminUsersList"))byId("ocAdminUsersList").textContent="Loading connected user profiles…";
   stopUsers=onSnapshot(collection(db,"users"),renderUsers,error=>{console.error("Admin user directory listener failed:",error);if(byId("ocAdminUsersList"))byId("ocAdminUsersList").textContent="Could not load users ("+(error.code||"connection error")+"). Check that the administrator email is verified and Firestore rules are deployed.";});
  }else if(byId("ocAdminUsersList"))byId("ocAdminUsersList").textContent="Sign in with the verified administrator email to view connected user profiles.";
+});
+document.addEventListener("click",async event=>{
+ const saveButton=event.target.closest("[data-save-user-trade-control]");
+ if(!saveButton)return;
+ if(!currentAdmin||!auth.currentUser||!auth.currentUser.emailVerified){if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent="Only the verified administrator can update user controls.";return;}
+ const row=saveButton.closest("[data-user-control-row]");if(!row)return;
+ const uid=row.getAttribute("data-user-control-row");
+ const enabled=!!row.querySelector("[data-user-trading-enabled]")?.checked;
+ const maxAmount=Number(row.querySelector("[data-user-max-trade]")?.value);
+ if(!Number.isFinite(maxAmount)||maxAmount<100||maxAmount>1000000){if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent="Maximum practice order must be between 100 and 1,000,000 USDT.";return;}
+ saveButton.disabled=true;
+ if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent="Saving practice controls…";
+ try{
+  await setDoc(doc(db,"users",uid),{tradingEnabled:enabled,maxTradeAmountUSDT:maxAmount,tradeControlUpdatedAt:serverTimestamp(),tradeControlUpdatedBy:auth.currentUser.email},{merge:true});
+  if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent="Practice controls saved for "+uid+".";
+ }catch(error){
+  console.error("Per-user practice controls could not be saved:",error);
+  if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent="Could not save settings ("+(error.code||"connection error")+"). Check Firestore rules.";
+ }finally{saveButton.disabled=false;}
 });
 document.addEventListener("click",async event=>{
  const button=event.target.closest("[data-admin-demo-mode]");if(!button)return;
