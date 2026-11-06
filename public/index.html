@@ -3598,7 +3598,8 @@ document.addEventListener("click", event => {
       target.closest("#signInForm") || target.closest("#registerForm") ||
       target.closest("#authPhonePanel") || target.closest("#authPhoneDivider") ||
       target.closest("#resetPasswordBtn") || target.closest("#googleSignInBtn") ||
-      target.closest("#register-nav") || target.closest("#mobileRegisterBtn")) return;
+      target.closest("#register-nav") || target.closest("#mobileRegisterBtn") ||
+      target.closest("#ocBackBtn") || target.closest("#ocForwardBtn")) return;
   if (target.closest("button,a,[role=button],[data-page],[data-bottom-page],[data-menu-page]")) {
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -4196,7 +4197,7 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     if(currentName && currentName!==page && !opts.noStack && !window.__ocHandlingPopstate){
       const authMode=page==="register"?(document.body.classList.contains("oc-register-mode")?"register":"login"):null;
       const routeUrl=location.pathname+location.search+(page==="register"?(authMode==="register"?"#register":"#login"):"#"+page);
-      try{const ocIndex=Number(history.state?.ocIndex||0)+1;history.pushState({ocAppRoute:true,ocPage:page,ocAuthMode,ocIndex},"",routeUrl);window.__ocAppHistoryMaxIndex=ocIndex;}catch(error){console.warn("Navigation history could not be updated:",error);}
+      try{const ocIndex=Number(history.state?.ocIndex||0)+1;history.pushState({ocAppRoute:true,ocPage:page,ocAuthMode:authMode,ocIndex},"",routeUrl);window.__ocAppHistoryMaxIndex=ocIndex;}catch(error){console.warn("Navigation history could not be updated:",error);}
       window.__ocAppHistoryDepth=Number(history.state?.ocIndex||0);
       window.__ocAppCanForward=false;
     }
