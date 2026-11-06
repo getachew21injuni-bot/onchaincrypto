@@ -6141,7 +6141,8 @@ const respond=async q=>{
  else add(answer("I can help explain OnChainCrypto, accounts, passwords, KYC, Wallet, deposits, withdrawals, conversions, trading, Markets, BTC and other coins, gold, stocks, copy trading, fees, security and how to read History. Try asking in your own words—for example, “What is Bitcoin?”, “How do I withdraw?”, “What is KYC?” or “What is gold trading?”. If your question is account-specific or I cannot resolve it, email support."));
 };
 
-root.querySelector(".oc-support-launch").addEventListener("click",()=>root.classList.contains("is-open")?(root.classList.remove("is-open")):open());
+const open=()=>{root.classList.add("is-open");if(!messages.childElementCount)add("Hello! I’m Onchain Support. Ask me about accounts, KYC, deposits, withdrawals, trading, markets, coins or anything about using the platform. I’ll guide you, and you can email our support team for personal assistance: "+supportEmail+".");};
+root.querySelector(".oc-support-launch").addEventListener("click",()=>root.classList.contains("is-open")?root.classList.remove("is-open"):open());
 root.querySelector(".oc-support-close").addEventListener("click",()=>root.classList.remove("is-open"));
 root.querySelectorAll("[data-question]").forEach(b=>b.addEventListener("click",()=>{const q=b.dataset.question;add(q,"user");respond(q)}));
 root.querySelector("#ocSupportForm").addEventListener("submit",e=>{e.preventDefault();const q=input.value.trim();if(!q)return;add(q,"user");input.value="";respond(q);input.focus()});
