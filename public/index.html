@@ -11472,4 +11472,73 @@ html body:not(.oc-auth-screen) :is(button,a,[role="button"],input,select,textare
  html:not(.oc-light-theme) body:not(.oc-auth-screen) .bottom-nav{background:rgba(2,12,27,.97)!important}
  html.oc-light-theme body:not(.oc-auth-screen) .bottom-nav{background:rgba(255,255,255,.98)!important}
 }
+
+<style id="oc-bright-navigation-wallet-refresh">
+/* Brighter navigation, clearer headings and a light wallet balance card */
+body:not(.oc-auth-screen) main .page-title :is(h1,h2,h3),
+body:not(.oc-auth-screen) main #homeGreeting{
+  color:#eaf8ff!important;
+  font-weight:900!important;
+  letter-spacing:.15px;
+  text-shadow:0 0 5px rgba(68,190,255,.72),0 0 14px rgba(37,153,255,.48)!important;
+}
+body:not(.oc-auth-screen) header nav button,
+body:not(.oc-auth-screen) .bottom-nav button{
+  color:#e5f5ff!important;
+  font-weight:800!important;
+  text-shadow:0 1px 5px rgba(0,110,190,.3)!important;
+}
+body:not(.oc-auth-screen) header nav button.active,
+body:not(.oc-auth-screen) .bottom-nav button.active{
+  color:#fff!important;
+  background:linear-gradient(135deg,#168fe8,#36c6e8)!important;
+  border:1px solid rgba(255,255,255,.55)!important;
+  box-shadow:0 0 0 1px rgba(42,174,255,.18),0 5px 18px rgba(22,145,220,.28),0 0 16px rgba(59,196,255,.3)!important;
+  text-shadow:0 1px 5px rgba(0,64,120,.3)!important;
+}
+body:not(.oc-auth-screen) .bottom-nav{
+  background:linear-gradient(110deg,rgba(15,64,101,.98),rgba(20,105,145,.98),rgba(21,78,125,.98))!important;
+  border-top:1px solid rgba(117,218,255,.65)!important;
+  box-shadow:0 -7px 28px rgba(0,110,180,.22)!important;
+}
+body:not(.oc-auth-screen) .bottom-nav button span{
+  color:#b9efff!important;
+  filter:drop-shadow(0 0 5px rgba(66,198,255,.45));
+}
+body:not(.oc-auth-screen) .wallet-overview{
+  color:#12385a!important;
+  border:1px solid #8bdcff!important;
+  background:radial-gradient(ellipse at 92% 5%,rgba(255,255,255,.92),transparent 38%),linear-gradient(128deg,#e9f9ff 0%,#c9edff 48%,#a9ddfa 100%)!important;
+  box-shadow:0 14px 36px rgba(24,139,198,.2),inset 0 1px 0 rgba(255,255,255,.95)!important;
+}
+body:not(.oc-auth-screen) .wallet-overview:after{
+  border-color:rgba(22,145,210,.25)!important;
+  box-shadow:0 0 0 22px rgba(22,145,210,.055),0 0 0 46px rgba(22,145,210,.035)!important;
+}
+body:not(.oc-auth-screen) .wallet-eyebrow,
+body:not(.oc-auth-screen) .wallet-usd-note,
+body:not(.oc-auth-screen) .wallet-summary-strip span{
+  color:#315f80!important;
+}
+body:not(.oc-auth-screen) .wallet-total-line strong{
+  color:#083b66!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.8),0 0 12px rgba(44,164,220,.22)!important;
+}
+body:not(.oc-auth-screen) .wallet-currency{
+  color:#07518a!important;background:#f7fdff!important;border-color:#8acff0!important;
+}
+body:not(.oc-auth-screen) .wallet-orbit{
+  color:#0877b8!important;background:linear-gradient(145deg,#fff,#bdeaff)!important;border-color:#83d5f7!important;
+  box-shadow:0 0 24px rgba(20,153,220,.2)!important;
+}
+body:not(.oc-auth-screen) .wallet-overview .wallet-action.secondary{
+  color:#07518a!important;background:rgba(255,255,255,.78)!important;border:1px solid #83cbed!important;
+}
+body:not(.oc-auth-screen) .wallet-summary-strip{border-top-color:rgba(24,111,158,.2)!important}
+body:not(.oc-auth-screen) .wallet-summary-strip strong{color:#12486e!important}
+@media(max-width:700px){
+  body:not(.oc-auth-screen) .bottom-nav{background:linear-gradient(110deg,#124f7d,#167ba5,#155b91)!important}
+  body:not(.oc-auth-screen) .bottom-nav button{color:#f1fbff!important}
+}
+</style>
 </style>
