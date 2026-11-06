@@ -463,8 +463,30 @@ async function renderWalletAddresses(){
  }));
 }
 
+let adminActivityUnsubscribe=null;
+function renderAdminActivity(view){
+ const body=document.getElementById('detailBody'),api=window.__ocAdminFirebase;
+ if(!api){body.textContent='Admin data connection is not ready. Refresh and sign in again.';return;}
+ if(adminActivityUnsubscribe){adminActivityUnsubscribe();adminActivityUnsubscribe=null;}
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading live account activity…</p></div>';
+ const {db,collection,query,limit,onSnapshot}=api;
+ adminActivityUnsubscribe=onSnapshot(query(collection(db,'adminActivityLogs'),limit(250)),snap=>{
+  const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((x,y)=>(y.createdAt?.seconds||0)-(x.createdAt?.seconds||0));
+  const badge=document.querySelector('#sideNav [data-view="Notifications"] .pill');
+  if(badge)badge.textContent=String(rows.length);
+  const topBadge=document.querySelector('#notifyBtn b');if(topBadge)topBadge.textContent=String(rows.length);
+  if(!rows.length){body.innerHTML='<div class="empty">No account activity has been recorded yet. New sign-ins and account events will appear here.</div>';return;}
+  const filtered=view==='Login History'?rows.filter(r=>['login','logout','registration'].includes(r.eventType)):rows;
+  body.innerHTML='<div class="content-panel" style="margin:0"><div class="panel-head"><h3>'+ (view==='Login History'?'Recent sign-ins and registrations':'Live account notifications') +'</h3><span class="tag">LIVE</span></div><p class="muted">Latest 250 events · refreshes automatically · device and timezone only; no GPS or raw IP address.</p><div class="table-wrap"><table><thead><tr><th>Account</th><th>Event</th><th>When</th><th>Device</th><th>Browser</th><th>Timezone</th></tr></thead><tbody>'+filtered.map(r=>{
+   const dt=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'Pending timestamp';
+   const label=String(r.eventType||'activity').replace(/_/g,' ');
+   return '<tr><td>'+safeText(r.email||r.uid||'Unknown')+'</td><td><span class="tag">'+safeText(label)+'</span></td><td>'+safeText(dt)+'</td><td>'+safeText(r.device||'—')+'</td><td>'+safeText(r.browser||'—')+'</td><td>'+safeText(r.timezone||'—')+'</td></tr>';
+  }).join('')+'</tbody></table></div></div>';
+ },error=>{body.innerHTML='<div class="notice">Activity feed unavailable: '+safeText(error.code||error.message||'permission error')+'. Check Firestore rules and administrator verification.</div>';});
+}
 function renderModule(view){
  const body=document.getElementById('detailBody');
+ if(view==='Login History'||view==='Notifications'){renderAdminActivity(view);return;}
  if(view==='Support'&&window.renderSupportInbox){window.renderSupportInbox();return;}
  if(view==='Deposits'||view==='Withdrawals'){renderDemoFinance(view);return;}
  if(view==='Assets'){renderDemoFinance('Deposits');return;}
@@ -518,7 +540,7 @@ async function renderBrokerageRequests(){
  }));
  }catch(error){body.innerHTML='<div class="notice">Could not load brokerage requests: '+String(error.code||error.message||'error').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))+'</div>';}
 }
-function showView(view){const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your Onchain administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent='';if(view==='Trade Controls')renderTradeControls();else if(view==='Brokerage')renderBrokerageRequests();else if(!isHome)renderModule(view);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
+function showView(view){if(adminActivityUnsubscribe){adminActivityUnsubscribe();adminActivityUnsubscribe=null;}const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your Onchain administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent='';if(view==='Trade Controls')renderTradeControls();else if(view==='Brokerage')renderBrokerageRequests();else if(!isHome)renderModule(view);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
 document.getElementById('menuToggle').addEventListener('click',()=>sidebar.classList.toggle('open'));
 document.getElementById('refreshBtn').addEventListener('click',()=>{const active=document.querySelector('[data-view].active')?.dataset.view||'Dashboard';showView(active);const b=document.getElementById('refreshBtn');b.textContent='✓ Refreshed';setTimeout(()=>b.textContent='↻ Refresh',1200);});
@@ -528,11 +550,11 @@ document.getElementById('moreBtn').addEventListener('click',()=>showView('Settin
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, limit, doc, setDoc, deleteDoc, writeBatch, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, limit, doc, setDoc, deleteDoc, writeBatch, serverTimestamp, runTransaction, onSnapshot } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"});
 
 const auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
-window.__ocAdminFirebase={auth,db,collection,getDocs,query,limit,doc,setDoc,deleteDoc,writeBatch,serverTimestamp,runTransaction};
+window.__ocAdminFirebase={auth,db,collection,getDocs,query,limit,doc,setDoc,deleteDoc,writeBatch,serverTimestamp,runTransaction,onSnapshot};
 const safeText=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 window.adminGetLiveCollection=async function(view){
  const body=byId('detailBody'),isUsers=view==='Users',collectionName=isUsers?'users':'kycSubmissions';
@@ -585,6 +607,15 @@ window.adminGetLiveCollection=async function(view){
  }catch(error){body.innerHTML='<div class="notice"><strong>Could not load live '+(isUsers?'profiles':'KYC submissions')+'.</strong><p>Firebase denied access or Firestore is unavailable ('+safeText(error.code||'unknown error')+'). Check administrator access and Firestore rules.</p></div>';}
 };
 window.adminRefreshDashboard=async function(){
+ const api=window.__ocAdminFirebase;
+ if(api&&auth.currentUser){
+  // Keep the notification badge current even when the activity page is closed.
+  if(window.__ocActivityBadgeUnsubscribe)window.__ocActivityBadgeUnsubscribe();
+  window.__ocActivityBadgeUnsubscribe=onSnapshot(query(collection(db,'adminActivityLogs'),limit(250)),snap=>{
+   const count=snap.size,badge=document.querySelector('#sideNav [data-view="Notifications"] .pill'),top=document.querySelector('#notifyBtn b');
+   if(badge)badge.textContent=String(count);if(top)top.textContent=String(count);
+  },error=>console.warn('Admin activity badge unavailable:',error.code||error));
+ }
  const users=byId('liveUsersCount'),kyc=byId('liveKycCount'),status=byId('dashboardDataStatus'),updated=byId('dashboardUpdatedAt'),totalAssets=byId('liveTotalDemoAssets'),totalAssetsStatus=byId('liveTotalDemoAssetsStatus'),depositCount=byId('liveDepositRequests'),withdrawCount=byId('liveWithdrawalRequests');
  if(!users||!kyc||!status||!updated)return;
  status.textContent='Loading';updated.textContent='Connecting to Firestore…';

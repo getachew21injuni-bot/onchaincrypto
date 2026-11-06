@@ -258,6 +258,24 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // User-submitted account activity. Members can append only their own
+    // limited event metadata; only verified administrators can read the feed.
+    match /adminActivityLogs/{logId} {
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid','email','eventType','device','browser','timezone','createdAt'])
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 180
+        && request.resource.data.eventType in ['login','logout','registration','profile_update','kyc_submit','deposit_request','withdrawal_request','support_message']
+        && request.resource.data.device in ['Mobile','Desktop']
+        && request.resource.data.browser in ['Chrome','Firefox','Edge','Safari','Other']
+        && request.resource.data.timezone is string
+        && request.resource.data.timezone.size() <= 80
+        && request.resource.data.createdAt == request.time;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
     match /adminHistoryClearLogs/{logId} {
       allow read: if isAdmin();
       allow create: if isAdmin()

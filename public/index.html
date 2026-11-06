@@ -2873,7 +2873,7 @@ const [firebaseAppSdk, firebaseFirestoreSdk, firebaseAuthSdk] = await Promise.al
   loadFirebaseModule("https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js", "https://esm.sh/firebase@11.10.0/auth")
 ]);
 const { initializeApp, getApps } = firebaseAppSdk;
-const { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, serverTimestamp } = firebaseFirestoreSdk;
+const { getFirestore, collection, doc, getDoc, setDoc, addDoc, onSnapshot, serverTimestamp } = firebaseFirestoreSdk;
 const {
   getAuth, initializeAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider,
@@ -2934,6 +2934,25 @@ window.ocAuthBootstrapUnsubscribe = onAuthStateChanged(auth, user => {
 });
 
 const db = getFirestore(app);
+window.ocLogUserActivity = async function(eventType, extra = {}) {
+  const user = auth.currentUser;
+  const allowed = ["login","logout","registration","profile_update","kyc_submit","deposit_request","withdrawal_request","support_message"];
+  if (!user || !allowed.includes(eventType)) return false;
+  const ua = String(navigator.userAgent || "").slice(0, 280);
+  const device = /Mobile|Android|iPhone|iPad/i.test(ua) ? "Mobile" : "Desktop";
+  const browser = /Edg\//.test(ua) ? "Edge" : /Firefox\//.test(ua) ? "Firefox" : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : "Other";
+  try {
+    await addDoc(collection(db, "adminActivityLogs"), {
+      uid: user.uid, email: String(user.email || user.phoneNumber || "").slice(0, 180),
+      eventType, device, browser, timezone: String(Intl.DateTimeFormat().resolvedOptions().timeZone || "").slice(0, 80),
+      createdAt: serverTimestamp()
+    });
+    return true;
+  } catch (error) {
+    console.warn("Account activity could not be recorded:", error?.code || error);
+    return false;
+  }
+};
 // Public wallet instructions are read from Firestore so admin edits appear
 // for all visitors without another website deployment.
 onSnapshot(collection(db, "walletAddresses"), snapshot => {
@@ -3261,6 +3280,7 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
   try {
     const credential = await createUserWithEmailAndPassword(auth, email, password);
     window.onchaincryptoCurrentUser = credential.user;
+    void window.ocLogUserActivity?.("registration");
     try { await updateProfile(credential.user, { displayName: name }); }
     catch (profileError) { console.warn("Display name update deferred:", profileError?.code || profileError); }
     const localProfile = {
@@ -3374,6 +3394,7 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
   if (status) status.textContent = "Checking your sign-in details…";
   try {
     const credential = await signInWithEmailAndPassword(auth, email, password);
+    void window.ocLogUserActivity?.("login");
     document.getElementById("signInPassword").value = "";
     window.onchaincryptoCurrentUser = credential.user;
     window.ocPendingPage = "profile";
@@ -3461,6 +3482,8 @@ async function ocPerformSignOut() {
     // Wait until Firebase has finished restoring this browser's saved session.
     if (typeof activeAuth.authStateReady === "function") await activeAuth.authStateReady();
 
+    // Record the sign-out before ending this browser session.
+    try { await window.ocLogUserActivity?.("logout"); } catch (_) {}
     // Firebase signOut is a local, device-only action; it does not delete account data.
     await signOut(activeAuth);
 
