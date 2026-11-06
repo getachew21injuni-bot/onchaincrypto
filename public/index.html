@@ -2057,8 +2057,20 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
       <label for="ocAdminSupportReplyText">Admin reply</label>
       <textarea id="ocAdminSupportReplyText" class="field" rows="3" maxlength="3000" placeholder="Write a reply to the customer."></textarea>
       <div class="two-buttons">
-        <button id="ocAdminSupportReplySend" class="primary" type="button">Send reply</button>
+        <button id="ocAdminSupportReplySend" class="primary" type="button">Send reply in Onchain</button>
         <button id="ocAdminSupportResolve" class="secondary" type="button">Mark resolved</button>
+      </div>
+      <div class="panel" style="padding:14px;margin-top:14px">
+        <h3 style="margin-top:0">Send direct email</h3>
+        <p class="muted tiny">Send a separate email from support@onchainspro.com. The internal Onchain conversation remains available.</p>
+        <label for="ocAdminDirectEmailTo">Customer email</label>
+        <input id="ocAdminDirectEmailTo" class="field" type="email" readonly placeholder="Select a customer conversation first">
+        <label for="ocAdminDirectEmailSubject">Email subject</label>
+        <input id="ocAdminDirectEmailSubject" class="field" maxlength="160" value="Update from Onchain Support">
+        <label for="ocAdminDirectEmailBody">Email message</label>
+        <textarea id="ocAdminDirectEmailBody" class="field" rows="4" maxlength="8000" placeholder="Write your email to the customer."></textarea>
+        <button id="ocAdminDirectEmailSend" class="secondary full" type="button" disabled>Send direct email</button>
+        <p id="ocAdminDirectEmailStatus" class="muted tiny" aria-live="polite">Select a customer conversation to begin.</p>
       </div>
       <p id="ocAdminSupportStatus" class="muted tiny" aria-live="polite"></p>
     </section>
@@ -6484,6 +6496,12 @@ function watchAdminTickets(){
   const rows=snapshot.docs.map(item=>({id:item.id,...(item.data()||{})}));
   renderTicketList(byId("ocAdminSupportTicketList"),rows,selectedAdminTicket?.id,ticket=>{
    selectedAdminTicket=ticket;setText("ocAdminSupportStatus","Conversation: "+(ticket.subject||"Support request")+" · "+(ticket.customerEmail||ticket.ownerUid));
+   const directTo=byId("ocAdminDirectEmailTo"),directButton=byId("ocAdminDirectEmailSend"),directStatus=byId("ocAdminDirectEmailStatus");
+   if(directTo)directTo.value=ticket.customerEmail||"";
+   if(directButton)directButton.disabled=!(ticket.customerEmail&&isAdmin);
+   if(directStatus)directStatus.textContent=ticket.customerEmail?"Ready to email this customer's registered address.":"This customer has no registered email address.";
+   if(byId("ocAdminDirectEmailSubject"))byId("ocAdminDirectEmailSubject").value="Update from Onchain Support";
+   if(byId("ocAdminDirectEmailBody"))byId("ocAdminDirectEmailBody").value="";
    watchMessages(ticket,byId("ocAdminSupportConversation"),true);
   });
   if(selectedAdminTicket&&!rows.some(row=>row.id===selectedAdminTicket.id)){selectedAdminTicket=null;setText("ocAdminSupportConversation","Select a customer conversation to read and reply.");}
@@ -6519,6 +6537,34 @@ async function sendReply(adminView){
 }
 byId("ocSupportReplySend")?.addEventListener("click",()=>sendReply(false));
 byId("ocAdminSupportReplySend")?.addEventListener("click",()=>sendReply(true));
+byId("ocAdminDirectEmailSend")?.addEventListener("click",async()=>{
+ const button=byId("ocAdminDirectEmailSend"),status=byId("ocAdminDirectEmailStatus");
+ if(!currentUser||!isAdmin){setText("ocAdminDirectEmailStatus","Verified administrator sign-in is required.");return;}
+ if(!selectedAdminTicket){setText("ocAdminDirectEmailStatus","Select a customer conversation first.");return;}
+ const to=String(selectedAdminTicket.customerEmail||"").trim();
+ const subject=byId("ocAdminDirectEmailSubject")?.value.trim()||"";
+ const message=byId("ocAdminDirectEmailBody")?.value.trim()||"";
+ if(!to){setText("ocAdminDirectEmailStatus","This customer has no registered email address.");return;}
+ if(!subject||!message){setText("ocAdminDirectEmailStatus","Enter an email subject and message.");return;}
+ button.disabled=true;setText("ocAdminDirectEmailStatus","Sending email securely…");
+ try{
+  const idToken=await currentUser.getIdToken();
+  const response=await fetch("https://onchain-support-email.getachew21-inj-uni.workers.dev/send",{
+   method:"POST",
+   headers:{"Authorization":"Bearer "+idToken,"Content-Type":"application/json"},
+   body:JSON.stringify({to,subject,message})
+  });
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok||!result.success)throw new Error(result.error||"Email service rejected the request.");
+  byId("ocAdminDirectEmailBody").value="";
+  setText("ocAdminDirectEmailStatus","Email accepted by the mail server for "+to+".");
+ }catch(error){
+  console.error("Direct support email failed:",error);
+  setText("ocAdminDirectEmailStatus","Email was not sent. "+(error.message||"Please check the email service."));
+ }finally{
+  button.disabled=!(isAdmin&&selectedAdminTicket?.customerEmail);
+ }
+});
 byId("ocAdminSupportResolve")?.addEventListener("click",async()=>{
  if(!isAdmin||!selectedAdminTicket){setText("ocAdminSupportStatus","Select a customer conversation first.");return;}
  const button=byId("ocAdminSupportResolve");button.disabled=true;
