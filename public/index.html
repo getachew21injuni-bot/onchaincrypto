@@ -4193,6 +4193,13 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     const currentPage=pages().find(section=>!section.classList.contains('hidden'));
     const currentName=currentPage?.id?.slice(5);
     if(currentName && currentName!==page && !opts.noStack){pageStack.push(currentName);if(pageStack.length>30)pageStack.shift();}
+    if(currentName && currentName!==page && !opts.noStack){
+      const authMode=page==="register"?(document.body.classList.contains("oc-register-mode")?"register":"login"):null;
+      const routeUrl=location.pathname+location.search+(page==="register"?(authMode==="register"?"#register":"#login"):"#"+page);
+      try{history.pushState({ocAppRoute:true,ocPage:page,ocAuthMode:authMode},"",routeUrl);}catch(error){console.warn("Navigation history could not be updated:",error);}
+      window.__ocAppHistoryDepth=(window.__ocAppHistoryDepth||0)+1;
+      window.__ocAppCanForward=false;
+    }
     // Do not call the legacy page router here: its old listeners could re-open Trade
     // after a Wallet/Deposit/Withdraw action. Keep one authoritative visible page.
     pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-'+page));
@@ -4255,6 +4262,12 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-public-market'));
     navigate('public-market',{fromOriginal:true,keepScroll:true});
   } else if(current) navigate(current.id.slice(5),{fromOriginal:true,keepScroll:true});
+  const initial=pages().find(section=>!section.classList.contains('hidden'));
+  const initialPage=initial?.id?.slice(5)||"public-market";
+  const initialMode=initialPage==="register"?(document.body.classList.contains("oc-register-mode")?"register":"login"):null;
+  window.__ocAppHistoryDepth=0;
+  window.__ocAppCanForward=false;
+  try{history.replaceState({ocAppRoute:true,ocPage:initialPage,ocAuthMode:initialMode},"",location.pathname+location.search+(initialPage==="public-market"?"":"#"+(initialPage==="register"?(initialMode==="register"?"register":"login"):initialPage)));}catch(_){}
 })();
 </script>
 <script id="oc-auto-close-profile-panels">
@@ -10793,5 +10806,114 @@ html.oc-auth-pending main > #page-trade:not(.hidden){display:block!important}
       open('login');
     }
   }, true);
+})();
+</script>
+
+
+<style id="oc-unified-navigation-controls">
+/* Keep navigation available on every route, including guest login and registration. */
+body.oc-logged-out.oc-auth-screen>header{
+  display:flex!important;position:sticky!important;top:0!important;z-index:100!important;
+  align-items:center!important;justify-content:space-between!important;gap:10px!important;
+  width:100%!important;height:60px!important;padding:8px 14px!important;
+  background:#061321f5!important;border-bottom:1px solid #29445d!important;
+}
+body.oc-logged-out.oc-auth-screen>header .brand{display:flex!important;justify-self:flex-start!important;margin-right:auto!important;font-size:17px!important}
+body.oc-logged-out.oc-auth-screen>header #nav,
+body.oc-logged-out.oc-auth-screen>header #ocVisitorActions,
+body.oc-logged-out.oc-auth-screen>header #moreMenuBtn,
+body.oc-logged-out.oc-auth-screen>header .more-menu-wrap,
+body.oc-logged-out.oc-auth-screen>header #refreshBtn{display:none!important}
+#ocBackBtn,#ocForwardBtn{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  gap:5px!important;min-height:36px!important;padding:7px 11px!important;
+  border:1px solid #49617a!important;border-radius:9px!important;
+  background:#10263a!important;color:#f1f6fc!important;font-size:12px!important;font-weight:750!important;
+}
+#ocBackBtn:disabled,#ocForwardBtn:disabled{opacity:.38!important;cursor:not-allowed!important}
+body.oc-logged-out:not(.oc-auth-screen) header #ocBackBtn,
+body.oc-logged-out:not(.oc-auth-screen) header #ocForwardBtn{display:inline-flex!important}
+body.oc-logged-out.oc-auth-screen>header #ocBackBtn,
+body.oc-logged-out.oc-auth-screen>header #ocForwardBtn{display:inline-flex!important}
+@media(max-width:560px){
+ body.oc-logged-out.oc-auth-screen>header{height:54px!important;padding:6px 10px!important}
+ #ocBackBtn,#ocForwardBtn{min-height:34px!important;padding:6px 9px!important;font-size:11px!important}
+}
+</style>
+<script id="oc-browser-and-platform-history">
+(function(){
+  const header=document.querySelector("body>header .header-right");
+  const back=document.getElementById("ocBackBtn");
+  if(!header||!back)return;
+  let forward=document.getElementById("ocForwardBtn");
+  if(!forward){
+    forward=document.createElement("button");
+    forward.type="button";forward.id="ocForwardBtn";forward.className="secondary oc-nav-control";
+    forward.setAttribute("aria-label","Go forward to the next page");forward.title="Forward";
+    forward.innerHTML='Forward <span aria-hidden="true">→</span>';
+    back.insertAdjacentElement("afterend",forward);
+  }
+  const activePage=()=>document.querySelector("main>section[id^='page-']:not(.hidden)")?.id.slice(5)||"public-market";
+  const authMode=()=>document.body.classList.contains("oc-register-mode")?"register":"login";
+  function syncButtons(){
+    const depth=Number(window.__ocAppHistoryDepth||0);
+    back.disabled=depth<=0;
+    forward.disabled=!window.__ocAppCanForward;
+    back.title=depth>0?"Go to the previous OnChainSpro page":"No earlier OnChainSpro page";
+    forward.title=window.__ocAppCanForward?"Go to the next OnChainSpro page":"No next OnChainSpro page";
+  }
+  function routeState(){
+    const page=activePage();
+    return {ocAppRoute:true,ocPage:page,ocAuthMode:page==="register"?authMode():null};
+  }
+  // The login and create-account forms share one page; preserve the selected form
+  // as a separate browser-history step so Back/Forward switches between them.
+  let lastMode=routeState().ocAuthMode;
+  const modeObserver=new MutationObserver(()=>{
+    const route=routeState();
+    if(route.ocPage!=="register"||!route.ocAuthMode||route.ocAuthMode===lastMode)return;
+    lastMode=route.ocAuthMode;
+    if(history.state?.ocAppRoute&&history.state.ocPage==="register"&&history.state.ocAuthMode===route.ocAuthMode)return;
+    try{history.pushState(route,"",location.pathname+location.search+(route.ocAuthMode==="register"?"#register":"#login"));window.__ocAppHistoryDepth=(window.__ocAppHistoryDepth||0)+1;window.__ocAppCanForward=false;}catch(_){}
+    syncButtons();
+  });
+  modeObserver.observe(document.body,{attributes:true,attributeFilter:["class"]});
+  // Replace the old private stack-only controls with the real browser history.
+  window.__ocNavigateBack=function(){
+    if(Number(window.__ocAppHistoryDepth||0)>0)history.back();
+    syncButtons();
+  };
+  forward.addEventListener("click",()=>{
+    if(window.__ocAppCanForward)history.forward();
+  });
+  window.addEventListener("popstate",event=>{
+    const state=event.state;
+    if(!state?.ocAppRoute||!state.ocPage)return;
+    window.__ocAppHistoryDepth=Math.max(0,Number(window.__ocAppHistoryDepth||0)-1);
+    window.__ocAppCanForward=true;
+    const restore=()=>{
+      const signedIn=!!(window.onchaincryptoCurrentUser||window.ocFirebaseAuth?.currentUser);
+      if(!signedIn){
+        document.body.classList.add("oc-logged-out");
+        document.body.classList.toggle("oc-register-mode",state.ocPage==="register"&&state.ocAuthMode==="register");
+      }
+      if(typeof window.__ocNavigatePage==="function")window.__ocNavigatePage(state.ocPage,{noStack:true});
+      else if(typeof window.showPage==="function")window.showPage(state.ocPage);
+      document.body.classList.toggle("oc-register-mode",state.ocPage==="register"&&state.ocAuthMode==="register");
+      lastMode=state.ocPage==="register"?(state.ocAuthMode||"login"):null;
+      syncButtons();
+    };
+    // The Firebase guest popstate guard is registered earlier; restore the
+    // precise in-app route after it has completed its signed-out safety check.
+    setTimeout(restore,0);
+  });
+  // Track Forward after a browser-forward action and clear it on a new route.
+  const originalPush=history.pushState.bind(history);
+  history.pushState=function(state,title,url){
+    const result=originalPush(state,title,url);
+    if(state?.ocAppRoute){window.__ocAppCanForward=false;syncButtons();}
+    return result;
+  };
+  syncButtons();
 })();
 </script>
