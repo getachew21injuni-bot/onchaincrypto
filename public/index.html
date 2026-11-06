@@ -1453,13 +1453,14 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
 
  <section class="oc-visitor-products oc-home-roadmap" aria-label="Explore the Onchain ecosystem">
   <div class="oc-visitor-products-grid">
-    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">◈</div><div class="oc-visitor-product-top"><h3>Explore Markets</h3><span>Discover</span></div><p>Follow crypto, Gold and selected US stock market information with charts and daily price moves.</p><small>CRYPTO · GOLD · STOCKS</small><button type="button" class="secondary" data-go="markets" style="margin-top:14px;width:100%">Open markets</button></article>
-    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⇄</div><div class="oc-visitor-product-top"><h3>Copy Trading</h3><span>Trader strategies</span></div><p>Browse trader profiles, compare strategy styles, follow traders and manage your watchlist. Review risk before making decisions.</p><small>DISCOVER · FOLLOW · REVIEW</small><button type="button" class="secondary" data-go="copytrading" style="margin-top:14px;width:100%">Explore copy traders</button></article>
-    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⌁</div><div class="oc-visitor-product-top"><h3>Track Your Activity</h3><span>Overview</span></div><p>Review your portfolio overview, seven-day practice performance and recorded account activity.</p><small>PORTFOLIO · HISTORY · INSIGHTS</small><button type="button" class="secondary" data-go="history" data-home-history="true" style="margin-top:14px;width:100%">View activity</button></article>
+    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">◈</div><div class="oc-visitor-product-top"><h3>Explore Markets</h3><span>Discover</span></div><p>Browse crypto, Gold and selected US stock markets.</p><small>CRYPTO · GOLD · STOCKS</small><button type="button" class="secondary" data-go="markets" style="margin-top:14px;width:100%">Open markets</button></article>
+    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⇄</div><div class="oc-visitor-product-top"><h3>Copy Trading</h3><span>Trader strategies</span></div><p>Explore strategy ideas and save your preferred approaches.</p><small>DISCOVER · FOLLOW · REVIEW</small><button type="button" class="secondary" data-go="copytrading" style="margin-top:14px;width:100%">Explore copy traders</button></article>
+    <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⌁</div><div class="oc-visitor-product-top"><h3>Track Your Activity</h3><span>Overview</span></div><p>Review your portfolio and recent account activity.</p><small>PORTFOLIO · HISTORY · INSIGHTS</small><button type="button" class="secondary" data-go="history" data-home-history="true" style="margin-top:14px;width:100%">View activity</button></article>
    </div>
   <p class="oc-visitor-roadmap-note">Explore market insights, discover leading assets and explore the Onchain platform.</p>
  </section>
 </section>
+ <style id="oc-home-roadmap-black-cards">.oc-home-roadmap .oc-visitor-product-card{background:#080d16!important;border-color:#27364a!important;color:#f5f7fb!important}.oc-home-roadmap .oc-visitor-product-top h3{color:#f5f7fb!important}.oc-home-roadmap .oc-visitor-product-card p{color:#b8cbe0!important}.oc-home-roadmap .oc-visitor-product-card small{color:#d9ad55!important}</style>
   <section id="page-history" class="hidden">
     <div class="page-title"><div><h1>History</h1><div class="muted tiny">7-day performance and recorded activity</div></div></div>
   </section>
@@ -1488,9 +1489,9 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
           <h2>Discover trading strategies</h2>
           <div class="muted tiny">Compare strategy styles, market focus and risk before choosing who to follow.</div>
         </div>
-        <span class="tag">STRATEGY EXAMPLES</span>
+        <span class="tag">STRATEGY IDEAS</span>
       </div>
-      <p class="oc-copy-demo-note">Strategy examples only. Live trader accounts and verified performance history are not connected. Crypto and Gold markets carry risk.</p>
+      <p class="oc-copy-demo-note">Illustrative strategies. Live copy execution is not available.</p>
       <div class="cards" id="ocCopyTraderCards">
         <article class="card oc-copy-profile">
           <div class="oc-copy-profile-top"><div><div class="label">BTC · CRYPTO</div><div class="big">Bitcoin Trend</div></div><span class="oc-copy-risk oc-risk-high">Higher risk</span></div>
@@ -1522,18 +1523,6 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
     </section>
 
     <section class="panel" style="margin-bottom:16px">
-      <div class="section-head"><div><h2>Understand the key performance measures</h2><div class="muted tiny">A few useful checks can help you compare strategies more confidently.</div></div></div>
-      <div class="oc-copy-requirement-grid">
-        <div><b>Return</b><p>Shows how a strategy changed in value over a selected period. Compare the same time periods.</p></div>
-        <div><b>Win rate</b><p>Shows the share of closed trades that ended in profit. It does not show how large wins or losses were.</p></div>
-        <div><b>Maximum drawdown</b><p>Shows the largest peak-to-trough decline. Lower drawdown may indicate a smoother history, but does not remove risk.</p></div>
-        <div><b>Trading activity</b><p>Review the number of trades and average holding period to understand the strategy's pace.</p></div>
-        <div><b>Market exposure</b><p>Check which assets are traded and whether several positions may be affected by the same market move.</p></div>
-        <div><b>Risk controls</b><p>Look for position limits, stop-loss practices and clear rules for managing volatile conditions.</p></div>
-      </div>
-    </section>
-
-    <section class="panel" style="margin-bottom:16px">
       <div class="section-head"><div><h2>Your strategy watchlist</h2><div class="muted tiny">Keep the approaches you want to review together.</div></div><button type="button" class="secondary" id="ocCopyTraderRefresh">Refresh list</button></div>
       <div id="ocCopyTraderFollowing" class="empty">Your watchlist is ready. Follow a strategy above to save it here.</div>
     </section>
@@ -1548,7 +1537,7 @@ body.oc-logged-out.oc-auth-screen #page-register .oc-public-auth-hero li {
         <div><b>5. Understand the terms</b><p>Check how copying starts and stops, how fees are charged and how withdrawals work.</p></div>
         <div><b>6. Check service availability</b><p>Live copying needs an approved trading connection and a functioning order-execution service.</p></div>
       </div>
-      <p class="muted tiny" style="margin:8px 18px 16px">Following a strategy saves it to your local watchlist on this device. Live automatic trade execution is not connected yet.</p>
+      <p class="muted tiny" style="margin:8px 18px 16px">Watchlist only · Live copy execution is not available.</p>
     </section>
   </section>
   <section id="page-markets" class="hidden">
@@ -5840,7 +5829,7 @@ body.oc-logged-out.oc-auth-screen #page-register #resetPasswordBtn{
  function render(){
   const host=document.getElementById("ocCopyTraderFollowing");if(!host)return;
   const list=read();
-  host.innerHTML=list.length?list.map(id=>{const p=profiles[id];if(!p)return"";return '<div class="list-row"><div><strong>'+p.name+'</strong><div class="muted tiny">'+p.style+' · '+p.risk+'</div><div class="muted tiny">Example profile · watchlist only</div></div><button type="button" class="secondary" data-copy-unfollow="'+id+'">Unfollow</button></div>'}).join(""):'<div class="empty">You have not followed any traders yet.</div>';
+  host.innerHTML=list.length?list.map(id=>{const p=profiles[id];if(!p)return"";return '<div class="list-row"><div><strong>'+p.name+'</strong><div class="muted tiny">'+p.style+' · '+p.risk+'</div><div class="muted tiny">Strategy idea · watchlist only</div></div><button type="button" class="secondary" data-copy-unfollow="'+id+'">Unfollow</button></div>'}).join(""):'<div class="empty">You have not followed any traders yet.</div>';
   document.querySelectorAll("[data-copy-follow]").forEach(btn=>{const followed=list.includes(btn.dataset.copyFollow);btn.textContent=followed?"Unfollow":"Follow trader";btn.setAttribute("aria-pressed",followed?"true":"false");btn.disabled=false;});
  }
  document.addEventListener("click",e=>{
@@ -6034,7 +6023,7 @@ submit?.addEventListener("click",async()=>{const v=currentAddress(),a=Number(amo
 @media(max-width:560px){#ocVisitorSupportBot{right:12px;bottom:calc(14px + env(safe-area-inset-bottom))}#ocVisitorSupportBot .oc-support-launch{padding:6px 11px 6px 6px}#ocVisitorSupportBot .oc-support-avatar{width:44px;height:44px}#ocVisitorSupportBot .oc-support-panel{bottom:62px;width:min(350px,calc(100vw - 24px));height:min(500px,calc(100dvh - 95px))}}
 @media(prefers-reduced-motion:no-preference){#ocVisitorSupportBot .oc-support-launch{animation:ocSupportFloat 3.8s ease-in-out infinite}@keyframes ocSupportFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}}
 body.oc-auth-screen #ocVisitorSupportBot{display:none!important}
-#oc-visitor-support-bot{display:none!important}
+#oc-visitor-support-bot,#oc-support-button,#oc-chat{display:none!important}
 </style>
 <div id="ocVisitorSupportBot" aria-live="polite">
  <section class="oc-support-panel" role="dialog" aria-label="Onchain customer support" aria-modal="false">
@@ -6166,85 +6155,6 @@ html.oc-light-theme #page-register .auth-main-panel textarea.field{
   color:#fff!important;background:#080d16!important;border-color:#f4c76b!important;
 }
 </style>
-
-
-<!-- Visitor-side Onchain Support Assistant -->
-<style id="oc-visitor-support-bot-style">
-#oc-visitor-support-bot{position:fixed;right:22px;bottom:92px;z-index:99990;font-family:inherit}
-#oc-visitor-support-bot[hidden]{display:none!important}
-#oc-visitor-support-launch{width:58px;height:58px;border:0;border-radius:50%;background:linear-gradient(135deg,#0ecb81,#087e62);color:#041b16;font-size:25px;font-weight:900;box-shadow:0 8px 28px rgba(0,0,0,.38);cursor:pointer}
-#oc-visitor-support-panel{position:absolute;right:0;bottom:70px;width:min(360px,calc(100vw - 28px));height:470px;max-height:calc(100vh - 150px);display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(14,203,129,.45);border-radius:18px;background:#071522;color:#edf7f5;box-shadow:0 18px 55px rgba(0,0,0,.55)}
-#oc-visitor-support-panel[hidden]{display:none!important}
-#oc-visitor-support-head{display:flex;align-items:center;justify-content:space-between;padding:15px 16px;background:linear-gradient(120deg,#0b352c,#10283b);border-bottom:1px solid rgba(255,255,255,.1)}
-#oc-visitor-support-head strong{display:block;font-size:15px;color:#fff}
-#oc-visitor-support-head small{display:block;margin-top:3px;color:#b8d7ce;font-size:11px}
-#oc-visitor-support-close{border:0;background:transparent;color:#fff;font-size:23px;cursor:pointer}
-#oc-visitor-support-messages{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
-.oc-support-bubble{max-width:91%;padding:10px 12px;border-radius:13px;background:#142b3c;color:#e9f3f8;font-size:13px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
-.oc-support-bubble.oc-user{align-self:flex-end;background:#0b6e53;color:#fff}
-#oc-visitor-support-quick{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 10px}
-#oc-visitor-support-quick button{border:1px solid rgba(14,203,129,.45);border-radius:18px;background:#102d2a;color:#c9f7e4;padding:7px 10px;font-size:11px;cursor:pointer}
-#oc-visitor-support-form{display:flex;gap:7px;padding:10px;border-top:1px solid rgba(255,255,255,.1);background:#091b29}
-#oc-visitor-support-input{min-width:0;flex:1;border:1px solid #365064;border-radius:10px;background:#fff;color:#101820;padding:11px;font-size:13px}
-#oc-visitor-support-send{border:0;border-radius:10px;background:#0ecb81;color:#052219;padding:0 14px;font-weight:800;cursor:pointer}
-#oc-visitor-support-foot{padding:0 12px 9px;background:#091b29;color:#9eb5c4;font-size:10px;text-align:center}
-#oc-visitor-support-foot a{color:#72e6b7}
-@media(max-width:480px){#oc-visitor-support-bot{right:14px;bottom:82px}#oc-visitor-support-panel{position:fixed;right:10px;bottom:150px;width:calc(100vw - 20px);height:min(470px,calc(100dvh - 175px))}}
-</style>
-<div id="oc-visitor-support-bot" hidden>
-  <section id="oc-visitor-support-panel" aria-label="Onchain Support Assistant" hidden>
-    <header id="oc-visitor-support-head"><div><strong>Onchain Support</strong><small>Visitor help · Instant answers</small></div><button id="oc-visitor-support-close" type="button" aria-label="Close support">×</button></header>
-    <div id="oc-visitor-support-messages" aria-live="polite"><div class="oc-support-bubble">Welcome to Onchain! 👋 I can help with getting started, accounts, KYC, deposits, withdrawals and trading. What would you like to know?</div></div>
-    <div id="oc-visitor-support-quick">
-      <button type="button" data-oc-support-topic="account">Create an account</button>
-      <button type="button" data-oc-support-topic="kyc">Identity checks</button>
-      <button type="button" data-oc-support-topic="deposit">Deposits</button>
-      <button type="button" data-oc-support-topic="withdraw">Withdrawals</button>
-      <button type="button" data-oc-support-topic="trade">Trading</button>
-    </div>
-    <form id="oc-visitor-support-form"><input id="oc-visitor-support-input" maxlength="500" autocomplete="off" placeholder="Type your question…" aria-label="Type your support question"><button id="oc-visitor-support-send" type="submit">Send</button></form>
-    <div id="oc-visitor-support-foot">Never share passwords, verification codes or recovery phrases. <a href="#page-support" data-oc-open-support>Email support</a></div>
-  </section>
-  <button id="oc-visitor-support-launch" type="button" aria-label="Open customer support" aria-expanded="false">✦</button>
-</div>
-<script id="oc-visitor-support-bot">
-(function(){
- const root=document.getElementById("oc-visitor-support-bot");
- if(!root||root.dataset.ready==="1")return;root.dataset.ready="1";
- const panel=document.getElementById("oc-visitor-support-panel"),launch=document.getElementById("oc-visitor-support-launch");
- const messages=document.getElementById("oc-visitor-support-messages"),input=document.getElementById("oc-visitor-support-input");
- const answers={
- account:"To get started, choose Register on the website. Enter your name and choose email or phone registration, then follow the on-screen verification steps. Already registered? Choose Login. Keep your password private.",
- kyc:"If identity verification is requested, open your account's verification area and follow the instructions. Use accurate details and submit only through the secure Onchain form. Never send identity documents or verification codes by chat or email.",
- deposit:"Sign in and open Wallet, then choose Deposit and select the asset and network. Check that the network matches your sending wallet exactly before transferring. A deposit is not complete until the required network confirmations and platform review are finished. If you are unsure, do not send funds.",
- withdraw:"Sign in and open Wallet, then choose Withdraw. Confirm the asset, network and destination address carefully. A withdrawal may require account checks and review. Never share your password, private key or recovery phrase.",
- trade:"Open Markets to review available market information. Practice trading is for learning and does not place live exchange orders or move blockchain assets. Review the order details and risks before using any trading feature.",
- copy:"Trader discovery lets you compare strategy descriptions and risk measures and save strategies to your watchlist. Following a strategy does not automatically copy trades; automatic execution is not currently connected.",
- security:"Use a unique password and keep your sign-in details private. Onchain support will never need your password, one-time verification code, private key or recovery phrase.",
- general:"I can help with account setup, identity checks, deposits, withdrawals, wallets, markets and practice trading. Choose one of the topics below or type your question."
- };
- function add(text,who){const node=document.createElement("div");node.className="oc-support-bubble"+(who==="user"?" oc-user":"");node.textContent=text;messages.appendChild(node);messages.scrollTop=messages.scrollHeight;}
- function reply(q){
-  const t=String(q||"").toLowerCase();let key="general";
-  if(/register|sign up|create account|new account|login|log in|password|email|phone/.test(t))key="account";
-  else if(/kyc|identity|verify|verification|document/.test(t))key="kyc";
-  else if(/deposit|receive|send crypto|fund wallet/.test(t))key="deposit";
-  else if(/withdraw|cash out/.test(t))key="withdraw";
-  else if(/copy trad|follow trader|strategy|trader discovery/.test(t))key="copy";
-  else if(/trade|buy|sell|market|price/.test(t))key="trade";
-  else if(/secure|security|password|scam|private key/.test(t))key="security";
-  add(answers[key]);
-  if(key==="general")add("For personal assistance, sign in and open Help and Guidance to send a private support request. Please never share passwords, codes or wallet secrets.");
- }
- function setOpen(open){panel.hidden=!open;launch.setAttribute("aria-expanded",String(open));if(open)input.focus();}
- launch.addEventListener("click",()=>setOpen(panel.hidden));
- document.getElementById("oc-visitor-support-close").addEventListener("click",()=>setOpen(false));
- document.getElementById("oc-visitor-support-form").addEventListener("submit",e=>{e.preventDefault();const q=input.value.trim();if(!q)return;add(q,"user");input.value="";reply(q);});
- document.getElementById("oc-visitor-support-quick").addEventListener("click",e=>{const b=e.target.closest("[data-oc-support-topic]");if(!b)return;const key=b.dataset.ocSupportTopic;add(b.textContent,"user");add(answers[key]||answers.general);});
- function syncVisibility(){const guest=document.body.classList.contains("oc-logged-out");root.hidden=!guest;if(!guest)setOpen(false);}
- const observer=new MutationObserver(syncVisibility);observer.observe(document.body,{attributes:true,attributeFilter:["class"]});syncVisibility();
-})();
-</script>
 
 
 <style id="oc-guest-support-single-widget">body.oc-logged-out #oc-support-button,body.oc-logged-out #oc-chat{display:none!important}</style>
