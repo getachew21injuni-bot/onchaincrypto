@@ -6053,7 +6053,7 @@ submit?.addEventListener("click",async()=>{const v=currentAddress(),a=Number(amo
 #ocVisitorSupportBot .oc-support-msg.user{align-self:flex-end;background:linear-gradient(120deg,#d9ad55,#f0d18c);color:#201808;border-top-right-radius:4px}
 #ocVisitorSupportBot .oc-support-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 10px}
 #ocVisitorSupportBot .oc-support-suggestions button{border:1px solid rgba(217,173,85,.45);border-radius:999px;background:#0d2035;color:#f1d79d;font-size:10px;padding:7px 9px;cursor:pointer}
-#ocVisitorSupportBot .oc-support-register{margin:0 12px 8px;border:0;border-radius:10px;padding:9px;background:linear-gradient(110deg,#f0d18c,#c89437);color:#201707;font-weight:850;cursor:pointer}#ocVisitorSupportBot .oc-support-email{display:block;margin:0 12px 8px;padding:8px 10px;border:1px solid rgba(217,173,85,.55);border-radius:9px;color:#f1d79d;text-align:center;text-decoration:none;font-size:11px;font-weight:750;background:#10243a}
+#ocVisitorSupportBot .oc-support-email{display:block;margin:0 12px 8px;padding:8px 10px;border:1px solid rgba(217,173,85,.55);border-radius:9px;color:#f1d79d;text-align:center;text-decoration:none;font-size:11px;font-weight:750;background:#10243a}
 #ocVisitorSupportBot .oc-support-compose{display:flex;gap:7px;padding:10px;border-top:1px solid rgba(255,255,255,.09);background:#0a192a}
 #ocVisitorSupportBot .oc-support-compose input{flex:1;min-width:0;border:1px solid #344a62;border-radius:10px;background:#10243a;color:#fff;padding:10px;font:inherit;font-size:12px}
 #ocVisitorSupportBot .oc-support-compose button{border:0;border-radius:10px;padding:0 14px;background:#d9ad55;color:#201707;font-weight:850;cursor:pointer}
@@ -6072,12 +6072,12 @@ body.oc-auth-screen #ocVisitorSupportBot{display:none!important}
   </header>
   <div class="oc-support-messages" id="ocSupportMessages"></div>
   <div class="oc-support-suggestions">
-   <button type="button" data-question="How do I create an Onchain account?">Create account</button>
+   <button type="button" data-question="How do I create an OnChainCrypto account?">How to create an account?</button>
    <button type="button" data-question="How do crypto deposits work?">Crypto deposits</button>
    <button type="button" data-question="How do I use markets and trading?">Markets & trading</button>
   </div>
   <a class="oc-support-email" href="mailto:support@onchainspro.com?subject=OnChainCrypto%20Support">Email Onchain Support</a>
-  <button type="button" class="oc-support-register">Create your Onchain account</button>
+  
   <form class="oc-support-compose" id="ocSupportForm"><input id="ocSupportInput" type="text" maxlength="500" placeholder="Type your question…" aria-label="Your question" autocomplete="off"><button type="submit">Send</button></form>
   <div class="oc-support-note">Automated help · Never share passwords or verification codes</div>
  </section>
@@ -6134,7 +6134,7 @@ const respond=async q=>{
   return;
  }
  if(/\b(onchain|on chain|onchainspro|what is this platform|what is your platform)\b/i.test(v))add(answer("OnChainCrypto is a digital-asset platform interface for viewing supported markets, managing account features and using the trading tools that are enabled for your account. Available features and asset/network support are shown inside the app. Always check whether a feature is practice-only or live before taking action."));
- else if(/\b(create|register|sign up|new account|open an account|join)\b/i.test(v))add(answer("To create an account: 1) Tap Register. 2) Choose the available email or phone registration method. 3) Enter your details accurately and create a strong, unique password. 4) Complete the verification steps shown. 5) Sign in after registration. Use your own contact details and never share your password or one-time code."));
+ else if(/\b(how (do|can) i (create|register|sign up)|how to (create|register|sign up)|create an account|account creation|registration|register|sign up|new account|open an account)\b/i.test(v))add(answer("To create an OnChainCrypto account: 1) Open the Register page. 2) Choose an available email or phone registration method. 3) Enter your own details accurately and set a strong, unique password. 4) Complete the verification steps shown on screen. 5) Once registration is complete, use Login to access your account. Available methods and verification requirements are shown in the app. Never share your password or one-time verification code."));
  else if(/\b(login|log in|sign in|password|forgot password|reset password|locked out)\b/i.test(v))add(answer("To sign in, open Login and use the email, phone number or username linked to your account with your password. If you forgot it, use the password-reset option shown on the login page. Check your inbox and spam folder for verification messages. Never send your password or a one-time code to anyone, including support."));
  else if(/\b(deposit|fund|add money|add funds|receive crypto|deposit address)\b/i.test(v))add(answer("To deposit safely, open Wallet → Deposit and select the exact coin and network supported by the app. Before sending, compare the coin, network name, deposit address and any required memo/tag on both the sending wallet and OnChainCrypto. They must match exactly. Check minimums, fees and confirmations, and consider a small test transfer first when appropriate. Never send an asset over an unsupported network. A transfer may be irreversible and is not credited until the platform completes its stated checks; follow the status in History and OnChainCrypto rules. Use only deposit options currently enabled for your account. Depositing does not guarantee profits."));
  else if(/\b(withdraw|cash out|send crypto|withdrawal|payout)\b/i.test(v))add(answer("To withdraw safely, open Wallet → Withdraw and choose an asset and network supported by both OnChainCrypto and the receiving wallet. Verify the destination address carefully, and check any required memo/tag, network fee, minimum, limit and approval steps before confirming. The sending and receiving networks must match exactly; an incorrect address, missing tag or unsupported network can cause permanent loss. Follow OnChainCrypto rules and track the request in History. If it is delayed or rejected, contact support with the transaction reference. Never share passwords, private keys or one-time codes."));
@@ -6163,7 +6163,7 @@ root.querySelector(".oc-support-launch").addEventListener("click",()=>root.class
 root.querySelector(".oc-support-close").addEventListener("click",()=>root.classList.remove("is-open"));
 root.querySelectorAll("[data-question]").forEach(b=>b.addEventListener("click",()=>{const q=b.dataset.question;add(q,"user");respond(q)}));
 root.querySelector("#ocSupportForm").addEventListener("submit",e=>{e.preventDefault();const q=input.value.trim();if(!q)return;add(q,"user");input.value="";respond(q);input.focus()});
-root.querySelector(".oc-support-register").addEventListener("click",()=>{root.classList.remove("is-open");if(typeof window.showPage==="function")window.showPage("register");else document.getElementById("page-register")?.scrollIntoView({behavior:"smooth",block:"start"})});
+
 
 })();
 </script>
