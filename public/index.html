@@ -1252,6 +1252,70 @@ body main .section-head .muted {
 }
 </style>
 
+
+<style id="oc-single-centered-auth-layout-final">
+/* One dedicated, centered authentication card. Keep Firebase form IDs and handlers unchanged. */
+html.oc-auth-pending body,
+body.oc-logged-out { min-height:100vh!important; }
+html.oc-auth-pending main,
+body.oc-logged-out main {
+  display:flex!important; align-items:center!important; justify-content:center!important;
+  width:100%!important; min-height:100vh!important; padding:20px!important;
+  margin:0!important;
+}
+html.oc-auth-pending main > #page-register,
+body.oc-logged-out main > #page-register {
+  display:flex!important; flex-direction:column!important; align-items:center!important;
+  justify-content:center!important; gap:0!important; width:100%!important;
+  max-width:500px!important; min-height:0!important; margin:0 auto!important;
+  padding:0!important;
+}
+html.oc-auth-pending #page-register > .oc-public-auth-hero,
+body.oc-logged-out #page-register > .oc-public-auth-hero,
+html.oc-auth-pending #page-register > .auth-welcome,
+body.oc-logged-out #page-register > .auth-welcome { display:none!important; }
+html.oc-auth-pending #page-register > .content-grid,
+body.oc-logged-out #page-register > .content-grid {
+  display:block!important; width:100%!important; max-width:500px!important;
+  margin:0!important; padding:0!important;
+}
+html.oc-auth-pending #page-register .auth-main-panel,
+body.oc-logged-out #page-register .auth-main-panel {
+  display:block!important; width:100%!important; max-width:500px!important;
+  margin:0!important; padding:clamp(20px,4vw,30px)!important;
+  box-sizing:border-box!important; border-radius:18px!important;
+}
+html.oc-auth-pending #authChoicePanel,
+body.oc-logged-out #authChoicePanel { display:none!important; }
+html.oc-auth-pending #page-register #signInForm:not(.hidden),
+body.oc-logged-out #page-register #signInForm:not(.hidden),
+html.oc-auth-pending #page-register #registerForm:not(.hidden),
+body.oc-logged-out #page-register #registerForm:not(.hidden) {
+  display:block!important; width:100%!important; margin:0!important;
+}
+html.oc-auth-pending #page-register #signInForm.hidden,
+body.oc-logged-out #page-register #signInForm.hidden,
+html.oc-auth-pending #page-register #registerForm.hidden,
+body.oc-logged-out #page-register #registerForm.hidden,
+html.oc-auth-pending #page-register .hidden,
+body.oc-logged-out #page-register .hidden { display:none!important; }
+html.oc-auth-pending #page-register .auth-main-panel label,
+body.oc-logged-out #page-register .auth-main-panel label { display:block!important; margin:12px 0 6px!important; }
+html.oc-auth-pending #page-register .auth-main-panel input:not([type=checkbox]),
+body.oc-logged-out #page-register .auth-main-panel input:not([type=checkbox]),
+html.oc-auth-pending #page-register .auth-main-panel select,
+body.oc-logged-out #page-register .auth-main-panel select {
+  display:block!important; width:100%!important; min-height:48px!important;
+}
+html.oc-auth-pending #page-register .auth-main-panel button.full,
+body.oc-logged-out #page-register .auth-main-panel button.full { width:100%!important; }
+@media(max-width:600px) {
+  html.oc-auth-pending main, body.oc-logged-out main { min-height:100dvh!important; padding:14px!important; }
+  html.oc-auth-pending #page-register .auth-main-panel,
+  body.oc-logged-out #page-register .auth-main-panel { padding:18px!important; }
+}
+</style>
+
 </head>
 <body>
 <header>
