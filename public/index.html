@@ -1412,7 +1412,7 @@ body main .section-head .muted {
 
     <div class="oc-platform-final-cta">
       <div><div class="oc-platform-eyebrow">START WITH ONCHAIN</div><h2>Ready to explore your markets?</h2><p>Create your Onchain account and discover the tools available across the platform.</p></div>
-      <button type="button" class="primary" id="ocVisitorAboutSignup">Create account <span aria-hidden="true">→</span></button>
+      <button type="button" class="primary" id="ocPlatformAboutSignup">Create account <span aria-hidden="true">→</span></button>
     </div>
   </section>
 </section>
@@ -5633,6 +5633,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  $("ocVisitorDetailClose")?.addEventListener("click",()=>{$("ocVisitorCoinDetail").classList.add("hidden");$("ocVisitorTradingChart").src="about:blank"});
  $("ocVisitorDetailBuy")?.addEventListener("click",()=>openAuth("signup"));
  ["ocVisitorHeroExplore","ocVisitorAboutExplore"].forEach(id=>$(id)?.addEventListener("click",()=>$("ocVisitorMarkets")?.scrollIntoView({behavior:"smooth",block:"start"})));
+ ["ocVisitorAboutSignup","ocPlatformAboutSignup"].forEach(id=>$(id)?.addEventListener("click",()=>openAuth("signup")));
  window.addEventListener("load",()=>{window.ocRenderVisitorMarket?.();void loadVisitorGoldFallback()});
  window.addEventListener("market-updated",()=>window.ocRenderVisitorMarket?.());
  setInterval(()=>{window.ocRenderVisitorMarket?.();void loadVisitorGoldFallback()},30000);
