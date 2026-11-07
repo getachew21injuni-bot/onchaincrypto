@@ -13,14 +13,16 @@ service cloud.firestore {
         && request.resource.data.adminAssigned == true
         && request.resource.data.keys().hasOnly([
           'uid','adminAssigned','email','phoneNumber','phone','firstName','lastName','displayName','referralCode','referredByCode',
-          'country','dateOfBirth','gender','address','createdAt','updatedAt'
-        ]);
+          'country','dateOfBirth','gender','address','avatarDataUrl','createdAt','updatedAt'
+        ])
+        && (!('avatarDataUrl' in request.resource.data) || (request.resource.data.avatarDataUrl is string && request.resource.data.avatarDataUrl.size() <= 160000));
       allow update: if (
         owns(uid) && request.resource.data.uid == uid
         && request.resource.data.adminAssigned == true
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'adminAssigned','email','phoneNumber','phone','firstName','lastName','displayName','referralCode','referredByCode','country','dateOfBirth','gender','address','createdAt','updatedAt'
+          'adminAssigned','email','phoneNumber','phone','firstName','lastName','displayName','referralCode','referredByCode','country','dateOfBirth','gender','address','avatarDataUrl','createdAt','updatedAt'
         ])
+        && (!('avatarDataUrl' in request.resource.data) || (request.resource.data.avatarDataUrl is string && request.resource.data.avatarDataUrl.size() <= 160000))
       ) || (
         isAdmin()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminAssigned','demoBalanceUSDT','demoBalanceUpdatedAt','demoAssetBalances','demoAssetBalancesUpdatedAt','demoAssetBalancesUpdatedBy','demoWalletResetAt','demoWalletResetBy','demoBalanceLastTransferId','adminUpdatedAt','adminUpdatedBy','accountStatus','tradingEnabled','maxTradeAmountUSDT','demoTradeControlMode','demoWinPercent','demoLossPercent','tradeControlUpdatedAt','tradeControlUpdatedBy'])
