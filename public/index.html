@@ -1896,7 +1896,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
     </section>
   </section>
   <section id="page-transfer" class="hidden">
-    <div class="page-title"><div><h1>⇄ Send USDT</h1><div class="muted">Send USDT to another OnChainCrypto account.</div></div><span class="tag">INTERNAL SEND</span></div>
+    <div class="page-title"><div><h1>⇄ Send USDT</h1><div class="muted">Request a USDT transfer to another OnChainCrypto account.</div></div><span class="tag">INTERNAL SEND</span></div>
     <section class="panel form-panel" style="padding:18px">
       <div class="panel" style="padding:14px;margin-bottom:16px;background:var(--panel2)">
         <div class="muted tiny">YOUR ONCHAIN ID</div>
@@ -1909,8 +1909,8 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
       <label for="transferAmount">Amount (USDT)</label>
       <input id="transferAmount" class="field" type="number" min="0.00000001" max="1000000000" step="0.00000001" inputmode="decimal" placeholder="Enter amount">
       <p id="transferAvailableBalance" class="muted tiny">Available balance: checking…</p>
-      <button class="primary full" type="button" id="transferSubmit" disabled>Send USDT</button>
-      <p id="transferNotice" class="muted tiny" role="status" aria-live="polite">Internal demo-balance transfer only. No blockchain funds move.</p>
+      <button class="primary full" type="button" id="transferSubmit" disabled>Request transfer</button>
+      <p id="transferNotice" class="muted tiny" role="status" aria-live="polite">Admin approval required. This moves demo USDT balances only; no blockchain funds move.</p>
     </section>
     <section class="panel" style="margin-top:18px"><div class="section-head"><h2>Internal transfer history</h2></div><div id="transferHistoryRows" style="padding:14px 18px"><div class="empty">Your transfers will appear here.</div></div></section>
   </section>
@@ -6860,11 +6860,11 @@ body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.descr
 <script type="module" id="oc-internal-usdt-send">
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, where, limit, onSnapshot, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, addDoc, collection, query, where, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
 const app=getApps()[0]||initializeApp(config),auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
 const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
-let user=null,recipient=null,myName="OnChain member",stopSent=null,stopReceived=null,stopBalance=null,sentRows=[],receivedRows=[];
+let user=null,recipient=null,myName="OnChain member",stopSent=null,stopReceived=null,stopRequestsSent=null,stopRequestsReceived=null,stopBalance=null,sentRows=[],receivedRows=[],requestRowsSent=[],requestRowsReceived=[];
 const amountText=value=>Number(value||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:8});
 function notice(message,isError=false){const node=byId("transferNotice");if(node){node.textContent=message;node.className=isError?"red tiny":"muted tiny";}}
 function updateButton(){const amount=Number(byId("transferAmount")?.value||0);if(byId("transferSubmit"))byId("transferSubmit").disabled=!(!!user&&!!recipient&&Number.isFinite(amount)&&amount>0);}
@@ -6879,22 +6879,34 @@ async function publishDirectoryEntry(current){
 }
 function renderHistory(){
  const host=byId("transferHistoryRows");if(!host)return;
- const rows=[...sentRows,...receivedRows].filter((row,index,array)=>array.findIndex(other=>other.id===row.id)===index).sort((a,b)=>{
+ const ledger=[...sentRows,...receivedRows].filter((row,index,array)=>array.findIndex(other=>other.id===row.id)===index).map(row=>({...row,rowKind:"ledger"}));
+ const requests=[...requestRowsSent,...requestRowsReceived].filter((row,index,array)=>array.findIndex(other=>other.id===row.id)===index).filter(row=>row.status!=="approved").map(row=>({...row,rowKind:"request"}));
+ const rows=[...ledger,...requests].sort((a,b)=>{
   const time=value=>value?.toDate?.().getTime?.()||0;return time(b.createdAt)-time(a.createdAt);
- }).slice(0,30);
+ }).slice(0,40);
  host.innerHTML=rows.length?rows.map(row=>{
   const sent=row.senderUid===user?.uid,name=sent?(row.recipientName||"OnChain member"):(row.senderName||"OnChain member");
   const date=row.createdAt?.toDate?.()?row.createdAt.toDate().toLocaleString():"Just now";
+  if(row.rowKind==="request"){
+   const state=String(row.status||"pending").toUpperCase();
+   return '<div style="display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)"><div><strong>'+(sent?"Request to ":"Incoming request from ")+esc(name)+'</strong><div class="muted tiny">'+esc(date)+' · '+esc(state)+'</div><div class="muted tiny">Request ID: '+esc(row.id)+'</div></div><strong style="white-space:nowrap">'+amountText(row.amount)+' USDT</strong></div>';
+  }
   return '<div style="display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)"><div><strong>'+(sent?"Sent to ":"Received from ")+esc(name)+'</strong><div class="muted tiny">'+esc(date)+' · Completed</div><div class="muted tiny">ID: '+esc(row.id)+'</div></div><strong class="'+(sent?"red":"green")+'" style="white-space:nowrap">'+(sent?"−":"+")+amountText(row.amount)+' USDT</strong></div>';
- }).join(""):'<div class="empty">No internal transfers yet.</div>';
+ }).join(""):'<div class="empty">No internal transfer requests or completed transfers yet.</div>';
 }
 function watchHistory(){
- stopSent?.();stopReceived?.();stopSent=null;stopReceived=null;sentRows=[];receivedRows=[];
+ [stopSent,stopReceived,stopRequestsSent,stopRequestsReceived].forEach(stop=>stop?.());
+ stopSent=stopReceived=stopRequestsSent=stopRequestsReceived=null;
+ sentRows=[];receivedRows=[];requestRowsSent=[];requestRowsReceived=[];
  if(!user){renderHistory();return;}
  const sentQuery=query(collection(db,"internalTransfers"),where("senderUid","==",user.uid),limit(25));
  const receivedQuery=query(collection(db,"internalTransfers"),where("recipientUid","==",user.uid),limit(25));
- stopSent=onSnapshot(sentQuery,snapshot=>{sentRows=snapshot.docs.map(item=>({id:item.id,...item.data()}));renderHistory();},()=>{if(byId("transferHistoryRows"))byId("transferHistoryRows").textContent="Transfer history is temporarily unavailable.";});
- stopReceived=onSnapshot(receivedQuery,snapshot=>{receivedRows=snapshot.docs.map(item=>({id:item.id,...item.data()}));renderHistory();},()=>{if(byId("transferHistoryRows"))byId("transferHistoryRows").textContent="Transfer history is temporarily unavailable.";});
+ const sentRequestQuery=query(collection(db,"internalTransferRequests"),where("senderUid","==",user.uid),limit(25));
+ const receivedRequestQuery=query(collection(db,"internalTransferRequests"),where("recipientUid","==",user.uid),limit(25));
+ stopSent=onSnapshot(sentQuery,snapshot=>{sentRows=snapshot.docs.map(item=>({id:item.id,...item.data()}));renderHistory();},()=>{});
+ stopReceived=onSnapshot(receivedQuery,snapshot=>{receivedRows=snapshot.docs.map(item=>({id:item.id,...item.data()}));renderHistory();},()=>{});
+ stopRequestsSent=onSnapshot(sentRequestQuery,snapshot=>{requestRowsSent=snapshot.docs.map(item=>({id:item.id,...item.data()}));renderHistory();},()=>{});
+ stopRequestsReceived=onSnapshot(receivedRequestQuery,snapshot=>{requestRowsReceived=snapshot.docs.map(item=>({id:item.id,...item.data()}));renderHistory();},()=>{});
 }
 onAuthStateChanged(auth,async current=>{
  user=current||null;recipient=null;stopBalance?.();stopBalance=null;
@@ -6930,37 +6942,26 @@ byId("copyTransferMyId")?.addEventListener("click",async()=>{
  catch(_){notice("Select and copy the OnChain ID shown above.",true);}
 });
 byId("transferSubmit")?.addEventListener("click",async()=>{
- if(!user||!recipient){notice("Check the recipient before sending.",true);return;}
+ if(!user||!recipient){notice("Check the recipient before submitting.",true);return;}
  const raw=Number(byId("transferAmount")?.value||0),amount=Math.round(raw*1e8)/1e8;
  if(!Number.isFinite(amount)||amount<=0||amount>1000000000||Math.abs(amount-raw)>1e-9){notice("Enter a valid USDT amount (up to 8 decimal places).",true);return;}
- if(!window.confirm("Send "+amountText(amount)+" USDT to "+recipient.displayName+"? Internal transfers are immediate and cannot be reversed."))return;
- const button=byId("transferSubmit");button.disabled=true;button.textContent="Sending…";
- const senderRef=doc(db,"users",user.uid),recipientRef=doc(db,"users",recipient.uid),transferRef=doc(collection(db,"internalTransfers"));
+ if(!window.confirm("Submit a request for "+amountText(amount)+" USDT to "+recipient.displayName+"? The admin must approve it before either balance changes."))return;
+ const button=byId("transferSubmit");button.disabled=true;button.textContent="Submitting…";
  try{
-  await runTransaction(db,async transaction=>{
-   const senderSnap=await transaction.get(senderRef),recipientSnap=await transaction.get(recipientRef),transferSnap=await transaction.get(transferRef);
-   if(!senderSnap.exists()||!recipientSnap.exists())throw new Error("A required account profile could not be found. No balance was changed.");
-   if(transferSnap.exists())throw new Error("Please retry with a new transfer.");
-   const senderData=senderSnap.data()||{},recipientData=recipientSnap.data()||{};
-   if(senderData.accountStatus==="suspended"||recipientData.accountStatus==="suspended")throw new Error("A suspended account cannot use internal transfers.");
-   const senderBefore=Number(senderData.demoBalanceUSDT||0),recipientBefore=Number(recipientData.demoBalanceUSDT||0);
-   if(!Number.isFinite(senderBefore)||!Number.isFinite(recipientBefore)||senderBefore<amount)throw new Error("Insufficient available USDT balance. No transfer was made.");
-   const senderAfter=senderBefore-amount,recipientAfter=recipientBefore+amount;
-   if(recipientAfter>1000000000)throw new Error("The recipient balance limit would be exceeded.");
-   transaction.update(senderRef,{demoBalanceUSDT:senderAfter,demoBalanceUpdatedAt:serverTimestamp(),demoBalanceLastTransferId:transferRef.id});
-   transaction.update(recipientRef,{demoBalanceUSDT:recipientAfter,demoBalanceUpdatedAt:serverTimestamp(),demoBalanceLastTransferId:transferRef.id});
-   transaction.set(transferRef,{senderUid:user.uid,recipientUid:recipient.uid,asset:"USDT",amount,senderBefore,senderAfter,recipientBefore,recipientAfter,senderName:myName,recipientName:recipient.displayName,createdAt:serverTimestamp()});
+  const requestRef=await addDoc(collection(db,"internalTransferRequests"),{
+   senderUid:user.uid,recipientUid:recipient.uid,asset:"USDT",amount,
+   senderName:myName,recipientName:recipient.displayName,status:"pending",createdAt:serverTimestamp()
   });
-  notice("Sent "+amountText(amount)+" USDT to "+recipient.displayName+". Transfer ID: "+transferRef.id);
+  notice("Transfer request submitted for admin approval. No balance has changed. Request ID: "+requestRef.id);
   byId("transferAmount").value="";byId("transferDestination").value="";recipient=null;
-  if(byId("transferRecipientPreview"))byId("transferRecipientPreview").textContent="Transfer completed. Check another recipient when ready.";
+  if(byId("transferRecipientPreview"))byId("transferRecipientPreview").textContent="Request submitted. You can track its status below.";
   updateButton();
  }catch(error){
-  console.warn("Internal USDT transfer failed:",error?.code||error?.message);
-  const message=error?.code==="permission-denied"?"Transfer was blocked by wallet security rules. No balance was changed.":error?.message||"Transfer failed. No balance was changed.";
-  notice(message,true);
- }finally{button.textContent="Send USDT";updateButton();}
+  console.warn("Internal USDT transfer request failed:",error?.code||error?.message);
+  notice(error?.code==="permission-denied"?"Request blocked by account security rules. No balance was changed.":error?.message||"Could not submit the request.",true);
+ }finally{button.textContent="Request transfer";updateButton();}
 });
+
 </script>
 </body>
 </html>
