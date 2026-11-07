@@ -34,7 +34,6 @@ service cloud.firestore {
         && (!('demoAssetBalancesUpdatedBy' in request.resource.data) || request.resource.data.demoAssetBalancesUpdatedBy == request.auth.token.email)
         && (!('demoWalletResetBy' in request.resource.data) || request.resource.data.demoWalletResetBy == request.auth.token.email)
         && (!('adminUpdatedBy' in request.resource.data) || request.resource.data.adminUpdatedBy == request.auth.token.email)
-            );
       ) || (
         // Sender-side USDT transfer: only the matching atomic ledger record can decrease balance.
         signedIn()
@@ -68,7 +67,7 @@ service cloud.firestore {
         && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.demoBalanceLastTransferId)).data.recipientAfter == request.resource.data.demoBalanceUSDT
         && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.demoBalanceLastTransferId)).data.recipientAfter == getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.demoBalanceLastTransferId)).data.recipientBefore + getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.demoBalanceLastTransferId)).data.amount
         && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.demoBalanceLastTransferId)).data.amount > 0
-
+      );
       allow delete: if false;
     }
 
