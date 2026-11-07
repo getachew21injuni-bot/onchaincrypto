@@ -3348,7 +3348,7 @@ function openHomeAfterAuth() {
   document.getElementById("signInForm")?.classList.add("hidden");
   document.getElementById("authChoicePanel")?.classList.add("hidden");
   document.getElementById("registerForm")?.classList.add("hidden");
-  const routeNames = new Set(["home","markets","trade","browser","wallet","deposit","withdraw","transfer","convert","history","profile","notifications","support","admin","copytrading"]);
+  const routeNames = new Set(["home","markets","trade","browser","wallet","deposit","withdraw","transfer","convert","history","profile","financial","kyc","notifications","support","admin","copytrading"]);
   const requestedPage = String(location.hash || "").replace(/^#/, "").toLowerCase();
   const destinationPage = routeNames.has(requestedPage) ? requestedPage : "home";
   const applyHomeRoute = () => {
