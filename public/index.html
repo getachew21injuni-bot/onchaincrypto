@@ -286,23 +286,18 @@ document.addEventListener('DOMContentLoaded',function(){
 #page-trade .chart-area>.signal-box .section-head{padding:0!important}
 </style><style id="oc-hide-numbered-trade-steps">#timedPaperTrade .oc-flow-step{display:none!important}</style>
 <style id="oc-logged-out-lockscreen">
-/* Guest Home remains public; all other platform pages require sign-in. */
-body.oc-logged-out:not(.oc-auth-screen) > header,
-body.oc-logged-out:not(.oc-auth-screen) > #bottomNav { display:block!important; }
-body.oc-logged-out:not(.oc-auth-screen) main > section[id^="page-"]:not(#page-home) { display:none!important; }
-body.oc-logged-out:not(.oc-auth-screen) #page-home { display:block!important; }
-body.oc-logged-out:not(.oc-auth-screen) #page-register { display:none!important; }
-body.oc-logged-out.oc-auth-screen > header,
-body.oc-logged-out.oc-auth-screen > footer,
-body.oc-logged-out.oc-auth-screen > #bottomNav,
-body.oc-logged-out.oc-auth-screen > #adminDashboardShortcut,
-body.oc-logged-out.oc-auth-screen > a,
-body.oc-logged-out.oc-auth-screen > nav,
-body.oc-logged-out.oc-auth-screen > aside,
-body.oc-logged-out.oc-auth-screen > .more-menu-wrap { display:none!important; }
-body.oc-logged-out.oc-auth-screen main > section[id^="page-"]:not(#page-register) { display:none!important; }
-body.oc-logged-out.oc-auth-screen #page-register { display:flex!important; }
-body.oc-logged-out.oc-auth-screen main { display:flex!important; min-height:100vh; padding-top:24px; }
+/* Signed-out visitors see authentication only; all app pages and navigation stay hidden. */
+body.oc-logged-out > header,
+body.oc-logged-out > footer,
+body.oc-logged-out > #bottomNav,
+body.oc-logged-out > #adminDashboardShortcut,
+body.oc-logged-out > a,
+body.oc-logged-out > nav,
+body.oc-logged-out > aside,
+body.oc-logged-out > .more-menu-wrap { display:none!important; }
+body.oc-logged-out main > section[id^="page-"]:not(#page-register) { display:none!important; }
+body.oc-logged-out #page-register { display:flex!important; }
+body.oc-logged-out main { display:flex!important; min-height:100vh; padding-top:24px; }
 </style>
 
 <style id="oc-auth-only-screen-tweaks">
@@ -2720,7 +2715,7 @@ window.ocApplyAdminDemoBalance=function(amount){const n=Number(amount);if(!Numbe
 window.ocApplyAdminDemoAssets=function(balances){if(!balances||typeof balances!=="object"||Array.isArray(balances))return;let changed=false;for(const [rawSymbol,rawAmount] of Object.entries(balances)){const symbol=String(rawSymbol||"").toUpperCase();const amount=Number(rawAmount);if(!/^[A-Z0-9]{2,12}$/.test(symbol)||!Number.isFinite(amount)||amount<0)continue;state.holdings[symbol]=amount;changed=true;}if(changed){saveState();renderWallet();}};
 function renderWallet(){const pricedHoldings=Object.entries(state.holdings).reduce((out,[sym,qty])=>{const symbol=String(sym).toUpperCase(),amount=Number(qty)||0;if(amount<=0||symbol==="USDT")return out;const price=Number(priceFor(symbol)?.current_price||0);if(price>0){out.value+=amount*price;out.priced++;}else out.unpriced++;return out;},{value:0,priced:0,unpriced:0});const totalValue=(Number(state.balance)||0)+pricedHoldings.value;$("summaryBalance").textContent=usdtMoney(state.balance);$("walletBalance").textContent=usdtMoney(totalValue);$("walletBalanceNote").textContent="Estimated total value in USDT · "+pricedHoldings.priced+" priced coin holding"+(pricedHoldings.priced===1?"":"s")+(pricedHoldings.unpriced?"; "+pricedHoldings.unpriced+" asset price"+(pricedHoldings.unpriced===1?" is":"s are")+" unavailable and excluded":"")+" · estimated portfolio";$("holdingsValue").textContent=usdtMoney(pricedHoldings.value);const rows=Object.entries(state.holdings).filter(([sym,qty])=>String(sym).toUpperCase()!=="USDT"&&Number(qty)>0.0000000001&&(! $("hideSmallBalances")?.checked||Number(qty)*(priceFor(sym)?.current_price||0)>=1));$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym,current_price:0},price=Number(c.current_price||0);return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+' '+safe(sym.toUpperCase())+'</td><td>'+(price>0?usdtMoney(Number(qty)*price):"Price unavailable")+'</td></tr>'}).join(''):'<tr><td colspan="3" class="empty">No coin holdings yet. Your USDT balance is shown above.</td></tr>';renderActivityHistory();renderTradeHistory();renderPnl();renderWalletMarket()}
 document.addEventListener("change",e=>{if(e.target&&e.target.id==="hideSmallBalances")renderWallet();if(e.target&&e.target.id==="homeHistoryFilter")renderActivityHistory()});
-function showPage(page){const guest=window.ocLoggedOut===true&&!auth.currentUser;if(guest&&!["public-market","home","markets","trade","browser","register","copytrading"].includes(page))page="register";document.body.classList.toggle("oc-visitor-mode",guest);document.body.classList.toggle("oc-auth-screen",guest&&page==="register");if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
+function showPage(page){const guest=window.ocLoggedOut===true&&!auth.currentUser;if(guest&&page!=="register")page="register";document.body.classList.toggle("oc-visitor-mode",guest);document.body.classList.toggle("oc-auth-screen",guest&&page==="register");if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
 window.showPage = showPage;
 let timedPaper=null,timedTimer=null,pendingTimedDirection=null;
 function quickPlan(){const amount=Number($("timedStake")?.value||0)*Number(priceFor(window.__ocTradeFundingCoin||"USDT")?.current_price||1),isGold=($("tradeAsset")?.value||selected)==="XAU",minimum=isGold?500:100;const levels=[{rate:12,min:minimum,max:5000,duration:30,label:"Level 1"},{rate:15,min:5000,max:10000,duration:60,label:"Level 2"},{rate:18,min:10000,max:25000,duration:90,label:"Level 3"},{rate:21,min:25000,max:50000,duration:120,label:"Level 4"},{rate:24,min:50000,max:100000,duration:180,label:"Level 5"},{rate:27,min:100000,max:Infinity,duration:360,label:"Level 6"}];return levels.find((p,i)=>amount>=p.min&&(amount<p.max||i===levels.length-1&&amount<=p.max))||levels[0]}
@@ -3761,10 +3756,12 @@ onAuthStateChanged(auth, (user) => {
 });
 
 window.ocSetAuthScreenVisibility = function(signedIn) {
-  // Native hidden attributes guarantee protected navigation and pages stay out of view.
+  // Keep the authentication page outside the signed-in app, and keep every app page
+  // outside the signed-out screen. The active router controls which signed-in page shows.
   document.querySelectorAll("body > :not(main)").forEach(node => node.removeAttribute("hidden"));
   document.querySelectorAll("main > *").forEach(node => {
-    if (signedIn || node.id === "page-public-market" || node.id === "page-register") node.removeAttribute("hidden");
+    const isLoginPage = node.id === "page-register";
+    if (signedIn ? !isLoginPage : isLoginPage) node.removeAttribute("hidden");
     else node.setAttribute("hidden", "");
   });
 };
