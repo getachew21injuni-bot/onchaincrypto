@@ -3,7 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
     function owns(uid) { return signedIn() && request.auth.uid == uid; }
-    function isAdmin() { return signedIn() && (request.auth.token.admin == true || (request.auth.token.email_verified == true && request.auth.token.email in ['getachew21.INJ.UNI@gmail.com', 'getachew21.inj.uni@gmail.com'])); }
+    function isAdmin() { return signedIn() && (request.auth.token.get('admin', false) == true || (request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '') in ['getachew21.INJ.UNI@gmail.com', 'getachew21.inj.uni@gmail.com'])); }
 
     // Each member may read and update only their own profile.
     match /users/{uid} {
@@ -23,7 +23,7 @@ service cloud.firestore {
         ])
       ) || (
         isAdmin()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminAssigned','demoBalanceUSDT','demoBalanceUpdatedAt','demoAssetBalances','demoAssetBalancesUpdatedAt','demoAssetBalancesUpdatedBy','demoWalletResetAt','demoWalletResetBy','adminUpdatedAt','adminUpdatedBy','accountStatus','tradingEnabled','maxTradeAmountUSDT','tradeControlUpdatedAt','tradeControlUpdatedBy'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminAssigned','demoBalanceUSDT','demoBalanceUpdatedAt','demoAssetBalances','demoAssetBalancesUpdatedAt','demoAssetBalancesUpdatedBy','demoWalletResetAt','demoWalletResetBy','demoBalanceLastTransferId','adminUpdatedAt','adminUpdatedBy','accountStatus','tradingEnabled','maxTradeAmountUSDT','tradeControlUpdatedAt','tradeControlUpdatedBy'])
         && (!('adminAssigned' in request.resource.data) || request.resource.data.adminAssigned == true)
         && (!('demoBalanceUSDT' in request.resource.data) || (request.resource.data.demoBalanceUSDT is number && request.resource.data.demoBalanceUSDT >= 0 && request.resource.data.demoBalanceUSDT <= 1000000000))
         && (!('accountStatus' in request.resource.data) || request.resource.data.accountStatus in ['active','suspended'])
@@ -239,6 +239,110 @@ service cloud.firestore {
         && request.resource.data.status in ['approved','rejected']
         && request.resource.data.reviewedBy == request.auth.token.email;
       allow delete: if false;
+    }
+
+    // Minimal account directory: signed-in users can fetch a known OnChain ID,
+    // but cannot list or enumerate other members.
+    match /userDirectory/{uid} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create, update: if owns(uid)
+        && request.resource.data.keys().hasOnly(['uid','displayName','updatedAt'])
+        && request.resource.data.uid == uid
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() <= 80
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    // Customer-submitted USDT transfer requests. Requests never expose wallet balances.
+    match /internalTransferRequests/{requestId} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['senderUid','recipientUid','asset','amount','senderName','recipientName','status','createdAt'])
+        && request.resource.data.senderUid == request.auth.uid
+        && request.resource.data.recipientUid is string
+        && request.resource.data.recipientUid != request.auth.uid
+        && exists(/databases/$(database)/documents/userDirectory/$(request.resource.data.recipientUid))
+        && request.resource.data.recipientName == get(/databases/$(database)/documents/userDirectory/$(request.resource.data.recipientUid)).data.displayName
+        && exists(/databases/$(database)/documents/userDirectory/$(request.auth.uid))
+        && request.resource.data.senderName == get(/databases/$(database)/documents/userDirectory/$(request.auth.uid)).data.displayName
+        && request.resource.data.asset == 'USDT'
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0
+        && request.resource.data.amount <= 1000000000
+        && request.resource.data.senderName is string
+        && request.resource.data.senderName.size() <= 80
+        && request.resource.data.recipientName is string
+        && request.resource.data.recipientName.size() <= 80
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time;
+      allow get, list: if isAdmin()
+        || (signedIn() && (resource.data.senderUid == request.auth.uid || resource.data.recipientUid == request.auth.uid));
+      allow update: if isAdmin()
+        && resource.data.status == 'pending'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reviewedAt','reviewedBy','transferId'])
+        && request.resource.data.status in ['approved','rejected']
+        && request.resource.data.reviewedAt == request.time
+        && request.resource.data.reviewedBy == request.auth.token.email
+        && (
+          (request.resource.data.status == 'rejected' && !('transferId' in request.resource.data))
+          || (
+            request.resource.data.status == 'approved'
+            && request.resource.data.transferId is string
+            && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.transferId)).data.transferRequestId == requestId
+            && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.transferId)).data.senderUid == resource.data.senderUid
+            && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.transferId)).data.recipientUid == resource.data.recipientUid
+            && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.transferId)).data.amount == resource.data.amount
+          )
+        );
+      allow delete: if false;
+    }
+
+    // Immutable ledger. Only an administrator can approve a pending request;
+    // both wallet updates, request status, and ledger must commit atomically.
+    match /internalTransfers/{transferId} {
+      allow get, list: if signedIn()
+        && (isAdmin() || resource.data.senderUid == request.auth.uid || resource.data.recipientUid == request.auth.uid);
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['senderUid','recipientUid','asset','amount','senderBefore','senderAfter','recipientBefore','recipientAfter','senderName','recipientName','createdAt','transferRequestId','approvedBy'])
+        && request.resource.data.senderUid is string
+        && request.resource.data.recipientUid is string
+        && request.resource.data.senderUid != request.resource.data.recipientUid
+        && request.resource.data.asset == 'USDT'
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0
+        && request.resource.data.amount <= 1000000000
+        && request.resource.data.senderBefore is number
+        && request.resource.data.senderAfter is number
+        && request.resource.data.recipientBefore is number
+        && request.resource.data.recipientAfter is number
+        && request.resource.data.senderBefore >= request.resource.data.amount
+        && request.resource.data.senderAfter == request.resource.data.senderBefore - request.resource.data.amount
+        && request.resource.data.recipientAfter == request.resource.data.recipientBefore + request.resource.data.amount
+        && request.resource.data.senderAfter >= 0
+        && request.resource.data.recipientAfter <= 1000000000
+        && request.resource.data.senderName is string
+        && request.resource.data.senderName.size() <= 80
+        && request.resource.data.recipientName is string
+        && request.resource.data.recipientName.size() <= 80
+        && request.resource.data.transferRequestId is string
+        && request.resource.data.approvedBy == request.auth.token.email
+        && request.resource.data.createdAt == request.time
+        && get(/databases/$(database)/documents/internalTransferRequests/$(request.resource.data.transferRequestId)).data.status == 'pending'
+        && get(/databases/$(database)/documents/internalTransferRequests/$(request.resource.data.transferRequestId)).data.senderUid == request.resource.data.senderUid
+        && get(/databases/$(database)/documents/internalTransferRequests/$(request.resource.data.transferRequestId)).data.recipientUid == request.resource.data.recipientUid
+        && get(/databases/$(database)/documents/internalTransferRequests/$(request.resource.data.transferRequestId)).data.amount == request.resource.data.amount
+        && getAfter(/databases/$(database)/documents/internalTransferRequests/$(request.resource.data.transferRequestId)).data.status == 'approved'
+        && getAfter(/databases/$(database)/documents/internalTransferRequests/$(request.resource.data.transferRequestId)).data.transferId == transferId
+        && get(/databases/$(database)/documents/users/$(request.resource.data.senderUid)).data.get('demoBalanceUSDT', 0) == request.resource.data.senderBefore
+        && get(/databases/$(database)/documents/users/$(request.resource.data.recipientUid)).data.get('demoBalanceUSDT', 0) == request.resource.data.recipientBefore
+        && get(/databases/$(database)/documents/users/$(request.resource.data.senderUid)).data.get('accountStatus', 'active') == 'active'
+        && get(/databases/$(database)/documents/users/$(request.resource.data.recipientUid)).data.get('accountStatus', 'active') == 'active'
+        && getAfter(/databases/$(database)/documents/users/$(request.resource.data.senderUid)).data.demoBalanceUSDT == request.resource.data.senderAfter
+        && getAfter(/databases/$(database)/documents/users/$(request.resource.data.recipientUid)).data.demoBalanceUSDT == request.resource.data.recipientAfter
+        && getAfter(/databases/$(database)/documents/users/$(request.resource.data.senderUid)).data.demoBalanceLastTransferId == transferId
+        && getAfter(/databases/$(database)/documents/users/$(request.resource.data.recipientUid)).data.demoBalanceLastTransferId == transferId;
+      allow update, delete: if false;
     }
 
     match /brokerConnectionRequests/{uid} {

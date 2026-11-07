@@ -1615,7 +1615,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
       <div class="quick-action-grid">
         <button class="quick-action" style="--action-color:#00d7a0" type="button" data-go="deposit"><span class="action-icon">⇩</span><strong>Deposit Funds</strong><small>Add funds to your account</small></button>
         <button class="quick-action" style="--action-color:#ff5573" type="button" data-go="withdraw"><span class="action-icon">⇧</span><strong>Withdraw</strong><small>Send funds to your wallet</small></button>
-        <button class="quick-action" style="--action-color:#a78bfa" type="button" data-go="transfer"><span class="action-icon">⇄</span><strong>Transfer</strong><small>Move between accounts</small></button>
+        <button class="quick-action" style="--action-color:#a78bfa" type="button" data-go="transfer"><span class="action-icon">⇄</span><strong>Send</strong><small>Send USDT to another user</small></button>
         <button class="quick-action" style="--action-color:#159cff" type="button" data-go="trade"><span class="action-icon">↗</span><strong>Start Trading</strong><small>Explore the trading screen</small></button>
         <button class="quick-action quick-action-extra" style="display:none;--action-color:#00cce8" style="--action-color:#00cce8" type="button" data-go="convert"><span class="action-icon">⟳</span><strong>Convert</strong><small>Swap asset views</small></button>
         <button class="quick-action quick-action-extra" style="display:none;--action-color:#f5b51b" style="--action-color:#f5b51b" type="button" data-go="wallet"><span class="action-icon">◷</span><strong>History</strong><small>View wallet transactions</small></button>
@@ -1815,7 +1815,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
     <div class="page-title"><div><h1>Wallet</h1><div class="muted">Displayed balances and portfolio values</div></div><span class="tag">WALLET</span></div>
     <section class="wallet-overview">
       <div class="wallet-overview-top"><div><div class="wallet-eyebrow">YOUR BALANCE</div><div class="wallet-total-line"><strong id="walletBalance">0.00 USDT</strong></div><div class="wallet-usd-note" id="walletBalanceNote">Estimated total portfolio value</div></div><div class="wallet-orbit" aria-hidden="true">◈</div></div>
-      <div class="wallet-action-row"><button class="primary wallet-action" type="button" data-wallet-action="deposit">⇩ <span>Deposit</span></button><button class="secondary wallet-action" type="button" data-wallet-action="withdraw">⇧ <span>Withdraw</span></button><button class="secondary wallet-action" type="button" data-wallet-action="transfer">⇄ <span>Transfer</span></button></div>
+      <div class="wallet-action-row"><button class="primary wallet-action" type="button" data-wallet-action="deposit">⇩ <span>Deposit</span></button><button class="secondary wallet-action" type="button" data-wallet-action="withdraw">⇧ <span>Withdraw</span></button><button class="secondary wallet-action" type="button" data-wallet-action="transfer">⇄ <span>Send</span></button></div>
       <div class="wallet-summary-strip"><div><span>Coin holdings value</span><strong id="holdingsValue">0.00 USDT</strong></div><div><span>Balance display</span><strong>Account overview</strong></div></div><p class="muted tiny">Displayed balances do not confirm blockchain settlement. Check transaction status in History.</p>
     </section>
     <section class="panel wallet-assets-panel"><div class="section-head wallet-assets-heading"><div><h2>Your Assets</h2><p class="muted tiny">Your Available balances at a glance</p></div><label class="wallet-hide-small"><input type="checkbox" id="hideSmallBalances"> Hide small balances</label></div><div class="table-wrap"><table><thead><tr><th>Asset</th><th>Amount owned</th><th>Value (USDT)</th></tr></thead><tbody id="holdingsRows"><tr><td colspan="3" class="empty">No holdings yet. Record a trade to see asset details.</td></tr></tbody></table></div></section>
@@ -1896,8 +1896,23 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
     </section>
   </section>
   <section id="page-transfer" class="hidden">
-    <div class="page-title"><div><h1>⇄ Transfer</h1><div class="muted">Transfer between supported wallets.</div></div><span class="tag">Backend setup required</span></div>
-    <section class="panel form-panel"><label for="transferAsset">Asset</label><select id="transferAsset" class="field"><option>USDT</option><option>BTC</option><option>ETH</option><option>BNB</option><option>XRP</option></select><label for="transferDestination">Destination account / wallet</label><input id="transferDestination" class="field" placeholder="Recipient account ID"><label for="transferAmount">Amount</label><input id="transferAmount" class="field" type="number" min="0" step="any" placeholder="Enter amount"><button class="primary full" type="button" disabled>Transfers unavailable until secure ledger setup.</button><p class="muted tiny">Transfers are unavailable until secure backend validation is enabled.</p></section>
+    <div class="page-title"><div><h1>⇄ Send USDT</h1><div class="muted">Request a USDT transfer to another OnChainCrypto account.</div></div><span class="tag">INTERNAL SEND</span></div>
+    <section class="panel form-panel" style="padding:18px">
+      <div class="panel" style="padding:14px;margin-bottom:16px;background:var(--panel2)">
+        <div class="muted tiny">YOUR ONCHAIN ID</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px"><strong id="transferMyId" style="overflow-wrap:anywhere">Loading account ID…</strong><button class="secondary" type="button" id="copyTransferMyId">Copy ID</button></div>
+      </div>
+      <label for="transferDestination">Recipient OnChain ID</label>
+      <input id="transferDestination" class="field" type="text" autocomplete="off" spellcheck="false" placeholder="Paste recipient's OnChain ID">
+      <button class="secondary" type="button" id="transferCheckRecipient" style="margin-top:10px">Check recipient</button>
+      <p id="transferRecipientPreview" class="muted tiny" aria-live="polite">Check the recipient before sending.</p>
+      <label for="transferAmount">Amount (USDT)</label>
+      <input id="transferAmount" class="field" type="number" min="0.00000001" max="1000000000" step="0.00000001" inputmode="decimal" placeholder="Enter amount">
+      <p id="transferAvailableBalance" class="muted tiny">Available balance: checking…</p>
+      <button class="primary full" type="button" id="transferSubmit" disabled>Request transfer</button>
+      <p id="transferNotice" class="muted tiny" role="status" aria-live="polite">Admin approval required. This moves demo USDT balances only; no blockchain funds move.</p>
+    </section>
+    <section class="panel" style="margin-top:18px"><div class="section-head"><h2>Internal transfer history</h2></div><div id="transferHistoryRows" style="padding:14px 18px"><div class="empty">Your transfers will appear here.</div></div></section>
   </section>
   <section id="page-convert" class="hidden">
     <div class="page-title"><div><h1>⇄ Convert</h1><div class="muted">Convert supported assets using available public market prices.</div></div><span class="tag" style="color:#c4a1ff">WALLET CONVERSION</span></div>
@@ -6076,7 +6091,7 @@ submit?.addEventListener("click",async()=>{const v=currentAddress(),a=Number(amo
   trade:["tradeAsset","ocTradeFundingCoin","timedStake","timedUpBtn","timedConfirmBtn"],
   deposit:["depositNetwork","depositAmount","depositTransactionHash","depositReceiptFile","depositSubmitRequest"],
   withdraw:["withdrawNetwork","withdrawAddress","withdrawAmount","withdrawSubmit"],
-  transfer:["transferAsset","transferDestination","transferAmount","transferSubmit"],
+  transfer:["transferDestination","transferCheckRecipient","transferAmount","transferSubmit"],
   convert:["convertAmount","convertFrom","convertTo","convertConfirm"],
   profile:["ocProfileFirstName","ocProfileLastName","ocProfilePhone","ocProfileCountry","ocProfileDob","ocProfileGender","ocProfileAddress","ocSaveProfileBtn"],
   support:["supportTopic","supportSubject","supportDetails","sendSupportEmail"],
@@ -6840,6 +6855,113 @@ body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.descr
     if(button) button.remove();
   });
 })();
+</script>
+
+<script type="module" id="oc-internal-usdt-send">
+import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, addDoc, collection, query, where, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
+const app=getApps()[0]||initializeApp(config),auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
+const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+let user=null,recipient=null,myName="OnChain member",stopSent=null,stopReceived=null,stopRequestsSent=null,stopRequestsReceived=null,stopBalance=null,sentRows=[],receivedRows=[],requestRowsSent=[],requestRowsReceived=[];
+const amountText=value=>Number(value||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:8});
+function notice(message,isError=false){const node=byId("transferNotice");if(node){node.textContent=message;node.className=isError?"red tiny":"muted tiny";}}
+function updateButton(){const amount=Number(byId("transferAmount")?.value||0);if(byId("transferSubmit"))byId("transferSubmit").disabled=!(!!user&&!!recipient&&Number.isFinite(amount)&&amount>0);}
+function showAvailable(value){const node=byId("transferAvailableBalance");if(node)node.textContent="Available balance: "+amountText(value)+" USDT";}
+async function publishDirectoryEntry(current){
+ const profileSnap=await getDoc(doc(db,"users",current.uid));
+ const profile=profileSnap.exists()?profileSnap.data()||{}:{};
+ myName=[profile.firstName,profile.lastName].filter(Boolean).join(" ").trim()||profile.displayName||current.displayName||current.email?.split("@")[0]||"OnChain member";
+ await setDoc(doc(db,"userDirectory",current.uid),{uid:current.uid,displayName:String(myName).slice(0,80),updatedAt:serverTimestamp()},{merge:true});
+ if(byId("transferMyId"))byId("transferMyId").textContent=current.uid;
+ showAvailable(Number(profile.demoBalanceUSDT||0));
+}
+function renderHistory(){
+ const host=byId("transferHistoryRows");if(!host)return;
+ const ledger=[...sentRows,...receivedRows].filter((row,index,array)=>array.findIndex(other=>other.id===row.id)===index).map(row=>({...row,rowKind:"ledger"}));
+ const requests=[...requestRowsSent,...requestRowsReceived].filter((row,index,array)=>array.findIndex(other=>other.id===row.id)===index).filter(row=>row.status!=="approved").map(row=>({...row,rowKind:"request"}));
+ const rows=[...ledger,...requests].sort((a,b)=>{
+  const time=value=>value?.toDate?.().getTime?.()||0;return time(b.createdAt)-time(a.createdAt);
+ }).slice(0,40);
+ host.innerHTML=rows.length?rows.map(row=>{
+  const sent=row.senderUid===user?.uid,name=sent?(row.recipientName||"OnChain member"):(row.senderName||"OnChain member");
+  const date=row.createdAt?.toDate?.()?row.createdAt.toDate().toLocaleString():"Just now";
+  if(row.rowKind==="request"){
+   const state=String(row.status||"pending").toUpperCase();
+   return '<div style="display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)"><div><strong>'+(sent?"Request to ":"Incoming request from ")+esc(name)+'</strong><div class="muted tiny">'+esc(date)+' · '+esc(state)+'</div><div class="muted tiny">Request ID: '+esc(row.id)+'</div></div><strong style="white-space:nowrap">'+amountText(row.amount)+' USDT</strong></div>';
+  }
+  return '<div style="display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)"><div><strong>'+(sent?"Sent to ":"Received from ")+esc(name)+'</strong><div class="muted tiny">'+esc(date)+' · Completed</div><div class="muted tiny">ID: '+esc(row.id)+'</div></div><strong class="'+(sent?"red":"green")+'" style="white-space:nowrap">'+(sent?"−":"+")+amountText(row.amount)+' USDT</strong></div>';
+ }).join(""):'<div class="empty">No internal transfer requests or completed transfers yet.</div>';
+}
+function watchHistory(){
+ [stopSent,stopReceived,stopRequestsSent,stopRequestsReceived].forEach(stop=>stop?.());
+ stopSent=stopReceived=stopRequestsSent=stopRequestsReceived=null;
+ sentRows=[];receivedRows=[];requestRowsSent=[];requestRowsReceived=[];
+ if(!user){renderHistory();return;}
+ const sentQuery=query(collection(db,"internalTransfers"),where("senderUid","==",user.uid),limit(25));
+ const receivedQuery=query(collection(db,"internalTransfers"),where("recipientUid","==",user.uid),limit(25));
+ const sentRequestQuery=query(collection(db,"internalTransferRequests"),where("senderUid","==",user.uid),limit(25));
+ const receivedRequestQuery=query(collection(db,"internalTransferRequests"),where("recipientUid","==",user.uid),limit(25));
+ stopSent=onSnapshot(sentQuery,snapshot=>{sentRows=snapshot.docs.map(item=>({id:item.id,...item.data()}));renderHistory();},()=>{});
+ stopReceived=onSnapshot(receivedQuery,snapshot=>{receivedRows=snapshot.docs.map(item=>({id:item.id,...item.data()}));renderHistory();},()=>{});
+ stopRequestsSent=onSnapshot(sentRequestQuery,snapshot=>{requestRowsSent=snapshot.docs.map(item=>({id:item.id,...item.data()}));renderHistory();},()=>{});
+ stopRequestsReceived=onSnapshot(receivedRequestQuery,snapshot=>{requestRowsReceived=snapshot.docs.map(item=>({id:item.id,...item.data()}));renderHistory();},()=>{});
+}
+onAuthStateChanged(auth,async current=>{
+ user=current||null;recipient=null;stopBalance?.();stopBalance=null;
+ if(byId("transferRecipientPreview"))byId("transferRecipientPreview").textContent=user?"Check the recipient before sending.":"Sign in to use internal transfers.";
+ if(byId("transferMyId"))byId("transferMyId").textContent=user?user.uid:"Sign in required";
+ if(byId("transferDestination"))byId("transferDestination").value="";
+ if(byId("transferAmount"))byId("transferAmount").value="";
+ updateButton();watchHistory();
+ if(!user){showAvailable(0);notice("Sign in to send USDT.",true);return;}
+ try{await publishDirectoryEntry(user);stopBalance=onSnapshot(doc(db,"users",user.uid),snap=>{if(snap.exists())showAvailable(Number(snap.data()?.demoBalanceUSDT||0));},()=>{});notice("Internal demo-balance transfer only. No blockchain funds move.");}
+ catch(error){console.warn("OnChain directory setup:",error?.code||error?.message);notice("Your account ID could not be prepared. Refresh and try again.",true);}
+});
+byId("transferDestination")?.addEventListener("input",()=>{recipient=null;if(byId("transferRecipientPreview"))byId("transferRecipientPreview").textContent="Check the recipient before sending.";updateButton();});
+byId("transferAmount")?.addEventListener("input",updateButton);
+byId("transferCheckRecipient")?.addEventListener("click",async()=>{
+ if(!user){notice("Please sign in first.",true);return;}
+ const id=String(byId("transferDestination")?.value||"").trim();
+ if(!id){notice("Enter the recipient's OnChain ID.",true);return;}
+ if(id===user.uid){notice("You cannot send USDT to your own account.",true);return;}
+ const button=byId("transferCheckRecipient");button.disabled=true;button.textContent="Checking…";
+ try{
+  const snap=await getDoc(doc(db,"userDirectory",id));
+  if(!snap.exists())throw new Error("Recipient ID not found. Ask them to sign in and share their OnChain ID.");
+  const data=snap.data()||{};recipient={uid:id,displayName:String(data.displayName||"OnChain member").slice(0,80)};
+  if(byId("transferRecipientPreview"))byId("transferRecipientPreview").textContent="Recipient verified: "+recipient.displayName+" · "+id.slice(0,10)+"…";
+  notice("Check the recipient name carefully before sending.");updateButton();
+ }catch(error){recipient=null;if(byId("transferRecipientPreview"))byId("transferRecipientPreview").textContent=error?.message||"Could not find that account.";notice(error?.message||"Recipient lookup failed.",true);updateButton();}
+ finally{button.disabled=false;button.textContent="Check recipient";}
+});
+byId("copyTransferMyId")?.addEventListener("click",async()=>{
+ if(!user){notice("Sign in to view your OnChain ID.",true);return;}
+ try{await navigator.clipboard.writeText(user.uid);notice("Your OnChain ID has been copied.");}
+ catch(_){notice("Select and copy the OnChain ID shown above.",true);}
+});
+byId("transferSubmit")?.addEventListener("click",async()=>{
+ if(!user||!recipient){notice("Check the recipient before submitting.",true);return;}
+ const raw=Number(byId("transferAmount")?.value||0),amount=Math.round(raw*1e8)/1e8;
+ if(!Number.isFinite(amount)||amount<=0||amount>1000000000||Math.abs(amount-raw)>1e-9){notice("Enter a valid USDT amount (up to 8 decimal places).",true);return;}
+ if(!window.confirm("Submit a request for "+amountText(amount)+" USDT to "+recipient.displayName+"? The admin must approve it before either balance changes."))return;
+ const button=byId("transferSubmit");button.disabled=true;button.textContent="Submitting…";
+ try{
+  const requestRef=await addDoc(collection(db,"internalTransferRequests"),{
+   senderUid:user.uid,recipientUid:recipient.uid,asset:"USDT",amount,
+   senderName:myName,recipientName:recipient.displayName,status:"pending",createdAt:serverTimestamp()
+  });
+  notice("Transfer request submitted for admin approval. No balance has changed. Request ID: "+requestRef.id);
+  byId("transferAmount").value="";byId("transferDestination").value="";recipient=null;
+  if(byId("transferRecipientPreview"))byId("transferRecipientPreview").textContent="Request submitted. You can track its status below.";
+  updateButton();
+ }catch(error){
+  console.warn("Internal USDT transfer request failed:",error?.code||error?.message);
+  notice(error?.code==="permission-denied"?"Request blocked by account security rules. No balance was changed.":error?.message||"Could not submit the request.",true);
+ }finally{button.textContent="Request transfer";updateButton();}
+});
+
 </script>
 </body>
 </html>
