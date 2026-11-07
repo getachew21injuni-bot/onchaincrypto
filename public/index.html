@@ -3348,35 +3348,37 @@ function openHomeAfterAuth() {
   document.getElementById("signInForm")?.classList.add("hidden");
   document.getElementById("authChoicePanel")?.classList.add("hidden");
   document.getElementById("registerForm")?.classList.add("hidden");
+  const routeNames = new Set(["home","markets","trade","browser","wallet","deposit","withdraw","transfer","convert","history","profile","notifications","support","admin","copytrading"]);
+  const requestedPage = String(location.hash || "").replace(/^#/, "").toLowerCase();
+  const destinationPage = routeNames.has(requestedPage) ? requestedPage : "home";
   const applyHomeRoute = () => {
     const main = document.querySelector("main");
-    const home = document.getElementById("page-home");
-    if (!main || !home) return;
+    if (!main || !document.getElementById("page-home")) return;
     document.documentElement.classList.remove("oc-auth-pending");
     document.body.classList.remove("oc-logged-out", "oc-auth-screen", "oc-register-mode");
     loginPage?.classList.add("hidden");
     loginPage?.setAttribute("hidden", "");
     if (typeof window.__ocNavigatePage === "function") {
-      try { window.__ocNavigatePage("home"); }
-      catch (error) { console.warn("Home route handler failed:", error); }
+      try { window.__ocNavigatePage(destinationPage, { noStack: true, keepScroll: true }); }
+      catch (error) { console.warn("Authenticated route handler failed:", error); }
     } else if (typeof window.showPage === "function") {
-      try { window.showPage("home"); }
-      catch (error) { console.warn("Home route handler failed:", error); }
+      try { window.showPage(destinationPage); }
+      catch (error) { console.warn("Authenticated route handler failed:", error); }
     }
     main.querySelectorAll('section[id^="page-"]').forEach(section => {
-      section.classList.toggle("hidden", section.id !== "page-home");
-      if (section.id === "page-home") section.removeAttribute("hidden");
+      const active = section.id === "page-" + destinationPage;
+      section.classList.toggle("hidden", !active);
+      if (active) section.removeAttribute("hidden");
       else section.setAttribute("hidden", "");
     });
-    document.querySelectorAll("#nav [data-page]").forEach(button => button.classList.toggle("active", button.dataset.page === "home"));
-    document.querySelectorAll("[data-bottom-page]").forEach(button => button.classList.toggle("active", button.dataset.bottomPage === "home"));
+    document.querySelectorAll("#nav [data-page]").forEach(button => button.classList.toggle("active", button.dataset.page === destinationPage));
+    document.querySelectorAll("[data-bottom-page]").forEach(button => button.classList.toggle("active", button.dataset.bottomPage === destinationPage));
     if (typeof window.refreshProfileAccountInfo === "function") {
       try { window.refreshProfileAccountInfo(); } catch (_) {}
     }
   };
   applyHomeRoute();
   requestAnimationFrame(applyHomeRoute);
-  [80, 300, 700].forEach(delay => window.setTimeout(applyHomeRoute, delay));
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 document.getElementById("registerForm").addEventListener("submit", async (event) => {
@@ -4409,10 +4411,7 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     }
     const guest=window.ocLoggedOut===true&&!authenticatedUser;
     document.body.classList.toggle("oc-visitor-mode",guest);
-    if(guest){
-      if(page==="home")page="public-market";
-      if(!["public-market","markets","trade","browser","register"].includes(page))page="register";
-    }
+    if(guest && page!=="register") page="register";
     // Keep the authentication screen class synchronized with the actual visible route.
     document.body.classList.toggle("oc-auth-screen",guest&&page==="register");
     const target=document.getElementById('page-'+page);
@@ -4429,7 +4428,12 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     }
     // Do not call the legacy page router here: its old listeners could re-open Trade
     // after a Wallet/Deposit/Withdraw action. Keep one authoritative visible page.
-    pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-'+page));
+    pages().forEach(section=>{
+      const active=section.id==='page-'+page;
+      section.classList.toggle('hidden',!active);
+      if(active)section.removeAttribute('hidden');
+      else section.setAttribute('hidden','');
+    });
     document.querySelectorAll('#nav [data-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.page===page||(guest&&page==='public-market'&&btn.dataset.page==='home')));
     document.querySelectorAll('[data-bottom-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.bottomPage===page||(guest&&page==='public-market'&&btn.dataset.bottomPage==='home')));
     // The order book belongs only to Trade; never let it cover other pages.
@@ -4437,6 +4441,18 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     if(book) book.style.display=page==='trade'?'':'none';
     if(page==='wallet' && typeof window.renderWallet==='function'){try{window.renderWallet()}catch(_){}}
     if(page==='profile' && typeof window.refreshProfileAccountInfo==='function'){try{window.refreshProfileAccountInfo()}catch(_){}}
+    if(page==='deposit'){
+      try{if(typeof drawCoinPicker==='function')drawCoinPicker('deposit',document.getElementById('depositCoinSearch')?.value||'');if(typeof updateSelectedCoin==='function')updateSelectedCoin('deposit');}catch(error){console.warn('Deposit page setup failed:',error);}
+    }
+    if(page==='withdraw'){
+      try{if(typeof drawCoinPicker==='function')drawCoinPicker('withdraw',document.getElementById('withdrawCoinSearch')?.value||'');if(typeof updateSelectedCoin==='function')updateSelectedCoin('withdraw');document.getElementById('withdrawAddress')?.dispatchEvent(new Event('input',{bubbles:true}));}catch(error){console.warn('Withdraw page setup failed:',error);}
+    }
+    if(page==='trade'){
+      try{if(typeof updateTradePreview==='function')updateTradePreview();if(typeof loadPriceHistory==='function')loadPriceHistory();if(typeof renderPnl==='function')renderPnl();}catch(error){console.warn('Trade page setup failed:',error);}
+    }
+    if(page==='browser')document.getElementById('browserSearchInput')?.focus();
+    if(page==='notifications' && typeof window.ocRenderUserNotifications==='function'){try{window.ocRenderUserNotifications(window.onchaincryptoCurrentUser||null)}catch(_){}}
+    if(page==='admin' && typeof showAdminDashboard==='function'){try{showAdminDashboard()}catch(error){console.warn('Admin page setup failed:',error)}}
     // The capture-phase router bypasses the legacy page handler, so refresh Market here too.
     if(page==='markets' && typeof loadMarket==='function' && (!window.ocMarketLastSuccess || Date.now()-window.ocMarketLastSuccess>60000)){loadMarket();}
     if(!opts.keepScroll) window.scrollTo({top:0,behavior:'smooth'});
@@ -4455,33 +4471,50 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     };
   }
   document.addEventListener('click',function(e){
-    const btn=e.target.closest('[data-go],[data-page],[data-bottom-page],[data-wallet-action]');
+    const target=e.target instanceof Element?e.target:null;
+    const btn=target?.closest('[data-go],[data-page],[data-bottom-page],[data-wallet-action]');
     if(!btn) return;
     let page=btn.dataset.go||btn.dataset.page||btn.dataset.bottomPage||btn.dataset.walletAction;
     if(!page) return;
-    // The capture-phase router stops later click listeners, so explicitly switch the
-    // auth form mode before routing to the Register/Sign In page.
-    if(btn.id==='register-nav' || btn.id==='mobileRegisterBtn'){
-      document.getElementById('showRegisterBtn')?.click();
-      page='register';
-    } else if(btn.id==='signin-nav' || btn.id==='mobileSignInBtn'){
-      document.getElementById('showSignInBtn')?.click();
-      page='register';
-    }
-    if(btn.hasAttribute('data-wallet-action') && page==='transfer') page='transfer';
-    if(btn.hasAttribute('data-gold-trade')){
-      const asset=document.getElementById('tradeAsset');
-      if(asset){asset.value='XAU';asset.dispatchEvent(new Event('change',{bubbles:true}));}
-      if(typeof updateTradingViewChart==='function')updateTradingViewChart('XAU');
-      const title=document.getElementById('tradePairTitle');if(title)title.innerHTML='XAU / USD <span aria-hidden="true">▾</span>';
-      const pair=document.getElementById('orderBookPair');if(pair)pair.textContent='XAU/USD';
-      const name=document.getElementById('tradeAssetName');if(name)name.textContent='Gold (XAU)';
-      const timed=document.getElementById('timedPair');if(timed)timed.textContent='XAU / USD';
-      const result=document.getElementById('signalResult');
-      if(result)result.innerHTML='<div class="signal-value signal-neutral">GOLD (XAU) SELECTED</div><div class="muted tiny" style="margin-top:6px"></div>';
-    }
     e.preventDefault();e.stopImmediatePropagation();
-    navigate(page,{history:btn.hasAttribute('data-home-history')});
+    // Wait for Firebase session restoration before treating a startup guest flag
+    // as a confirmed sign-out.
+    void (async()=>{
+      if(page!=='register'){
+        try{if(window.ocAuthReady)await window.ocAuthReady;}catch(_){}
+        const activeUser=window.ocFirebaseAuth?.currentUser||window.onchaincryptoCurrentUser||null;
+        if(!activeUser){
+          window.ocLoggedOut=true;
+          document.body.classList.add('oc-logged-out','oc-auth-screen');
+          document.body.classList.remove('oc-register-mode');
+          navigate('register');
+          return;
+        }
+        window.onchaincryptoCurrentUser=activeUser;
+        window.ocLoggedOut=false;
+        document.documentElement.classList.remove('oc-auth-pending');
+        document.body.classList.remove('oc-logged-out','oc-auth-screen','oc-register-mode','oc-visitor-mode');
+      }
+      if(btn.id==='register-nav' || btn.id==='mobileRegisterBtn'){
+        document.getElementById('showRegisterBtn')?.click();
+        page='register';
+      } else if(btn.id==='signin-nav' || btn.id==='mobileSignInBtn'){
+        document.getElementById('showSignInBtn')?.click();
+        page='register';
+      }
+      if(btn.hasAttribute('data-gold-trade')){
+        const asset=document.getElementById('tradeAsset');
+        if(asset){asset.value='XAU';asset.dispatchEvent(new Event('change',{bubbles:true}));}
+        if(typeof updateTradingViewChart==='function')updateTradingViewChart('XAU');
+        const title=document.getElementById('tradePairTitle');if(title)title.innerHTML='XAU / USD <span aria-hidden="true">▾</span>';
+        const pair=document.getElementById('orderBookPair');if(pair)pair.textContent='XAU/USD';
+        const name=document.getElementById('tradeAssetName');if(name)name.textContent='Gold (XAU)';
+        const timed=document.getElementById('timedPair');if(timed)timed.textContent='XAU / USD';
+        const result=document.getElementById('signalResult');
+        if(result)result.innerHTML='<div class="signal-value signal-neutral">GOLD (XAU) SELECTED</div><div class="muted tiny" style="margin-top:6px"></div>';
+      }
+      navigate(page,{history:btn.hasAttribute('data-home-history')});
+    })();
   },true);
   // Signed-out visitors start on Sign In; authenticated users retain the app route.
   const current=pages().find(s=>!s.classList.contains('hidden'));
@@ -5417,7 +5450,7 @@ function setup(){
 function asset(k){const m=($ (k+"CoinName")?.textContent||"BTC").match(/\(([A-Z0-9]+)\)/);return m?m[1]:"BTC"}
 function tag(s){const c=s==="approved"?"#16d9a0":s==="rejected"?"#ff5573":"#f0b90b";const label=s==="approved"?"APPROVED":(s||"pending").toUpperCase();return '<span class="tag" style="color:'+c+'">'+esc(label)+'</span>'}
 function adminRows(id,docs,k){const host=$(id);if(!host)return;host.innerHTML=docs.length?docs.map(d=>{const x=d.data(),p=x.status==="pending";return '<article class="panel" style="padding:12px;margin:10px 0;background:#08182b"><div style="display:flex;justify-content:space-between"><strong>'+esc(x.amount)+' '+esc(x.asset)+'</strong>'+tag(x.status)+'</div><div class="muted tiny">User: '+esc(x.email||x.uid)+' · '+esc(x.network)+'</div><div class="muted tiny">'+(k==="deposit"?"TX: "+esc(x.transactionHash):"Destination: "+esc(x.destinationAddress))+'</div><div class="muted tiny">UID: '+esc(x.uid)+'</div>'+(p?'<div style="display:flex;gap:8px;margin-top:10px"><button class="buy" data-oc-review="approve" data-k="'+k+'" data-id="'+esc(d.id)+'">'+(k==="deposit"?"Approve Available balance adjustment":"Approve balance adjustment")+'</button><button class="sell" data-oc-review="reject" data-k="'+k+'" data-id="'+esc(d.id)+'">Reject</button></div>':'')+'</article>'}).join(""):"No "+k+" requests."}
-async function withdraw(){const u=auth.currentUser,a=Number($("withdrawAmount")?.value),to=$("withdrawAddress")?.value.trim(),network=$("withdrawNetwork")?.value,coin=asset("withdraw");if(!u)throw Error("Sign in again.");if(!(a>0&&Number.isFinite(a)))throw Error("Enter a valid amount.");if(!to)throw Error("Enter a destination address.");if($("withdrawAddressCheck")?.dataset.state!=="valid")throw Error("Enter an address matching the selected network.");await addDoc(collection(db,"withdrawRequests"),{uid:u.uid,email:u.email||"",asset:coin,network,amount:a,destinationAddress:to,status:"pending",createdAt:serverTimestamp()});$("withdrawAmount").value="";$("withdrawAddress").value="";$("withdrawAddressCheck").textContent="";$("withdrawAddressCheck").dataset.state=""}
+async function withdraw(){const u=auth.currentUser,a=Number($("withdrawAmount")?.value),to=$("withdrawAddress")?.value.trim(),network=$("withdrawNetwork")?.value,coin=asset("withdraw");if(!u)throw Error("Sign in again.");if(!(a>0&&Number.isFinite(a)))throw Error("Enter a valid amount.");const available=coin==="USDT"?Number(state.balance||0):Number(state.holdings?.[coin]||0);if(a>available)throw Error("Amount exceeds your available displayed "+coin+" balance.");if(!to)throw Error("Enter a destination address.");if($("withdrawAddressCheck")?.dataset.state!=="valid")throw Error("Enter an address matching the selected network.");await addDoc(collection(db,"withdrawRequests"),{uid:u.uid,email:u.email||"",asset:coin,network,amount:a,destinationAddress:to,status:"pending",createdAt:serverTimestamp()});$("withdrawAmount").value="";$("withdrawAddress").value="";$("withdrawAddressCheck").textContent="";$("withdrawAddressCheck").dataset.state=""}
 function stop(){stops.forEach(f=>f());stops=[]}
 function watch(u){if(admin){stops.push(onSnapshot(collection(db,"depositRequests"),s=>adminRows("ocAdminDeposits",s.docs,"deposit"),e=>{$("ocAdminDeposits").textContent="Could not load deposit requests ("+e.code+")."}));stops.push(onSnapshot(collection(db,"withdrawRequests"),s=>adminRows("ocAdminWithdrawals",s.docs,"withdraw"),e=>{$("ocAdminWithdrawals").textContent="Could not load withdrawal requests ("+e.code+")."}));}}
 setup();
@@ -6129,7 +6162,7 @@ async function compressImage(source){
 }
 file?.addEventListener("change",async()=>{receiptData="";receiptName="";const chosen=file.files?.[0];if(!chosen){preview.textContent="No screenshot selected.";validate();return;}if(!chosen.type.startsWith("image/")){file.value="";preview.textContent="Please choose an image screenshot.";validate();return;}preview.textContent="Preparing screenshot securely…";submit.disabled=true;try{receiptData=await compressImage(chosen);receiptName=String(chosen.name||"payment-screenshot").slice(0,120);preview.innerHTML='<img alt="Payment screenshot" src="'+receiptData+'"><span class="muted tiny">Screenshot ready to submit.</span>';}catch(error){preview.textContent=error.message;receiptData="";file.value="";}validate();});
 [amount,hash].forEach(el=>{el?.addEventListener("input",validate);el?.addEventListener("change",validate);});
-$("depositNetwork")?.addEventListener("change",validate);window.addEventListener("oc-wallet-addresses-updated",validate);
+$("depositNetwork")?.addEventListener("change",validate);window.addEventListener("oc-wallet-addresses-updated",()=>{try{if(typeof window.refreshDepositAddress==="function")window.refreshDepositAddress();}catch(_){}validate();});
 document.querySelectorAll('[data-quick-coin="deposit"]').forEach(b=>b.addEventListener("click",()=>setTimeout(validate,0)));
 submit?.addEventListener("click",async()=>{const v=currentAddress(),a=Number(amount.value),txHash=hash.value.trim();if(!user){notice.textContent="Please sign in first.";return;}if(!(a>0&&Number.isFinite(a))||txHash.length<8||!receiptData||!v.address){notice.textContent="Complete the amount, transaction hash and screenshot, and select a configured deposit address.";return;}submit.disabled=true;submit.textContent="Submitting…";notice.textContent="Sending your deposit request to admin review…";try{await addDoc(collection(db,"depositRequests"),{uid:user.uid,email:user.email||"",asset:v.asset,network:v.network,amount:a,depositAddress:v.address,transactionHash:txHash,receiptImage:receiptData,receiptFileName:receiptName,status:"pending",createdAt:serverTimestamp()});amount.value="";hash.value="";file.value="";receiptData="";receiptName="";preview.textContent="No screenshot selected.";notice.textContent="Deposit request submitted. Admin can review your payment screenshot and transaction details. Funds are not credited automatically.";}catch(error){notice.textContent="Could not submit ("+(error.code||error.message||"error")+"). Check the selected network and try again.";}finally{submit.textContent="Submit deposit request";validate();}});
 </script>
@@ -6387,24 +6420,15 @@ root.querySelector("#ocSupportForm").addEventListener("submit",e=>{e.preventDefa
 
 
 <style id="oc-visitor-browser-overview-access">
-/* Public visitors can open the curated Browser and public market overview only. */
-html.oc-auth-pending main>#page-browser:not(.hidden),
-body.oc-logged-out:not(.oc-auth-screen) main>#page-browser:not(.hidden){display:block!important}
-html.oc-auth-pending main>section[id^="page-"]:not(#page-public-market):not(#page-browser):not(#page-register),
-body.oc-logged-out:not(.oc-auth-screen) main>section[id^="page-"]:not(#page-public-market):not(#page-browser):not(#page-register){display:none!important}
-/* Keep public navigation focused on Markets and Browser. */
-html.oc-auth-pending #nav,
-body.oc-logged-out:not(.oc-auth-screen) #nav{display:flex!important;visibility:visible!important;pointer-events:auto!important}
-html.oc-auth-pending #nav [data-page="home"],
-html.oc-auth-pending #nav [data-page="trade"],
-html.oc-auth-pending #nav [data-page="wallet"],
-body.oc-logged-out:not(.oc-auth-screen) #nav [data-page="home"],
-body.oc-logged-out:not(.oc-auth-screen) #nav [data-page="trade"],
-body.oc-logged-out:not(.oc-auth-screen) #nav [data-page="wallet"]{display:none!important}
-html.oc-auth-pending #nav [data-page="markets"],
-html.oc-auth-pending #nav [data-page="browser"],
-body.oc-logged-out:not(.oc-auth-screen) #nav [data-page="markets"],
-body.oc-logged-out:not(.oc-auth-screen) #nav [data-page="browser"]{display:inline-flex!important}
+/* Signed-out visitors see only the authentication screen. */
+body.oc-logged-out header,
+body.oc-logged-out footer,
+body.oc-logged-out #nav,
+body.oc-logged-out #bottomNav,
+body.oc-logged-out #moreMenu,
+body.oc-logged-out .more-menu-wrap{display:none!important;visibility:hidden!important;pointer-events:none!important}
+body.oc-logged-out main>section[id^="page-"]:not(#page-register){display:none!important}
+body.oc-logged-out main>#page-register{display:flex!important;visibility:visible!important}
 </style>
 
 <style id="oc-auth-border-text-visibility">
