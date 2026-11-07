@@ -1276,6 +1276,17 @@ body main .section-head .muted {
 }
 </style>
 
+<style id="oc-footer-and-bottom-nav-login-only">
+/* Show the company footer and app navigation only on the login/register screen. */
+body:not(.oc-auth-screen) .oc-trust-footer,
+body:not(.oc-auth-screen) #bottomNav { display:none !important; }
+body.oc-auth-screen .oc-trust-footer,
+body.oc-logged-out.oc-auth-screen .oc-trust-footer { display:block !important; }
+body.oc-auth-screen #bottomNav,
+body.oc-logged-out.oc-auth-screen #bottomNav { display:grid !important; }
+html.oc-auth-pending body .oc-trust-footer,
+html.oc-auth-pending body #bottomNav { display:none !important; }
+</style>
 </head>
 <body>
 <header>
