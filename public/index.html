@@ -4,16 +4,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b0e11">
-<meta name="description" content="Onchain — explore cryptocurrency and Gold markets, live market information, interactive charts and digital-asset tools.">
+<meta name="theme-color" content="#071426">
+<meta name="application-name" content="OnChainCrypto">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="OnChainCrypto">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="/icons/onchain-app.svg">
+<meta name="description" content="OnChainCrypto — explore cryptocurrency and Gold markets, live market information, interactive charts and digital-asset tools.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Onchain">
-<meta property="og:title" content="Onchain | Crypto & Gold Markets">
-<meta property="og:description" content="Explore cryptocurrency and Gold markets, market insights, interactive charts and digital-asset tools with Onchain.">
+<meta property="og:site_name" content="OnChainCrypto">
+<meta property="og:title" content="OnChainCrypto | Crypto & Gold Markets">
+<meta property="og:description" content="Explore cryptocurrency and Gold markets, market insights, interactive charts and digital-asset tools with OnChainCrypto.">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Onchain | Crypto & Gold Markets">
-<meta name="twitter:description" content="Explore cryptocurrency and Gold markets, market insights, interactive charts and digital-asset tools with Onchain.">
-<title>Onchain | Crypto &amp; Gold Markets</title>
+<meta name="twitter:title" content="OnChainCrypto | Crypto & Gold Markets">
+<meta name="twitter:description" content="Explore cryptocurrency and Gold markets, market insights, interactive charts and digital-asset tools with OnChainCrypto.">
+<title>OnChainCrypto | Crypto &amp; Gold Markets</title>
 <script id="oc-fail-closed-auth-startup">
   // Until Firebase restores and confirms a session, treat every visit as signed out.
   // This prevents deep links and the home page from flashing protected app content.
@@ -6801,6 +6807,40 @@ body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.descr
 </style>
 
 <style id="oc-show-copy-strategy-note">.oc-copy-strategy-note{display:block!important}</style>
+
+<script id="oc-pwa-register">
+(function(){
+  if (!('serviceWorker' in navigator)) return;
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('/service-worker.js', {scope:'/'})
+      .catch(function(err){ console.warn('OnChainCrypto app setup could not finish.', err); });
+  });
+  var installEvent = null;
+  window.addEventListener('beforeinstallprompt', function(event){
+    event.preventDefault();
+    installEvent = event;
+    if (document.getElementById('oc-install-app')) return;
+    var button = document.createElement('button');
+    button.id = 'oc-install-app';
+    button.type = 'button';
+    button.textContent = 'Install OnChainCrypto';
+    button.setAttribute('aria-label','Install OnChainCrypto app');
+    button.style.cssText = 'position:fixed;right:16px;bottom:calc(92px + env(safe-area-inset-bottom));z-index:99990;padding:12px 16px;border:1px solid #38d9ff;border-radius:999px;background:linear-gradient(135deg,#20d9ff,#438dff);color:#03101e;font-weight:800;box-shadow:0 8px 28px #0008';
+    button.addEventListener('click', async function(){
+      if (!installEvent) return;
+      installEvent.prompt();
+      await installEvent.userChoice;
+      installEvent = null;
+      button.remove();
+    });
+    document.body.appendChild(button);
+  });
+  window.addEventListener('appinstalled', function(){
+    var button=document.getElementById('oc-install-app');
+    if(button) button.remove();
+  });
+})();
+</script>
 </body>
 </html>
 
