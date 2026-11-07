@@ -263,6 +263,9 @@ service cloud.firestore {
         && request.resource.data.recipientUid is string
         && request.resource.data.recipientUid != request.auth.uid
         && exists(/databases/$(database)/documents/userDirectory/$(request.resource.data.recipientUid))
+        && request.resource.data.recipientName == get(/databases/$(database)/documents/userDirectory/$(request.resource.data.recipientUid)).data.displayName
+        && exists(/databases/$(database)/documents/userDirectory/$(request.auth.uid))
+        && request.resource.data.senderName == get(/databases/$(database)/documents/userDirectory/$(request.auth.uid)).data.displayName
         && request.resource.data.asset == 'USDT'
         && request.resource.data.amount is number
         && request.resource.data.amount > 0
