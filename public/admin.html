@@ -178,7 +178,7 @@ async function renderTradeControls(){
    <div id="tradeControlsPanel" style="display:grid;gap:16px;max-width:900px">
     <div class="content-panel">
      <h3 style="margin-top:0">Registered user trade controls</h3>
-     <p class="muted">Select an actual registered profile. These controls store account trading permission and a maximum trade amount; they do not force wins or losses or alter market prices.</p>
+     <p class="muted">Set trading permission, order limits, and the simulated outcome mode for each registered user. Individual settings override the global mode for that user. Practice trades only.</p>
      <label style="display:grid;gap:8px;font-weight:700">Select registered user
       <select id="tradeControlUser" style="width:100%;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#10243a;color:white">
        ${users.map(u=>'<option value="'+esc(u.id)+'">'+esc((u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id)+' — '+(u.email||u.id))+'</option>').join('')}
@@ -189,8 +189,29 @@ async function renderTradeControls(){
      <label style="display:grid;gap:8px;font-weight:700;margin-top:16px">Maximum trade amount (USDT)
       <input id="tradeControlMax" type="number" min="100" max="1000000" step="1" value="1000000" style="width:100%;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#10243a;color:white">
      </label>
+     <label style="display:grid;gap:8px;font-weight:700;margin-top:16px">Practice outcome for this user
+      <select id="tradeControlDemoMode" style="width:100%;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#10243a;color:white">
+       <option value="inherit">Use global setting</option><option value="market">Market-Based</option><option value="win">Set Win Outcome</option><option value="lose">Set Loss Outcome</option>
+      </select>
+     </label>
+     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:14px">
+      <label style="display:grid;gap:7px;font-weight:700">Win chance (%)
+       <input id="tradeControlWinPercent" type="number" min="1" max="100" step="1" value="15" style="width:100%;padding:12px;border:1px solid #5d8797;border-radius:10px;background:#10243a;color:white">
+      </label>
+      <label style="display:grid;gap:7px;font-weight:700">Loss chance (%)
+       <input id="tradeControlLossPercent" type="number" min="1" max="100" step="1" value="50" style="width:100%;padding:12px;border:1px solid #5d8797;border-radius:10px;background:#10243a;color:white">
+      </label>
+     </div>
      <button id="saveTradeControl" class="icon-btn" style="width:100%;padding:14px;margin-top:18px;background:linear-gradient(90deg,#24b8d2,#20d9dc);border:0;color:#062b3a;font-weight:800">Save trade controls</button>
      <p id="tradeControlMessage" class="muted" role="status" aria-live="polite">Loading this user's saved settings…</p>
+    </div>
+    <div class="content-panel">
+     <h3 style="margin-top:0">User outcome assignments</h3>
+     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px">
+      <div><h4 style="color:#6ee7b7;margin:0 0 8px">Configured for wins</h4><div id="demoWinUsers" class="muted">Loading…</div></div>
+      <div><h4 style="color:#fda4af;margin:0 0 8px">Configured for losses</h4><div id="demoLossUsers" class="muted">Loading…</div></div>
+     </div>
+     <p class="muted tiny">Lists show saved simulation settings, not actual trade results. “Use global setting” follows the global control above.</p>
     </div>
     <div class="content-panel"><h3 style="margin-top:0">Registered profiles: ${users.length}</h3><p class="muted">Example accounts A, B and C have been removed. Every Firestore user profile is listed here without filtering by email, name, trading activity, or account status. Saved settings are account-level records; enforcement in trade execution must also be enabled before these settings can restrict live trades.</p></div>
    </div>`;
