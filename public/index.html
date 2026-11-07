@@ -3715,23 +3715,18 @@ onAuthStateChanged(auth, (user) => {
    if (typeof window.ocRefreshReferral === "function") window.ocRefreshReferral(user || null);
    if (user) { openHomeAfterAuth(); }
     else {
-      // Signed-out visitors land on public Home; protected actions open Sign In.
+      // Signed-out visitors must always see Sign In; never leave Home or app navigation visible.
       window.ocPendingPage = null;
       window.ocLoggedOut = true;
       document.documentElement.classList.remove("oc-auth-pending");
-      document.body.classList.add("oc-logged-out");
-      document.body.classList.remove("oc-auth-screen", "oc-register-mode");
-      window.ocSetAuthScreenVisibility?.(false);
-      document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-public-market"));
-      window.showPage?.("public-market");
+      document.body.classList.add("oc-logged-out", "oc-auth-screen");
+      document.body.classList.remove("oc-register-mode");
+      window.ocForceSignInScreen?.();
       try {
-        const keepLogoutBoundary=window.__ocSignedOutHistoryBoundary===true||history.state?.ocSignedOutBoundary===true;
-        if(keepLogoutBoundary){
-          window.__ocSignedOutHistoryBoundary=true;
-          history.replaceState({ocAppRoute:true,ocPage:"public-market",ocAuthMode:null,ocIndex:0,ocSignedOutBoundary:true,ocLogoutBoundary:true},"",location.pathname+location.search);
-        }else{
-          history.replaceState({ocSignedOut:true},"",location.pathname+location.search);
-        }
+        const signedOutRoute={ocAppRoute:true,ocPage:"register",ocAuthMode:"login",ocIndex:0,ocSignedOutBoundary:true,ocLogoutBoundary:true};
+        const loginUrl=location.pathname+location.search+"#login";
+        history.replaceState(signedOutRoute,"",loginUrl);
+        window.__ocSignedOutHistoryBoundary=true;
       } catch (_) {}
     }
   const status = document.getElementById("authStatus");
