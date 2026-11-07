@@ -47,6 +47,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <button data-view="Analytics"><span class="ico">◔</span>Analytics</button>
 <button data-view="Deposits"><span class="ico">↓</span>Deposits</button>
 <button data-view="Withdrawals"><span class="ico">↑</span>Withdrawals</button>
+<button data-view="Transfers"><span class="ico">⇄</span>Internal Transfers <span class="pill">USDT</span></button>
 <button data-view="Addresses"><span class="ico">▰</span>Addresses</button>
 <button data-view="Trades"><span class="ico">⇄</span>Trades</button>
 <button data-view="Brokerage"><span class="ico">▣</span>Brokerage</button>
@@ -98,7 +99,7 @@ const descriptions={
 'Brokerage':'Review Alpaca brokerage eligibility requests. Approval does not activate live order routing.',
 'Trade Controls':'Manage practice-trading permissions and maximum practice order sizes for every saved Onchain user profile. Settings are saved to the shared account record.',
 'Assets':'Adjust practice coin balances to a selected user wallet or view the supported asset balances.',
-'Transfers':'Review transfer requests after server-side authorization is implemented.',
+'Transfers':'Review and approve internal USDT demo-balance transfer requests.',
 'History':'View platform event history after the audit-log backend is connected.',
 'Settings':'Admin settings and access controls must be enforced by the server, not only this page.',
 'Support':'Chat directly with customers and manage support conversations.'
@@ -484,9 +485,69 @@ function renderAdminActivity(view){
   }).join('')+'</tbody></table></div></div>';
  },error=>{body.innerHTML='<div class="notice">Activity feed unavailable: '+esc(error.code||error.message||'permission error')+'. Check Firestore rules and administrator verification.</div>';});
 }
+async function renderInternalTransfers(){
+ const body=document.getElementById('detailBody'),api=window.__ocAdminFirebase;
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading internal transfer requests…</p></div>';
+ if(!api){body.textContent='Admin Firebase connection is not ready.';return;}
+ const {db,collection,getDocs,query,limit,doc,serverTimestamp,runTransaction,auth}=api;
+ const escHtml=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ try{
+  let current=auth.currentUser;
+  if(!current)throw new Error('Verified administrator sign-in required.');
+  await current.reload();current=auth.currentUser;
+  if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('Verified administrator sign-in required.');
+  await current.getIdToken(true);
+  const snap=await getDocs(query(collection(db,'internalTransferRequests'),limit(200)));
+  const requests=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  const pending=requests.filter(r=>r.status==='pending').length;
+  body.innerHTML='<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Internal USDT transfer requests</h3><span class="tag">'+pending+' pending · '+requests.length+' total</span></div><p class="muted">Review each recipient and amount. Approval atomically debits and credits both demo wallets and records an immutable ledger entry. The sender balance is checked again at approval. No blockchain funds move.</p><div class="table-wrap"><table style="min-width:850px"><thead><tr><th>Sender</th><th>Recipient</th><th>Amount</th><th>Submitted</th><th>Status</th><th>Admin action</th></tr></thead><tbody>'+(requests.length?requests.map(r=>{
+   const when=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'—',state=String(r.status||'pending');
+   const action=state==='pending'?'<button type="button" class="icon-btn" data-transfer-action="approve" data-transfer-id="'+escHtml(r.id)+'" style="background:#087b56;border:0">Approve</button> <button type="button" class="icon-btn" data-transfer-action="reject" data-transfer-id="'+escHtml(r.id)+'">Reject</button>':'<span class="tag">'+escHtml(state.toUpperCase())+'</span>';
+   return '<tr><td>'+escHtml(r.senderName||'OnChain member')+'<br><small class="muted">'+escHtml(r.senderUid)+'</small></td><td>'+escHtml(r.recipientName||'OnChain member')+'<br><small class="muted">'+escHtml(r.recipientUid)+'</small></td><td><strong>'+Number(r.amount||0).toLocaleString(undefined,{maximumFractionDigits:8})+' USDT</strong></td><td>'+escHtml(when)+'</td><td>'+escHtml(state.toUpperCase())+'</td><td>'+action+'</td></tr>';
+  }).join(''):'<tr><td colspan="6" class="empty">No internal transfer requests have been submitted.</td></tr>')+'</tbody></table></div><p id="ocInternalTransferAdminMessage" class="muted" role="status" aria-live="polite"></p></div>';
+  body.querySelectorAll('[data-transfer-action]').forEach(button=>button.addEventListener('click',async()=>{
+   const action=button.dataset.transferAction,id=button.dataset.transferId,request=requests.find(r=>r.id===id);
+   if(!request||!['approve','reject'].includes(action)||request.status!=='pending')return;
+   const approved=action==='approve';
+   if(!confirm(approved?'Approve '+Number(request.amount).toLocaleString()+' USDT from '+(request.senderName||'sender')+' to '+(request.recipientName||'recipient')+'? Both demo balances will change only after this approval.':'Reject this internal USDT transfer request?'))return;
+   button.disabled=true;const msg=document.getElementById('ocInternalTransferAdminMessage');if(msg)msg.textContent=approved?'Checking balances and approving atomically…':'Rejecting request…';
+   try{
+    await current.getIdToken(true);
+    const requestRef=doc(db,'internalTransferRequests',id);
+    if(!approved){
+     await runTransaction(db,async tx=>{
+      const rs=await tx.get(requestRef);if(!rs.exists()||rs.data().status!=='pending')throw new Error('This request has already been processed.');
+      tx.update(requestRef,{status:'rejected',reviewedAt:serverTimestamp(),reviewedBy:current.email});
+     });
+    }else{
+     const senderRef=doc(db,'users',request.senderUid),recipientRef=doc(db,'users',request.recipientUid),transferRef=doc(collection(db,'internalTransfers'));
+     await runTransaction(db,async tx=>{
+      const [rs,ss,rr]=await Promise.all([tx.get(requestRef),tx.get(senderRef),tx.get(recipientRef)]);
+      if(!rs.exists()||rs.data().status!=='pending')throw new Error('This request has already been processed.');
+      if(!ss.exists()||!rr.exists())throw new Error('Sender or recipient account could not be found.');
+      const req=rs.data(),sender=ss.data(),recipient=rr.data(),amount=Number(req.amount);
+      if(!Number.isFinite(amount)||amount<=0||req.asset!=='USDT')throw new Error('The request amount or asset is invalid.');
+      if(sender.accountStatus==='suspended'||recipient.accountStatus==='suspended')throw new Error('A suspended account cannot receive or send internal transfers.');
+      const senderBefore=Number(sender.demoBalanceUSDT||0),recipientBefore=Number(recipient.demoBalanceUSDT||0);
+      if(!Number.isFinite(senderBefore)||!Number.isFinite(recipientBefore)||senderBefore<amount)throw new Error('Insufficient sender USDT balance. No balance was changed.');
+      const senderAfter=Number((senderBefore-amount).toFixed(8)),recipientAfter=Number((recipientBefore+amount).toFixed(8));
+      if(recipientAfter>1000000000)throw new Error('Recipient balance limit would be exceeded.');
+      tx.update(senderRef,{demoBalanceUSDT:senderAfter,demoBalanceUpdatedAt:serverTimestamp(),demoBalanceLastTransferId:transferRef.id});
+      tx.update(recipientRef,{demoBalanceUSDT:recipientAfter,demoBalanceUpdatedAt:serverTimestamp(),demoBalanceLastTransferId:transferRef.id});
+      tx.set(transferRef,{senderUid:req.senderUid,recipientUid:req.recipientUid,asset:'USDT',amount,senderBefore,senderAfter,recipientBefore,recipientAfter,senderName:req.senderName||'OnChain member',recipientName:req.recipientName||'OnChain member',createdAt:serverTimestamp(),transferRequestId:id,approvedBy:current.email});
+      tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email,transferId:transferRef.id});
+     });
+    }
+    if(msg)msg.textContent=approved?'Approved. Both practice balances and the transfer ledger were updated once.':'Request rejected. No wallet balance changed.';
+    await renderInternalTransfers();if(typeof window.adminRefreshDashboard==='function')await window.adminRefreshDashboard();
+   }catch(error){button.disabled=false;if(msg)msg.textContent='Could not '+(approved?'approve':'reject')+' request ('+(error.code||error.message||'error')+'). No partial balance update was made.';}
+  }));
+ }catch(error){body.innerHTML='<div class="notice">Could not load internal transfer requests ('+escHtml(error.code||error.message||'error')+'). Check administrator verification and Firestore rules.</div>';}
+}
 function renderModule(view){
  const body=document.getElementById('detailBody');
  if(view==='Login History'||view==='Notifications'){renderAdminActivity(view);return;}
+ if(view==='Transfers'){renderInternalTransfers();return;}
  if(view==='Support'&&window.renderSupportInbox){window.renderSupportInbox();return;}
  if(view==='Deposits'||view==='Withdrawals'){renderDemoFinance(view);return;}
  if(view==='Assets'){renderDemoFinance('Deposits');return;}
