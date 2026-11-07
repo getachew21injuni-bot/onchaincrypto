@@ -43,6 +43,7 @@ service cloud.firestore {
         && request.resource.data.demoBalanceUSDT <= 1000000000
         && request.resource.data.demoBalanceUpdatedAt == request.time
         && request.resource.data.demoBalanceLastTransferId is string
+        && !exists(/databases/$(database)/documents/internalTransfers/$(request.resource.data.demoBalanceLastTransferId))
         && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.demoBalanceLastTransferId)).data.senderUid == request.auth.uid
         && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.demoBalanceLastTransferId)).data.senderUid == uid
         && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.demoBalanceLastTransferId)).data.recipientUid != uid
@@ -60,6 +61,7 @@ service cloud.firestore {
         && request.resource.data.demoBalanceUSDT <= 1000000000
         && request.resource.data.demoBalanceUpdatedAt == request.time
         && request.resource.data.demoBalanceLastTransferId is string
+        && !exists(/databases/$(database)/documents/internalTransfers/$(request.resource.data.demoBalanceLastTransferId))
         && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.demoBalanceLastTransferId)).data.senderUid == request.auth.uid
         && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.demoBalanceLastTransferId)).data.recipientUid == uid
         && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.demoBalanceLastTransferId)).data.asset == 'USDT'
@@ -320,6 +322,8 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time
         && get(/databases/$(database)/documents/users/$(request.resource.data.senderUid)).data.get('demoBalanceUSDT', 0) == request.resource.data.senderBefore
         && get(/databases/$(database)/documents/users/$(request.resource.data.recipientUid)).data.get('demoBalanceUSDT', 0) == request.resource.data.recipientBefore
+        && get(/databases/$(database)/documents/users/$(request.resource.data.senderUid)).data.get('accountStatus', 'active') != 'suspended'
+        && get(/databases/$(database)/documents/users/$(request.resource.data.recipientUid)).data.get('accountStatus', 'active') != 'suspended'
         && getAfter(/databases/$(database)/documents/users/$(request.resource.data.senderUid)).data.demoBalanceUSDT == request.resource.data.senderAfter
         && getAfter(/databases/$(database)/documents/users/$(request.resource.data.recipientUid)).data.demoBalanceUSDT == request.resource.data.recipientAfter
         && getAfter(/databases/$(database)/documents/users/$(request.resource.data.senderUid)).data.demoBalanceLastTransferId == transferId
