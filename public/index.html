@@ -9214,22 +9214,7 @@ body.oc-auth-screen.oc-register-mode #page-register #registerForm {
 
 
 <style id="oc-visitor-auth-entry-final">
-/* Visitors land on the public showcase; authentication opens only after an explicit choice. */
-html.oc-auth-pending main > :not(#page-public-market) { display:none!important; }
-html.oc-auth-pending main > #page-public-market { display:block!important; }
-html.oc-auth-pending main { display:block!important; min-height:100vh; }
-
-/* Signed-out visitors keep the public market page visible until they choose Sign Up or Login. */
-body.oc-logged-out:not(.oc-auth-screen) main > section[id^="page-"]:not(#page-public-market) {
-  display:none!important;
-}
-body.oc-logged-out:not(.oc-auth-screen) #page-public-market {
-  display:block!important;
-}
-body.oc-logged-out:not(.oc-auth-screen) #page-home,
-body.oc-logged-out:not(.oc-auth-screen) #page-register {
-  display:none!important;
-}
+/* The page-level access gate is centralized in #oc-authoritative-auth-layout. */
 
 /* Once a visitor chooses an action, show only the dedicated authentication page. */
 body.oc-logged-out.oc-auth-screen main > section[id^="page-"]:not(#page-register) {
