@@ -104,11 +104,58 @@ const descriptions={
 'Settings':'Admin settings and access controls must be enforced by the server, not only this page.',
 'Support':'Chat directly with customers and manage support conversations.'
 };
+function renderGlobalDemoControls(api,current){
+ const {db,doc,setDoc,serverTimestamp,onSnapshot,auth}=api;
+ if(stopGlobalDemoMode){stopGlobalDemoMode();stopGlobalDemoMode=null;}
+ const host=document.getElementById('globalDemoTradeControls'),status=document.getElementById('globalDemoModeStatus');
+ if(!host||!status)return;
+ const names={market:'Market-Based',win:'Set Win Outcome',lose:'Set Loss Outcome'};
+ const paint=mode=>{
+  const valid=Object.hasOwn(names,mode)?mode:'market';
+  status.textContent='Shared setting active for all users: '+names[valid]+'.';
+  host.querySelectorAll('[data-global-demo-mode]').forEach(button=>{
+   const active=button.dataset.globalDemoMode===valid;
+   button.setAttribute('aria-pressed',String(active));
+   button.style.outline=active?'2px solid #f0b90b':'';
+   button.style.outlineOffset=active?'2px':'';
+  });
+ };
+ stopGlobalDemoMode=onSnapshot(doc(db,'platformSettings','demoTradeControl'),snapshot=>{
+  const data=snapshot.exists()?snapshot.data()||{}:{};
+  paint(data.mode||'market');
+ },error=>{
+  console.error('Global practice simulation setting could not be read:',error);
+  status.textContent='Could not load shared setting ('+(error.code||'connection error')+'). Check Firestore rules.';
+ });
+ host.querySelectorAll('[data-global-demo-mode]').forEach(button=>button.addEventListener('click',async()=>{
+  const mode=button.dataset.globalDemoMode;
+  if(!Object.hasOwn(names,mode))return;
+  const signedIn=auth.currentUser;
+  if(!signedIn||!signedIn.emailVerified||(signedIn.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){
+   status.textContent='Only the verified administrator can change the global simulation mode.';return;
+  }
+  host.querySelectorAll('[data-global-demo-mode]').forEach(item=>item.disabled=true);
+  status.textContent='Publishing shared setting…';
+  try{
+   await signedIn.getIdToken(true);
+   await setDoc(doc(db,'platformSettings','demoTradeControl'),{mode,updatedAt:serverTimestamp(),updatedBy:signedIn.email},{merge:true});
+   status.textContent='Published. New timed practice trades will use '+names[mode]+'.';
+  }catch(error){
+   console.error('Global practice simulation setting could not be published:',error);
+   status.textContent='Could not publish setting ('+(error.code||error.message||'error')+'). Check Firestore rules.';
+  }finally{
+   host.querySelectorAll('[data-global-demo-mode]').forEach(item=>item.disabled=false);
+  }
+ }));
+}
+
 async function renderTradeControls(){
  const body=document.getElementById('detailBody');
  const api=window.__ocAdminFirebase;
- body.innerHTML='<div class="content-panel"><p class="muted">Loading users…</p></div>';
- if(!api){body.textContent='Firebase admin connection is not ready. Refresh and sign in again.';return;}
+ body.innerHTML=`<div id="globalDemoTradeControls" class="content-panel" style="margin:0 0 18px;border-color:#8b6b2d"><h3 style="margin-top:0">Global practice simulation</h3><p class="muted">Choose the outcome mode for new timed practice trades across all users. Existing trades keep the mode selected when they started. These controls affect simulated results only.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px"><button type="button" class="icon-btn" data-global-demo-mode="market">Market-Based</button><button type="button" class="icon-btn" data-global-demo-mode="win" style="background:#087b56;border:0">↗ Set Win Outcome</button><button type="button" class="icon-btn" data-global-demo-mode="lose" style="background:#8a3343;border:0">↘ Set Loss Outcome</button></div><p id="globalDemoModeStatus" class="muted" role="status" aria-live="polite">Connecting to shared simulation settings…</p></div><div id="tradeControlsUsers"></div>`;
+ const usersBody=document.getElementById('tradeControlsUsers');
+ usersBody.innerHTML='<div class="content-panel"><p class="muted">Loading users…</p></div>';
+ if(!api){usersBody.textContent='Firebase admin connection is not ready. Refresh and sign in again.';return;}
  const {db,collection,getDocs,doc,setDoc,serverTimestamp,auth}=api;
  try{
   let current=auth.currentUser;
@@ -118,6 +165,7 @@ async function renderTradeControls(){
   if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('Verified administrator sign-in required. Please verify the admin email and sign in again.');
   // Refresh the Firebase ID token so Firestore rules receive the latest verified-email/admin claims.
   await current.getIdToken(true);
+  renderGlobalDemoControls(api,current);
   // Bound the read so a stalled network request cannot leave this panel loading forever.
   let loadTimer;
   const snap=await Promise.race([
@@ -125,8 +173,8 @@ async function renderTradeControls(){
    new Promise((_,reject)=>{loadTimer=setTimeout(()=>reject(new Error('User profile request timed out after 15 seconds. Check your connection and Firestore availability, then retry.')),15000);})
   ]).finally(()=>clearTimeout(loadTimer));
   const users=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
-  if(!users.length){body.innerHTML='<div class="notice">No registered user profiles were found in Firestore yet. Users appear here after their profile is created.</div>';return;}
-  body.innerHTML=`
+  if(!users.length){usersBody.innerHTML='<div class="notice">No registered user profiles were found in Firestore yet. Users appear here after their profile is created.</div>';return;}
+  usersBody.innerHTML=`
    <div id="tradeControlsPanel" style="display:grid;gap:16px;max-width:900px">
     <div class="content-panel">
      <h3 style="margin-top:0">Registered user trade controls</h3>
@@ -146,14 +194,14 @@ async function renderTradeControls(){
     </div>
     <div class="content-panel"><h3 style="margin-top:0">Registered profiles: ${users.length}</h3><p class="muted">Example accounts A, B and C have been removed. Every Firestore user profile is listed here without filtering by email, name, trading activity, or account status. Saved settings are account-level records; enforcement in trade execution must also be enabled before these settings can restrict live trades.</p></div>
    </div>`;
-  const select=body.querySelector('#tradeControlUser'),enabled=body.querySelector('#tradeControlEnabled'),max=body.querySelector('#tradeControlMax'),message=body.querySelector('#tradeControlMessage');
+  const select=usersBody.querySelector('#tradeControlUser'),enabled=usersBody.querySelector('#tradeControlEnabled'),max=usersBody.querySelector('#tradeControlMax'),message=usersBody.querySelector('#tradeControlMessage');
   const load=async()=>{const u=users.find(x=>x.id===select.value);enabled.checked=u?.tradingEnabled!==false;max.value=Number(u?.maxTradeAmountUSDT||1000000);message.textContent='Current settings loaded for '+(u?.email||u?.displayName||u?.id||'selected user')+'.';};
   select.addEventListener('change',load);await load();
-  body.querySelector('#saveTradeControl').addEventListener('click',async()=>{
+  usersBody.querySelector('#saveTradeControl').addEventListener('click',async()=>{
    const u=users.find(x=>x.id===select.value),amount=Number(max.value);
    if(!u){message.textContent='Select a registered user.';return;}
    if(!Number.isFinite(amount)||amount<100||amount>1000000){message.textContent='Maximum trade amount must be between 100 and 1,000,000 USDT.';return;}
-   const button=body.querySelector('#saveTradeControl');button.disabled=true;message.textContent='Saving to Firebase…';
+   const button=usersBody.querySelector('#saveTradeControl');button.disabled=true;message.textContent='Saving to Firebase…';
    try{
     await setDoc(doc(db,'users',u.id),{tradingEnabled:enabled.checked,maxTradeAmountUSDT:amount,tradeControlUpdatedAt:serverTimestamp(),tradeControlUpdatedBy:current.email},{merge:true});
     u.tradingEnabled=enabled.checked;u.maxTradeAmountUSDT=amount;message.textContent='Saved to Firebase for '+(u.email||u.displayName||u.id)+'. Note: trade execution enforcement is not yet enabled by this Admin setting.';
@@ -162,11 +210,12 @@ async function renderTradeControls(){
   });
  }catch(e){
   const detail=String(e.code||e.message||'unknown error');
-  body.innerHTML='<div class="notice"><strong>Could not load registered users.</strong><p>'+esc(detail)+'</p><p>Confirm you are signed in with the verified administrator email and that Firestore is reachable.</p><button type="button" id="retryTradeUsers" class="icon-btn">↻ Retry loading users</button></div>';
-  body.querySelector('#retryTradeUsers')?.addEventListener('click',()=>renderTradeControls());
+  usersBody.innerHTML='<div class="notice"><strong>Could not load registered users.</strong><p>'+esc(detail)+'</p><p>Confirm you are signed in with the verified administrator email and that Firestore is reachable.</p><button type="button" id="retryTradeUsers" class="icon-btn">↻ Retry loading users</button></div>';
+  usersBody.querySelector('#retryTradeUsers')?.addEventListener('click',()=>renderTradeControls());
  }
 }
 
+let stopGlobalDemoMode=null;
 const moduleKey='onchaincrypto_admin_demo_v1';
 const moduleNames=['Users','Login History','Notifications','KYC','Email','Analytics','Deposits','Withdrawals','Addresses','Trades','Transfers','History','Assets','Settings','Support'];
 const seedRecords={
