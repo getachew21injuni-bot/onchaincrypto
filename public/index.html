@@ -9602,21 +9602,10 @@ body.oc-logged-out.oc-auth-screen main>#page-register{display:flex!important}
     if(typeof original!=="function"||original.__ocVisitorGuarded)return;
     const wrapped=function(page){
       const signedIn=!!(window.onchaincryptoCurrentUser||window.ocFirebaseAuth?.currentUser);
-      if(!signedIn){
-        if(page==="markets"||page==="market"){
-          document.body.classList.remove("oc-auth-screen");
-          const result=original("public-market");
-          document.querySelector('#nav [data-page="markets"]')?.classList.add("active");
-          return result;
-        }
-        if(page==="browser"){
-          document.body.classList.remove("oc-auth-screen");
-          return original("browser");
-        }
-        if(protectedPages.has(String(page))){
-          document.body.classList.add("oc-auth-screen");
-          return original("register");
-        }
+      if(!signedIn && String(page)!=="register"){
+        document.body.classList.add("oc-logged-out","oc-auth-screen");
+        document.body.classList.remove("oc-register-mode");
+        return original("register");
       }
       return original(page);
     };
@@ -11487,7 +11476,7 @@ body.oc-logged-out.oc-auth-screen>header #ocForwardBtn{display:inline-flex!impor
     const state=event.state;
     const signedIn=!!(window.onchaincryptoCurrentUser||window.ocFirebaseAuth?.currentUser);
     const guestBoundary=window.__ocSignedOutHistoryBoundary===true&&!signedIn;
-    const allowedGuestPage=state?.ocPage==="public-market"||state?.ocPage==="markets"||state?.ocPage==="trade"||state?.ocPage==="browser"||state?.ocPage==="register";
+    const allowedGuestPage=state?.ocPage==="register";
     // A logout boundary separates all pre-logout history from the signed-out
     // visitor session. Old private or pre-boundary entries always return to Login.
     if(guestBoundary&&(!state?.ocSignedOutBoundary||!state?.ocAppRoute||!allowedGuestPage)){
@@ -11784,4 +11773,34 @@ body:not(.oc-auth-screen) .wallet-summary-strip strong{color:#12486e!important}
   body:not(.oc-auth-screen) .bottom-nav button{color:#f1fbff!important}
 }
 </style>
+</style>
+
+<style id="oc-final-signed-out-route-lock">
+/* Final access rule: no public app pages or app navigation before sign-in. */
+html.oc-auth-pending main>section[id^="page-"]:not(#page-register),
+body.oc-logged-out:not(.oc-auth-screen) main>section[id^="page-"]:not(#page-register),
+body.oc-logged-out.oc-auth-screen main>section[id^="page-"]:not(#page-register){display:none!important;visibility:hidden!important}
+html.oc-auth-pending main>#page-register,
+body.oc-logged-out main>#page-register{display:flex!important;visibility:visible!important}
+html.oc-auth-pending body #nav,
+html.oc-auth-pending body .bottom-nav,
+html.oc-auth-pending body #bottomNav,
+body.oc-logged-out:not(.oc-auth-screen) #nav,
+body.oc-logged-out.oc-auth-screen #nav,
+body.oc-logged-out:not(.oc-auth-screen) .bottom-nav,
+body.oc-logged-out.oc-auth-screen .bottom-nav,
+body.oc-logged-out:not(.oc-auth-screen) #bottomNav,
+body.oc-logged-out.oc-auth-screen #bottomNav,
+body.oc-logged-out:not(.oc-auth-screen) header #ocVisitorActions,
+body.oc-logged-out.oc-auth-screen header #ocVisitorActions,
+body.oc-logged-out:not(.oc-auth-screen) footer,
+body.oc-logged-out.oc-auth-screen footer,
+body.oc-logged-out:not(.oc-auth-screen) #moreMenuBtn,
+body.oc-logged-out.oc-auth-screen #moreMenuBtn,
+body.oc-logged-out:not(.oc-auth-screen) #refreshBtn,
+body.oc-logged-out.oc-auth-screen #refreshBtn,
+body.oc-logged-out:not(.oc-auth-screen) #ocBackBtn,
+body.oc-logged-out.oc-auth-screen #ocBackBtn,
+body.oc-logged-out:not(.oc-auth-screen) #ocForwardBtn,
+body.oc-logged-out.oc-auth-screen #ocForwardBtn{display:none!important;visibility:hidden!important;pointer-events:none!important}
 </style>
