@@ -1412,7 +1412,7 @@ body main .section-head .muted {
 
     <div class="oc-platform-final-cta">
       <div><div class="oc-platform-eyebrow">START WITH ONCHAIN</div><h2>Ready to explore your markets?</h2><p>Create your Onchain account and discover the tools available across the platform.</p></div>
-      <button type="button" class="primary" id="ocVisitorAboutSignup">Create account <span aria-hidden="true">→</span></button>
+      <button type="button" class="primary" id="ocPlatformAboutSignup">Create account <span aria-hidden="true">→</span></button>
     </div>
   </section>
 </section>
@@ -2693,7 +2693,7 @@ window.ocApplyAdminDemoBalance=function(amount){const n=Number(amount);if(!Numbe
 window.ocApplyAdminDemoAssets=function(balances){if(!balances||typeof balances!=="object"||Array.isArray(balances))return;let changed=false;for(const [rawSymbol,rawAmount] of Object.entries(balances)){const symbol=String(rawSymbol||"").toUpperCase();const amount=Number(rawAmount);if(!/^[A-Z0-9]{2,12}$/.test(symbol)||!Number.isFinite(amount)||amount<0)continue;state.holdings[symbol]=amount;changed=true;}if(changed){saveState();renderWallet();}};
 function renderWallet(){const pricedHoldings=Object.entries(state.holdings).reduce((out,[sym,qty])=>{const symbol=String(sym).toUpperCase(),amount=Number(qty)||0;if(amount<=0||symbol==="USDT")return out;const price=Number(priceFor(symbol)?.current_price||0);if(price>0){out.value+=amount*price;out.priced++;}else out.unpriced++;return out;},{value:0,priced:0,unpriced:0});const totalValue=(Number(state.balance)||0)+pricedHoldings.value;$("summaryBalance").textContent=usdtMoney(state.balance);$("walletBalance").textContent=usdtMoney(totalValue);$("walletBalanceNote").textContent="Estimated total value in USDT · "+pricedHoldings.priced+" priced coin holding"+(pricedHoldings.priced===1?"":"s")+(pricedHoldings.unpriced?"; "+pricedHoldings.unpriced+" asset price"+(pricedHoldings.unpriced===1?" is":"s are")+" unavailable and excluded":"")+" · estimated portfolio";$("holdingsValue").textContent=usdtMoney(pricedHoldings.value);const rows=Object.entries(state.holdings).filter(([sym,qty])=>String(sym).toUpperCase()!=="USDT"&&Number(qty)>0.0000000001&&(! $("hideSmallBalances")?.checked||Number(qty)*(priceFor(sym)?.current_price||0)>=1));$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym,current_price:0},price=Number(c.current_price||0);return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+' '+safe(sym.toUpperCase())+'</td><td>'+(price>0?usdtMoney(Number(qty)*price):"Price unavailable")+'</td></tr>'}).join(''):'<tr><td colspan="3" class="empty">No coin holdings yet. Your USDT balance is shown above.</td></tr>';renderActivityHistory();renderTradeHistory();renderPnl();renderWalletMarket()}
 document.addEventListener("change",e=>{if(e.target&&e.target.id==="hideSmallBalances")renderWallet();if(e.target&&e.target.id==="homeHistoryFilter")renderActivityHistory()});
-function showPage(page){const guest=window.ocLoggedOut===true&&!auth.currentUser;if(guest&&page!=="register")page="register";document.body.classList.toggle("oc-visitor-mode",guest);document.body.classList.toggle("oc-auth-screen",guest&&page==="register");if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
+function showPage(page){const guest=window.ocLoggedOut===true&&!auth.currentUser;if(guest&&!["home","markets","trade","browser","wallet","public-market","register"].includes(page))page="register";document.body.classList.toggle("oc-visitor-mode",guest);document.body.classList.toggle("oc-auth-screen",guest&&page==="register");if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
 window.showPage = showPage;
 let timedPaper=null,timedTimer=null,pendingTimedDirection=null;
 function quickPlan(){const amount=Number($("timedStake")?.value||0)*Number(priceFor(window.__ocTradeFundingCoin||"USDT")?.current_price||1),isGold=($("tradeAsset")?.value||selected)==="XAU",minimum=isGold?500:100;const levels=[{rate:12,min:minimum,max:5000,duration:30,label:"Level 1"},{rate:15,min:5000,max:10000,duration:60,label:"Level 2"},{rate:18,min:10000,max:25000,duration:90,label:"Level 3"},{rate:21,min:25000,max:50000,duration:120,label:"Level 4"},{rate:24,min:50000,max:100000,duration:180,label:"Level 5"},{rate:27,min:100000,max:Infinity,duration:360,label:"Level 6"}];return levels.find((p,i)=>amount>=p.min&&(amount<p.max||i===levels.length-1&&amount<=p.max))||levels[0]}
@@ -3691,7 +3691,8 @@ window.ocSetAuthScreenVisibility = function(signedIn) {
   // Only control page sections here. Header, footer and navigation are handled by
   // the single authoritative auth-layout rule; the router selects the active app page.
   document.querySelectorAll('main > section[id^="page-"]').forEach(section => {
-    const shouldHide = signedIn ? section.id === "page-register" : section.id !== "page-register";
+    if (!signedIn) return;
+    const shouldHide = section.id === "page-register";
     section.classList.toggle("hidden", shouldHide);
     if (shouldHide) section.setAttribute("hidden", "");
     else section.removeAttribute("hidden");
@@ -3737,13 +3738,14 @@ document.addEventListener("click", event => {
   const target = event.target instanceof Element ? event.target : null;
   if (!target) return;
   // Keep sign-in/register controls usable; every other app action routes to sign-in.
-  if (target.closest("#page-public-market") || target.closest("#ocVisitorActions") || target.closest("#page-register") || target.closest("#authChoicePanel") ||
+  if (target.closest("#nav") || target.closest("#bottomNav") || target.closest("#page-public-market") || target.closest("#ocVisitorActions") || target.closest("#page-register") || target.closest("#authChoicePanel") ||
       target.closest("#signInForm") || target.closest("#registerForm") ||
       target.closest("#authPhonePanel") || target.closest("#authPhoneDivider") ||
       target.closest("#resetPasswordBtn") || target.closest("#googleSignInBtn") ||
       target.closest("#register-nav") || target.closest("#mobileRegisterBtn") ||
       target.closest("#ocBackBtn") || target.closest("#ocForwardBtn")) return;
-  if (target.closest("button,a,[role=button],[data-page],[data-bottom-page],[data-menu-page]")) {
+  const privateAction=target.closest('[data-wallet-action],#timedUpBtn,#timedDownBtn,#timedConfirmBtn,[data-copy-follow],#ocStockOrderSubmit,#ocStockOrderPlace,#depositSubmitBtn,#withdrawSubmitBtn,#convertSubmitBtn');
+  if(privateAction){
     event.preventDefault();
     event.stopImmediatePropagation();
     window.ocForceSignInScreen();
@@ -3753,6 +3755,8 @@ document.addEventListener("click", event => {
 window.addEventListener("pageshow", async () => {
   try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
   if (!auth.currentUser && window.ocLoggedOut === true) {
+    const activeGuestPage=document.querySelector("main>section[id^=page-]:not(.hidden)")?.id?.slice(5);
+    if(["home","markets","trade","browser","wallet","public-market"].includes(activeGuestPage)) return;
     document.body.classList.add("oc-auth-screen");
     document.body.classList.toggle("oc-register-mode",location.hash==="#register");
     window.ocForceSignInScreen?.();
@@ -4340,7 +4344,7 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     }
     const guest=window.ocLoggedOut===true&&!authenticatedUser;
     document.body.classList.toggle("oc-visitor-mode",guest);
-    if(guest && page!=="register") page="register";
+    if(guest&&!["home","markets","trade","browser","wallet","public-market","register"].includes(page)) page="register";
     // Keep the authentication screen class synchronized with the actual visible route.
     document.body.classList.toggle("oc-auth-screen",guest&&page==="register");
     const target=document.getElementById('page-'+page);
@@ -4407,15 +4411,19 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
         const activeUser=window.ocFirebaseAuth?.currentUser||window.onchaincryptoCurrentUser||null;
         if(!activeUser){
           window.ocLoggedOut=true;
-          document.body.classList.add('oc-logged-out','oc-auth-screen');
-          document.body.classList.remove('oc-register-mode');
-          navigate('register');
-          return;
+          document.body.classList.add('oc-logged-out','oc-visitor-mode');
+          document.body.classList.remove('oc-auth-screen','oc-register-mode');
+          if(!["home","markets","trade","browser","wallet","public-market","register"].includes(page)){
+            document.body.classList.add('oc-auth-screen');
+            navigate('register');
+            return;
+          }
+        } else {
+          window.onchaincryptoCurrentUser=activeUser;
+          window.ocLoggedOut=false;
+          document.documentElement.classList.remove('oc-auth-pending');
+          document.body.classList.remove('oc-logged-out','oc-auth-screen','oc-register-mode','oc-visitor-mode');
         }
-        window.onchaincryptoCurrentUser=activeUser;
-        window.ocLoggedOut=false;
-        document.documentElement.classList.remove('oc-auth-pending');
-        document.body.classList.remove('oc-logged-out','oc-auth-screen','oc-register-mode','oc-visitor-mode');
       }
       if(btn.id==='register-nav' || btn.id==='mobileRegisterBtn'){
         document.getElementById('showRegisterBtn')?.click();
@@ -5625,6 +5633,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  $("ocVisitorDetailClose")?.addEventListener("click",()=>{$("ocVisitorCoinDetail").classList.add("hidden");$("ocVisitorTradingChart").src="about:blank"});
  $("ocVisitorDetailBuy")?.addEventListener("click",()=>openAuth("signup"));
  ["ocVisitorHeroExplore","ocVisitorAboutExplore"].forEach(id=>$(id)?.addEventListener("click",()=>$("ocVisitorMarkets")?.scrollIntoView({behavior:"smooth",block:"start"})));
+ ["ocVisitorAboutSignup","ocPlatformAboutSignup"].forEach(id=>$(id)?.addEventListener("click",()=>openAuth("signup")));
  window.addEventListener("load",()=>{window.ocRenderVisitorMarket?.();void loadVisitorGoldFallback()});
  window.addEventListener("market-updated",()=>window.ocRenderVisitorMarket?.());
  setInterval(()=>{window.ocRenderVisitorMarket?.();void loadVisitorGoldFallback()},30000);
@@ -6988,8 +6997,7 @@ html.oc-auth-pending body .oc-trust-footer,
 html.oc-auth-pending body #bottomNav { display:none!important; }
 </style>
 
-</body>
-</html>
+
 
 <style id="oc-register-contact-choice-style">
 .oc-register-contact-choice{margin:10px 0 14px;display:grid;gap:6px}
@@ -11150,7 +11158,7 @@ html.oc-auth-pending #ocBackBtn,html.oc-auth-pending #ocForwardBtn{display:none!
     const state=event.state;
     const signedIn=!!(window.onchaincryptoCurrentUser||window.ocFirebaseAuth?.currentUser);
     const guestBoundary=window.__ocSignedOutHistoryBoundary===true&&!signedIn;
-    const allowedGuestPage=state?.ocPage==="register";
+    const allowedGuestPage=["home","markets","trade","browser","wallet","public-market","register"].includes(state?.ocPage);
     // A logout boundary separates all pre-logout history from the signed-out
     // visitor session. Old private or pre-boundary entries always return to Login.
     if(guestBoundary&&(!state?.ocSignedOutBoundary||!state?.ocAppRoute||!allowedGuestPage)){
@@ -11379,6 +11387,7 @@ html body:not(.oc-auth-screen) :is(button,a,[role="button"],input,select,textare
  html.oc-light-theme body:not(.oc-auth-screen) .bottom-nav{background:rgba(255,255,255,.98)!important}
 }
 
+</style>
 <style id="oc-bright-navigation-wallet-refresh">
 /* Brighter navigation, clearer headings and a light wallet balance card */
 body:not(.oc-auth-screen) main .page-title :is(h1,h2,h3),
@@ -11447,6 +11456,39 @@ body:not(.oc-auth-screen) .wallet-summary-strip strong{color:#12486e!important}
   body:not(.oc-auth-screen) .bottom-nav button{color:#f1fbff!important}
 }
 </style>
+<style id="oc-guest-navigation-access-recovery">
+/* Keep the main navigation available to guests; the router selects one page at a time. */
+html.oc-auth-pending body>header,
+html.oc-auth-pending body>.oc-trust-footer,
+html.oc-auth-pending body>#bottomNav,
+body.oc-logged-out>header,
+body.oc-logged-out>.oc-trust-footer,
+body.oc-logged-out>#bottomNav{display:flex!important;visibility:visible!important;pointer-events:auto!important}
+html.oc-auth-pending body>#bottomNav,
+body.oc-logged-out>#bottomNav{display:grid!important}
+html.oc-auth-pending header #nav,
+body.oc-logged-out header #nav{display:flex!important;visibility:visible!important;pointer-events:auto!important}
+body.oc-logged-out header #nav button,
+body.oc-logged-out #bottomNav button{display:inline-flex!important;visibility:visible!important;pointer-events:auto!important}
+body.oc-logged-out #ocVisitorActions{display:flex!important;visibility:visible!important;pointer-events:auto!important}
+html.oc-auth-pending main>section:not(#page-public-market){display:none!important}
+html.oc-auth-pending main>#page-public-market{display:block!important;visibility:visible!important}
+body.oc-logged-out main>section[id^="page-"].hidden{display:none!important}
+body.oc-logged-out main>section[id^="page-"]:not(.hidden){display:block!important;visibility:visible!important;pointer-events:auto!important}
+body.oc-logged-out.oc-auth-screen main>section[id^="page-"].hidden{display:none!important}
+body.oc-logged-out.oc-auth-screen main>#page-register:not(.hidden){display:flex!important;visibility:visible!important}
+body.oc-logged-out:not(.oc-auth-screen) main>#page-register{display:none!important}
 </style>
 
-
+<style id="oc-guest-navigation-specific-overrides">
+/* Specificity overrides for older visitor locks; only the active page is shown. */
+body.oc-logged-out:not(.oc-auth-screen) main>section[id^="page-"]:not(#page-public-market):not(#page-register):not(.hidden){display:block!important;visibility:visible!important;pointer-events:auto!important}
+body.oc-logged-out:not(.oc-auth-screen) #page-home:not(.hidden){display:block!important;visibility:visible!important}
+body.oc-logged-out.oc-visitor-mode #nav [data-page="wallet"],
+body.oc-logged-out.oc-visitor-mode #bottomNav [data-bottom-page="wallet"],
+body.oc-logged-out.oc-visitor-mode [data-page="wallet"],
+body.oc-logged-out.oc-visitor-mode [data-go="wallet"]{display:inline-flex!important;visibility:visible!important;pointer-events:auto!important}
+body.oc-logged-out.oc-visitor-mode #bottomNav{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+</style>
+</body>
+</html>
