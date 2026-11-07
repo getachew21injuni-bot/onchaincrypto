@@ -3332,11 +3332,25 @@ document.getElementById("resendEmailCodeBtn")?.addEventListener("click", async (
 });
 // Route authenticated users directly to Home after sign-in or registration.
 function openHomeAfterAuth() {
+  // Clear every guest/auth-screen gate immediately after Firebase confirms sign-in.
+  window.ocLoggedOut = false;
   window.ocPendingPage = null;
+  document.documentElement.classList.remove("oc-auth-pending");
+  document.body.classList.remove("oc-logged-out", "oc-auth-screen", "oc-register-mode");
+  const loginPage = document.getElementById("page-register");
+  loginPage?.classList.add("hidden");
+  loginPage?.setAttribute("hidden", "");
+  document.getElementById("signInForm")?.classList.add("hidden");
+  document.getElementById("authChoicePanel")?.classList.add("hidden");
+  document.getElementById("registerForm")?.classList.add("hidden");
   const applyHomeRoute = () => {
     const main = document.querySelector("main");
     const home = document.getElementById("page-home");
     if (!main || !home) return;
+    document.documentElement.classList.remove("oc-auth-pending");
+    document.body.classList.remove("oc-logged-out", "oc-auth-screen", "oc-register-mode");
+    loginPage?.classList.add("hidden");
+    loginPage?.setAttribute("hidden", "");
     if (typeof window.__ocNavigatePage === "function") {
       try { window.__ocNavigatePage("home"); }
       catch (error) { console.warn("Home route handler failed:", error); }
@@ -3346,6 +3360,8 @@ function openHomeAfterAuth() {
     }
     main.querySelectorAll('section[id^="page-"]').forEach(section => {
       section.classList.toggle("hidden", section.id !== "page-home");
+      if (section.id === "page-home") section.removeAttribute("hidden");
+      else section.setAttribute("hidden", "");
     });
     document.querySelectorAll("#nav [data-page]").forEach(button => button.classList.toggle("active", button.dataset.page === "home"));
     document.querySelectorAll("[data-bottom-page]").forEach(button => button.classList.toggle("active", button.dataset.bottomPage === "home"));
@@ -3493,20 +3509,20 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
     const credential = await signInWithEmailAndPassword(auth, email, password);
     void window.ocLogUserActivity?.("login");
     document.getElementById("signInPassword").value = "";
-    window.onchaincryptoCurrentUser = credential.user;
-    window.ocPendingPage = "profile";
-    // Authentication is the sign-in decision. A profile read/write outage must
-    // never turn a successful Firebase login into a false "login failed" message.
+    // Firebase has confirmed the session: leave the sign-in screen immediately.
     const signedInUser = credential.user;
     window.onchaincryptoCurrentUser = signedInUser;
-    try { await loadSavedUserProfile(signedInUser); }
-    catch (profileError) { console.warn("Profile load deferred after successful sign-in:", profileError?.code || profileError); }
-    try { await saveBasicUserProfile(signedInUser); }
-    catch (profileError) { console.warn("Profile sync deferred after successful sign-in:", profileError?.code || profileError); }
-    if (status) status.textContent = "Welcome back, " + (signedInUser.displayName || signedInUser.email || signedInUser.phoneNumber || "user") + ".";
-    msg("Login successful. Welcome back to Onchain.");
-    if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
     openHomeAfterAuth();
+    if (status) status.textContent = "Welcome back, " + (signedInUser.displayName || signedInUser.email || signedInUser.phoneNumber || "user") + ".";
+    // Profile reads/writes continue in the background and cannot keep the login
+    // form visible or delay access to the signed-in platform.
+    void (async () => {
+      try { await loadSavedUserProfile(signedInUser); }
+      catch (profileError) { console.warn("Profile load deferred after successful sign-in:", profileError?.code || profileError); }
+      try { await saveBasicUserProfile(signedInUser); }
+      catch (profileError) { console.warn("Profile sync deferred after successful sign-in:", profileError?.code || profileError); }
+      if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
+    })();
   } catch (error) {
     const code = error?.code || "unknown";
     console.error("Onchain sign-in failed:", code, error?.message || error);
