@@ -194,17 +194,25 @@ async function renderTradeControls(){
     </div>
     <div class="content-panel"><h3 style="margin-top:0">Registered profiles: ${users.length}</h3><p class="muted">Example accounts A, B and C have been removed. Every Firestore user profile is listed here without filtering by email, name, trading activity, or account status. Saved settings are account-level records; enforcement in trade execution must also be enabled before these settings can restrict live trades.</p></div>
    </div>`;
-  const select=usersBody.querySelector('#tradeControlUser'),enabled=usersBody.querySelector('#tradeControlEnabled'),max=usersBody.querySelector('#tradeControlMax'),message=usersBody.querySelector('#tradeControlMessage');
-  const load=async()=>{const u=users.find(x=>x.id===select.value);enabled.checked=u?.tradingEnabled!==false;max.value=Number(u?.maxTradeAmountUSDT||1000000);message.textContent='Current settings loaded for '+(u?.email||u?.displayName||u?.id||'selected user')+'.';};
-  select.addEventListener('change',load);await load();
+  const select=usersBody.querySelector('#tradeControlUser'),enabled=usersBody.querySelector('#tradeControlEnabled'),max=usersBody.querySelector('#tradeControlMax'),mode=usersBody.querySelector('#tradeControlDemoMode'),win=usersBody.querySelector('#tradeControlWinPercent'),loss=usersBody.querySelector('#tradeControlLossPercent'),message=usersBody.querySelector('#tradeControlMessage');
+  const renderOutcomeLists=()=>{
+   const label=u=>esc(u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id);
+   const winUsers=users.filter(u=>u.demoTradeControlMode==='win'),lossUsers=users.filter(u=>u.demoTradeControlMode==='lose');
+   usersBody.querySelector('#demoWinUsers').innerHTML=winUsers.length?winUsers.map(u=>'<div style="padding:7px 0;border-bottom:1px solid #ffffff18">'+label(u)+'</div>').join(""):'No users assigned to wins.';
+   usersBody.querySelector('#demoLossUsers').innerHTML=lossUsers.length?lossUsers.map(u=>'<div style="padding:7px 0;border-bottom:1px solid #ffffff18">'+label(u)+'</div>').join(""):'No users assigned to losses.';
+  };
+  const load=async()=>{const u=users.find(x=>x.id===select.value);enabled.checked=u?.tradingEnabled!==false;max.value=Number(u?.maxTradeAmountUSDT||1000000);mode.value=['inherit','market','win','lose'].includes(u?.demoTradeControlMode)?u.demoTradeControlMode:'inherit';win.value=Math.min(100,Math.max(1,Number(u?.demoWinPercent??15)||15));loss.value=Math.min(100,Math.max(1,Number(u?.demoLossPercent??50)||50));message.textContent='Current settings loaded for '+(u?.email||u?.displayName||u?.id||'selected user')+'.';};
+  select.addEventListener('change',load);await load();renderOutcomeLists();
   usersBody.querySelector('#saveTradeControl').addEventListener('click',async()=>{
-   const u=users.find(x=>x.id===select.value),amount=Number(max.value);
+   const u=users.find(x=>x.id===select.value),amount=Number(max.value),winPercent=Number(win.value),lossPercent=Number(loss.value),demoMode=mode.value;
    if(!u){message.textContent='Select a registered user.';return;}
    if(!Number.isFinite(amount)||amount<100||amount>1000000){message.textContent='Maximum trade amount must be between 100 and 1,000,000 USDT.';return;}
+   if(!['inherit','market','win','lose'].includes(demoMode)){message.textContent='Choose a valid practice outcome mode.';return;}
+   if(!Number.isInteger(winPercent)||winPercent<1||winPercent>100||!Number.isInteger(lossPercent)||lossPercent<1||lossPercent>100){message.textContent='Win and loss percentages must each be between 1 and 100.';return;}
    const button=usersBody.querySelector('#saveTradeControl');button.disabled=true;message.textContent='Saving to Firebase…';
    try{
-    await setDoc(doc(db,'users',u.id),{tradingEnabled:enabled.checked,maxTradeAmountUSDT:amount,tradeControlUpdatedAt:serverTimestamp(),tradeControlUpdatedBy:current.email},{merge:true});
-    u.tradingEnabled=enabled.checked;u.maxTradeAmountUSDT=amount;message.textContent='Saved to Firebase for '+(u.email||u.displayName||u.id)+'. Note: trade execution enforcement is not yet enabled by this Admin setting.';
+    await setDoc(doc(db,'users',u.id),{tradingEnabled:enabled.checked,maxTradeAmountUSDT:amount,demoTradeControlMode:demoMode,demoWinPercent:winPercent,demoLossPercent:lossPercent,tradeControlUpdatedAt:serverTimestamp(),tradeControlUpdatedBy:current.email},{merge:true});
+    u.tradingEnabled=enabled.checked;u.maxTradeAmountUSDT=amount;u.demoTradeControlMode=demoMode;u.demoWinPercent=winPercent;u.demoLossPercent=lossPercent;renderOutcomeLists();message.textContent='Saved to Firebase for '+(u.email||u.displayName||u.id)+'. New timed practice trades for this user will follow the selected mode.';
    }catch(e){message.textContent='Could not save settings: '+(e.code||e.message||'permission error');}
    finally{button.disabled=false;}
   });
