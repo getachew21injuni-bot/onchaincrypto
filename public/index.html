@@ -11386,6 +11386,7 @@ html body:not(.oc-auth-screen) :is(button,a,[role="button"],input,select,textare
  html.oc-light-theme body:not(.oc-auth-screen) .bottom-nav{background:rgba(255,255,255,.98)!important}
 }
 
+</style>
 <style id="oc-bright-navigation-wallet-refresh">
 /* Brighter navigation, clearer headings and a light wallet balance card */
 body:not(.oc-auth-screen) main .page-title :is(h1,h2,h3),
@@ -11454,7 +11455,6 @@ body:not(.oc-auth-screen) .wallet-summary-strip strong{color:#12486e!important}
   body:not(.oc-auth-screen) .bottom-nav button{color:#f1fbff!important}
 }
 </style>
-</style>
 <style id="oc-guest-navigation-access-recovery">
 /* Keep the main navigation available to guests; the router selects one page at a time. */
 html.oc-auth-pending body>header,
@@ -11477,6 +11477,17 @@ body.oc-logged-out main>section[id^="page-"]:not(.hidden){display:block!importan
 body.oc-logged-out.oc-auth-screen main>section[id^="page-"].hidden{display:none!important}
 body.oc-logged-out.oc-auth-screen main>#page-register:not(.hidden){display:flex!important;visibility:visible!important}
 body.oc-logged-out:not(.oc-auth-screen) main>#page-register{display:none!important}
+</style>
+
+<style id="oc-guest-navigation-specific-overrides">
+/* Specificity overrides for older visitor locks; only the active page is shown. */
+body.oc-logged-out:not(.oc-auth-screen) main>section[id^="page-"]:not(#page-public-market):not(#page-register):not(.hidden){display:block!important;visibility:visible!important;pointer-events:auto!important}
+body.oc-logged-out:not(.oc-auth-screen) #page-home:not(.hidden){display:block!important;visibility:visible!important}
+body.oc-logged-out.oc-visitor-mode #nav [data-page="wallet"],
+body.oc-logged-out.oc-visitor-mode #bottomNav [data-bottom-page="wallet"],
+body.oc-logged-out.oc-visitor-mode [data-page="wallet"],
+body.oc-logged-out.oc-visitor-mode [data-go="wallet"]{display:inline-flex!important;visibility:visible!important;pointer-events:auto!important}
+body.oc-logged-out.oc-visitor-mode #bottomNav{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 </style>
 </body>
 </html>
