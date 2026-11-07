@@ -6754,6 +6754,52 @@ onAuthStateChanged(auth,user=>{
   }
 </style>
 
+
+<!-- Platform-wide heading and navigation readability cleanup: text-only styling, preserving layout and controls. -->
+<style id="oc-platform-clean-heading-contrast">
+body:not(.oc-auth-screen) header,
+body:not(.oc-auth-screen) header .brand,
+body:not(.oc-auth-screen) header nav,
+body:not(.oc-auth-screen) .bottom-nav{
+  color:#f3f7fc!important;
+}
+body:not(.oc-auth-screen) header .brand,
+body:not(.oc-auth-screen) header .brand *,
+body:not(.oc-auth-screen) header nav button,
+body:not(.oc-auth-screen) .bottom-nav button{
+  -webkit-text-stroke:0 transparent!important;
+  text-shadow:none!important;
+  filter:none!important;
+}
+body:not(.oc-auth-screen) header nav button,
+body:not(.oc-auth-screen) .bottom-nav button{
+  color:#dce8f5!important;
+}
+body:not(.oc-auth-screen) header nav button.active,
+body:not(.oc-auth-screen) .bottom-nav button.active{
+  color:#55c8ff!important;
+  font-weight:800!important;
+}
+body:not(.oc-auth-screen) main :is(h1,h2,h3,h4,.page-title,.section-title,.section-head,.section-head strong,.card-title,.quick-action strong){
+  color:#f5faff!important;
+  -webkit-text-stroke:0 transparent!important;
+  text-shadow:none!important;
+  filter:none!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+body:not(.oc-auth-screen) main :is(.page-title h1,.section-head h2,.section-head h3){
+  font-weight:800!important;
+  letter-spacing:normal!important;
+}
+body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.description,.helper-text){
+  color:#c1d0e0;
+  -webkit-text-stroke:0 transparent!important;
+  text-shadow:none!important;
+}
+</style>
+
 </body>
 </html>
 
