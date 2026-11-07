@@ -6864,7 +6864,7 @@ import { getFirestore, doc, getDoc, setDoc, collection, query, where, limit, onS
 const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
 const app=getApps()[0]||initializeApp(config),auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
 const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
-let user=null,recipient=null,myName="OnChain member",stopSent=null,stopReceived=null,sentRows=[],receivedRows=[];
+let user=null,recipient=null,myName="OnChain member",stopSent=null,stopReceived=null,stopBalance=null,sentRows=[],receivedRows=[];
 const amountText=value=>Number(value||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:8});
 function notice(message,isError=false){const node=byId("transferNotice");if(node){node.textContent=message;node.className=isError?"red tiny":"muted tiny";}}
 function updateButton(){const amount=Number(byId("transferAmount")?.value||0);if(byId("transferSubmit"))byId("transferSubmit").disabled=!(!!user&&!!recipient&&Number.isFinite(amount)&&amount>0);}
@@ -6897,14 +6897,14 @@ function watchHistory(){
  stopReceived=onSnapshot(receivedQuery,snapshot=>{receivedRows=snapshot.docs.map(item=>({id:item.id,...item.data()}));renderHistory();},()=>{if(byId("transferHistoryRows"))byId("transferHistoryRows").textContent="Transfer history is temporarily unavailable.";});
 }
 onAuthStateChanged(auth,async current=>{
- user=current||null;recipient=null;
+ user=current||null;recipient=null;stopBalance?.();stopBalance=null;
  if(byId("transferRecipientPreview"))byId("transferRecipientPreview").textContent=user?"Check the recipient before sending.":"Sign in to use internal transfers.";
  if(byId("transferMyId"))byId("transferMyId").textContent=user?user.uid:"Sign in required";
  if(byId("transferDestination"))byId("transferDestination").value="";
  if(byId("transferAmount"))byId("transferAmount").value="";
  updateButton();watchHistory();
  if(!user){showAvailable(0);notice("Sign in to send USDT.",true);return;}
- try{await publishDirectoryEntry(user);notice("Internal demo-balance transfer only. No blockchain funds move.");}
+ try{await publishDirectoryEntry(user);stopBalance=onSnapshot(doc(db,"users",user.uid),snap=>{if(snap.exists())showAvailable(Number(snap.data()?.demoBalanceUSDT||0));},()=>{});notice("Internal demo-balance transfer only. No blockchain funds move.");}
  catch(error){console.warn("OnChain directory setup:",error?.code||error?.message);notice("Your account ID could not be prepared. Refresh and try again.",true);}
 });
 byId("transferDestination")?.addEventListener("input",()=>{recipient=null;if(byId("transferRecipientPreview"))byId("transferRecipientPreview").textContent="Check the recipient before sending.";updateButton();});
