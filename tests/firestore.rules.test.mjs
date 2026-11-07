@@ -34,6 +34,7 @@ beforeEach(async () => {
     const db = context.firestore();
     await setDoc(doc(db, "users/sender"), { uid: "sender", demoBalanceUSDT: 100, accountStatus: "active" });
     await setDoc(doc(db, "users/recipient"), { uid: "recipient", demoBalanceUSDT: 20, accountStatus: "active" });
+    await setDoc(doc(db, "userDirectory/sender"), { uid: "sender", displayName: "Sender" });
     await setDoc(doc(db, "userDirectory/recipient"), { uid: "recipient", displayName: "Recipient" });
   });
 });
