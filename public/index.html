@@ -6149,7 +6149,7 @@ const app=getApps()[0]||initializeApp(config),auth=getAuth(app),db=getFirestore(
 const amount=$("depositAmount"),hash=$("depositTransactionHash"),file=$("depositReceiptFile"),preview=$("depositReceiptPreview"),submit=$("depositSubmitRequest"),notice=$("depositRequestNotice");
 let user=null,receiptData="",receiptName="";
 function currentAddress(){const network=$("depositNetwork")?.value||"",asset=String($("depositCoinName")?.textContent.match(/\(([^)]+)\)/)?.[1]||"").toUpperCase();return {asset,network,address:window.ONCHAINSPRO_DEPOSIT_ADDRESSES?.[asset]?.[network]||""};}
-function validate(){const a=Number(amount?.value),v=currentAddress();submit.disabled=!user||!(a>0&&Number.isFinite(a))||hash.value.trim().length<8||!receiptData||!v.address||!v.asset||!v.network;}
+function validate(){user=auth.currentUser||null;const a=Number(amount?.value),v=currentAddress();submit.disabled=!user||!(a>0&&Number.isFinite(a))||hash.value.trim().length<8||!receiptData||!v.address||!v.asset||!v.network;}
 onAuthStateChanged(auth,u=>{user=u||null;if(notice&&!user)notice.textContent="Sign in to submit a deposit request.";validate();});
 async function compressImage(source){
  const image=new Image(),url=URL.createObjectURL(source);
