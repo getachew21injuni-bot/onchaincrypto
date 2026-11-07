@@ -33,11 +33,16 @@
 </script>
 <style id="oc-auth-pending-gate">
   /* Public Home is visible to guests; protected app actions open the dedicated sign-in screen. */
-  html.oc-auth-pending main > :not(#page-home),
-  body.oc-logged-out:not(.oc-auth-screen) main > :not(#page-home) { display:none!important; }
-  html.oc-auth-pending main > #page-home,
-  body.oc-logged-out:not(.oc-auth-screen) main > #page-home { display:block!important; }
-  html.oc-auth-pending main { display:block!important; min-height:100vh; padding-top:24px; }
+  /* Keep the sign-in form visible while Firebase restores the saved session. */
+  html.oc-auth-pending main > :not(#page-register) { display:none!important; }
+  html.oc-auth-pending main > #page-register { display:flex!important; }
+  html.oc-auth-pending body > header,
+  html.oc-auth-pending body > footer,
+  html.oc-auth-pending body > #bottomNav,
+  html.oc-auth-pending body > nav,
+  html.oc-auth-pending body > aside,
+  html.oc-auth-pending body > .more-menu-wrap { display:none!important; }
+  html.oc-auth-pending main { display:flex!important; min-height:100vh; padding-top:24px; }
   html.oc-auth-pending #authChoicePanel,
   html.oc-auth-pending #registerForm,
   html.oc-auth-pending #googleSignInBtn,
@@ -3817,21 +3822,21 @@ document.addEventListener("click", event => {
 window.addEventListener("pageshow", async () => {
   try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
   if (!auth.currentUser && window.ocLoggedOut === true) {
-    if (location.hash === "#login" || location.hash === "#register") {
-      document.body.classList.add("oc-auth-screen");
-      document.body.classList.toggle("oc-register-mode",location.hash==="#register");
-      window.ocForceSignInScreen?.();
-    } else {
-      document.body.classList.remove("oc-auth-screen","oc-register-mode");
-      document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-public-market"));
-      window.showPage?.("public-market");
-    }
+    document.body.classList.add("oc-auth-screen");
+    document.body.classList.toggle("oc-register-mode",location.hash==="#register");
+    window.ocForceSignInScreen?.();
+    try {
+      const mode=location.hash==="#register"?"register":"login";
+      history.replaceState({ocAppRoute:true,ocPage:"register",ocAuthMode:mode,ocIndex:0,ocSignedOutBoundary:true},"",location.pathname+location.search+(mode==="register"?"#register":"#login"));
+    } catch (_) {}
   }
 });
 window.addEventListener("popstate", async () => {
   try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
   if (!auth.currentUser && window.ocLoggedOut === true) {
-    if(location.hash==="#login"){document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-register"));window.showPage?.("register");}else{document.querySelectorAll("main>section[id^=page-]").forEach(section => section.classList.toggle("hidden", section.id !== "page-public-market"));window.showPage?.("public-market");}
+    document.body.classList.add("oc-auth-screen");
+    document.body.classList.toggle("oc-register-mode",location.hash==="#register");
+    window.ocForceSignInScreen?.();
   }
 });
 // Account deletion is handled by the Gmail-confirmed request flow below.
@@ -4478,11 +4483,13 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     e.preventDefault();e.stopImmediatePropagation();
     navigate(page,{history:btn.hasAttribute('data-home-history')});
   },true);
-  // Guests start on public Home; signed-in routing remains unchanged.
+  // Signed-out visitors start on Sign In; authenticated users retain the app route.
   const current=pages().find(s=>!s.classList.contains('hidden'));
   if(window.ocLoggedOut===true){
-    pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-public-market'));
-    navigate('public-market',{fromOriginal:true,keepScroll:true});
+    document.body.classList.add('oc-auth-screen');
+    document.body.classList.remove('oc-register-mode');
+    pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-register'));
+    navigate('register',{fromOriginal:true,keepScroll:true});
   } else if(current) navigate(current.id.slice(5),{fromOriginal:true,keepScroll:true});
   const initial=pages().find(section=>!section.classList.contains('hidden'));
   const initialPage=initial?.id?.slice(5)||"public-market";
