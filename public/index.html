@@ -32,7 +32,7 @@
   document.documentElement.classList.add("oc-auth-pending");
 </script>
 <style id="oc-auth-pending-gate">
-  /* Public Home is visible to guests; protected app actions open the dedicated sign-in screen. */
+  /* The dedicated Login/Register page is the only screen shown before sign-in. */
   /* Keep the sign-in form visible while Firebase restores the saved session. */
   html.oc-auth-pending main > :not(#page-register) { display:none!important; }
   html.oc-auth-pending main > #page-register { display:flex!important; }
@@ -285,21 +285,6 @@ document.addEventListener('DOMContentLoaded',function(){
 #page-trade .chart-area>.signal-box{margin-top:6px!important;padding:9px!important}
 #page-trade .chart-area>.signal-box .section-head{padding:0!important}
 </style><style id="oc-hide-numbered-trade-steps">#timedPaperTrade .oc-flow-step{display:none!important}</style>
-<style id="oc-logged-out-lockscreen">
-/* Signed-out visitors see authentication only; all app pages and navigation stay hidden. */
-body.oc-logged-out > header,
-body.oc-logged-out > footer,
-body.oc-logged-out > #bottomNav,
-body.oc-logged-out > #adminDashboardShortcut,
-body.oc-logged-out > a,
-body.oc-logged-out > nav,
-body.oc-logged-out > aside,
-body.oc-logged-out > .more-menu-wrap { display:none!important; }
-body.oc-logged-out main > section[id^="page-"]:not(#page-register) { display:none!important; }
-body.oc-logged-out #page-register { display:flex!important; }
-body.oc-logged-out main { display:flex!important; min-height:100vh; padding-top:24px; }
-</style>
-
 <style id="oc-auth-only-screen-tweaks">
 body.oc-logged-out #authChoicePanel,
 body.oc-logged-out #registerForm,
@@ -1276,17 +1261,6 @@ body main .section-head .muted {
 }
 </style>
 
-<style id="oc-footer-and-bottom-nav-login-only">
-/* Show the company footer and app navigation only on the login/register screen. */
-body:not(.oc-auth-screen) .oc-trust-footer,
-body:not(.oc-auth-screen) #bottomNav { display:none !important; }
-body.oc-auth-screen .oc-trust-footer,
-body.oc-logged-out.oc-auth-screen .oc-trust-footer { display:block !important; }
-body.oc-auth-screen #bottomNav,
-body.oc-logged-out.oc-auth-screen #bottomNav { display:grid !important; }
-html.oc-auth-pending body .oc-trust-footer,
-html.oc-auth-pending body #bottomNav { display:none !important; }
-</style>
 </head>
 <body>
 <header>
@@ -3000,27 +2974,7 @@ window.ocAuthReady = Promise.resolve(
   return auth.currentUser || null;
 });
 window.ocFirebaseAuth = auth;
-// Attach the first auth-state observer immediately. The full account/profile
-// handlers are registered farther down the module, but the login gate must not
-// depend on the rest of the app finishing its initialization.
-window.ocAuthBootstrapUnsubscribe = onAuthStateChanged(auth, user => {
-  document.documentElement.classList.remove("oc-auth-pending");
-  const status = document.getElementById("authStatus");
-  if (user) {
-    document.body.classList.remove("oc-logged-out");
-    if (status) status.textContent = "Signed in. Opening your account…";
-  } else {
-    window.ocLoggedOut = true;
-    document.body.classList.add("oc-logged-out");
-    if (status) status.textContent = "Please sign in to continue.";
-  }
-}, error => {
-  console.error("Early Firebase auth-state check failed:", error?.code || error, error?.message || "");
-  document.documentElement.classList.remove("oc-auth-pending");
-  document.body.classList.add("oc-logged-out");
-  const status = document.getElementById("authStatus");
-  if (status) status.textContent = "Unable to confirm sign-in. Please sign in again or refresh.";
-});
+// The full auth-state observer below is the single owner of login and app visibility.
 
 const db = getFirestore(app);
 window.ocLogUserActivity = async function(eventType, extra = {}) {
@@ -3346,48 +3300,21 @@ document.getElementById("resendEmailCodeBtn")?.addEventListener("click", async (
 });
 // Route authenticated users directly to Home after sign-in or registration.
 function openHomeAfterAuth() {
-  // Clear every guest/auth-screen gate immediately after Firebase confirms sign-in.
   window.ocLoggedOut = false;
   window.ocPendingPage = null;
   document.documentElement.classList.remove("oc-auth-pending");
-  document.body.classList.remove("oc-logged-out", "oc-auth-screen", "oc-register-mode");
-  const loginPage = document.getElementById("page-register");
-  loginPage?.classList.add("hidden");
-  loginPage?.setAttribute("hidden", "");
-  document.getElementById("signInForm")?.classList.add("hidden");
-  document.getElementById("authChoicePanel")?.classList.add("hidden");
-  document.getElementById("registerForm")?.classList.add("hidden");
+  document.body.classList.remove("oc-logged-out", "oc-auth-screen", "oc-register-mode", "oc-visitor-mode");
   const routeNames = new Set(["home","markets","trade","browser","wallet","deposit","withdraw","transfer","convert","history","profile","financial","kyc","notifications","support","admin","copytrading"]);
   const requestedPage = String(location.hash || "").replace(/^#/, "").toLowerCase();
   const destinationPage = routeNames.has(requestedPage) ? requestedPage : "home";
-  const applyHomeRoute = () => {
-    const main = document.querySelector("main");
-    if (!main || !document.getElementById("page-home")) return;
-    document.documentElement.classList.remove("oc-auth-pending");
-    document.body.classList.remove("oc-logged-out", "oc-auth-screen", "oc-register-mode");
-    loginPage?.classList.add("hidden");
-    loginPage?.setAttribute("hidden", "");
-    if (typeof window.__ocNavigatePage === "function") {
-      try { window.__ocNavigatePage(destinationPage, { noStack: true, keepScroll: true }); }
-      catch (error) { console.warn("Authenticated route handler failed:", error); }
-    } else if (typeof window.showPage === "function") {
-      try { window.showPage(destinationPage); }
-      catch (error) { console.warn("Authenticated route handler failed:", error); }
-    }
-    main.querySelectorAll('section[id^="page-"]').forEach(section => {
-      const active = section.id === "page-" + destinationPage;
-      section.classList.toggle("hidden", !active);
-      if (active) section.removeAttribute("hidden");
-      else section.setAttribute("hidden", "");
-    });
-    document.querySelectorAll("#nav [data-page]").forEach(button => button.classList.toggle("active", button.dataset.page === destinationPage));
-    document.querySelectorAll("[data-bottom-page]").forEach(button => button.classList.toggle("active", button.dataset.bottomPage === destinationPage));
-    if (typeof window.refreshProfileAccountInfo === "function") {
-      try { window.refreshProfileAccountInfo(); } catch (_) {}
-    }
-  };
-  applyHomeRoute();
-  requestAnimationFrame(applyHomeRoute);
+  if (typeof window.__ocNavigatePage === "function") {
+    window.__ocNavigatePage(destinationPage, { noStack: true, keepScroll: true });
+  } else if (typeof window.showPage === "function") {
+    window.showPage(destinationPage);
+  }
+  if (typeof window.refreshProfileAccountInfo === "function") {
+    try { window.refreshProfileAccountInfo(); } catch (_) {}
+  }
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 document.getElementById("registerForm").addEventListener("submit", async (event) => {
@@ -3770,13 +3697,13 @@ onAuthStateChanged(auth, (user) => {
 });
 
 window.ocSetAuthScreenVisibility = function(signedIn) {
-  // Keep the authentication page outside the signed-in app, and keep every app page
-  // outside the signed-out screen. The active router controls which signed-in page shows.
-  document.querySelectorAll("body > :not(main)").forEach(node => node.removeAttribute("hidden"));
-  document.querySelectorAll("main > *").forEach(node => {
-    const isLoginPage = node.id === "page-register";
-    if (signedIn ? !isLoginPage : isLoginPage) node.removeAttribute("hidden");
-    else node.setAttribute("hidden", "");
+  // Only control page sections here. Header, footer and navigation are handled by
+  // the single authoritative auth-layout rule; the router selects the active app page.
+  document.querySelectorAll('main > section[id^="page-"]').forEach(section => {
+    const shouldHide = signedIn ? section.id === "page-register" : section.id !== "page-register";
+    section.classList.toggle("hidden", shouldHide);
+    if (shouldHide) section.setAttribute("hidden", "");
+    else section.removeAttribute("hidden");
   });
 };
 // A signed-out visitor must always land on the actual sign-in form, not Home or the auth choice screen.
@@ -3784,15 +3711,15 @@ window.ocForceSignInScreen = function() {
   // Always restore the signed-out screen explicitly; do not leave a stale
   // profile/home page visible while Firebase finishes its auth-state callback.
   window.ocLoggedOut = true;
-  document.documentElement.classList.add("oc-auth-pending");
-  document.body.classList.add("oc-logged-out");
+  document.body.classList.add("oc-logged-out", "oc-auth-screen");
   document.body.classList.remove("oc-register-mode");
   window.ocPendingPage = null;
   window.ocSetAuthScreenVisibility(false);
   document.querySelectorAll("main>section[id^=page-]").forEach(section => {
     section.classList.toggle("hidden", section.id !== "page-register");
   });
-  if (typeof window.showPage === "function") window.showPage("register");
+  if (typeof window.__ocNavigatePage === "function") window.__ocNavigatePage("register", { noStack: true, keepScroll: true });
+  else if (typeof window.showPage === "function") window.showPage("register");
   const choice = document.getElementById("authChoicePanel");
   const register = document.getElementById("registerForm");
   const signIn = document.getElementById("signInForm");
@@ -4427,6 +4354,7 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     document.body.classList.toggle("oc-auth-screen",guest&&page==="register");
     const target=document.getElementById('page-'+page);
     if(!target) return;
+    if(["deposit","withdraw","transfer","convert"].includes(page)) recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");
     const currentPage=pages().find(section=>!section.classList.contains('hidden'));
     const currentName=currentPage?.id?.slice(5);
     if(currentName && currentName!==page && !opts.noStack && !window.__ocHandlingPopstate){pageStack.push(currentName);if(pageStack.length>30)pageStack.shift();}
@@ -4471,16 +4399,8 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
   }
   // Auth flows can route directly to a page without triggering legacy click handlers.
   window.__ocNavigatePage=(page,opts={})=>navigate(page,opts);
-  if(typeof window.showPage==='function' && !window.__ocOriginalShowPage){
-    window.__ocOriginalShowPage=window.showPage;
-    // Record the page being left before the legacy router hides it.
-    window.showPage=function(page){
-      navigate(page,{fromOriginal:true});
-      const result=window.__ocOriginalShowPage(page);
-      navigate(page,{fromOriginal:true,noStack:true,keepScroll:true});
-      return result;
-    };
-  }
+  // All programmatic navigation uses the same router as the navigation controls.
+  window.showPage = (page) => navigate(page);
   document.addEventListener('click',function(e){
     const target=e.target instanceof Element?e.target:null;
     const btn=target?.closest('[data-go],[data-page],[data-bottom-page],[data-wallet-action]');
@@ -6430,18 +6350,6 @@ root.querySelector("#ocSupportForm").addEventListener("submit",e=>{e.preventDefa
 </script>
 
 
-<style id="oc-visitor-browser-overview-access">
-/* Signed-out visitors see only the authentication screen. */
-body.oc-logged-out header,
-body.oc-logged-out footer,
-body.oc-logged-out #nav,
-body.oc-logged-out #bottomNav,
-body.oc-logged-out #moreMenu,
-body.oc-logged-out .more-menu-wrap{display:none!important;visibility:hidden!important;pointer-events:none!important}
-body.oc-logged-out main>section[id^="page-"]:not(#page-register){display:none!important}
-body.oc-logged-out main>#page-register{display:flex!important;visibility:visible!important}
-</style>
-
 <style id="oc-auth-border-text-visibility">
 /* Auth form: border and text styling only; preserve structure, controls and behaviour. */
 #page-register .auth-main-panel{
@@ -7054,6 +6962,40 @@ byId("transferSubmit")?.addEventListener("click",async()=>{
 });
 
 </script>
+
+<style id="oc-authoritative-auth-layout">
+/* One layout rule: signed-out visitors see only Login/Register; signed-in users see the app. */
+html.oc-auth-pending body > header,
+html.oc-auth-pending body > footer,
+html.oc-auth-pending body > #bottomNav,
+html.oc-auth-pending body > #adminDashboardShortcut,
+html.oc-auth-pending body > nav,
+html.oc-auth-pending body > aside,
+html.oc-auth-pending body > .more-menu-wrap { display:none!important; }
+html.oc-auth-pending main > section[id^="page-"]:not(#page-register) { display:none!important; }
+html.oc-auth-pending main > #page-register { display:flex!important; visibility:visible!important; }
+body.oc-logged-out > header,
+body.oc-logged-out > footer,
+body.oc-logged-out > #bottomNav,
+body.oc-logged-out > #adminDashboardShortcut,
+body.oc-logged-out > a,
+body.oc-logged-out > nav,
+body.oc-logged-out > aside,
+body.oc-logged-out > .more-menu-wrap,
+body.oc-logged-out #nav,
+body.oc-logged-out #ocVisitorActions,
+body.oc-logged-out #moreMenuBtn,
+body.oc-logged-out #refreshBtn,
+body.oc-logged-out #ocBackBtn,
+body.oc-logged-out #ocForwardBtn { display:none!important; visibility:hidden!important; pointer-events:none!important; }
+body.oc-logged-out main > section[id^="page-"]:not(#page-register) { display:none!important; visibility:hidden!important; }
+body.oc-logged-out main > #page-register { display:flex!important; visibility:visible!important; }
+body:not(.oc-logged-out) .oc-trust-footer { display:block!important; }
+body:not(.oc-logged-out) #bottomNav { display:grid!important; }
+html.oc-auth-pending body .oc-trust-footer,
+html.oc-auth-pending body #bottomNav { display:none!important; }
+</style>
+
 </body>
 </html>
 
@@ -8699,50 +8641,6 @@ body.oc-trade-overlay-open{overflow:auto!important}
  }
 }
 </style>
-
-<style id="oc-visitor-explore-layout">
-/* Guests can browse public sections; account-only areas remain masked. */
-html.oc-auth-pending main > section[id^="page-"]:not(#page-public-market),
-body.oc-logged-out:not(.oc-auth-screen) main > section[id^="page-"].hidden{display:none!important}
-html.oc-auth-pending main > #page-public-market,
-body.oc-logged-out:not(.oc-auth-screen) main > section[id^="page-"]:not(.hidden):not(#page-home):not(#page-register){display:block!important}
-html.oc-auth-pending main,body.oc-logged-out:not(.oc-auth-screen) main{display:block!important;min-height:calc(100vh - 72px)!important;max-width:1440px!important;margin:0 auto!important;padding:22px!important}
-html.oc-auth-pending body > header,
-body.oc-logged-out:not(.oc-auth-screen) > header{display:grid!important}
-html.oc-auth-pending body > #bottomNav,
-body.oc-logged-out:not(.oc-auth-screen) > #bottomNav{display:grid!important}
-html.oc-auth-pending body > footer,
-body.oc-logged-out:not(.oc-auth-screen) > footer{display:block!important}
-html.oc-auth-pending body > :not(header):not(main):not(footer):not(#bottomNav),
-body.oc-logged-out:not(.oc-auth-screen) > :not(header):not(main):not(footer):not(#bottomNav){display:none!important}
-body.oc-logged-out:not(.oc-auth-screen) #nav{display:flex!important}
-body.oc-logged-out:not(.oc-auth-screen) #ocVisitorActions,
-html.oc-auth-pending #ocVisitorActions{display:flex!important}
-body.oc-logged-out:not(.oc-auth-screen) #moreMenuBtn,
-body.oc-logged-out:not(.oc-auth-screen) #refreshBtn,
-body.oc-logged-out:not(.oc-auth-screen) #ocBackBtn{display:none!important}
-body.oc-logged-out:not(.oc-auth-screen) .oc-visitor-account-gate{display:block!important}
-body.oc-logged-out:not(.oc-auth-screen) #page-trade .form-panel,
-body.oc-logged-out:not(.oc-auth-screen) #page-trade #tradeHistory,
-body.oc-logged-out:not(.oc-auth-screen) #page-trade .performance-panel,
-body.oc-logged-out:not(.oc-auth-screen) #page-trade .level-grid,
-body.oc-logged-out:not(.oc-auth-screen) #page-wallet .wallet-overview,
-body.oc-logged-out:not(.oc-auth-screen) #page-wallet .wallet-assets-panel{display:none!important}
-.oc-visitor-account-gate{display:none;margin:18px 0;padding:22px;border:1px solid #2a4561;border-radius:14px;background:linear-gradient(120deg,#10243a,#0b192b);color:#edf6ff}
-.oc-visitor-account-gate h2{margin:0 0 8px;font-size:21px}
-.oc-visitor-account-gate p{margin:0 0 14px;color:#a9bdd2;line-height:1.6}
-.oc-visitor-account-gate .gate-actions{display:flex;gap:10px;flex-wrap:wrap}
-.oc-visitor-account-gate button{min-height:42px}
-@media(max-width:700px){
- html.oc-auth-pending main,body.oc-logged-out:not(.oc-auth-screen) main{padding:14px!important}
- body.oc-logged-out:not(.oc-auth-screen) #nav{display:none!important}
-}
-</style>
-<script id="oc-visitor-explore-layout-script">
-/* Visitors can browse public sections without inline login panels. Account actions
-   still open the dedicated Login / Sign Up page through the header controls. */
-document.querySelectorAll(".oc-visitor-account-gate").forEach(el=>el.remove());
-</script>
 
 <style id="oc-gold-dark-background">
 /* Gold-toned dark mode: a warm gold page canvas with clearly separated dark surfaces. */
@@ -11786,32 +11684,4 @@ body:not(.oc-auth-screen) .wallet-summary-strip strong{color:#12486e!important}
 </style>
 </style>
 
-<style id="oc-final-signed-out-route-lock">
-/* Final access rule: no public app pages or app navigation before sign-in. */
-html.oc-auth-pending main>section[id^="page-"]:not(#page-register),
-body.oc-logged-out:not(.oc-auth-screen) main>section[id^="page-"]:not(#page-register),
-body.oc-logged-out.oc-auth-screen main>section[id^="page-"]:not(#page-register){display:none!important;visibility:hidden!important}
-html.oc-auth-pending main>#page-register,
-body.oc-logged-out main>#page-register{display:flex!important;visibility:visible!important}
-html.oc-auth-pending body #nav,
-html.oc-auth-pending body .bottom-nav,
-html.oc-auth-pending body #bottomNav,
-body.oc-logged-out:not(.oc-auth-screen) #nav,
-body.oc-logged-out.oc-auth-screen #nav,
-body.oc-logged-out:not(.oc-auth-screen) .bottom-nav,
-body.oc-logged-out.oc-auth-screen .bottom-nav,
-body.oc-logged-out:not(.oc-auth-screen) #bottomNav,
-body.oc-logged-out.oc-auth-screen #bottomNav,
-body.oc-logged-out:not(.oc-auth-screen) header #ocVisitorActions,
-body.oc-logged-out.oc-auth-screen header #ocVisitorActions,
-body.oc-logged-out:not(.oc-auth-screen) footer,
-body.oc-logged-out.oc-auth-screen footer,
-body.oc-logged-out:not(.oc-auth-screen) #moreMenuBtn,
-body.oc-logged-out.oc-auth-screen #moreMenuBtn,
-body.oc-logged-out:not(.oc-auth-screen) #refreshBtn,
-body.oc-logged-out.oc-auth-screen #refreshBtn,
-body.oc-logged-out:not(.oc-auth-screen) #ocBackBtn,
-body.oc-logged-out.oc-auth-screen #ocBackBtn,
-body.oc-logged-out:not(.oc-auth-screen) #ocForwardBtn,
-body.oc-logged-out.oc-auth-screen #ocForwardBtn{display:none!important;visibility:hidden!important;pointer-events:none!important}
-</style>
+
