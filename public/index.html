@@ -1907,7 +1907,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
       <button class="secondary" type="button" id="transferCheckRecipient" style="margin-top:10px">Check recipient</button>
       <p id="transferRecipientPreview" class="muted tiny" aria-live="polite">Check the recipient before sending.</p>
       <label for="transferAmount">Amount (USDT)</label>
-      <input id="transferAmount" class="field" type="number" min="0.00000001" step="0.00000001" inputmode="decimal" placeholder="Enter amount">
+      <input id="transferAmount" class="field" type="number" min="0.00000001" max="1000000000" step="0.00000001" inputmode="decimal" placeholder="Enter amount">
       <p id="transferAvailableBalance" class="muted tiny">Available balance: checking…</p>
       <button class="primary full" type="button" id="transferSubmit" disabled>Send USDT</button>
       <p id="transferNotice" class="muted tiny" role="status" aria-live="polite">Internal demo-balance transfer only. No blockchain funds move.</p>
@@ -6932,7 +6932,7 @@ byId("copyTransferMyId")?.addEventListener("click",async()=>{
 byId("transferSubmit")?.addEventListener("click",async()=>{
  if(!user||!recipient){notice("Check the recipient before sending.",true);return;}
  const raw=Number(byId("transferAmount")?.value||0),amount=Math.round(raw*1e8)/1e8;
- if(!Number.isFinite(amount)||amount<=0||Math.abs(amount-raw)>1e-9){notice("Enter a valid USDT amount (up to 8 decimal places).",true);return;}
+ if(!Number.isFinite(amount)||amount<=0||amount>1000000000||Math.abs(amount-raw)>1e-9){notice("Enter a valid USDT amount (up to 8 decimal places).",true);return;}
  if(!window.confirm("Send "+amountText(amount)+" USDT to "+recipient.displayName+"? Internal transfers are immediate and cannot be reversed."))return;
  const button=byId("transferSubmit");button.disabled=true;button.textContent="Sending…";
  const senderRef=doc(db,"users",user.uid),recipientRef=doc(db,"users",recipient.uid),transferRef=doc(collection(db,"internalTransfers"));
@@ -6945,7 +6945,7 @@ byId("transferSubmit")?.addEventListener("click",async()=>{
    if(senderData.accountStatus==="suspended"||recipientData.accountStatus==="suspended")throw new Error("A suspended account cannot use internal transfers.");
    const senderBefore=Number(senderData.demoBalanceUSDT||0),recipientBefore=Number(recipientData.demoBalanceUSDT||0);
    if(!Number.isFinite(senderBefore)||!Number.isFinite(recipientBefore)||senderBefore<amount)throw new Error("Insufficient available USDT balance. No transfer was made.");
-   const senderAfter=Math.round((senderBefore-amount)*1e8)/1e8,recipientAfter=Math.round((recipientBefore+amount)*1e8)/1e8;
+   const senderAfter=senderBefore-amount,recipientAfter=recipientBefore+amount;
    if(recipientAfter>1000000000)throw new Error("The recipient balance limit would be exceeded.");
    transaction.update(senderRef,{demoBalanceUSDT:senderAfter,demoBalanceUpdatedAt:serverTimestamp(),demoBalanceLastTransferId:transferRef.id});
    transaction.update(recipientRef,{demoBalanceUSDT:recipientAfter,demoBalanceUpdatedAt:serverTimestamp(),demoBalanceLastTransferId:transferRef.id});
