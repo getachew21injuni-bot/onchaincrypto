@@ -4399,7 +4399,15 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
   };
 
   function navigate(page, opts={}){
-    const guest=window.ocLoggedOut===true&&!window.onchaincryptoCurrentUser;
+    // Firebase Auth is authoritative. A stale bootstrap flag must not hide the
+    // signed-in header or app pages after the persisted session has restored.
+    const authenticatedUser=window.onchaincryptoCurrentUser||window.ocFirebaseAuth?.currentUser||null;
+    if(authenticatedUser){
+      window.ocLoggedOut=false;
+      document.documentElement.classList.remove("oc-auth-pending");
+      document.body.classList.remove("oc-logged-out","oc-auth-screen","oc-register-mode","oc-visitor-mode");
+    }
+    const guest=window.ocLoggedOut===true&&!authenticatedUser;
     document.body.classList.toggle("oc-visitor-mode",guest);
     if(guest){
       if(page==="home")page="public-market";
