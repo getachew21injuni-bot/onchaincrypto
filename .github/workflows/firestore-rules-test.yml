@@ -1,0 +1,40 @@
+name: Firestore Rules Tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "firestore.rules"
+      - "tests/**"
+      - "package.json"
+      - "firebase.json"
+      - ".github/workflows/firestore-rules-test.yml"
+  push:
+    branches: [main, "feature/internal-usdt-send"]
+    paths:
+      - "firestore.rules"
+      - "tests/**"
+      - "package.json"
+      - "firebase.json"
+      - ".github/workflows/firestore-rules-test.yml"
+
+jobs:
+  firestore-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Set up Java for the Firestore emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Install dependencies
+        run: npm install
+      - name: Run Firestore rules tests in the emulator
+        run: npx firebase emulators:exec --project demo-onchaincrypto-rules-test --only firestore "npm test"
