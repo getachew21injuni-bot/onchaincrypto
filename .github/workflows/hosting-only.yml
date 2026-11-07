@@ -6,7 +6,7 @@ on:
       - main
   workflow_dispatch:
 
-# Only one Hosting deployment may run at a time. Newer commits replace older pending runs.
+# Deploy Hosting only. Firestore rules are changed and deployed separately.
 concurrency:
   group: onchaincrypto-firebase-hosting
   cancel-in-progress: true
@@ -40,5 +40,5 @@ jobs:
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
 
-      - name: Deploy website and Firestore security rules only (no Functions or API enablement)
-        run: firebase deploy --project onchaincrypto-d976b --only hosting,firestore:rules --non-interactive
+      - name: Deploy website to Firebase Hosting only
+        run: firebase deploy --project onchaincrypto-d976b --only hosting --non-interactive
