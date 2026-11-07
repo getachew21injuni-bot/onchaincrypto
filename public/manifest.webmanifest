@@ -1,8 +1,8 @@
 {
   "id": "/",
   "name": "Onchainspro",
-  "short_name": "OnChain",
-  "description": "Onchainspro — the OnChain cryptocurrency and Gold markets app.",
+  "short_name": "OnChainSpro",
+  "description": "OnChainSpro — cryptocurrency and gold market information, charts and practice tools.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
