@@ -3111,7 +3111,7 @@ const {
   sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider,
   signInWithPopup, onAuthStateChanged, signOut, RecaptchaVerifier,
   signInWithPhoneNumber, updateProfile, reload,
-  browserLocalPersistence, setPersistence
+  browserLocalPersistence
 } = firebaseAuthSdk;
 window.ocFirebaseModuleStarted = true;
 
@@ -3136,27 +3136,33 @@ try {
   console.warn("Firebase Auth initialization fallback:", initializeError?.code || initializeError);
   auth = getAuth(app);
 }
-window.ocAuthReady = Promise.resolve(
-  typeof auth.authStateReady === "function" ? auth.authStateReady() : null
-).then(() => auth.currentUser || null).catch(error => {
-  console.warn("Firebase auth-state restoration was delayed:", error?.code || error, error?.message || "");
-  return auth.currentUser || null;
-});
+// Let Firebase's auth observer report the restored session. Do not block
+// the entire application module on authStateReady() or a persistence migration:
+// either can stall on a browser's local storage/IndexedDB and freeze the login UI.
 window.ocFirebaseAuth = auth;
-// Explicitly confirm browser-local persistence before the app accepts sign-in
-// or attaches its authoritative auth-state observer. This also migrates any
-// existing user session to local persistence without signing the user out.
-try {
-  await setPersistence(auth, browserLocalPersistence);
-  window.ocAuthPersistenceConfirmed = true;
-} catch (persistenceError) {
-  window.ocAuthPersistenceConfirmed = false;
-  console.error("Firebase browser-local persistence could not be confirmed:", persistenceError?.code || persistenceError, persistenceError?.message || "");
-}
-// Do not publish a signed-out state until Firebase has restored browser-local
-// persistence. The observer's first null event must not race session recovery.
-await window.ocAuthReady;
-// The full auth-state observer below is the single owner of login and app visibility.
+window.ocAuthPersistenceConfirmed = true; // initializeAuth already uses browserLocalPersistence.
+window.ocAuthReady = new Promise(resolve => {
+  let settled = false;
+  let unsubscribe = () => {};
+  let timer = null;
+  const finish = user => {
+    if (settled) return;
+    settled = true;
+    if (timer) clearTimeout(timer);
+    try { unsubscribe(); } catch (_) {}
+    resolve(user || null);
+  };
+  unsubscribe = onAuthStateChanged(auth, user => finish(user), error => {
+    console.warn("Firebase auth observer startup warning:", error?.code || error);
+    finish(auth.currentUser || null);
+  });
+  timer = setTimeout(() => {
+    console.warn("Firebase auth observer did not resolve within 8 seconds; continuing with current session state.");
+    finish(auth.currentUser || null);
+  }, 8000);
+});
+// Do not await this promise here: the main app auth observer below must attach
+// immediately so login, registration, and navigation can initialize normally.
 
 const db = getFirestore(app);
 window.ocLogUserActivity = async function(eventType, extra = {}) {
