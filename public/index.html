@@ -2833,6 +2833,77 @@ $("saveAnnouncement").addEventListener("click",()=>{
 });
 function renderTradeSelect(){const old=$("tradeAsset").value||selected;$("tradeAsset").innerHTML=market.map(c=>'<option value="'+safe(c.symbol)+'">'+safe(c.symbol+' — '+c.name)+'</option>').join("");if(market.some(c=>c.symbol===old))$("tradeAsset").value=old;else if(market.some(c=>c.symbol===selected))$("tradeAsset").value=selected;updateTradePreview()}
 function updateTradePreview(){const sym=$("tradeAsset")?.value||selected;const c=priceFor(sym);const pair=(sym==="USDT"||sym==="USDC")?"BTC/USDT":sym+"/USDT";if($("tradePairTitle"))$("tradePairTitle").textContent=pair.replace("/"," / ");if($("timedPair"))$("timedPair").textContent=pair.replace("/"," / ");if($("tradeAssetName"))$("tradeAssetName").textContent=c?.name||sym;if($("tradeCurrentPrice"))$("tradeCurrentPrice").textContent=c?money(c.current_price):"—";if($("tradeCurrentChange")){$("tradeCurrentChange").textContent=c?pct(c.price_change_percentage_24h):"Waiting for market data";$("tradeCurrentChange").className=(c?.price_change_percentage_24h||0)>=0?"green":"red"}if($("tradeAvailable"))$("tradeAvailable").textContent=money(state.balance);}function doTrade(side){const sym=$("tradeAsset").value,c=priceFor(sym),amount=Number($("tradeUsd").value);const msg=$("tradeMessage");if(!c||!Number.isFinite(Number(c.current_price))||Number(c.current_price)<=0){msg.textContent="Market price unavailable. Refresh and try again.";msg.className="muted tiny red";return}if(!Number.isFinite(amount)||amount<1){msg.textContent="Enter an amount of at least $1.";msg.className="muted tiny red";return}const qty=amount/Number(c.current_price);state.holdings[sym]=Number(state.holdings[sym]||0);if(side==="buy"){if(amount>state.balance){msg.textContent="Insufficient virtual balance. Available: "+money(state.balance)+".";msg.className="muted tiny red";return}state.balance-=amount;state.holdings[sym]+=qty}else{if(qty>state.holdings[sym]+1e-10){msg.textContent="Not enough "+sym+" displayed holdings. Available: "+state.holdings[sym].toFixed(8)+" "+sym+".";msg.className="muted tiny red";return}state.holdings[sym]=Math.max(0,state.holdings[sym]-qty);state.balance+=amount}const trade={side,symbol:sym,amount,qty,price:Number(c.current_price),time:new Date().toISOString(),demo:true};state.history.unshift(trade);saveState();renderWallet();updateTradePreview();msg.className="muted tiny green";msg.textContent="TRADE RESULT RECORDED · "+side.toUpperCase()+" "+qty.toFixed(8)+" "+sym+" at "+money(c.current_price)+" per coin. Total: "+money(amount)+". Check Trading performance below for estimated P/L and win/loss results. Virtual funds only — no real exchange order was placed.";renderTradeHistory();renderWalletCoinList();renderPnl();renderTradeOutcomes()}
+const OC_WALLET_API_BASE="https://onchaincrypto-wallet-api.getachew21-inj-uni.workers.dev";
+function setStandardTradeMessage(message,kind="muted"){
+ const el=$("standardTradeMessage");if(!el)return;
+ el.textContent=message;el.className="muted tiny "+(kind==="success"?"green":kind==="error"?"red":"");
+}
+function applyCloudWalletBalances(balances){
+ if(!balances||typeof balances!=="object")return;
+ state.balance=Number(balances.USDT||0);
+ const holdings={};
+ for(const [asset,amount] of Object.entries(balances))if(asset!=="USDT")holdings[asset]=Number(amount)||0;
+ state.holdings=holdings;
+ renderWallet();updateTradePreview();renderWalletCoinList();renderTradeHistory();
+ const label=$("standardCloudBalance");if(label)label.textContent=money(state.balance)+" USDT";
+}
+async function refreshStandardCloudBalance(){
+ const user=window.ocFirebaseAuth?.currentUser;
+ if(!user){const label=$("standardCloudBalance");if(label)label.textContent="Sign in required";return null}
+ try{
+  const token=await user.getIdToken();
+  const res=await fetch(OC_WALLET_API_BASE+"/v1/wallet/account",{method:"GET",headers:{Authorization:"Bearer "+token,Accept:"application/json"},cache:"no-store"});
+  const data=await res.json();
+  if(!res.ok||!data.ok)throw new Error(data.error||"Cloud wallet is unavailable.");
+  if(data.status==="active"){applyCloudWalletBalances(data.balances);return data}
+  const label=$("standardCloudBalance");if(label)label.textContent="Verification pending";
+  setStandardTradeMessage("Your existing wallet data is preserved. Cloud trading will activate after your balance is reconciled and verified.","muted");
+  return data;
+ }catch(error){
+  const label=$("standardCloudBalance");if(label)label.textContent="Unavailable";
+  setStandardTradeMessage(error.message||"Could not read your cloud wallet.","error");return null;
+ }
+}
+async function executeStandardCloudTrade(side){
+ const buy=$("standardBuyBtn"),sell=$("standardSellBtn"),amountInput=$("standardTradeAmount");
+ if(buy?.disabled||sell?.disabled)return;
+ const user=window.ocFirebaseAuth?.currentUser;
+ if(!user){setStandardTradeMessage("Please sign in before placing an order.","error");return}
+ const symbol=String($("tradeAsset")?.value||selected||"BTC").toUpperCase();
+ const amount=Number(amountInput?.value);
+ const minimum=symbol==="PAXG"?500:100;
+ if(!Number.isFinite(amount)||amount<minimum){setStandardTradeMessage("Enter at least "+minimum+" USDT.","error");return}
+ const panel=$("standardBuySellPanel");
+ const operationId=panel?.dataset.pendingOperationId||crypto.randomUUID();
+ if(panel)panel.dataset.pendingOperationId=operationId;
+ if(buy)buy.disabled=true;if(sell)sell.disabled=true;
+ setStandardTradeMessage("Checking your cloud wallet and live market price…");
+ try{
+  const token=await user.getIdToken();
+  const res=await fetch(OC_WALLET_API_BASE+"/v1/trade/execute",{
+   method:"POST",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json",Accept:"application/json"},
+   body:JSON.stringify({side,symbol,quoteAmount:amount.toFixed(8),operationId}),cache:"no-store"
+  });
+  const data=await res.json();
+  if(!res.ok||!data.ok)throw new Error(data.error||"Trade could not be completed.");
+  if(data.balances)applyCloudWalletBalances(data.balances);
+  const trade={side,symbol,amount:Number(data.grossAmount),qty:Number(data.quantity),price:Number(data.price),time:new Date().toISOString(),demo:false};
+  state.history.unshift(trade);
+  renderTradeHistory();renderActivityHistory();renderPnl();renderTradeOutcomes();
+  if(panel)delete panel.dataset.pendingOperationId;
+  setStandardTradeMessage((data.replayed?"Previous order confirmed: ":"Order completed: ")+side.toUpperCase()+" "+data.quantity+" "+symbol+" at "+money(data.price)+". Wallet and trade ledger updated.","success");
+ }catch(error){
+  setStandardTradeMessage(error.message||"Trade could not be completed. Your cloud wallet was not changed.","error");
+ }finally{
+  if(buy)buy.disabled=false;if(sell)sell.disabled=false;
+ }
+}
+$("standardBuyBtn")?.addEventListener("click",()=>executeStandardCloudTrade("buy"));
+$("standardSellBtn")?.addEventListener("click",()=>executeStandardCloudTrade("sell"));
+$("tradeAsset")?.addEventListener("change",()=>{
+ const pair=$("standardTradePair");if(pair)pair.textContent=($("tradeAsset").value||"BTC")+" / USDT";
+});
+if(window.ocFirebaseAuth?.currentUser)refreshStandardCloudBalance();
 function renderTradeHistory(){const rows=state.history.slice(0,10);$("tradeHistory").innerHTML=rows.length?rows.map(t=>'<div class="list-row"><div><strong class="'+(t.side==="buy"?"green":"red")+'">'+t.side.toUpperCase()+' '+safe(t.symbol)+'</strong><div class="muted tiny">'+new Date(t.time).toLocaleString()+'</div></div><div style="text-align:right"><strong>'+money(t.amount)+'</strong><div class="muted tiny">'+Number(t.qty).toFixed(8)+' @ '+money(t.price)+'</div></div></div>').join(""):'<div class="empty">No trades recorded yet.</div>'}
 function renderWalletCoinList(){const el=$("walletCoinRows");if(!el)return;const rows=[...market].sort((a,b)=>(b.market_cap||0)-(a.market_cap||0));el.innerHTML=rows.length?rows.map(c=>'<tr><td>'+coinAsset(c)+'</td><td>'+money(c.current_price)+'</td><td class="'+((c.price_change_percentage_24h||0)>=0?'green':'red')+'">'+pct(c.price_change_percentage_24h)+'</td><td>'+money(c.market_cap)+'</td><td><button class="secondary" data-wallet-trade="'+safe(c.symbol)+'">Trade</button></td></tr>').join(""):'<tr><td colspan="5" class="empty">Market data is loading. Try refreshing prices.</td></tr>';el.querySelectorAll("[data-wallet-trade]").forEach(b=>b.addEventListener("click",()=>{const sel=$("tradeAsset");if(sel)sel.value=b.dataset.walletTrade;showPage("trade");updateTradePreview()}))}
 function renderPnl(){const live=Object.entries(state.holdings).filter(([sym,qty])=>Number(qty)>0.0000000001).map(([sym,qty])=>{const c=priceFor(sym);const buys=state.history.filter(t=>t.symbol===sym&&t.side==="buy").reduce((n,t)=>n+Number(t.amount||0),0);const boughtQty=state.history.filter(t=>t.symbol===sym&&t.side==="buy").reduce((n,t)=>n+Number(t.qty||0),0);const avg=boughtQty?buys/boughtQty:(c?.current_price||0);const value=Number(qty)*(c?.current_price||0);return {sym,qty:Number(qty),value,pnl:value-Number(qty)*avg,change:c?.price_change_percentage_24h||0}});const total=live.reduce((n,x)=>n+x.pnl,0);const totalEl=$("estimatedPnl");if(totalEl){totalEl.textContent=(total>=0?"+":"")+money(total);totalEl.className="big "+(total>=0?"green":"red");$("openPositions").textContent=String(live.length);$("pnlUpdated").textContent=new Date().toLocaleTimeString()}const rows=$("pnlRows");if(rows)rows.innerHTML=live.length?live.map(x=>'<div class="pnl-row"><div>'+safe(x.sym)+'<div class="muted tiny">'+x.qty.toFixed(8)+' coins · '+pct(x.change)+' 24h</div></div><div>'+money(x.value)+'</div><strong class="pnl-value '+(x.pnl>=0?'green':'red')+'">'+(x.pnl>=0?'+':'')+money(x.pnl)+'</strong></div>').join(""):'<div class="empty">No open positions yet. Record a trade to see an estimated P/L breakdown.</div>';const canvas=$("pnlChart");if(canvas){const w=Math.max(300,canvas.clientWidth||600),h=150,dpr=window.devicePixelRatio||1;canvas.width=w*dpr;canvas.height=h*dpr;const ctx=canvas.getContext("2d");ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);ctx.strokeStyle="#2b3139";ctx.beginPath();ctx.moveTo(0,h/2);ctx.lineTo(w,h/2);ctx.stroke();if(live.length){const max=Math.max(1,...live.map(x=>Math.abs(x.pnl)));const gap=12,bw=Math.max(8,(w-gap*(live.length+1))/live.length);live.forEach((x,i)=>{const bh=Math.max(2,Math.abs(x.pnl)/max*(h/2-18));const xx=gap+i*(bw+gap);ctx.fillStyle=x.pnl>=0?"#0ecb81":"#f6465d";ctx.fillRect(xx,x.pnl>=0?h/2-bh:h/2,bw,bh);ctx.fillStyle="#848e9c";ctx.font="11px Arial";ctx.textAlign="center";ctx.fillText(x.sym,xx+bw/2,h-3)})}}renderTradeOutcomes();}
