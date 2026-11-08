@@ -1768,8 +1768,8 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
  document.getElementById("discoverySearch")?.addEventListener("input",draw);
  document.getElementById("discoveryTabs")?.addEventListener("click",e=>{const b=e.target.closest("[data-discovery-tab]");if(!b)return;document.querySelectorAll("#discoveryTabs [data-discovery-tab]").forEach(x=>x.classList.toggle("active",x===b));tab=b.dataset.discoveryTab;if(tab==="tradfi"||tab==="alpha"){document.getElementById("discoveryTrackerStatus").textContent=tab==="tradfi"?"Traditional-market price data is not currently available.":"Alpha signals are not currently available.";document.getElementById("discoveryTrackerRows").innerHTML='<div class="md-muted">This market category is currently unavailable. Crypto prices are available in Markets.</div>';return;}draw();});
  document.addEventListener("click",e=>{if(e.target.closest("#marketPulseTabs")||e.target.closest("#marketTabs"))setTimeout(draw,0);});
- const target=document.getElementById("marketPulseRows");if(target&&window.MutationObserver)new MutationObserver(draw).observe(target,{childList:true,subtree:true});
- draw();setInterval(draw,15000);
+ /* Avoid observing marketPulseRows itself: draw() replaces its children and would retrigger the observer continuously. */
+ draw();setInterval(()=>{if(!document.hidden)draw()},60000);
 })();
 </script>
   </section>
@@ -2820,7 +2820,8 @@ $("marketSearch").addEventListener("input",renderMarket);$("refreshBtn").addEven
   host.innerHTML='<table><thead><tr><th>Coin / Pair</th><th>Price (USD)</th><th>24h Change</th><th>Action</th></tr></thead><tbody>'+list.slice(0,8).map(c=>{const sym=String(c.symbol||"").toUpperCase(),chg=Number(c.price_change_percentage_24h||0);return '<tr><td><strong>'+esc(sym)+'</strong><div class="muted tiny">'+esc(c.name||sym)+'</div></td><td>'+money(c.current_price)+'</td><td class="'+(chg>=0?'green':'red')+'">'+(chg>=0?'+':'')+chg.toFixed(2)+'%</td><td><button type="button" class="secondary small" data-home-trade="'+esc(sym)+'">Trade</button></td></tr>'}).join('')+'</tbody></table>';
  };
  renderHomePairs();
- setInterval(renderHomePairs,5000);
+ /* Market table refresh is intentionally throttled; avoid rewriting its DOM every 5 seconds. */
+ setInterval(()=>{if(!document.hidden&&!$("page-home")?.classList.contains("hidden"))renderHomePairs()},30000);
  document.addEventListener("click",e=>{const btn=e.target.closest("[data-home-trade]");if(!btn)return;selected=btn.dataset.homeTrade;const asset=$("tradeAsset");if(asset)asset.value=selected;showPage("trade");updateTradePreview();updateTradingViewChart(selected)});
 })();
 updateQuickEstimate();
@@ -4399,7 +4400,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',draw);else draw();
  const oldRender=window.renderMarket;
- const timer=setInterval(()=>{if(Array.isArray(window.market)&&window.market.length){draw();}},5000);
+ const timer=setInterval(()=>{if(!document.hidden&&!$("page-home")?.classList.contains("hidden")&&Array.isArray(window.market)&&window.market.length){draw();}},30000);
  window.addEventListener('beforeunload',()=>clearInterval(timer));
 })();
 </script>
@@ -5639,7 +5640,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  }
  refresh();
  window.addEventListener("oc-market-updated",refresh);
- window.setInterval(refresh,5000);
+ window.setInterval(()=>{if(!document.hidden)refresh()},30000);
 })();
 </script>
 \n<script type="module" src="./support-chat.js"></script>\n
@@ -8271,7 +8272,7 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  const oldRender=window.renderWallet;
  if(typeof oldRender==='function')window.renderWallet=function(){oldRender();updateSelected()};
  document.addEventListener('click',function(e){if(e.target.closest('[data-page="wallet"]'))setTimeout(updateSelected,0)});
- setInterval(()=>{if(!menu.classList.contains('hidden'))renderOptions()},5000);
+ /* Options are refreshed when the wallet selector opens; no background polling needed. */
  updateSelected();
 })();
 </script>
