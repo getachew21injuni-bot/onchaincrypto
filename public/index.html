@@ -7479,6 +7479,79 @@ html.oc-auth-pending body #bottomNav { display:none!important; }
   if(window.MutationObserver){const observer=new MutationObserver(sync);observer.observe(document.body,{attributes:true,attributeFilter:["class"]});}
 })();
 </script>
+
+<style id="oc-visitor-clean-layout-final">
+/* Single, uncluttered visitor entry: public market overview + one auth pair. */
+body.oc-visitor-mode{padding-bottom:0!important;overflow-x:hidden!important}
+body.oc-visitor-mode>header{
+  position:relative!important;top:auto!important;z-index:20!important;
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:12px!important;min-height:68px!important;height:auto!important;
+  padding:10px clamp(12px,3vw,28px)!important;flex-wrap:nowrap!important;
+}
+body.oc-visitor-mode>header .brand{flex:0 1 auto!important;min-width:0!important;justify-self:auto!important;white-space:nowrap!important}
+body.oc-visitor-mode>header #nav,
+body.oc-visitor-mode>header #refreshBtn,
+body.oc-visitor-mode>header #ocBackBtn,
+body.oc-visitor-mode>header #moreMenuBtn,
+body.oc-visitor-mode>header #moreMenu,
+body.oc-visitor-mode>header #ocThemeToggle{display:none!important}
+body.oc-visitor-mode>header .header-right{
+  display:flex!important;flex:0 0 auto!important;align-items:center!important;
+  justify-content:flex-end!important;gap:8px!important;min-width:0!important;
+}
+body.oc-visitor-mode #ocVisitorActions{
+  display:flex!important;flex-wrap:nowrap!important;align-items:center!important;
+  justify-content:flex-end!important;gap:8px!important;margin:0!important;
+}
+body.oc-visitor-mode #ocVisitorActions button{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  min-width:86px!important;min-height:40px!important;padding:8px 13px!important;
+  white-space:nowrap!important;flex:0 0 auto!important;
+}
+body.oc-visitor-mode main{
+  display:block!important;width:100%!important;max-width:none!important;
+  min-height:0!important;padding:0 0 100px!important;margin:0!important;
+}
+body.oc-visitor-mode main>section[id^="page-"]:not(#page-public-market):not(#page-register){
+  display:none!important;visibility:hidden!important;
+}
+body.oc-visitor-mode main>#page-public-market{
+  display:block!important;visibility:visible!important;width:100%!important;
+  max-width:none!important;margin:0 auto!important;
+}
+body.oc-visitor-mode #page-public-market .oc-visitor-hero-actions,
+body.oc-visitor-mode #page-public-market .oc-visitor-bottom-cta{display:none!important}
+body.oc-visitor-mode #ocVisitorSupportBot{
+  display:block!important;position:fixed!important;right:18px!important;
+  bottom:calc(18px + env(safe-area-inset-bottom))!important;
+  left:auto!important;top:auto!important;z-index:100000!important;
+  width:auto!important;max-width:calc(100vw - 28px)!important;
+  pointer-events:auto!important;
+}
+body.oc-visitor-mode #ocVisitorSupportBot .oc-support-launch{
+  display:grid!important;position:relative!important;margin:0!important;
+  width:56px!important;height:56px!important;min-width:56px!important;
+}
+body.oc-visitor-mode #ocVisitorSupportBot .oc-support-panel{
+  position:absolute!important;right:0!important;left:auto!important;
+  bottom:68px!important;width:min(360px,calc(100vw - 28px))!important;
+  max-width:calc(100vw - 28px)!important;max-height:65dvh!important;
+}
+@media(max-width:560px){
+ body.oc-visitor-mode>header{min-height:62px!important;padding:8px 12px!important;gap:8px!important}
+ body.oc-visitor-mode>header .brand{font-size:17px!important;letter-spacing:0!important}
+ body.oc-visitor-mode>header .brand .header-logo-mark{width:30px!important;height:30px!important;flex-basis:30px!important}
+ body.oc-visitor-mode #ocVisitorActions{gap:6px!important}
+ body.oc-visitor-mode #ocVisitorActions button{min-width:76px!important;min-height:38px!important;padding:7px 9px!important;font-size:12px!important}
+ body.oc-visitor-mode #ocVisitorSupportBot{right:14px!important;bottom:calc(14px + env(safe-area-inset-bottom))!important}
+}
+@media(max-width:360px){
+ body.oc-visitor-mode>header .brand>span:last-child{font-size:14px!important}
+ body.oc-visitor-mode #ocVisitorActions button{min-width:68px!important;padding-inline:7px!important}
+}
+</style>
+
 </body>
 </html>
 
