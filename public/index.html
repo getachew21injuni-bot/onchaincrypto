@@ -6436,6 +6436,11 @@ body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
 #ocVisitorSupportBot .oc-support-agent{color:#07130d!important;font-weight:900!important;background:linear-gradient(135deg,#28df91,#14b86d)!important}
 #ocVisitorSupportBot .oc-support-note{color:#d4dfec!important;font-size:10px!important}
 #ocVisitorSupportBot .oc-support-note a{color:#ffffff!important;font-weight:850!important;text-decoration:underline!important}
+
+#ocVisitorSupportBot .oc-support-suggestions{display:grid!important;max-height:145px!important;padding-top:2px}
+#ocVisitorSupportBot .oc-support-suggestions button{background:#f4f6f8!important;color:#111!important;border:1px solid #aeb8c4!important;font-weight:750!important}
+#ocVisitorSupportBot .oc-support-menu-title{color:#f1d79d!important}
+#ocVisitorSupportBot .oc-support-suggestions button:hover{background:#d9f7e8!important;border-color:#20c77a!important;color:#07130d!important}
 </style>
 <div id="ocVisitorSupportBot" aria-live="polite">
  <section class="oc-support-panel" role="dialog" aria-label="OnChainsPro information assistant" aria-modal="false">
@@ -6444,7 +6449,12 @@ body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
    <span class="oc-support-headcopy"><strong>Customer Support</strong><small>Ask about OnChain features and account guidance</small></span>
    <button class="oc-support-close" type="button" aria-label="Close assistant">×</button>
   </header>
-  <div class="oc-support-messages" id="ocSupportMessages" aria-live="polite" aria-relevant="additions"><div class="oc-support-msg bot">Welcome to OnChain! 👋 I can guide you through accounts, profiles, wallets, deposits, withdrawals, markets, gold, trading, history, referrals and security. What would you like help with?</div></div>
+  <div class="oc-support-messages" id="ocSupportMessages" aria-live="polite" aria-relevant="additions"><div class="oc-support-msg bot">Welcome to OnChain! 👋 Explore crypto, stocks, Gold and our platform features. I’m here to answer questions and help you discover what OnChain offers. What interests you today? What would you like help with?</div></div>
+  <div class="oc-support-suggestions" id="ocSupportChoices" aria-label="Explore OnChain topics">
+   <div class="oc-support-menu-group"><span class="oc-support-menu-title">Explore OnChain</span><div class="oc-support-menu-items">
+    <button type="button" data-oc-topic="overview">Platform overview</button><button type="button" data-oc-topic="stocks">Stocks</button><button type="button" data-oc-topic="gold">Gold</button><button type="button" data-oc-topic="crypto">Cryptocurrency</button><button type="button" data-oc-topic="markets">Live markets</button><button type="button" data-oc-topic="wallet">Wallet features</button>
+   </div></div>
+  </div>
     <form class="oc-support-compose" id="ocSupportForm"><input id="ocSupportInput" type="text" maxlength="300" placeholder="Ask me anything about OnChain…" aria-label="Ask about OnChain" autocomplete="off"><button type="submit">Send</button></form>
   <button type="button" class="oc-support-agent" id="ocSupportTalkAgent">Talk to Agent</button>
   <div class="oc-support-note">Email support: <a href="mailto:support@onchainspro.com">support@onchainspro.com</a></div>
@@ -6452,71 +6462,47 @@ body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
  <button class="oc-support-launch" type="button" aria-label="Open information assistant"><span class="oc-support-avatar" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M7 25v-4a17 17 0 0 1 34 0v4" stroke="#17253a" stroke-width="5" stroke-linecap="round"/><path d="M7 22h5a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-1a4 4 0 0 1-4-4zM41 22h-5a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4h1a4 4 0 0 0 4-4z" fill="#17253a" stroke="#e9c879" stroke-width="1.5"/><path d="M16 23c1.5-5 14.5-5 16 0v10c0 5-4 8-8 8s-8-3-8-8z" fill="#f1c98b" stroke="#17253a" stroke-width="2"/><path d="M20 30h.1M28 30h.1" stroke="#17253a" stroke-width="3" stroke-linecap="round"/><path d="M21 35q3 2 6 0" stroke="#9c542e" stroke-width="1.7" stroke-linecap="round"/><path d="M24 40v3" stroke="#17253a" stroke-width="2" stroke-linecap="round"/></svg></span></button>
 </div>
 <script id="oc-visitor-support-bot-guest-visibility">
-(()=>{const sync=()=>{const root=document.getElementById("ocVisitorSupportBot");if(!root||!document.body)return;if(root.parentElement!==document.body)document.body.appendChild(root);root.style.display=!document.body.classList.contains("oc-auth-screen")?"block":"none"};sync();if(document.body&&window.MutationObserver)new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:["class"]});})();
+(()=>{const sync=()=>{const root=document.getElementById("ocVisitorSupportBot");if(!root||!document.body)return;if(root.parentElement!==document.body)document.body.appendChild(root);root.style.display="block"};sync();if(document.body&&window.MutationObserver)new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:["class"]});})();
 </script>
 <script id="oc-visitor-support-bot-script">
 (()=>{const root=document.getElementById("ocVisitorSupportBot");if(!root||root.dataset.ready)return;root.dataset.ready="1";
 const messages=root.querySelector("#ocSupportMessages"),input=root.querySelector("#ocSupportInput"),form=root.querySelector("#ocSupportForm");
 const add=(value,who="bot")=>{const el=document.createElement("div");el.className="oc-support-msg "+who;el.textContent=value;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;};
-const topics=[
-["Account & registration",/\b(account|register|registration|sign ?up|login|log ?in|sign ?in|password|verification|verify|kyc)\b/i,"account"],
-["Profile & security",/\b(profile|avatar|photo|picture|username|email change|security|2fa|two.factor|password reset|device)\b/i,"profile"],
-["Wallet & balance",/\b(wallet|balance|holding|asset balance|coin balance|available funds)\b/i,"wallet"],
-["Deposits",/\b(deposit|add funds|receive|receiving address|fund account)\b/i,"deposit"],
-["Withdrawals",/\b(withdraw|withdrawal|send funds|cash out)\b/i,"withdraw"],
-["Markets & prices",/\b(market|markets|price|coin list|chart|graph|btc price|gold price|xau|xaut)\b/i,"market"],
-["Trading",/\b(trade|trading|buy|sell|order|profit|loss|quick trade|confirm trade)\b/i,"trade"],
-["History & performance",/\b(history|transaction|transactions|activity|performance|past trade|records)\b/i,"history"],
-["Referrals",/\b(referral|refer|invite|invitation|referral code|referral link)\b/i,"referral"],
-["Help & support",/\b(agent|human|support|help|contact|email|talk to)\b/i,"support"]
+const answers=[
+[/\b(stock|stocks|share|shares|equity|equities)\b/i,"Stocks represent ownership shares in a company. Stock markets bring buyers and sellers together, with prices moving as company performance, news and market demand change. Explore the available market listings on OnChain to see the assets shown on the platform."],
+[/\b(gold|\bxau|\bxaut|precious metal)\b/i,"Gold is a globally traded precious metal, often used as a store of value. XAU commonly represents one troy ounce, and XAU/USDT shows its price against USDT. OnChain brings Gold into the market experience alongside digital assets."],
+[/\b(bitcoin|\bbtc|\bxbt)\b/i,"Bitcoin (BTC) is a decentralised digital currency that runs on its own blockchain. It is the first cryptocurrency and has a maximum supply of 21 million."],
+[/\b(ethereum|\beth|ether)\b/i,"Ethereum is a blockchain for smart contracts and decentralised applications. ETH is its native digital asset."],
+[/\b(usdt|tether|stablecoin|stable coin)\b/i,"USDT is a digital stablecoin designed to track the US dollar. It is commonly used as a quote asset for crypto markets."],
+[/\b(crypto|cryptocurrency|digital asset|coins?)\b/i,"Cryptocurrencies are digital assets that use cryptography and blockchain networks. OnChain brings crypto market information and trading-related features together in one place."],
+[/\b(market|markets|price|chart|graph|live price)\b/i,"The Markets area helps you explore available assets, compare price movements and open individual charts. You can browse crypto, Gold and other listed market categories."],
+[/\b(wallet|balance|holdings)\b/i,"The Wallet area brings your account balance and supported asset holdings together. It is designed to make your assets easier to review and manage."],
+[/\b(trad(e|ing)|buy|sell|order)\b/i,"OnChain’s Trade area is designed to make it easy to select a listed asset, review the available details and follow the trade flow. Always review the order information before confirming."],
+[/\b(history|activity|performance|transaction)\b/i,"The History area helps you review recorded activity and follow your account performance over time."],
+[/\b(referral|invite|invitation)\b/i,"The referral feature helps users share an invitation link or code. Referral details are available in the platform’s referral area."],
+[/\b(blockchain)\b/i,"A blockchain is a shared digital record that stores transactions in linked blocks, helping networks verify and track activity."],
+[/\b(kyc|identity verification)\b/i,"KYC means Know Your Customer. It is an identity-check process used by financial services to verify customers and support compliance."],
+[/\b(wallet address|deposit address|withdrawal address)\b/i,"A wallet address identifies where a blockchain asset can be sent. Always match the asset and network carefully before making a transfer."],
+[/\b(private key|seed phrase|recovery phrase)\b/i,"A private key or recovery phrase can control access to a wallet. Keep it private and never share it with anyone, including support."]
 ];
-const navHints={
-account:"Select Sign Up to create an account, or Login if you already have one. Follow the on-screen verification steps.",
-profile:"Open your profile area to review your account details, update available profile information and manage security settings. Never share your password or verification codes.",
-wallet:"Open Wallet from the platform navigation to view your balance and asset holdings. Refresh only after your account has finished loading.",
-deposit:"Open Wallet and choose Deposit. Check the selected asset and network carefully, then use the address shown for that exact network. Never send a different asset or network to that address.",
-withdraw:"Open Wallet and choose Withdraw. Check the destination address, asset and network before submitting. A blockchain transfer may not be reversible.",
-market:"Open Market to browse available assets and select a coin or gold pair to view its price chart and market details.",
-trade:"Open Trade, choose the asset and direction, enter the amount and review every detail before confirming. Check the final confirmation screen before submitting.",
-history:"Open History to review your recorded account activity and past trades.",
-referral:"Open the referral area in your account to view your own referral code or link and its available details.",
-support:"For personal assistance, email support@onchainspro.com. This is the customer support contact."
-};
-const definitions=[
-[/\b(bitcoin|\bbtc|\bxbt)\b/i,"Bitcoin (BTC) is a decentralised digital currency. Its network records transactions on a public blockchain and its supply is capped at 21 million."],
-[/\b(ethereum|\beth|\bether)\b/i,"Ethereum is a blockchain for smart contracts and decentralised applications. ETH is its native asset."],
-[/\b(usdt|tether|stablecoin|stable coin)\b/i,"USDT is a stablecoin designed to track the US dollar. Its value and availability can still be affected by issuer, reserve and market risks."],
-[/\b(gold|\bxau|\bxaut)\b/i,"Gold is a precious metal traded globally. XAU commonly represents one troy ounce; XAU/USDT quotes gold against USDT. XAUT is a token designed to represent ownership of gold."],
-[/\b(blockchain|distributed ledger)\b/i,"A blockchain is a shared digital record where transactions are verified and stored in linked blocks."],
-[/\b(private key|seed phrase|recovery phrase)\b/i,"A private key or recovery phrase can give access to a wallet. Keep it secret and never share it with anyone, including support."],
-[/\b(kyc|know your customer|identity verification)\b/i,"KYC means Know Your Customer. It is the identity-check process used to help verify customers and meet compliance requirements."],
-[/\b(network fee|gas fee|transaction fee)\b/i,"A network fee is paid to process a transaction on a blockchain. The amount varies by network and activity."],
-[/\b(spread)\b/i,"The spread is the difference between the best available buy price and sell price."],
-[/\b(limit order)\b/i,"A limit order lets you set the price at which you want to buy or sell. It may not execute if the market does not reach that price."],
-[/\b(market order)\b/i,"A market order aims to execute promptly at available market prices. The final execution price can differ from the last displayed price."],
-[/\b(blockchain confirmation|confirmations)\b/i,"A blockchain confirmation means a transaction has been included in a block and accepted by the network. More confirmations generally provide greater confidence."],
-[/\b(referral)\b/i,"A referral code or link identifies invitations associated with your account. Open the referral area while signed in to see your own details."]
-];
-const greet=/^(hi|hello|hey|good morning|good afternoon|good evening)\b/i;
+const topics=[["Wallet",/\b(wallet|balance|holding)\b/i],["Markets",/\b(market|markets|price|chart|stock|stocks|gold|xau|crypto)\b/i],["Trading",/\b(trade|trading|buy|sell|order)\b/i],["History",/\b(history|activity|performance|transaction)\b/i]];
 const answer=q=>{
- const v=String(q||"").trim();if(!v)return "What would you like help with?";
- if(greet.test(v))return "Hello! 👋 I’m here to help with OnChain. You can ask in your own words about your account, wallet, deposits, markets, trading or anything else on the platform.";
- if(/\b(which|where|how)\b/i.test(v)&&/\b(start|begin)\b/i.test(v))return "You can start from the main navigation. Are you trying to open your Wallet, view the Market, or place a Trade?";
+ const v=String(q||"").trim();if(!v)return "What would you like to explore?";
+ if(/^(hi|hello|hey|good morning|good afternoon|good evening)\b/i.test(v))return "Hello and welcome to OnChain! 👋 Great to have you here. Would you like to explore Stocks, Gold, Crypto, Live Markets or Wallet features?";
+ if(/\b(who are you|what can you do|help|features|about onchain|what is onchain)\b/i.test(v))return "I’m the OnChain visitor assistant. I can introduce the platform, explain Stocks, Gold, Crypto, Markets, Wallet and Trading features, and answer general questions. Choose a topic below or ask me anything.";
+ if(/\b(talk to agent|human agent|customer support|contact support)\b/i.test(v))return "Our support team can be reached at support@onchainspro.com.";
  const matched=topics.filter(t=>t[1].test(v));
- if(matched.length>1){
-   const labels=matched.map(t=>t[0]);
-   return "I can help with that. Which part do you mean: "+labels.join(", ")+"? Tell me one and I’ll guide you step by step.";
- }
- if(matched.length===1)return navHints[matched[0][2]];
- for(const [pattern,reply] of definitions){if(pattern.test(v))return reply;}
- if(/\b(hello|thanks|thank you)\b/i.test(v))return "You’re welcome! Ask me anything about using OnChain and I’ll point you in the right direction.";
- if(/\b(what|how|why|where|when|can i|do i)\b/i.test(v))return "I want to make sure I guide you correctly. Do you mean your account, Wallet, Deposit, Withdrawal, Market, Trade, History or Referral section?";
- return "I can help with OnChain features and account guidance. Could you tell me which section you mean—Wallet, Deposit, Withdrawal, Market, Trade, Profile, History or Referral?";
+ if(matched.length>1)return "Happy to help! Which would you like to explore first: "+matched.map(t=>t[0]).join(" or ")+"?";
+ for(const [pattern,reply] of answers){if(pattern.test(v))return reply;}
+ if(/\b(thanks|thank you)\b/i.test(v))return "You’re very welcome! Enjoy exploring OnChain. What would you like to discover next?";
+ if(/\b(what|how|why|where|when|can i|tell me)\b/i.test(v))return "Good question! Are you asking about Stocks, Gold, Crypto, Live Markets, Wallet features or Trading? I can explain whichever you mean.";
+ return "I’m happy to help you explore OnChain. Ask me about Stocks, Gold, Crypto, Live Markets, Wallet or Trading—or choose one of the topics above.";
 };
 const open=()=>{root.classList.add("is-open");messages.scrollTop=messages.scrollHeight;input.focus();};
 root.querySelector(".oc-support-launch").addEventListener("click",()=>root.classList.contains("is-open")?root.classList.remove("is-open"):open());
 root.querySelector(".oc-support-close").addEventListener("click",()=>root.classList.remove("is-open"));
 root.querySelector("#ocSupportTalkAgent").addEventListener("click",()=>{add("For personal assistance, email our support team at support@onchainspro.com.");});
+root.querySelectorAll("[data-oc-topic]").forEach(button=>button.addEventListener("click",()=>{const prompts={overview:"What is OnChain and what features does it offer?",stocks:"Tell me about stocks on OnChain.",gold:"Tell me about Gold and XAU on OnChain.",crypto:"Tell me about cryptocurrency on OnChain.",markets:"How do the markets and charts work?",wallet:"What can I do with the OnChain wallet?"};const q=prompts[button.dataset.ocTopic];if(q){add(q,"user");add(answer(q));}}));
 form.addEventListener("submit",e=>{e.preventDefault();const value=input.value.trim();if(!value)return;input.value="";add(value,"user");add(answer(value));});
 })();
 </script>
