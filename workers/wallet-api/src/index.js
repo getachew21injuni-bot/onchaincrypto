@@ -1,3 +1,4 @@
+// Standard Buy/Sell Worker entry point; bundled for the Cloudflare dashboard editor.
 import { verifyFirebaseIdToken } from "./auth.js";
 import { executeStandardTrade } from "./trades.js";
 import { readWalletAccount } from "./accounts.js";
