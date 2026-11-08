@@ -127,8 +127,8 @@ export async function executeStandardTrade({ user, body, env, dependencies = {} 
       balances: mapValue(balances),
       version: firestoreInteger(Number(accountFields.version?.integerValue || 0) + 1)
     }, ["balances", "version"], [timestampTransform("updatedAt")]);
-    tx.create("walletLedger", buyEntryId, { ...quoteEntry, createdAt: { timestampValue: new Date().toISOString() } });
-    tx.create("walletLedger", sellEntryId, { ...assetEntry, createdAt: { timestampValue: new Date().toISOString() } });
+    tx.create("walletLedger", buyEntryId, quoteEntry, [timestampTransform("createdAt")]);
+    tx.create("walletLedger", sellEntryId, assetEntry, [timestampTransform("createdAt")]);
     tx.create("tradeLedger", tradeId, {
       uid: firestoreString(user.uid), operationId: firestoreString(operationId),
       symbol: firestoreString(symbol + "/USDT"), baseAsset: firestoreString(symbol),
@@ -139,7 +139,7 @@ export async function executeStandardTrade({ user, body, env, dependencies = {} 
       quoteSource: firestoreString(quote.source), quoteTimestamp: firestoreString(quote.quotedAt),
       status: firestoreString("filled"),
       settlementWalletEntryIds: { arrayValue: { values: [{ stringValue: buyEntryId }, { stringValue: sellEntryId }] } }
-    });
+    }, [timestampTransform("createdAt")]);
     tx.create("operationKeys", keyId, {
       uid: firestoreString(user.uid), operationId: firestoreString(operationId),
       result: { mapValue: { fields: {
