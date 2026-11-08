@@ -65,3 +65,30 @@ test("wallet forms use concise network labels and hide unavailable deposit netwo
   assert.ok(html.includes('for="withdrawNetwork">Select network</label>'));
   assert.ok(html.includes('select.innerHTML=\'<option value="">No network available</option>\''));
 });
+
+
+test("public copy uses neutral Quick Trade wording and keeps transaction disclosures", () => {
+  const lower = html.toLowerCase();
+  for (const phrase of [
+    "demo usdt balances only",
+    "demo-trade outcome",
+    "simulated environment",
+    "simulated balances",
+    "demo wallet balance",
+    "deposits unavailable",
+    "real orders stay unavailable",
+    "copy execution is not available yet",
+  ]) {
+    assert.ok(!lower.includes(phrase), "Legacy public wording remains: " + phrase);
+  }
+  assert.ok(html.includes("Quick Trade calculates outcomes from public market prices"));
+  assert.ok(html.includes("it does not place external exchange orders"));
+  assert.ok(html.includes("active, verified address is displayed for the exact asset and network"));
+});
+
+test("authentication navigation controls have one click handler each", () => {
+  for (const id of ["mobileRegisterBtn", "signin-nav", "showRegisterBtn", "registerLoginBtn"]) {
+    const handlers = [...html.matchAll(new RegExp("getElementById\\(['\\\"]" + id + "['\\\"]\\)\\??\\.addEventListener\\(['\\\"]click['\\\"]", "g"))];
+    assert.equal(handlers.length, 1, id + " should have one shared click handler");
+  }
+});
