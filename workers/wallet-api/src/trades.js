@@ -86,7 +86,8 @@ export async function executeStandardTrade({ user, body, env, dependencies = {} 
         symbol: valueOf(result.symbol),
         quantity: valueOf(result.quantity),
         price: valueOf(result.price),
-        grossAmount: valueOf(result.grossAmount)
+        grossAmount: valueOf(result.grossAmount),
+        balances: Object.fromEntries(Object.entries(result.balances?.mapValue?.fields || {}).map(([asset, field]) => [asset, valueOf(field)]))
       };
     }
     const account = await tx.get("walletAccounts", user.uid);
@@ -159,6 +160,6 @@ export async function executeStandardTrade({ user, body, env, dependencies = {} 
         grossAmount: firestoreString(fmt(actualGross))
       } } }
     });
-    return { replayed: false, tradeId, status: "filled", side, symbol, quantity: fmt(quantity), price: fmtPrice(priceUnits), grossAmount: fmt(actualGross), quoteSource: quote.source, quoteTimestamp: quote.quotedAt };
+    return { replayed: false, tradeId, status: "filled", side, symbol, quantity: fmt(quantity), price: fmtPrice(priceUnits), grossAmount: fmt(actualGross), balances, quoteSource: quote.source, quoteTimestamp: quote.quotedAt };
   }, 3, dependencies.firestoreDependencies || {});
 }
