@@ -1,6 +1,11 @@
 name: Frontend smoke checks
 
 on:
+  push:
+    paths:
+      - "public/**"
+      - "tests/public-html-smoke.test.mjs"
+      - ".github/workflows/frontend-smoke.yml"
   pull_request:
     paths:
       - "public/**"
