@@ -1940,7 +1940,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
     <div class="page-title"><div><h1>Wallet</h1><div class="muted">Displayed balances and portfolio values</div></div><span class="tag">WALLET</span></div>
     <section class="wallet-overview">
       <div class="wallet-overview-top"><div><div class="wallet-eyebrow">YOUR BALANCE</div><div class="wallet-total-line"><strong id="walletBalance">0.00 USDT</strong></div><div class="wallet-usd-note" id="walletBalanceNote">Estimated total portfolio value</div></div><div class="wallet-orbit" aria-hidden="true">◈</div></div>
-      <div class="wallet-action-row"><button class="primary wallet-action" type="button" data-wallet-action="deposit">⇩ <span>Deposit</span></button><button class="secondary wallet-action" type="button" data-wallet-action="withdraw">⇧ <span>Withdraw</span></button><button class="secondary wallet-action" type="button" data-wallet-action="transfer">⇄ <span>Send</span></button></div>
+      <div class="wallet-action-row oc-wallet-action-grid" id="walletQuickActions"><button class="primary wallet-action" type="button" data-wallet-action="deposit">⇩ <span>Deposit</span></button><button class="secondary wallet-action" type="button" data-wallet-action="withdraw">⇧ <span>Withdraw</span></button><button class="secondary wallet-action" type="button" data-go="convert">⇄ <span>Convert</span></button><button class="secondary wallet-action" type="button" data-wallet-action="transfer">⇧ <span>Send</span></button><button class="secondary wallet-action oc-wallet-action-extra" type="button" data-go="trade">↗ <span>Trade</span></button><button class="secondary wallet-action oc-wallet-action-extra" type="button" data-go="history">◷ <span>History</span></button><button class="secondary wallet-action oc-wallet-action-extra" type="button" data-go="markets">▥ <span>Markets</span></button></div><div class="oc-wallet-actions-controls" id="walletQuickActionsControls"><span class="muted tiny" id="walletQuickActionsCount">Showing 4 quick actions</span><button class="secondary" type="button" id="walletQuickActionsToggle" aria-expanded="false">More +</button></div>
       <div class="wallet-summary-strip"><div><span>Coin holdings value</span><strong id="holdingsValue">0.00 USDT</strong></div><div><span>Balance display</span><strong>Account overview</strong></div></div><p class="muted tiny">Displayed balances do not confirm blockchain settlement. Check transaction status in History.</p>
     </section>
     <section class="panel wallet-assets-panel"><div class="section-head wallet-assets-heading"><div><h2>Your Assets</h2><p class="muted tiny">Your Available balances at a glance</p></div><label class="wallet-hide-small"><input type="checkbox" id="hideSmallBalances"> Hide small balances</label></div><div class="table-wrap"><table><thead><tr><th>Asset</th><th>Amount owned</th><th>Value (USDT)</th></tr></thead><tbody id="holdingsRows"><tr><td colspan="3" class="empty">No holdings yet. Record a trade to see asset details.</td></tr></tbody></table></div></section>
@@ -4561,6 +4561,9 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     }
     if(page==='withdraw'){
       try{if(typeof drawCoinPicker==='function')drawCoinPicker('withdraw',document.getElementById('withdrawCoinSearch')?.value||'');if(typeof updateSelectedCoin==='function')updateSelectedCoin('withdraw');document.getElementById('withdrawAddress')?.dispatchEvent(new Event('input',{bubbles:true}));}catch(error){console.warn('Withdraw page setup failed:',error);}
+    }
+    if(page==='convert'){
+      try{window.ocRefreshConvert?.();}catch(error){console.warn('Convert page setup failed:',error);}
     }
     if(page==='trade'){
       try{if(typeof updateTradePreview==='function')updateTradePreview();if(typeof loadPriceHistory==='function')loadPriceHistory();if(typeof renderPnl==='function')renderPnl();}catch(error){console.warn('Trade page setup failed:',error);}
@@ -8299,9 +8302,9 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
   amount.value='';fillSelects();renderHistory();preview();
   const msg=$('convertMessage');if(msg)msg.textContent='Conversion record updated. Displayed balances and history were updated; no real funds were moved.';
  });
+ window.ocRefreshConvert=function(){fillSelects();renderHistory();preview()};
  const oldShowPage=window.showPage;
- if(typeof oldShowPage==='function')window.showPage=function(page){oldShowPage(page);if(page==='convert'){fillSelects();renderHistory();preview()}};
- document.addEventListener('click',e=>{const btn=e.target.closest('[data-go="convert"]');if(btn){e.preventDefault();window.showPage('convert')}});
+ if(typeof oldShowPage==='function')window.showPage=function(page){oldShowPage(page);if(page==='convert')window.ocRefreshConvert()};
  document.addEventListener('market-updated',()=>{fillSelects();preview()});
  fillSelects();renderHistory();preview();
  setInterval(()=>{if(!$('page-convert')?.classList.contains('hidden')){fillSelects();preview()}},8000);
@@ -11591,3 +11594,32 @@ body:not(.oc-auth-screen) .wallet-summary-strip strong{color:#12486e!important}
 </style>
 
 
+
+
+<style id="oc-wallet-quick-actions-more-style">
+#page-wallet .oc-wallet-action-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+#page-wallet .oc-wallet-action-extra{display:none!important}
+#page-wallet .oc-wallet-action-grid.oc-expanded .oc-wallet-action-extra{display:inline-flex!important}
+#page-wallet .oc-wallet-actions-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 2px}
+#page-wallet #walletQuickActionsToggle{min-width:104px}
+@media(max-width:520px){#page-wallet .oc-wallet-action-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#page-wallet .oc-wallet-action-grid .wallet-action{min-height:42px}}
+</style>
+<script id="oc-wallet-quick-actions-more-script">
+(function(){
+ const grid=document.getElementById('walletQuickActions');
+ const button=document.getElementById('walletQuickActionsToggle');
+ const count=document.getElementById('walletQuickActionsCount');
+ if(!grid||!button||grid.dataset.ocMoreReady)return;
+ grid.dataset.ocMoreReady='1';
+ const extras=Array.from(grid.querySelectorAll('.oc-wallet-action-extra'));
+ if(!extras.length){document.getElementById('walletQuickActionsControls')?.remove();return;}
+ function render(){
+  const expanded=grid.classList.contains('oc-expanded');
+  button.textContent=expanded?'Less −':'More +';
+  button.setAttribute('aria-expanded',String(expanded));
+  if(count)count.textContent='Showing '+(expanded?4+extras.length:4)+' quick actions';
+ }
+ button.addEventListener('click',()=>{grid.classList.toggle('oc-expanded');render()});
+ render();
+})();
+</script>
