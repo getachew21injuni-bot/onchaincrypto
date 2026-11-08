@@ -2047,6 +2047,14 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
   <section id="page-notifications" class="hidden"><div class="page-title"><div><h1>♢ Notifications</h1><div class="muted">Manage notification preferences and alerts directly.</div></div><span class="tag">NOTIFICATIONS</span></div><div id="notificationsPageContent"></div></section>
   <section id="page-profile" class="hidden">
     <div class="page-title"><div><h1>Profile</h1><div class="muted">Manage account and preference.</div></div><span class="tag">ACCOUNT CENTER</span></div>
+    <section class="panel" id="oc-profile-install-card" style="margin:14px 0;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+      <div style="min-width:180px;flex:1">
+        <strong style="display:block">Get the OnChainSpro app</strong>
+        <span class="muted tiny" id="oc-install-help">Add OnChainSpro to your device for quick access from your home screen.</span>
+        <span class="muted tiny" id="oc-install-status" role="status" aria-live="polite" style="display:block;margin-top:6px"></span>
+      </div>
+      <button type="button" class="primary" id="oc-install-app" style="white-space:nowrap">Install App</button>
+    </section>
     <div class="profile-menu-list">
       <details class="panel profile-menu-section" id="profileAccountSection" open>
         <summary><img id="ocProfileSectionAvatar" class="profile-menu-icon oc-profile-avatar-menu" src="/icons/onchain-app.svg" alt="OnChainSpro profile picture"><span class="profile-menu-copy"><strong>Account</strong><small>Manage your profile</small></span><span class="profile-menu-chevron">⌄</span></summary>
@@ -6975,35 +6983,84 @@ body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.descr
 
 <script id="oc-pwa-register">
 (function(){
-  if (!('serviceWorker' in navigator)) return;
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('/service-worker.js', {scope:'/'})
-      .catch(function(err){ console.warn('OnChainCrypto app setup could not finish.', err); });
-  });
-  var installEvent = null;
-  window.addEventListener('beforeinstallprompt', function(event){
-    event.preventDefault();
-    installEvent = event;
-    if (document.getElementById('oc-install-app')) return;
-    var button = document.createElement('button');
-    button.id = 'oc-install-app';
-    button.type = 'button';
-    button.textContent = 'Install Onchainspro';
-    button.setAttribute('aria-label','Install Onchainspro app');
-    button.style.cssText = 'position:fixed;right:16px;bottom:calc(92px + env(safe-area-inset-bottom));z-index:99990;padding:12px 16px;border:1px solid #38d9ff;border-radius:999px;background:linear-gradient(135deg,#20d9ff,#438dff);color:#03101e;font-weight:800;box-shadow:0 8px 28px #0008';
-    button.addEventListener('click', async function(){
-      if (!installEvent) return;
-      installEvent.prompt();
-      await installEvent.userChoice;
-      installEvent = null;
-      button.remove();
+  var installEvent=null;
+  var button=null;
+  var status=null;
+  var help=null;
+  function elements(){
+    button=document.getElementById('oc-install-app');
+    status=document.getElementById('oc-install-status');
+    help=document.getElementById('oc-install-help');
+  }
+  function installed(){
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+  }
+  function setMessage(message){
+    if(status)status.textContent=message;
+  }
+  function isAppleMobile(){
+    return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  }
+  function refresh(){
+    elements();
+    if(!button)return;
+    if(installed()){
+      button.textContent='App Installed';
+      button.disabled=true;
+      setMessage('OnChainSpro is installed on this device.');
+      return;
+    }
+    button.disabled=false;
+    button.textContent='Install App';
+    if(installEvent){
+      setMessage('Ready to install on this device.');
+    }else if(isAppleMobile()){
+      setMessage('On iPhone or iPad: tap Share in Safari, then choose Add to Home Screen.');
+    }else{
+      setMessage('If the install prompt is not available yet, use your browser menu and choose Install app or Add to Home screen.');
+    }
+  }
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('/service-worker.js',{scope:'/'})
+        .catch(function(error){console.warn('OnChainSpro app setup could not finish.',error);});
     });
-    document.body.appendChild(button);
+  }
+  window.addEventListener('beforeinstallprompt',function(event){
+    event.preventDefault();
+    installEvent=event;
+    refresh();
   });
-  window.addEventListener('appinstalled', function(){
-    var button=document.getElementById('oc-install-app');
-    if(button) button.remove();
+  window.addEventListener('appinstalled',function(){
+    installEvent=null;
+    refresh();
+    setMessage('OnChainSpro has been added to your device.');
   });
+  document.addEventListener('click',async function(event){
+    var target=event.target instanceof Element?event.target.closest('#oc-install-app'):null;
+    if(!target)return;
+    if(installed()){refresh();return;}
+    if(installEvent){
+      var promptEvent=installEvent;
+      installEvent=null;
+      try{
+        await promptEvent.prompt();
+        var choice=await promptEvent.userChoice;
+        if(choice&&choice.outcome==='accepted'){
+          setMessage('Installation started. Follow your device prompts.');
+        }else{
+          setMessage('Installation was cancelled. You can install it later from this button.');
+        }
+      }catch(error){
+        setMessage('Open your browser menu and choose Install app.');
+      }
+      refresh();
+      return;
+    }
+    refresh();
+  });
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refresh);
+  else refresh();
 })();
 </script>
 
