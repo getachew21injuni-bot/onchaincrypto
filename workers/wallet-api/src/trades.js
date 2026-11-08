@@ -77,7 +77,12 @@ export async function executeStandardTrade({ user, body, env, dependencies = {} 
   return withFirestoreTransaction(env, async tx => {
     const prior = await tx.get("operationKeys", keyId);
     if (prior) {
-      const result = prior.fields?.result?.mapValue?.fields || {};
+      const priorFields = prior.fields || {};
+      if (valueOf(priorFields.side) !== side || valueOf(priorFields.symbol) !== symbol ||
+          valueOf(priorFields.quoteAmount) !== fmt(quoteAmount)) {
+        fail("This operation ID was already used for a different order. Start a new order.", 409, "IDEMPOTENCY_CONFLICT");
+      }
+      const result = priorFields.result?.mapValue?.fields || {};
       return {
         replayed: true,
         tradeId: valueOf(result.tradeId),
@@ -153,6 +158,7 @@ export async function executeStandardTrade({ user, body, env, dependencies = {} 
     }, [timestampTransform("createdAt")]);
     tx.create("operationKeys", keyId, {
       uid: firestoreString(user.uid), operationId: firestoreString(operationId),
+      side: firestoreString(side), symbol: firestoreString(symbol), quoteAmount: firestoreString(fmt(quoteAmount)),
       result: { mapValue: { fields: {
         tradeId: firestoreString(tradeId), status: firestoreString("filled"),
         side: firestoreString(side), symbol: firestoreString(symbol),
