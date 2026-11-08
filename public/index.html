@@ -4162,22 +4162,29 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  ];
  function planFor(amount){return levels.find((p,i)=>amount>=p.min&&(amount<p.max||(i===levels.length-1&&amount<=p.max)))||null}
  function validatePlan(){
-  const amount=Number($("timedStake")?.value||0);
-  const balance=Number(typeof state!=="undefined" ? state.balance : 0);
+  const stake=Number($("timedStake")?.value||0);
+  const funding=window.__ocTradeFundingCoin||"USDT";
+  const fundingPrice=Number(priceFor(funding)?.current_price||1);
+  const fundingBalance=funding==="USDT"?Number(state.balance||0):Number(state.holdings?.[funding]||0);
+  const amount=stake*fundingPrice;
+  const balanceUsd=fundingBalance*fundingPrice;
+  const symbol=$("tradeAsset")?.value||"";
+  const minimum=symbol==="XAU"?500:100;
   const plan=planFor(amount);
   const gate=$("ocTradePlanGate");
-  if(gate){
-   if(amount>0&&!plan){gate.textContent="Choose an amount of at least 100 USDT.";gate.style.display="block"}
-   else if(plan&&balance<plan.min){gate.textContent="Your available balance is below this investment plan's minimum of "+plan.min.toLocaleString()+" USDT. Increase your balance before choosing this plan.";gate.style.display="block"}
-   else if(plan&&amount>balance){gate.textContent="Your available balance is too low for this investment amount.";gate.style.display="block"}
-   else {gate.textContent="";gate.style.display="none"}
-  }
+  let message="";
+  if(stake>0&&amount<minimum)message="Minimum trade: $"+minimum.toLocaleString()+" equivalent.";
+  else if(stake>0&&stake>fundingBalance+1e-10)message="Your available "+funding+" balance is too low for this amount.";
+  else if(stake>0&&!plan)message="Choose an amount within the available investment levels.";
+  else if(stake>0&&plan&&amount>plan.max)message="This amount is above the selected investment level.";
+  if(gate){gate.textContent=message;gate.style.display=message?"block":"none";}
   const confirm=$("timedConfirmBtn");
   if(confirm){
-   const blocked=!plan||balance<plan.min||amount>balance||amount<plan.min||amount>plan.max;
+   const blocked=!Number.isFinite(stake)||stake<=0||!Number.isFinite(fundingPrice)||fundingPrice<=0||!plan||amount<minimum||amount<plan.min||amount>plan.max||stake>fundingBalance+1e-10;
    confirm.disabled=blocked||(typeof pendingTimedDirection==="undefined"||!pendingTimedDirection)||(typeof timedPaper!=="undefined"&&!!timedPaper);
   }
  }
+ window.ocValidateQuickTradeForm=validatePlan;
  function enhanceBoard(){
   const board=$("timedResultBoard");if(!board)return;
   // Prevent the old result handler from scrolling the page to the board.
@@ -4251,29 +4258,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  }
  const stake=$('timedStake');
  function validateTier(){
-   const amount=Number(stake?.value||0);
-   const balance=Number(typeof state!=='undefined' ? state.balance : 0);
-   const levels=[
-     {min:100,max:5000,label:'Level 1'},
-     {min:5000,max:10000,label:'Level 2'},
-     {min:10000,max:25000,label:'Level 3'},
-     {min:25000,max:50000,label:'Level 4'},
-     {min:50000,max:100000,label:'Level 5'},
-     {min:100000,max:Infinity,label:'Level 6'}
-   ];
-   const plan=levels.find((p,i)=>amount>=p.min&&(amount<p.max||(i===levels.length-1&&amount<=p.max)));
-   const gate=$('ocTradePlanGate');
-   if(gate&&amount>0){
-     if(!plan){gate.textContent='Enter an amount above the minimum.';gate.style.display='block';}
-     else if(balance<plan.min){gate.textContent='Your balance is '+balance.toLocaleString()+' USDT. You need at least '+plan.min.toLocaleString()+' USDT to access '+plan.label+'.';gate.style.display='block';}
-     else if(amount>balance){gate.textContent='Insufficient balance for this investment amount.';gate.style.display='block';}
-     else {gate.textContent='';gate.style.display='none';}
-   }
-   const confirm=$('timedConfirmBtn');
-   if(confirm&&plan){
-     const directionSelected=(up?.getAttribute('aria-pressed')==='true')||(down?.getAttribute('aria-pressed')==='true');
-     confirm.disabled=balance<plan.min||amount<plan.min||amount>plan.max||amount>balance||!directionSelected||!!(typeof timedPaper!=='undefined'&&timedPaper);
-   }
+   if(typeof window.ocValidateQuickTradeForm==="function")window.ocValidateQuickTradeForm();
  }
  stake?.addEventListener('input',()=>setTimeout(validateTier,0));
  up?.addEventListener('click',()=>setTimeout(validateTier,0));
