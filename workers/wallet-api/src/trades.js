@@ -103,7 +103,6 @@ export async function executeStandardTrade({ user, body, env, dependencies = {} 
       quoteDebit = 0n; quoteCredit = actualGross; assetDebit = quantity; assetCredit = 0n;
     }
     balances.USDT = fmt(afterQuote); balances[symbol] = fmt(afterAsset);
-    const createdAt = timestampTransform("createdAt");
     const ledgerBase = {
       uid: firestoreString(user.uid), operationId: firestoreString(operationId),
       type: firestoreString("trade_settlement"), status: firestoreString("posted"),
