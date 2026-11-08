@@ -2943,7 +2943,6 @@ function filterFaqs(){const query=(document.getElementById("faqSearch")?.value||
 document.getElementById("faqSearch")?.addEventListener("input",filterFaqs);
 document.querySelectorAll("[data-faq-category]").forEach(button=>button.addEventListener("click",()=>{activeFaqCategory=button.dataset.faqCategory;document.querySelectorAll("[data-faq-category]").forEach(b=>b.classList.toggle("active",b===button));filterFaqs()}));document.addEventListener("click",event=>{if(!event.target.closest(".more-menu-wrap")){moreMenu.classList.add("hidden");moreMenuBtn.setAttribute("aria-expanded","false")}});document.querySelectorAll("#nav button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
 // Mobile registration is handled once by the shared openAuth('register') entry point.
-document.getElementById("signin-nav")?.addEventListener("click",()=>{showPage("register");document.getElementById("signInEmail")?.focus();});
 document.getElementById("admin-login-link")?.addEventListener("click",()=>{showPage("register");document.getElementById("signInEmail")?.focus();document.getElementById("registerMessage").textContent="Sign in with your authorized administrator account. Admin controls remain disabled until secure backend authorization is deployed.";});
 // Support requests are submitted and answered inside Onchain by the in-app support module.
 document.querySelectorAll("#marketTabs button").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.filter;document.querySelectorAll("#marketTabs button").forEach(x=>x.classList.toggle("active",x===b));renderMarket()}));
@@ -3997,12 +3996,12 @@ window.addEventListener("popstate", async () => {
     if(heading)heading.textContent=creating?'Create your Onchain account':'Welcome back to Onchain';
     if(sub){sub.textContent=creating?'Set up your account to continue.':'';sub.classList.toggle('hidden',!creating);}
   }
-  document.getElementById('showRegisterBtn')?.addEventListener('click',()=>setMode('register'));
+  document.getElementById('showRegisterBtn')?.addEventListener('click',()=>{const method=document.getElementById('registerContactMethod');if(method){method.value='email';method.dispatchEvent(new Event('change'));}setMode('register');});
    // The Login link inside the registration form must switch back to the sign-in form.
-   document.getElementById('registerLoginBtn')?.addEventListener('click',()=>{const selector=document.getElementById('registerContactMethod');if(selector)selector.value='email';setMode('signin');document.getElementById('signInEmail')?.focus();});
+   document.getElementById('registerLoginBtn')?.addEventListener('click',()=>{const selector=document.getElementById('registerContactMethod');if(selector){selector.value='email';selector.dispatchEvent(new Event('change'));}setMode('signin');document.getElementById('signInEmail')?.focus();});
   document.getElementById("registerContactMethod")?.addEventListener("change",e=>setRegistrationMethod(e.target.value));
   
-  document.getElementById('signin-nav')?.addEventListener('click',()=>{setMode('signin');document.getElementById('signInEmail')?.focus();});
+  document.getElementById('signin-nav')?.addEventListener('click',()=>{showPage('register');setMode('signin');document.getElementById('signInEmail')?.focus();});
   document.getElementById('showSignInBtn')?.addEventListener('click',()=>setMode('signin'));
   document.getElementById('showSignInPassword')?.addEventListener('change',e=>{const p=document.getElementById('signInPassword');if(p)p.type=e.target.checked?'text':'password';});
   const remember=document.getElementById('rememberMe'), email=document.getElementById('signInEmail');
@@ -7341,8 +7340,6 @@ html.oc-auth-pending body #bottomNav { display:none!important; }
    form.querySelectorAll('input').forEach(el=>{if(el!==email)el.disabled=phone;});
  }
  selector.addEventListener('change',sync);
- document.getElementById('showRegisterBtn')?.addEventListener('click',()=>{selector.value='email';sync();});
- document.getElementById('registerLoginBtn')?.addEventListener('click',()=>{selector.value='email';sync();});
  sync();
 })();
 </script>
