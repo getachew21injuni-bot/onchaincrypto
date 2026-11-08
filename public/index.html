@@ -1556,7 +1556,7 @@ html.oc-auth-pending body > nav {
 
     <div class="oc-platform-final-cta">
       <div><div class="oc-platform-eyebrow">START WITH ONCHAIN</div><h2>Ready to explore your markets?</h2><p>Create your Onchain account and discover the tools available across the platform.</p></div>
-      <button type="button" class="primary" id="ocVisitorAboutSignup">Create account <span aria-hidden="true">→</span></button>
+      <button type="button" class="primary" id="ocVisitorAboutSignupFooter">Create account <span aria-hidden="true">→</span></button>
     </div>
   </section>
 </section>
@@ -2984,6 +2984,8 @@ $("manageSessionBtn").addEventListener("click",()=>{document.getElementById("ocS
 $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new Date().toISOString(),notice:"This export contains browser-local Onchain data only; it is not a full server-account export.",profile:JSON.parse(localStorage.getItem("oc_profile")||"{}"),notificationPreferences:JSON.parse(localStorage.getItem("oc_notification_preferences")||"{}"),localData:{}};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&(/onchain|wallet|trade|history|profile|asset/i.test(key))&&!["oc_profile","oc_notification_preferences"].includes(key)){try{data.localData[key]=JSON.parse(localStorage.getItem(key))}catch(_){data.localData[key]=localStorage.getItem(key)}}}const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="onchaincrypto-data-export.json";link.click();URL.revokeObjectURL(url);$("privacyMessage").textContent="Downloaded available browser-local data. This does not include all server records."});
 $("requestDeleteAccountBtn").addEventListener("click",()=>{const ok=window.confirm("Account deletion is permanent. This site cannot delete your Firebase account automatically. Open an email request to support instead?");if(!ok)return;const subject="Account deletion request";const body="Please help me request deletion of my Onchain account and associated personal data. Please explain any identity checks required.";window.showPage?.("support");const supportSubjectField=document.getElementById("supportSubject"),supportDetailsField=document.getElementById("supportDetails");if(supportSubjectField)supportSubjectField.value=subject;if(supportDetailsField)supportDetailsField.value=body;$("privacyMessage").textContent="Your email app should open with a deletion request draft. Review and send it; this website has not deleted your account."});
 // Profile saving is handled once by the Firebase module below.
+ document.querySelectorAll("#ocVisitorAboutSignup,#ocVisitorAboutSignupFooter").forEach(button=>button.addEventListener("click",()=>showPage("register")));
+ document.getElementById("ocVisitorAboutExplore")?.addEventListener("click",()=>showPage("markets"));
  renderWallet();loadMarket();setInterval(loadMarket,120000);
  document.addEventListener("visibilitychange",()=>{if(!document.hidden&&(!window.ocMarketLastSuccess||Date.now()-window.ocMarketLastSuccess>60000))loadMarket()});
  window.addEventListener("focus",()=>{if(!window.ocMarketLastSuccess||Date.now()-window.ocMarketLastSuccess>60000)loadMarket()});
