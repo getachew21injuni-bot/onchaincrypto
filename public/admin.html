@@ -152,7 +152,7 @@ function renderGlobalDemoControls(api,current){
 async function renderTradeControls(){
  const body=document.getElementById('detailBody');
  const api=window.__ocAdminFirebase;
- body.innerHTML=`<div id="globalDemoTradeControls" class="content-panel" style="margin:0 0 18px;border-color:#8b6b2d"><h3 style="margin-top:0">Global practice simulation</h3><p class="muted">Choose how new Quick Trade results are recorded. Market-based follows the selected market result; win/loss overrides force a selected outcome. These settings affect platform records only and do not place exchange orders.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px"><button type="button" class="icon-btn" data-global-demo-mode="market">Market-Based</button><button type="button" class="icon-btn" data-global-demo-mode="win" style="background:#087b56;border:0">↗ Set Win Outcome</button><button type="button" class="icon-btn" data-global-demo-mode="lose" style="background:#8a3343;border:0">↘ Set Loss Outcome</button></div><p id="globalDemoModeStatus" class="muted" role="status" aria-live="polite">Connecting to shared simulation settings…</p></div><div id="tradeControlsUsers"></div>`;
+ body.innerHTML=`<div id="globalDemoTradeControls" class="content-panel" style="margin:0 0 18px;border-color:#8b6b2d"><h3 style="margin-top:0">Quick Trade outcome controls</h3><p class="muted">Choose how new Quick Trade results are recorded. Market-based follows the selected market result; win/loss overrides force a selected outcome. These settings affect platform records only and do not place exchange orders.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px"><button type="button" class="icon-btn" data-global-demo-mode="market">Market-Based</button><button type="button" class="icon-btn" data-global-demo-mode="win" style="background:#087b56;border:0">↗ Set Win Outcome</button><button type="button" class="icon-btn" data-global-demo-mode="lose" style="background:#8a3343;border:0">↘ Set Loss Outcome</button></div><p id="globalDemoModeStatus" class="muted" role="status" aria-live="polite">Loading shared outcome settings…</p></div><div id="tradeControlsUsers"></div>`;
  const usersBody=document.getElementById('tradeControlsUsers');
  usersBody.innerHTML='<div class="content-panel"><p class="muted">Loading users…</p></div>';
  if(!api){usersBody.textContent='Firebase admin connection is not ready. Refresh and sign in again.';return;}
@@ -294,8 +294,8 @@ async function renderRequestQueue(view){
      if(after<0)throw new Error('insufficient-demo-balance');
      if(asset==='USDT')tx.update(userRef,{demoBalanceUSDT:after,demoBalanceUpdatedAt:serverTimestamp()});
      else tx.update(userRef,{demoAssetBalances:{...(data.demoAssetBalances||{}),[asset]:after},demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:current.email});
-     if(asset==='USDT')tx.set(usdtLedgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request practice adjustment':'Withdrawal request practice adjustment'),source:'admin-demo',status:'completed'});
-     else tx.set(ledgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request practice adjustment':'Withdrawal request practice adjustment'),source:'admin-demo',status:'completed'});
+     if(asset==='USDT')tx.set(usdtLedgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request account adjustment':'Withdrawal request account adjustment'),source:'admin-demo',status:'completed'});
+     else tx.set(ledgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request account adjustment':'Withdrawal request account adjustment'),source:'admin-demo',status:'completed'});
      tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email});
     });
     if(msg)msg.textContent=action==='approve'?'Approved. The account ledger was updated. No blockchain payment or payout occurred.':'Request rejected.';
@@ -394,7 +394,7 @@ async function renderDemoFinance(view){
    for(const symbol of targets){
     const before=symbol==='USDT'?usdtBefore:Math.max(0,Number(oldMap[symbol])||0);
     const after=Math.round((before+(isDeposit?amount:-amount))*100000000)/100000000;
-    if(after<0){msg.textContent='Insufficient '+symbol+' practice balance. No changes were saved.';return;}
+    if(after<0){msg.textContent='Insufficient '+symbol+' account balance. No changes were saved.';return;}
     changes.push({symbol,before,after});
     if(symbol==='USDT')usdtAfter=Math.round(after*100)/100;else nextMap[symbol]=after;
    }
@@ -405,7 +405,7 @@ async function renderDemoFinance(view){
     if(targets.includes('USDT')){userUpdate.demoBalanceUSDT=usdtAfter;userUpdate.demoBalanceUpdatedAt=serverTimestamp();}
     batch.update(userRef,userUpdate);
     const notificationRef=doc(collection(db,'userNotifications',uid,'items'));
-    batch.set(notificationRef,{kind:isDeposit?'deposit':'withdrawal',title:isDeposit?'Practice deposit adjustment recorded':'Practice withdrawal adjustment recorded',message:(isDeposit?'Your practice balance was adjusted by ':'A practice balance adjustment of ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+'. '+(note?'Admin note: '+note:'This is a simulated balance update, not a real blockchain transfer.'),createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:window.__ocAdminFirebase.auth.currentUser.uid,source:'admin-demo'});
+    batch.set(notificationRef,{kind:isDeposit?'deposit':'withdrawal',title:isDeposit?'Account deposit adjustment recorded':'Account withdrawal adjustment recorded',message:(isDeposit?'Your account balance was adjusted by ':'A account balance adjustment of ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+'. '+(note?'Admin note: '+note:'This is a simulated balance update, not a real blockchain transfer.'),createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:window.__ocAdminFirebase.auth.currentUser.uid,source:'admin-demo'});
     for(const c of changes){
      const txRef=doc(collection(db,c.symbol==='USDT'?'demoTransactions':'demoAssetTransactions'));
      if(c.symbol==='USDT'){
@@ -597,7 +597,7 @@ async function renderInternalTransfers(){
       tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email,transferId:transferRef.id});
      });
     }
-    if(msg)msg.textContent=approved?'Approved. Both practice balances and the transfer ledger were updated once.':'Request rejected. No wallet balance changed.';
+    if(msg)msg.textContent=approved?'Approved. Both account balances and the transfer ledger were updated once.':'Request rejected. No wallet balance changed.';
     await renderInternalTransfers();if(typeof window.adminRefreshDashboard==='function')await window.adminRefreshDashboard();
    }catch(error){button.disabled=false;if(msg)msg.textContent='Could not '+(approved?'approve':'reject')+' request ('+(error.code||error.message||'error')+'). No partial balance update was made.';}
   }));
