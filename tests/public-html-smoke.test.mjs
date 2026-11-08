@@ -44,3 +44,24 @@ test("market, trade summary, and withdrawal validation elements are present", ()
   assert.ok(html.includes("data-api.binance.vision/api/v3/klines"), "Expected an independent chart-history fallback");
   assert.ok(html.includes("networksByAsset"), "Expected asset-specific withdrawal network rules");
 });
+
+test("home quick actions start with four and expand on demand", () => {
+  const start = html.indexOf('id="page-home"');
+  const end = html.indexOf('id="page-markets"', start);
+  assert.ok(start >= 0 && end > start, "Expected home and market page sections");
+  const home = html.slice(start, end);
+  const visible = [...home.matchAll(/class="quick-action"(?![^"]*home-quick-action-extra)/g)];
+  const extra = [...home.matchAll(/class="quick-action home-quick-action-extra/g)];
+  assert.equal(visible.length, 4, "Home should show four actions first");
+  assert.equal(extra.length, 5, "Five extra actions should be available");
+  for (const id of ["homeQuickActionMore", "homeQuickActionLess"]) {
+    assert.ok(home.includes('id="' + id + '"'), "Missing control: " + id);
+  }
+  assert.ok(html.includes("#homeQuickActionMore"), "Expected More/Less click handling");
+});
+
+test("wallet forms use concise network labels and hide unavailable deposit networks", () => {
+  assert.ok(html.includes('for="depositNetwork">Select network</label>'));
+  assert.ok(html.includes('for="withdrawNetwork">Select network</label>'));
+  assert.ok(html.includes('select.innerHTML=\'<option value="">No network available</option>\''));
+});
