@@ -86,7 +86,9 @@ test("public copy uses neutral Quick Trade wording and keeps transaction disclos
   assert.ok(html.includes("active, verified address is displayed for the exact asset and network"));
 });
 
-test("mobile registration entry point is bound only once", () => {
-  const handlers = [...html.matchAll(/getElementById\(['"]mobileRegisterBtn['"]\)\??\.addEventListener\(['"]click['"]/g)];
-  assert.equal(handlers.length, 1, "Mobile registration should use the shared auth entry point once");
+test("authentication navigation controls have one click handler each", () => {
+  for (const id of ["mobileRegisterBtn", "signin-nav", "showRegisterBtn", "registerLoginBtn"]) {
+    const handlers = [...html.matchAll(new RegExp("getElementById\\(['\\\"]" + id + "['\\\"]\\)\\??\\.addEventListener\\(['\\\"]click['\\\"]", "g"))];
+    assert.equal(handlers.length, 1, id + " should have one shared click handler");
+  }
 });
