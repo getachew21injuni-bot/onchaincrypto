@@ -1916,6 +1916,20 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
       <div class="oc-orderbook-actions" aria-label="Trade direction"><button type="button" class="buy" data-oc-book-direction="buy">↗ Buy</button><button type="button" class="sell" data-oc-book-direction="sell">↘ Sell</button></div>
       <p class="muted tiny"></p>
     </section>
+    <section class="panel" id="standardBuySellPanel">
+      <div class="section-head"><div><h2>Standard Buy / Sell</h2><div class="muted tiny">Market-priced internal orders. Confirmed trades update your cloud wallet and permanent trade ledger.</div></div><span class="tag">CLOUD SETTLEMENT</span></div>
+      <div class="form-panel">
+        <div class="list-row"><span class="muted">Selected pair</span><strong id="standardTradePair">BTC / USDT</strong></div>
+        <label for="standardTradeAmount">Order amount (USDT)</label>
+        <input id="standardTradeAmount" class="field" type="number" min="100" step="0.01" inputmode="decimal" placeholder="Minimum 100 USDT">
+        <div class="list-row"><span class="muted">Cloud wallet available</span><strong id="standardCloudBalance">Checking account…</strong></div>
+        <div class="two-buttons">
+          <button type="button" class="buy" id="standardBuyBtn">↗ Buy</button>
+          <button type="button" class="sell" id="standardSellBtn">↘ Sell</button>
+        </div>
+        <p id="standardTradeMessage" class="muted tiny" role="status" aria-live="polite">Your cloud wallet is checked before every order.</p>
+      </div>
+    </section>
     <section class="panel" id="timedPaperTrade"><div class="section-head"><div><h2>Quick Trade</h2><div class="muted tiny">Quick Trade calculates outcomes from public market prices and updates the internal account balance; it does not place external exchange orders.</div></div><span class="tag">MARKET-LINKED</span></div>
       <div class="form-panel">
         <label for="tradeAsset">Trading pair</label><select id="tradeAsset" class="field"></select><label for="ocTradeFundingCoin">Wallet coin to use</label><select id="ocTradeFundingCoin" class="field"></select>
