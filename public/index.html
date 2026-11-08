@@ -898,7 +898,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
  html.oc-light-theme .panel,html.oc-light-theme .card{box-shadow:0 3px 12px rgba(30,35,41,.04)!important}
 }
 </style>
-<style id="oc-visitor-private-page-guard">/* Visitors may browse public market content. Account entry points stay visible, but private app pages never render before authentication. */body.oc-visitor-mode main>section[id^="page-"]:not(#page-public-market):not(#page-markets):not(#page-register){display:none!important;visibility:hidden!important}body.oc-visitor-mode #nav [data-page="home"],body.oc-visitor-mode #nav [data-page="trade"],body.oc-visitor-mode #nav [data-page="browser"],body.oc-visitor-mode #bottomNav [data-bottom-page="home"],body.oc-visitor-mode #bottomNav [data-bottom-page="trade"],body.oc-visitor-mode #bottomNav [data-bottom-page="browser"]{display:none!important}body.oc-visitor-mode #bottomNav{grid-template-columns:repeat(2,minmax(0,1fr))!important;justify-items:stretch;gap:4px}body.oc-visitor-mode #bottomNav>button{width:100%;min-width:0;justify-content:center}body.oc-visitor-mode main>#page-public-market.hidden{display:none!important}body.oc-visitor-mode #page-markets .cards:has(#summaryBalance),body.oc-visitor-mode #page-markets #marketQuickActionsPanel,body.oc-visitor-mode #page-markets #marketRecentActivity,body.oc-visitor-mode #page-markets #ocStockBrokerageWorkspace{display:none!important}</style>
+<style id="oc-visitor-private-page-guard">/* Public visitors see only the public market overview; account screens and internal navigation remain private. */body.oc-visitor-mode main>section[id^="page-"]:not(#page-public-market):not(#page-register){display:none!important;visibility:hidden!important}body.oc-visitor-mode #nav,body.oc-visitor-mode #bottomNav,body.oc-visitor-mode #moreMenuBtn,body.oc-visitor-mode #refreshBtn,body.oc-visitor-mode #ocBackBtn{display:none!important}body.oc-visitor-mode .header-right{display:flex;align-items:center;gap:8px}body.oc-visitor-mode #ocVisitorActions{display:flex!important;align-items:center;gap:8px}body.oc-visitor-mode #moreMenu{display:none!important}body.oc-visitor-mode main>#page-public-market.hidden{display:none!important}body.oc-visitor-mode #ocVisitorSupportBot{display:block!important;right:18px!important;bottom:18px!important;z-index:99999!important}body.oc-visitor-mode #ocVisitorSupportBot .oc-support-panel{bottom:68px!important}body.oc-visitor-mode #ocVisitorSupportBot .oc-support-launch{display:grid!important}@media(max-width:560px){body.oc-visitor-mode #ocVisitorSupportBot{right:14px!important;bottom:calc(16px + env(safe-area-inset-bottom))!important}}</style>
 
 <style id="oc-stock-crypto-quick-style">.oc-stock-brand-card{cursor:pointer;transition:border-color .18s,transform .18s,background .18s}.oc-stock-brand-card:hover,.oc-stock-brand-card.selected,.oc-stock-brand-card[aria-pressed="true"]{border-color:var(--oc-gold,#d9ad55);background:rgba(217,173,85,.09);transform:translateY(-1px)}.oc-stock-brand-card:focus-visible{outline:2px solid var(--oc-gold,#d9ad55);outline-offset:3px}.oc-stock-order-summary a{color:var(--oc-gold,#e5bd67);text-decoration:none}.oc-crypto-quick-picks{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}.oc-crypto-quick-picks button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:8px 13px;font-weight:700}.oc-crypto-quick-picks button:hover{border-color:var(--yellow);color:var(--yellow)}</style>
 <style id="oc-home-promo-and-simple-auth-layout">
@@ -4545,7 +4545,7 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     }
     const guest=window.ocLoggedOut===true&&!authenticatedUser;
     document.body.classList.toggle("oc-visitor-mode",guest);
-    if(guest && !["register","public-market","markets"].includes(page)) page="register";
+    if(guest && !["register","public-market"].includes(page)) page="register";
     // Keep the authentication screen class synchronized with the actual visible route.
     document.body.classList.toggle("oc-auth-screen",guest&&page==="register");
     const target=document.getElementById('page-'+page);
@@ -4610,7 +4610,7 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     // Wait for Firebase session restoration before treating a startup guest flag
     // as a confirmed sign-out.
     void (async()=>{
-      if(!["register","public-market","markets"].includes(page)){
+      if(!["register","public-market"].includes(page)){
         try{if(window.ocAuthReady)await window.ocAuthReady;}catch(_){}
         const activeUser=window.ocFirebaseAuth?.currentUser||window.onchaincryptoCurrentUser||null;
         if(!activeUser){
@@ -7398,7 +7398,7 @@ html.oc-auth-pending body #bottomNav { display:none!important; }
 
 <script id="oc-visitor-private-route-guard">
 (function(){
-  const privatePages=new Set(["home","trade","wallet","profile","deposit","withdraw","transfer","convert","history","notifications","settings","kyc","admin","browser"]);
+  const privatePages=new Set(["home","markets","trade","wallet","profile","deposit","withdraw","transfer","convert","history","notifications","settings","kyc","admin","browser"]);
   function signedIn(){return !!(window.ocFirebaseAuth?.currentUser||window.onchaincryptoCurrentUser)&&window.ocLoggedOut!==true;}
   function protectRoute(page){
     if(!privatePages.has(String(page||""))||signedIn())return false;
@@ -7427,7 +7427,7 @@ html.oc-auth-pending body #bottomNav { display:none!important; }
     }
     document.body.classList.add("oc-visitor-mode");
     const visible=document.querySelector('main>section[id^="page-"]:not(.hidden)');
-    if(visible&&!["page-public-market","page-markets","page-register"].includes(visible.id)){
+    if(visible&&!["page-public-market","page-register"].includes(visible.id)){
       visible.classList.add("hidden");visible.setAttribute("hidden","");
       const publicPage=document.getElementById("page-public-market");
       if(publicPage){publicPage.classList.remove("hidden");publicPage.removeAttribute("hidden");}
@@ -7437,6 +7437,46 @@ html.oc-auth-pending body #bottomNav { display:none!important; }
   window.addEventListener("pageshow",applyGuestGuard);
   window.addEventListener("popstate",applyGuestGuard);
   document.addEventListener("DOMContentLoaded",applyGuestGuard,{once:true});
+})();
+</script>
+
+<script id="oc-visitor-minimal-navigation-guard">
+(function(){
+  function isGuest(){return !(window.ocFirebaseAuth?.currentUser||window.onchaincryptoCurrentUser)&&window.ocLoggedOut!==false;}
+  function sync(){
+    if(!isGuest()){
+      document.body.classList.remove("oc-visitor-mode");
+      return;
+    }
+    document.body.classList.add("oc-visitor-mode");
+    const visible=document.querySelector('main>section[id^="page-"]:not(.hidden)');
+    if(visible&&!["page-public-market","page-register"].includes(visible.id)){
+      visible.classList.add("hidden");visible.setAttribute("hidden","");
+      const market=document.getElementById("page-public-market");
+      if(market){market.classList.remove("hidden");market.removeAttribute("hidden");}
+    }
+    const menu=document.getElementById("moreMenu");
+    if(menu){menu.classList.add("hidden");menu.setAttribute("aria-hidden","true");}
+    const trigger=document.getElementById("moreMenuBtn");
+    if(trigger)trigger.setAttribute("aria-expanded","false");
+  }
+  document.addEventListener("click",function(e){
+    if(!isGuest())return;
+    const el=e.target instanceof Element?e.target:null;if(!el)return;
+    const target=el.closest("[data-page],[data-bottom-page],[data-menu-page]");if(!target)return;
+    const p=target.dataset.page||target.dataset.bottomPage||target.dataset.menuPage||"";
+    if(["profile","wallet","markets","home","trade","browser","financial","settings","notifications","kyc","deposit","withdraw","history","convert","transfer","admin"].includes(p)){
+      e.preventDefault();e.stopImmediatePropagation();
+      const route=window.showPage;if(typeof route==="function")route("register");
+      document.getElementById("authChoicePanel")?.classList.add("hidden");
+      document.getElementById("authChoiceLogin")?.click();
+    }
+  },true);
+  sync();
+  document.addEventListener("DOMContentLoaded",sync,{once:true});
+  window.addEventListener("pageshow",sync);
+  window.addEventListener("popstate",sync);
+  if(window.MutationObserver){const observer=new MutationObserver(sync);observer.observe(document.body,{attributes:true,attributeFilter:["class"]});}
 })();
 </script>
 </body>
