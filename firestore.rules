@@ -198,11 +198,44 @@ service cloud.firestore {
     // only the verified administrator can change it.
     match /platformSettings/{settingId} {
       allow read: if signedIn();
-      allow create, update: if isAdmin() && settingId == 'demoTradeControl'
-        && request.resource.data.keys().hasOnly(['mode','updatedAt','updatedBy'])
-        && request.resource.data.mode in ['market','win','lose']
-        && request.resource.data.updatedBy == request.auth.token.email;
+      allow create, update: if isAdmin() && (
+        (settingId == 'demoTradeControl'
+          && request.resource.data.keys().hasOnly(['mode','updatedAt','updatedBy'])
+          && request.resource.data.mode in ['market','win','lose']
+          && request.resource.data.updatedBy == request.auth.token.email)
+        ||
+        (settingId == 'marketAlertState'
+          && request.resource.data.keys().hasOnly(['lastSentAtMs','lastKind','updatedAt','updatedBy'])
+          && request.resource.data.lastSentAtMs is number
+          && request.resource.data.lastKind in ['bullish','bearish']
+          && request.resource.data.updatedBy == request.auth.token.email)
+      );
       allow delete: if false;
+    }
+
+    // Shared market alerts are visible to signed-in members and published only
+    // by the verified administrator. Alerts are append-only.
+    match /marketAlerts/{alertId} {
+      allow read: if signedIn();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly([
+          'kind','title','message','createdAt','createdAtText',
+          'createdBy','createdByEmail','source','basketMedian24h','assetCount'
+        ])
+        && request.resource.data.kind in ['bullish','bearish']
+        && request.resource.data.title is string
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 8
+        && request.resource.data.message.size() <= 500
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.createdAtText is string
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdByEmail == request.auth.token.email
+        && request.resource.data.source in ['admin-manual','market-auto']
+        && (!('basketMedian24h' in request.resource.data) || request.resource.data.basketMedian24h is number)
+        && (!('assetCount' in request.resource.data) || request.resource.data.assetCount is int);
+      allow update, delete: if false;
     }
 
 
