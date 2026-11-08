@@ -1327,6 +1327,14 @@ html.oc-auth-pending body > nav {
 #withdrawNotice[data-state="pending"]{color:#f0b90b!important;background:rgba(240,185,11,.10)!important;border-color:rgba(240,185,11,.32)!important;font-weight:600}
 #withdrawNotice[data-state="error"]{color:#ff5573!important;background:rgba(255,85,115,.10)!important;border-color:rgba(255,85,115,.32)!important;font-weight:600}
 </style>
+
+<style id="oc-visitor-hide-all-member-sections">
+/* Visitors get only the public market page; hide every other direct main child,
+   including legacy/member feature containers that do not use a page-* section ID. */
+body.oc-visitor-mode:not(.oc-auth-screen) main > :not(#page-public-market){
+  display:none!important;visibility:hidden!important;pointer-events:none!important;
+}
+</style>
 </head>
 <body>
 <header>
