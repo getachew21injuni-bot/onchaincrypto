@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   bundle:
@@ -31,3 +31,14 @@ jobs:
           path: wallet-api-worker.js
           if-no-files-found: error
           retention-days: 7
+      - name: Publish paste-ready bundle on the migration branch
+        run: |
+          mkdir -p workers/wallet-api/dist
+          cp wallet-api-worker.js workers/wallet-api/dist/worker.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add workers/wallet-api/dist/worker.js
+          if ! git diff --cached --quiet; then
+            git commit -m "Build standalone Cloudflare wallet worker"
+            git push
+          fi
