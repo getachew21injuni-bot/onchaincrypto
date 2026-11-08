@@ -3246,6 +3246,7 @@ window.ocAuthReady = new Promise(resolve => {
   }, 8000);
 });
 window.ocAuthReady.then(user=>{if(user)window.ocRefreshStandardCloudBalance?.()}).catch(()=>{});
+onAuthStateChanged(auth,user=>{if(user)window.ocRefreshStandardCloudBalance?.()});
 // Do not await this promise here: the main app auth observer below must attach
 // immediately so login, registration, and navigation can initialize normally.
 
