@@ -6365,29 +6365,29 @@ body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
 const messages=root.querySelector("#ocSupportMessages"),input=root.querySelector("#ocSupportInput"),form=root.querySelector("#ocSupportForm");
 const add=(text,who="bot")=>{const el=document.createElement("div");el.className="oc-support-msg "+who;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;};
 const answers=[
-[/\\b(bitcoin|\\bbtc|\\bxbt)\\b/i,"Bitcoin (BTC) is a decentralised digital currency. Its network records transactions on a public blockchain, and its supply is capped at 21 million."],
-[/\\b(ethereum|\\beth|\\bether)\\b/i,"Ethereum is a blockchain that supports smart contracts and apps. ETH is its native asset, used for network fees and transfers."],
-[/\\b(usdt|tether|stablecoin|stable coin)\\b/i,"USDT is a stablecoin designed to track the US dollar. Stablecoins can still carry issuer, reserve and market risks."],
-[/\\b(gold|\\bxau|\\bxaut)\\b/i,"Gold is a precious metal traded globally. XAU commonly represents one troy ounce; XAU/USDT quotes its price in USDT."],
-[/\\b(blockchain|distributed ledger)\\b/i,"A blockchain is a shared digital record. Network participants verify transactions and add them in linked blocks."],
-[/\\b(crypto|cryptocurrency|digital asset)\\b/i,"A cryptocurrency is a digital asset secured with cryptography and usually transferred on a blockchain."],
-[/\\b(wallet|wallet address)\\b/i,"A crypto wallet manages the keys used to access digital assets. A wallet address lets others send assets to you on a supported network."],
-[/\\b(deposit|receive funds)\\b/i,"A deposit is an incoming transfer to your account or wallet. Always check the asset, address and network before sending."],
-[/\\b(withdraw|withdrawal|send funds)\\b/i,"A withdrawal sends assets from your account or wallet to another address. Check the address and network carefully before confirming."],
-[/\\b(trading|trade|buy|sell)\\b/i,"Trading is buying and selling assets based on market prices. Prices move with supply, demand and market conditions."],
-[/\\b(market|market price|price)\\b/i,"A market brings buyers and sellers together. Prices change as orders, supply, demand and wider market news change."],
-[/\\b(spot trading|spot)\\b/i,"Spot trading means buying or selling an asset for immediate settlement, rather than trading a contract based on its price."],
-[/\\b(limit order|limit)\\b/i,"A limit order sets the price at which you are willing to buy or sell. It may not execute if the market does not reach that price."],
-[/\\b(market order)\\b/i,"A market order aims to execute promptly at the best available prices. The final price can differ from the last displayed price."],
-[/\\b(spread)\\b/i,"The spread is the difference between the best available buy price and sell price."],
-[/\\b(network fee|gas fee|transaction fee|fee)\\b/i,"A network fee is paid to process a transaction on a blockchain. Fees vary by network and current activity."],
-[/\\b(kyc|identity verification|verify identity)\\b/i,"KYC means Know Your Customer. It is an identity-verification process used to help meet compliance requirements."],
-[/\\b(private key|seed phrase|recovery phrase)\\b/i,"A private key or recovery phrase can provide access to a wallet. Keep it secret and never share it with anyone, including support."],
-[/\\b(bull market|bullish)\\b/i,"A bull market is a period when prices are generally rising or market sentiment is positive."],
-[/\\b(bear market|bearish)\\b/i,"A bear market is a period when prices are generally falling or market sentiment is negative."],
-[/\\b(solana|\\bsol)\\b/i,"Solana is a blockchain designed for fast transactions and decentralised applications. SOL is its native asset."],
-[/\\b(xrp|ripple)\\b/i,"XRP is the digital asset used on the XRP Ledger, a network designed for transferring value."],
-[/\\b(bnb)\\b/i,"BNB is the native asset of the BNB Chain ecosystem and is used for network fees and other services."]
+[/\b(bitcoin|\bbtc|\bxbt)\b/i,"Bitcoin (BTC) is a decentralised digital currency. Its network records transactions on a public blockchain, and its supply is capped at 21 million."],
+[/\b(ethereum|\beth|\bether)\b/i,"Ethereum is a blockchain that supports smart contracts and apps. ETH is its native asset, used for network fees and transfers."],
+[/\b(usdt|tether|stablecoin|stable coin)\b/i,"USDT is a stablecoin designed to track the US dollar. Stablecoins can still carry issuer, reserve and market risks."],
+[/\b(gold|\bxau|\bxaut)\b/i,"Gold is a precious metal traded globally. XAU commonly represents one troy ounce; XAU/USDT quotes its price in USDT."],
+[/\b(blockchain|distributed ledger)\b/i,"A blockchain is a shared digital record. Network participants verify transactions and add them in linked blocks."],
+[/\b(crypto|cryptocurrency|digital asset)\b/i,"A cryptocurrency is a digital asset secured with cryptography and usually transferred on a blockchain."],
+[/\b(wallet|wallet address)\b/i,"A crypto wallet manages the keys used to access digital assets. A wallet address lets others send assets to you on a supported network."],
+[/\b(deposit|receive funds)\b/i,"A deposit is an incoming transfer to your account or wallet. Always check the asset, address and network before sending."],
+[/\b(withdraw|withdrawal|send funds)\b/i,"A withdrawal sends assets from your account or wallet to another address. Check the address and network carefully before confirming."],
+[/\b(trading|trade|buy|sell)\b/i,"Trading is buying and selling assets based on market prices. Prices move with supply, demand and market conditions."],
+[/\b(market|market price|price)\b/i,"A market brings buyers and sellers together. Prices change as orders, supply, demand and wider market news change."],
+[/\b(spot trading|spot)\b/i,"Spot trading means buying or selling an asset for immediate settlement, rather than trading a contract based on its price."],
+[/\b(limit order|limit)\b/i,"A limit order sets the price at which you are willing to buy or sell. It may not execute if the market does not reach that price."],
+[/\b(market order)\b/i,"A market order aims to execute promptly at the best available prices. The final price can differ from the last displayed price."],
+[/\b(spread)\b/i,"The spread is the difference between the best available buy price and sell price."],
+[/\b(network fee|gas fee|transaction fee|fee)\b/i,"A network fee is paid to process a transaction on a blockchain. Fees vary by network and current activity."],
+[/\b(kyc|identity verification|verify identity)\b/i,"KYC means Know Your Customer. It is an identity-verification process used to help meet compliance requirements."],
+[/\b(private key|seed phrase|recovery phrase)\b/i,"A private key or recovery phrase can provide access to a wallet. Keep it secret and never share it with anyone, including support."],
+[/\b(bull market|bullish)\b/i,"A bull market is a period when prices are generally rising or market sentiment is positive."],
+[/\b(bear market|bearish)\b/i,"A bear market is a period when prices are generally falling or market sentiment is negative."],
+[/\b(solana|\bsol)\b/i,"Solana is a blockchain designed for fast transactions and decentralised applications. SOL is its native asset."],
+[/\b(xrp|ripple)\b/i,"XRP is the digital asset used on the XRP Ledger, a network designed for transferring value."],
+[/\b(bnb)\b/i,"BNB is the native asset of the BNB Chain ecosystem and is used for network fees and other services."]
 ];
 const answer=q=>{const v=String(q||"").trim();if(!v)return "What would you like me to explain?";
 if(/^(hi|hello|hey|good morning|good afternoon|good evening)$/i.test(v))return "Hello! Glad to help. Ask me about crypto, Gold, markets or a platform feature.";
@@ -6395,7 +6395,7 @@ if(/how (do|can) i (create|register|sign up)|how to (create|register|sign up)|cr
 if(/login|log in|sign in/i.test(v))return "For an existing account, select Login and enter your registered details. I can explain the steps without opening or redirecting you.";
 if(/support|contact (someone|team|you)|speak to (a person|someone)|human agent/i.test(v))return "For account-specific help, use the support options available after signing in. Customer email replies are managed by our verified support administrators.";
 for(const [pattern,reply] of answers){if(pattern.test(v))return reply;}
-if(/^(what is|what are|explain|define|tell me about)\\b/i.test(v))return "I can explain that. Try asking with the exact term, such as Bitcoin, XAU, wallet, spread, KYC or limit order.";
+if(/^(what is|what are|explain|define|tell me about)\b/i.test(v))return "I can explain that. Try asking with the exact term, such as Bitcoin, XAU, wallet, spread, KYC or limit order.";
 return "I can help explain crypto, Gold, trading terms and platform features. Could you tell me which part you’d like to understand?";
 };
 const open=()=>{root.classList.add("is-open");messages.scrollTop=0;};
