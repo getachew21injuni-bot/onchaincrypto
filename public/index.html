@@ -6424,7 +6424,7 @@ button?.addEventListener("click",async()=>{if(!user){if(message)message.textCont
 #ocVisitorSupportBot.show-topics .oc-support-messages{flex:1 1 45%;min-height:90px}
 @media(max-width:560px){#ocVisitorSupportBot{right:14px;bottom:calc(92px + env(safe-area-inset-bottom))}#ocVisitorSupportBot .oc-support-launch{width:52px;height:52px;min-width:52px;padding:3px}#ocVisitorSupportBot .oc-support-avatar{width:42px;height:42px}#ocVisitorSupportBot .oc-support-panel{bottom:62px;width:min(350px,calc(100vw - 24px));height:min(500px,calc(100dvh - 175px))}}
 @media(prefers-reduced-motion:no-preference){#ocVisitorSupportBot .oc-support-launch{animation:ocSupportFloat 3.8s ease-in-out infinite}@keyframes ocSupportFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}}
-body.oc-auth-screen #ocVisitorSupportBot{display:none!important}
+/* Visitor assistant remains available on public and auth screens. */
 #ocVisitorSupportBot{display:block!important}
 body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
 #oc-visitor-support-bot,#oc-support-button{display:none!important}
