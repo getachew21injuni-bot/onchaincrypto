@@ -34,8 +34,10 @@
 <style id="oc-auth-pending-gate">
   /* The dedicated Login/Register page is the only screen shown before sign-in. */
   /* Keep the sign-in form visible while Firebase restores the saved session. */
-  html.oc-auth-pending main > :not(#page-public-market) { display:none!important; }
-  html.oc-auth-pending main > #page-public-market { display:flex!important; }
+  html.oc-auth-pending body:not(.oc-auth-screen) main > :not(#page-public-market) { display:none!important; }
+  html.oc-auth-pending body:not(.oc-auth-screen) main > #page-public-market { display:block!important; }
+  html.oc-auth-pending body.oc-auth-screen main > :not(#page-register) { display:none!important; }
+  html.oc-auth-pending body.oc-auth-screen main > #page-register { display:block!important; visibility:visible!important; }
   html.oc-auth-pending body > footer,
   html.oc-auth-pending body > #bottomNav,
   html.oc-auth-pending body > nav,
@@ -3841,7 +3843,9 @@ window.addEventListener("popstate", async () => {
   if(!signIn||!register)return;
   function setMode(mode){
     const creating=mode==='register';
-    document.getElementById("authChoicePanel")?.classList.remove("hidden");
+    document.body.classList.add("oc-auth-screen","oc-logged-out");
+    document.body.classList.toggle("oc-register-mode",creating);
+    document.getElementById("authChoicePanel")?.classList.add("hidden");
     document.getElementById("authStatus")?.classList.add("hidden");
     if(methodOptions)methodOptions.classList.toggle("hidden",!creating);
     if(phonePanel){phonePanel.classList.add("hidden");phonePanel.open=false;phonePanel.querySelectorAll("input").forEach(el=>el.disabled=true);}
@@ -11773,8 +11777,11 @@ body.oc-auth-screen #ocVisitorSupportBot{display:none!important}
     const button=event.target instanceof Element?event.target.closest("#ocVisitorSignup,#ocVisitorLogin"):null;
     if(!button)return;
     event.preventDefault();
-    const open=window.ocOpenVisitorAuth;
-    if(typeof open==="function")open(button.id==="ocVisitorSignup"?"signup":"login");
+    const mode=button.id==="ocVisitorSignup"?"register":"login";
+    if(window.ocLoggedOut!==true)return;
+    window.showPage?.("register");
+    const choice=document.getElementById(mode==="register"?"authChoiceRegister":"authChoiceLogin");
+    if(choice)choice.click();
   });
 })();
 </script>
