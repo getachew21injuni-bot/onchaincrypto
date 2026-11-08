@@ -69,7 +69,6 @@ export async function executeStandardTrade({ user, body, env, dependencies = {} 
   const quantity = (quoteAmount * PRICE_SCALE) / priceUnits;
   if (quantity <= 0n) fail("Trade amount is too small for this asset.");
   const actualGross = side === "buy" ? quoteAmount : (quantity * priceUnits) / PRICE_SCALE;
-  if (actualGross < minimum) fail(`The minimum trade amount is ${symbol === "PAXG" ? "500" : "100"} USDT.`, 400, "MINIMUM_TRADE");
 
   const keyId = await hashKey(user.uid, operationId);
   const tradeId = crypto.randomUUID();
