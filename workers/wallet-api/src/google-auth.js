@@ -49,13 +49,16 @@ async function createAssertion(serviceAccount, nowSeconds) {
 }
 
 export async function getFirestoreAccessToken(secret, fetchImpl = fetch) {
-  if (cachedToken && Date.now() < cachedUntil) return cachedToken;
   let account;
   try {
     account = typeof secret === "string" ? JSON.parse(secret) : secret;
   } catch {
     throw new Error("Wallet service credentials are not valid JSON.");
   }
+  if (!account || typeof account.client_email !== "string" || typeof account.private_key !== "string" || account.token_uri !== TOKEN_URL) {
+    throw new Error("Wallet service credentials are incomplete or use an unapproved token endpoint.");
+  }
+  if (cachedToken && Date.now() < cachedUntil) return cachedToken;
   const now = Math.floor(Date.now() / 1000);
   const assertion = await createAssertion(account, now);
   const response = await fetchImpl(TOKEN_URL, {
