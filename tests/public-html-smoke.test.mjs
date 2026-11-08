@@ -19,7 +19,7 @@ test("all inline classic JavaScript parses", () => {
     try {
       new Script(source, { filename: "public/index.html#" + id });
     } catch (error) {
-      failures.push(id + ": " + error.message);
+      failures.push(id + ": " + error.stack);
     }
   }
   assert.ok(checked > 0, "Expected inline JavaScript to be checked");
