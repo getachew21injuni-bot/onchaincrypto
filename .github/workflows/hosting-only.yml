@@ -26,6 +26,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Test website HTML and JavaScript
+        run: node --test tests/public-html-smoke.test.mjs
+
       - name: Install Firebase CLI
         run: npm install --global firebase-tools
 
