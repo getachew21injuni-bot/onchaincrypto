@@ -356,7 +356,8 @@ var ALLOWED_ASSETS = /* @__PURE__ */ new Set([
   "WLD",
   "DAI",
   "FDUSD",
-  "PAXG"
+  "PAXG",
+  "XAUT"
 ]);
 async function getTrustedQuote(symbol, fetchImpl = fetch) {
   const asset = String(symbol || "").toUpperCase();
@@ -463,8 +464,8 @@ async function executeStandardTrade({ user, body, env, dependencies = {} }) {
   const operationId = body.operationId;
   if (typeof operationId !== "string" || !/^[A-Za-z0-9_-]{16,80}$/.test(operationId)) fail("A valid unique operation ID is required.");
   const quoteAmount = parseUnits(body.quoteAmount, "trade amount");
-  const minimum = symbol === "PAXG" ? 500n * SCALE : MIN_TRADE_USDT;
-  if (quoteAmount < minimum) fail(`The minimum trade amount is ${symbol === "PAXG" ? "500" : "100"} USDT.`, 400, "MINIMUM_TRADE");
+  const minimum = symbol === "XAUT" || symbol === "PAXG" ? 500n * SCALE : MIN_TRADE_USDT;
+  if (quoteAmount < minimum) fail(`The minimum trade amount is ${symbol === "XAUT" || symbol === "PAXG" ? "500" : "100"} USDT.`, 400, "MINIMUM_TRADE");
   const quote = await (dependencies.getQuote || getTrustedQuote)(symbol, dependencies.fetchImpl || fetch);
   const priceUnits = parsePriceUnits(quote.price);
   if (priceUnits <= 0n) fail("Invalid live market quote.", 503, "INVALID_QUOTE");
