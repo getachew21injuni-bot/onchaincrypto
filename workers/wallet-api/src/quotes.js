@@ -6,7 +6,7 @@ const ALLOWED_ASSETS = new Set([
   "HBAR","ARB","OP","RENDER","ATOM","VET","INJ","MKR","AAVE","GRT","ALGO",
   "THETA","MANA","SAND","AXS","EOS","ZEC","XMR","DASH","QNT","CAKE","FLOKI",
   "PEPE","BONK","FET","TAO","JUP","ONDO","SEI","KAS","STX","IMX","WLD","DAI",
-  "FDUSD","PAXG"
+  "FDUSD","PAXG","XAUT"
 ]);
 
 export async function getTrustedQuote(symbol, fetchImpl = fetch) {
