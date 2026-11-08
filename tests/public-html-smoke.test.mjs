@@ -38,7 +38,7 @@ test("HTML element IDs are unique", () => {
 });
 
 test("market, trade summary, and withdrawal validation elements are present", () => {
-  for (const id of ["marketRows", "priceChart", "timedTradeChart", "timedBoardChart", "timedResultBoard", "withdrawNetwork", "withdrawAddressCheck"]) {
+  for (const id of ["marketRows", "priceChart", "timedTradeChart", "timedBoardChart", "timedResultBoard", "timedBoardClose", "withdrawNetwork", "withdrawAddressCheck"]) {
     assert.ok(html.includes('id="' + id + '"') || html.includes("id='" + id + "'"), "Missing required element: " + id);
   }
   assert.ok(html.includes("data-api.binance.vision/api/v3/klines"), "Expected an independent chart-history fallback");
