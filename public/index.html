@@ -2921,13 +2921,26 @@ $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new 
 </script>
 
 <script>
-/* Keep auth diagnostics outside the Firebase module so this still runs if a CDN import stalls. */
+/* Startup watchdog: never leave the whole platform hidden if Firebase/CDN startup stalls. */
 setTimeout(() => {
   const status = document.getElementById("authStatus");
-  if (!status || !status.textContent.includes("Checking sign-in status")) return;
-  status.textContent = window.ocFirebaseModuleStarted
-    ? "Firebase loaded, but sign-in state is still waiting. Check your connection, then refresh."
-    : "Firebase sign-in service did not finish loading. Check your connection or network restrictions, then refresh.";
+  if (window.onchaincryptoCurrentUser || !document.documentElement.classList.contains("oc-auth-pending")) return;
+  if (status && /Checking sign-in status|Firebase loaded, but sign-in state is still waiting/i.test(status.textContent || "")) {
+    status.textContent = "Market view is ready. Sign in when the account service reconnects.";
+  }
+  document.documentElement.classList.remove("oc-auth-pending");
+  document.body.classList.add("oc-visitor-mode");
+  document.body.classList.remove("oc-auth-screen", "oc-register-mode");
+  const main = document.querySelector("main");
+  const market = document.getElementById("page-public-market");
+  if (main && market) {
+    main.querySelectorAll(':scope > section[id^="page-"]').forEach(section => {
+      section.style.setProperty("display", section === market ? "flex" : "none", "important");
+    });
+    market.style.setProperty("visibility", "visible", "important");
+    market.style.setProperty("opacity", "1", "important");
+  }
+  console.warn("OnChainSpro startup watchdog released the loading screen; Firebase auth can still complete later.");
 }, 12000);
 </script>
 
