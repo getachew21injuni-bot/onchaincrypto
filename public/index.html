@@ -6408,7 +6408,7 @@ const coinInfo={
  ton:{name:"Toncoin",symbol:"TON",id:"the-open-network",about:"Toncoin (TON) is the native asset of The Open Network, a blockchain ecosystem with links to Telegram."}
 };
 const coinAliases={btc:"bitcoin",bitcoin:"bitcoin",xbt:"bitcoin",eth:"ethereum",ethereum:"ethereum",ether:"ethereum",usdt:"tether",tether:"tether",bnb:"bnb",xrp:"xrp",ripple:"xrp",sol:"solana",solana:"solana",ada:"cardano",cardano:"cardano",doge:"dogecoin",dogecoin:"dogecoin",trx:"tron",tron:"tron",link:"chainlink",chainlink:"chainlink",avax:"avalanche",avalanche:"avalanche",dot:"polkadot",polkadot:"polkadot",ltc:"litecoin",litecoin:"litecoin",ton:"ton",toncoin:"ton"};
-const footer="For personal account assistance, create an account or sign in, then contact Support from inside the platform. Never share passwords or verification codes.";
+const footer="Need more help? Email support@onchainspro.com.";
 const answer=(body)=>body+"\n\n"+footer;
 const getCoin=q=>{const s=q.toLowerCase();for(const [alias,key] of Object.entries(coinAliases)){if(new RegExp("(^|[^a-z0-9])"+alias+"([^a-z0-9]|$)","i").test(s))return coinInfo[key]}return null};
 const fetchCoinPrice=async coin=>{
@@ -6425,34 +6425,34 @@ const respond=async q=>{
  const v=q.toLowerCase().trim();
  if(/^(hi|hello|hey|good morning|good afternoon|good evening|welcome|how are you)[!. ]*$/i.test(v)){add("Welcome to OnChainCrypto! I’m your visitor assistant. Explore Market Overview, ask about crypto or Gold, or get help creating an account. No login is needed to ask questions.");return;}
  const coin=getCoin(v);
- const asksPrice=/\\b(price|current|how much|value|quote|market rate|worth)\\b/i.test(v);
- if(coin&&(asksPrice||/\\b(about|what is|define|explain|tell me)\\b/i.test(v))){
+ const asksPrice=/\b(price|current|how much|value|quote|market rate|worth)\b/i.test(v);
+ if(coin&&(asksPrice||/\b(about|what is|define|explain|tell me)\b/i.test(v))){
   if(asksPrice){add("Checking the latest public quote for "+coin.name+"…");const price=await fetchCoinPrice(coin);add(answer(coin.name+" ("+coin.symbol+") reference price: "+price+" USD. Source: CoinGecko public market data. Check the in-app quote before taking action."));}
   else add(answer(coin.about));
   return;
  }
- if(/\\b(onchain|on chain|onchainspro|what is this platform|what is your platform)\\b/i.test(v))add(answer("OnChainSpro brings crypto and Gold markets, charts, trading tools, Wallet and account features together in one place. Explore Market Overview or create an account to access your account tools."));
- else if(/\\b(how (do|can) i (create|register|sign up)|how to (create|register|sign up)|create an account|account creation|registration|register|sign up|new account|open an account)\\b/i.test(v))add(answer("Select Sign Up, enter your details and follow the verification steps. When your account is ready, choose Login to continue."));
- else if(/\\b(login|log in|sign in|password|forgot password|reset password)\\b/i.test(v))add(answer("Select Login and enter your registered email, phone or username with your password. Use the password-reset option if needed."));
- else if(/\\b(deposit|fund|add money|add funds|receive crypto|deposit address)\\b/i.test(v))add(answer("Open Wallet → Deposit. Choose the asset and network, then match the address and network with your sending wallet. Check any memo/tag before sending."));
- else if(/\\b(withdraw|cash out|send crypto|withdrawal|payout)\\b/i.test(v))add(answer("Open Wallet → Withdraw. Select the asset and network, enter the destination and amount, then review the details before submitting."));
- else if(/\\b(convert|conversion|swap|exchange one coin|change coin|exchange crypto)\\b/i.test(v))add(answer("Open Wallet → Convert where available. Select both assets, enter an amount and review the rate, fees and final amount before confirming."));
- else if(/\\b(kyc|identity|verify identity|verification|proof of identity|document verification)\\b/i.test(v))add(answer("Open Verification in your account and follow the on-screen steps. You can review your verification status in the same section."));
- else if(/\\b(trade|trading|buy|sell|order|how do i make a trade|how to trade)\\b/i.test(v))add(answer("Open Markets, choose an asset and select Trade. Review the available direction, amount, displayed price and fees before confirming. The current workspace shows market-linked estimates; it does not submit orders to an external exchange."));
- else if(/\\b(gold|xau|xaut|gold trade|trade gold)\\b/i.test(v))add(answer("Explore Gold through the XAU/USDT market when listed. XAU represents gold exposure, and USDT is the quote asset. Open the pair to view its price and chart."));
- else if(/\\b(stock|stocks|share market|equity|shares)\\b/i.test(v))add(answer("Explore the Stocks section to view listed companies and available market information. Availability and order services are shown in the platform."));
- else if(/\\b(copy trade|copy trading|copy trader|copy someone|follow trader)\\b/i.test(v))add(answer("Open Copy Trading to explore available strategies, compare their focus and review risk information before choosing an option."));
- else if(/\\b(coin|coins|crypto|cryptocurrency|token|digital asset)\\b/i.test(v))add(answer("Explore Bitcoin, Ethereum, USDT, BNB, XRP, Solana and other listed assets in Market. Ask about any coin by name or ticker for a short explanation or public reference price."));
- else if(/\\b(market|market now|current market|market overview|market trend|bull|bear|chart|live price|prices)\\b/i.test(v))add(answer("Open Market Overview to browse listed assets, compare prices and view charts. Select an asset for its market details."));
- else if(/\\b(earn|staking|stake|rewards)\\b/i.test(v))add(answer("Open Earn to review the products currently available, including their supported assets, terms and displayed rates."));
- else if(/\\b(wallet|balance|asset|holding|my funds)\\b/i.test(v))add(answer("Open Wallet to view your balance, assets and available actions. Use History to review recorded account activity."));
- else if(/\\b(history|transaction|activity|performance|record)\\b/i.test(v))add(answer("Open History to review your recorded trades and account activity. Select a date or activity type to find a record."));
- else if(/\\b(referral|invite|refer|referral code)\\b/i.test(v))add(answer("Open Referral in your account to view your personal code or invitation link, when available."));
- else if(/\\b(profile|change email|change phone|personal details|account details|settings)\\b/i.test(v))add(answer("Open Profile or Account Settings to review your details, preferences and security options."));
- else if(/\\b(fee|fees|spread|minimum|limit|network fee|commission)\\b/i.test(v))add(answer("Check the fee, minimum and limit displayed on each confirmation screen before continuing. Email support if you need help understanding a charge."));
- else if(/\\b(safe|secure|scam|risk|protect|security|2fa)\\b/i.test(v))add(answer("Protect your account with a unique password and available security settings. Never share passwords, verification codes, private keys or recovery phrases."));
- else if(/\\b(thanks|thank you|thx|appreciate it)\\b/i.test(v))add("You’re welcome! I’m here whenever you need help.");
- else if(/\\b(support|contact|human|agent|admin|help|complaint|request|email)\\b/i.test(v))add(answer("Our support team can help with account questions, Wallet, deposits, withdrawals and platform features. Email support@onchainspro.com."));
+ if(/\b(onchain|on chain|onchainspro|what is this platform|what is your platform)\b/i.test(v))add(answer("OnChainSpro brings crypto and Gold markets, charts, trading tools, Wallet and account features together in one place. Explore Market Overview or create an account to access your account tools."));
+ else if(/\b(how (do|can) i (create|register|sign up)|how to (create|register|sign up)|create an account|account creation|registration|register|sign up|new account|open an account)\b/i.test(v))add(answer("Select Sign Up, enter your details and follow the verification steps. When your account is ready, choose Login to continue."));
+ else if(/\b(login|log in|sign in|password|forgot password|reset password)\b/i.test(v))add(answer("Select Login and enter your registered email, phone or username with your password. Use the password-reset option if needed."));
+ else if(/\b(deposit|fund|add money|add funds|receive crypto|deposit address)\b/i.test(v))add(answer("Open Wallet → Deposit. Choose the asset and network, then match the address and network with your sending wallet. Check any memo/tag before sending."));
+ else if(/\b(withdraw|cash out|send crypto|withdrawal|payout)\b/i.test(v))add(answer("Open Wallet → Withdraw. Select the asset and network, enter the destination and amount, then review the details before submitting."));
+ else if(/\b(convert|conversion|swap|exchange one coin|change coin|exchange crypto)\b/i.test(v))add(answer("Open Wallet → Convert where available. Select both assets, enter an amount and review the rate, fees and final amount before confirming."));
+ else if(/\b(kyc|identity|verify identity|verification|proof of identity|document verification)\b/i.test(v))add(answer("Open Verification in your account and follow the on-screen steps. You can review your verification status in the same section."));
+ else if(/\b(trade|trading|buy|sell|order|how do i make a trade|how to trade)\b/i.test(v))add(answer("Open Markets, choose an asset and select Trade. Review the available direction, amount, displayed price and fees before confirming. The current workspace shows market-linked estimates; it does not submit orders to an external exchange."));
+ else if(/\b(gold|xau|xaut|gold trade|trade gold)\b/i.test(v))add(answer("Explore Gold through the XAU/USDT market when listed. XAU represents gold exposure, and USDT is the quote asset. Open the pair to view its price and chart."));
+ else if(/\b(stock|stocks|share market|equity|shares)\b/i.test(v))add(answer("Explore the Stocks section to view listed companies and available market information. Availability and order services are shown in the platform."));
+ else if(/\b(copy trade|copy trading|copy trader|copy someone|follow trader)\b/i.test(v))add(answer("Open Copy Trading to explore available strategies, compare their focus and review risk information before choosing an option."));
+ else if(/\b(coin|coins|crypto|cryptocurrency|token|digital asset)\b/i.test(v))add(answer("Explore Bitcoin, Ethereum, USDT, BNB, XRP, Solana and other listed assets in Market. Ask about any coin by name or ticker for a short explanation or public reference price."));
+ else if(/\b(market|market now|current market|market overview|market trend|bull|bear|chart|live price|prices)\b/i.test(v))add(answer("Open Market Overview to browse listed assets, compare prices and view charts. Select an asset for its market details."));
+ else if(/\b(earn|staking|stake|rewards)\b/i.test(v))add(answer("Open Earn to review the products currently available, including their supported assets, terms and displayed rates."));
+ else if(/\b(wallet|balance|asset|holding|my funds)\b/i.test(v))add(answer("Open Wallet to view your balance, assets and available actions. Use History to review recorded account activity."));
+ else if(/\b(history|transaction|activity|performance|record)\b/i.test(v))add(answer("Open History to review your recorded trades and account activity. Select a date or activity type to find a record."));
+ else if(/\b(referral|invite|refer|referral code)\b/i.test(v))add(answer("Open Referral in your account to view your personal code or invitation link, when available."));
+ else if(/\b(profile|change email|change phone|personal details|account details|settings)\b/i.test(v))add(answer("Open Profile or Account Settings to review your details, preferences and security options."));
+ else if(/\b(fee|fees|spread|minimum|limit|network fee|commission)\b/i.test(v))add(answer("Check the fee, minimum and limit displayed on each confirmation screen before continuing. Email support if you need help understanding a charge."));
+ else if(/\b(safe|secure|scam|risk|protect|security|2fa)\b/i.test(v))add(answer("Protect your account with a unique password and available security settings. Never share passwords, verification codes, private keys or recovery phrases."));
+ else if(/\b(thanks|thank you|thx|appreciate it)\b/i.test(v))add("You’re welcome! I’m here whenever you need help.");
+ else if(/\b(support|contact|human|agent|admin|help|complaint|request|email)\b/i.test(v))add(answer("Our support team can help with account questions, Wallet, deposits, withdrawals and platform features. Email support@onchainspro.com."));
  else add(answer("I can help with OnChainSpro, accounts, Wallet, deposits, withdrawals, Markets, trading, crypto, Gold, stocks, KYC and History. Ask a short question or email support@onchainspro.com for personal assistance."));
 };
 const open=()=>{root.classList.add("is-open");if(!messages.childElementCount)add("Welcome to OnChainCrypto! I’m your visitor assistant. No account is needed to ask questions. Explore Market Overview, learn about the platform, or ask me how to create an account or sign in.");};
