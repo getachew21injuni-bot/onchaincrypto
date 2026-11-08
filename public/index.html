@@ -8180,30 +8180,30 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  async function updateSelected(){
   const token=++requestToken;
   const note=$('walletBalanceNote'),heading=document.querySelector('.wallet-eyebrow'),balance=$('walletBalance');
-  const st=typeof state!=='undefined'?state:{},usdtBalance=Number(st.balance||0);
-  const holdings=st.holdings||{};
-  const heldKey=Object.keys(holdings).find(k=>String(k).toUpperCase()===selected);
-  const selectedQty=selected==='USDT'?usdtBalance:Math.max(0,Number(heldKey?holdings[heldKey]:0)||0);
-  let price=selected==='USDT'?1:knownPrice(selected);
-  if(selected!=='USDT'&&price<=0){
-   if(heading)heading.textContent=selected+' BALANCE';
-   if(balance)balance.textContent='Loading price…';
-   if(note)note.textContent='Fetching current public price…';
+  const st=typeof state!=='undefined'?state:{},holdings=st.holdings||{};
+  let selectedPrice=selected==='USDT'?1:knownPrice(selected);
+  if(selected!=='USDT'&&selectedPrice<=0){
    renderOptions();
-   price=await resolvePrice(selected);
+   selectedPrice=await resolvePrice(selected);
    if(token!==requestToken)return;
   }
-  if(selected!=='USDT'&&(!Number.isFinite(price)||price<=0)){
-   if(heading)heading.textContent=selected+' BALANCE';
-   if(balance)balance.textContent='— '+selected;
-   if(note)note.textContent='Live price is temporarily unavailable. Your USDT balance is unchanged; try again shortly.';
-   toggle.textContent=selected+'⌄';renderOptions();return;
-  }
-  const qty=selectedQty;
-  if(heading)heading.textContent=selected==='USDT'?'YOUR BALANCE':selected+' BALANCE';
-  if(balance)balance.textContent=selected==='USDT'?usdtBalance.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT':qty.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:8})+' '+selected;
-  if(note)note.textContent=selected==='USDT'?'Displayed balance · not real funds':'≈ '+(qty*price).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2})+' equivalent · estimated value only';
-  toggle.textContent=selected+'⌄';renderOptions();
+  // The main wallet figure is always the full portfolio value in USDT.
+  let coinValue=0,priced=0,unpriced=0;
+  Object.entries(holdings).forEach(([sym,qty])=>{
+   const symbol=String(sym||'').toUpperCase(),amount=Number(qty)||0;
+   if(!symbol||symbol==='USDT'||amount<=0)return;
+   const price=knownPrice(symbol);
+   if(price>0){coinValue+=amount*price;priced++;}
+   else unpriced++;
+  });
+  const total=Math.max(0,Number(st.balance)||0)+coinValue;
+  if(heading)heading.textContent='TOTAL PORTFOLIO VALUE';
+  if(balance)balance.textContent=total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT';
+  if(note)note.textContent='USDT equivalent · '+priced+' priced coin holding'+(priced===1?'':'s')+(unpriced?'; '+unpriced+' asset price'+(unpriced===1?' is':'s are')+' unavailable and excluded':'');
+  const holdingsValue=$('holdingsValue');
+  if(holdingsValue)holdingsValue.textContent=coinValue.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT';
+  toggle.textContent=selected+'⌄';
+  renderOptions();
  }
  toggle.addEventListener('click',function(){renderOptions();const open=menu.classList.contains('hidden');menu.classList.toggle('hidden',!open);toggle.setAttribute('aria-expanded',String(open))});
  options.addEventListener('click',function(e){const btn=e.target.closest('[data-wallet-asset]');if(!btn)return;selected=btn.dataset.walletAsset;menu.classList.add('hidden');toggle.setAttribute('aria-expanded','false');updateSelected()});
