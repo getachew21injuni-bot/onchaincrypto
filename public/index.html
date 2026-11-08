@@ -5441,7 +5441,7 @@ window.ocSubmitGuestSupport=async({email,message})=>{
  batch.set(ticketRef,{ownerUid:visitor.uid,customerEmail:cleanEmail,customerName:"Website visitor",subject:"Website visitor support",status:"open",createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:cleanMessage,source:"visitor-bot"});
  batch.set(messageRef,{senderUid:visitor.uid,senderRole:"customer",senderName:"Website visitor",text:cleanMessage,createdAt:serverTimestamp()});
  await batch.commit();
- await signOut(guestAuth);
+ try{await signOut(guestAuth);}catch(error){console.warn("Guest support session cleanup deferred:",error?.code||error);}
  return true;
 };
 const app=getApps()[0]||initializeApp(config),auth=getAuth(app),db=getFirestore(app);
