@@ -1,15 +1,19 @@
-name: Backend build check
+name: Wallet API and backend checks
 
 on:
   push:
     paths:
-      - "functions/**"
-      - "firebase.json"
+      - "workers/wallet-api/**"
+      - "tests/wallet-api-*.test.mjs"
+      - "tests/firestore-rest.test.mjs"
+      - "package.json"
       - ".github/workflows/backend-check.yml"
   pull_request:
     paths:
-      - "functions/**"
-      - "firebase.json"
+      - "workers/wallet-api/**"
+      - "tests/wallet-api-*.test.mjs"
+      - "tests/firestore-rest.test.mjs"
+      - "package.json"
       - ".github/workflows/backend-check.yml"
   workflow_dispatch:
 
@@ -17,7 +21,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  wallet-api-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -26,9 +30,5 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install backend dependencies
-        working-directory: functions
-        run: npm install
-      - name: Compile TypeScript
-        working-directory: functions
-        run: npm run build
+      - name: Run isolated wallet API tests
+        run: npm run test:wallet-api
