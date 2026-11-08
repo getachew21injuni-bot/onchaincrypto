@@ -7064,7 +7064,8 @@ body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.descr
     if(!button)return;
     var home=document.getElementById('page-home');
     var homeActive=!!home && !home.classList.contains('hidden') && getComputedStyle(home).display!=='none';
-    button.hidden=!homeActive;
+    var shouldHide=!homeActive;
+    if(button.hidden!==shouldHide)button.hidden=shouldHide;
     if(installed()){
       button.innerHTML='<span aria-hidden="true">✓</span> App Installed';
       button.setAttribute('aria-label','OnChainSpro app installed');
@@ -7128,8 +7129,13 @@ body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.descr
     if(event.target.closest('#bottomNav button,[data-bottom-page]'))window.setTimeout(refresh,80);
   });
   if('MutationObserver' in window){
-    var observer=new MutationObserver(refresh);
-    observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class','style','hidden']});
+    // Watch only Home visibility. Observing every page's style/hidden attributes
+    // caused repeated refreshes while the login screen was active.
+    var homePage=document.getElementById('page-home');
+    if(homePage){
+      var observer=new MutationObserver(refresh);
+      observer.observe(homePage,{attributes:true,attributeFilter:['class']});
+    }
   }
   window.addEventListener('pageshow',refresh);
 })();
