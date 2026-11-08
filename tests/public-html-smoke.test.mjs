@@ -45,19 +45,19 @@ test("market, trade summary, and withdrawal validation elements are present", ()
   assert.ok(html.includes("networksByAsset"), "Expected asset-specific withdrawal network rules");
 });
 
-test("home quick actions start with four and expand on demand", () => {
+test("home quick actions use one More/Less controller", () => {
   const start = html.indexOf('id="page-home"');
   const end = html.indexOf('id="page-markets"', start);
   assert.ok(start >= 0 && end > start, "Expected home and market page sections");
   const home = html.slice(start, end);
-  const visible = [...home.matchAll(/class="quick-action"(?![^"]*home-quick-action-extra)/g)];
-  const extra = [...home.matchAll(/class="quick-action home-quick-action-extra/g)];
-  assert.equal(visible.length, 4, "Home should show four actions first");
-  assert.equal(extra.length, 5, "Five extra actions should be available");
-  for (const id of ["homeQuickActionMore", "homeQuickActionLess"]) {
-    assert.ok(home.includes('id="' + id + '"'), "Missing control: " + id);
-  }
-  assert.ok(html.includes("#homeQuickActionMore"), "Expected More/Less click handling");
+  const actions = [...home.matchAll(/class="quick-action(?:\s+[^"]*)?"/g)];
+  assert.equal(actions.length, 9, "Expected nine Home actions");
+  assert.ok(html.includes('id="homeQuickActionsMoreWrap"'), "Expected the shared More/Less wrapper");
+  assert.ok(html.includes('id="homeQuickActionsMore"'), "Expected the shared More/Less button");
+  assert.equal((html.match(/id="homeQuickActionsMoreWrap"/g) || []).length, 1, "Only one More/Less wrapper should exist");
+  assert.equal((html.match(/id="homeQuickActionMore"/g) || []).length, 0, "Legacy duplicate control should be removed");
+  assert.equal((html.match(/home-quick-action-extra/g) || []).length, 0, "Legacy competing visibility classes should be removed");
+  assert.ok(html.includes('actions.forEach((item,index)=>item.classList.toggle("oc-quick-action-hidden",!expanded&&index>=4))'));
 });
 
 test("wallet forms use concise network labels and hide unavailable deposit networks", () => {
