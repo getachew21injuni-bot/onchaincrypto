@@ -5546,9 +5546,8 @@ async function checkAutomaticMarketAlert(){
 }
 document.addEventListener("click",async event=>{
  const button=event.target.closest("[data-oc-market-alert]");if(!button)return;
- const status=byId("ocAdminMarketAlertStatus"),kind=button.dataset.ocMarketAlert,field=byId("ocAdminMarketAlertMessage"),message=String(field?.value||"").trim();
+ const status=byId("ocAdminMarketAlertStatus"),kind=button.dataset.ocMarketAlert,field=byId("ocAdminMarketAlertMessage"),customMessage=String(field?.value||"").trim(),message=customMessage||(kind==="bullish"?"Market momentum is turning positive. Review the latest market movement and consider your trading opportunities carefully.":"Market momentum is turning negative. Review current conditions and manage your risk carefully.");
  if(!currentAdmin||!auth.currentUser?.emailVerified){if(status)status.textContent="Verified administrator access is required.";return;}
- if(!message){if(status)status.textContent="Enter the alert message first.";field?.focus();return;}
  button.disabled=true;if(status)status.textContent="Publishing alert to all signed-in users…";
  try{await publishMarketAlert(kind,message);if(status)status.textContent=(kind==="bullish"?"Bullish":"Bearish")+" alert published to Notifications for all signed-in users.";if(field)field.value="";}
  catch(error){if(status)status.textContent="Could not publish alert ("+(error.code||error.message||"error")+").";}
