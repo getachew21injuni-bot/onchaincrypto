@@ -7133,6 +7133,41 @@ html.oc-auth-pending body #bottomNav { display:none!important; }
 #timedResultBoard [id^="timedBoard"]{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 @media(max-width:560px){#timedPaperTrade.oc-stage-complete>#timedResultBoard{padding:12px!important}#timedBoardChart{height:170px}}
 </style>
+
+<script id="oc-profile-menu-click-repair">
+(function(){
+  const trigger=document.getElementById("moreMenuBtn");
+  const menu=document.getElementById("moreMenu");
+  if(!trigger||!menu)return;
+  function setOpen(open){
+    menu.classList.toggle("hidden",!open);
+    menu.style.setProperty("display",open?"block":"none","important");
+    menu.style.setProperty("visibility",open?"visible":"hidden","important");
+    menu.style.setProperty("opacity",open?"1":"0","important");
+    menu.style.setProperty("pointer-events",open?"auto":"none","important");
+    menu.style.setProperty("z-index","99999","important");
+    trigger.setAttribute("aria-expanded",String(open));
+    menu.setAttribute("aria-hidden",String(!open));
+  }
+  // Intercept the trigger before older handlers can toggle it back closed.
+  document.addEventListener("click",function(event){
+    const hit=event.target instanceof Element?event.target.closest("#moreMenuBtn"):null;
+    if(hit){
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      setOpen(trigger.getAttribute("aria-expanded")!=="true");
+      return;
+    }
+    if(!menu.contains(event.target)&&!event.target.closest?.("#moreMenuBtn")){
+      if(trigger.getAttribute("aria-expanded")==="true")setOpen(false);
+    }
+  },true);
+  document.addEventListener("keydown",function(event){
+    if(event.key==="Escape")setOpen(false);
+  });
+  setOpen(false);
+})();
+</script>
 </body>
 </html>
 
