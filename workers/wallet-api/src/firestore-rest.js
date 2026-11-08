@@ -20,8 +20,8 @@ function firestoreError(status, payload) {
   return error;
 }
 
-async function firestoreRequest(url, token, options = {}) {
-  const response = await fetch(url, {
+async function firestoreRequest(url, token, options = {}, fetchImpl = fetch) {
+  const response = await fetchImpl(url, {
     ...options,
     headers: {
       Authorization: `Bearer ${token}`,
@@ -39,18 +39,20 @@ async function firestoreRequest(url, token, options = {}) {
   return payload;
 }
 
-export async function withFirestoreTransaction(env, callback, maxAttempts = 3) {
+export async function withFirestoreTransaction(env, callback, maxAttempts = 3, dependencies = {}) {
   if (!env.FIREBASE_PROJECT_ID || !env.FIREBASE_SERVICE_ACCOUNT) {
     throw new Error("Wallet database is not configured.");
   }
-  const token = await getFirestoreAccessToken(env.FIREBASE_SERVICE_ACCOUNT);
+  const tokenProvider = dependencies.getAccessToken || getFirestoreAccessToken;
+  const fetchImpl = dependencies.fetchImpl || fetch;
+  const token = await tokenProvider(env.FIREBASE_SERVICE_ACCOUNT);
   const base = `${API_ROOT}/projects/${encodeURIComponent(env.FIREBASE_PROJECT_ID)}/databases/(default)/documents`;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const started = await firestoreRequest(`${base}:beginTransaction`, token, {
       method: "POST",
       body: JSON.stringify({ options: { readWrite: {} } })
-    });
+    }, fetchImpl);
     if (typeof started?.transaction !== "string") throw new Error("Firestore did not start a transaction.");
 
     const writes = [];
@@ -60,7 +62,7 @@ export async function withFirestoreTransaction(env, callback, maxAttempts = 3) {
         const results = await firestoreRequest(`${base}:batchGet`, token, {
           method: "POST",
           body: JSON.stringify({ documents: [name], transaction: started.transaction })
-        });
+        }, fetchImpl);
         const found = Array.isArray(results) ? results.find(item => item.found)?.found : null;
         const missing = Array.isArray(results) ? results.some(item => item.missing) : false;
         if (found) return found;
@@ -104,13 +106,13 @@ export async function withFirestoreTransaction(env, callback, maxAttempts = 3) {
         await firestoreRequest(`${base}:rollback`, token, {
           method: "POST",
           body: JSON.stringify({ transaction: started.transaction })
-        });
+        }, fetchImpl);
         return result;
       }
       await firestoreRequest(`${base}:commit`, token, {
         method: "POST",
         body: JSON.stringify({ writes, transaction: started.transaction })
-      });
+      }, fetchImpl);
       return result;
     } catch (error) {
       try {
