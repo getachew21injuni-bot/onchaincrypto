@@ -1397,7 +1397,8 @@ html.oc-auth-pending body > nav {
       <div class="oc-visitor-detail-head"><div><div class="oc-visitor-kicker">ASSET OVERVIEW</div><h3 id="ocVisitorDetailName">Bitcoin</h3><span id="ocVisitorDetailSymbol">BTC / USD</span></div><button type="button" class="secondary" id="ocVisitorDetailClose" aria-label="Close asset details">✕</button></div>
       <div class="oc-visitor-detail-stats"><div><small>Current price</small><strong id="ocVisitorDetailPrice">—</strong></div><div><small>24H change</small><strong id="ocVisitorDetailChange">—</strong></div><div><small>Market cap</small><strong id="ocVisitorDetailCap">—</strong></div></div>
       <div class="oc-visitor-chart-wrap"><iframe id="ocVisitorTradingChart" title="Selected asset price chart" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-      
+      <div class="oc-visitor-signal-summary" aria-live="polite"><div><small id="ocVisitorSignalLabel">24H MARKET MOMENTUM</small><strong id="ocVisitorDetailSignal">Market overview</strong><span id="ocVisitorSignalNote">Based on the latest available 24-hour price movement</span></div><span class="oc-visitor-signal-mark" aria-hidden="true">↗</span></div>
+      <div class="oc-visitor-buy-row"><button type="button" class="oc-visitor-buy-button" data-visitor-buy>Buy <span id="ocVisitorBuySymbol">BTC</span><b aria-hidden="true">→</b></button></div>
     </section>
   </section>
 
@@ -1630,7 +1631,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
         <div class="oc-stock-brand-card" role="button" tabindex="0" data-stock-pick="GOOGL" aria-label="Select Alphabet (GOOGL)"><span class="oc-stock-brand-mark" style="--stock-brand:#4285F4">G</span><span><b>GOOGL</b><small>Alphabet</small></span></div>
         <div class="oc-stock-brand-card" role="button" tabindex="0" data-stock-pick="META" aria-label="Select Meta Platforms (META)"><span class="oc-stock-brand-mark" style="--stock-brand:#0866FF">∞</span><span><b>META</b><small>Meta Platforms</small></span></div>
       </div>
-      <div class="oc-stock-widget-wrap"><tv-market-overview symbol-sectors='[{"sectionName":"US Stocks","symbols":["NASDAQ:AAPL","NASDAQ:MSFT","NASDAQ:NVDA","NASDAQ:TSLA","NASDAQ:AMZN","NASDAQ:GOOGL","NASDAQ:META"]}]' theme="light" locale="en"></tv-market-overview></div>
+      <div class="oc-stock-widget-wrap"><tv-market-overview symbol-sectors='[{"sectionName":"US Stocks","symbols":["NASDAQ:AAPL","NASDAQ:MSFT","NASDAQ:NVDA","NASDAQ:TSLA","NASDAQ:AMZN","NASDAQ:GOOGL","NASDAQ:META"]}]' theme="dark" locale="en"></tv-market-overview></div>
       <div class="oc-stock-brokerage" id="ocStockBrokerageWorkspace">
         <div>
           <div class="oc-stock-brokerage-head"><h3>Stock trading</h3><span class="oc-stock-brokerage-status" id="ocStockBrokerStatus">BROKER CONNECTION PENDING</span></div>
@@ -3858,7 +3859,7 @@ window.addEventListener("popstate", async () => {
     if(switchText)switchText.classList.toggle('hidden',creating);
     if(registerSwitch)registerSwitch.classList.toggle('hidden',!creating);
     if(intro)intro.innerHTML=creating?'<h2>Create your account</h2><p class="muted tiny">Join with your name and either email or phone.</p>':'';
-    if(heading)heading.textContent=creating?'Create your Onchain account':'Welcome back to Onchain';
+    if(heading)heading.textContent=creating?'Create your OnChain account':'Welcome back to OnChain';
     if(sub){sub.textContent=creating?'Set up your account to continue.':'';sub.classList.toggle('hidden',!creating);}
   }
   document.getElementById('showRegisterBtn')?.addEventListener('click',()=>{const method=document.getElementById('registerContactMethod');if(method){method.value='email';method.dispatchEvent(new Event('change'));}setMode('register');});
@@ -5676,8 +5677,8 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
    if(more)more.style.display="none";
    if(!stockMatches.length){rows.innerHTML='<tr><td colspan="5" class="oc-visitor-empty">No matching US stocks. Try AAPL, MSFT, NVDA or another ticker.</td></tr>';return}
    const sectors=[{sectionName:"US Stocks",symbols:stockMatches.map(x=>"NASDAQ:"+x.symbol)}];
-   const brandCards=stockMatches.map(x=>'<div class="oc-stock-brand-card"><span class="oc-stock-brand-mark" style="--stock-brand:'+x.color+'">'+escapeHtml(x.mark)+'</span><span><b>'+escapeHtml(x.symbol)+'</b><small>'+escapeHtml(x.name)+'</small></span></div>').join("");
-   rows.innerHTML='<tr><td colspan="4"><div class="oc-visitor-stocks-panel"><div class="oc-stock-brand-grid">'+brandCards+'</div><div class="oc-stock-widget-wrap"><tv-market-overview symbol-sectors=\''+escapeHtml(JSON.stringify(sectors))+'\' theme="light" locale="en"></tv-market-overview></div><p class="oc-stock-note">Quotes and charts powered by TradingView. Market data may be delayed. Stock order placement requires an approved brokerage connection.</p></div></td></tr>';
+   const brandCards=stockMatches.map(x=>'<button type="button" class="oc-stock-brand-card" data-visitor-detail="'+escapeHtml(x.symbol)+'"><span class="oc-stock-brand-mark" style="--stock-brand:'+x.color+'">'+escapeHtml(x.mark)+'</span><span><b>'+escapeHtml(x.symbol)+'</b><small>'+escapeHtml(x.name)+'</small></span><em>View chart →</em></button>').join("");
+   rows.innerHTML='<tr><td colspan="4"><div class="oc-visitor-stocks-panel"><div class="oc-stock-brand-grid">'+brandCards+'</div><div class="oc-stock-widget-wrap"><tv-market-overview symbol-sectors=\''+escapeHtml(JSON.stringify(sectors))+'\' theme="dark" locale="en"></tv-market-overview></div><p class="oc-stock-note">Quotes and charts powered by TradingView. Market data may be delayed. Stock order placement requires an approved brokerage connection.</p></div></td></tr>';
    return;
   }
   if(!visible.length){
@@ -5691,11 +5692,12 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  }
  function chartUrl(asset){
   const s=String(asset?.symbol||"BTC").toUpperCase();
-  const symbol=s==="XAU"?"OANDA:XAUUSD":s==="BTC"?"BINANCE:BTCUSDT":s==="USDT"?"BINANCE:USDTUSDC":s==="USDC"?"BINANCE:USDCUSDT":"BINANCE:"+s+"USDT";
+  const stockSymbols=["AAPL","MSFT","NVDA","TSLA","AMZN","GOOGL","META"];
+  const symbol=stockSymbols.includes(s)?"NASDAQ:"+s:s==="XAU"?"OANDA:XAUUSD":s==="BTC"?"BINANCE:BTCUSDT":s==="USDT"?"BINANCE:USDTUSDC":s==="USDC"?"BINANCE:USDCUSDT":"BINANCE:"+s+"USDT";
   return "https://s.tradingview.com/widgetembed/?frameElementId=ocVisitorTradingChart&symbol="+encodeURIComponent(symbol)+"&interval=60&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=%23081727&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&locale=en";
  }
  function showDetails(symbol){
-  const known={BTC:"Bitcoin",ETH:"Ethereum",USDT:"Tether",BNB:"BNB",XRP:"XRP",USDC:"USDC",SOL:"Solana",ADA:"Cardano",DOGE:"Dogecoin",TRX:"TRON",XAU:"Gold"};
+  const known={BTC:"Bitcoin",ETH:"Ethereum",USDT:"Tether",BNB:"BNB",XRP:"XRP",USDC:"USDC",SOL:"Solana",ADA:"Cardano",DOGE:"Dogecoin",TRX:"TRON",XAU:"Gold",AAPL:"Apple",MSFT:"Microsoft",NVDA:"NVIDIA",TSLA:"Tesla",AMZN:"Amazon",GOOGL:"Alphabet",META:"Meta Platforms"};
   const a=findAsset(symbol)||{symbol:String(symbol).toUpperCase(),name:known[String(symbol).toUpperCase()]||String(symbol).toUpperCase(),current_price:null,price_change_percentage_24h:null,market_cap:null};
   selectedAsset=a;
   $("ocVisitorDetailName").textContent=a.name;
@@ -5705,7 +5707,11 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
   $("ocVisitorDetailChange").textContent=fmtChange(change);
   $("ocVisitorDetailChange").style.color=change>=0?"#16d9a0":"#ff6b82";
   $("ocVisitorDetailCap").textContent=Number(a.market_cap)>0?compact(a.market_cap):"—";
-  $("ocVisitorBuySymbol").textContent=String(a.symbol).toUpperCase();
+  const assetSymbol=String(a.symbol).toUpperCase(),isStock=["AAPL","MSFT","NVDA","TSLA","AMZN","GOOGL","META"].includes(assetSymbol);
+  $("ocVisitorBuySymbol").textContent=assetSymbol;
+  const signal=$("ocVisitorDetailSignal"),signalLabel=$("ocVisitorSignalLabel"),signalNote=$("ocVisitorSignalNote"),buyButton=$("ocVisitorCoinDetail").querySelector("[data-visitor-buy]");
+  if(isStock){if(signalLabel)signalLabel.textContent="STOCK MARKET OVERVIEW";if(signal)signal.textContent="View live chart";if(signalNote)signalNote.textContent="Company market information and chart";if(buyButton)buyButton.firstChild.textContent="Explore ";}
+  else{const raw=a.price_change_percentage_24h,hasChange=raw!==null&&raw!==undefined&&Number.isFinite(Number(raw)),move=Number(raw)||0;if(signalLabel)signalLabel.textContent="24H MARKET MOMENTUM";if(signal)signal.textContent=!hasChange?"Awaiting market data":move>0?"Positive momentum":move<0?"Negative momentum":"Sideways movement";if(signalNote)signalNote.textContent=hasChange?fmtChange(raw)+" over the last 24 hours":"Based on the latest available market data";if(buyButton)buyButton.firstChild.textContent="Buy ";}
   $("ocVisitorTradingChart").src=chartUrl(a);
   $("ocVisitorCoinDetail").classList.remove("hidden");
   $("ocVisitorCoinDetail").scrollIntoView({behavior:"smooth",block:"start"});
@@ -5714,7 +5720,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
   refreshVisitorPinnedQuotes();renderTicker();renderTable();
   const status=$("ocVisitorFeedStatus");if(status){const live=!!window.ocMarketLastSuccess,stale=!live&&getAssets().length>0;status.classList.toggle("is-live",live);status.classList.toggle("is-stale",stale);status.classList.toggle("is-offline",!live&&!stale);const label=status.querySelector("span");if(label)label.textContent=live?"Market feed active":stale?"Recent market snapshot":"Explore market overview";}
   const btc=findAsset("BTC");if(btc){$("ocVisitorHeroPrice").textContent=priceText(btc);const chg=Number(btc.price_change_percentage_24h)||0;$("ocVisitorHeroChange").textContent=fmtChange(chg)+" · 24H";$("ocVisitorHeroChange").style.color=chg>=0?"#16d9a0":"#ff6b82"}
-  if(selectedAsset){const current=findAsset(selectedAsset.symbol);if(current){$("ocVisitorDetailPrice").textContent=priceText(current);$("ocVisitorDetailChange").textContent=fmtChange(current.price_change_percentage_24h);$("ocVisitorDetailCap").textContent=compact(current.market_cap)}}
+  if(selectedAsset){const current=findAsset(selectedAsset.symbol);if(current){$("ocVisitorDetailPrice").textContent=priceText(current);$("ocVisitorDetailChange").textContent=fmtChange(current.price_change_percentage_24h);$("ocVisitorDetailCap").textContent=compact(current.market_cap);const signal=$("ocVisitorDetailSignal"),note=$("ocVisitorSignalNote"),raw=current.price_change_percentage_24h,hasChange=raw!==null&&raw!==undefined&&Number.isFinite(Number(raw)),move=Number(raw)||0;if(signal)signal.textContent=!hasChange?"Awaiting market data":move>0?"Positive momentum":move<0?"Negative momentum":"Sideways movement";if(note)note.textContent=hasChange?fmtChange(raw)+" over the last 24 hours":"Based on the latest available market data"}}
  };
  document.addEventListener("click",event=>{
   const detail=event.target.closest("[data-visitor-detail]");if(detail){showDetails(detail.dataset.visitorDetail);return}
@@ -11796,6 +11802,39 @@ body.oc-auth-screen:not(.oc-register-mode) #page-register #registerForm{display:
 body.oc-auth-screen:not(.oc-register-mode) #page-register #signInForm:not(.hidden){display:block!important}
 body.oc-auth-screen.oc-register-mode #page-register #signInForm{display:none!important}
 body.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden){display:block!important}
+</style>
+
+<style id="oc-visitor-asset-journey-and-auth-polish">
+#ocVisitorCoinDetail{scroll-margin-top:22px}
+#ocVisitorCoinDetail .oc-visitor-signal-summary{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:16px 0 12px;padding:16px 18px;border:1px solid rgba(37,211,145,.25);border-radius:14px;background:linear-gradient(115deg,rgba(12,45,47,.88),rgba(12,26,43,.94))}
+#ocVisitorCoinDetail .oc-visitor-signal-summary>div{display:grid;gap:5px}
+#ocVisitorCoinDetail .oc-visitor-signal-summary small{font-size:10px;letter-spacing:1.1px;font-weight:850;color:#91b8c5}
+#ocVisitorCoinDetail .oc-visitor-signal-summary strong{font-size:17px;color:#e9f7f4}
+#ocVisitorCoinDetail .oc-visitor-signal-summary span{font-size:12px;color:#a8bdc9}
+#ocVisitorCoinDetail .oc-visitor-signal-mark{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:50%;background:rgba(32,214,133,.13);color:#20d685;font-size:22px}
+#ocVisitorCoinDetail .oc-visitor-buy-row{display:flex;justify-content:flex-end;margin:0 0 4px}
+#ocVisitorCoinDetail .oc-visitor-buy-button{display:flex;align-items:center;justify-content:center;gap:8px;min-width:190px;min-height:48px;padding:12px 20px;border:1px solid #0ca76a;border-radius:11px;background:linear-gradient(110deg,#19c77b,#079b62);color:#041b12;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 8px 22px rgba(13,185,111,.2)}
+#ocVisitorCoinDetail .oc-visitor-buy-button b{font-size:19px}
+#ocVisitorCoinDetail .oc-visitor-buy-button:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.oc-stock-brand-card{appearance:none;text-align:left;cursor:pointer}
+.oc-stock-brand-card em{display:block;margin-top:5px;color:#159b70;font-size:11px;font-style:normal;font-weight:800}
+.oc-stock-brand-card:hover{border-color:#19c77b!important;transform:translateY(-1px)}
+body.oc-auth-screen #page-register{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:16px!important;width:min(100%,620px)!important;max-width:620px!important;min-height:100vh!important;margin:0 auto!important;padding:clamp(18px,4vw,36px)!important;grid-template-columns:1fr!important;grid-template-rows:auto auto!important}
+body.oc-auth-screen #page-register>.auth-welcome{order:0!important;grid-column:1!important;grid-row:auto!important;width:100%!important;margin:0 auto 2px!important;text-align:center!important;align-self:center!important}
+body.oc-auth-screen #page-register>.content-grid{order:1!important;grid-column:1!important;grid-row:auto!important;width:100%!important;max-width:520px!important;margin:0 auto!important}
+body.oc-auth-screen #page-register .auth-main-panel{width:100%!important;max-width:520px!important;margin:0 auto!important}
+body.oc-auth-screen #page-register .auth-welcome h1{font-size:clamp(27px,5vw,36px)!important;font-weight:900!important;letter-spacing:-.6px!important;text-align:center!important}
+body.oc-auth-screen #page-register .auth-welcome .auth-brand,
+body.oc-auth-screen #page-register .auth-welcome .auth-logo-mark{display:none!important}
+body.oc-auth-screen #page-register #signInForm button[type=submit],
+body.oc-auth-screen #page-register #registerForm button[type=submit]{color:#042016!important;background:linear-gradient(110deg,#20d68a,#08a66a)!important;border:1px solid #078957!important;box-shadow:0 8px 22px rgba(8,166,106,.2)!important}
+body.oc-auth-screen #page-register #signInForm button[type=submit]:hover,
+body.oc-auth-screen #page-register #registerForm button[type=submit]:hover{filter:brightness(1.06)!important}
+@media(max-width:640px){
+ body.oc-auth-screen #page-register{min-height:100svh!important;padding:18px 14px!important;justify-content:center!important}
+ #ocVisitorCoinDetail .oc-visitor-buy-row{justify-content:stretch}
+ #ocVisitorCoinDetail .oc-visitor-buy-button{width:100%}
+}
 </style>
 
 </body>
