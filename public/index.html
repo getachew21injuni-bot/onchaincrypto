@@ -11827,6 +11827,65 @@ body:not(.oc-auth-screen) .wallet-summary-strip strong{color:#12486e!important}
 </style>
 </style>
 
-
-
-
+<style id="oc-visitor-layout-single-view-fix">
+/* Guest visitors get one scrollable public market page, never stacked app pages. */
+body.oc-visitor-mode{padding-bottom:0!important;overflow-x:hidden!important}
+body.oc-visitor-mode>header{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:14px!important;min-height:68px!important;height:auto!important;padding:10px 18px!important;
+  position:relative!important;top:auto!important;flex-wrap:nowrap!important;
+}
+body.oc-visitor-mode>header .brand{display:flex!important;align-items:center!important;justify-self:auto!important;min-width:0!important}
+body.oc-visitor-mode>header #nav,
+body.oc-visitor-mode>header #refreshBtn,
+body.oc-visitor-mode>header #ocBackBtn,
+body.oc-visitor-mode>header .more-menu-wrap,
+body.oc-visitor-mode>header #ocThemeToggle,
+body.oc-visitor-mode>#bottomNav{display:none!important}
+body.oc-visitor-mode>header .header-right{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;margin-left:auto!important;min-width:0!important}
+body.oc-visitor-mode #ocVisitorActions{display:flex!important;align-items:center!important;gap:8px!important;flex-wrap:nowrap!important}
+body.oc-visitor-mode #ocVisitorActions button{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:88px!important;min-height:40px!important;white-space:nowrap!important}
+body.oc-visitor-mode>main{
+  display:block!important;width:100%!important;min-height:0!important;
+  margin:0 auto!important;padding:0 16px 42px!important;overflow:visible!important;
+}
+body.oc-visitor-mode>main>section[id^="page-"]:not(#page-public-market){display:none!important}
+body.oc-visitor-mode>main>#page-public-market,
+body.oc-visitor-mode>main>#page-public-market.hidden{
+  display:block!important;visibility:visible!important;opacity:1!important;
+  position:relative!important;inset:auto!important;transform:none!important;
+  width:min(100%,1280px)!important;max-width:1280px!important;
+  height:auto!important;min-height:0!important;margin:0 auto!important;
+  padding:22px 0 36px!important;overflow:visible!important;
+}
+body.oc-visitor-mode #page-public-market .oc-visitor-hero-actions,
+body.oc-visitor-mode #page-public-market .oc-visitor-bottom-cta{display:none!important}
+body.oc-visitor-mode>footer{display:block!important;position:relative!important}
+@media(max-width:600px){
+  body.oc-visitor-mode>header{padding:9px 12px!important;gap:8px!important}
+  body.oc-visitor-mode>header .brand{font-size:17px!important}
+  body.oc-visitor-mode #ocVisitorActions{gap:6px!important}
+  body.oc-visitor-mode #ocVisitorActions button{min-width:72px!important;min-height:38px!important;padding:7px 10px!important;font-size:12px!important}
+  body.oc-visitor-mode>main{padding:0 10px 32px!important}
+  body.oc-visitor-mode>main>#page-public-market{padding-top:14px!important}
+}
+</style>
+<script id="oc-visitor-layout-single-view-controller">
+(function(){
+  function applyGuestView(){
+    if(window.ocLoggedOut!==true)return;
+    if(!document.body)return;
+    document.body.classList.add("oc-visitor-mode");
+    document.body.classList.remove("oc-auth-screen","oc-register-mode");
+    document.documentElement.classList.remove("oc-auth-pending");
+    document.querySelectorAll('main>section[id^="page-"]').forEach(function(section){
+      section.classList.toggle("hidden",section.id!=="page-public-market");
+    });
+    var publicPage=document.getElementById("page-public-market");
+    if(publicPage)publicPage.classList.remove("hidden");
+  }
+  applyGuestView();
+  document.addEventListener("DOMContentLoaded",applyGuestView,{once:true});
+  window.addEventListener("pageshow",applyGuestView);
+})();
+</script>
