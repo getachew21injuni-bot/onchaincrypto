@@ -1335,6 +1335,20 @@ body.oc-visitor-mode:not(.oc-auth-screen) main > :not(#page-public-market){
   display:none!important;visibility:hidden!important;pointer-events:none!important;
 }
 </style>
+<style id="oc-onchain-browser-results">
+#page-browser .browser-google-search{flex-wrap:wrap}
+#page-browser .browser-google-search button{min-height:46px}
+#page-browser .browser-link-grid button{display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:16px;border:1px solid var(--line);border-radius:13px;background:var(--panel2,var(--panel));color:var(--text);text-align:left;cursor:pointer}
+#page-browser .browser-link-grid button>span{font-size:23px;color:var(--green);font-weight:850}
+#page-browser .browser-link-grid button small{color:var(--muted)}
+.browser-onchain-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:16px}
+.browser-asset-result{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel2,var(--panel));min-width:0}
+.browser-asset-main,.browser-asset-price{display:flex;align-items:center;gap:10px}
+.browser-asset-price{justify-content:space-between;margin-top:14px;flex-wrap:wrap}
+.browser-asset-result p{font-size:13px;line-height:1.55;color:var(--muted);min-height:40px}
+.browser-asset-result button{width:100%;margin-top:6px}
+@media(max-width:560px){#page-browser .browser-google-search{flex-direction:column}#page-browser .browser-google-search button{width:100%}}
+</style>
 </head>
 <body>
 <header>
@@ -1982,36 +1996,25 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
   <section id="page-financial" class="hidden"><div class="page-title"><div><h1>⇵ Financial</h1><div class="muted">Wallet actions, transfers and transaction activity.</div></div><span class="tag">FINANCIAL</span></div><div id="financialPageContent"></div></section>
   <section id="page-kyc" class="hidden"><div class="page-title"><div><h1>✓ Identity Verification</h1><div class="muted">Review identity verification status and requirements.</div></div><span class="tag">IDENTITY</span></div><div id="kycPageContent"></div></section>
   <section id="page-browser" class="hidden">
-    <div class="page-title"><div><h1>Onchain Explorer</h1><div class="muted">Discover the Onchain platform and explore public market information.</div></div><span class="tag">EXPLORE</span></div>
-    <section class="panel browser-search-panel" aria-label="Google Search">
-      <div class="browser-search-heading"><div class="browser-search-icon">⌕</div><div><h2>Google Search</h2><p class="muted">Search the web without leaving OnChainSpro.</p></div></div>
+    <div class="page-title"><div><h1>Onchain Explorer</h1><div class="muted">Explore live markets, asset information and charts inside OnChainCrypto.</div></div><span class="tag">ONCHAIN EXPLORER</span></div>
+    <section class="panel browser-search-panel" aria-label="Onchain market search">
+      <div class="browser-search-heading"><div class="browser-search-icon">⌕</div><div><h2>Search Onchain markets</h2><p class="muted">Find an asset, view its current market and open its Onchain chart.</p></div></div>
       <form id="browserSearchForm" class="browser-google-search" role="search">
-        <label class="sr-only" for="browserSearchInput">Search Google</label>
-        <input id="browserSearchInput" type="search" placeholder="Search Google or enter a website address…" autocomplete="off" required>
-        <input type="hidden" id="browserSearchEngine" value="google">
-        <button type="submit">Search Google <span aria-hidden="true">↗</span></button>
+        <label class="sr-only" for="browserSearchInput">Search Onchain markets</label>
+        <input id="browserSearchInput" type="search" placeholder="Search Gold, Bitcoin, Ethereum, BTC…" autocomplete="off" required>
+        <button type="submit" id="browserOnchainSearchBtn">Search Onchain</button>
+        <button type="button" class="secondary" id="browserGoogleSearchBtn">Search Google ↗</button>
       </form>
-      <p class="muted tiny">Search results open securely in a new browser tab.</p>
+      <div id="browserSearchResults" class="browser-onchain-results" aria-live="polite"><div class="empty">Search for Gold, Bitcoin or another supported asset to see its market information here.</div></div>
     </section>
     <section class="panel browser-search-panel">
-      <div class="browser-search-heading"><div class="browser-search-icon">◆</div><div><h2>Explore Onchain</h2><p class="muted">Your overview of crypto, gold and global market information.</p></div></div>
+      <div class="browser-search-heading"><div class="browser-search-icon">◆</div><div><h2>Explore Onchain markets</h2><p class="muted">Choose an asset to view its market details and chart.</p></div></div>
       <div class="browser-link-grid">
-        <a href="#" data-page="public-market"><span>◈</span><strong>Market Overview</strong><small>Explore Onchain market highlights and asset information</small></a>
-        <a href="#" data-page="public-market"><span>₿</span><strong>Crypto Markets</strong><small>Discover Bitcoin, Ethereum and leading digital assets</small></a>
-        <a href="#" data-page="public-market"><span>Au</span><strong>Gold Markets</strong><small>Explore gold market information and XAU</small></a>
-        <a href="#" data-page="public-market"><span>🔥</span><strong>Hot Coins</strong><small>See market movers, price changes and trading volume</small></a>
-        <a href="#" data-page="public-market"><span>▥</span><strong>Stock Markets</strong><small>Explore public information about major companies</small></a>
+        <button type="button" data-browser-asset="BTC"><span>₿</span><strong>Bitcoin</strong><small>BTC / USDT market</small></button>
+        <button type="button" data-browser-asset="ETH"><span>◆</span><strong>Ethereum</strong><small>ETH / USDT market</small></button>
+        <button type="button" data-browser-asset="XAU"><span>Au</span><strong>Gold</strong><small>XAU / USDT market</small></button>
+        <button type="button" data-browser-asset="SOL"><span>◎</span><strong>Solana</strong><small>SOL / USDT market</small></button>
       </div>
-    </section>
-    <section class="panel browser-search-panel">
-      <div class="browser-search-heading"><div class="browser-search-icon">↗</div><div><h2>Market research</h2><p class="muted">Open independent market research and chart websites.</p></div></div>
-      <div class="browser-link-grid">
-        <a href="https://www.coingecko.com/" target="_blank" rel="noopener noreferrer"><span>₿</span><strong>CoinGecko</strong><small>Crypto market research</small></a>
-        <a href="https://coinmarketcap.com/" target="_blank" rel="noopener noreferrer"><span>◉</span><strong>CoinMarketCap</strong><small>Digital asset information</small></a>
-        <a href="https://www.tradingview.com/" target="_blank" rel="noopener noreferrer"><span>⌁</span><strong>TradingView</strong><small>Charts and market analysis</small></a>
-        <a href="https://finance.yahoo.com/" target="_blank" rel="noopener noreferrer"><span>Y</span><strong>Yahoo Finance</strong><small>Stocks and financial news</small></a>
-      </div>
-      <p class="muted tiny">External research websites open in a separate tab.</p>
     </section>
   </section>
   <section id="page-register" class="hidden">
@@ -3910,7 +3913,21 @@ window.addEventListener("popstate", async () => {
 
 $("marketShowMore")?.addEventListener("click",()=>{window.marketRowsExpanded=(window.marketRowsExpanded||5)+5;renderMarket()});
 $("marketShowLess")?.addEventListener("click",()=>{window.marketRowsExpanded=5;renderMarket()});
-$("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const field=$("browserSearchInput"),raw=field?.value.trim();if(!raw)return;let destination="";const looksLikeAddress=/^(https?:\/\/)?([\w-]+\.)+[a-z]{2,}([/:?#][^\s]*)?$/i.test(raw);if(looksLikeAddress){try{const candidate=new URL(/^https?:\/\//i.test(raw)?raw:"https://"+raw);if(candidate.protocol==="http:"||candidate.protocol==="https:")destination=candidate.href}catch(_){destination=""}}if(!destination){const engine=$("browserSearchEngine")?.value||"google";const bases={google:"https://www.google.com/search?q=",bing:"https://www.bing.com/search?q=",brave:"https://search.brave.com/search?q="};destination=(bases[engine]||bases.google)+encodeURIComponent(raw)}window.open(destination,"_blank","noopener,noreferrer")});
+function onchainBrowserSearch(query){
+ const raw=String(query||"").trim().toLowerCase(),host=$("browserSearchResults");if(!host)return;
+ const aliases=[["XAU",/(gold|xau|bullion|precious metal)/i],["BTC",/(bitcoin|btc)/i],["ETH",/(ethereum|ether|eth)/i],["SOL",/(solana|sol)/i]];
+ let matches=market.filter(c=>raw&&(c.name.toLowerCase().includes(raw)||c.symbol.toLowerCase().includes(raw)));
+ const alias=aliases.find(x=>x[1].test(raw));if(alias){const item=market.find(c=>c.symbol.toUpperCase()===alias[0]);if(item)matches=[item,...matches.filter(c=>c!==item)];}
+ if(!raw||/^(market|markets|market overview|current market|overview)$/.test(raw))matches=[...market].sort((x,y)=>(y.total_volume||0)-(x.total_volume||0)).slice(0,6);
+ matches=[...new Map(matches.map(c=>[c.symbol.toUpperCase(),c])).values()].slice(0,6);
+ if(!matches.length){host.innerHTML='<div class="empty">No matching asset found in Onchain markets yet. Try Gold, Bitcoin, Ethereum or a supported symbol.</div>';return;}
+ const about={XAU:"Gold is a precious metal widely followed as a store of value and a global market asset. Onchain tracks Gold as XAU / USDT.",BTC:"Bitcoin is a decentralised digital asset with a maximum supply of 21 million coins.",ETH:"Ethereum is a blockchain network that supports smart contracts and decentralised applications.",SOL:"Solana is a high-performance blockchain designed for fast transactions and applications."};
+ host.innerHTML=matches.map(c=>{const sym=c.symbol.toUpperCase(),change=Number(c.price_change_percentage_24h||0),description=about[sym]||safe(c.name)+" is available to explore in Onchain markets.";return '<article class="browser-asset-result"><div class="browser-asset-main"><div>'+coinIcon(c,36)+'</div><div><strong>'+safe(c.name)+' · '+safe(sym)+'</strong><div class="muted tiny">'+safe(sym==="XAU"?"XAU / USDT":sym+" / USDT")+'</div></div></div><div class="browser-asset-price"><strong>'+money(c.current_price)+'</strong><span class="'+(change>=0?"green":"red")+'">'+pct(change)+' · 24h</span></div><p>'+description+'</p><button type="button" class="primary" data-browser-open-chart="'+safe(sym)+'">View Onchain chart →</button></article>'}).join("");
+ host.querySelectorAll("[data-browser-open-chart]").forEach(btn=>btn.addEventListener("click",()=>{const sym=btn.dataset.browserOpenChart;selected=sym;if($("tradeAsset"))$("tradeAsset").value=sym;showPage("trade");updateTradePreview();loadPriceHistory();updateTradingViewChart(sym);}));
+}
+$("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();onchainBrowserSearch($("browserSearchInput")?.value||"")});
+$("browserGoogleSearchBtn")?.addEventListener("click",()=>{const q=$("browserSearchInput")?.value.trim();if(q)window.open("https://www.google.com/search?q="+encodeURIComponent(q),"_blank","noopener,noreferrer")});
+document.querySelectorAll("[data-browser-asset]").forEach(btn=>btn.addEventListener("click",()=>{const sym=btn.dataset.browserAsset;if($("browserSearchInput"))$("browserSearchInput").value=sym==="XAU"?"Gold":sym;onchainBrowserSearch(sym==="XAU"?"Gold":sym)}));
 </script>
 <script id="oc-auth-deep-links">
 (function(){
