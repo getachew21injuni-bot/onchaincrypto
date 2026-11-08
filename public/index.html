@@ -5427,18 +5427,21 @@ body.oc-logged-out .auth-welcome h1{ text-shadow:0 5px 28px rgba(240,185,11,.10)
 <script type="module" id="oc-global-demo-trade-admin">
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, serverTimestamp, runTransaction, addDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, serverTimestamp, runTransaction, addDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
+const guestApp=getApps().find(item=>item.name==="visitor-support")||initializeApp(config,"visitor-support");
+const guestAuth=getAuth(guestApp),guestDb=getFirestore(guestApp);
 window.ocSubmitGuestSupport=async({email,message})=>{
  const cleanEmail=String(email||"").trim().slice(0,160),cleanMessage=String(message||"").trim().slice(0,3000);
  if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(cleanEmail))throw new Error("Please enter a valid email address.");
  if(cleanMessage.length<3)throw new Error("Please add a little more detail.");
- let visitor=auth.currentUser;
- if(!visitor)visitor=(await signInAnonymously(auth)).user;
- const ticketRef=doc(collection(db,"supportTickets")),messageRef=doc(collection(db,"supportTickets",ticketRef.id,"messages")),batch=writeBatch(db);
+ let visitor=guestAuth.currentUser;
+ if(!visitor)visitor=(await signInAnonymously(guestAuth)).user;
+ const ticketRef=doc(collection(guestDb,"supportTickets")),messageRef=doc(collection(guestDb,"supportTickets",ticketRef.id,"messages")),batch=writeBatch(guestDb);
  batch.set(ticketRef,{ownerUid:visitor.uid,customerEmail:cleanEmail,customerName:"Website visitor",subject:"Website visitor support",status:"open",createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:cleanMessage,source:"visitor-bot"});
  batch.set(messageRef,{senderUid:visitor.uid,senderRole:"customer",senderName:"Website visitor",text:cleanMessage,createdAt:serverTimestamp()});
  await batch.commit();
+ await signOut(guestAuth);
  return true;
 };
 const app=getApps()[0]||initializeApp(config),auth=getAuth(app),db=getFirestore(app);
@@ -6455,7 +6458,7 @@ body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
 #ocVisitorSupportBot .oc-support-suggestions button:hover{background:#d9f7e8!important;border-color:#20c77a!important;color:#07130d!important}
 </style>
 <div id="ocVisitorSupportBot" aria-live="polite">
- <section class="oc-support-panel" role="dialog" aria-label="OnChainsPro information assistant" aria-modal="false">
+ <section class="oc-support-panel" role="dialog" aria-label="OnChain information assistant" aria-modal="false">
   <header class="oc-support-head">
    <span class="oc-support-avatar" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M7 25v-4a17 17 0 0 1 34 0v4" stroke="#17253a" stroke-width="5" stroke-linecap="round"/><path d="M7 22h5a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-1a4 4 0 0 1-4-4zM41 22h-5a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4h1a4 4 0 0 0 4-4z" fill="#17253a" stroke="#e9c879" stroke-width="1.5"/><path d="M16 23c1.5-5 14.5-5 16 0v10c0 5-4 8-8 8s-8-3-8-8z" fill="#f1c98b" stroke="#17253a" stroke-width="2"/><path d="M20 30h.1M28 30h.1" stroke="#17253a" stroke-width="3" stroke-linecap="round"/><path d="M21 35q3 2 6 0" stroke="#9c542e" stroke-width="1.7" stroke-linecap="round"/><path d="M24 40v3" stroke="#17253a" stroke-width="2" stroke-linecap="round"/></svg></span>
    <span class="oc-support-headcopy"><strong>Customer Support</strong><small>Ask about OnChain features and account guidance</small></span>
@@ -6507,7 +6510,7 @@ const answer=q=>{
  const v=String(q||"").trim();if(!v)return "What would you like to explore?";
  if(/^(hi|hello|hey|good morning|good afternoon|good evening)\b/i.test(v))return "Hello and welcome to OnChain! 👋 Great to have you here. Would you like to explore Stocks, Gold, Crypto, Live Markets or Wallet features?";
  if(/\b(who are you|what can you do|help|features|about onchain|what is onchain)\b/i.test(v))return "I’m the OnChain visitor assistant. I can introduce the platform, explain Stocks, Gold, Crypto, Markets, Wallet and Trading features, and answer general questions. Choose a topic below or ask me anything.";
- if(/\b(talk to agent|human agent|customer support|contact support)\b/i.test(v))return "Our support team can be reached at support@onchainspro.com.";
+ if(/\b(talk to agent|human agent|customer support|contact support)\b/i.test(v))return "Tap Talk to Agent below to send a private message to our support team. Add your email so the team can reply directly.";
  const matched=topics.filter(t=>t[1].test(v));
  if(matched.length>1)return "Happy to help! Which would you like to explore first: "+matched.map(t=>t[0]).join(" or ")+"?";
  for(const [pattern,reply] of answers){if(pattern.test(v))return reply;}
@@ -7158,7 +7161,7 @@ body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.descr
 
 <script type="module" id="oc-internal-usdt-send">
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, addDoc, collection, query, where, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
 const app=getApps()[0]||initializeApp(config),auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
