@@ -5,6 +5,22 @@ service cloud.firestore {
     function owns(uid) { return signedIn() && request.auth.uid == uid; }
     function isAdmin() { return signedIn() && (request.auth.token.get('admin', false) == true || (request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '') in ['getachew21.INJ.UNI@gmail.com', 'getachew21.inj.uni@gmail.com'])); }
 
+    // Per-account trading state and results. This is an account-specific
+    // platform ledger snapshot, separate from admin-controlled deposit credits.
+    match /userTradeState/{uid} {
+      allow read: if owns(uid) || isAdmin();
+      allow create, update: if owns(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.keys().hasOnly(['uid','balance','holdings','history','updatedAt'])
+        && request.resource.data.balance is number
+        && request.resource.data.balance >= 0
+        && request.resource.data.balance <= 1000000000
+        && request.resource.data.holdings is map
+        && request.resource.data.history is list
+        && request.resource.data.history.size() <= 300;
+      allow delete: if false;
+    }
+
     // Each member may read and update only their own profile.
     match /users/{uid} {
       allow read: if owns(uid) || isAdmin();
