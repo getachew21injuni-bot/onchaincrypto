@@ -132,3 +132,23 @@ test("visitor support uses an isolated Firebase session and submits through the 
   assert.ok(html.includes("Tap Talk to Agent below to send a private message"), "Bot must direct support requests to the Talk to Agent form");
   assert.equal((html.match(/id="ocVisitorSupportBot"/g) || []).length, 1, "Only one visitor support bot should be present");
 });
+
+
+test("Quick Trade uses concise positive copy and its result Close button restores the trade form", () => {
+  assert.ok(html.includes("Market-linked Quick Trades with clear results and automatic Onchain wallet updates."));
+  assert.ok(html.includes('form.classList.remove("oc-stage-complete","oc-stage-running");form.classList.add("oc-stage-config");'));
+  assert.ok(html.includes('document.getElementById("timedBoardClose")?.addEventListener("click"'));
+  assert.ok(html.includes('if(board)board.style.display="none";'));
+});
+
+test("Quick Trade saves the wallet update before displaying the completed result", () => {
+  const start = html.indexOf("async function startTimedPaper");
+  const end = html.indexOf("function finishedSymbolSafe", start);
+  assert.ok(start >= 0 && end > start, "Expected the Quick Trade execution flow");
+  const flow = html.slice(start, end);
+  assert.ok(flow.includes("await saveState()"), "Wallet and trade history must be saved");
+  assert.ok(flow.indexOf("await saveState()") < flow.indexOf('const board=$("timedResultBoard")'), "Show the result only after save succeeds");
+  assert.ok(flow.includes("renderWallet()"), "Refresh wallet display after the saved balance change");
+  assert.ok(flow.includes("state.balance=Math.max(0,balanceBefore+balanceAdjustmentFunding)"), "Apply USDT balance changes");
+  assert.ok(flow.includes("state.holdings[finished.funding]=Math.max(0,balanceBefore+balanceAdjustmentFunding)"), "Apply selected-coin balance changes");
+});
