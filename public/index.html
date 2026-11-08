@@ -2234,6 +2234,21 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
       <div id="ocAdminUsersList" class="notice">Waiting for administrator access…</div>
       <p id="ocAdminUserControlMessage" class="muted tiny" aria-live="polite"></p>
     </section>
+    <section id="ocAdminMarketAlerts" class="panel form-panel" style="margin-bottom:16px">
+      <div class="section-head"><h2>Market Alerts</h2><span class="tag">ALL SIGNED-IN USERS</span></div>
+      <p class="muted tiny">Publish a market update to the Notifications area for every signed-in user.</p>
+      <label for="ocAdminMarketAlertMessage">Alert message</label>
+      <textarea id="ocAdminMarketAlertMessage" class="field" rows="3" maxlength="500" placeholder="Write a clear market update. Avoid promising price direction."></textarea>
+      <div class="content-grid">
+        <button type="button" class="buy" data-oc-market-alert="bullish">↗ Send Bullish Alert</button>
+        <button type="button" class="sell" data-oc-market-alert="bearish">↘ Send Bearish Alert</button>
+      </div>
+      <p id="ocAdminMarketAlertStatus" class="muted tiny" aria-live="polite">Waiting for verified administrator access…</p>
+      <div class="divider"></div>
+      <strong>Automatic market alerts</strong>
+      <p class="muted tiny">Checks a broad crypto basket for a strong 24-hour move (±2.5%). A 6-hour cooldown helps prevent repeated alerts. Automatic checks run while the verified administrator is signed in and this app is open.</p>
+      <p id="ocAdminAutoAlertStatus" class="muted tiny">Automatic checks are not active.</p>
+    </section>
     <section id="ocAdminSupportInbox" class="panel form-panel" style="margin-bottom:16px">
       <div class="section-head"><h2>Customer Support Inbox</h2><span class="tag">PRIVATE MESSAGES</span></div>
       <p class="muted tiny">Read customer requests and reply directly inside Onchain. Conversations are stored in Firebase; no external email inbox is required.</p>
@@ -5448,14 +5463,14 @@ body.oc-logged-out .auth-welcome h1{ text-shadow:0 5px 28px rgba(240,185,11,.10)
 <script type="module" id="oc-global-demo-trade-admin">
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
 const app=getApps()[0]||initializeApp(config),auth=getAuth(app),db=getFirestore(app);
 const adminEmails=new Set(["getachew21.inj.uni@gmail.com"]);
 const byId=id=>document.getElementById(id);
 const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 const modeNames={market:"Market-Based",win:"Set Win Outcome",lose:"Set Loss Outcome"};
-let stopMode=null,stopUsers=null,stopOwnControl=null,currentAdmin=false;
+let stopMode=null,stopUsers=null,stopOwnControl=null,currentAdmin=false,autoAlertTimer=null,autoAlertBusy=false;
 window.__ocGlobalDemoTradeMode="market";
 function renderMode(mode){
  const valid=Object.hasOwn(modeNames,mode)?mode:"market";
@@ -5501,9 +5516,50 @@ async function ensureTradeControlProfile(user){
  },{merge:true});
 }
 function stopWatchers(){if(stopMode){stopMode();stopMode=null;}if(stopUsers){stopUsers();stopUsers=null;}if(stopOwnControl){stopOwnControl();stopOwnControl=null;}}
+async function publishMarketAlert(kind,message,source="admin-manual"){
+ const user=auth.currentUser;if(!currentAdmin||!user||!user.emailVerified)throw new Error("Verified administrator access is required.");
+ const clean=String(message||"").trim().slice(0,500);if(clean.length<8)throw new Error("Write a market message with at least 8 characters.");
+ await (async()=>{const {addDoc}=await import("https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js");await addDoc(collection(db,"marketAlerts"),{kind,title:kind==="bullish"?"Bullish Market Update":"Bearish Market Update",message:clean,createdAt:serverTimestamp(),createdAtText:new Date().toISOString(),createdBy:user.uid,createdByEmail:user.email||"",source});})();
+}
+async function checkAutomaticMarketAlert(){
+ if(!currentAdmin||autoAlertBusy||!auth.currentUser?.emailVerified)return;
+ const updated=Number(window.ocMarketLastSuccess||0);if(!updated||Date.now()-updated>180000)return;
+ const rows=Array.isArray(window.market)?window.market:[],core=["BTC","ETH","BNB","XRP","SOL","ADA","DOGE","LTC"];
+ const changes=rows.filter(x=>core.includes(String(x.symbol||"").toUpperCase())&&Number(x.current_price)>0&&Number.isFinite(Number(x.price_change_percentage_24h))).map(x=>Number(x.price_change_percentage_24h));
+ if(changes.length<5)return;
+ const sorted=changes.slice().sort((a,b)=>a-b),m=Math.floor(sorted.length/2),signal=sorted.length%2?sorted[m]:(sorted[m-1]+sorted[m])/2,kind=signal>=2.5?"bullish":signal<=-2.5?"bearish":null,status=byId("ocAdminAutoAlertStatus");
+ if(status)status.textContent="Active · basket median "+(signal>=0?"+":"")+signal.toFixed(2)+"% over 24h · "+changes.length+" assets checked.";
+ if(!kind)return;
+ autoAlertBusy=true;
+ try{
+  const stateRef=doc(db,"platformSettings","marketAlertState"),alertRef=doc(collection(db,"marketAlerts")),user=auth.currentUser;
+  await runTransaction(db,async tx=>{
+   const snap=await tx.get(stateRef),data=snap.exists()?snap.data():{},last=Number(data.lastSentAtMs||0);
+   if(Date.now()-last<6*60*60*1000)return;
+   const message=kind==="bullish"?"Broad crypto-market momentum is positive, with a basket median 24-hour move of +"+signal.toFixed(2)+"%. Review current prices and your risk before making a decision.":"Broad crypto-market momentum is negative, with a basket median 24-hour move of "+signal.toFixed(2)+"%. Review current prices and manage your risk carefully.";
+   tx.set(alertRef,{kind,title:kind==="bullish"?"Bullish Market Update":"Bearish Market Update",message,createdAt:serverTimestamp(),createdAtText:new Date().toISOString(),createdBy:user.uid,createdByEmail:user.email||"",source:"market-auto",basketMedian24h:Number(signal.toFixed(4)),assetCount:changes.length});
+   tx.set(stateRef,{lastSentAtMs:Date.now(),lastKind:kind,updatedAt:serverTimestamp(),updatedBy:user.email||""},{merge:true});
+  });
+  if(status)status.textContent="Active · automatic check completed; the 6-hour cooldown is enforced.";
+ }catch(error){console.warn("Automatic market alert check failed:",error);if(status)status.textContent="Automatic check unavailable ("+(error.code||"connection error")+").";}
+ finally{autoAlertBusy=false;}
+}
+document.addEventListener("click",async event=>{
+ const button=event.target.closest("[data-oc-market-alert]");if(!button)return;
+ const status=byId("ocAdminMarketAlertStatus"),kind=button.dataset.ocMarketAlert,field=byId("ocAdminMarketAlertMessage"),message=String(field?.value||"").trim();
+ if(!currentAdmin||!auth.currentUser?.emailVerified){if(status)status.textContent="Verified administrator access is required.";return;}
+ if(!message){if(status)status.textContent="Enter the alert message first.";field?.focus();return;}
+ button.disabled=true;if(status)status.textContent="Publishing alert to all signed-in users…";
+ try{await publishMarketAlert(kind,message);if(status)status.textContent=(kind==="bullish"?"Bullish":"Bearish")+" alert published to Notifications for all signed-in users.";if(field)field.value="";}
+ catch(error){if(status)status.textContent="Could not publish alert ("+(error.code||error.message||"error")+").";}
+ finally{button.disabled=false;}
+});
 onAuthStateChanged(auth,user=>{
  stopWatchers();
+ if(autoAlertTimer){clearInterval(autoAlertTimer);autoAlertTimer=null;}
  currentAdmin=!!(user&&user.emailVerified&&adminEmails.has(String(user.email||"").toLowerCase()));
+ const autoStatus=byId("ocAdminAutoAlertStatus");if(autoStatus)autoStatus.textContent=currentAdmin?"Starting automatic market checks…":"Automatic checks are not active.";
+ if(currentAdmin){void checkAutomaticMarketAlert();autoAlertTimer=setInterval(checkAutomaticMarketAlert,60000);}
  const nav=byId("ocAdminNavBtn");if(nav)nav.classList.toggle("hidden",!currentAdmin);const shortcut=byId("adminDashboardShortcut");if(shortcut)shortcut.classList.toggle("hidden",!currentAdmin);
  if(!user){window.__ocGlobalDemoTradeMode="market";window.__ocUserDemoTradeControl={mode:"inherit",winPercent:15,lossPercent:50};return;}
  stopOwnControl=onSnapshot(doc(db,"users",user.uid),snapshot=>{const data=snapshot.exists()?snapshot.data()||{}:{};window.__ocUserDemoTradeControl={mode:["inherit","market","win","lose"].includes(data.demoTradeControlMode)?data.demoTradeControlMode:"inherit",winPercent:Math.min(100,Math.max(1,Number(data.demoWinPercent??15)||15)),lossPercent:Math.min(100,Math.max(1,Number(data.demoLossPercent??50)||50))};},error=>{console.warn("Individual demo trade settings unavailable:",error?.code||error);window.__ocUserDemoTradeControl={mode:"inherit",winPercent:15,lossPercent:50};});
@@ -8571,22 +8627,24 @@ if(profile){
  }
 }
 const notificationHost=byId("notificationsPageContent");
-let stopUserNotifications=null;
-function renderUserNotifications(user){
- if(stopUserNotifications){stopUserNotifications();stopUserNotifications=null;}
+let stopUserNotifications=null,stopMarketAlerts=null,accountNotificationRows=[],marketAlertRows=[];
+function paintNotifications(){
  if(!notificationHost)return;
- if(!user){notificationHost.innerHTML="<div class=\"notice\">Sign in to receive account, identity-verification, deposit and withdrawal notifications.</div>";return;}
+ const rows=accountNotificationRows.concat(marketAlertRows).sort((a,b)=>{const t=x=>x.createdAt&&typeof x.createdAt.toMillis==="function"?x.createdAt.toMillis():Date.parse(x.createdAtText||"")||0;return t(b)-t(a);});
+ const unread=accountNotificationRows.filter(x=>!x.readAt).length;
+ if(!rows.length){notificationHost.innerHTML="<div class=\"panel\"><strong>No notifications yet</strong><p class=\"muted tiny\">Market updates and account notifications will appear here.</p></div>";return;}
+ notificationHost.innerHTML="<div class=\"panel\"><strong>"+unread+" unread · "+rows.length+" total</strong></div>"+rows.slice(0,40).map(n=>{
+  const k=String(n.kind||"").toLowerCase(),good=k==="kyc_approved"||k==="deposit"||k==="bullish",bad=k==="kyc_rejected"||k==="withdrawal"||k==="bearish",color=good?"#0ecb81":bad?"#f6465d":"#d6a84b",symbol=good?"↗":bad?"↘":"•",when=n.createdAt&&typeof n.createdAt.toDate==="function"?n.createdAt.toDate().toLocaleString():String(n.createdAtText||""),source=(k==="bullish"||k==="bearish")?(n.source==="market-auto"?"Automatic market alert":"Market alert"):"Account update";
+  return "<article class=\"panel\" style=\"padding:14px;margin:10px 0;border:1px solid "+color+";border-left:4px solid "+color+"\"><strong style=\"color:"+color+"\">"+symbol+" "+esc(n.title||"Account update")+"</strong><p class=\"muted tiny\">"+esc(n.message||"Your account has an update.")+"</p><small class=\"muted\">"+esc(source)+(when?" · "+when:"")+"</small></article>";
+ }).join("");
+}
+function renderUserNotifications(user){
+ if(stopUserNotifications){stopUserNotifications();stopUserNotifications=null;}if(stopMarketAlerts){stopMarketAlerts();stopMarketAlerts=null;}
+ accountNotificationRows=[];marketAlertRows=[];if(!notificationHost)return;
+ if(!user){notificationHost.innerHTML="<div class=\"notice\">Sign in to receive market and account notifications.</div>";return;}
  notificationHost.innerHTML="<div class=\"panel\">Loading your notifications…</div>";
- stopUserNotifications=onSnapshot(collection(db,"userNotifications",user.uid,"items"),snap=>{
-  const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>{const t=x=>x.createdAt&&typeof x.createdAt.toMillis==="function"?x.createdAt.toMillis():Date.parse(x.createdAtText||"")||0;return t(b)-t(a);});
-  const unread=rows.filter(x=>!x.readAt).length;
-  if(!rows.length){notificationHost.innerHTML="<div class=\"panel\"><strong>No notifications yet</strong><p class=\"muted tiny\">Identity and wallet updates will appear here.</p></div>";return;}
-  notificationHost.innerHTML="<div class=\"panel\"><strong>"+unread+" unread · "+rows.length+" total</strong></div>"+rows.map(n=>{
-   const k=String(n.kind||"").toLowerCase(),good=k==="kyc_approved"||k==="deposit",bad=k==="kyc_rejected"||k==="withdrawal",color=good?"#0ecb81":bad?"#f6465d":"#d6a84b",symbol=good?"✓":bad?"!":"•";
-   const when=n.createdAt&&typeof n.createdAt.toDate==="function"?n.createdAt.toDate().toLocaleString():String(n.createdAtText||"");
-   return "<article class=\"panel\" style=\"padding:14px;margin:10px 0;border:1px solid "+color+";border-left:4px solid "+color+"\"><strong style=\"color:"+color+"\">"+symbol+" "+esc(n.title||"Account update")+"</strong><p class=\"muted tiny\">"+esc(n.message||"Your account has an update.")+"</p><small class=\"muted\">"+esc(when)+"</small></article>";
-  }).join("");
- },error=>{notificationHost.innerHTML="<div class=\"notice\">Could not load notifications ("+esc(error.code||"connection error")+"). Check Firestore rules.</div>";});
+ stopUserNotifications=onSnapshot(collection(db,"userNotifications",user.uid,"items"),snap=>{accountNotificationRows=snap.docs.map(d=>({id:d.id,...d.data()}));paintNotifications();},error=>{notificationHost.innerHTML="<div class=\"notice\">Could not load account notifications ("+esc(error.code||"connection error")+").</div>";});
+ stopMarketAlerts=onSnapshot(collection(db,"marketAlerts"),snap=>{marketAlertRows=snap.docs.map(d=>({id:d.id,...d.data()}));paintNotifications();},error=>{console.warn("Market alerts could not be loaded:",error.code||error);if(!accountNotificationRows.length)notificationHost.innerHTML="<div class=\"notice\">Market notifications are temporarily unavailable.</div>";});
 }
 window.ocRenderUserNotifications=renderUserNotifications;
 onAuthStateChanged(auth,user=>renderUserNotifications(user||null));
