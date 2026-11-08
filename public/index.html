@@ -3759,15 +3759,14 @@ async function ocPerformSignOut() {
     window.__ocSignedOutHistoryBoundary = true;
     window.onchaincryptoCurrentUser = null;
     window.ocPendingPage = null;
-    document.body.classList.add("oc-logged-out", "oc-auth-screen");
-  document.body.classList.remove("oc-register-mode");
-    window.showPage?.("register");
-    window.ocForceSignInScreen?.();
+    document.body.classList.remove("oc-logged-out", "oc-auth-screen", "oc-register-mode");
+    document.body.classList.add("oc-visitor-mode");
+    window.showPage?.("public-market");
     try {
-      const signedOutRoute={ocAppRoute:true,ocPage:"register",ocAuthMode:"login",ocIndex:0,ocSignedOutBoundary:true,ocLogoutBoundary:true};
-      const loginUrl=location.pathname+location.search+"#login";
-      history.replaceState(signedOutRoute,"",loginUrl);
-      history.pushState({...signedOutRoute,ocBoundarySentinel:true},"",loginUrl);
+      const signedOutRoute={ocAppRoute:true,ocPage:"public-market",ocAuthMode:null,ocIndex:0,ocSignedOutBoundary:true,ocLogoutBoundary:true};
+      const marketUrl=location.pathname+location.search;
+      history.replaceState(signedOutRoute,"",marketUrl);
+      history.pushState({...signedOutRoute,ocBoundarySentinel:true},"",marketUrl);
       window.__ocAppHistoryDepth=0;
       window.__ocAppHistoryMaxIndex=0;
       window.__ocAppCanForward=false;
@@ -3950,7 +3949,7 @@ document.addEventListener("click", event => {
 // Prevent browser Back/Forward or back-forward-cache restoration from reopening a signed-out session.
 window.addEventListener("pageshow", async () => {
   try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
-  if (!auth.currentUser && window.ocLoggedOut === true && document.body.classList.contains("oc-auth-screen")) {
+  if (!auth.currentUser && window.ocLoggedOut === true && document.body.classList.contains("oc-auth-screen") && history.state?.ocPage !== "public-market") {
     document.body.classList.add("oc-auth-screen");
     document.body.classList.toggle("oc-register-mode",location.hash==="#register");
     window.ocForceSignInScreen?.();
@@ -3962,7 +3961,7 @@ window.addEventListener("pageshow", async () => {
 });
 window.addEventListener("popstate", async () => {
   try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
-  if (!auth.currentUser && window.ocLoggedOut === true && document.body.classList.contains("oc-auth-screen")) {
+  if (!auth.currentUser && window.ocLoggedOut === true && document.body.classList.contains("oc-auth-screen") && history.state?.ocPage !== "public-market") {
     document.body.classList.add("oc-auth-screen");
     const mode=location.hash==="#register"?"register":"login";
     document.body.classList.toggle("oc-register-mode",mode==="register");
@@ -5167,13 +5166,13 @@ body.oc-logged-out.oc-register-mode #authSwitchText{display:none!important}
       window.ocLoggedOut=true;
       window.onchaincryptoCurrentUser=null;
       window.ocPendingPage=null;
-      document.body.classList.add("oc-logged-out");
+      document.body.classList.remove("oc-logged-out","oc-auth-screen","oc-register-mode");
+      document.body.classList.add("oc-visitor-mode");
       document.getElementById("moreMenu")?.classList.add("hidden");
       document.getElementById("moreMenu")?.setAttribute("aria-hidden","true");
       document.getElementById("moreMenuBtn")?.setAttribute("aria-expanded","false");
-      window.showPage?.("register");
-      window.ocForceSignInScreen?.();
-      try{history.replaceState({ocSignedOut:true},"",location.pathname+location.search+"#login")}catch(_){}
+      window.showPage?.("public-market");
+      try{history.replaceState({ocAppRoute:true,ocPage:"public-market",ocSignedOutBoundary:true,ocLogoutBoundary:true,ocIndex:0},"",location.pathname+location.search)}catch(_){}
     }catch(error){
       console.error("Independent Onchain sign-out failed:",error?.code||error,error?.message||"");
       const status=document.getElementById("authStatus");
@@ -11809,3 +11808,46 @@ body:not(.oc-auth-screen) .wallet-summary-strip strong{color:#12486e!important}
 
 
 
+
+<style id="oc-visitor-first-startup-override">
+html.oc-auth-pending main > :not(#page-public-market){display:none!important}
+html.oc-auth-pending main > #page-public-market{display:flex!important}
+html.oc-auth-pending body > header{display:flex!important}
+html.oc-auth-pending body > footer,html.oc-auth-pending body > #bottomNav,html.oc-auth-pending body > nav,html.oc-auth-pending body > aside{display:none!important}
+html.oc-auth-pending main{display:block!important;min-height:0!important;padding-top:0!important}
+html.oc-auth-pending #page-public-market.hidden{display:flex!important}
+html.oc-auth-pending #page-register{display:none!important}
+</style>
+<script id="oc-visitor-first-auth-actions">
+(function(){
+ const ids="#ocVisitorSignup,#ocVisitorLogin,#ocVisitorHeroSignup,#ocVisitorHeroLogin";
+ function openAuth(mode){
+  document.documentElement.classList.remove("oc-auth-pending");
+  document.body.classList.remove("oc-visitor-mode");
+  document.body.classList.add("oc-logged-out","oc-auth-screen");
+  document.body.classList.toggle("oc-register-mode",mode==="register");
+  window.__ocNavigatePage?.("register",{noStack:false,keepScroll:false});
+  document.getElementById(mode==="register"?"authChoiceRegister":"authChoiceLogin")?.click();
+  document.getElementById("authChoicePanel")?.classList.add("hidden");
+  document.body.classList.toggle("oc-register-mode",mode==="register");
+  document.getElementById(mode==="register"?"signInForm":"registerForm")?.classList.add("hidden");
+  document.getElementById(mode==="register"?"registerForm":"signInForm")?.classList.remove("hidden");
+  if(mode==="register")document.getElementById("registerFirstName")?.focus();
+  else document.getElementById("signInEmail")?.focus();
+  try{history.replaceState({ocAppRoute:true,ocPage:"register",ocAuthMode:mode,ocIndex:1,ocSignedOutBoundary:true},"",location.pathname+location.search+(mode==="register"?"#register":"#login"));}catch(_){}
+ }
+ document.addEventListener("click",function(event){
+  const button=event.target instanceof Element?event.target.closest(ids):null;
+  if(!button)return;
+  event.preventDefault();event.stopImmediatePropagation();
+  openAuth(button.id.toLowerCase().includes("signup")?"register":"login");
+ },true);
+ document.addEventListener("click",function(event){
+  const target=event.target instanceof Element?event.target:null;
+  if(target?.closest("#authChoiceLogin,#authChoiceRegister,#registerLoginBtn,#showRegisterBtn,#showSignInBtn,#authSwitchText")){
+   queueMicrotask(()=>document.getElementById("authChoicePanel")?.classList.add("hidden"));
+  }
+ },true);
+ if(window.ocLoggedOut===true&&!document.body.classList.contains("oc-auth-screen"))document.body.classList.add("oc-visitor-mode");
+})();
+</script>
