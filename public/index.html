@@ -2835,7 +2835,7 @@ function renderTradeOutcomes(){
  outcomes.reverse();
  const wins=outcomes.filter(x=>x.pnl>0).length,losses=outcomes.filter(x=>x.pnl<0).length,total=outcomes.reduce((n,x)=>n+x.pnl,0);
  $("winningTrades").textContent=String(wins);$("losingTrades").textContent=String(losses);$("realizedPnl").textContent=(total>=0?"+":"")+money(total);$("realizedPnl").className="big "+(total>=0?"green":"red");
- if(rowsEl)rowsEl.innerHTML=outcomes.length?[...outcomes].reverse().slice(0,12).map(x=>'<div class="pnl-row"><div><strong>'+safe(x.sym)+' sell</strong><div class="muted tiny">'+new Date(x.time).toLocaleString()+' · '+x.qty.toFixed(8)+' coins</div></div><div class="muted tiny">Avg. cost '+money(x.avg)+'</div><strong class="pnl-value '+(x.pnl>=0?'green':'red')+'">'+(x.pnl>=0?'+':'')+money(x.pnl)+'</strong></div>').join(""):'<div class="empty">Completed sell results will appear here. Buy and sell transactions are simulated only.</div>';
+ if(rowsEl)rowsEl.innerHTML=outcomes.length?[...outcomes].reverse().slice(0,12).map(x=>'<div class="pnl-row"><div><strong>'+safe(x.sym)+' sell</strong><div class="muted tiny">'+new Date(x.time).toLocaleString()+' · '+x.qty.toFixed(8)+' coins</div></div><div class="muted tiny">Avg. cost '+money(x.avg)+'</div><strong class="pnl-value '+(x.pnl>=0?'green':'red')+'">'+(x.pnl>=0?'+':'')+money(x.pnl)+'</strong></div>').join(""):'<div class="empty">Completed sell results will appear here. Quick Trade outcomes are calculated from public market prices and update the internal account ledger.</div>';
  const w=Math.max(300,canvas.clientWidth||600),h=150,dpr=window.devicePixelRatio||1;canvas.width=w*dpr;canvas.height=h*dpr;const ctx=canvas.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);ctx.strokeStyle="#2b3139";ctx.beginPath();ctx.moveTo(0,h/2);ctx.lineTo(w,h/2);ctx.stroke();
  if(outcomes.length){const max=Math.max(.01,...outcomes.map(x=>Math.abs(x.pnl))),gap=8,bw=Math.max(8,(w-gap*(outcomes.length+1))/outcomes.length);outcomes.forEach((x,i)=>{const bh=Math.max(2,Math.abs(x.pnl)/max*(h/2-20)),xx=gap+i*(bw+gap);ctx.fillStyle=x.pnl>=0?"#0ecb81":"#f6465d";ctx.fillRect(xx,x.pnl>=0?h/2-bh:h/2,bw,bh);ctx.fillStyle="#848e9c";ctx.font="10px Arial";ctx.textAlign="center";ctx.fillText(x.sym.slice(0,5),xx+bw/2,h-3)})}
 }renderTradeOutcomes();
@@ -2866,7 +2866,7 @@ function startTimedPaper(direction){
  if(!c||!Number.isFinite(Number(c.current_price))||Number(c.current_price)<=0){$("timedResult").textContent="Market price unavailable. Refresh market data and try again.";return}
  const minimumUsd=sym==="XAU"?500:100;if(!Number.isFinite(stake)||stake<=0||stakeUsd<minimumUsd){$("timedResult").textContent="Invalid trade amount. "+(sym==="XAU"?"Gold trades require at least $500 equivalent.":"Crypto trades require at least $100 equivalent.");return}
  const plan=quickPlan();if(stakeUsd<plan.min||stakeUsd>plan.max){$("timedResult").textContent="The amount does not fit the selected investment level. Choose the matching level or adjust the amount.";return}
- const fundingBalance=funding==="USDT"?Number(state.balance||0):Number(state.holdings?.[funding]||0);if(stake>fundingBalance+1e-10){$("timedResult").textContent="Insufficient simulated "+funding+" balance for this amount.";return}
+ const fundingBalance=funding==="USDT"?Number(state.balance||0):Number(state.holdings?.[funding]||0);if(stake>fundingBalance+1e-10){$("timedResult").textContent="Insufficient "+funding+" account balance for this amount.";return}
  pendingTimedDirection=null;$("timedConfirmBtn").disabled=true;$("timedUpBtn").disabled=true;$("timedDownBtn").disabled=true;
  const started=Date.now(),entry=Number(c.current_price),userControl=window.__ocUserDemoTradeControl||{mode:"inherit",winPercent:15,lossPercent:50},globalMode=window.__ocGlobalDemoTradeMode||"market",effectiveMode=userControl.mode&&userControl.mode!=="inherit"?userControl.mode:globalMode;timedPaper={symbol:sym,funding,fundingPrice,direction,stake,stakeUsd,duration,entry,ends:started+duration*1000,payoutRate:plan.rate,adminMode:effectiveMode,adminWinPercent:userControl.winPercent||15,adminLossPercent:userControl.lossPercent||50,samples:[{time:started,price:entry}]};recordActivity("trade","Quick trade started · "+(direction==="up"?"BUY ":"SELL ")+sym,usdtMoney(stake)+" · Entry "+usdtMoney(entry)+" · Duration "+timedFormat(duration),"Running");
  $("timedPair").textContent=sym+" / USDT";$("timedEntryPrice").textContent=money(entry);$("timedCountdown").textContent=timedFormat(duration);
@@ -2885,7 +2885,7 @@ function chooseTimedDirection(direction){pendingTimedDirection=direction;$("time
 $("timedUpBtn").addEventListener("click",()=>chooseTimedDirection("up"));
 $("timedDownBtn").addEventListener("click",()=>chooseTimedDirection("down"));
 $("timedConfirmBtn").addEventListener("click",()=>{if(pendingTimedDirection)startTimedPaper(pendingTimedDirection)});
-$("timedCancelBtn").addEventListener("click",()=>{if(timedPaper){$("timedResult").textContent="A running trade cannot be cancelled after confirmation. Wait for expiry.";return}pendingTimedDirection=null;$("timedUpBtn").setAttribute("aria-pressed","false");$("timedDownBtn").setAttribute("aria-pressed","false");$("timedConfirmBtn").disabled=true;$("timedResult").textContent="Trade cancelled. No order was submitted.";updateQuickEstimate()});
+$("timedCancelBtn").addEventListener("click",()=>{if(timedPaper){$("timedResult").textContent="Confirmed trades complete at expiry. Your result will appear automatically.";return}pendingTimedDirection=null;$("timedUpBtn").setAttribute("aria-pressed","false");$("timedDownBtn").setAttribute("aria-pressed","false");$("timedConfirmBtn").disabled=true;$("timedResult").textContent="Trade cancelled. No account balance adjustment was made.";updateQuickEstimate()});
 $("timedStake").addEventListener("input",updateQuickEstimate);
 
 // Firebase authentication handlers are initialized in the Firebase module below.
@@ -3696,7 +3696,7 @@ document.getElementById("verifyPhoneCodeBtn").addEventListener("click", async ()
   } catch (error) { msg(friendlyError(error)); }
 });
 
-document.querySelectorAll("[data-level]").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll("[data-level]").forEach(b=>b.classList.toggle("active",b===btn));const level=btn.dataset.level;document.getElementById("levelMessage").textContent=({beginner:"Beginner view selected. Levels change display only.",intermediate:"Intermediate workspace selected. Use market movement and estimated P/L to review paper positions.",advanced:"Advanced workspace selected. Review more market details and estimated paper-position performance."})[level]}));
+document.querySelectorAll("[data-level]").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll("[data-level]").forEach(b=>b.classList.toggle("active",b===btn));const level=btn.dataset.level;document.getElementById("levelMessage").textContent=({beginner:"Beginner view selected. Levels change display only.",intermediate:"Intermediate workspace selected. Use market movement and estimated P/L to review market-linked positions.",advanced:"Advanced workspace selected. Review more market details and estimated position performance."})[level]}));
 window.addEventListener("resize",()=>{if(!$("page-trade").classList.contains("hidden"))renderPnl()});
 async function ocPerformSignOut() {
   if (window.ocLogoutInProgress) return;
@@ -5568,7 +5568,7 @@ document.addEventListener("click",async event=>{
  const uid=row.getAttribute("data-user-control-row");
  const enabled=!!row.querySelector("[data-user-trading-enabled]")?.checked;
 const demoMode=row.querySelector("[data-user-demo-mode]")?.value||"inherit";const winPercent=Number(row.querySelector("[data-user-demo-win]")?.value);const lossPercent=Number(row.querySelector("[data-user-demo-loss]")?.value);
-if(!["inherit","market","win","lose"].includes(demoMode)||!Number.isFinite(winPercent)||winPercent<1||winPercent>100||!Number.isFinite(lossPercent)||lossPercent<1||lossPercent>100){if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent="Choose a valid demo outcome and set win/loss percentages from 1 to 100.";return;}
+if(!["inherit","market","win","lose"].includes(demoMode)||!Number.isFinite(winPercent)||winPercent<1||winPercent>100||!Number.isFinite(lossPercent)||lossPercent<1||lossPercent>100){if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent="Choose a Quick Trade outcome rule and set win/loss percentages from 1 to 100.";return;}
  saveButton.disabled=true;
  if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent="Saving trade settings…";
  try{
