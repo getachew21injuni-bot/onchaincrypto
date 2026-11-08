@@ -94,8 +94,8 @@ test("authentication navigation controls have one click handler each", () => {
 });
 
 test("unguarded event listeners only target elements present in the HTML", () => {
-  const declaredIds = new Set([...html.matchAll(/\\bid=["']([^"']+)["']/g)].map(match => match[1]));
-  const references = [...html.matchAll(/(?:\\$\\(\\s*["']([^"']+)["']\\s*\\)|getElementById\\(\\s*["']([^"']+)["']\\s*\\))\\.addEventListener/g)]
+  const declaredIds = new Set([...html.matchAll(/\bid=["']([^"']+)["']/g)].map(match => match[1]));
+  const references = [...html.matchAll(/(?:\$\(\s*["']([^"']+)["']\s*\)|getElementById\(\s*["']([^"']+)["']\s*\))\.addEventListener/g)]
     .map(match => match[1] || match[2]);
   const missing = [...new Set(references.filter(id => !declaredIds.has(id)))];
   assert.deepEqual(missing, [], "Missing elements used by unguarded event listeners: " + missing.join(", "));
