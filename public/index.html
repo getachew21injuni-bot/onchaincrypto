@@ -6428,18 +6428,26 @@ body.oc-auth-screen #ocVisitorSupportBot{display:none!important}
 #ocVisitorSupportBot{display:block!important}
 body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
 #oc-visitor-support-bot,#oc-support-button{display:none!important}
+
+/* Clear, high-contrast support header and agent action */
+#ocVisitorSupportBot .oc-support-head{background:linear-gradient(110deg,#f4d98f,#ffe9b5)!important;border-bottom:1px solid #c49b43!important}
+#ocVisitorSupportBot .oc-support-headcopy strong{color:#111!important;font-size:15px!important;font-weight:900!important}
+#ocVisitorSupportBot .oc-support-headcopy small{color:#292318!important;font-size:11px!important;font-weight:650!important}
+#ocVisitorSupportBot .oc-support-agent{color:#07130d!important;font-weight:900!important;background:linear-gradient(135deg,#28df91,#14b86d)!important}
+#ocVisitorSupportBot .oc-support-note{color:#d4dfec!important;font-size:10px!important}
+#ocVisitorSupportBot .oc-support-note a{color:#ffffff!important;font-weight:850!important;text-decoration:underline!important}
 </style>
 <div id="ocVisitorSupportBot" aria-live="polite">
  <section class="oc-support-panel" role="dialog" aria-label="OnChainsPro information assistant" aria-modal="false">
   <header class="oc-support-head">
    <span class="oc-support-avatar" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M7 25v-4a17 17 0 0 1 34 0v4" stroke="#17253a" stroke-width="5" stroke-linecap="round"/><path d="M7 22h5a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-1a4 4 0 0 1-4-4zM41 22h-5a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4h1a4 4 0 0 0 4-4z" fill="#17253a" stroke="#e9c879" stroke-width="1.5"/><path d="M16 23c1.5-5 14.5-5 16 0v10c0 5-4 8-8 8s-8-3-8-8z" fill="#f1c98b" stroke="#17253a" stroke-width="2"/><path d="M20 30h.1M28 30h.1" stroke="#17253a" stroke-width="3" stroke-linecap="round"/><path d="M21 35q3 2 6 0" stroke="#9c542e" stroke-width="1.7" stroke-linecap="round"/><path d="M24 40v3" stroke="#17253a" stroke-width="2" stroke-linecap="round"/></svg></span>
-   <span class="oc-support-headcopy"><strong>OnChainsPro Assistant</strong><small>Quick answers · No login needed</small></span>
+   <span class="oc-support-headcopy"><strong>Customer Support</strong><small>Ask about OnChain features and account guidance</small></span>
    <button class="oc-support-close" type="button" aria-label="Close assistant">×</button>
   </header>
-  <div class="oc-support-messages" id="ocSupportMessages" aria-live="polite" aria-relevant="additions"><div class="oc-support-msg bot">Welcome to OnChainsPro! 👋 I can explain crypto, Gold, markets and platform features in simple words. What would you like to know?</div></div>
-    <form class="oc-support-compose" id="ocSupportForm"><input id="ocSupportInput" type="text" maxlength="300" placeholder="Ask for a definition…" aria-label="Ask for a definition" autocomplete="off"><button type="submit">Send</button></form>
+  <div class="oc-support-messages" id="ocSupportMessages" aria-live="polite" aria-relevant="additions"><div class="oc-support-msg bot">Welcome to OnChain! 👋 I can guide you through accounts, profiles, wallets, deposits, withdrawals, markets, gold, trading, history, referrals and security. What would you like help with?</div></div>
+    <form class="oc-support-compose" id="ocSupportForm"><input id="ocSupportInput" type="text" maxlength="300" placeholder="Ask me anything about OnChain…" aria-label="Ask about OnChain" autocomplete="off"><button type="submit">Send</button></form>
   <button type="button" class="oc-support-agent" id="ocSupportTalkAgent">Talk to Agent</button>
-  <div class="oc-support-note">Need personal help? Send a private message to our support team.</div>
+  <div class="oc-support-note">Email support: <a href="mailto:support@onchainspro.com">support@onchainspro.com</a></div>
  </section>
  <button class="oc-support-launch" type="button" aria-label="Open information assistant"><span class="oc-support-avatar" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M7 25v-4a17 17 0 0 1 34 0v4" stroke="#17253a" stroke-width="5" stroke-linecap="round"/><path d="M7 22h5a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-1a4 4 0 0 1-4-4zM41 22h-5a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4h1a4 4 0 0 0 4-4z" fill="#17253a" stroke="#e9c879" stroke-width="1.5"/><path d="M16 23c1.5-5 14.5-5 16 0v10c0 5-4 8-8 8s-8-3-8-8z" fill="#f1c98b" stroke="#17253a" stroke-width="2"/><path d="M20 30h.1M28 30h.1" stroke="#17253a" stroke-width="3" stroke-linecap="round"/><path d="M21 35q3 2 6 0" stroke="#9c542e" stroke-width="1.7" stroke-linecap="round"/><path d="M24 40v3" stroke="#17253a" stroke-width="2" stroke-linecap="round"/></svg></span></button>
 </div>
@@ -6449,45 +6457,66 @@ body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
 <script id="oc-visitor-support-bot-script">
 (()=>{const root=document.getElementById("ocVisitorSupportBot");if(!root||root.dataset.ready)return;root.dataset.ready="1";
 const messages=root.querySelector("#ocSupportMessages"),input=root.querySelector("#ocSupportInput"),form=root.querySelector("#ocSupportForm");
-const add=(text,who="bot")=>{const el=document.createElement("div");el.className="oc-support-msg "+who;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;};
-const answers=[
-[/\b(bitcoin|\bbtc|\bxbt)\b/i,"Bitcoin (BTC) is a decentralised digital currency. Its network records transactions on a public blockchain, and its supply is capped at 21 million."],
-[/\b(ethereum|\beth|\bether)\b/i,"Ethereum is a blockchain that supports smart contracts and apps. ETH is its native asset, used for network fees and transfers."],
-[/\b(usdt|tether|stablecoin|stable coin)\b/i,"USDT is a stablecoin designed to track the US dollar. Stablecoins can still carry issuer, reserve and market risks."],
-[/\b(gold|\bxau|\bxaut)\b/i,"Gold is a precious metal traded globally. XAU commonly represents one troy ounce; XAU/USDT quotes its price in USDT."],
-[/\b(blockchain|distributed ledger)\b/i,"A blockchain is a shared digital record. Network participants verify transactions and add them in linked blocks."],
-[/\b(crypto|cryptocurrency|digital asset)\b/i,"A cryptocurrency is a digital asset secured with cryptography and usually transferred on a blockchain."],
-[/\b(wallet|wallet address)\b/i,"A crypto wallet manages the keys used to access digital assets. A wallet address lets others send assets to you on a supported network."],
-[/\b(deposit|receive funds)\b/i,"A deposit is an incoming transfer to your account or wallet. Always check the asset, address and network before sending."],
-[/\b(withdraw|withdrawal|send funds)\b/i,"A withdrawal sends assets from your account or wallet to another address. Check the address and network carefully before confirming."],
-[/\b(trading|trade|buy|sell)\b/i,"Trading is buying and selling assets based on market prices. Prices move with supply, demand and market conditions."],
-[/\b(market|market price|price)\b/i,"A market brings buyers and sellers together. Prices change as orders, supply, demand and wider market news change."],
-[/\b(spot trading|spot)\b/i,"Spot trading means buying or selling an asset for immediate settlement, rather than trading a contract based on its price."],
-[/\b(limit order|limit)\b/i,"A limit order sets the price at which you are willing to buy or sell. It may not execute if the market does not reach that price."],
-[/\b(market order)\b/i,"A market order aims to execute promptly at the best available prices. The final price can differ from the last displayed price."],
-[/\b(spread)\b/i,"The spread is the difference between the best available buy price and sell price."],
-[/\b(network fee|gas fee|transaction fee|fee)\b/i,"A network fee is paid to process a transaction on a blockchain. Fees vary by network and current activity."],
-[/\b(kyc|identity verification|verify identity)\b/i,"KYC means Know Your Customer. It is an identity-verification process used to help meet compliance requirements."],
-[/\b(private key|seed phrase|recovery phrase)\b/i,"A private key or recovery phrase can provide access to a wallet. Keep it secret and never share it with anyone, including support."],
-[/\b(bull market|bullish)\b/i,"A bull market is a period when prices are generally rising or market sentiment is positive."],
-[/\b(bear market|bearish)\b/i,"A bear market is a period when prices are generally falling or market sentiment is negative."],
-[/\b(solana|\bsol)\b/i,"Solana is a blockchain designed for fast transactions and decentralised applications. SOL is its native asset."],
-[/\b(xrp|ripple)\b/i,"XRP is the digital asset used on the XRP Ledger, a network designed for transferring value."],
-[/\b(bnb)\b/i,"BNB is the native asset of the BNB Chain ecosystem and is used for network fees and other services."]
+const add=(value,who="bot")=>{const el=document.createElement("div");el.className="oc-support-msg "+who;el.textContent=value;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;};
+const topics=[
+["Account & registration",/\b(account|register|registration|sign ?up|login|log ?in|sign ?in|password|verification|verify|kyc)\b/i,"account"],
+["Profile & security",/\b(profile|avatar|photo|picture|username|email change|security|2fa|two.factor|password reset|device)\b/i,"profile"],
+["Wallet & balance",/\b(wallet|balance|holding|asset balance|coin balance|available funds)\b/i,"wallet"],
+["Deposits",/\b(deposit|add funds|receive|receiving address|fund account)\b/i,"deposit"],
+["Withdrawals",/\b(withdraw|withdrawal|send funds|cash out)\b/i,"withdraw"],
+["Markets & prices",/\b(market|markets|price|coin list|chart|graph|btc price|gold price|xau|xaut)\b/i,"market"],
+["Trading",/\b(trade|trading|buy|sell|order|profit|loss|quick trade|confirm trade)\b/i,"trade"],
+["History & performance",/\b(history|transaction|transactions|activity|performance|past trade|records)\b/i,"history"],
+["Referrals",/\b(referral|refer|invite|invitation|referral code|referral link)\b/i,"referral"],
+["Help & support",/\b(agent|human|support|help|contact|email|talk to)\b/i,"support"]
 ];
-const answer=q=>{const v=String(q||"").trim();if(!v)return "What would you like me to explain?";
-if(/^(hi|hello|hey|good morning|good afternoon|good evening)$/i.test(v))return "Hello! Glad to help. Ask me about crypto, Gold, markets or a platform feature.";
-if(/how (do|can) i (create|register|sign up)|how to (create|register|sign up)|create an account|register|sign up/i.test(v))return "To create an account, select Sign Up on the website, enter the requested details and follow the verification steps. I can explain each step, but I won’t open the form for you.";
-if(/login|log in|sign in/i.test(v))return "For an existing account, select Login and enter your registered details. I can explain the steps without opening or redirecting you.";
-if(/support|contact (someone|team|you)|speak to (a person|someone)|human agent/i.test(v))return "For account-specific help, use the support options available after signing in. Customer email replies are managed by our verified support administrators.";
-for(const [pattern,reply] of answers){if(pattern.test(v))return reply;}
-if(/^(what is|what are|explain|define|tell me about)\b/i.test(v))return "I can explain that. Try asking with the exact term, such as Bitcoin, XAU, wallet, spread, KYC or limit order.";
-return "I can help explain crypto, Gold, trading terms and platform features. Could you tell me which part you’d like to understand?";
+const navHints={
+account:"Select Sign Up to create an account, or Login if you already have one. Follow the on-screen verification steps.",
+profile:"Open your profile area to review your account details, update available profile information and manage security settings. Never share your password or verification codes.",
+wallet:"Open Wallet from the platform navigation to view your balance and asset holdings. Refresh only after your account has finished loading.",
+deposit:"Open Wallet and choose Deposit. Check the selected asset and network carefully, then use the address shown for that exact network. Never send a different asset or network to that address.",
+withdraw:"Open Wallet and choose Withdraw. Check the destination address, asset and network before submitting. A blockchain transfer may not be reversible.",
+market:"Open Market to browse available assets and select a coin or gold pair to view its price chart and market details.",
+trade:"Open Trade, choose the asset and direction, enter the amount and review every detail before confirming. Check the final confirmation screen before submitting.",
+history:"Open History to review your recorded account activity and past trades.",
+referral:"Open the referral area in your account to view your own referral code or link and its available details.",
+support:"For personal assistance, email support@onchainspro.com. This is the customer support contact."
 };
-const open=()=>{root.classList.add("is-open");messages.scrollTop=0;};
+const definitions=[
+[/\b(bitcoin|\bbtc|\bxbt)\b/i,"Bitcoin (BTC) is a decentralised digital currency. Its network records transactions on a public blockchain and its supply is capped at 21 million."],
+[/\b(ethereum|\beth|\bether)\b/i,"Ethereum is a blockchain for smart contracts and decentralised applications. ETH is its native asset."],
+[/\b(usdt|tether|stablecoin|stable coin)\b/i,"USDT is a stablecoin designed to track the US dollar. Its value and availability can still be affected by issuer, reserve and market risks."],
+[/\b(gold|\bxau|\bxaut)\b/i,"Gold is a precious metal traded globally. XAU commonly represents one troy ounce; XAU/USDT quotes gold against USDT. XAUT is a token designed to represent ownership of gold."],
+[/\b(blockchain|distributed ledger)\b/i,"A blockchain is a shared digital record where transactions are verified and stored in linked blocks."],
+[/\b(private key|seed phrase|recovery phrase)\b/i,"A private key or recovery phrase can give access to a wallet. Keep it secret and never share it with anyone, including support."],
+[/\b(kyc|know your customer|identity verification)\b/i,"KYC means Know Your Customer. It is the identity-check process used to help verify customers and meet compliance requirements."],
+[/\b(network fee|gas fee|transaction fee)\b/i,"A network fee is paid to process a transaction on a blockchain. The amount varies by network and activity."],
+[/\b(spread)\b/i,"The spread is the difference between the best available buy price and sell price."],
+[/\b(limit order)\b/i,"A limit order lets you set the price at which you want to buy or sell. It may not execute if the market does not reach that price."],
+[/\b(market order)\b/i,"A market order aims to execute promptly at available market prices. The final execution price can differ from the last displayed price."],
+[/\b(blockchain confirmation|confirmations)\b/i,"A blockchain confirmation means a transaction has been included in a block and accepted by the network. More confirmations generally provide greater confidence."],
+[/\b(referral)\b/i,"A referral code or link identifies invitations associated with your account. Open the referral area while signed in to see your own details."]
+];
+const greet=/^(hi|hello|hey|good morning|good afternoon|good evening)\b/i;
+const answer=q=>{
+ const v=String(q||"").trim();if(!v)return "What would you like help with?";
+ if(greet.test(v))return "Hello! 👋 I’m here to help with OnChain. You can ask in your own words about your account, wallet, deposits, markets, trading or anything else on the platform.";
+ if(/\b(which|where|how)\b/i.test(v)&&/\b(start|begin)\b/i.test(v))return "You can start from the main navigation. Are you trying to open your Wallet, view the Market, or place a Trade?";
+ const matched=topics.filter(t=>t[1].test(v));
+ if(matched.length>1){
+   const labels=matched.map(t=>t[0]);
+   return "I can help with that. Which part do you mean: "+labels.join(", ")+"? Tell me one and I’ll guide you step by step.";
+ }
+ if(matched.length===1)return navHints[matched[0][2]];
+ for(const [pattern,reply] of definitions){if(pattern.test(v))return reply;}
+ if(/\b(hello|thanks|thank you)\b/i.test(v))return "You’re welcome! Ask me anything about using OnChain and I’ll point you in the right direction.";
+ if(/\b(what|how|why|where|when|can i|do i)\b/i.test(v))return "I want to make sure I guide you correctly. Do you mean your account, Wallet, Deposit, Withdrawal, Market, Trade, History or Referral section?";
+ return "I can help with OnChain features and account guidance. Could you tell me which section you mean—Wallet, Deposit, Withdrawal, Market, Trade, Profile, History or Referral?";
+};
+const open=()=>{root.classList.add("is-open");messages.scrollTop=messages.scrollHeight;input.focus();};
 root.querySelector(".oc-support-launch").addEventListener("click",()=>root.classList.contains("is-open")?root.classList.remove("is-open"):open());
 root.querySelector(".oc-support-close").addEventListener("click",()=>root.classList.remove("is-open"));
-root.querySelector("#ocSupportTalkAgent").addEventListener("click",()=>{root.classList.remove("is-open");if(typeof window.openOnchainSupport==="function"){window.openOnchainSupport();return;}if(typeof window.showPage==="function"){window.showPage("support");return;}const supportLink=document.querySelector("[data-oc-open-support]");if(supportLink)supportLink.click();});
+root.querySelector("#ocSupportTalkAgent").addEventListener("click",()=>{add("For personal assistance, email our support team at support@onchainspro.com.");});
 form.addEventListener("submit",e=>{e.preventDefault();const value=input.value.trim();if(!value)return;input.value="";add(value,"user");add(answer(value));});
 })();
 </script>
