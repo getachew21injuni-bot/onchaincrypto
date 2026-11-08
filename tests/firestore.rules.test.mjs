@@ -167,3 +167,45 @@ describe("admin-approved internal USDT transfer security", () => {
     }));
   });
 });
+
+
+describe("per-account trade wallet persistence", () => {
+  it("allows a member to save and reload only their own trade balance, holdings and history", async () => {
+    const db = testEnv.authenticatedContext("wallet-owner").firestore();
+    const walletRef = doc(db, "userTradeState/wallet-owner");
+    const snapshot = {
+      uid: "wallet-owner",
+      balance: 20500,
+      holdings: { USDT: 20500, BTC: 0.01 },
+      history: [{ id: "trade-1", type: "quick-result", pnl: 125, status: "win" }],
+      updatedAt: serverTimestamp()
+    };
+    await assertSucceeds(setDoc(walletRef, snapshot));
+    await assertSucceeds(updateDoc(walletRef, {
+      balance: 20625,
+      history: [...snapshot.history, { id: "trade-2", type: "quick-result", pnl: 125, status: "win" }],
+      updatedAt: serverTimestamp()
+    }));
+    const restored = await assertSucceeds(getDoc(walletRef));
+    assert.equal(restored.data().balance, 20625);
+    assert.equal(restored.data().history.length, 2);
+    await assertFails(getDoc(doc(testEnv.authenticatedContext("another-member").firestore(), "userTradeState/wallet-owner")));
+  });
+
+  it("rejects another user's wallet writes, negative balances and oversized history", async () => {
+    const ownerDb = testEnv.authenticatedContext("wallet-owner").firestore();
+    const otherDb = testEnv.authenticatedContext("another-member").firestore();
+    const walletRef = doc(ownerDb, "userTradeState/wallet-owner");
+    await assertFails(setDoc(doc(otherDb, "userTradeState/wallet-owner"), {
+      uid: "wallet-owner", balance: 500, holdings: {}, history: [], updatedAt: serverTimestamp()
+    }));
+    await assertFails(setDoc(walletRef, {
+      uid: "wallet-owner", balance: -1, holdings: {}, history: [], updatedAt: serverTimestamp()
+    }));
+    await assertFails(setDoc(walletRef, {
+      uid: "wallet-owner", balance: 100, holdings: {},
+      history: Array.from({ length: 301 }, (_, i) => ({ id: String(i) })),
+      updatedAt: serverTimestamp()
+    }));
+  });
+});
