@@ -120,3 +120,15 @@ test("wallet sync cannot trade on failed restore or overwrite results on unchang
   assert.ok(html.includes("lastAdminBalance"), "Admin wallet snapshots must track the last applied balance");
   assert.ok(html.includes("data.demoBalanceUSDT!==lastAdminBalance"), "Unchanged admin profile snapshots must not overwrite trade results");
 });
+
+
+test("visitor support uses an isolated Firebase session and submits through the admin inbox", () => {
+  assert.ok(html.includes('initializeApp(config,"visitor-support")'), "Guest support must use a separate Firebase app");
+  assert.ok(html.includes("const guestAuth=getAuth(guestApp),guestDb=getFirestore(guestApp);"), "Guest support must not change the main login session");
+  assert.ok(html.includes("signInAnonymously(guestAuth)"), "Guest support must authenticate its own visitor session");
+  assert.ok(html.includes("writeBatch(guestDb)"), "Guest support must write the ticket and first message together");
+  assert.ok(html.includes("signInAnonymously, signOut"), "Guest auth methods must be imported");
+  assert.ok(html.includes("addDoc, writeBatch"), "Firestore batch writer must be imported");
+  assert.ok(html.includes("Tap Talk to Agent below to send a private message"), "Bot must direct support requests to the Talk to Agent form");
+  assert.equal((html.match(/id="ocVisitorSupportBot"/g) || []).length, 1, "Only one visitor support bot should be present");
+});
