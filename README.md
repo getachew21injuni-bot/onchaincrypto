@@ -1,6 +1,6 @@
-# Onchainspro
+# OnChainSpro
 
-A static demo website for viewing public crypto-market data and testing simulated trades. **This repository is not a live cryptocurrency exchange.**
+A Firebase-hosted platform for cryptocurrency and gold market information, account features and interactive trading tools. **The current Quick Trade workflow records account results; it does not submit orders to an external exchange or provide on-chain custody.**
 
 ## Live sites
 
@@ -38,11 +38,11 @@ After each change, check the relevant GitHub Actions run. Do not assume a commit
 
 ## Current status and limitations
 
-- Public market data and simulated trade UI are intended for demo use.
-- Firebase Authentication UI is present; test sign-in on the live site before relying on it.
-- Cloud Functions source is present, but backend deployment must be verified in GitHub Actions.
-- Support contact shown in the app: `onchaincryptosupport@gmail.com`. Create and test this mailbox before relying on it.
-- Real-money deposits, withdrawals, custody, and live exchange execution are **not implemented**. Balances and trades in the prototype are simulated and browser-local.
+- Public market pages display cryptocurrency and gold information from external providers; availability and refresh timing depend on those providers.
+- Firebase Authentication and Firestore support account features and per-account trade-state persistence. Verify each live workflow before relying on it.
+- Quick Trade records outcomes in the platform account ledger using market prices. It does not place orders on an external exchange.
+- Platform balances are account records; they are not, by themselves, proof of funds held in on-chain custody or of a confirmed blockchain transfer.
+- Support contact shown in the current Firebase app: `support@onchainspro.com`.
 
 ## Security: rotate any exposed service-account key
 
@@ -63,6 +63,6 @@ If a Firebase service-account private key was ever pasted into a chat, ticket, o
 
 - Keep API keys, service-account JSON, passwords, private keys, wallet recovery phrases, and exchange secrets out of source files and commits.
 - Never ask users for wallet seed phrases.
-- Do not describe demo balances as real funds.
+- Do not describe platform account balances as customer-held or on-chain assets unless custody and transaction settlement have been independently verified.
 - Before accepting real deposits, require payment monitoring, ledger accounting, reconciliation, withdrawal controls, compliance review, and independent security testing.
 - Make the smallest targeted change possible, run the backend build check when backend files change, and confirm deployment status before telling users an update is live.
