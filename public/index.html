@@ -898,7 +898,7 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
  html.oc-light-theme .panel,html.oc-light-theme .card{box-shadow:0 3px 12px rgba(30,35,41,.04)!important}
 }
 </style>
-<style id="oc-hide-wallet-from-visitors">body.oc-visitor-mode #nav [data-page="wallet"],body.oc-visitor-mode #bottomNav [data-bottom-page="wallet"],body.oc-visitor-mode [data-page="wallet"],body.oc-visitor-mode [data-go="wallet"]{display:none!important}body.oc-visitor-mode #bottomNav{grid-template-columns:repeat(4,minmax(0,1fr))!important;justify-items:stretch;gap:4px}body.oc-visitor-mode #bottomNav>button{width:100%;min-width:0;justify-content:center}</style>
+<style id="oc-visitor-private-page-guard">/* Visitors may browse public market content. Account entry points stay visible, but private app pages never render before authentication. */body.oc-visitor-mode main>section[id^="page-"]:not(#page-public-market):not(#page-markets):not(#page-register){display:none!important;visibility:hidden!important}body.oc-visitor-mode #nav [data-page="home"],body.oc-visitor-mode #nav [data-page="trade"],body.oc-visitor-mode #nav [data-page="browser"],body.oc-visitor-mode #bottomNav [data-bottom-page="home"],body.oc-visitor-mode #bottomNav [data-bottom-page="trade"],body.oc-visitor-mode #bottomNav [data-bottom-page="browser"]{display:none!important}body.oc-visitor-mode #bottomNav{grid-template-columns:repeat(2,minmax(0,1fr))!important;justify-items:stretch;gap:4px}body.oc-visitor-mode #bottomNav>button{width:100%;min-width:0;justify-content:center}body.oc-visitor-mode main>#page-public-market.hidden{display:none!important}body.oc-visitor-mode #page-markets .cards:has(#summaryBalance),body.oc-visitor-mode #page-markets #marketQuickActionsPanel,body.oc-visitor-mode #page-markets #marketRecentActivity,body.oc-visitor-mode #page-markets #ocStockBrokerageWorkspace{display:none!important}</style>
 
 <style id="oc-stock-crypto-quick-style">.oc-stock-brand-card{cursor:pointer;transition:border-color .18s,transform .18s,background .18s}.oc-stock-brand-card:hover,.oc-stock-brand-card.selected,.oc-stock-brand-card[aria-pressed="true"]{border-color:var(--oc-gold,#d9ad55);background:rgba(217,173,85,.09);transform:translateY(-1px)}.oc-stock-brand-card:focus-visible{outline:2px solid var(--oc-gold,#d9ad55);outline-offset:3px}.oc-stock-order-summary a{color:var(--oc-gold,#e5bd67);text-decoration:none}.oc-crypto-quick-picks{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}.oc-crypto-quick-picks button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:8px 13px;font-weight:700}.oc-crypto-quick-picks button:hover{border-color:var(--yellow);color:var(--yellow)}</style>
 <style id="oc-home-promo-and-simple-auth-layout">
@@ -4545,7 +4545,7 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     }
     const guest=window.ocLoggedOut===true&&!authenticatedUser;
     document.body.classList.toggle("oc-visitor-mode",guest);
-    if(guest && page!=="register" && page!=="public-market") page="register";
+    if(guest && !["register","public-market","markets"].includes(page)) page="register";
     // Keep the authentication screen class synchronized with the actual visible route.
     document.body.classList.toggle("oc-auth-screen",guest&&page==="register");
     const target=document.getElementById('page-'+page);
@@ -4610,7 +4610,7 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     // Wait for Firebase session restoration before treating a startup guest flag
     // as a confirmed sign-out.
     void (async()=>{
-      if(page!=='register'){
+      if(!["register","public-market","markets"].includes(page)){
         try{if(window.ocAuthReady)await window.ocAuthReady;}catch(_){}
         const activeUser=window.ocFirebaseAuth?.currentUser||window.onchaincryptoCurrentUser||null;
         if(!activeUser){
@@ -7393,6 +7393,50 @@ html.oc-auth-pending body #bottomNav { display:none!important; }
     if(event.key==="Escape")setOpen(false);
   });
   setOpen(false);
+})();
+</script>
+
+<script id="oc-visitor-private-route-guard">
+(function(){
+  const privatePages=new Set(["home","trade","wallet","profile","deposit","withdraw","transfer","convert","history","notifications","settings","kyc","admin","browser"]);
+  function signedIn(){return !!(window.ocFirebaseAuth?.currentUser||window.onchaincryptoCurrentUser)&&window.ocLoggedOut!==true;}
+  function protectRoute(page){
+    if(!privatePages.has(String(page||""))||signedIn())return false;
+    window.ocLoggedOut=true;
+    document.body.classList.add("oc-visitor-mode","oc-logged-out","oc-auth-screen");
+    document.body.classList.remove("oc-register-mode");
+    const route=window.__ocNavigatePage||window.showPage;
+    if(typeof route==="function")route("register");
+    document.getElementById("authChoiceLogin")?.click();
+    document.getElementById("authChoicePanel")?.classList.add("hidden");
+    return true;
+  }
+  const original=window.showPage;
+  if(typeof original==="function")window.showPage=function(page,...args){if(protectRoute(page))return;return original.call(this,page,...args);};
+  document.addEventListener("click",function(event){
+    if(signedIn())return;
+    const el=event.target instanceof Element?event.target:null;if(!el)return;
+    const control=el.closest("[data-page],[data-bottom-page],[data-go],[data-wallet-action],[onclick]");if(!control)return;
+    const page=control.dataset.page||control.dataset.bottomPage||control.dataset.go||control.dataset.walletAction||"";
+    if(protectRoute(page)){event.preventDefault();event.stopImmediatePropagation();}
+  },true);
+  function applyGuestGuard(){
+    if(signedIn()){
+      document.body.classList.remove("oc-visitor-mode");
+      return;
+    }
+    document.body.classList.add("oc-visitor-mode");
+    const visible=document.querySelector('main>section[id^="page-"]:not(.hidden)');
+    if(visible&&!["page-public-market","page-markets","page-register"].includes(visible.id)){
+      visible.classList.add("hidden");visible.setAttribute("hidden","");
+      const publicPage=document.getElementById("page-public-market");
+      if(publicPage){publicPage.classList.remove("hidden");publicPage.removeAttribute("hidden");}
+    }
+  }
+  applyGuestGuard();
+  window.addEventListener("pageshow",applyGuestGuard);
+  window.addEventListener("popstate",applyGuestGuard);
+  document.addEventListener("DOMContentLoaded",applyGuestGuard,{once:true});
 })();
 </script>
 </body>
