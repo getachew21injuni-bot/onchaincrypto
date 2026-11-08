@@ -5429,6 +5429,18 @@ import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.10
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, serverTimestamp, runTransaction, addDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
+window.ocSubmitGuestSupport=async({email,message})=>{
+ const cleanEmail=String(email||"").trim().slice(0,160),cleanMessage=String(message||"").trim().slice(0,3000);
+ if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(cleanEmail))throw new Error("Please enter a valid email address.");
+ if(cleanMessage.length<3)throw new Error("Please add a little more detail.");
+ let visitor=auth.currentUser;
+ if(!visitor)visitor=(await signInAnonymously(auth)).user;
+ const ticketRef=doc(collection(db,"supportTickets")),messageRef=doc(collection(db,"supportTickets",ticketRef.id,"messages")),batch=writeBatch(db);
+ batch.set(ticketRef,{ownerUid:visitor.uid,customerEmail:cleanEmail,customerName:"Website visitor",subject:"Website visitor support",status:"open",createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:cleanMessage,source:"visitor-bot"});
+ batch.set(messageRef,{senderUid:visitor.uid,senderRole:"customer",senderName:"Website visitor",text:cleanMessage,createdAt:serverTimestamp()});
+ await batch.commit();
+ return true;
+};
 const app=getApps()[0]||initializeApp(config),auth=getAuth(app),db=getFirestore(app);
 const adminEmails=new Set(["getachew21.inj.uni@gmail.com"]);
 const byId=id=>document.getElementById(id);
@@ -5568,7 +5580,7 @@ document.addEventListener("click",async event=>{
 </script>
 <script type="module" id="oc-deposit-withdraw-requests">
 import {getApps,initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import {getAuth,onAuthStateChanged,signInAnonymously} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import {getFirestore,collection,doc,addDoc,updateDoc,onSnapshot,query,where,serverTimestamp,runTransaction} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const cfg={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
 const app=getApps()[0]||initializeApp(cfg),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id),esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -6457,7 +6469,12 @@ body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
   </div>
     <form class="oc-support-compose" id="ocSupportForm"><input id="ocSupportInput" type="text" maxlength="300" placeholder="Ask me anything about OnChain…" aria-label="Ask about OnChain" autocomplete="off"><button type="submit">Send</button></form>
   <button type="button" class="oc-support-agent" id="ocSupportTalkAgent">Talk to Agent</button>
-  <div class="oc-support-note">Email support: <a href="mailto:support@onchainspro.com">support@onchainspro.com</a></div>
+  <form id="ocGuestAgentForm" class="oc-support-compose" style="display:none;flex-direction:column;gap:8px;padding:10px;border-top:1px solid rgba(255,255,255,.1)">
+   <input id="ocGuestAgentEmail" type="email" maxlength="160" required placeholder="Your email for the reply" aria-label="Your email">
+   <textarea id="ocGuestAgentMessage" maxlength="3000" required rows="3" placeholder="How can our team help?" aria-label="Message to support"></textarea>
+   <button type="submit">Send to support team</button>
+   <small id="ocGuestAgentStatus" aria-live="polite"></small>
+  </form>
  </section>
  <button class="oc-support-launch" type="button" aria-label="Open information assistant"><span class="oc-support-avatar" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M7 25v-4a17 17 0 0 1 34 0v4" stroke="#17253a" stroke-width="5" stroke-linecap="round"/><path d="M7 22h5a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-1a4 4 0 0 1-4-4zM41 22h-5a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4h1a4 4 0 0 0 4-4z" fill="#17253a" stroke="#e9c879" stroke-width="1.5"/><path d="M16 23c1.5-5 14.5-5 16 0v10c0 5-4 8-8 8s-8-3-8-8z" fill="#f1c98b" stroke="#17253a" stroke-width="2"/><path d="M20 30h.1M28 30h.1" stroke="#17253a" stroke-width="3" stroke-linecap="round"/><path d="M21 35q3 2 6 0" stroke="#9c542e" stroke-width="1.7" stroke-linecap="round"/><path d="M24 40v3" stroke="#17253a" stroke-width="2" stroke-linecap="round"/></svg></span></button>
 </div>
@@ -6501,7 +6518,20 @@ const answer=q=>{
 const open=()=>{root.classList.add("is-open");messages.scrollTop=messages.scrollHeight;input.focus();};
 root.querySelector(".oc-support-launch").addEventListener("click",()=>root.classList.contains("is-open")?root.classList.remove("is-open"):open());
 root.querySelector(".oc-support-close").addEventListener("click",()=>root.classList.remove("is-open"));
-root.querySelector("#ocSupportTalkAgent").addEventListener("click",()=>{add("For personal assistance, email our support team at support@onchainspro.com.");});
+const agentForm=root.querySelector("#ocGuestAgentForm");
+root.querySelector("#ocSupportTalkAgent").addEventListener("click",()=>{
+ if(agentForm){agentForm.style.display=agentForm.style.display==="none"?"flex":"none";if(agentForm.style.display==="flex")root.querySelector("#ocGuestAgentEmail")?.focus();}
+});
+agentForm?.addEventListener("submit",async e=>{
+ e.preventDefault();
+ const email=root.querySelector("#ocGuestAgentEmail")?.value.trim()||"",message=root.querySelector("#ocGuestAgentMessage")?.value.trim()||"",status=root.querySelector("#ocGuestAgentStatus"),button=agentForm.querySelector("button[type=submit]");
+ if(!email||!message){if(status)status.textContent="Please enter your email and message.";return;}
+ if(typeof window.ocSubmitGuestSupport!=="function"){if(status)status.textContent="Support is connecting. Please try again in a moment.";return;}
+ button.disabled=true;if(status)status.textContent="Sending securely…";
+ try{await window.ocSubmitGuestSupport({email,message});add("Your message has been sent to our support team. We’ll reply to the email you provided.");agentForm.reset();agentForm.style.display="none";}
+ catch(error){console.error("Visitor support submission failed:",error);if(status)status.textContent="Could not send right now. Please try again.";}
+ finally{button.disabled=false;}
+});
 root.querySelectorAll("[data-oc-topic]").forEach(button=>button.addEventListener("click",()=>{const prompts={overview:"What is OnChain and what features does it offer?",stocks:"Tell me about stocks on OnChain.",gold:"Tell me about Gold and XAU on OnChain.",crypto:"Tell me about cryptocurrency on OnChain.",markets:"How do the markets and charts work?",wallet:"What can I do with the OnChain wallet?"};const q=prompts[button.dataset.ocTopic];if(q){add(q,"user");add(answer(q));}}));
 form.addEventListener("submit",e=>{e.preventDefault();const value=input.value.trim();if(!value)return;input.value="";add(value,"user");add(answer(value));});
 })();
