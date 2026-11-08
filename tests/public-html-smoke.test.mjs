@@ -85,3 +85,8 @@ test("public copy uses neutral Quick Trade wording and keeps transaction disclos
   assert.ok(html.includes("it does not place external exchange orders"));
   assert.ok(html.includes("active, verified address is displayed for the exact asset and network"));
 });
+
+test("mobile registration entry point is bound only once", () => {
+  const handlers = [...html.matchAll(/getElementById\(['"]mobileRegisterBtn['"]\)\??\.addEventListener\(['"]click['"]/g)];
+  assert.equal(handlers.length, 1, "Mobile registration should use the shared auth entry point once");
+});
