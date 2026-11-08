@@ -3103,6 +3103,9 @@ window.ocAuthReady = Promise.resolve(
   return auth.currentUser || null;
 });
 window.ocFirebaseAuth = auth;
+// Do not publish a signed-out state until Firebase has restored browser-local
+// persistence. The observer's first null event must not race session recovery.
+await window.ocAuthReady;
 // The full auth-state observer below is the single owner of login and app visibility.
 
 const db = getFirestore(app);
@@ -3798,6 +3801,10 @@ onAuthStateChanged(auth, (user) => {
         const signedOutRoute={ocAppRoute:true,ocPage:"register",ocAuthMode:"login",ocIndex:0,ocSignedOutBoundary:true,ocLogoutBoundary:true};
         const loginUrl=location.pathname+location.search+"#login";
         history.replaceState(signedOutRoute,"",loginUrl);
+        history.pushState({...signedOutRoute,ocBoundarySentinel:true},"",loginUrl);
+        window.__ocAppHistoryDepth=0;
+        window.__ocAppHistoryMaxIndex=0;
+        window.__ocAppCanForward=false;
         window.__ocSignedOutHistoryBoundary=true;
       } catch (_) {}
     }
@@ -3904,8 +3911,21 @@ window.addEventListener("popstate", async () => {
   try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
   if (!auth.currentUser && window.ocLoggedOut === true) {
     document.body.classList.add("oc-auth-screen");
-    document.body.classList.toggle("oc-register-mode",location.hash==="#register");
+    const mode=location.hash==="#register"?"register":"login";
+    document.body.classList.toggle("oc-register-mode",mode==="register");
     window.ocForceSignInScreen?.();
+    // Re-establish a signed-out history boundary after every Back/Forward
+    // event so a protected page can never become the visible destination.
+    try {
+      const boundary={ocAppRoute:true,ocPage:"register",ocAuthMode:mode,ocIndex:0,ocSignedOutBoundary:true,ocLogoutBoundary:true};
+      const loginUrl=location.pathname+location.search+(mode==="register"?"#register":"#login");
+      history.replaceState(boundary,"",loginUrl);
+      history.pushState({...boundary,ocBoundarySentinel:true},"",loginUrl);
+      window.__ocAppHistoryDepth=0;
+      window.__ocAppHistoryMaxIndex=0;
+      window.__ocAppCanForward=false;
+      window.__ocSignedOutHistoryBoundary=true;
+    } catch (_) {}
   }
 });
 // Account deletion is handled by the Gmail-confirmed request flow below.
