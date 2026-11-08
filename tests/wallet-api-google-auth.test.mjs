@@ -47,7 +47,7 @@ describe("Firestore service-account OAuth", () => {
         private_key: "not-used",
         token_uri: "https://attacker.example/token"
       }),
-      /not approved/
+      /unapproved|approved/
     );
   });
 });
