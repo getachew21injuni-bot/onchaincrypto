@@ -2003,7 +2003,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
       <div class="coin-list-controls coin-picker-controls"><span class="muted tiny" id="withdrawCoinCount">Showing 6 coins</span><div><button class="secondary" type="button" id="withdrawCoinLess" disabled>Less</button> <button class="primary" type="button" id="withdrawCoinMore">More +6</button></div></div>
       <div id="withdrawCoinList" class="coin-picker" role="listbox" aria-label="Withdrawal coin list"></div>
       <div class="selected-coin"><span id="withdrawCoinIcon" class="coin-icon">₿</span><div><strong id="withdrawCoinName">Bitcoin (BTC)</strong><div class="muted tiny">Selected withdrawal asset</div></div></div>
-      <label for="withdrawNetwork">Network</label><select id="withdrawNetwork" class="field"><option value="Bitcoin">Bitcoin</option><option value="Ethereum">Ethereum</option><option value="TRC20">TRON (TRC20)</option><option value="ERC20">Ethereum (ERC20)</option><option value="BEP20">BNB Smart Chain (BEP20)</option><option value="Solana">Solana</option><option value="Polygon">Polygon</option><option value="XRP">XRP Ledger</option></select>
+      <label for="withdrawNetwork">Network</label><select id="withdrawNetwork" class="field"><option value="Bitcoin">Bitcoin</option><option value="Ethereum">Ethereum</option><option value="TRC20">TRON (TRC20)</option><option value="ERC20">Ethereum (ERC20)</option><option value="BEP20">BNB Smart Chain (BEP20)</option><option value="Solana">Solana</option><option value="Polygon">Polygon</option><option value="XRP">XRP Ledger</option><option value="Dogecoin">Dogecoin</option><option value="Cardano">Cardano</option><option value="Litecoin">Litecoin</option><option value="Avalanche">Avalanche C-Chain</option><option value="TON">TON</option><option value="Stellar">Stellar</option><option value="BitcoinCash">Bitcoin Cash</option><option value="Polkadot">Polkadot</option><option value="EthereumClassic">Ethereum Classic</option></select>
       <label for="withdrawAddress">Destination address</label><input id="withdrawAddress" class="field" placeholder="Paste your receiving address" autocomplete="off" spellcheck="false" aria-describedby="withdrawAddressCheck"><div id="withdrawAddressCheck" class="muted tiny" aria-live="polite"></div>
       <label for="withdrawAmount">Amount</label><div class="oc-withdraw-amount-wrap"><input id="withdrawAmount" class="field" type="number" min="0" step="any" placeholder="Enter amount"><button id="withdrawAllBtn" type="button" class="secondary oc-withdraw-all">All</button></div>
       <div id="withdrawNotice" class="muted tiny" aria-live="polite"></div>
@@ -2730,20 +2730,42 @@ let historySeries=[];
 async function loadPriceHistory(){
  const coin=priceFor($("tradeAsset").value||selected);
  if(!coin){$("chartStatus").textContent="Select an asset after market data loads.";return}
- $("chartStatus").textContent="Loading 7-day price history for "+coin.name+"…";
+ $("chartStatus").textContent="Loading 7-day price history…";
+ const fetchJson=async(url,ms=9000)=>{
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),ms);
+  try{const response=await fetch(url,{headers:{accept:"application/json"},signal:controller.signal,cache:"no-store"});if(!response.ok)throw new Error("HTTP "+response.status);return await response.json()}
+  finally{clearTimeout(timer)}
+ };
+ let source="CoinGecko",prices=null,lastError=null;
  try{
-  const historyController=new AbortController(),historyTimer=setTimeout(()=>historyController.abort(),12000);
-  let res,data;
-  try{
-   res=await fetch("https://api.coingecko.com/api/v3/coins/"+encodeURIComponent(coin.id)+"/market_chart?vs_currency=usd&days=7&interval=hourly",{headers:{accept:"application/json"},signal:historyController.signal,cache:"no-store"});
-   if(!res.ok)throw new Error("CoinGecko history returned "+res.status);
-   data=await res.json();
-  }finally{clearTimeout(historyTimer)}
-  if(!Array.isArray(data.prices)||data.prices.length<3)throw new Error("Not enough price points");
-  historySeries=data.prices.map(p=>({time:p[0],price:Number(p[1])})).filter(p=>Number.isFinite(p.price));
+  const data=await fetchJson("https://api.coingecko.com/api/v3/coins/"+encodeURIComponent(coin.id)+"/market_chart?vs_currency=usd&days=7&interval=hourly",9000);
+  if(!Array.isArray(data.prices)||data.prices.length<3)throw new Error("Not enough CoinGecko history points");
+  prices=data.prices;
+ }catch(error){
+  lastError=error;
+  const symbol=String(coin.symbol||"").toUpperCase();
+  if(symbol&&symbol!=="XAU"&&symbol!=="USDT"&&symbol!=="USDC"){
+   try{
+    const rows=await fetchJson("https://data-api.binance.vision/api/v3/klines?symbol="+encodeURIComponent(symbol+"USDT")+"&interval=1h&limit=168",9000);
+    if(!Array.isArray(rows)||rows.length<3)throw new Error("Binance history returned too few points");
+    prices=rows.map(row=>[Number(row[0]),Number(row[4])]).filter(row=>Number.isFinite(row[0])&&Number.isFinite(row[1])&&row[1]>0);
+    source="Binance";
+   }catch(binanceError){lastError=binanceError;}
+  }
+ }
+ try{
+  if(!prices||prices.length<3)throw lastError||new Error("No price history source returned data");
+  historySeries=prices.map(point=>({time:Number(point[0]),price:Number(point[1])})).filter(point=>Number.isFinite(point.time)&&Number.isFinite(point.price)&&point.price>0);
+  if(historySeries.length<3)throw new Error("Not enough valid chart points");
   drawPriceChart();calculateSignal();
-  $("chartStatus").textContent="7-day public price history · "+historySeries.length+" points · updated "+new Date().toLocaleTimeString();
- }catch(e){$("chartStatus").textContent="Price history unavailable (API limits or connection). Try again later."; $("signalResult").textContent="Signal unavailable without price history."}
+  $("chartStatus").textContent="7-day public price history · "+source+" · "+historySeries.length+" points · updated "+new Date().toLocaleTimeString();
+ }catch(error){
+  historySeries=[];
+  const canvas=$("priceChart"),ctx=canvas?.getContext?.("2d");
+  if(canvas&&ctx){ctx.clearRect(0,0,canvas.width,canvas.height);}
+  $("chartStatus").textContent="Price history is temporarily unavailable. Try refreshing the chart.";
+  $("signalResult").textContent="Market indicators will appear when price history is available.";
+ }
 }
 function drawPriceChart(){
  const canvas=$("priceChart");if(!canvas||!historySeries.length)return;
@@ -5534,7 +5556,7 @@ function tag(s){const c=s==="approved"?"#16d9a0":s==="rejected"?"#ff5573":"#f0b9
 function adminRows(id,docs,k){const host=$(id);if(!host)return;host.innerHTML=docs.length?docs.map(d=>{const x=d.data(),p=x.status==="pending";return '<article class="panel" style="padding:12px;margin:10px 0;background:#08182b"><div style="display:flex;justify-content:space-between"><strong>'+esc(x.amount)+' '+esc(x.asset)+'</strong>'+tag(x.status)+'</div><div class="muted tiny">User: '+esc(x.email||x.uid)+' · '+esc(x.network)+'</div><div class="muted tiny">'+(k==="deposit"?"TX: "+esc(x.transactionHash):"Destination: "+esc(x.destinationAddress))+'</div><div class="muted tiny">UID: '+esc(x.uid)+'</div>'+(p?'<div style="display:flex;gap:8px;margin-top:10px"><button class="buy" data-oc-review="approve" data-k="'+k+'" data-id="'+esc(d.id)+'">'+(k==="deposit"?"Approve Available balance adjustment":"Approve balance adjustment")+'</button><button class="sell" data-oc-review="reject" data-k="'+k+'" data-id="'+esc(d.id)+'">Reject</button></div>':'')+'</article>'}).join(""):"No "+k+" requests."}
 async function withdraw(){const u=auth.currentUser,a=Number($("withdrawAmount")?.value),to=$("withdrawAddress")?.value.trim(),network=$("withdrawNetwork")?.value,coin=asset("withdraw");if(!u)throw Error("Sign in again.");if(!(a>0&&Number.isFinite(a)))throw Error("Enter a valid amount.");const available=typeof window.ocGetDisplayedAssetBalance==="function"?window.ocGetDisplayedAssetBalance(coin):NaN;if(!Number.isFinite(available))throw Error("Wallet balance is still loading. Refresh and try again.");if(a>available)throw Error("Amount exceeds your available displayed "+coin+" balance.");if(!to)throw Error("Enter a destination address.");if($("withdrawAddressCheck")?.dataset.state!=="valid")throw Error("Enter an address matching the selected network.");await addDoc(collection(db,"withdrawRequests"),{uid:u.uid,email:u.email||"",asset:coin,network,amount:a,destinationAddress:to,status:"pending",createdAt:serverTimestamp()});$("withdrawAmount").value="";$("withdrawAddress").value="";$("withdrawAddressCheck").textContent="";$("withdrawAddressCheck").dataset.state=""}
 function stop(){stops.forEach(f=>f());stops=[]}
-function watch(u){stops.push(onSnapshot(query(collection(db,"withdrawRequests"),where("uid","==",u.uid)),s=>{const rows=s.docs.slice().sort((a,b)=>(b.data().createdAt?.seconds||0)-(a.data().createdAt?.seconds||0));const latest=rows[0]?.data(),m=$("withdrawNotice");if(!latest||!m)return;if(latest.status==="approved"){m.textContent="Withdrawal successful.";m.dataset.state="success";}else if(latest.status==="rejected"){m.textContent="Withdrawal request was not approved.";m.dataset.state="error";}else{m.textContent="Withdrawal status: Pending.";m.dataset.state="pending";}},e=>console.warn("Could not refresh withdrawal status:",e.code)));if(admin){stops.push(onSnapshot(collection(db,"depositRequests"),s=>adminRows("ocAdminDeposits",s.docs,"deposit"),e=>{$("ocAdminDeposits").textContent="Could not load deposit requests ("+e.code+")."}));stops.push(onSnapshot(collection(db,"withdrawRequests"),s=>adminRows("ocAdminWithdrawals",s.docs,"withdraw"),e=>{$("ocAdminWithdrawals").textContent="Could not load withdrawal requests ("+e.code+")."}));}}
+function watch(u){stops.push(onSnapshot(query(collection(db,"withdrawRequests"),where("uid","==",u.uid)),s=>{const rows=s.docs.slice().sort((a,b)=>(b.data().createdAt?.seconds||0)-(a.data().createdAt?.seconds||0));const latest=rows[0]?.data(),m=$("withdrawNotice");if(!latest||!m)return;if(latest.status==="approved"){m.textContent="Withdrawal request approved. Payout confirmation is still required.";m.dataset.state="pending";}else if(latest.status==="rejected"){m.textContent="Withdrawal request was not approved.";m.dataset.state="error";}else{m.textContent="Withdrawal status: Pending.";m.dataset.state="pending";}},e=>console.warn("Could not refresh withdrawal status:",e.code)));if(admin){stops.push(onSnapshot(collection(db,"depositRequests"),s=>adminRows("ocAdminDeposits",s.docs,"deposit"),e=>{$("ocAdminDeposits").textContent="Could not load deposit requests ("+e.code+")."}));stops.push(onSnapshot(collection(db,"withdrawRequests"),s=>adminRows("ocAdminWithdrawals",s.docs,"withdraw"),e=>{$("ocAdminWithdrawals").textContent="Could not load withdrawal requests ("+e.code+")."}));}}
 setup();
 
 document.getElementById("withdrawAllBtn")?.addEventListener("click",()=>{const symbol=String(asset("withdraw")||"BTC").toUpperCase();const amount=typeof window.ocGetDisplayedAssetBalance==="function"?window.ocGetDisplayedAssetBalance(symbol):NaN;if(!Number.isFinite(amount)){const note=document.getElementById("withdrawNotice");if(note)note.textContent="Wallet balance is still loading. Refresh and try again.";return;}const field=document.getElementById("withdrawAmount");if(!field)return;field.value=amount>0?String(Number(amount.toFixed(8))):"";field.dispatchEvent(new Event("input",{bubbles:true}));field.dispatchEvent(new Event("change",{bubbles:true}));});
@@ -8644,50 +8666,89 @@ byId("ocVerifyDeleteCode")?.addEventListener("click",async()=>{
 (function(){
  const address=document.getElementById("withdrawAddress");
  const network=document.getElementById("withdrawNetwork");
- const coin=document.getElementById("withdrawCoinName");
  const output=document.getElementById("withdrawAddressCheck");
+ const icon=document.getElementById("withdrawCoinIcon");
  if(!address||!network||!output)return;
  const patterns={
   Bitcoin:/^(bc1[ac-hj-np-z02-9]{11,71}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/i,
-  Ethereum:/^0x[a-fA-F0-9]{40}$/,
-  ERC20:/^0x[a-fA-F0-9]{40}$/,
-  BEP20:/^0x[a-fA-F0-9]{40}$/,
-  Polygon:/^0x[a-fA-F0-9]{40}$/,
+  Ethereum:/^0x[a-fA-F0-9]{40}$/,ERC20:/^0x[a-fA-F0-9]{40}$/,
+  BEP20:/^0x[a-fA-F0-9]{40}$/,Polygon:/^0x[a-fA-F0-9]{40}$/,
+  Avalanche:/^0x[a-fA-F0-9]{40}$/,EthereumClassic:/^0x[a-fA-F0-9]{40}$/,
   TRC20:/^T[1-9A-HJ-NP-Za-km-z]{33}$/,
   Solana:/^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
   XRP:/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/,
-  Dogecoin:/^(D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{24,33})$/,
-  Cardano:/^(addr1|addr_test1)[a-z0-9]{20,100}$/i,
-  Litecoin:/^(ltc1[ac-hj-np-z02-9]{11,71}|[LM3][a-km-zA-HJ-NP-Z1-9]{26,33})$/i,
-  Avalanche:/^0x[a-fA-F0-9]{40}$/,
+  Dogecoin:/^D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{24,33}$/,
+  Cardano:/^addr1[a-z0-9]{20,100}$/i,
+  Litecoin:/^(ltc1[ac-hj-np-z02-9]{11,71}|[LM][a-km-zA-HJ-NP-Z1-9]{26,33})$/i,
   TON:/^(EQ|UQ)[A-Za-z0-9_-]{46}$/,
   Stellar:/^G[A-Z2-7]{55}$/,
   BitcoinCash:/^(bitcoincash:)?(q|p)[a-z0-9]{41}$/i,
-  Polkadot:/^1[1-9A-HJ-NP-Za-km-z]{45,47}$/,
-  EthereumClassic:/^0x[a-fA-F0-9]{40}$/
+  Polkadot:/^1[1-9A-HJ-NP-Za-km-z]{45,47}$/
  };
- 
+ const networksByAsset={
+  BTC:["Bitcoin"],ETH:["Ethereum"],USDT:["TRC20","ERC20","BEP20","Polygon"],
+  USDC:["ERC20","BEP20","Polygon","Solana"],BNB:["BEP20"],TRX:["TRC20"],
+  SOL:["Solana"],XRP:["XRP"],DOGE:["Dogecoin"],ADA:["Cardano"],LTC:["Litecoin"],
+  AVAX:["Avalanche"],TON:["TON"],XLM:["Stellar"],BCH:["BitcoinCash"],DOT:["Polkadot"],
+  ETC:["EthereumClassic"],POL:["Polygon"],LINK:["Ethereum","ERC20","BEP20","Polygon"],
+  UNI:["Ethereum","ERC20"],AAVE:["Ethereum","ERC20"],MKR:["Ethereum","ERC20"],
+  DAI:["Ethereum","ERC20","BEP20"],PAXG:["Ethereum","ERC20"],XAUT:["Ethereum","ERC20"]
+ };
+ const optionLabels={Bitcoin:"Bitcoin",Ethereum:"Ethereum",TRC20:"TRON (TRC20)",ERC20:"Ethereum (ERC20)",BEP20:"BNB Smart Chain (BEP20)",Solana:"Solana",Polygon:"Polygon",XRP:"XRP Ledger",Dogecoin:"Dogecoin",Cardano:"Cardano",Litecoin:"Litecoin",Avalanche:"Avalanche C-Chain",TON:"TON",Stellar:"Stellar",BitcoinCash:"Bitcoin Cash",Polkadot:"Polkadot",EthereumClassic:"Ethereum Classic"};
+ function symbol(){
+  const raw=icon?.parentElement?.dataset?.coin||"";
+  if(raw)return String(raw).toUpperCase();
+  const label=document.getElementById("withdrawCoinName")?.textContent||"";
+  const match=label.match(/\(([A-Z0-9]+)\)/);return match?match[1]:"BTC";
+ }
+ function allowed(){return networksByAsset[symbol()]||[]}
+ function syncNetworks(){
+  const choices=allowed(),previous=network.value;
+  network.innerHTML="";
+  if(!choices.length){
+   const option=document.createElement("option");option.value="";option.textContent="Network not available for this asset";network.appendChild(option);network.disabled=true;return;
+  }
+  network.disabled=false;
+  choices.forEach(key=>{const option=document.createElement("option");option.value=key;option.textContent=optionLabels[key]||key;network.appendChild(option)});
+  network.value=choices.includes(previous)?previous:choices[0];
+ }
+ function detect(value){
+  const candidates=[];
+  for(const [key,re] of Object.entries(patterns))if(re.test(value))candidates.push(key);
+  if(candidates.length===1)return candidates[0];
+  // EVM addresses are identical across several chains; infer only when the asset
+  // has exactly one compatible EVM network. Never guess for USDT/USDC.
+  if(/^0x[a-fA-F0-9]{40}$/.test(value)){
+   const evm=allowed().filter(key=>["Ethereum","ERC20","BEP20","Polygon","Avalanche","EthereumClassic"].includes(key));
+   if(evm.length===1)return evm[0];
+  }
+  return "";
+ }
  function check(){
-  const value=address.value.trim(),net=network.value;
+  const value=address.value.trim(),choices=allowed();
   output.dataset.state="";
+  if(!choices.length){output.textContent="Withdrawal network is not configured for this asset.";output.dataset.state="invalid";return false}
   if(!value){output.textContent="";return false}
-  const re=patterns[net];
-  if(!re){output.textContent="Address format check is not available for this network.";output.dataset.state="invalid";return false}
-  if(!re.test(value)){output.textContent="Address format does not match the selected network.";output.dataset.state="invalid";return false}
-  output.textContent="Address format looks valid for "+net+".";
+  const detected=detect(value);
+  if(detected&&choices.includes(detected)&&network.value!==detected){network.value=detected;}
+  const net=network.value,re=patterns[net];
+  if(!choices.includes(net)){output.textContent="Choose a network supported for "+symbol()+".";output.dataset.state="invalid";return false}
+  if(!re||!re.test(value)){output.textContent="Address format does not match the selected network.";output.dataset.state="invalid";return false}
+  const evmChoices=choices.filter(key=>["Ethereum","ERC20","BEP20","Polygon","Avalanche","EthereumClassic"].includes(key));
+  if(/^0x[a-fA-F0-9]{40}$/.test(value)&&evmChoices.length>1){
+   output.textContent="Address format matches EVM networks. Confirm the exact network with the receiving wallet.";
+  }else{
+   output.textContent="Address format matches "+(optionLabels[net]||net)+".";
+  }
   output.dataset.state="valid";
   return true;
  }
+ function refresh(){syncNetworks();check();}
  address.addEventListener("input",check);
  network.addEventListener("change",check);
- const selectedCoin=document.getElementById("withdrawCoinList");
- if(selectedCoin){selectedCoin.addEventListener("click",()=>setTimeout(check,0));}
- if(typeof window.updateSelectedCoin==="function"&&!window.updateSelectedCoin.__ocAddressCheckWrapped){
-  const old=window.updateSelectedCoin;
-  const wrapped=function(kind){const result=old.apply(this,arguments);if(kind==="withdraw")setTimeout(check,0);return result};
-  wrapped.__ocAddressCheckWrapped=true;window.updateSelectedCoin=wrapped;
- }
- check();
+ document.getElementById("withdrawCoinList")?.addEventListener("click",()=>setTimeout(refresh,0));
+ document.querySelectorAll('[data-quick-coin="withdraw"]').forEach(button=>button.addEventListener("click",()=>setTimeout(refresh,0)));
+ refresh();
 })();
 </script>
 
