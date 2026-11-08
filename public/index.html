@@ -3074,17 +3074,32 @@ setTimeout(() => {
 <script type="module">
 // Load Firebase SDK with a CDN fallback so a blocked gstatic request does not
 // leave the sign-in screen permanently waiting for its auth-state callback.
-async function loadFirebaseModule(primary, fallback) {
+async function loadFirebaseModule(primary, fallback, lastResort) {
   try { return await import(primary); }
   catch (primaryError) {
     console.warn("Primary Firebase SDK CDN failed; trying fallback:", primaryError?.message || primaryError);
-    return await import(fallback);
+    try { return await import(fallback); }
+    catch (fallbackError) {
+      console.warn("Secondary Firebase SDK CDN failed; trying final fallback:", fallbackError?.message || fallbackError);
+      try { return await import(lastResort); }
+      catch (finalError) {
+        window.ocFirebaseModuleError = finalError?.message || String(finalError);
+        document.documentElement.classList.remove("oc-auth-pending");
+        document.body.classList.add("oc-logged-out", "oc-auth-screen");
+        const status = document.getElementById("authStatus");
+        if (status) {
+          status.textContent = "Sign-in service could not connect. Check your internet connection and reload the page.";
+          status.classList.add("notice");
+        }
+        throw finalError;
+      }
+    }
   }
 }
 const [firebaseAppSdk, firebaseFirestoreSdk, firebaseAuthSdk] = await Promise.all([
-  loadFirebaseModule("https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js", "https://esm.sh/firebase@11.10.0/app"),
-  loadFirebaseModule("https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js", "https://esm.sh/firebase@11.10.0/firestore"),
-  loadFirebaseModule("https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js", "https://esm.sh/firebase@11.10.0/auth")
+  loadFirebaseModule("https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js", "https://esm.sh/firebase@11.10.0/app", "https://cdn.jsdelivr.net/npm/firebase@11.10.0/app/+esm"),
+  loadFirebaseModule("https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js", "https://esm.sh/firebase@11.10.0/firestore", "https://cdn.jsdelivr.net/npm/firebase@11.10.0/firestore/+esm"),
+  loadFirebaseModule("https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js", "https://esm.sh/firebase@11.10.0/auth", "https://cdn.jsdelivr.net/npm/firebase@11.10.0/auth/+esm")
 ]);
 const { initializeApp, getApps } = firebaseAppSdk;
 const { getFirestore, collection, doc, getDoc, setDoc, addDoc, onSnapshot, serverTimestamp } = firebaseFirestoreSdk;
