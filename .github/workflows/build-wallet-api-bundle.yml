@@ -1,0 +1,33 @@
+name: Build standalone Wallet API Worker
+
+on:
+  push:
+    branches: [feature/cloud-wallet-migration]
+    paths:
+      - "workers/wallet-api/src/**"
+      - ".github/workflows/build-wallet-api-bundle.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Bundle Worker for Cloudflare editor
+        run: |
+          npx --yes esbuild@0.25.0 workers/wallet-api/src/index.js --bundle --format=esm --platform=browser --target=es2022 --outfile=wallet-api-worker.js
+      - name: Upload standalone Worker script
+        uses: actions/upload-artifact@v4
+        with:
+          name: onchaincrypto-wallet-api-worker
+          path: wallet-api-worker.js
+          if-no-files-found: error
+          retention-days: 7
