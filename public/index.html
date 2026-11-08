@@ -34,9 +34,8 @@
 <style id="oc-auth-pending-gate">
   /* The dedicated Login/Register page is the only screen shown before sign-in. */
   /* Keep the sign-in form visible while Firebase restores the saved session. */
-  html.oc-auth-pending main > :not(#page-register) { display:none!important; }
-  html.oc-auth-pending main > #page-register { display:flex!important; }
-  html.oc-auth-pending body > header,
+  html.oc-auth-pending main > :not(#page-public-market) { display:none!important; }
+  html.oc-auth-pending main > #page-public-market { display:flex!important; }
   html.oc-auth-pending body > footer,
   html.oc-auth-pending body > #bottomNav,
   html.oc-auth-pending body > nav,
@@ -4546,7 +4545,7 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     }
     const guest=window.ocLoggedOut===true&&!authenticatedUser;
     document.body.classList.toggle("oc-visitor-mode",guest);
-    if(guest && page!=="register") page="register";
+    if(guest && page!=="register" && page!=="public-market") page="register";
     // Keep the authentication screen class synchronized with the actual visible route.
     document.body.classList.toggle("oc-auth-screen",guest&&page==="register");
     const target=document.getElementById('page-'+page);
@@ -4617,8 +4616,10 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
         if(!activeUser){
           window.ocLoggedOut=true;
           document.body.classList.add('oc-logged-out','oc-auth-screen');
-          document.body.classList.remove('oc-register-mode');
+          document.body.classList.remove('oc-register-mode','oc-visitor-mode');
           navigate('register');
+          document.getElementById('authChoiceLogin')?.click();
+          document.getElementById('authChoicePanel')?.classList.add('hidden');
           return;
         }
         window.onchaincryptoCurrentUser=activeUser;
@@ -4650,10 +4651,10 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
   // Signed-out visitors start on Sign In; authenticated users retain the app route.
   const current=pages().find(s=>!s.classList.contains('hidden'));
   if(window.ocLoggedOut===true){
-    document.body.classList.add('oc-auth-screen');
-    document.body.classList.remove('oc-register-mode');
-    pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-register'));
-    navigate('register',{fromOriginal:true,keepScroll:true});
+    document.body.classList.remove('oc-auth-screen','oc-logged-out','oc-register-mode');
+    document.body.classList.add('oc-visitor-mode');
+    pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-public-market'));
+    navigate('public-market',{fromOriginal:true,keepScroll:true});
   } else if(current) navigate(current.id.slice(5),{fromOriginal:true,keepScroll:true});
   const initial=pages().find(section=>!section.classList.contains('hidden'));
   const initialPage=initial?.id?.slice(5)||"public-market";
