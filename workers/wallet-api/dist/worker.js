@@ -870,6 +870,37 @@ var index_default = {
         return response({ ok: false, error: message, code }, status, origin);
       }
     }
+    if (request.method === "GET" && url.pathname === "/v1/admin/wallet/account") {
+      try {
+        if (!env.FIREBASE_PROJECT_ID || !env.FIREBASE_SERVICE_ACCOUNT) {
+          const error = new Error("Wallet service is not configured.");
+          error.status = 503;
+          error.code = "SERVICE_NOT_CONFIGURED";
+          throw error;
+        }
+        const user = await requireUser(request, env);
+        if (user.admin !== true) {
+          const error = new Error("Administrator authorization is required.");
+          error.status = 403;
+          error.code = "ADMIN_REQUIRED";
+          throw error;
+        }
+        const targetUid = url.searchParams.get("uid") || "";
+        if (!/^[A-Za-z0-9_-]{1,128}$/.test(targetUid)) {
+          const error = new Error("A valid customer account is required.");
+          error.status = 400;
+          error.code = "INVALID_UID";
+          throw error;
+        }
+        const account = await readWalletAccount({ uid: targetUid }, env);
+        return response({ ok: true, uid: targetUid, ...account }, 200, origin);
+      } catch (error) {
+        const status = Number.isInteger(error?.status) && error.status >= 400 && error.status <= 599 ? error.status : 503;
+        const code = typeof error?.code === "string" ? error.code : "ADMIN_WALLET_UNAVAILABLE";
+        const message = status >= 500 ? "The customer wallet could not be loaded." : error.message || "Wallet request was rejected.";
+        return response({ ok: false, error: message, code }, status, origin);
+      }
+    }
     if (request.method === "POST" && url.pathname === "/v1/admin/wallet/adjust") {
       try {
         if (!env.FIREBASE_PROJECT_ID || !env.FIREBASE_SERVICE_ACCOUNT) {
