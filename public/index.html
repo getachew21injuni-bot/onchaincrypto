@@ -11815,27 +11815,29 @@ html.oc-auth-pending body>aside,
 body.oc-visitor-mode:not(.oc-auth-screen)>footer,
 body.oc-visitor-mode:not(.oc-auth-screen)>#bottomNav{display:none!important}
 html.oc-auth-pending body>#ocVisitorSupportBot,
-body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorSupportBot{
+body.oc-auth-screen>#ocVisitorSupportBot,
+body.oc-visitor-mode #ocVisitorSupportBot{
   display:block!important;position:fixed!important;right:16px!important;
   bottom:calc(16px + env(safe-area-inset-bottom))!important;left:auto!important;top:auto!important;
   z-index:100000!important;width:auto!important;max-width:calc(100vw - 28px)!important;pointer-events:auto!important;
 }
 html.oc-auth-pending #ocVisitorSupportBot .oc-support-launch,
-body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorSupportBot .oc-support-launch{
+body.oc-auth-screen #ocVisitorSupportBot .oc-support-launch,
+body.oc-visitor-mode #ocVisitorSupportBot .oc-support-launch{
   display:grid!important;position:relative!important;margin:0!important;width:54px!important;height:54px!important;min-width:54px!important;
 }
 html.oc-auth-pending #ocVisitorSupportBot .oc-support-panel,
-body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorSupportBot .oc-support-panel{
+body.oc-auth-screen #ocVisitorSupportBot .oc-support-panel,
+body.oc-visitor-mode #ocVisitorSupportBot .oc-support-panel{
   position:absolute!important;right:0!important;left:auto!important;bottom:66px!important;
   width:min(360px,calc(100vw - 28px))!important;max-width:calc(100vw - 28px)!important;max-height:65dvh!important;
 }
-body.oc-auth-screen #ocVisitorSupportBot{display:none!important}
 @media(max-width:560px){
  html.oc-auth-pending body>header,body.oc-visitor-mode:not(.oc-auth-screen)>header{min-height:60px!important;padding:8px 10px!important;gap:7px!important}
  html.oc-auth-pending body>header .brand,body.oc-visitor-mode:not(.oc-auth-screen)>header .brand{font-size:16px!important}
  html.oc-auth-pending #ocVisitorActions,body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorActions{gap:6px!important}
  html.oc-auth-pending #ocVisitorActions button,body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorActions button{min-width:70px!important;min-height:37px!important;padding:7px 9px!important;font-size:11px!important}
- html.oc-auth-pending body>#ocVisitorSupportBot,body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorSupportBot{right:12px!important;bottom:calc(12px + env(safe-area-inset-bottom))!important}
+ html.oc-auth-pending body>#ocVisitorSupportBot,body.oc-auth-screen>#ocVisitorSupportBot,body.oc-visitor-mode #ocVisitorSupportBot{right:12px!important;bottom:calc(12px + env(safe-area-inset-bottom))!important}
 }
 </style>
 <script id="oc-visitor-single-auth-entry">
