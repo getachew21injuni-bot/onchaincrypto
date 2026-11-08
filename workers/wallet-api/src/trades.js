@@ -51,14 +51,15 @@ export async function executeStandardTrade({ user, body, env, dependencies = {} 
   const operationId = body.operationId;
   if (typeof operationId !== "string" || !/^[A-Za-z0-9_-]{16,80}$/.test(operationId)) fail("A valid unique operation ID is required.");
   const quoteAmount = parseUnits(body.quoteAmount, "trade amount");
-  if (quoteAmount < MIN_TRADE_USDT) fail("The minimum trade amount is 100 USDT.", 400, "MINIMUM_TRADE");
+  const minimum = symbol === "PAXG" ? 500n * SCALE : MIN_TRADE_USDT;
+  if (quoteAmount < minimum) fail(`The minimum trade amount is ${symbol === "PAXG" ? "500" : "100"} USDT.`, 400, "MINIMUM_TRADE");
   const quote = await (dependencies.getQuote || getTrustedQuote)(symbol, dependencies.fetchImpl || fetch);
   const priceUnits = parseUnits(quote.price, "market price");
   if (priceUnits <= 0n) fail("Invalid live market quote.", 503, "INVALID_QUOTE");
   const quantity = (quoteAmount * SCALE) / priceUnits;
   if (quantity <= 0n) fail("Trade amount is too small for this asset.");
   const actualGross = side === "buy" ? quoteAmount : (quantity * priceUnits) / SCALE;
-  if (actualGross < MIN_TRADE_USDT) fail("The minimum trade amount is 100 USDT.", 400, "MINIMUM_TRADE");
+  if (actualGross < minimum) fail(`The minimum trade amount is ${symbol === "PAXG" ? "500" : "100"} USDT.`, 400, "MINIMUM_TRADE");
 
   const keyId = await hashKey(user.uid, operationId);
   const tradeId = crypto.randomUUID();
