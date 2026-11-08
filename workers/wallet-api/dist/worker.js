@@ -653,9 +653,12 @@ function parseAmount(value) {
   return negative ? -units : units;
 }
 function formatAmount(units) {
-  const whole = units / SCALE2;
-  const fraction = (units % SCALE2).toString().padStart(8, "0").replace(/0+$/, "");
-  return fraction ? `${whole}.${fraction}` : String(whole);
+  const negative = units < 0n;
+  const absolute = negative ? -units : units;
+  const whole = absolute / SCALE2;
+  const fraction = (absolute % SCALE2).toString().padStart(8, "0").replace(/0+$/, "");
+  const formatted = fraction ? `${whole}.${fraction}` : String(whole);
+  return negative ? `-${formatted}` : formatted;
 }
 function stringField(field) {
   return typeof field?.stringValue === "string" ? field.stringValue : void 0;
