@@ -34,9 +34,8 @@
 <style id="oc-auth-pending-gate">
   /* The dedicated Login/Register page is the only screen shown before sign-in. */
   /* Keep the sign-in form visible while Firebase restores the saved session. */
-  html.oc-auth-pending main > :not(#page-register) { display:none!important; }
-  html.oc-auth-pending main > #page-register { display:flex!important; }
-  html.oc-auth-pending body > header,
+  html.oc-auth-pending main > :not(#page-public-market) { display:none!important; }
+  html.oc-auth-pending main > #page-public-market { display:flex!important; }
   html.oc-auth-pending body > footer,
   html.oc-auth-pending body > #bottomNav,
   html.oc-auth-pending body > nav,
@@ -3760,15 +3759,14 @@ async function ocPerformSignOut() {
     window.__ocSignedOutHistoryBoundary = true;
     window.onchaincryptoCurrentUser = null;
     window.ocPendingPage = null;
-    document.body.classList.add("oc-logged-out", "oc-auth-screen");
-  document.body.classList.remove("oc-register-mode");
-    window.showPage?.("register");
-    window.ocForceSignInScreen?.();
+    document.body.classList.remove("oc-logged-out", "oc-auth-screen", "oc-register-mode");
+    document.body.classList.add("oc-visitor-mode");
+    window.showPage?.("public-market");
     try {
-      const signedOutRoute={ocAppRoute:true,ocPage:"register",ocAuthMode:"login",ocIndex:0,ocSignedOutBoundary:true,ocLogoutBoundary:true};
-      const loginUrl=location.pathname+location.search+"#login";
-      history.replaceState(signedOutRoute,"",loginUrl);
-      history.pushState({...signedOutRoute,ocBoundarySentinel:true},"",loginUrl);
+      const signedOutRoute={ocAppRoute:true,ocPage:"public-market",ocAuthMode:null,ocIndex:0,ocSignedOutBoundary:true,ocLogoutBoundary:true};
+      const marketUrl=location.pathname+location.search;
+      history.replaceState(signedOutRoute,"",marketUrl);
+      history.pushState({...signedOutRoute,ocBoundarySentinel:true},"",marketUrl);
       window.__ocAppHistoryDepth=0;
       window.__ocAppHistoryMaxIndex=0;
       window.__ocAppCanForward=false;
@@ -3843,18 +3841,19 @@ onAuthStateChanged(auth, (user) => {
    if (typeof window.ocRefreshReferral === "function") window.ocRefreshReferral(user || null);
    if (user) { openHomeAfterAuth(); }
     else {
-      // Signed-out visitors must always see Sign In; never leave Home or app navigation visible.
+      // Signed-out visitors land on the public market; authentication opens only when requested.
       window.ocPendingPage = null;
       window.ocLoggedOut = true;
       document.documentElement.classList.remove("oc-auth-pending");
-      document.body.classList.add("oc-logged-out", "oc-auth-screen");
-      document.body.classList.remove("oc-register-mode");
-      window.ocForceSignInScreen?.();
+      document.body.classList.remove("oc-logged-out", "oc-auth-screen", "oc-register-mode");
+      document.body.classList.add("oc-visitor-mode");
+      window.__ocSignedOutHistoryBoundary = true;
+      window.__ocNavigatePage?.("public-market", { noStack: true, keepScroll: true });
       try {
-        const signedOutRoute={ocAppRoute:true,ocPage:"register",ocAuthMode:"login",ocIndex:0,ocSignedOutBoundary:true,ocLogoutBoundary:true};
-        const loginUrl=location.pathname+location.search+"#login";
-        history.replaceState(signedOutRoute,"",loginUrl);
-        history.pushState({...signedOutRoute,ocBoundarySentinel:true},"",loginUrl);
+        const signedOutRoute={ocAppRoute:true,ocPage:"public-market",ocAuthMode:null,ocIndex:0,ocSignedOutBoundary:true,ocLogoutBoundary:true};
+        const marketUrl=location.pathname+location.search;
+        history.replaceState(signedOutRoute,"",marketUrl);
+        history.pushState({...signedOutRoute,ocBoundarySentinel:true},"",marketUrl);
         window.__ocAppHistoryDepth=0;
         window.__ocAppHistoryMaxIndex=0;
         window.__ocAppCanForward=false;
@@ -3950,7 +3949,7 @@ document.addEventListener("click", event => {
 // Prevent browser Back/Forward or back-forward-cache restoration from reopening a signed-out session.
 window.addEventListener("pageshow", async () => {
   try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
-  if (!auth.currentUser && window.ocLoggedOut === true) {
+  if (!auth.currentUser && window.ocLoggedOut === true && document.body.classList.contains("oc-auth-screen") && history.state?.ocPage !== "public-market") {
     document.body.classList.add("oc-auth-screen");
     document.body.classList.toggle("oc-register-mode",location.hash==="#register");
     window.ocForceSignInScreen?.();
@@ -3962,7 +3961,7 @@ window.addEventListener("pageshow", async () => {
 });
 window.addEventListener("popstate", async () => {
   try { if (typeof auth.authStateReady === "function") await auth.authStateReady(); } catch (_) {}
-  if (!auth.currentUser && window.ocLoggedOut === true) {
+  if (!auth.currentUser && window.ocLoggedOut === true && document.body.classList.contains("oc-auth-screen") && history.state?.ocPage !== "public-market") {
     document.body.classList.add("oc-auth-screen");
     const mode=location.hash==="#register"?"register":"login";
     document.body.classList.toggle("oc-register-mode",mode==="register");
@@ -4546,7 +4545,7 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
     }
     const guest=window.ocLoggedOut===true&&!authenticatedUser;
     document.body.classList.toggle("oc-visitor-mode",guest);
-    if(guest && page!=="register") page="register";
+    if(guest && page!=="register" && page!=="public-market") page="register";
     // Keep the authentication screen class synchronized with the actual visible route.
     document.body.classList.toggle("oc-auth-screen",guest&&page==="register");
     const target=document.getElementById('page-'+page);
@@ -4617,8 +4616,10 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
         if(!activeUser){
           window.ocLoggedOut=true;
           document.body.classList.add('oc-logged-out','oc-auth-screen');
-          document.body.classList.remove('oc-register-mode');
+          document.body.classList.remove('oc-register-mode','oc-visitor-mode');
           navigate('register');
+          document.getElementById('authChoiceLogin')?.click();
+          document.getElementById('authChoicePanel')?.classList.add('hidden');
           return;
         }
         window.onchaincryptoCurrentUser=activeUser;
@@ -4650,10 +4651,10 @@ body{background-color:#020a12!important;background-image:radial-gradient(ellipse
   // Signed-out visitors start on Sign In; authenticated users retain the app route.
   const current=pages().find(s=>!s.classList.contains('hidden'));
   if(window.ocLoggedOut===true){
-    document.body.classList.add('oc-auth-screen');
-    document.body.classList.remove('oc-register-mode');
-    pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-register'));
-    navigate('register',{fromOriginal:true,keepScroll:true});
+    document.body.classList.remove('oc-auth-screen','oc-logged-out','oc-register-mode');
+    document.body.classList.add('oc-visitor-mode');
+    pages().forEach(section=>section.classList.toggle('hidden',section.id!=='page-public-market'));
+    navigate('public-market',{fromOriginal:true,keepScroll:true});
   } else if(current) navigate(current.id.slice(5),{fromOriginal:true,keepScroll:true});
   const initial=pages().find(section=>!section.classList.contains('hidden'));
   const initialPage=initial?.id?.slice(5)||"public-market";
@@ -5165,13 +5166,13 @@ body.oc-logged-out.oc-register-mode #authSwitchText{display:none!important}
       window.ocLoggedOut=true;
       window.onchaincryptoCurrentUser=null;
       window.ocPendingPage=null;
-      document.body.classList.add("oc-logged-out");
+      document.body.classList.remove("oc-logged-out","oc-auth-screen","oc-register-mode");
+      document.body.classList.add("oc-visitor-mode");
       document.getElementById("moreMenu")?.classList.add("hidden");
       document.getElementById("moreMenu")?.setAttribute("aria-hidden","true");
       document.getElementById("moreMenuBtn")?.setAttribute("aria-expanded","false");
-      window.showPage?.("register");
-      window.ocForceSignInScreen?.();
-      try{history.replaceState({ocSignedOut:true},"",location.pathname+location.search+"#login")}catch(_){}
+      window.showPage?.("public-market");
+      try{history.replaceState({ocAppRoute:true,ocPage:"public-market",ocSignedOutBoundary:true,ocLogoutBoundary:true,ocIndex:0},"",location.pathname+location.search)}catch(_){}
     }catch(error){
       console.error("Independent Onchain sign-out failed:",error?.code||error,error?.message||"");
       const status=document.getElementById("authStatus");
@@ -11499,7 +11500,7 @@ html.oc-auth-pending #ocBackBtn,html.oc-auth-pending #ocForwardBtn{display:none!
     const state=event.state;
     const signedIn=!!(window.onchaincryptoCurrentUser||window.ocFirebaseAuth?.currentUser);
     const guestBoundary=window.__ocSignedOutHistoryBoundary===true&&!signedIn;
-    const allowedGuestPage=state?.ocPage==="register";
+    const allowedGuestPage=state?.ocPage==="register"||state?.ocPage==="public-market";
     // A logout boundary separates all pre-logout history from the signed-out
     // visitor session. Old private or pre-boundary entries always return to Login.
     if(guestBoundary&&(!state?.ocSignedOutBoundary||!state?.ocAppRoute||!allowedGuestPage)){
@@ -11526,7 +11527,13 @@ html.oc-auth-pending #ocBackBtn,html.oc-auth-pending #ocForwardBtn{display:none!
     const restore=()=>{
       const nowSignedIn=!!(window.onchaincryptoCurrentUser||window.ocFirebaseAuth?.currentUser);
       if(!nowSignedIn){
-        document.body.classList.add("oc-logged-out");
+        if(state.ocPage==="register"){
+          document.body.classList.add("oc-logged-out","oc-auth-screen");
+          document.body.classList.remove("oc-visitor-mode");
+        }else{
+          document.body.classList.remove("oc-logged-out","oc-auth-screen","oc-register-mode");
+          document.body.classList.add("oc-visitor-mode");
+        }
         document.body.classList.toggle("oc-register-mode",state.ocPage==="register"&&state.ocAuthMode==="register");
       }
       if(typeof window.__ocNavigatePage==="function")window.__ocNavigatePage(state.ocPage,{noStack:true});
@@ -11801,3 +11808,46 @@ body:not(.oc-auth-screen) .wallet-summary-strip strong{color:#12486e!important}
 
 
 
+
+<style id="oc-visitor-first-startup-override">
+html.oc-auth-pending main > :not(#page-public-market){display:none!important}
+html.oc-auth-pending main > #page-public-market{display:flex!important}
+html.oc-auth-pending body > header{display:flex!important}
+html.oc-auth-pending body > footer,html.oc-auth-pending body > #bottomNav,html.oc-auth-pending body > nav,html.oc-auth-pending body > aside{display:none!important}
+html.oc-auth-pending main{display:block!important;min-height:0!important;padding-top:0!important}
+html.oc-auth-pending #page-public-market.hidden{display:flex!important}
+html.oc-auth-pending #page-register{display:none!important}
+</style>
+<script id="oc-visitor-first-auth-actions">
+(function(){
+ const ids="#ocVisitorSignup,#ocVisitorLogin,#ocVisitorHeroSignup,#ocVisitorHeroLogin";
+ function openAuth(mode){
+  document.documentElement.classList.remove("oc-auth-pending");
+  document.body.classList.remove("oc-visitor-mode");
+  document.body.classList.add("oc-logged-out","oc-auth-screen");
+  document.body.classList.toggle("oc-register-mode",mode==="register");
+  window.__ocNavigatePage?.("register",{noStack:false,keepScroll:false});
+  document.getElementById(mode==="register"?"authChoiceRegister":"authChoiceLogin")?.click();
+  document.getElementById("authChoicePanel")?.classList.add("hidden");
+  document.body.classList.toggle("oc-register-mode",mode==="register");
+  document.getElementById(mode==="register"?"signInForm":"registerForm")?.classList.add("hidden");
+  document.getElementById(mode==="register"?"registerForm":"signInForm")?.classList.remove("hidden");
+  if(mode==="register")document.getElementById("registerFirstName")?.focus();
+  else document.getElementById("signInEmail")?.focus();
+  try{history.replaceState({ocAppRoute:true,ocPage:"register",ocAuthMode:mode,ocIndex:1,ocSignedOutBoundary:true},"",location.pathname+location.search+(mode==="register"?"#register":"#login"));}catch(_){}
+ }
+ document.addEventListener("click",function(event){
+  const button=event.target instanceof Element?event.target.closest(ids):null;
+  if(!button)return;
+  event.preventDefault();event.stopImmediatePropagation();
+  openAuth(button.id.toLowerCase().includes("signup")?"register":"login");
+ },true);
+ document.addEventListener("click",function(event){
+  const target=event.target instanceof Element?event.target:null;
+  if(target?.closest("#authChoiceLogin,#authChoiceRegister,#registerLoginBtn,#showRegisterBtn,#showSignInBtn,#authSwitchText")){
+   queueMicrotask(()=>document.getElementById("authChoicePanel")?.classList.add("hidden"));
+  }
+ },true);
+ if(window.ocLoggedOut===true&&!document.body.classList.contains("oc-auth-screen"))document.body.classList.add("oc-visitor-mode");
+})();
+</script>
