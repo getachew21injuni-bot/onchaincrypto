@@ -62,6 +62,11 @@ describe("standard buy/sell settlement", () => {
     assert.equal(writes.filter(write => write.update?.name.includes("/walletLedger/")).length, 2);
     assert.equal(writes.filter(write => write.update?.name.includes("/tradeLedger/")).length, 1);
     assert.equal(writes.filter(write => write.update?.name.includes("/operationKeys/")).length, 1);
+    const idempotencyWrite = writes.find(write => write.update?.name.includes("/operationKeys/"));
+    const savedResult = idempotencyWrite.update.fields.result.mapValue.fields;
+    assert.equal(savedResult.price.stringValue, "50000");
+    assert.equal(savedResult.balances.mapValue.fields.USDT.stringValue, "400");
+    assert.equal(savedResult.balances.mapValue.fields.BTC.stringValue, "0.252");
   });
 
   it("rejects insufficient USDT without committing a balance change", async () => {
