@@ -3841,6 +3841,10 @@ window.addEventListener("popstate", async () => {
   if(!signIn||!register)return;
   function setMode(mode){
     const creating=mode==='register';
+    // Keep the selected form and its visibility state synchronized, including form-switch links.
+    document.documentElement.classList.remove('oc-auth-pending');
+    document.body.classList.add('oc-auth-screen');
+    document.body.classList.toggle('oc-register-mode',creating);
     document.getElementById("authChoicePanel")?.classList.remove("hidden");
     document.getElementById("authStatus")?.classList.add("hidden");
     if(methodOptions)methodOptions.classList.toggle("hidden",!creating);
@@ -11778,6 +11782,21 @@ body.oc-auth-screen #ocVisitorSupportBot{display:none!important}
   });
 })();
 </script>
+
+<style id="oc-auth-exclusive-screen">
+/* While signing in or registering, show only the selected account form. */
+body.oc-auth-screen main>section:not(#page-register){display:none!important}
+body.oc-auth-screen main>#page-register{display:block!important;visibility:visible!important;opacity:1!important}
+body.oc-auth-screen>header,
+body.oc-auth-screen>footer,
+body.oc-auth-screen>#bottomNav,
+body.oc-auth-screen>#ocVisitorSupportBot{display:none!important}
+body.oc-auth-screen #page-register #authChoicePanel{display:none!important}
+body.oc-auth-screen:not(.oc-register-mode) #page-register #registerForm{display:none!important}
+body.oc-auth-screen:not(.oc-register-mode) #page-register #signInForm:not(.hidden){display:block!important}
+body.oc-auth-screen.oc-register-mode #page-register #signInForm{display:none!important}
+body.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden){display:block!important}
+</style>
 
 </body>
 </html>
