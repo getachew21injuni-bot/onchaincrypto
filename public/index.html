@@ -7071,7 +7071,7 @@ body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.descr
   }
   window.ocSyncHomeActions=function(){
     var home=document.getElementById('page-home');
-    var active=!!home&&!home.classList.contains('hidden')&&getComputedStyle(home).display!=='none';
+    var active=!!home&&!home.classList.contains('hidden')&&home.getClientRects().length>0;
     document.body.classList.toggle('oc-home-actions-visible',active);
     if(!active){
       var panel=document.querySelector('#ocVisitorSupportBot .oc-support-panel');
@@ -7079,6 +7079,17 @@ body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.descr
     }
     refresh();
   };
+  // Keep the Home-only Support launcher in sync with page and authentication changes.
+  var homeActionsObserver=new MutationObserver(function(){window.ocSyncHomeActions();});
+  homeActionsObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
+  var homeActionsPage=document.getElementById('page-home');
+  if(homeActionsPage)homeActionsObserver.observe(homeActionsPage,{attributes:true,attributeFilter:['class','style']});
+  window.addEventListener('pageshow',function(){window.ocSyncHomeActions();});
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){window.ocSyncHomeActions();},{once:true});
+  }else{
+    window.ocSyncHomeActions();
+  }
   function setMessage(message){
     if(status)status.textContent=message;
   }
