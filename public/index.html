@@ -67,6 +67,7 @@
 @keyframes ocVisitorPhoneFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 @keyframes ocVisitorSignalDraw{to{stroke-dashoffset:0}}
 @media(prefers-reduced-motion:reduce){#page-public-market .oc-visitor-visual,#page-public-market .oc-visitor-phone-chart polyline{animation:none!important}}
+#timedPaperTrade{display:none!important}
 </style>
 <style>
 :root{--bg:#06101f;--panel:#0b1b30;--panel2:#102641;--line:#1b4263;--text:#eaf6ff;--muted:#91abc5;--yellow:#20d9ff;--green:#16d9a0;--red:#ff5573;--blue:#438dff}
@@ -1913,7 +1914,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
     <section class="panel" id="liveOrderBookPanel">
       <div class="section-head"><div><h2>Order Book</h2><div class="muted tiny"><span id="orderBookPair">BTC/USDT</span> · refreshed with public market price</div></div><span class="tag" id="orderBookStatus">WAITING</span></div>
       <div class="table-wrap"><table><thead><tr><th>PRICE (USDT approx.)</th><th>QTY (indicative)</th><th>Side</th></tr></thead><tbody id="liveOrderBookRows"><tr><td colspan="3" class="empty">Waiting for public market data…</td></tr></tbody></table></div>
-      <div class="oc-orderbook-actions" aria-label="Trade direction"><button type="button" class="buy" data-oc-book-direction="buy">↗ Buy</button><button type="button" class="sell" data-oc-book-direction="sell">↘ Sell</button></div>
+      <div class="oc-orderbook-actions" aria-label="Trade direction"><button type="button" class="buy" data-standard-direction="buy">↗ Buy</button><button type="button" class="sell" data-standard-direction="sell">↘ Sell</button></div>
       <p class="muted tiny"></p>
     </section>
     <section class="panel" id="standardBuySellPanel">
@@ -2900,6 +2901,7 @@ async function executeStandardCloudTrade(side){
  }
 }
 window.ocRefreshStandardCloudBalance=refreshStandardCloudBalance;
+document.querySelectorAll("[data-standard-direction]").forEach(button=>button.addEventListener("click",()=>{const amount=$("standardTradeAmount");if(amount){amount.focus();setStandardTradeMessage("Enter your USDT amount, then confirm Buy or Sell below.");document.getElementById("standardBuySellPanel")?.scrollIntoView({behavior:"smooth",block:"center"});}}));
 $("standardBuyBtn")?.addEventListener("click",()=>executeStandardCloudTrade("buy"));
 $("standardSellBtn")?.addEventListener("click",()=>executeStandardCloudTrade("sell"));
 $("tradeAsset")?.addEventListener("change",()=>{
