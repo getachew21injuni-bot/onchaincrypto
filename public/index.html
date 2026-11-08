@@ -1784,7 +1784,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
       <div class="oc-orderbook-actions" aria-label="Trade direction"><button type="button" class="buy" data-oc-book-direction="buy">↗ Buy</button><button type="button" class="sell" data-oc-book-direction="sell">↘ Sell</button></div>
       <p class="muted tiny"></p>
     </section>
-    <section class="panel" id="timedPaperTrade"><div class="section-head"><div><h2>Quick Trade</h2><div class="muted tiny">Results use public prices and update your account balance; no exchange order is placed.</div></div><span class="tag">MARKET-LINKED</span></div>
+    <section class="panel" id="timedPaperTrade"><div class="section-head"><div><h2>Quick Trade</h2><div class="muted tiny">Market-linked Quick Trades with clear results and automatic Onchain wallet updates.</div></div><span class="tag">MARKET-LINKED</span></div>
       <div class="form-panel">
         <label for="tradeAsset">Trading pair</label><select id="tradeAsset" class="field"></select><label for="ocTradeFundingCoin">Wallet coin to use</label><select id="ocTradeFundingCoin" class="field"></select>
         <div class="content-grid"><div><label id="quickBalanceLabel">Available trade balance</label><div class="card"><div class="big" id="quickAvailableBalance">0.00 USDT</div><div class="muted tiny"></div></div><div id="quickMinimumAccess" class="muted tiny" aria-live="polite" style="margin:8px 0 12px"></div><label for="timedStake" id="timedStakeLabel">Trade amount (USDT)</label><div class="oc-trade-amount-row"><input id="timedStake" class="field" type="number" min="100" step="0.01" placeholder="Enter amount"><button type="button" id="timedStakeAll" class="secondary" hidden>All</button></div>
@@ -2860,7 +2860,7 @@ $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new 
 
 // Profile saving is handled once by the Firebase module below.
 
- document.getElementById("timedBoardClose")?.addEventListener("click",()=>{const board=document.getElementById("timedResultBoard");if(board)board.style.display="none";});
+ document.getElementById("timedBoardClose")?.addEventListener("click",()=>{const form=document.getElementById("timedPaperTrade"),board=document.getElementById("timedResultBoard");if(board)board.style.display="none";if(form){form.classList.remove("oc-stage-complete","oc-stage-running");form.classList.add("oc-stage-config");}const result=document.getElementById("timedResult");if(result){result.className="muted tiny";result.textContent="Trade completed · Your Onchain wallet has been updated."; }document.getElementById("timedConfirmBtn")?.setAttribute("disabled","");document.getElementById("timedUpBtn")?.setAttribute("disabled","");document.getElementById("timedDownBtn")?.setAttribute("disabled","");});
 
  renderWallet();loadMarket();setInterval(loadMarket,120000);
  document.addEventListener("visibilitychange",()=>{if(!document.hidden&&(!window.ocMarketLastSuccess||Date.now()-window.ocMarketLastSuccess>60000))loadMarket()});
