@@ -2108,7 +2108,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
     </section>
     <section id="ocAdminSupportInbox" class="panel form-panel" style="margin-bottom:16px">
       <div class="section-head"><h2>Customer Support Inbox</h2><span class="tag">PRIVATE MESSAGES</span></div>
-      <p class="muted tiny">Read customer requests and reply directly inside Onchain. Conversations are stored in Firebase; no external email inbox is required.</p>
+      <p class="muted tiny">Manage customer conversations and send direct email replies from the administrator dashboard.</p><div class="panel" style="padding:10px 12px;margin:10px 0;background:#0b1b2d;border:1px solid rgba(217,173,85,.35)"><strong>Support mailbox</strong><div style="margin-top:4px;color:#f1d79d;font-weight:700">support@onchainspro.com</div><small class="muted">Customer email is handled here by verified administrators.</small></div>
       <div id="ocAdminSupportTicketList" class="muted tiny">Waiting for verified administrator access…</div>
       <div id="ocAdminSupportConversation" class="panel" style="padding:12px;margin-top:12px">
         <p class="muted tiny">Select a customer conversation to read and reply.</p>
@@ -6351,15 +6351,9 @@ body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
    <span class="oc-support-headcopy"><strong>OnChainsPro Assistant</strong><small>Quick answers · No login needed</small></span>
    <button class="oc-support-close" type="button" aria-label="Close assistant">×</button>
   </header>
-  <div class="oc-support-messages" id="ocSupportMessages" aria-live="polite" aria-relevant="additions"></div>
-  <div class="oc-support-suggestions" aria-label="Information topics">
-   <div class="oc-support-menu-items">
-    <button type="button" data-definition="Bitcoin">Bitcoin</button><button type="button" data-definition="Gold">Gold</button><button type="button" data-definition="Blockchain">Blockchain</button><button type="button" data-definition="Trading">Trading</button><button type="button" data-definition="Wallet">Wallet</button>
-   </div>
-  </div>
-  <form class="oc-support-compose" id="ocSupportForm"><input id="ocSupportInput" type="text" maxlength="300" placeholder="Ask for a definition…" aria-label="Ask for a definition" autocomplete="off"><button type="submit">Send</button></form>
-  <div class="oc-support-note">Information only · Never share passwords or verification codes</div>
-  <a class="oc-support-email" href="mailto:support@onchainspro.com">Contact support by email</a>
+  <div class="oc-support-messages" id="ocSupportMessages" aria-live="polite" aria-relevant="additions"><div class="oc-support-msg bot">Welcome to OnChainsPro! 👋\nI can explain crypto, Gold, markets and platform features in simple words. What would you like to know?</div></div>
+    <form class="oc-support-compose" id="ocSupportForm"><input id="ocSupportInput" type="text" maxlength="300" placeholder="Ask for a definition…" aria-label="Ask for a definition" autocomplete="off"><button type="submit">Send</button></form>
+  <div class="oc-support-note">Ask a question in your own words.</div>
  </section>
  <button class="oc-support-launch" type="button" aria-label="Open information assistant"><span class="oc-support-avatar" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M7 25v-4a17 17 0 0 1 34 0v4" stroke="#17253a" stroke-width="5" stroke-linecap="round"/><path d="M7 22h5a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-1a4 4 0 0 1-4-4zM41 22h-5a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4h1a4 4 0 0 0 4-4z" fill="#17253a" stroke="#e9c879" stroke-width="1.5"/><path d="M16 23c1.5-5 14.5-5 16 0v10c0 5-4 8-8 8s-8-3-8-8z" fill="#f1c98b" stroke="#17253a" stroke-width="2"/><path d="M20 30h.1M28 30h.1" stroke="#17253a" stroke-width="3" stroke-linecap="round"/><path d="M21 35q3 2 6 0" stroke="#9c542e" stroke-width="1.7" stroke-linecap="round"/><path d="M24 40v3" stroke="#17253a" stroke-width="2" stroke-linecap="round"/></svg></span></button>
 </div>
@@ -6370,45 +6364,44 @@ body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
 (()=>{const root=document.getElementById("ocVisitorSupportBot");if(!root||root.dataset.ready)return;root.dataset.ready="1";
 const messages=root.querySelector("#ocSupportMessages"),input=root.querySelector("#ocSupportInput"),form=root.querySelector("#ocSupportForm");
 const add=(text,who="bot")=>{const el=document.createElement("div");el.className="oc-support-msg "+who;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;};
-const definitions={
- bitcoin:"Bitcoin (BTC) is a digital currency that operates on a decentralised blockchain. Its maximum supply is 21 million BTC.",
- ethereum:"Ethereum is a blockchain network for smart contracts and decentralised applications. ETH is its native cryptocurrency.",
- tether:"Tether (USDT) is a stablecoin designed to track the US dollar. Its value can still vary and it carries issuer and reserve risks.",
- bnb:"BNB is the native token of the BNB Chain ecosystem. It is used for network fees and other ecosystem services.",
- xrp:"XRP is a digital asset used on the XRP Ledger, a blockchain designed for transferring value.",
- solana:"Solana (SOL) is a blockchain network designed for fast transactions and decentralised applications.",
- blockchain:"A blockchain is a shared digital record of transactions, stored across a network of computers.",
- cryptocurrency:"A cryptocurrency is a digital asset that uses cryptography and typically operates on a blockchain.",
- gold:"Gold is a precious metal. XAU is the common market code for one troy ounce of gold; a quoted pair such as XAU/USDT shows its price in USDT.",
- trading:"Trading means buying and selling an asset in an attempt to benefit from changes in its market price. Prices can move against you.",
- wallet:"A crypto wallet is a tool for managing access to digital assets. A wallet address is used to receive assets on a particular network.",
- deposit:"A crypto deposit is the transfer of digital assets into a wallet address. The sending and receiving networks must match.",
- withdrawal:"A crypto withdrawal is the transfer of digital assets from a wallet to another address. Always verify the address and network.",
- market:"A market is where buyers and sellers exchange an asset. A market price can change as supply and demand change.",
- stablecoin:"A stablecoin is a cryptocurrency designed to maintain a relatively stable value, often by tracking a currency such as the US dollar.",
- "network fee":"A network fee is a charge paid to process a transaction on a blockchain. The amount depends on the network and its conditions.",
- kyc:"KYC means Know Your Customer. It is an identity-check process used by services to verify customers.",
- "private key":"A private key is a secret code that controls access to crypto assets. Never share it with anyone.",
- "seed phrase":"A seed phrase is a set of words used to recover a crypto wallet. Anyone who has it may be able to access the wallet.",
- "bull market":"A bull market is a period when prices are generally rising or sentiment is optimistic.",
- "bear market":"A bear market is a period when prices are generally falling or sentiment is pessimistic."
+const answers=[
+[/\\b(bitcoin|\\bbtc|\\bxbt)\\b/i,"Bitcoin (BTC) is a decentralised digital currency. Its network records transactions on a public blockchain, and its supply is capped at 21 million."],
+[/\\b(ethereum|\\beth|\\bether)\\b/i,"Ethereum is a blockchain that supports smart contracts and apps. ETH is its native asset, used for network fees and transfers."],
+[/\\b(usdt|tether|stablecoin|stable coin)\\b/i,"USDT is a stablecoin designed to track the US dollar. Stablecoins can still carry issuer, reserve and market risks."],
+[/\\b(gold|\\bxau|\\bxaut)\\b/i,"Gold is a precious metal traded globally. XAU commonly represents one troy ounce; XAU/USDT quotes its price in USDT."],
+[/\\b(blockchain|distributed ledger)\\b/i,"A blockchain is a shared digital record. Network participants verify transactions and add them in linked blocks."],
+[/\\b(crypto|cryptocurrency|digital asset)\\b/i,"A cryptocurrency is a digital asset secured with cryptography and usually transferred on a blockchain."],
+[/\\b(wallet|wallet address)\\b/i,"A crypto wallet manages the keys used to access digital assets. A wallet address lets others send assets to you on a supported network."],
+[/\\b(deposit|receive funds)\\b/i,"A deposit is an incoming transfer to your account or wallet. Always check the asset, address and network before sending."],
+[/\\b(withdraw|withdrawal|send funds)\\b/i,"A withdrawal sends assets from your account or wallet to another address. Check the address and network carefully before confirming."],
+[/\\b(trading|trade|buy|sell)\\b/i,"Trading is buying and selling assets based on market prices. Prices move with supply, demand and market conditions."],
+[/\\b(market|market price|price)\\b/i,"A market brings buyers and sellers together. Prices change as orders, supply, demand and wider market news change."],
+[/\\b(spot trading|spot)\\b/i,"Spot trading means buying or selling an asset for immediate settlement, rather than trading a contract based on its price."],
+[/\\b(limit order|limit)\\b/i,"A limit order sets the price at which you are willing to buy or sell. It may not execute if the market does not reach that price."],
+[/\\b(market order)\\b/i,"A market order aims to execute promptly at the best available prices. The final price can differ from the last displayed price."],
+[/\\b(spread)\\b/i,"The spread is the difference between the best available buy price and sell price."],
+[/\\b(network fee|gas fee|transaction fee|fee)\\b/i,"A network fee is paid to process a transaction on a blockchain. Fees vary by network and current activity."],
+[/\\b(kyc|identity verification|verify identity)\\b/i,"KYC means Know Your Customer. It is an identity-verification process used to help meet compliance requirements."],
+[/\\b(private key|seed phrase|recovery phrase)\\b/i,"A private key or recovery phrase can provide access to a wallet. Keep it secret and never share it with anyone, including support."],
+[/\\b(bull market|bullish)\\b/i,"A bull market is a period when prices are generally rising or market sentiment is positive."],
+[/\\b(bear market|bearish)\\b/i,"A bear market is a period when prices are generally falling or market sentiment is negative."],
+[/\\b(solana|\\bsol)\\b/i,"Solana is a blockchain designed for fast transactions and decentralised applications. SOL is its native asset."],
+[/\\b(xrp|ripple)\\b/i,"XRP is the digital asset used on the XRP Ledger, a network designed for transferring value."],
+[/\\b(bnb)\\b/i,"BNB is the native asset of the BNB Chain ecosystem and is used for network fees and other services."]
+];
+const answer=q=>{const v=String(q||"").trim();if(!v)return "What would you like me to explain?";
+if(/^(hi|hello|hey|good morning|good afternoon|good evening)$/i.test(v))return "Hello! Glad to help. Ask me about crypto, Gold, markets or a platform feature.";
+if(/how (do|can) i (create|register|sign up)|how to (create|register|sign up)|create an account|register|sign up/i.test(v))return "To create an account, select Sign Up on the website, enter the requested details and follow the verification steps. I can explain each step, but I won’t open the form for you.";
+if(/login|log in|sign in/i.test(v))return "For an existing account, select Login and enter your registered details. I can explain the steps without opening or redirecting you.";
+if(/support|contact (someone|team|you)|speak to (a person|someone)|human agent/i.test(v))return "For account-specific help, use the support options available after signing in. Customer email replies are managed by our verified support administrators.";
+for(const [pattern,reply] of answers){if(pattern.test(v))return reply;}
+if(/^(what is|what are|explain|define|tell me about)\\b/i.test(v))return "I can explain that. Try asking with the exact term, such as Bitcoin, XAU, wallet, spread, KYC or limit order.";
+return "I can help explain crypto, Gold, trading terms and platform features. Could you tell me which part you’d like to understand?";
 };
-const normalise=s=>s.toLowerCase().replace(/[^a-z0-9/ ]/g," ").replace(/\s+/g," ").trim();
-const answer=q=>{const v=normalise(q);if(!v)return "Please enter a term you would like explained.";
-if(/^(hi|hello|hey|good morning|good afternoon|good evening)$/.test(v))return "Hello! Welcome to OnChainsPro. I can explain crypto, Gold and platform terminology. What would you like to know?";
-if(/how (do|can) i (create|register|sign up)|how to (create|register|sign up)|create an account|register|sign up/.test(v))return "To create an account, choose Sign Up on the website, enter the requested details and follow the verification steps. I can explain the process, but I will not open or redirect you to the form.";
-if(/login|log in|sign in/.test(v))return "To access an existing account, choose Login on the website and enter your registered details. I can explain the process, but I will not open the login form.";
-const aliases={btc:"bitcoin",xbt:"bitcoin",eth:"ethereum",ether:"ethereum",usdt:"tether",xau:"gold",xaut:"gold",crypto:"cryptocurrency",cryptocurrencies:"cryptocurrency",fees:"network fee","private keys":"private key"};
-const key=aliases[v]||v;if(definitions[key])return definitions[key];
-for(const [term,desc] of Object.entries(definitions)){if(v===term||v.includes(term))return desc;}
-return "I can explain crypto, Gold, blockchain and common platform terms in simple words. Try Bitcoin, Wallet, KYC or trading.";
-};
-const open=()=>{root.classList.add("is-open");if(!messages.childElementCount)add("Welcome to OnChainsPro! 👋\nI’m here to explain crypto, Gold and platform terms in simple words. What would you like to know?");};
+const open=()=>{root.classList.add("is-open");messages.scrollTop=0;};
 root.querySelector(".oc-support-launch").addEventListener("click",()=>root.classList.contains("is-open")?root.classList.remove("is-open"):open());
 root.querySelector(".oc-support-close").addEventListener("click",()=>root.classList.remove("is-open"));
-const send=q=>{const value=String(q||"").trim();if(!value)return;add(value,"user");add(answer(value));};
-form.addEventListener("submit",e=>{e.preventDefault();const value=input.value;input.value="";send(value);});
-root.querySelectorAll("[data-definition]").forEach(b=>b.addEventListener("click",()=>send(b.dataset.definition)));
+form.addEventListener("submit",e=>{e.preventDefault();const value=input.value.trim();if(!value)return;input.value="";add(value,"user");add(answer(value));});
 })();
 </script>
 
