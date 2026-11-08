@@ -56,8 +56,19 @@ export async function withFirestoreTransaction(env, callback, maxAttempts = 3, d
     if (typeof started?.transaction !== "string") throw new Error("Firestore did not start a transaction.");
 
     const writes = [];
+    const writtenDocuments = new Set();
+    const assertReadable = () => {
+      if (writes.length) throw new Error("Firestore transaction reads must happen before writes.");
+    };
+    const addWrite = (collection, id, write) => {
+      const name = documentPath(env.FIREBASE_PROJECT_ID, collection, id);
+      if (writtenDocuments.has(name)) throw new Error("A Firestore transaction cannot write the same document twice.");
+      writtenDocuments.add(name);
+      writes.push(write);
+    };
     const tx = {
       async get(collection, id) {
+        assertReadable();
         const name = documentPath(env.FIREBASE_PROJECT_ID, collection, id);
         const results = await firestoreRequest(`${base}:batchGet`, token, {
           method: "POST",
@@ -70,20 +81,14 @@ export async function withFirestoreTransaction(env, callback, maxAttempts = 3, d
         throw new Error("Firestore document read returned an unexpected result.");
       },
       create(collection, id, fields) {
-        writes.push({
-          update: {
-            name: documentPath(env.FIREBASE_PROJECT_ID, collection, id),
-            fields
-          },
+        addWrite(collection, id, {
+          update: { name: documentPath(env.FIREBASE_PROJECT_ID, collection, id), fields },
           currentDocument: { exists: false }
         });
       },
       set(collection, id, fields) {
-        writes.push({
-          update: {
-            name: documentPath(env.FIREBASE_PROJECT_ID, collection, id),
-            fields
-          }
+        addWrite(collection, id, {
+          update: { name: documentPath(env.FIREBASE_PROJECT_ID, collection, id), fields }
         });
       },
       update(collection, id, fields, fieldPaths) {
@@ -96,7 +101,7 @@ export async function withFirestoreTransaction(env, callback, maxAttempts = 3, d
         if (Array.isArray(fieldPaths) && fieldPaths.length) {
           write.updateMask = { fieldPaths };
         }
-        writes.push(write);
+        addWrite(collection, id, write);
       }
     };
 
@@ -119,7 +124,7 @@ export async function withFirestoreTransaction(env, callback, maxAttempts = 3, d
         await firestoreRequest(`${base}:rollback`, token, {
           method: "POST",
           body: JSON.stringify({ transaction: started.transaction })
-        });
+        }, fetchImpl);
       } catch { /* The transaction may already have expired or aborted. */ }
       if ((error.code === "ABORTED" || error.status === 409) && attempt + 1 < maxAttempts) continue;
       throw error;
