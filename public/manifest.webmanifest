@@ -2,7 +2,7 @@
   "id": "/",
   "name": "OnChainSpro",
   "short_name": "OnChainSpro",
-  "description": "OnChainSpro — cryptocurrency and gold market information, charts and practice tools.",
+  "description": "OnChainSpro — cryptocurrency and gold market information, charts and account tools.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
