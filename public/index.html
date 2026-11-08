@@ -45,12 +45,14 @@
   html.oc-auth-pending body > .more-menu-wrap { display:none!important; }
   html.oc-auth-pending main { display:flex!important; min-height:100vh; padding-top:24px; }
   html.oc-auth-pending #authChoicePanel,
-  html.oc-auth-pending #registerForm,
   html.oc-auth-pending #googleSignInBtn,
   html.oc-auth-pending .auth-google-hint,
   html.oc-auth-pending #authPhoneDivider,
   html.oc-auth-pending #phoneRegistrationPanel { display:none!important; }
-  html.oc-auth-pending #signInForm { display:block!important; }
+  html.oc-auth-pending body:not(.oc-register-mode) #registerForm,
+  html.oc-auth-pending body.oc-register-mode #signInForm { display:none!important; }
+  html.oc-auth-pending body:not(.oc-register-mode) #signInForm,
+  html.oc-auth-pending body.oc-register-mode #registerForm { display:block!important; }
   body.oc-logged-out [hidden],
   html.oc-auth-pending [hidden] { display:none!important; }
 
