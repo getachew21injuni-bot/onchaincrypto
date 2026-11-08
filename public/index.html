@@ -8628,23 +8628,30 @@ if(profile){
 }
 const notificationHost=byId("notificationsPageContent");
 let stopUserNotifications=null,stopMarketAlerts=null,accountNotificationRows=[],marketAlertRows=[];
+let marketAlertsInitialized=false;
+function showMarketAlertToast(alert){
+ const old=byId("ocMarketAlertToast");if(old)old.remove();
+ const good=alert.kind==="bullish",color=good?"#0ecb81":"#f6465d",host=document.createElement("div");host.id="ocMarketAlertToast";host.setAttribute("role","status");host.style.cssText="position:fixed;z-index:100000;top:84px;left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 24px));padding:14px 16px;border:1px solid "+color+";border-left:5px solid "+color+";border-radius:13px;background:#08182bf5;color:#eaf6ff;box-shadow:0 16px 42px #0009";
+ host.innerHTML="<div style=\"display:flex;gap:12px;align-items:flex-start\"><div style=\"flex:1;min-width:0\"><strong style=\"color:"+color+"\">"+(good?"↗ ":"↘ ")+esc(alert.title||"Market Alert")+"</strong><p style=\"margin:5px 0 0;font-size:13px\">"+esc(alert.message||"A new market update is available.")+"</p></div><button type=\"button\" aria-label=\"Close market alert\" style=\"background:transparent;color:#eaf6ff;padding:0 4px;font-size:20px\">×</button></div>";
+ host.querySelector("button")?.addEventListener("click",()=>host.remove());document.body.appendChild(host);setTimeout(()=>host.remove(),10000);
+}
 function paintNotifications(){
  if(!notificationHost)return;
  const rows=accountNotificationRows.concat(marketAlertRows).sort((a,b)=>{const t=x=>x.createdAt&&typeof x.createdAt.toMillis==="function"?x.createdAt.toMillis():Date.parse(x.createdAtText||"")||0;return t(b)-t(a);});
  const unread=accountNotificationRows.filter(x=>!x.readAt).length;
  if(!rows.length){notificationHost.innerHTML="<div class=\"panel\"><strong>No notifications yet</strong><p class=\"muted tiny\">Market updates and account notifications will appear here.</p></div>";return;}
- notificationHost.innerHTML="<div class=\"panel\"><strong>"+unread+" unread · "+rows.length+" total</strong></div>"+rows.slice(0,40).map(n=>{
+ notificationHost.innerHTML="<div class=\"panel\"><strong>"+unread+" unread account updates · "+rows.length+" total notifications</strong></div>"+rows.slice(0,40).map(n=>{
   const k=String(n.kind||"").toLowerCase(),good=k==="kyc_approved"||k==="deposit"||k==="bullish",bad=k==="kyc_rejected"||k==="withdrawal"||k==="bearish",color=good?"#0ecb81":bad?"#f6465d":"#d6a84b",symbol=good?"↗":bad?"↘":"•",when=n.createdAt&&typeof n.createdAt.toDate==="function"?n.createdAt.toDate().toLocaleString():String(n.createdAtText||""),source=(k==="bullish"||k==="bearish")?(n.source==="market-auto"?"Automatic market alert":"Market alert"):"Account update";
   return "<article class=\"panel\" style=\"padding:14px;margin:10px 0;border:1px solid "+color+";border-left:4px solid "+color+"\"><strong style=\"color:"+color+"\">"+symbol+" "+esc(n.title||"Account update")+"</strong><p class=\"muted tiny\">"+esc(n.message||"Your account has an update.")+"</p><small class=\"muted\">"+esc(source)+(when?" · "+when:"")+"</small></article>";
  }).join("");
 }
 function renderUserNotifications(user){
  if(stopUserNotifications){stopUserNotifications();stopUserNotifications=null;}if(stopMarketAlerts){stopMarketAlerts();stopMarketAlerts=null;}
- accountNotificationRows=[];marketAlertRows=[];if(!notificationHost)return;
+ accountNotificationRows=[];marketAlertRows=[];marketAlertsInitialized=false;if(!notificationHost)return;
  if(!user){notificationHost.innerHTML="<div class=\"notice\">Sign in to receive market and account notifications.</div>";return;}
  notificationHost.innerHTML="<div class=\"panel\">Loading your notifications…</div>";
  stopUserNotifications=onSnapshot(collection(db,"userNotifications",user.uid,"items"),snap=>{accountNotificationRows=snap.docs.map(d=>({id:d.id,...d.data()}));paintNotifications();},error=>{notificationHost.innerHTML="<div class=\"notice\">Could not load account notifications ("+esc(error.code||"connection error")+").</div>";});
- stopMarketAlerts=onSnapshot(collection(db,"marketAlerts"),snap=>{marketAlertRows=snap.docs.map(d=>({id:d.id,...d.data()}));paintNotifications();},error=>{console.warn("Market alerts could not be loaded:",error.code||error);if(!accountNotificationRows.length)notificationHost.innerHTML="<div class=\"notice\">Market notifications are temporarily unavailable.</div>";});
+ stopMarketAlerts=onSnapshot(collection(db,"marketAlerts"),snap=>{if(marketAlertsInitialized)snap.docChanges().filter(change=>change.type==="added").forEach(change=>{const alert=change.doc.data()||{};if(["bullish","bearish"].includes(alert.kind))showMarketAlertToast(alert);});marketAlertsInitialized=true;marketAlertRows=snap.docs.map(d=>({id:d.id,...d.data()}));paintNotifications();},error=>{console.warn("Market alerts could not be loaded:",error.code||error);if(!accountNotificationRows.length)notificationHost.innerHTML="<div class=\"notice\">Market notifications are temporarily unavailable.</div>";});
 }
 window.ocRenderUserNotifications=renderUserNotifications;
 onAuthStateChanged(auth,user=>renderUserNotifications(user||null));
