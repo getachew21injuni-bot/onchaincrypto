@@ -634,6 +634,145 @@ async function readWalletAccount(user, env, dependencies = {}) {
   }, 3, dependencies);
 }
 
+// workers/wallet-api/src/admin-wallet.js
+var SCALE2 = 100000000n;
+function fail2(message, status = 400, code = "INVALID_REQUEST") {
+  const error = new Error(message);
+  error.status = status;
+  error.code = code;
+  throw error;
+}
+function parseAmount(value) {
+  if (typeof value !== "string" || !/^-?(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,8})?$/.test(value) || value === "-0") {
+    fail2("Enter a valid balance change with up to 8 decimal places.");
+  }
+  const negative = value.startsWith("-");
+  const unsigned = negative ? value.slice(1) : value;
+  const [whole, fraction = ""] = unsigned.split(".");
+  const units = BigInt(whole) * SCALE2 + BigInt((fraction + "00000000").slice(0, 8));
+  return negative ? -units : units;
+}
+function formatAmount(units) {
+  const whole = units / SCALE2;
+  const fraction = (units % SCALE2).toString().padStart(8, "0").replace(/0+$/, "");
+  return fraction ? `${whole}.${fraction}` : String(whole);
+}
+function stringField(field) {
+  return typeof field?.stringValue === "string" ? field.stringValue : void 0;
+}
+function balancesMap(balances) {
+  const fields = {};
+  for (const [asset, amount] of Object.entries(balances)) fields[asset] = firestoreString(amount);
+  return { mapValue: { fields } };
+}
+async function idempotencyKey(adminUid, operationId) {
+  const bytes = new TextEncoder().encode("admin-wallet:" + adminUid + ":" + operationId);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+function timestampTransform2(fieldPath) {
+  return { fieldPath, setToServerValue: "REQUEST_TIME" };
+}
+async function adjustWalletBalance({ admin, body, env, dependencies = {} }) {
+  if (!admin || admin.admin !== true || typeof admin.uid !== "string" || !admin.uid) {
+    fail2("Administrator authorization is required.", 403, "ADMIN_REQUIRED");
+  }
+  if (!body || typeof body !== "object" || Array.isArray(body)) fail2("Invalid wallet adjustment request.");
+  const targetUid = body.targetUid;
+  const asset = typeof body.asset === "string" ? body.asset.toUpperCase() : "";
+  const operationId = body.operationId;
+  const reason = typeof body.reason === "string" ? body.reason.trim() : "";
+  if (typeof targetUid !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(targetUid)) fail2("A valid customer account is required.");
+  if (!/^[A-Z0-9]{2,12}$/.test(asset)) fail2("Invalid asset symbol.");
+  if (typeof operationId !== "string" || !/^[A-Za-z0-9_-]{16,80}$/.test(operationId)) fail2("A valid unique operation ID is required.");
+  if (reason.length < 5 || reason.length > 300) fail2("Enter an adjustment reason (5\u2013300 characters).");
+  const delta = parseAmount(body.amount);
+  if (delta === 0n) fail2("The balance change cannot be zero.");
+  const keyId = await idempotencyKey(admin.uid, operationId);
+  const ledgerId = crypto.randomUUID();
+  return withFirestoreTransaction(env, async (tx) => {
+    const prior = await tx.get("operationKeys", keyId);
+    if (prior) {
+      const fields = prior.fields || {};
+      if (stringField(fields.type) !== "admin_balance_adjustment" || stringField(fields.targetUid) !== targetUid || stringField(fields.asset) !== asset || stringField(fields.amount) !== formatAmount(delta)) {
+        fail2("This operation ID was already used for a different adjustment.", 409, "IDEMPOTENCY_CONFLICT");
+      }
+      return {
+        replayed: true,
+        ledgerId: stringField(fields.ledgerId),
+        targetUid,
+        asset,
+        balance: stringField(fields.balanceAfter)
+      };
+    }
+    const account = await tx.get("walletAccounts", targetUid);
+    let balances = {};
+    let version = 0;
+    if (account) {
+      const fields = account.fields || {};
+      if (stringField(fields.uid) !== targetUid || stringField(fields.status) !== "active" || stringField(fields.migrationStatus) !== "verified" || Number(fields.schemaVersion?.integerValue) !== 1) {
+        fail2("This customer's cloud wallet is not verified. No balance was changed.", 409, "ACCOUNT_NOT_VERIFIED");
+      }
+      const raw = fields.balances?.mapValue?.fields || {};
+      for (const [symbol, field] of Object.entries(raw)) {
+        if (typeof field.stringValue !== "string" || !/^(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,8})?$/.test(field.stringValue)) {
+          fail2("The customer's existing wallet needs administrator review.", 409, "WALLET_DATA_INVALID");
+        }
+        balances[symbol] = field.stringValue;
+      }
+      version = Number(fields.version?.integerValue || 0);
+    }
+    const before = parseAmount(balances[asset] || "0");
+    const after = before + delta;
+    if (after < 0n) fail2("This adjustment would make the balance negative.", 409, "NEGATIVE_BALANCE");
+    balances[asset] = formatAmount(after);
+    const accountFields = {
+      uid: firestoreString(targetUid),
+      status: firestoreString("active"),
+      migrationStatus: firestoreString("verified"),
+      schemaVersion: firestoreInteger(1),
+      balances: balancesMap(balances),
+      version: firestoreInteger(version + 1)
+    };
+    if (account) {
+      tx.update(
+        "walletAccounts",
+        targetUid,
+        accountFields,
+        ["status", "migrationStatus", "schemaVersion", "balances", "version"],
+        [timestampTransform2("updatedAt")]
+      );
+    } else {
+      tx.create("walletAccounts", targetUid, accountFields, [timestampTransform2("createdAt"), timestampTransform2("updatedAt")]);
+    }
+    tx.create("walletLedger", ledgerId, {
+      uid: firestoreString(targetUid),
+      asset: firestoreString(asset),
+      amount: firestoreString(formatAmount(delta < 0n ? -delta : delta)),
+      direction: firestoreString(delta > 0n ? "credit" : "debit"),
+      balanceBefore: firestoreString(formatAmount(before)),
+      balanceAfter: firestoreString(formatAmount(after)),
+      type: firestoreString("admin_balance_adjustment"),
+      status: firestoreString("posted"),
+      source: firestoreString("admin"),
+      adminUid: firestoreString(admin.uid),
+      reason: firestoreString(reason),
+      operationId: firestoreString(operationId)
+    }, [timestampTransform2("createdAt")]);
+    tx.create("operationKeys", keyId, {
+      uid: firestoreString(admin.uid),
+      type: firestoreString("admin_balance_adjustment"),
+      targetUid: firestoreString(targetUid),
+      asset: firestoreString(asset),
+      amount: firestoreString(formatAmount(delta)),
+      reason: firestoreString(reason),
+      ledgerId: firestoreString(ledgerId),
+      balanceAfter: firestoreString(formatAmount(after))
+    }, [timestampTransform2("createdAt")]);
+    return { replayed: false, ledgerId, targetUid, asset, balance: formatAmount(after), version: version + 1 };
+  }, 3, dependencies.firestoreDependencies || {});
+}
+
 // workers/wallet-api/src/index.js
 var ALLOWED_ORIGINS = /* @__PURE__ */ new Set([
   "https://onchaincrypto-d976b.web.app",
@@ -725,6 +864,31 @@ var index_default = {
         const status = Number.isInteger(error?.status) && error.status >= 400 && error.status <= 599 ? error.status : 503;
         const code = typeof error?.code === "string" ? error.code : "WALLET_READ_UNAVAILABLE";
         const message = status >= 500 ? "Cloud wallet information is temporarily unavailable." : error.message || "Wallet request was rejected.";
+        return response({ ok: false, error: message, code }, status, origin);
+      }
+    }
+    if (request.method === "POST" && url.pathname === "/v1/admin/wallet/adjust") {
+      try {
+        if (!env.FIREBASE_PROJECT_ID || !env.FIREBASE_SERVICE_ACCOUNT) {
+          const error = new Error("Wallet service is not configured.");
+          error.status = 503;
+          error.code = "SERVICE_NOT_CONFIGURED";
+          throw error;
+        }
+        const user = await requireUser(request, env);
+        if (user.admin !== true) {
+          const error = new Error("Administrator authorization is required.");
+          error.status = 403;
+          error.code = "ADMIN_REQUIRED";
+          throw error;
+        }
+        const body = await readJson(request);
+        const result = await adjustWalletBalance({ admin: user, body, env });
+        return response({ ok: true, ...result }, 200, origin);
+      } catch (error) {
+        const status = Number.isInteger(error?.status) && error.status >= 400 && error.status <= 599 ? error.status : 503;
+        const code = typeof error?.code === "string" ? error.code : "ADMIN_WALLET_UNAVAILABLE";
+        const message = status >= 500 ? "The wallet adjustment could not be completed. No balance change was confirmed." : error.message || "Wallet adjustment was rejected.";
         return response({ ok: false, error: message, code }, status, origin);
       }
     }
