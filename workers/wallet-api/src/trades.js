@@ -16,7 +16,7 @@ function parseUnits(value, label) {
   return BigInt(whole) * SCALE + BigInt((fraction + "00000000").slice(0, 8));
 }
 function parsePriceUnits(value) {
-  if (typeof value !== "string" || !/^(?:0|[1-9]\\d{0,11})(?:\\.\\d{1,12})?$/.test(value)) fail("Invalid market price.", 503, "INVALID_QUOTE");
+  if (typeof value !== "string" || !/^(?:0|[1-9][0-9]{0,11})(?:[.][0-9]{1,12})?$/.test(value)) fail("Invalid market price.", 503, "INVALID_QUOTE");
   const [whole, fraction = ""] = value.split(".");
   return BigInt(whole) * PRICE_SCALE + BigInt((fraction + "000000000000").slice(0, 12));
 }
