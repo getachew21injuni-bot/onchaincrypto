@@ -1408,7 +1408,7 @@ html.oc-auth-pending body > nav {
     <button data-page="wallet">Wallet</button>
     
   </nav>
-  <div class="header-right"><button class="secondary oc-theme-toggle" id="ocThemeToggle" type="button" aria-label="Switch to light mode" title="Switch display mode"><span aria-hidden="true">☼</span><small>Light</small></button><div class="oc-visitor-actions" id="ocVisitorActions"><button class="primary" type="button" id="ocVisitorSignup">Sign Up</button><button class="secondary" type="button" id="ocVisitorLogin">Log In</button></div><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button><button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Support</strong><small>Chat with our support team</small></span></button></div></div></div>
+  <div class="header-right"><button class="secondary oc-theme-toggle" id="ocThemeToggle" type="button" aria-label="Switch to light mode" title="Switch display mode"><span aria-hidden="true">☼</span><small>Light</small></button><div class="oc-visitor-actions" id="ocVisitorActions"><button class="primary" type="button" id="ocVisitorSignup">Sign Up</button><button class="secondary" type="button" id="ocVisitorLogin">Log In</button></div><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button></div></div></div>
 </header>
 <main>
   
@@ -2850,7 +2850,7 @@ window.ocApplyAdminDemoBalance=function(amount){const n=Number(amount);if(!Numbe
 window.ocApplyAdminDemoAssets=function(balances){if(!balances||typeof balances!=="object"||Array.isArray(balances))return;let changed=false;for(const [rawSymbol,rawAmount] of Object.entries(balances)){const symbol=String(rawSymbol||"").toUpperCase();const amount=Number(rawAmount);if(!/^[A-Z0-9]{2,12}$/.test(symbol)||!Number.isFinite(amount)||amount<0)continue;state.holdings[symbol]=amount;changed=true;}if(changed){saveState();renderWallet();}};
 function renderWallet(){const pricedHoldings=Object.entries(state.holdings).reduce((out,[sym,qty])=>{const symbol=String(sym).toUpperCase(),amount=Number(qty)||0;if(amount<=0||symbol==="USDT")return out;const price=Number(priceFor(symbol)?.current_price||0);if(price>0){out.value+=amount*price;out.priced++;}else out.unpriced++;return out;},{value:0,priced:0,unpriced:0});const totalValue=(Number(state.balance)||0)+pricedHoldings.value;$("summaryBalance").textContent=usdtMoney(state.balance);$("walletBalance").textContent=usdtMoney(totalValue);$("walletBalanceNote").textContent="Estimated total value in USDT · "+pricedHoldings.priced+" priced coin holding"+(pricedHoldings.priced===1?"":"s")+(pricedHoldings.unpriced?"; "+pricedHoldings.unpriced+" asset price"+(pricedHoldings.unpriced===1?" is":"s are")+" unavailable and excluded":"")+" · estimated portfolio";$("holdingsValue").textContent=usdtMoney(pricedHoldings.value);const rows=Object.entries(state.holdings).filter(([sym,qty])=>String(sym).toUpperCase()!=="USDT"&&Number(qty)>0.0000000001&&(! $("hideSmallBalances")?.checked||Number(qty)*(priceFor(sym)?.current_price||0)>=1));$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym,current_price:0},price=Number(c.current_price||0);return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+' '+safe(sym.toUpperCase())+'</td><td>'+(price>0?usdtMoney(Number(qty)*price):"Price unavailable")+'</td></tr>'}).join(''):'<tr><td colspan="3" class="empty">No coin holdings yet. Your USDT balance is shown above.</td></tr>';renderActivityHistory();renderTradeHistory();renderPnl();renderWalletMarket()}
 document.addEventListener("change",e=>{if(e.target&&e.target.id==="hideSmallBalances")renderWallet();if(e.target&&e.target.id==="homeHistoryFilter")renderActivityHistory()});
-function showPage(page){const guest=window.ocLoggedOut===true&&!auth.currentUser;if(guest&&page!=="register")page="register";document.body.classList.toggle("oc-visitor-mode",guest);document.body.classList.toggle("oc-auth-screen",guest&&page==="register");if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
+function showPage(page){const guest=window.ocLoggedOut===true&&!auth.currentUser;if(guest&&page!=="register")page="register";document.body.classList.toggle("oc-visitor-mode",guest);document.body.classList.toggle("oc-auth-screen",guest&&page==="register");if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));window.ocSyncHomeActions?.();document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
 window.showPage = showPage;
 let timedPaper=null,timedTimer=null,pendingTimedDirection=null;
 function quickPlan(){const amount=Number($("timedStake")?.value||0)*Number(priceFor(window.__ocTradeFundingCoin||"USDT")?.current_price||1),isGold=($("tradeAsset")?.value||selected)==="XAU",minimum=isGold?500:100;const levels=[{rate:12,min:minimum,max:5000,duration:30,label:"Level 1"},{rate:15,min:5000,max:10000,duration:60,label:"Level 2"},{rate:18,min:10000,max:25000,duration:90,label:"Level 3"},{rate:21,min:25000,max:50000,duration:120,label:"Level 4"},{rate:24,min:50000,max:100000,duration:180,label:"Level 5"},{rate:27,min:100000,max:Infinity,duration:360,label:"Level 6"}];return levels.find((p,i)=>amount>=p.min&&(amount<p.max||i===levels.length-1&&amount<=p.max))||levels[0]}
@@ -2917,7 +2917,7 @@ function ensureMoreMenuContent(){if(!moreMenu||moreMenu.querySelector("button"))
  '<button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Password, sessions and privacy</small></span></button>'+
  '<button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification and email preferences</small></span></button>'+
  '<button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>KYC status and requirements</small></span></button>'+
- '<button type="button" data-menu-page="support" role="menuitem"><span class="menu-symbol support-symbol">☏</span><span><strong>Support</strong><small>Chat with our support team</small></span></button>';
+ '';
 }
 function setMoreMenuOpen(open){if(!moreMenu||!moreMenuBtn)return;ensureMoreMenuContent();if(typeof updateProfileAvatarDisplay==="function")updateProfileAvatarDisplay(ocCurrentAvatarDataUrl);moreMenu.classList.toggle("hidden",!open);moreMenu.style.setProperty("display",open?"block":"none","important");moreMenu.style.setProperty("visibility",open?"visible":"hidden","important");moreMenu.style.setProperty("opacity",open?"1":"0","important");moreMenu.style.setProperty("pointer-events",open?"auto":"none","important");moreMenu.style.setProperty("z-index","99999","important");moreMenuBtn.setAttribute("aria-expanded",String(open));moreMenu.setAttribute("aria-hidden",String(!open));}
 moreMenuBtn?.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();setMoreMenuOpen(moreMenuBtn.getAttribute("aria-expanded")!=="true");});
@@ -6452,6 +6452,8 @@ button?.addEventListener("click",async()=>{if(!user){if(message)message.textCont
 @media(max-width:560px){#ocVisitorSupportBot{right:14px;bottom:calc(92px + env(safe-area-inset-bottom))}#ocVisitorSupportBot .oc-support-launch{width:52px;height:52px;min-width:52px;padding:3px}#ocVisitorSupportBot .oc-support-avatar{width:42px;height:42px}#ocVisitorSupportBot .oc-support-panel{bottom:62px;width:min(350px,calc(100vw - 24px));height:min(500px,calc(100dvh - 175px))}}
 @media(prefers-reduced-motion:no-preference){#ocVisitorSupportBot .oc-support-launch{animation:ocSupportFloat 3.8s ease-in-out infinite}@keyframes ocSupportFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}}
 body.oc-auth-screen #ocVisitorSupportBot{display:none!important}
+#ocVisitorSupportBot{display:none!important}
+body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
 #oc-visitor-support-bot,#oc-support-button{display:none!important}
 </style>
 <div id="ocVisitorSupportBot" aria-live="polite">
@@ -7033,7 +7035,7 @@ body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.descr
 <style id="oc-show-copy-strategy-note">.oc-copy-strategy-note{display:block!important}</style>
 
 <style id="oc-home-install-button-style">
-.oc-home-install-button{position:fixed;right:12px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:59;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:8px 13px;border:1px solid #287fba;border-radius:999px;background:linear-gradient(135deg,#0879bd,#07518e);color:#fff;font-size:12px;font-weight:750;letter-spacing:.1px;box-shadow:0 5px 18px #0006,0 0 14px #078bff25;cursor:pointer}
+.oc-home-install-button{position:fixed;right:12px;bottom:calc(158px + env(safe-area-inset-bottom));z-index:59;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:8px 13px;border:1px solid #287fba;border-radius:999px;background:linear-gradient(135deg,#0879bd,#07518e);color:#fff;font-size:12px;font-weight:750;letter-spacing:.1px;box-shadow:0 5px 18px #0006,0 0 14px #078bff25;cursor:pointer}
 .oc-home-install-button span{font-size:17px;line-height:1}
 .oc-home-install-button:disabled{opacity:.8;cursor:default}
 .oc-install-sr-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
@@ -7050,9 +7052,33 @@ body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.descr
     status=document.getElementById('oc-install-status');
     help=null;
   }
-  function installed(){
-    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+  function installStorageKeys(){
+    var user=window.onchaincryptoCurrentUser||null;
+    var uid=user&&user.uid?String(user.uid):'';
+    return ['oc-pwa-installed-device-v1'].concat(uid?['oc-pwa-installed-user-v1:'+uid]:[]);
   }
+  function isInstalledForUser(){
+    try{return installStorageKeys().some(function(key){return localStorage.getItem(key)==='1';});}
+    catch(error){return false;}
+  }
+  function rememberInstalled(){
+    try{installStorageKeys().forEach(function(key){localStorage.setItem(key,'1');});}catch(error){}
+  }
+  function installed(){
+    var standalone=window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+    if(standalone)rememberInstalled();
+    return standalone || isInstalledForUser();
+  }
+  window.ocSyncHomeActions=function(){
+    var home=document.getElementById('page-home');
+    var active=!!home&&!home.classList.contains('hidden')&&getComputedStyle(home).display!=='none';
+    document.body.classList.toggle('oc-home-actions-visible',active);
+    if(!active){
+      var panel=document.querySelector('#ocVisitorSupportBot .oc-support-panel');
+      if(panel)panel.classList.remove('is-open');
+    }
+    refresh();
+  };
   function setMessage(message){
     if(status)status.textContent=message;
   }
@@ -7067,8 +7093,7 @@ body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.descr
     var shouldHide=!homeActive;
     if(button.hidden!==shouldHide)button.hidden=shouldHide;
     if(installed()){
-      button.innerHTML='<span aria-hidden="true">✓</span> App Installed';
-      button.setAttribute('aria-label','OnChainSpro app installed');
+      button.hidden=true;
       button.disabled=true;
       setMessage('OnChainSpro is installed on this device.');
       return;
@@ -7097,9 +7122,12 @@ body:not(.oc-auth-screen) main :is(p,label,.tiny,.muted,.section-subtitle,.descr
   });
   window.addEventListener('appinstalled',function(){
     installEvent=null;
+    rememberInstalled();
     refresh();
     setMessage('OnChainSpro has been added to your device.');
   });
+  window.ocRefreshHomeInstall=refresh;
+  window.addEventListener('load',function(){window.ocSyncHomeActions&&window.ocSyncHomeActions();refresh();});
   document.addEventListener('click',async function(event){
     var target=event.target instanceof Element?event.target.closest('#oc-install-app'):null;
     if(!target)return;
