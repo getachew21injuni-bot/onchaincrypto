@@ -2,6 +2,7 @@ import { withFirestoreTransaction, firestoreString, firestoreInteger } from "./f
 import { getTrustedQuote } from "./quotes.js";
 
 const SCALE = 100000000n;
+const PRICE_SCALE = 1000000000000n;
 const MIN_TRADE_USDT = 100n * SCALE;
 
 function fail(message, status = 400, code = "INVALID_REQUEST") {
@@ -14,8 +15,17 @@ function parseUnits(value, label) {
   const [whole, fraction = ""] = s.split(".");
   return BigInt(whole) * SCALE + BigInt((fraction + "00000000").slice(0, 8));
 }
+function parsePriceUnits(value) {
+  if (typeof value !== "string" || !/^(?:0|[1-9]\\d{0,11})(?:\\.\\d{1,12})?$/.test(value)) fail("Invalid market price.", 503, "INVALID_QUOTE");
+  const [whole, fraction = ""] = value.split(".");
+  return BigInt(whole) * PRICE_SCALE + BigInt((fraction + "000000000000").slice(0, 12));
+}
 function fmt(units) {
   const whole = units / SCALE, fraction = (units % SCALE).toString().padStart(8, "0").replace(/0+$/, "");
+  return fraction ? `${whole}.${fraction}` : String(whole);
+}
+function fmtPrice(units) {
+  const whole = units / PRICE_SCALE, fraction = (units % PRICE_SCALE).toString().padStart(12, "0").replace(/0+$/, "");
   return fraction ? `${whole}.${fraction}` : String(whole);
 }
 function valueOf(field) {
@@ -54,11 +64,11 @@ export async function executeStandardTrade({ user, body, env, dependencies = {} 
   const minimum = symbol === "PAXG" ? 500n * SCALE : MIN_TRADE_USDT;
   if (quoteAmount < minimum) fail(`The minimum trade amount is ${symbol === "PAXG" ? "500" : "100"} USDT.`, 400, "MINIMUM_TRADE");
   const quote = await (dependencies.getQuote || getTrustedQuote)(symbol, dependencies.fetchImpl || fetch);
-  const priceUnits = parseUnits(quote.price, "market price");
+  const priceUnits = parsePriceUnits(quote.price);
   if (priceUnits <= 0n) fail("Invalid live market quote.", 503, "INVALID_QUOTE");
-  const quantity = (quoteAmount * SCALE) / priceUnits;
+  const quantity = (quoteAmount * PRICE_SCALE) / priceUnits;
   if (quantity <= 0n) fail("Trade amount is too small for this asset.");
-  const actualGross = side === "buy" ? quoteAmount : (quantity * priceUnits) / SCALE;
+  const actualGross = side === "buy" ? quoteAmount : (quantity * priceUnits) / PRICE_SCALE;
   if (actualGross < minimum) fail(`The minimum trade amount is ${symbol === "PAXG" ? "500" : "100"} USDT.`, 400, "MINIMUM_TRADE");
 
   const keyId = await hashKey(user.uid, operationId);
@@ -134,7 +144,7 @@ export async function executeStandardTrade({ user, body, env, dependencies = {} 
       symbol: firestoreString(symbol + "/USDT"), baseAsset: firestoreString(symbol),
       quoteAsset: firestoreString("USDT"), side: firestoreString(side),
       orderType: firestoreString("market"), quantity: firestoreString(fmt(quantity)),
-      price: firestoreString(fmt(priceUnits)), grossAmount: firestoreString(fmt(actualGross)),
+      price: firestoreString(fmtPrice(priceUnits)), grossAmount: firestoreString(fmt(actualGross)),
       fee: firestoreString("0"), netAmount: firestoreString(fmt(actualGross)),
       quoteSource: firestoreString(quote.source), quoteTimestamp: firestoreString(quote.quotedAt),
       status: firestoreString("filled"),
@@ -149,6 +159,6 @@ export async function executeStandardTrade({ user, body, env, dependencies = {} 
         grossAmount: firestoreString(fmt(actualGross))
       } } }
     });
-    return { replayed: false, tradeId, status: "filled", side, symbol, quantity: fmt(quantity), price: fmt(priceUnits), grossAmount: fmt(actualGross), quoteSource: quote.source, quoteTimestamp: quote.quotedAt };
+    return { replayed: false, tradeId, status: "filled", side, symbol, quantity: fmt(quantity), price: fmtPrice(priceUnits), grossAmount: fmt(actualGross), quoteSource: quote.source, quoteTimestamp: quote.quotedAt };
   }, 3, dependencies.firestoreDependencies || {});
 }
