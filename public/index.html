@@ -3103,6 +3103,16 @@ window.ocAuthReady = Promise.resolve(
   return auth.currentUser || null;
 });
 window.ocFirebaseAuth = auth;
+// Explicitly confirm browser-local persistence before the app accepts sign-in
+// or attaches its authoritative auth-state observer. This also migrates any
+// existing user session to local persistence without signing the user out.
+try {
+  await setPersistence(auth, browserLocalPersistence);
+  window.ocAuthPersistenceConfirmed = true;
+} catch (persistenceError) {
+  window.ocAuthPersistenceConfirmed = false;
+  console.error("Firebase browser-local persistence could not be confirmed:", persistenceError?.code || persistenceError, persistenceError?.message || "");
+}
 // Do not publish a signed-out state until Firebase has restored browser-local
 // persistence. The observer's first null event must not race session recovery.
 await window.ocAuthReady;
