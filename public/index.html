@@ -34,21 +34,26 @@
 <style id="oc-auth-pending-gate">
   /* The dedicated Login/Register page is the only screen shown before sign-in. */
   /* Keep the sign-in form visible while Firebase restores the saved session. */
-  html.oc-auth-pending main > :not(#page-public-market) { display:none!important; }
-  html.oc-auth-pending main > #page-public-market { display:flex!important; }
+  html.oc-auth-pending body:not(.oc-auth-screen) main > :not(#page-public-market) { display:none!important; }
+  html.oc-auth-pending body:not(.oc-auth-screen) main > #page-public-market { display:block!important; }
+  html.oc-auth-pending body.oc-auth-screen main > :not(#page-register) { display:none!important; }
+  html.oc-auth-pending body.oc-auth-screen main > #page-register { display:block!important; visibility:visible!important; }
   html.oc-auth-pending body > footer,
   html.oc-auth-pending body > #bottomNav,
   html.oc-auth-pending body > nav,
   html.oc-auth-pending body > aside,
   html.oc-auth-pending body > .more-menu-wrap { display:none!important; }
+  html.oc-auth-pending body.oc-auth-screen #ocVisitorActions { display:none!important; }
   html.oc-auth-pending main { display:flex!important; min-height:100vh; padding-top:24px; }
   html.oc-auth-pending #authChoicePanel,
-  html.oc-auth-pending #registerForm,
   html.oc-auth-pending #googleSignInBtn,
   html.oc-auth-pending .auth-google-hint,
   html.oc-auth-pending #authPhoneDivider,
   html.oc-auth-pending #phoneRegistrationPanel { display:none!important; }
-  html.oc-auth-pending #signInForm { display:block!important; }
+  html.oc-auth-pending body:not(.oc-register-mode) #registerForm,
+  html.oc-auth-pending body.oc-register-mode #signInForm { display:none!important; }
+  html.oc-auth-pending body:not(.oc-register-mode) #signInForm,
+  html.oc-auth-pending body.oc-register-mode #registerForm { display:block!important; }
   body.oc-logged-out [hidden],
   html.oc-auth-pending [hidden] { display:none!important; }
 
@@ -3841,7 +3846,9 @@ window.addEventListener("popstate", async () => {
   if(!signIn||!register)return;
   function setMode(mode){
     const creating=mode==='register';
-    document.getElementById("authChoicePanel")?.classList.remove("hidden");
+    document.body.classList.add("oc-auth-screen","oc-logged-out");
+    document.body.classList.toggle("oc-register-mode",creating);
+    document.getElementById("authChoicePanel")?.classList.add("hidden");
     document.getElementById("authStatus")?.classList.add("hidden");
     if(methodOptions)methodOptions.classList.toggle("hidden",!creating);
     if(phonePanel){phonePanel.classList.add("hidden");phonePanel.open=false;phonePanel.querySelectorAll("input").forEach(el=>el.disabled=true);}
@@ -11773,8 +11780,11 @@ body.oc-auth-screen #ocVisitorSupportBot{display:none!important}
     const button=event.target instanceof Element?event.target.closest("#ocVisitorSignup,#ocVisitorLogin"):null;
     if(!button)return;
     event.preventDefault();
-    const open=window.ocOpenVisitorAuth;
-    if(typeof open==="function")open(button.id==="ocVisitorSignup"?"signup":"login");
+    const mode=button.id==="ocVisitorSignup"?"register":"login";
+    if(window.ocLoggedOut!==true)return;
+    window.showPage?.("register");
+    const choice=document.getElementById(mode==="register"?"authChoiceRegister":"authChoiceLogin");
+    if(choice)choice.click();
   });
 })();
 </script>
