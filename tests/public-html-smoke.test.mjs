@@ -92,3 +92,11 @@ test("authentication navigation controls have one click handler each", () => {
     assert.equal(handlers.length, 1, id + " should have one shared click handler");
   }
 });
+
+test("unguarded event listeners only target elements present in the HTML", () => {
+  const declaredIds = new Set([...html.matchAll(/\bid=["']([^"']+)["']/g)].map(match => match[1]));
+  const references = [...html.matchAll(/(?:\$\(\s*["']([^"']+)["']\s*\)|getElementById\(\s*["']([^"']+)["']\s*\))\.addEventListener/g)]
+    .map(match => match[1] || match[2]);
+  const missing = [...new Set(references.filter(id => !declaredIds.has(id)))];
+  assert.deepEqual(missing, [], "Missing elements used by unguarded event listeners: " + missing.join(", "));
+});
