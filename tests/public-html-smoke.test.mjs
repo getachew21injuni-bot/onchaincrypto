@@ -106,3 +106,17 @@ test("unguarded event listeners only target elements present in the HTML", () =>
   const missing = [...new Set(references.filter(id => !declaredIds.has(id)))];
   assert.deepEqual(missing, [], "Missing elements used by unguarded event listeners: " + missing.join(", "));
 });
+
+
+test("Quick Trade confirmation validates the selected funding asset", () => {
+  assert.ok(html.includes('window.ocValidateQuickTradeForm=validatePlan;'), "Expected one shared Quick Trade validator");
+  assert.ok(html.includes('const funding=window.__ocTradeFundingCoin||"USDT";'), "Expected the selected funding asset");
+  assert.ok(html.includes("stake>fundingBalance+1e-10"), "Expected validation against the selected asset balance");
+  assert.ok(html.includes('if(typeof window.ocValidateQuickTradeForm==="function")window.ocValidateQuickTradeForm();'), "Expected the secondary control to reuse the shared validator");
+});
+
+test("wallet sync cannot trade on failed restore or overwrite results on unchanged admin snapshots", () => {
+  assert.ok(html.includes("tradeCloudReadyUid=null;"), "A failed wallet restore must block trading");
+  assert.ok(html.includes("lastAdminBalance"), "Admin wallet snapshots must track the last applied balance");
+  assert.ok(html.includes("data.demoBalanceUSDT!==lastAdminBalance"), "Unchanged admin profile snapshots must not overwrite trade results");
+});
