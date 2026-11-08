@@ -2872,7 +2872,7 @@ async function executeStandardCloudTrade(side){
  if(!user){setStandardTradeMessage("Please sign in before placing an order.","error");return}
  const symbol=String($("tradeAsset")?.value||selected||"BTC").toUpperCase();
  const amount=Number(amountInput?.value);
- const minimum=symbol==="PAXG"?500:100;
+ const minimum=(symbol==="XAUT"||symbol==="PAXG")?500:100;
  if(!Number.isFinite(amount)||amount<minimum){setStandardTradeMessage("Enter at least "+minimum+" USDT.","error");return}
  const panel=$("standardBuySellPanel");
  const fingerprint=side+"|"+symbol+"|"+amount.toFixed(8);
