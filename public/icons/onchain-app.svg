@@ -1,12 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="OnChainSpro profile symbol">
 <defs>
-  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071426"/><stop offset="1" stop-color="#0b3150"/></linearGradient>
-  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0a6"/><stop offset=".48" stop-color="#f5c542"/><stop offset="1" stop-color="#b87908"/></linearGradient>
-  <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#20e5ff"/><stop offset="1" stop-color="#438dff"/></linearGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0a8"/><stop offset=".48" stop-color="#f5c542"/><stop offset="1" stop-color="#b87908"/></linearGradient>
+ <linearGradient id="silver" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#aeb8c8"/></linearGradient>
+ <radialGradient id="bg"><stop stop-color="#142338"/><stop offset="1" stop-color="#030811"/></radialGradient>
+ <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
 </defs>
-<rect width="512" height="512" rx="112" fill="url(#bg)"/>
-<circle cx="256" cy="256" r="174" fill="none" stroke="url(#gold)" stroke-width="30"/>
-<path d="M315 163a112 112 0 1 0 0 186" fill="none" stroke="url(#cyan)" stroke-width="34" stroke-linecap="round"/>
-<path d="M190 257h132" stroke="#eaf6ff" stroke-width="22" stroke-linecap="round"/>
-<path d="m276 215 45 42-45 42" fill="none" stroke="#eaf6ff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="256" cy="256" r="244" fill="url(#bg)" stroke="url(#gold)" stroke-width="12"/>
+<circle cx="256" cy="256" r="215" fill="none" stroke="#f5c542" stroke-opacity=".22" stroke-width="2"/>
+<path d="M154 185a104 104 0 1 0 0 142" fill="none" stroke="url(#gold)" stroke-width="48" stroke-linecap="round" filter="url(#glow)"/>
+<path d="M359 185a104 104 0 1 0 0 142" fill="none" stroke="url(#silver)" stroke-width="38" stroke-linecap="round"/>
+<circle cx="154" cy="256" r="54" fill="#241a08" stroke="url(#gold)" stroke-width="8"/>
+<circle cx="154" cy="256" r="43" fill="none" stroke="#f5c542" stroke-opacity=".65" stroke-width="2"/>
+<path d="M148 221v70m16-70v70m-29-53h28c19 0 19 25 0 25h-28m0 0h31c20 0 20 28 0 28h-31" fill="none" stroke="#fff2c2" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M170 326C244 316 318 280 386 207l-7-27 70-27-9 74-24-12c-70 80-152 126-244 139" fill="none" stroke="url(#gold)" stroke-width="19" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+<path d="M104 374h304" stroke="#f5c542" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>
+<text x="256" y="423" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="31" font-weight="800" letter-spacing="1">OC</text>
 </svg>
