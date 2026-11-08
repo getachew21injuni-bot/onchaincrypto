@@ -100,10 +100,29 @@ describe("standard buy/sell settlement", () => {
 });
 
 describe("trusted market quote", () => {
-  it("accepts a matching Binance quote and rejects unsupported XAU until a reliable source is configured", async () => {
-    const goodFetch = async () => json({ symbol: "BTCUSDT", price: "50000.12" });
+  it("accepts the Binance XAUT/USDT ticker and rejects unsupported XAU", async () => {
+    const goodFetch = async url => {
+      const pair = new URL(url).searchParams.get("symbol");
+      return json({ symbol: pair, price: pair === "XAUTUSDT" ? "2500.25" : "50000.12" });
+    };
     const quote = await getTrustedQuote("BTC", goodFetch);
     assert.equal(quote.price, "50000.12");
+    const goldQuote = await getTrustedQuote("XAUT", goodFetch);
+    assert.equal(goldQuote.pair, "XAUTUSDT");
+    assert.equal(goldQuote.price, "2500.25");
     await assert.rejects(() => getTrustedQuote("XAU", goodFetch), error => error.code === "UNSUPPORTED_ASSET");
+  });
+
+  it("requires a 500 USDT minimum for XAUT gold trades", async () => {
+    const db = firestoreHarness();
+    await assert.rejects(() => executeStandardTrade({
+      user: { uid: "user-1" }, env,
+      body: { side: "buy", symbol: "XAUT", quoteAmount: "499.99", operationId },
+      dependencies: {
+        getQuote: async () => ({ symbol: "XAUT", pair: "XAUTUSDT", price: "2500", source: "test", quotedAt: "2026-11-08T10:00:00Z" }),
+        firestoreDependencies: { getAccessToken: async () => "test-token", fetchImpl: db.fetchImpl }
+      }
+    }), error => error.code === "MINIMUM_TRADE");
+    assert.equal(db.calls.some(call => call.url.endsWith(":commit")), false);
   });
 });
