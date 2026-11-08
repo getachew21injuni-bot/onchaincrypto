@@ -1,5 +1,6 @@
 import { verifyFirebaseIdToken } from "./auth.js";
 import { executeStandardTrade } from "./trades.js";
+import { readWalletAccount } from "./accounts.js";
 
 const ALLOWED_ORIGINS = new Set([
   "https://onchaincrypto-d976b.web.app",
@@ -55,6 +56,21 @@ export default {
         serviceCredentialConfigured: Boolean(env.FIREBASE_SERVICE_ACCOUNT),
         stage: "standard-buy-sell"
       }, 200, origin);
+    }
+    if (request.method === "GET" && url.pathname === "/v1/wallet/account") {
+      try {
+        if (!env.FIREBASE_PROJECT_ID || !env.FIREBASE_SERVICE_ACCOUNT) {
+          const error = new Error("Wallet service is not configured."); error.status = 503; error.code = "SERVICE_NOT_CONFIGURED"; throw error;
+        }
+        const user = await requireUser(request, env);
+        const account = await readWalletAccount(user, env);
+        return response({ ok: true, ...account }, 200, origin);
+      } catch (error) {
+        const status = Number.isInteger(error?.status) && error.status >= 400 && error.status <= 599 ? error.status : 503;
+        const code = typeof error?.code === "string" ? error.code : "WALLET_READ_UNAVAILABLE";
+        const message = status >= 500 ? "Cloud wallet information is temporarily unavailable." : (error.message || "Wallet request was rejected.");
+        return response({ ok: false, error: message, code }, status, origin);
+      }
     }
     if (request.method === "POST" && url.pathname === "/v1/trade/execute") {
       try {
