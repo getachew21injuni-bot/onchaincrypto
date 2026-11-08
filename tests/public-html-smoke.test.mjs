@@ -142,7 +142,7 @@ test("Quick Trade uses concise positive copy and its result Close button restore
 });
 
 test("Quick Trade saves the wallet update before displaying the completed result", () => {
-  const start = html.indexOf("async function startTimedPaper");
+  const start = html.indexOf("function startTimedPaper(");
   const end = html.indexOf("function finishedSymbolSafe", start);
   assert.ok(start >= 0 && end > start, "Expected the Quick Trade execution flow");
   const flow = html.slice(start, end);
