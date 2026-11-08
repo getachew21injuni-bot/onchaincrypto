@@ -194,7 +194,7 @@ async function renderCloudWallet(){
   form.addEventListener('submit',async event=>{
    event.preventDefault();
    const amount=String(form.elements.amount.value||'').trim(),reason=String(form.elements.reason.value||'').trim(),asset=String(form.elements.asset.value||'').trim();
-   if(!/^-?(?:0|[1-9][0-9]{0,11})(?:\\.[0-9]{1,8})?$/.test(amount)||amount==='-0'||/^0(?:\\.0{1,8})?$/.test(amount)){message.textContent='Enter a non-zero amount with up to 8 decimal places.';return;}
+   if(!/^-?(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,8})?$/.test(amount)||amount==='-0'||/^0(?:\.0{1,8})?$/.test(amount)){message.textContent='Enter a non-zero amount with up to 8 decimal places.';return;}
    if(reason.length<5){message.textContent='Please enter a clear reason for the adjustment.';return;}
    if(!confirm('Apply '+amount+' '+asset+' to this customer’s cloud wallet? This action will be permanently recorded in the wallet ledger.'))return;
    const button=form.querySelector('button[type=submit]');button.disabled=true;message.textContent='Submitting secure adjustment…';
