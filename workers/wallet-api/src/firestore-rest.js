@@ -70,28 +70,41 @@ export async function withFirestoreTransaction(env, callback, maxAttempts = 3, d
       async get(collection, id) {
         assertReadable();
         const name = documentPath(env.FIREBASE_PROJECT_ID, collection, id);
-        const results = await firestoreRequest(`${base}:batchGet`, token, {
+        const raw = await fetchImpl(`${base}:batchGet`, {
           method: "POST",
+          headers: { Authorization: `Bearer ${token}`, Accept: "application/json", "Content-Type": "application/json" },
           body: JSON.stringify({ documents: [name], transaction: started.transaction })
-        }, fetchImpl);
-        const found = Array.isArray(results) ? results.find(item => item.found)?.found : null;
-        const missing = Array.isArray(results) ? results.some(item => item.missing) : false;
+        });
+        const rawText = await raw.text();
+        if (!raw.ok) {
+          let payload = null; try { payload = JSON.parse(rawText); } catch {}
+          throw firestoreError(raw.status, payload);
+        }
+        let results;
+        try { results = JSON.parse(rawText); }
+        catch {
+          results = rawText.split(/\\r?\\n/).filter(Boolean).map(line => JSON.parse(line));
+        }
+        const found = Array.isArray(results) ? results.find(item => item.found)?.found : results?.found;
+        const missing = Array.isArray(results) ? results.some(item => item.missing) : Boolean(results?.missing);
         if (found) return found;
         if (missing) return null;
         throw new Error("Firestore document read returned an unexpected result.");
       },
-      create(collection, id, fields) {
-        addWrite(collection, id, {
+      create(collection, id, fields, transforms = []) {
+        const write = {
           update: { name: documentPath(env.FIREBASE_PROJECT_ID, collection, id), fields },
           currentDocument: { exists: false }
-        });
+        };
+        if (transforms.length) write.updateTransforms = transforms;
+        addWrite(collection, id, write);
       },
-      set(collection, id, fields) {
-        addWrite(collection, id, {
-          update: { name: documentPath(env.FIREBASE_PROJECT_ID, collection, id), fields }
-        });
+      set(collection, id, fields, transforms = []) {
+        const write = { update: { name: documentPath(env.FIREBASE_PROJECT_ID, collection, id), fields } };
+        if (transforms.length) write.updateTransforms = transforms;
+        addWrite(collection, id, write);
       },
-      update(collection, id, fields, fieldPaths) {
+      update(collection, id, fields, fieldPaths, transforms = []) {
         const write = {
           update: {
             name: documentPath(env.FIREBASE_PROJECT_ID, collection, id),
@@ -101,6 +114,7 @@ export async function withFirestoreTransaction(env, callback, maxAttempts = 3, d
         if (Array.isArray(fieldPaths) && fieldPaths.length) {
           write.updateMask = { fieldPaths };
         }
+        if (transforms.length) write.updateTransforms = transforms;
         addWrite(collection, id, write);
       }
     };
