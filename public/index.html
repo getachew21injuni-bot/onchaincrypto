@@ -2744,7 +2744,14 @@ async function loadPriceHistory(){
  }catch(error){
   lastError=error;
   const symbol=String(coin.symbol||"").toUpperCase();
-  if(symbol&&symbol!=="XAU"&&symbol!=="USDT"&&symbol!=="USDC"){
+  if(symbol==="XAU"){
+   try{
+    const rows=await fetchJson("https://fapi.binance.com/fapi/v1/klines?symbol=XAUUSDT&interval=1h&limit=168",9000);
+    if(!Array.isArray(rows)||rows.length<3)throw new Error("Gold history returned too few points");
+    prices=rows.map(row=>[Number(row[0]),Number(row[4])]).filter(row=>Number.isFinite(row[0])&&Number.isFinite(row[1])&&row[1]>0);
+    source="Binance Gold";
+   }catch(goldError){lastError=goldError;}
+  }else if(symbol&&symbol!=="USDT"&&symbol!=="USDC"){
    try{
     const rows=await fetchJson("https://data-api.binance.vision/api/v3/klines?symbol="+encodeURIComponent(symbol+"USDT")+"&interval=1h&limit=168",9000);
     if(!Array.isArray(rows)||rows.length<3)throw new Error("Binance history returned too few points");
@@ -2902,7 +2909,7 @@ function showDepositQr(){const network=$("depositNetwork").value,address=window.
 
  document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>{showPage(b.dataset.go);if(b.dataset.go==="trade"&&!b.hasAttribute("data-gold-trade")){const asset=$("tradeAsset");if(asset){asset.value="";const title=$("tradePairTitle");if(title)title.textContent="Select a coin / USDT";const timed=$("timedPair");if(timed)timed.textContent="Select a coin / USDT";const name=$("tradeAssetName");if(name)name.textContent="Choose a trading coin";const price=$("tradeCurrentPrice");if(price)price.textContent="—";updateQuickEstimate();setTimeout(()=>asset.focus(),50)}}}));
 document.querySelectorAll("[data-home-history]").forEach(b=>b.addEventListener("click",()=>{showPage("home");requestAnimationFrame(()=>document.getElementById("homePerformancePanel")?.scrollIntoView({behavior:"smooth",block:"start"}));}));
-document.querySelectorAll("[data-gold-trade]").forEach(b=>b.addEventListener("click",()=>{const asset=$("tradeAsset");if(asset){selected="XAU";renderTradeSelect();asset.value="XAU";updateTradePreview();if(typeof updateTradingViewChart==="function")updateTradingViewChart("XAU");}const title=$("tradePairTitle");if(title)title.textContent="XAU / USDT";const timed=$("timedPair");if(timed)timed.textContent="XAU / USDT";showPage("trade");updateQuickEstimate();}));
+document.querySelectorAll("[data-gold-trade]").forEach(b=>b.addEventListener("click",()=>{const asset=$("tradeAsset");selected="XAU";if(asset){renderTradeSelect();asset.value="XAU";asset.dispatchEvent(new Event("change",{bubbles:true}));updateTradePreview();}const title=$("tradePairTitle");if(title)title.textContent="XAU / USDT";const timed=$("timedPair");if(timed)timed.textContent="XAU / USDT";const orderPair=$("orderBookPair");if(orderPair)orderPair.textContent="XAU/USDT";showPage("trade");updateQuickEstimate();requestAnimationFrame(()=>{if(typeof updateTradingViewChart==="function")updateTradingViewChart("XAU");if(typeof loadPriceHistory==="function")loadPriceHistory();document.getElementById("tradingViewChart")?.scrollIntoView({behavior:"smooth",block:"start"});});}));
 document.querySelectorAll("[data-bottom-page]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-bottom-page]").forEach(x=>x.classList.toggle("active",x===b));showPage(b.dataset.bottomPage)}));
 $("homeCoinSearch").addEventListener("input",renderHomeCoinResults);
 $("depositCoinSearch").addEventListener("input",e=>{coinPickerExpanded.deposit=6;drawCoinPicker("deposit",e.target.value)});$("withdrawCoinSearch").addEventListener("input",e=>{coinPickerExpanded.withdraw=6;drawCoinPicker("withdraw",e.target.value)});
