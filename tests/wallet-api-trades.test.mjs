@@ -113,6 +113,23 @@ describe("trusted market quote", () => {
     await assert.rejects(() => getTrustedQuote("XAU", goodFetch), error => error.code === "UNSUPPORTED_ASSET");
   });
 
+  it("allows an XAUT sell at the 500 USDT minimum despite asset-precision rounding", async () => {
+    const seller = structuredClone(account);
+    seller.fields.balances.mapValue.fields.XAUT = { stringValue: "1" };
+    const db = firestoreHarness(seller);
+    const result = await executeStandardTrade({
+      user: { uid: "user-1" }, env,
+      body: { side: "sell", symbol: "XAUT", quoteAmount: "500", operationId: "xaut_sell_500_test_123" },
+      dependencies: {
+        getQuote: async () => ({ symbol: "XAUT", pair: "XAUTUSDT", price: "2500.123456789123", source: "test", quotedAt: "2026-11-08T10:00:00Z" }),
+        firestoreDependencies: { getAccessToken: async () => "test-token", fetchImpl: db.fetchImpl }
+      }
+    });
+    assert.equal(result.status, "filled");
+    assert.ok(Number(result.grossAmount) <= 500);
+    assert.ok(db.calls.some(call => call.url.endsWith(":commit")));
+  });
+
   it("requires a 500 USDT minimum for XAUT gold trades", async () => {
     const db = firestoreHarness();
     await assert.rejects(() => executeStandardTrade({
