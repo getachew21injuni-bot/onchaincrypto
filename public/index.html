@@ -6442,8 +6442,12 @@ button?.addEventListener("click",async()=>{if(!user){if(message)message.textCont
 #ocVisitorSupportBot .oc-support-msg{max-width:88%;padding:10px 12px;border-radius:13px;font-size:12px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
 #ocVisitorSupportBot .oc-support-msg.bot{align-self:flex-start;background:#142943;color:#edf4fc;border:1px solid rgba(255,255,255,.07);border-top-left-radius:4px}
 #ocVisitorSupportBot .oc-support-msg.user{align-self:flex-end;background:linear-gradient(120deg,#d9ad55,#f0d18c);color:#201808;border-top-right-radius:4px}
-#ocVisitorSupportBot .oc-support-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 10px}
+#ocVisitorSupportBot .oc-support-suggestions{display:grid;gap:9px;padding:0 12px 10px}
+#ocVisitorSupportBot .oc-support-menu-group{display:grid;gap:5px}
+#ocVisitorSupportBot .oc-support-menu-title{color:#d9ad55;font-size:10px;font-weight:800;letter-spacing:.45px;text-transform:uppercase}
+#ocVisitorSupportBot .oc-support-menu-items{display:flex;flex-wrap:wrap;gap:6px}
 #ocVisitorSupportBot .oc-support-suggestions button{border:1px solid rgba(217,173,85,.45);border-radius:999px;background:#0d2035;color:#f1d79d;font-size:10px;padding:7px 9px;cursor:pointer}
+#ocVisitorSupportBot .oc-support-suggestions button:focus-visible{outline:2px solid #f1d79d;outline-offset:2px}
 #ocVisitorSupportBot .oc-support-email{display:block;margin:0 12px 8px;padding:8px 10px;border:1px solid rgba(217,173,85,.55);border-radius:9px;color:#f1d79d;text-align:center;text-decoration:none;font-size:11px;font-weight:750;background:#10243a}
 #ocVisitorSupportBot .oc-support-compose{display:flex;gap:7px;padding:10px;border-top:1px solid rgba(255,255,255,.09);background:#0a192a}
 #ocVisitorSupportBot .oc-support-compose input{flex:1;min-width:0;border:1px solid #344a62;border-radius:10px;background:#10243a;color:#fff;padding:10px;font:inherit;font-size:12px}
@@ -6464,10 +6468,30 @@ body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
    <button class="oc-support-close" type="button" aria-label="Close support chat">×</button>
   </header>
   <div class="oc-support-messages" id="ocSupportMessages"></div>
-  <div class="oc-support-suggestions">
-   <button type="button" data-question="How do I create an Onchain account?">How to create an account?</button>
-   <button type="button" data-question="How do crypto deposits work?">Crypto deposits</button>
-   <button type="button" data-question="How do I use markets and trading?">Markets & trading</button>
+  <div class="oc-support-suggestions" aria-label="Quick help topics">
+   <div class="oc-support-menu-group">
+    <span class="oc-support-menu-title">1. Wallet</span>
+    <div class="oc-support-menu-items">
+     <button type="button" data-question="How do I deposit crypto?">Deposit</button>
+     <button type="button" data-question="How do I withdraw crypto?">Withdraw</button>
+    </div>
+   </div>
+   <div class="oc-support-menu-group">
+    <span class="oc-support-menu-title">2. Trading</span>
+    <div class="oc-support-menu-items">
+     <button type="button" data-question="How do I trade?">How to trade</button>
+    </div>
+   </div>
+   <div class="oc-support-menu-group">
+    <span class="oc-support-menu-title">3. Markets & Assets</span>
+    <div class="oc-support-menu-items">
+     <button type="button" data-question="What is gold trading?">Gold</button>
+     <button type="button" data-question="What is Bitcoin BTC?">Bitcoin · BTC</button>
+     <button type="button" data-question="What is Ethereum ETH?">Ethereum · ETH</button>
+     <button type="button" data-question="What is BNB?">BNB</button>
+     <button type="button" data-question="Tell me about other supported crypto assets.">Other assets</button>
+    </div>
+   </div>
   </div>
   <button class="oc-support-email" type="button" data-oc-open-support>Contact Support Team</button>
   
@@ -6547,6 +6571,7 @@ const respond=async q=>{
  else if(/\b(profile|change email|change phone|personal details|account details|settings)\b/i.test(v))add(answer("Open your profile or account menu to review the details saved to your account and the settings available to you. If a detail cannot be changed in the app, open Help Center → New support request and describe the change requested. Do not send passwords or one-time codes."));
  else if(/\b(fee|fees|spread|minimum|limit|network fee|commission)\b/i.test(v))add(answer("Fees, spreads, minimums and limits depend on the asset, network and feature. Review the exact values displayed on the confirmation screen before submitting a deposit, withdrawal or trade. If no fee or limit is shown, ask support to confirm it before proceeding."));
  else if(/\b(safe|secure|scam|risk|is it safe|protect|security|2fa)\b/i.test(v))add(answer("Protect your account with a unique password and any security options offered in the app. Never share passwords, verification codes, recovery phrases or private keys. Check website addresses carefully and ignore anyone promising guaranteed profits or asking you to send funds to a personal wallet. Digital-asset transactions can be irreversible."));
+ else if(/\b(thanks|thank you|thx|appreciate it)\b/i.test(v))add("You’re very welcome! I’m here whenever you need help.");
  else if(/\b(support|contact|human|agent|admin|help|complaint|request|email)\b/i.test(v))add(answer("I can explain general platform features, but account-specific issues such as missing deposits, withdrawals, KYC reviews or login problems need the support team. Open Help Center → New support request and provide a clear description. Include a transaction reference when relevant, but never include passwords, one-time codes or private keys."));
  else add(answer("I can help explain Onchain, accounts, passwords, KYC, Wallet, deposits, withdrawals, conversions, trading, Markets, BTC and other coins, gold, stocks, copy trading, fees, security and how to read History. Try asking in your own words—for example, “What is Bitcoin?”, “How do I withdraw?”, “What is KYC?” or “What is gold trading?”. If your question is account-specific or I cannot resolve it, use Contact Support to start a private in-app conversation with the team."));
 };
