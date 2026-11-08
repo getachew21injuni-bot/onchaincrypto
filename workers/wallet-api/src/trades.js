@@ -162,8 +162,9 @@ export async function executeStandardTrade({ user, body, env, dependencies = {} 
       result: { mapValue: { fields: {
         tradeId: firestoreString(tradeId), status: firestoreString("filled"),
         side: firestoreString(side), symbol: firestoreString(symbol),
-        quantity: firestoreString(fmt(quantity)), price: firestoreString(fmt(priceUnits)),
-        grossAmount: firestoreString(fmt(actualGross))
+        quantity: firestoreString(fmt(quantity)), price: firestoreString(fmtPrice(priceUnits)),
+        grossAmount: firestoreString(fmt(actualGross)),
+        balances: mapValue(balances)
       } } }
     });
     return { replayed: false, tradeId, status: "filled", side, symbol, quantity: fmt(quantity), price: fmtPrice(priceUnits), grossAmount: fmt(actualGross), balances, quoteSource: quote.source, quoteTimestamp: quote.quotedAt };
