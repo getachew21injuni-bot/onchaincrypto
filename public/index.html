@@ -3729,9 +3729,15 @@ async function restoreCloudTradeState(user){
       tradeCloudReadyUid=user.uid;
       syncAdminDemoBalance(user,true);
     }else{
+      const localHasTradeData=(Number(state.balance)||0)>0
+        || (state.history||[]).length>0
+        || Object.values(state.holdings||{}).some(value=>Number(value)>0);
       tradeCloudReadyUid=user.uid;
-      syncAdminDemoBalance(user,false);
-      window.ocPersistTradeState();
+      // First sign-in after this upgrade: preserve the current device's account
+      // state and upload it. Only seed from the admin balance when no local
+      // trading state exists, so an old local profit is not overwritten.
+      syncAdminDemoBalance(user,localHasTradeData);
+      if(localHasTradeData)window.ocPersistTradeState();
     }
   }catch(error){
     console.warn("Account trade restore failed:",error?.code||error);
