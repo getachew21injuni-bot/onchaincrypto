@@ -52,6 +52,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <button data-view="Trades"><span class="ico">⇄</span>Trades</button>
 <button data-view="Brokerage"><span class="ico">▣</span>Brokerage</button>
 <button data-view="Trade Controls"><span class="ico">⚖</span>Trade Controls</button>
+<button data-view="Cloud Wallet"><span class="ico">◈</span>Cloud Wallet</button>
 <button data-view="Assets"><span class="ico">◉</span>Assets</button>
 <button data-view="Support"><span class="ico">☏</span>Support <span class="pill" style="background:#1d6b53">Inbox</span></button>
 <button data-view="Settings"><span class="ico">⚙</span>Settings</button>
@@ -98,6 +99,7 @@ const descriptions={
 'Trades':'Review order history after a trusted trading backend is connected.',
 'Brokerage':'Review Alpaca brokerage eligibility requests. Approval does not activate live order routing.',
 'Trade Controls':'Manage practice-trading permissions and maximum practice order sizes for every saved Onchain user profile. Settings are saved to the shared account record.',
+'Cloud Wallet':'Manage verified customer cloud wallet balances through the secure wallet service. Every change is audited.',
 'Assets':'Adjust practice coin balances to a selected user wallet or view the supported asset balances.',
 'Transfers':'Review and approve internal USDT demo-balance transfer requests.',
 'History':'View platform event history after the audit-log backend is connected.',
@@ -147,6 +149,67 @@ function renderGlobalDemoControls(api,current){
    host.querySelectorAll('[data-global-demo-mode]').forEach(item=>item.disabled=false);
   }
  }));
+}
+
+
+async function renderCloudWallet(){
+ const body=document.getElementById('detailBody'),api=window.__ocAdminFirebase;
+ const apiBase='https://onchaincrypto-wallet-api.getachew21-inj-uni.workers.dev';
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading registered accounts…</p></div>';
+ if(!api){body.textContent='Firebase admin connection is not ready. Refresh and sign in again.';return;}
+ try{
+  const current=api.auth.currentUser;
+  if(!current)throw new Error('Administrator sign-in required.');
+  await current.reload();
+  if(!api.auth.currentUser)throw new Error('Administrator sign-in required.');
+  const token=await api.auth.currentUser.getIdToken(true);
+  const snap=await api.getDocs(api.query(api.collection(api.db,'users'),api.limit(500)));
+  const users=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(a.displayName||a.email||a.id).localeCompare(String(b.displayName||b.email||b.id)));
+  if(!users.length){body.innerHTML='<div class="notice">No registered customer profiles were found.</div>';return;}
+  const options=users.map(u=>'<option value="'+esc(u.id)+'">'+esc((u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id)+' — '+(u.email||u.id))+'</option>').join('');
+  body.innerHTML='<div style="display:grid;gap:16px;max-width:1000px">'+
+   '<div class="notice" style="border-color:#8b6b2d;background:#211b10"><strong style="color:#f0c96a">SECURE CLOUD WALLET MANAGEMENT</strong><p style="margin:6px 0 0">This panel changes the cloud wallet only. Existing profile balances and historical records are not copied, erased or overwritten. Every adjustment requires a reason and is recorded in the wallet ledger. Admin authorization is checked by the server.</p></div>'+
+   '<section class="content-panel" style="margin:0"><h3 style="margin-top:0">Customer cloud wallet</h3><label style="display:grid;gap:7px;font-weight:700">Select customer<select id="cloudWalletUser" style="width:100%;padding:13px;border:1px solid #526878;border-radius:10px;background:#102333;color:white">'+options+'</select></label><div id="cloudWalletSummary" class="notice" style="margin-top:14px">Select a customer to load their cloud wallet.</div><button id="cloudWalletReload" type="button" class="icon-btn" style="margin-top:10px">↻ Reload wallet</button></section>'+
+   '<form id="cloudWalletAdjustForm" class="content-panel" style="margin:0;display:grid;gap:12px;border-color:#8b6b2d"><h3 style="margin:0">Adjust cloud balance</h3><p class="muted" style="margin:0">Use a positive amount to credit or a negative amount to debit. Maximum precision: 8 decimal places. A debit cannot make the balance negative.</p>'+
+   '<label style="display:grid;gap:7px;font-weight:700">Asset<select name="asset" style="width:100%;padding:12px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"><option>USDT</option><option>BTC</option><option>ETH</option><option>BNB</option><option>SOL</option><option>XAUT</option><option>PAXG</option><option>USDC</option><option>XRP</option><option>TRX</option></select></label>'+
+   '<label style="display:grid;gap:7px;font-weight:700">Balance change<input name="amount" required inputmode="decimal" placeholder="Example: 250 or -25.5" style="width:100%;padding:12px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label>'+
+   '<label style="display:grid;gap:7px;font-weight:700">Reason for adjustment<input name="reason" required minlength="5" maxlength="300" placeholder="Explain why this adjustment is required" style="width:100%;padding:12px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label>'+
+   '<button type="submit" class="icon-btn" style="background:linear-gradient(90deg,#9b762c,#d7aa4c);border:0;padding:14px;color:#1c1608;font-weight:850">Confirm cloud wallet adjustment</button><p id="cloudWalletMessage" class="muted" role="status" aria-live="polite" style="margin:0"></p></form></div>';
+  const select=body.querySelector('#cloudWalletUser'),summary=body.querySelector('#cloudWalletSummary'),message=body.querySelector('#cloudWalletMessage'),form=body.querySelector('#cloudWalletAdjustForm');
+  let activeToken=token;
+  async function loadWallet(){
+   summary.textContent='Loading cloud wallet…';
+   try{
+    activeToken=await api.auth.currentUser.getIdToken(true);
+    const response=await fetch(apiBase+'/v1/admin/wallet/account?uid='+encodeURIComponent(select.value),{headers:{Authorization:'Bearer '+activeToken}});
+    const result=await response.json();
+    if(!response.ok||!result.ok)throw new Error(result.error||result.code||'Wallet lookup failed');
+    const entries=Object.entries(result.balances||{});
+    summary.innerHTML='<strong>Cloud wallet status: '+esc(result.status||'unknown')+'</strong><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;margin-top:10px">'+(entries.length?entries.map(([asset,value])=>'<div style="padding:12px;border:1px solid #34465b;border-radius:10px;background:#0d1724"><small class="muted">'+esc(asset)+'</small><div style="font-size:19px;font-weight:800;overflow-wrap:anywhere">'+esc(value)+'</div></div>').join(''):'<div class="muted">No cloud wallet balances yet.</div>')+'</div><small class="muted">Wallet version: '+esc(result.version??'—')+'</small>';
+    if(result.status!=='active')summary.innerHTML+='<p style="color:#f0c96a;margin-bottom:0">No verified cloud wallet is active. A first admin credit will create a new cloud wallet; it will not import legacy balances.</p>';
+   }catch(error){summary.textContent='Could not load cloud wallet: '+(error.message||'error');}
+  }
+  select.addEventListener('change',loadWallet);
+  body.querySelector('#cloudWalletReload').addEventListener('click',loadWallet);
+  form.addEventListener('submit',async event=>{
+   event.preventDefault();
+   const amount=String(form.elements.amount.value||'').trim(),reason=String(form.elements.reason.value||'').trim(),asset=String(form.elements.asset.value||'').trim();
+   if(!/^-?(?:0|[1-9][0-9]{0,11})(?:\\.[0-9]{1,8})?$/.test(amount)||amount==='-0'||/^0(?:\\.0{1,8})?$/.test(amount)){message.textContent='Enter a non-zero amount with up to 8 decimal places.';return;}
+   if(reason.length<5){message.textContent='Please enter a clear reason for the adjustment.';return;}
+   if(!confirm('Apply '+amount+' '+asset+' to this customer’s cloud wallet? This action will be permanently recorded in the wallet ledger.'))return;
+   const button=form.querySelector('button[type=submit]');button.disabled=true;message.textContent='Submitting secure adjustment…';
+   try{
+    activeToken=await api.auth.currentUser.getIdToken(true);
+    const response=await fetch(apiBase+'/v1/admin/wallet/adjust',{method:'POST',headers:{Authorization:'Bearer '+activeToken,'Content-Type':'application/json'},body:JSON.stringify({targetUid:select.value,asset,amount,reason,operationId:crypto.randomUUID().replace(/-/g,'_')})});
+    const result=await response.json();
+    if(!response.ok||!result.ok)throw new Error(result.error||result.code||'Adjustment rejected');
+    message.textContent='Adjustment recorded. New '+asset+' balance: '+result.balance+(result.replayed?' (previous request confirmed)':'')+'.';
+    form.elements.amount.value='';await loadWallet();
+   }catch(error){message.textContent='Adjustment not confirmed: '+(error.message||'service error');}
+   finally{button.disabled=false;}
+  });
+  await loadWallet();
+ }catch(error){body.innerHTML='<div class="notice"><strong>Cloud wallet panel could not start.</strong><p>'+esc(error.message||'Admin connection unavailable')+'</p><p>Confirm the administrator account has the verified Firebase admin claim, then sign out and sign in again.</p></div>';}
 }
 
 async function renderTradeControls(){
@@ -675,7 +738,7 @@ async function renderBrokerageRequests(){
  }));
  }catch(error){body.innerHTML='<div class="notice">Could not load brokerage requests: '+String(error.code||error.message||'error').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))+'</div>';}
 }
-function showView(view){if(adminActivityUnsubscribe){adminActivityUnsubscribe();adminActivityUnsubscribe=null;}const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your Onchain administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent='';if(view==='Trade Controls')renderTradeControls();else if(view==='Brokerage')renderBrokerageRequests();else if(!isHome)renderModule(view);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
+function showView(view){if(adminActivityUnsubscribe){adminActivityUnsubscribe();adminActivityUnsubscribe=null;}const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your Onchain administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent='';if(view==='Trade Controls')renderTradeControls();else if(view==='Cloud Wallet')renderCloudWallet();else if(view==='Brokerage')renderBrokerageRequests();else if(!isHome)renderModule(view);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
 document.getElementById('menuToggle').addEventListener('click',()=>sidebar.classList.toggle('open'));
 document.getElementById('refreshBtn').addEventListener('click',()=>{const active=document.querySelector('[data-view].active')?.dataset.view||'Dashboard';showView(active);const b=document.getElementById('refreshBtn');b.textContent='✓ Refreshed';setTimeout(()=>b.textContent='↻ Refresh',1200);});
