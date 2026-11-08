@@ -1,4 +1,5 @@
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
 import { after, before, beforeEach, describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -32,8 +33,8 @@ beforeEach(async () => {
   await testEnv.clearFirestore();
   await testEnv.withSecurityRulesDisabled(async (context) => {
     const db = context.firestore();
-    await setDoc(doc(db, "users/sender"), { uid: "sender", demoBalanceUSDT: 100, accountStatus: "active" });
-    await setDoc(doc(db, "users/recipient"), { uid: "recipient", demoBalanceUSDT: 20, accountStatus: "active" });
+    await setDoc(doc(db, "users/sender"), { uid: "sender", adminAssigned: true, demoBalanceUSDT: 100, accountStatus: "active" });
+    await setDoc(doc(db, "users/recipient"), { uid: "recipient", adminAssigned: true, demoBalanceUSDT: 20, accountStatus: "active" });
     await setDoc(doc(db, "userDirectory/sender"), { uid: "sender", displayName: "Sender" });
     await setDoc(doc(db, "userDirectory/recipient"), { uid: "recipient", displayName: "Recipient" });
   });
@@ -207,5 +208,50 @@ describe("per-account trade wallet persistence", () => {
       history: Array.from({ length: 301 }, (_, i) => ({ id: String(i) })),
       updatedAt: serverTimestamp()
     }));
+  });
+});
+
+
+describe("per-account profile avatar storage", () => {
+  it("allows an account to save its own avatar and blocks changes to another profile", async () => {
+    const ownerDb = testEnv.authenticatedContext("sender").firestore();
+    const otherDb = testEnv.authenticatedContext("recipient").firestore();
+    const avatar = "data:image/jpeg;base64,ZmFrZS1hdmF0YXI=";
+    await assertSucceeds(updateDoc(doc(ownerDb, "users/sender"), {
+      avatarDataUrl: avatar,
+      updatedAt: serverTimestamp()
+    }));
+    const saved = await assertSucceeds(getDoc(doc(ownerDb, "users/sender")));
+    assert.equal(saved.data().avatarDataUrl, avatar);
+    await assertFails(updateDoc(doc(otherDb, "users/sender"), {
+      avatarDataUrl: "data:image/jpeg;base64,b3RoZXI=",
+      updatedAt: serverTimestamp()
+    }));
+  });
+});
+
+describe("frontend JavaScript syntax", () => {
+  it("parses every inline index script and public JavaScript asset", async () => {
+    const html = await readFile("public/index.html", "utf8");
+    const inline = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+      .filter(([, attrs, source]) => !/\bsrc\s*=/i.test(attrs) && !/application\/ld\+json/i.test(attrs) && source.trim());
+    const jsFiles = (await readdir("public")).filter(name => name.endsWith(".js"));
+    const sources = [
+      ...inline.map(([, attrs, source], index) => ({
+        name: "public/index.html inline script " + (index + 1),
+        source,
+        module: /\btype\s*=\s*["']module["']/i.test(attrs)
+      })),
+      ...(await Promise.all(jsFiles.map(async name => ({
+        name: "public/" + name,
+        source: await readFile("public/" + name, "utf8"),
+        module: name !== "service-worker.js"
+      }))))
+    ];
+    for (const item of sources) {
+      const args = item.module ? ["--check", "--input-type=module"] : ["--check"];
+      const result = spawnSync(process.execPath, args, { input: item.source, encoding: "utf8" });
+      assert.equal(result.status, 0, item.name + " syntax error:\n" + (result.stderr || result.stdout || "Node parser failed"));
+    }
   });
 });
