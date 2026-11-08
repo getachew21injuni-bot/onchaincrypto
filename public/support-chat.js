@@ -5,7 +5,14 @@ const cfg={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchainc
 const style=document.createElement("style");style.textContent=`
 #oc-support-button{position:fixed;right:20px;bottom:100px;z-index:99998;width:58px;height:58px;border:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#0ecb81;color:#062018;box-shadow:0 8px 28px #0007;cursor:pointer}
 #oc-chat{display:none;position:fixed;right:18px;bottom:100px;z-index:99999;width:min(370px,calc(100vw - 24px));height:min(560px,calc(100vh - 40px));background:#101820;color:#eaecef;border:1px solid #344451;border-radius:16px;box-shadow:0 15px 45px #0009;font:14px Arial;overflow:hidden;flex-direction:column}
-#oc-chat.open{display:flex}#oc-chat header{padding:14px;background:#17232d;display:flex;justify-content:space-between;align-items:center}#oc-chat header button{background:none;border:0;color:white;font-size:23px}
+#oc-chat.open{display:flex}
+#oc-chat header{padding:14px 14px 14px 16px;background:linear-gradient(115deg,#203b55,#14283b);display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:82px;border-bottom:1px solid #45627c}
+#oc-chat header>div{flex:1;min-width:0;padding-right:2px}
+#oc-chat header>div>b{display:block;color:#fff!important;font-size:17px!important;font-weight:800!important;line-height:1.3;letter-spacing:.2px;text-shadow:0 1px 4px #0008}
+#oc-chat header>div>div{color:#e0edf9!important;font-size:12px!important;font-weight:500;line-height:1.45;margin-top:5px!important}
+#oc-chat header button#oc-x{display:grid!important;place-items:center;flex:0 0 42px;width:42px!important;height:42px!important;min-width:42px;min-height:42px;margin:0;padding:0!important;border:2px solid #fff!important;border-radius:50%!important;background:#d94b58!important;color:#fff!important;font-family:Arial,sans-serif!important;font-size:29px!important;font-weight:900!important;line-height:1!important;opacity:1!important;visibility:visible!important;cursor:pointer;box-shadow:0 2px 12px #0008}
+#oc-chat header button#oc-x:hover{background:#b92f40!important;transform:scale(1.04)}
+#oc-chat header button#oc-x:focus-visible{outline:3px solid #ffd166!important;outline-offset:3px}
 #oc-body{padding:12px;overflow:auto;flex:1}#oc-chat input,#oc-chat textarea{box-sizing:border-box;width:100%;padding:10px;margin:5px 0 9px;border:1px solid #344451;border-radius:8px;background:#0b1117;color:white}#oc-chat textarea{min-height:58px;resize:vertical}
 #oc-chat .oc-btn{padding:10px 12px;border:0;border-radius:8px;background:#0ecb81;color:#062018;font-weight:bold;cursor:pointer}#oc-chat .oc-secondary{background:#263641;color:#eaecef;border:1px solid #425563}
 #oc-chat .oc-ticket{width:100%;text-align:left;padding:9px;margin:4px 0;border:1px solid #344451;border-radius:8px;background:#17232d;color:#eaecef;cursor:pointer}
