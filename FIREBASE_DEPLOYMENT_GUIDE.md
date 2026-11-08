@@ -1,0 +1,50 @@
+# Finish deploying the OnChainCrypto Firebase backend
+
+> **Security first:** A Firebase service-account private key was exposed in a chat. Treat that key as compromised. Revoke/delete that exact key in Google Cloud IAM > Service Accounts > the service account > Keys before generating a replacement. Do not delete the service account itself. Never paste any key into chat or commit it to GitHub.
+
+The GitHub build check passing means the TypeScript compiles. It does **not** mean the Firebase backend has been deployed.
+
+## One-time account setup (the account owner must do this)
+
+1. Open https://console.firebase.google.com/project/onchaincrypto-d976b/overview and confirm you are signed in to the correct Google account.
+2. Open **Project settings** (gear icon) > **Service accounts**.
+3. Generate a private key for a dedicated service account only if you have permission and understand that it grants backend deployment access. Keep the downloaded JSON private. Never commit it to this repository or paste it into a chat.
+4. Open https://github.com/getachew21injuni-bot/onchaincrypto/settings/secrets/actions
+5. Choose **New repository secret**.
+   - Name: `FIREBASE_SERVICE_ACCOUNT_ONCHAINCRYPTO`
+   - Secret: paste the *entire contents* of the downloaded service-account JSON file into GitHub's secret field, then save.
+6. In Firebase Console, check whether Cloud Functions deployment requires switching the project to the Blaze billing plan. Review Firebase pricing and set a budget alert before enabling billing. Do not enable billing unless you accept possible charges.
+7. Open https://github.com/getachew21injuni-bot/onchaincrypto/actions/workflows/deploy-firebase.yml
+8. Click **Run workflow** > choose **main** > **Run workflow**.
+9. Open the run and check each step. A green check means the deployment command completed; a red X means open the failed step and read its error.
+
+## Important limitations
+
+- The deployment workflow deploys Cloud Functions and Firestore rules/indexes only.
+- The callable support function currently requires a signed-in user and Firebase App Check. The frontend must be configured with a real App Check web site key before support calls can work.
+- The support function stores tickets in Firestore; it does not email the support mailbox yet.
+- The public website still uses demo-only balances/trades. Do not accept real deposits, promise withdrawals, or represent demo trading as real trading.
+- This starter is not a production cryptocurrency exchange. A real exchange needs a secure ledger, transaction reconciliation, withdrawal approvals and monitoring, key management, abuse controls, legal/compliance review, and independent security testing.
+- Never put private keys, seed phrases, exchange API secrets, passwords, or service-account JSON in website code or ordinary Git files.
+
+
+## Assign the first admin safely (project owner only)
+
+Do this only from a trusted computer or Google Cloud Shell signed in as a project owner/admin. Do not paste credentials into chat or commit any credential file.
+
+1. Revoke the previously exposed service-account private key in Google Cloud IAM > Service Accounts > that service account > Keys, if you have not already done so.
+2. Install Node.js 20 and the Firebase CLI. In a terminal at the repository root, run:
+   ```bash
+   npm install --prefix functions
+   gcloud auth application-default login
+   gcloud config set project onchaincrypto-d976b
+   ```
+   The signed-in Google account needs permission to administer Firebase Authentication custom claims. Do not create or download a service-account JSON key for this step.
+3. Run the script with the exact Firebase Auth UID copied from Authentication > Users:
+   ```bash
+   node functions/scripts/set-admin-claim.cjs YOUR_COPIED_UID
+   ```
+   Replace `YOUR_COPIED_UID` with your UID in the terminal command only. Do not commit the UID into a source file.
+4. If successful, sign out of OnChainCrypto, sign in again, and reload the admin page. If it still denies access, check the browser console and confirm the deployed site is using the same Firebase project.
+
+This script grants `admin: true` to the specified Firebase user using existing Application Default Credentials and preserves other custom claims. It does not deploy Cloud Functions or make demo trades, deposits, or withdrawals real. The project owner must review and deploy the backend separately.

@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#06172a">
+<title>Onchain | Admin Dashboard</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0e11;--panel:#15191e;--panel2:#1e2329;--line:#2b3139;--text:#eaecef;--muted:#848e9c;--blue:#4c8dff;--cyan:#00e5ff;--purple:#7651e9;--red:#f6465d;--green:#0ecb81;--gold:#f0b90b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 12% 0%,#0b2740 0%,#0b0e11 43%,#070b11 100%);background-attachment:fixed;color:var(--text);font:15px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif}button{font:inherit;cursor:pointer;color:inherit}.topbar{height:70px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 22px;background:linear-gradient(100deg,#030a17f5,#06172af5,#030a17f5);backdrop-filter:blur(14px);position:sticky;top:0;z-index:5}.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}.logo{width:38px;height:38px;border-radius:13px;background:linear-gradient(135deg,#00e5ff,#1265ff);display:grid;place-items:center;font-size:21px;box-shadow:0 0 22px #008cff60}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:1.5px}.top-actions{margin-left:auto;display:flex;gap:8px}.icon-btn{border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:9px 12px}.layout{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:calc(100vh - 70px)}aside{background:linear-gradient(180deg,#0b1b2d,#101418 72%);border-right:1px solid #17334e;padding:20px 14px}.admin-profile{display:flex;align-items:center;gap:12px;padding:4px 8px 24px;border-bottom:1px solid var(--line);margin-bottom:18px}.avatar{width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,#00e5ff,#1265ff);display:grid;place-items:center;font-size:22px;font-weight:800}.admin-profile strong{display:block;font-size:16px}.admin-profile small{color:#73aaff;letter-spacing:1.4px;font-size:10px}.nav{display:grid;gap:7px}.nav button{width:100%;border:1px solid transparent;background:transparent;color:#9ca9bd;border-radius:13px;text-align:left;padding:13px 12px;display:flex;align-items:center;gap:13px}.nav button .ico{width:24px;text-align:center;font-size:18px}.nav button.active,.nav button:hover{color:white;background:linear-gradient(100deg,#102c45,#111c30);border-color:#1e5a7b;box-shadow:inset 3px 0 var(--cyan)}.pill{margin-left:auto;border-radius:20px;background:var(--purple);color:white;padding:3px 9px;font-size:11px}.main{padding:24px;max-width:1500px;width:100%;margin:auto}.heading{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:23px}.heading h1{font-size:26px;margin:0 0 4px}.heading p{margin:0;color:var(--muted)}.status{font-size:12px;color:var(--cyan);border:1px solid #1b594d;background:#0b2826;border-radius:30px;padding:7px 11px;white-space:nowrap}.section-title{font-size:17px;margin:0 0 14px}.quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:26px}.quick{min-height:154px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(145deg,#151e28,#101418);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:15px;transition:.2s}.quick:hover{transform:translateY(-2px);border-color:#426da8}.quick .qicon{width:72px;height:72px;border-radius:25px;background:#172945;color:#68aaff;display:grid;place-items:center;font-size:29px}.quick:nth-child(3) .qicon{background:#301c31;color:#fb7185}.quick:nth-child(4) .qicon{background:#241f3e;color:#b197ff}.quick:nth-child(5) .qicon{background:#332b1d;color:var(--gold)}.quick span:last-child{font-size:18px}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.stat{padding:24px;border:1px solid var(--line);border-radius:23px;background:linear-gradient(145deg,#151e28,#101418);min-height:160px;position:relative}.stat .label{color:#9ba8bc;font-size:15px}.stat .value{font-size:36px;font-weight:800;margin:13px 0 8px}.stat .trend{color:var(--green)}.stat .sicon{position:absolute;right:24px;top:25px;font-size:31px;color:#4b8cff}.content-panel{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.panel-head h2{font-size:17px;margin:0}.muted{color:var(--muted)}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:520px}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-weight:600}.tag{display:inline-block;border-radius:30px;padding:4px 9px;background:#12372e;color:#6ee7b7;font-size:11px}.empty{padding:25px 5px;color:var(--muted);text-align:center}.mobile-menu{display:none}.notice{color:#c5d2e6;font-size:12px;margin-top:22px;padding:13px 15px;border:1px solid #263348;border-radius:13px;background:#0d1524}.bottomnav{display:none}.hidden{display:none!important}.layout.locked{display:none!important}.auth-gate{max-width:480px;margin:48px auto;padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 70px #0005}.auth-gate h1{margin-top:0}.auth-gate label{display:block;color:var(--muted);font-size:13px;margin:14px 0 6px}.auth-gate input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#080d16;color:var(--text)}.auth-gate .primary{margin-top:16px}.auth-gate p{color:var(--muted);font-size:13px}.auth-error{color:#fca5a5!important;min-height:20px}
+@media(min-width:900px){.quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.topbar{height:62px;padding:0 14px}.mobile-menu{display:inline-block}.brand{font-size:14px}.brand small{font-size:9px}.top-actions .hide-mobile{display:none}.layout{display:block}aside{position:fixed;z-index:10;left:0;top:62px;bottom:0;width:min(82vw,300px);overflow:auto;transform:translateX(-105%);transition:transform .2s;box-shadow:20px 0 50px #0008}aside.open{transform:translateX(0)}.main{padding:20px 14px 100px}.heading h1{font-size:23px}.heading p{font-size:13px}.status{font-size:10px}.quick-grid{gap:12px}.quick{min-height:140px;border-radius:22px}.quick .qicon{width:62px;height:62px;border-radius:22px}.quick span:last-child{font-size:16px}.stats{grid-template-columns:1fr}.stat{min-height:145px;padding:21px}.stat .value{font-size:32px}.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:6;display:flex;justify-content:space-around;align-items:center;height:70px;background:#101827f2;border-top:1px solid var(--line);backdrop-filter:blur(12px)}.bottomnav button{border:0;background:none;color:#8e9bb0;display:grid;gap:3px;justify-items:center;font-size:10px}.bottomnav .center{width:58px;height:58px;margin-top:-27px;border-radius:50%;background:linear-gradient(145deg,#3f82ff,#6748e9);border:6px solid #101827;box-shadow:0 0 0 2px #355a9e;font-size:23px;color:white}.content-panel{padding:15px}.notice{margin-bottom:10px}}
+</style>
+<style id="oc-admin-bitcoin-gold-atmosphere">
+:root{--oc-admin-gold:#d9ad55;--oc-admin-btc:#f7931a}
+body{background-image:radial-gradient(ellipse at 12% 0%,rgba(247,147,26,.075),transparent 34%),radial-gradient(ellipse at 90% 12%,rgba(217,173,85,.085),transparent 36%),linear-gradient(180deg,#0b0e11 0%,#101419 58%,#070b11 100%)}
+.topbar{border-bottom-color:rgba(217,173,85,.2)}
+.panel,.card,.stat-card{border-color:color-mix(in srgb,var(--line) 84%,var(--oc-admin-gold) 16%)}
+.logo,.avatar{background:linear-gradient(145deg,#fff0bd,#d9ad55 58%,#98651e);color:#211706;box-shadow:0 0 20px rgba(217,173,85,.18)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--oc-admin-gold);outline-offset:2px}
+</style>
+
+</head>
+<body>
+<header class="topbar">
+<button class="icon-btn mobile-menu" id="menuToggle" aria-label="Open menu">☰</button>
+<div class="brand"><div class="logo">◉</div><div>Onchain<small>ADMIN CONTROL CENTER</small></div></div>
+<div class="top-actions"><span id="authState" class="muted" style="font-size:12px">Admin sign-in required</span><button class="icon-btn hidden" id="adminSignOut">Sign out</button><a class="icon-btn" href="./" style="text-decoration:none">↗ Platform</a><button class="icon-btn" id="refreshBtn">↻ Refresh</button><button class="icon-btn hide-mobile" id="notifyBtn">♧ Notifications <b style="color:#34d399">0</b></button><button class="icon-btn" id="moreBtn">⋮</button></div>
+</header>
+<section id="adminAuthGate" class="auth-gate">
+<h1>Administrator sign-in</h1><p>Sign in with the designated administrator account. Live user and KYC data require a verified administrator email and Firestore rules.</p>
+<label for="adminEmail">Email</label><input id="adminEmail" type="email" autocomplete="username" placeholder="Administrator email">
+<label for="adminPassword">Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Password">
+<button class="icon-btn" id="adminSignIn" style="background:#2459a8;border-color:#3978d8">Sign in securely</button>\n<button class="icon-btn" id="adminResetPassword" type="button" style="margin-top:10px;width:100%">Forgot password? Send reset email</button><p id="adminAuthMessage" class="auth-error" role="status" aria-live="polite"></p>
+<p>Do not share passwords, one-time codes, private keys, or service-account files. If your account is not authorized, ask the project owner to assign admin access securely.</p>
+</section>
+<div class="layout locked" id="adminWorkspace">
+<aside id="sidebar">
+<div class="admin-profile"><div class="avatar">O</div><div><strong>OnChain Admin</strong><small>ADMIN DASHBOARD</small></div></div>
+<nav class="nav" id="sideNav">
+<button class="active" data-view="Dashboard"><span class="ico">◉</span>Dashboard</button>
+<button data-view="Users"><span class="ico">♟</span>Users <span class="pill">0</span></button>
+<button data-view="Login History"><span class="ico">◴</span>Login History</button>
+<button data-view="Notifications"><span class="ico">♧</span>Notification <span class="pill" style="background:#1d6b53">0</span></button>
+<button data-view="KYC"><span class="ico">▣</span>KYC <span class="pill">0</span></button>
+<button data-view="Email"><span class="ico">✉</span>Email</button>
+<button data-view="Analytics"><span class="ico">◔</span>Analytics</button>
+<button data-view="Deposits"><span class="ico">↓</span>Deposits</button>
+<button data-view="Withdrawals"><span class="ico">↑</span>Withdrawals</button>
+<button data-view="Transfers"><span class="ico">⇄</span>Internal Transfers <span class="pill">USDT</span></button>
+<button data-view="Addresses"><span class="ico">▰</span>Addresses</button>
+<button data-view="Trades"><span class="ico">⇄</span>Trades</button>
+<button data-view="Brokerage"><span class="ico">▣</span>Brokerage</button>
+<button data-view="Trade Controls"><span class="ico">⚖</span>Trade Controls</button>
+<button data-view="Assets"><span class="ico">◉</span>Assets</button>
+<button data-view="Support"><span class="ico">☏</span>Support <span class="pill" style="background:#1d6b53">Inbox</span></button>
+<button data-view="Settings"><span class="ico">⚙</span>Settings</button>
+</nav>
+</aside>
+<main class="main">
+<div class="heading"><div><h1 id="pageTitle">Dashboard Overview</h1><p id="pageSubtitle">Welcome to your Onchain administration panel.</p></div><span class="status">● Panel ready</span></div>
+<section id="dashboardView">
+<h2 class="section-title">Quick Actions <span style="font-size:12px;color:#9ca9bd;font-weight:500">— open a section with one click</span></h2>
+<div class="quick-grid">
+<button class="quick" data-view="Users"><span class="qicon">♟</span><span>Users</span></button>
+<button class="quick" data-view="Deposits"><span class="qicon">↓</span><span>Adjust Practice Balance</span></button>
+<button class="quick" data-view="Assets"><span class="qicon">◈</span><span>Manage Coin Assets</span></button>
+<button class="quick" data-view="Withdrawals"><span class="qicon">↑</span><span>Withdraw</span></button>
+<button class="quick" data-view="Transfers"><span class="qicon">⇄</span><span>Transfer</span></button>
+<button class="quick" data-view="History"><span class="qicon">◴</span><span>History</span></button>
+</div>
+<div class="stats">
+<div class="stat"><span class="label">Saved User Profiles</span><span class="sicon">♟</span><div class="value" id="liveUsersCount">—</div><div class="trend" id="liveUsersStatus">● Waiting for admin data connection</div></div>
+<div class="stat"><span class="label">Total Practice Wallet Assets (USDT)</span><span class="sicon" style="color:#34d399">◈</span><div class="value" id="liveTotalDemoAssets">—</div><div class="muted" id="liveTotalDemoAssetsStatus">Connecting to practice wallet records</div></div>
+<div class="stat"><span class="label">Pending KYC</span><span class="sicon" style="color:#b197ff">▣</span><div class="value" id="liveKycCount">—</div><div class="muted" id="liveKycStatus">Waiting for secure KYC data</div></div>
+<div class="stat"><span class="label">Deposit Requests</span><span class="sicon" style="color:#68aaff">↓</span><div class="value" id="liveDepositRequests">—</div><div class="muted" id="liveDepositStatus">Connecting to Firestore request queue</div></div>
+<div class="stat"><span class="label">Withdrawal Requests</span><span class="sicon" style="color:#fb7185">↑</span><div class="value" id="liveWithdrawalRequests">—</div><div class="muted" id="liveWithdrawalStatus">Connecting to Firestore request queue</div></div>
+<div class="stat"><span class="label">Dashboard Data</span><span class="sicon" style="color:#fbbf24">◴</span><div class="value" id="dashboardDataStatus">Checking</div><div class="muted" id="dashboardUpdatedAt">Live data status will appear here</div></div>
+</div>
+<div class="notice"><strong>Live connection status:</strong> User profiles and KYC submissions are read from Firestore when administrator permissions allow it. Deposit and withdrawal requests are read from Firestore and can be approved as simulated balance changes only. Blockchain verification and real payouts are not connected; no real funds are managed here.</div>
+</section>
+<section id="detailView" class="content-panel hidden"><div class="panel-head"><h2 id="detailTitle">Section</h2><span class="muted">Admin workspace</span></div><div id="detailBody" class="empty">This section is ready for a secure backend connection. No live records are displayed.</div></section>
+</main>
+</div>
+<nav class="bottomnav"><button data-view="Users"><span>♟</span>Users</button><button data-view="Support"><span>☏</span>Support</button><button class="center" data-view="Dashboard" aria-label="Dashboard">◉</button><button data-view="Email"><span>✉</span>Email</button><button data-view="Analytics"><span>◔</span>Stats</button></nav>
+<script>
+const sidebar=document.getElementById('sidebar'),dashboard=document.getElementById('dashboardView'),detail=document.getElementById('detailView');
+const descriptions={
+'Users':'Manage registered accounts after a secure user database is connected.',
+'Login History':'Review sign-in events through a server-side audit log.',
+'Notifications':'Create and review platform notices after notification services are connected.',
+'KYC':'Review identity-verification submissions securely. Do not upload identity documents to this preview.',
+'Email':'Prepare account announcements after a verified email service is configured.',
+'Analytics':'View user and platform analytics after data access is configured.',
+'Deposits':'Review deposit requests, clear reviewed deposit history, and manage user practice balances.',
+'Withdrawals':'Review withdrawal requests. This preview cannot send funds.',
+'Addresses':'Manage deposit address records only after secure wallet infrastructure is configured.',
+'Trades':'Review order history after a trusted trading backend is connected.',
+'Brokerage':'Review Alpaca brokerage eligibility requests. Approval does not activate live order routing.',
+'Trade Controls':'Manage practice-trading permissions and maximum practice order sizes for every saved Onchain user profile. Settings are saved to the shared account record.',
+'Assets':'Adjust practice coin balances to a selected user wallet or view the supported asset balances.',
+'Transfers':'Review and approve internal USDT demo-balance transfer requests.',
+'History':'View platform event history after the audit-log backend is connected.',
+'Settings':'Admin settings and access controls must be enforced by the server, not only this page.',
+'Support':'Chat directly with customers and manage support conversations.'
+};
+function renderGlobalDemoControls(api,current){
+ const {db,doc,setDoc,serverTimestamp,onSnapshot,auth}=api;
+ if(stopGlobalDemoMode){stopGlobalDemoMode();stopGlobalDemoMode=null;}
+ const host=document.getElementById('globalDemoTradeControls'),status=document.getElementById('globalDemoModeStatus');
+ if(!host||!status)return;
+ const names={market:'Market-Based',win:'Set Win Outcome',lose:'Set Loss Outcome'};
+ const paint=mode=>{
+  const valid=Object.hasOwn(names,mode)?mode:'market';
+  status.textContent='Shared setting active for all users: '+names[valid]+'.';
+  host.querySelectorAll('[data-global-demo-mode]').forEach(button=>{
+   const active=button.dataset.globalDemoMode===valid;
+   button.setAttribute('aria-pressed',String(active));
+   button.style.outline=active?'2px solid #f0b90b':'';
+   button.style.outlineOffset=active?'2px':'';
+  });
+ };
+ stopGlobalDemoMode=onSnapshot(doc(db,'platformSettings','demoTradeControl'),snapshot=>{
+  const data=snapshot.exists()?snapshot.data()||{}:{};
+  paint(data.mode||'market');
+ },error=>{
+  console.error('Global practice simulation setting could not be read:',error);
+  status.textContent='Could not load shared setting ('+(error.code||'connection error')+'). Check Firestore rules.';
+ });
+ host.querySelectorAll('[data-global-demo-mode]').forEach(button=>button.addEventListener('click',async()=>{
+  const mode=button.dataset.globalDemoMode;
+  if(!Object.hasOwn(names,mode))return;
+  const signedIn=auth.currentUser;
+  if(!signedIn||!signedIn.emailVerified||(signedIn.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){
+   status.textContent='Only the verified administrator can change the global simulation mode.';return;
+  }
+  host.querySelectorAll('[data-global-demo-mode]').forEach(item=>item.disabled=true);
+  status.textContent='Publishing shared setting…';
+  try{
+   await signedIn.getIdToken(true);
+   await setDoc(doc(db,'platformSettings','demoTradeControl'),{mode,updatedAt:serverTimestamp(),updatedBy:signedIn.email},{merge:true});
+   status.textContent='Published. New timed practice trades will use '+names[mode]+'.';
+  }catch(error){
+   console.error('Global practice simulation setting could not be published:',error);
+   status.textContent='Could not publish setting ('+(error.code||error.message||'error')+'). Check Firestore rules.';
+  }finally{
+   host.querySelectorAll('[data-global-demo-mode]').forEach(item=>item.disabled=false);
+  }
+ }));
+}
+
+async function renderTradeControls(){
+ const body=document.getElementById('detailBody');
+ const api=window.__ocAdminFirebase;
+ body.innerHTML=`<div id="globalDemoTradeControls" class="content-panel" style="margin:0 0 18px;border-color:#8b6b2d"><h3 style="margin-top:0">Global practice simulation</h3><p class="muted">Choose the outcome mode for new timed practice trades across all users. Existing trades keep the mode selected when they started. These controls affect simulated results only.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px"><button type="button" class="icon-btn" data-global-demo-mode="market">Market-Based</button><button type="button" class="icon-btn" data-global-demo-mode="win" style="background:#087b56;border:0">↗ Set Win Outcome</button><button type="button" class="icon-btn" data-global-demo-mode="lose" style="background:#8a3343;border:0">↘ Set Loss Outcome</button></div><p id="globalDemoModeStatus" class="muted" role="status" aria-live="polite">Connecting to shared simulation settings…</p></div><div id="tradeControlsUsers"></div>`;
+ const usersBody=document.getElementById('tradeControlsUsers');
+ usersBody.innerHTML='<div class="content-panel"><p class="muted">Loading users…</p></div>';
+ if(!api){usersBody.textContent='Firebase admin connection is not ready. Refresh and sign in again.';return;}
+ const {db,collection,getDocs,doc,setDoc,serverTimestamp,auth}=api;
+ try{
+  let current=auth.currentUser;
+  if(!current)throw new Error('Verified administrator sign-in required. Please sign in again.');
+  await current.reload();
+  current=auth.currentUser;
+  if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('Verified administrator sign-in required. Please verify the admin email and sign in again.');
+  // Refresh the Firebase ID token so Firestore rules receive the latest verified-email/admin claims.
+  await current.getIdToken(true);
+  renderGlobalDemoControls(api,current);
+  // Bound the read so a stalled network request cannot leave this panel loading forever.
+  let loadTimer;
+  const snap=await Promise.race([
+   getDocs(collection(db,'users')),
+   new Promise((_,reject)=>{loadTimer=setTimeout(()=>reject(new Error('User profile request timed out after 15 seconds. Check your connection and Firestore availability, then retry.')),15000);})
+  ]).finally(()=>clearTimeout(loadTimer));
+  const users=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+  if(!users.length){usersBody.innerHTML='<div class="notice">No registered user profiles were found in Firestore yet. Users appear here after their profile is created.</div>';return;}
+  usersBody.innerHTML=`
+   <div id="tradeControlsPanel" style="display:grid;gap:16px;max-width:900px">
+    <div class="content-panel">
+     <h3 style="margin-top:0">Registered user trade controls</h3>
+     <p class="muted">Set trading permission, order limits, and the simulated outcome mode for each registered user. Individual settings override the global mode for that user. Practice trades only.</p>
+     <label style="display:grid;gap:8px;font-weight:700">Select registered user
+      <select id="tradeControlUser" style="width:100%;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#10243a;color:white">
+       ${users.map(u=>'<option value="'+esc(u.id)+'">'+esc((u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id)+' — '+(u.email||u.id))+'</option>').join('')}
+      </select>
+     </label>
+     <div style="height:1px;background:#ffffff20;margin:18px 0"></div>
+     <label style="display:flex;align-items:center;gap:10px;font-weight:700"><input id="tradeControlEnabled" type="checkbox" checked> Trading enabled for this account</label>
+     <label style="display:grid;gap:8px;font-weight:700;margin-top:16px">Practice outcome for this user
+      <select id="tradeControlDemoMode" style="width:100%;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#10243a;color:white">
+       <option value="inherit">Use global setting</option><option value="market">Market-Based</option><option value="win">Set Win Outcome</option><option value="lose">Set Loss Outcome</option>
+      </select>
+     </label>
+     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:14px">
+      <label style="display:grid;gap:7px;font-weight:700">Win chance (%)
+       <input id="tradeControlWinPercent" type="number" min="1" max="100" step="1" value="15" style="width:100%;padding:12px;border:1px solid #5d8797;border-radius:10px;background:#10243a;color:white">
+      </label>
+      <label style="display:grid;gap:7px;font-weight:700">Loss chance (%)
+       <input id="tradeControlLossPercent" type="number" min="1" max="100" step="1" value="50" style="width:100%;padding:12px;border:1px solid #5d8797;border-radius:10px;background:#10243a;color:white">
+      </label>
+     </div>
+     <button id="saveTradeControl" class="icon-btn" style="width:100%;padding:14px;margin-top:18px;background:linear-gradient(90deg,#24b8d2,#20d9dc);border:0;color:#062b3a;font-weight:800">Save trade controls</button>
+     <p id="tradeControlMessage" class="muted" role="status" aria-live="polite">Loading this user's saved settings…</p>
+    </div>
+    <div class="content-panel">
+     <h3 style="margin-top:0">User outcome assignments</h3>
+     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px">
+      <div><h4 style="color:#6ee7b7;margin:0 0 8px">Configured for wins</h4><div id="demoWinUsers" class="muted">Loading…</div></div>
+      <div><h4 style="color:#fda4af;margin:0 0 8px">Configured for losses</h4><div id="demoLossUsers" class="muted">Loading…</div></div>
+     </div>
+     <p class="muted tiny">Lists show saved simulation settings, not actual trade results. “Use global setting” follows the global control above.</p>
+    </div>
+    <div class="content-panel"><h3 style="margin-top:0">Registered profiles: ${users.length}</h3><p class="muted">Example accounts A, B and C have been removed. Every Firestore user profile is listed here without filtering by email, name, trading activity, or account status. Saved settings are account-level records; enforcement in trade execution must also be enabled before these settings can restrict live trades.</p></div>
+   </div>`;
+  const select=usersBody.querySelector('#tradeControlUser'),enabled=usersBody.querySelector('#tradeControlEnabled'),mode=usersBody.querySelector('#tradeControlDemoMode'),win=usersBody.querySelector('#tradeControlWinPercent'),loss=usersBody.querySelector('#tradeControlLossPercent'),message=usersBody.querySelector('#tradeControlMessage');
+  const renderOutcomeLists=()=>{
+   const label=u=>esc(u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id);
+   const winUsers=users.filter(u=>u.demoTradeControlMode==='win'),lossUsers=users.filter(u=>u.demoTradeControlMode==='lose');
+   usersBody.querySelector('#demoWinUsers').innerHTML=winUsers.length?winUsers.map(u=>'<div style="padding:7px 0;border-bottom:1px solid #ffffff18">'+label(u)+'</div>').join(""):'No users assigned to wins.';
+   usersBody.querySelector('#demoLossUsers').innerHTML=lossUsers.length?lossUsers.map(u=>'<div style="padding:7px 0;border-bottom:1px solid #ffffff18">'+label(u)+'</div>').join(""):'No users assigned to losses.';
+  };
+  const load=async()=>{const u=users.find(x=>x.id===select.value);enabled.checked=u?.tradingEnabled!==false;mode.value=['inherit','market','win','lose'].includes(u?.demoTradeControlMode)?u.demoTradeControlMode:'inherit';win.value=Math.min(100,Math.max(1,Number(u?.demoWinPercent??15)||15));loss.value=Math.min(100,Math.max(1,Number(u?.demoLossPercent??50)||50));message.textContent='Current settings loaded for '+(u?.email||u?.displayName||u?.id||'selected user')+'.';};
+  select.addEventListener('change',load);await load();renderOutcomeLists();
+  usersBody.querySelector('#saveTradeControl').addEventListener('click',async()=>{
+   const u=users.find(x=>x.id===select.value),winPercent=Number(win.value),lossPercent=Number(loss.value),demoMode=mode.value;
+   if(!u){message.textContent='Select a registered user.';return;}
+   if(!['inherit','market','win','lose'].includes(demoMode)){message.textContent='Choose a valid practice outcome mode.';return;}
+   if(!Number.isInteger(winPercent)||winPercent<1||winPercent>100||!Number.isInteger(lossPercent)||lossPercent<1||lossPercent>100){message.textContent='Win and loss percentages must each be between 1 and 100.';return;}
+   const button=usersBody.querySelector('#saveTradeControl');button.disabled=true;message.textContent='Saving to Firebase…';
+   try{
+    await setDoc(doc(db,'users',u.id),{tradingEnabled:enabled.checked,demoTradeControlMode:demoMode,demoWinPercent:winPercent,demoLossPercent:lossPercent,tradeControlUpdatedAt:serverTimestamp(),tradeControlUpdatedBy:current.email},{merge:true});
+    u.tradingEnabled=enabled.checked;u.demoTradeControlMode=demoMode;u.demoWinPercent=winPercent;u.demoLossPercent=lossPercent;renderOutcomeLists();message.textContent='Saved to Firebase for '+(u.email||u.displayName||u.id)+'. New timed practice trades for this user will follow the selected mode.';
+   }catch(e){message.textContent='Could not save settings: '+(e.code||e.message||'permission error');}
+   finally{button.disabled=false;}
+  });
+ }catch(e){
+  const detail=String(e.code||e.message||'unknown error');
+  usersBody.innerHTML='<div class="notice"><strong>Could not load registered users.</strong><p>'+esc(detail)+'</p><p>Confirm you are signed in with the verified administrator email and that Firestore is reachable.</p><button type="button" id="retryTradeUsers" class="icon-btn">↻ Retry loading users</button></div>';
+  usersBody.querySelector('#retryTradeUsers')?.addEventListener('click',()=>renderTradeControls());
+ }
+}
+
+let stopGlobalDemoMode=null;
+const moduleKey='onchaincrypto_admin_demo_v1';
+const moduleNames=['Users','Login History','Notifications','KYC','Email','Analytics','Deposits','Withdrawals','Addresses','Trades','Transfers','History','Assets','Settings','Support'];
+const seedRecords={
+ 'Users':[{title:'Sample user A',owner:'sample-a@example.invalid',amount:'0',status:'Active'},{title:'Sample user B',owner:'sample-b@example.invalid',amount:'0',status:'Pending'}],
+ 'Login History':[{title:'Sample sign-in event',owner:'sample-a@example.invalid',amount:'—',status:'Recorded'}],
+ 'Notifications':[{title:'Welcome to Onchain',owner:'Sample users',amount:'—',status:'Draft'}],
+ 'KYC':[{title:'Sample review item (no documents)',owner:'Sample user B',amount:'—',status:'Pending'}],
+ 'Email':[{title:'Sample announcement draft',owner:'Admin',amount:'—',status:'Draft'}],
+ 'Deposits':[{title:'Sample deposit request',owner:'Sample user A',amount:'100 USDT',status:'Pending'}],
+ 'Withdrawals':[{title:'Sample withdrawal request',owner:'Sample user B',amount:'25 USDT',status:'Pending'}],
+ 'Addresses':[{title:'Sample address record',owner:'BTC',amount:'—',status:'Unassigned'}],
+ 'Trades':[{title:'BTC/USDT paper trade',owner:'Sample user A',amount:'50 USDT',status:'Open'}],
+ 'Transfers':[{title:'Sample internal transfer',owner:'Sample user A → Sample user B',amount:'10 USDT',status:'Pending'}],
+ 'History':[{title:'Sample platform event',owner:'System',amount:'—',status:'Recorded'}],
+ 'Assets':[{title:'USDT practice ledger entry',owner:'Practice ledger',amount:'1,000 USDT',status:'Practice only'}],
+ 'Settings':[{title:'Paper trading mode',owner:'This browser only',amount:'—',status:'Enabled'}],
+ 'Support':[{title:'Sample support request',owner:'Sample user A',amount:'—',status:'Open'}]
+};
+function loadAdminData(){try{return JSON.parse(localStorage.getItem(moduleKey)||'{}')||{};}catch(e){return {};}}
+function saveAdminData(data){localStorage.setItem(moduleKey,JSON.stringify(data));}
+function esc(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function getRecords(view){const data=loadAdminData();return Array.isArray(data[view])?data[view]:(seedRecords[view]||[]).map((x,i)=>({...x,id:view.toLowerCase().replace(/[^a-z]/g,'')+'-'+i,createdAt:new Date().toISOString()}));}
+function renderLiveCollection(view){if(window.adminGetLiveCollection)window.adminGetLiveCollection(view);else document.getElementById('detailBody').textContent='Firebase admin data module is not ready. Refresh and sign in again.';}
+
+async function renderRequestQueue(view){
+ const body=document.getElementById('detailBody'),kind=view==='Deposits'?'deposit':'withdraw',collectionName=kind==='deposit'?'depositRequests':'withdrawRequests';
+ const api=window.__ocAdminFirebase;if(!api)return;
+ const {db,collection,getDocs,query,limit,doc,serverTimestamp,runTransaction}=api;
+ const queueId='ocRequestQueue';
+ try{
+  const snap=await getDocs(query(collection(db,collectionName),limit(200)));
+  const requests=snap.docs.map(d=>({id:d.id,...d.data()})).filter(r=>!r.adminHiddenFromHistory).sort((a,b)=>String(b.createdAt?.seconds||0).localeCompare(String(a.createdAt?.seconds||0)));
+  const usersSnap=await getDocs(query(collection(db,'users'),limit(500)));
+  const users=new Map(usersSnap.docs.map(d=>[d.id,d.data()]));
+  const pending=requests.filter(r=>(r.status||'pending')==='pending').length;
+  const rows=requests.map(r=>{
+   const u=users.get(r.uid)||{},name=u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||r.email||r.uid||'Unknown';
+   const amount=Number(r.amount||0),asset=String(r.asset||'USDT'),status=String(r.status||'pending');
+   const when=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'—';
+   const details=kind==='deposit'?'TX: '+(r.transactionHash||'—')+' · To: '+(r.depositAddress||'—'):'To: '+(r.destinationAddress||'—');
+   const receipt=kind==='deposit'&&typeof r.receiptImage==='string'&&r.receiptImage.length<=760000&&r.receiptImage.startsWith('data:image/jpeg;base64,')?'<a href="'+r.receiptImage+'" target="_blank" rel="noopener noreferrer" title="Open full payment screenshot"><img src="'+r.receiptImage+'" alt="Customer payment receipt" style="display:block;width:88px;height:88px;object-fit:cover;border-radius:8px;border:1px solid #526878;margin-top:8px"><small>View receipt · '+esc(r.receiptFileName||'Screenshot')+'</small></a>':'';
+   const actions=status==='pending'?'<button class="icon-btn" data-request-action="approve" data-request-id="'+esc(r.id)+'" style="background:#087b56;border:0">Approve practice balance</button> <button class="icon-btn" data-request-action="reject" data-request-id="'+esc(r.id)+'">Reject</button>':'<span class="tag">'+esc(status==='approved'?'APPROVED · PRACTICE':status.toUpperCase())+'</span>';
+   return '<tr><td>'+esc(name)+'<br><small class="muted">'+esc(r.email||r.uid||'')+'</small></td><td>'+amount.toLocaleString(undefined,{maximumFractionDigits:8})+' '+esc(asset)+'</td><td>'+esc(r.network||'—')+'</td><td style="max-width:240px;overflow-wrap:anywhere">'+esc(details)+receipt+'</td><td>'+esc(when)+'</td><td>'+actions+'</td></tr>';
+  }).join('');
+  const panel=document.createElement('div');panel.id=queueId;panel.className='content-panel';panel.style.margin='0 0 16px';
+  panel.innerHTML='<div class="panel-head"><h3>Live '+(kind==='deposit'?'deposit':'withdrawal')+' requests</h3><span class="tag">'+pending+' pending · '+requests.length+' total</span></div><p class="muted">Firestore request queue · approvals change simulated balances only. Deposits are not blockchain-verified and withdrawals are not paid out.</p><div class="table-wrap"><table style="min-width:900px"><thead><tr><th>User</th><th>Amount</th><th>Network</th><th>Payment / destination details</th><th>Submitted</th><th>Admin action</th></tr></thead><tbody>'+(rows||'<tr><td colspan="6" class="empty">No '+kind+' requests found.</td></tr>')+'</tbody></table></div><p id="ocRequestMessage" class="muted" role="status" aria-live="polite"></p>';
+  const old=document.getElementById(queueId);if(old)old.remove();body.prepend(panel);
+  panel.querySelectorAll('[data-request-action]').forEach(button=>button.addEventListener('click',async()=>{
+   const action=button.dataset.requestAction,id=button.dataset.requestId;
+   if(!id||!['approve','reject'].includes(action))return;
+   const current=window.__ocAdminFirebase?.auth?.currentUser;if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){alert('Verified administrator sign-in required.');return;}
+   const req=requests.find(x=>x.id===id);if(!req)return;
+   if(!confirm(action==='approve'?'Approve this request to the user’s SIMULATED balance? No blockchain payment or payout will occur.':'Reject this request?'))return;
+   button.disabled=true;const msg=document.getElementById('ocRequestMessage');if(msg)msg.textContent='Processing request securely…';
+   try{
+    const requestRef=doc(db,collectionName,id),userRef=doc(db,'users',req.uid);
+    const ledgerRef=doc(collection(db,'demoAssetTransactions')),usdtLedgerRef=doc(collection(db,'demoTransactions'));
+    await runTransaction(db,async tx=>{
+     const rs=await tx.get(requestRef);if(!rs.exists()||(rs.data().status||'pending')!=='pending')throw new Error('request-already-processed');
+     if(action==='reject'){tx.update(requestRef,{status:'rejected',reviewedAt:serverTimestamp(),reviewedBy:current.email});return;}
+     const us=await tx.get(userRef);if(!us.exists())throw new Error('user-profile-not-found');
+     const data=us.data(),asset=String(req.asset||'USDT').toUpperCase(),amount=Number(req.amount);
+     if(!Number.isFinite(amount)||amount<=0)throw new Error('invalid-request-amount');
+     const deposit=kind==='deposit',before=asset==='USDT'?Number(data.demoBalanceUSDT||0):Number((data.demoAssetBalances||{})[asset]||0);
+     const after=Number((before+(deposit?amount:-amount)).toFixed(asset==='USDT'?2:8));
+     if(after<0)throw new Error('insufficient-demo-balance');
+     if(asset==='USDT')tx.update(userRef,{demoBalanceUSDT:after,demoBalanceUpdatedAt:serverTimestamp()});
+     else tx.update(userRef,{demoAssetBalances:{...(data.demoAssetBalances||{}),[asset]:after},demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:current.email});
+     if(asset==='USDT')tx.set(usdtLedgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request practice adjustment':'Withdrawal request practice adjustment'),source:'admin-demo',status:'completed'});
+     else tx.set(ledgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request practice adjustment':'Withdrawal request practice adjustment'),source:'admin-demo',status:'completed'});
+     tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email});
+    });
+    if(msg)msg.textContent=action==='approve'?'Approved. The practice balance and ledger were updated. No real payment or payout occurred.':'Request rejected.';
+    await renderRequestQueue(view);if(typeof window.adminRefreshDashboard==='function')await window.adminRefreshDashboard();
+   }catch(error){button.disabled=false;if(msg)msg.textContent='Could not process request ('+(error.code||error.message||'error')+'). Check Firestore rules and user profile.';}
+  }));
+ }catch(error){const old=document.getElementById(queueId);if(old)old.remove();const panel=document.createElement('div');panel.className='notice';panel.textContent='Could not load '+kind+' requests from Firestore ('+(error.code||error.message||'error')+'). Check administrator permissions and Firestore rules.';body.prepend(panel);}
+}
+async function renderDemoFinance(view){
+ const body=document.getElementById('detailBody');
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading registered users and practice ledger…</p></div>';
+ const assets=['USDT','BTC','ETH','BNB','SOL','XRP','USDC','DOGE','TRX','TON','ADA','AVAX','SHIB','LINK','BCH','SUI','XLM','DOT','LTC','NEAR','UNI','ETC','ICP','APT','FIL','HBAR','ARB','OP','RENDER','ATOM','VET','INJ','MKR','DAI','FDUSD','PAXG','XAUT','XAU'];
+ try{
+  const {collection,getDocs,query,limit,doc,setDoc,writeBatch,serverTimestamp,runTransaction}=window.__ocAdminFirebase;
+  const db=window.__ocAdminFirebase.db;
+  const [us,usdtSnap,assetSnap]=await Promise.all([
+   getDocs(query(collection(db,'users'),limit(200))),
+   getDocs(query(collection(db,'demoTransactions'),limit(200))),
+   getDocs(query(collection(db,'demoAssetTransactions'),limit(300)))
+  ]);
+  const users=us.docs.map(d=>({id:d.id,...d.data()}));
+  const allTx=[...usdtSnap.docs.map(d=>({id:d.id,...d.data(),asset:'USDT',amount:d.data().amountUSDT,balanceAfter:d.data().balanceAfterUSDT})),...assetSnap.docs.map(d=>({id:d.id,...d.data()}))];
+  const txs=allTx.filter(t=>!t.adminHiddenFromHistory&&(view==='Deposits'?t.type==='deposit':t.type==='withdrawal')).sort((a,b)=>String(b.createdAtText||'').localeCompare(String(a.createdAtText||''))).slice(0,100);
+  if(!users.length){body.innerHTML='<div class="notice">No registered user profiles were found. A user must complete registration before a practice balance adjustment can be assigned.</div>';return;}
+  const opts=users.map(u=>'<option value="'+esc(u.id)+'">'+esc((u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id)+' — '+(u.email||u.id))+'</option>').join('');
+  const assetOptions=assets.map(a=>'<option value="'+a+'">'+a+'</option>').join('');
+  const userRows=users.map(u=>{
+   const extra=Object.entries(u.demoAssetBalances||{}).filter(([a,n])=>a!=='USDT'&&Number(n)>0).map(([a,n])=>a+' '+Number(n).toLocaleString(undefined,{maximumFractionDigits:8})).join(' · ');
+   return '<tr><td>'+esc(u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||'—')+'</td><td>'+esc(u.email||'—')+'</td><td>'+Number(u.demoBalanceUSDT||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT</td><td>'+esc(extra||'—')+'</td><td>'+esc(u.accountStatus||'active')+'</td></tr>';
+  }).join('');
+  const txRows=txs.map(t=>'<tr><td>'+esc(t.createdAtText||'Recorded')+'</td><td>'+esc(t.uid||'—')+'</td><td>'+esc(t.type)+'</td><td>'+Number(t.amount??0).toLocaleString(undefined,{maximumFractionDigits:8})+' '+esc(t.asset||'USDT')+'</td><td>'+Number(t.balanceAfter??0).toLocaleString(undefined,{maximumFractionDigits:8})+' '+esc(t.asset||'USDT')+'</td><td>'+esc(t.note||'—')+'</td></tr>').join('');
+  body.innerHTML='<div style="display:grid;gap:16px">'+
+   '<div class="notice" style="border-color:#1d8065;background:linear-gradient(120deg,#0d332b,#102333);font-size:13px"><strong style="color:#6ee7b7;font-size:14px">LIVE PRACTICE BALANCE ADJUSTMENT</strong><p style="margin:6px 0 0">When you submit here, the selected user’s Firestore wallet record is updated. If the user is signed in, their wallet refreshes automatically. These are simulated balances only—not real deposits, exchange custody or withdrawable funds.</p></div>'+
+   '<form id="demoFinanceForm" class="content-panel" style="margin:0;display:grid;gap:13px;border:1px solid #267b68;box-shadow:0 12px 35px #0003">'+
+   '<div><h3 style="margin:0 0 5px;font-size:20px">'+(view==='Deposits'?'＋ Add practice balance to user wallet':'− Deduct practice balance from user wallet')+'</h3><p class="muted" style="margin:0">Choose one coin or apply the same quantity to all supported assets.</p></div>'+
+   '<label style="display:grid;gap:6px;font-weight:700">USER ACCOUNT<select name="uid" required style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878">'+opts+'</select></label>'+
+   '<label style="display:grid;gap:6px;font-weight:700">COIN / ASSET<select name="asset" required style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"><option value="__ALL__">✦ ALL SUPPORTED ASSETS</option>'+assetOptions+'</select></label>'+
+   '<label style="display:grid;gap:6px;font-weight:700">AMOUNT<input name="amount" type="number" min="0.00000001" max="1000000000" step="any" required placeholder="Enter quantity for selected coin(s)" style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label>'+
+   '<label style="display:grid;gap:6px;font-weight:700">ADMIN NOTE (OPTIONAL)<input name="note" maxlength="200" placeholder="Reason for this practice balance adjustment" style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label>'+
+   '<button class="icon-btn" type="submit" style="background:'+(view==='Deposits'?'linear-gradient(90deg,#087b56,#12a879)':'linear-gradient(90deg,#813246,#bd4058)')+';border:0;padding:16px;font-size:16px;font-weight:850;box-shadow:0 8px 22px #0004">'+(view==='Deposits'?'＋ ADD TO USER WALLET':'− CONFIRM PRACTICE DEDUCTION')+'</button><p id="demoFinanceMessage" class="muted" role="status" aria-live="polite" style="margin:0"></p></form>'+
+   '<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Registered user wallet balances</h3><span class="tag">'+users.length+' profiles</span></div><div style="display:grid;gap:10px;margin:12px 0 16px"><label style="display:grid;gap:6px;font-weight:700">Select user to reset all wallet balances<select id="resetWalletUser" style="width:100%;padding:12px;border-radius:10px;background:#102333;color:white;border:1px solid #526878">'+opts+'</select></label><button id="resetWalletBalanceBtn" class="icon-btn" type="button" style="background:#9a3048;border:0;padding:14px;font-weight:800">Reset selected user wallet to zero</button><p id="resetWalletMessage" class="muted" role="status" aria-live="polite" style="margin:0">Resets USDT and all recorded coin balances. The admin audit log is retained.</p></div><div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>USDT balance</th><th>Other coin balances</th><th>Status</th></tr></thead><tbody>'+userRows+'</tbody></table></div></div>'+
+   '<div class="content-panel" style="margin:0"><h3 style="margin-top:0">Recent practice '+(view==='Deposits'?'credits':'deductions')+'</h3><div class="table-wrap"><table><thead><tr><th>Time</th><th>User UID</th><th>Type</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody>'+(txRows||'<tr><td colspan="6">No practice transactions recorded yet.</td></tr>')+'</tbody></table></div></div></div>';
+  await renderRequestQueue(view);
+  if(view==='Deposits'){
+   const hp=document.createElement('div');hp.className='content-panel';hp.style.margin='0';
+   hp.innerHTML='<h3 style="margin-top:0">Deposit history maintenance</h3><p class="muted">Archive reviewed deposit requests and practice deposit ledger entries from this Admin history view. Pending requests and wallet balances are unchanged. Archived records remain stored for audit.</p><button id="clearDepositHistoryBtn" class="icon-btn" type="button" style="background:#7c2639;border:0;padding:13px;font-weight:800">Clear reviewed deposit history</button><p id="clearDepositHistoryMessage" class="muted" role="status" aria-live="polite"></p>';
+   body.appendChild(hp);
+   hp.querySelector('#clearDepositHistoryBtn').addEventListener('click',async()=>{
+    const current=window.__ocAdminFirebase?.auth?.currentUser;
+    if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){alert('Verified administrator sign-in required.');return;}
+    if(!confirm('Archive reviewed deposit history? Pending requests and wallet balances remain unchanged. Records are retained for audit.'))return;
+    const btn=hp.querySelector('#clearDepositHistoryBtn'),msg=hp.querySelector('#clearDepositHistoryMessage');btn.disabled=true;msg.textContent='Archiving…';
+    try{
+     await current.getIdToken(true);
+     const [q1,q2,q3]=await Promise.all([getDocs(collection(db,'depositRequests')),getDocs(collection(db,'demoTransactions')),getDocs(collection(db,'demoAssetTransactions'))]);
+     const refs=[...q1.docs.filter(d=>(d.data().status||'pending')!=='pending'&&!d.data().adminHiddenFromHistory).map(d=>d.ref),...q2.docs.filter(d=>d.data().type==='deposit'&&!d.data().adminHiddenFromHistory).map(d=>d.ref),...q3.docs.filter(d=>d.data().type==='deposit'&&!d.data().adminHiddenFromHistory).map(d=>d.ref)];
+     for(let i=0;i<refs.length;i+=450){const batch=writeBatch(db);for(const ref of refs.slice(i,i+450))batch.update(ref,{adminHiddenFromHistory:true,historyClearedAt:serverTimestamp(),historyClearedBy:current.email});await batch.commit();}
+     await setDoc(doc(collection(db,'adminHistoryClearLogs')),{kind:'deposit-history',archivedRecords:refs.length,createdAt:serverTimestamp(),createdBy:current.uid,createdByEmail:current.email,source:'admin-dashboard'});
+     msg.textContent='Archived '+refs.length+' reviewed deposit records. Pending requests and balances are unchanged.';
+     await renderDemoFinance('Deposits');
+    }catch(err){msg.textContent='Archive failed: '+(err.code||err.message||'unknown error');btn.disabled=false;}
+   });
+  }
+  const resetButton=document.getElementById('resetWalletBalanceBtn');
+  if(resetButton)resetButton.addEventListener('click',async()=>{
+   const current=window.__ocAdminFirebase?.auth?.currentUser,select=document.getElementById('resetWalletUser'),msg=document.getElementById('resetWalletMessage');
+   if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){alert('Verified administrator sign-in required.');return;}
+   const target=users.find(u=>u.id===select.value);if(!target){msg.textContent='Select a registered user.';return;}
+   if(!confirm('Set '+(target.displayName||target.email||target.id)+' USDT and all coin balances to ZERO? This does not delete the account.'))return;
+   resetButton.disabled=true;msg.textContent='Resetting wallet…';
+   try{
+    await current.getIdToken(true);
+    const userRef=doc(db,'users',target.id),logRef=doc(collection(db,'adminWalletResetLogs'));
+    await runTransaction(db,async tx=>{
+     const snap=await tx.get(userRef);if(!snap.exists())throw Error('User profile not found');
+     const data=snap.data(),beforeAssets={...(data.demoAssetBalances||{})},zeroAssets={};
+     for(const sym of new Set([...Object.keys(beforeAssets),...assets]))zeroAssets[sym]=0;
+     tx.update(userRef,{demoBalanceUSDT:0,demoAssetBalances:zeroAssets,demoBalanceUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:current.email,demoWalletResetAt:serverTimestamp(),demoWalletResetBy:current.email,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:current.email});
+     tx.set(logRef,{uid:target.id,userEmail:target.email||'',beforeUSDT:Number(data.demoBalanceUSDT)||0,beforeAssetBalances:beforeAssets,afterUSDT:0,afterAssetBalances:zeroAssets,createdAt:serverTimestamp(),createdBy:current.uid,createdByEmail:current.email,source:'admin-dashboard'});
+    });
+    msg.textContent='Wallet reset confirmed by Firebase. USDT and all coin balances are zero; audit record saved.';
+    await renderDemoFinance(view);
+   }catch(err){msg.textContent='Wallet reset failed: '+(err.code||err.message||'unknown error');resetButton.disabled=false;}
+  });
+  const form=document.getElementById('demoFinanceForm');
+  form.addEventListener('submit',async e=>{
+   e.preventDefault();
+   const msg=document.getElementById('demoFinanceMessage'),fd=new FormData(form),uid=String(fd.get('uid')||''),asset=String(fd.get('asset')||''),amount=Number(fd.get('amount')),note=String(fd.get('note')||'').trim();
+   if(!uid||!Number.isFinite(amount)||amount<=0||amount>1000000000){msg.textContent='Choose a user and enter a valid quantity up to 1,000,000,000.';return;}
+   const selected=users.find(u=>u.id===uid);if(!selected){msg.textContent='Selected user no longer exists. Refresh and try again.';return;}
+   const targets=asset==='__ALL__'?assets:[asset];
+   if(!targets.length||targets.some(a=>!assets.includes(a))){msg.textContent='Select a supported coin.';return;}
+   const isDeposit=view==='Deposits',oldMap={...(selected.demoAssetBalances||{})},nextMap={...oldMap};
+   let usdtBefore=Math.max(0,Number(selected.demoBalanceUSDT)||0),usdtAfter=usdtBefore;
+   const changes=[];
+   for(const symbol of targets){
+    const before=symbol==='USDT'?usdtBefore:Math.max(0,Number(oldMap[symbol])||0);
+    const after=Math.round((before+(isDeposit?amount:-amount))*100000000)/100000000;
+    if(after<0){msg.textContent='Insufficient '+symbol+' practice balance. No changes were saved.';return;}
+    changes.push({symbol,before,after});
+    if(symbol==='USDT')usdtAfter=Math.round(after*100)/100;else nextMap[symbol]=after;
+   }
+   const btn=form.querySelector('button[type=submit]');btn.disabled=true;msg.textContent='Publishing wallet update to Firebase…';
+   try{
+    const batch=writeBatch(db),userRef=doc(db,'users',uid),adminEmail=window.__ocAdminFirebase.auth.currentUser?.email||'';
+    const userUpdate={demoAssetBalances:nextMap,demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:adminEmail,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:adminEmail};
+    if(targets.includes('USDT')){userUpdate.demoBalanceUSDT=usdtAfter;userUpdate.demoBalanceUpdatedAt=serverTimestamp();}
+    batch.update(userRef,userUpdate);
+    const notificationRef=doc(collection(db,'userNotifications',uid,'items'));
+    batch.set(notificationRef,{kind:isDeposit?'deposit':'withdrawal',title:isDeposit?'Practice deposit adjustment recorded':'Practice withdrawal adjustment recorded',message:(isDeposit?'Your practice balance was adjusted by ':'A practice balance adjustment of ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+'. '+(note?'Admin note: '+note:'This is a simulated balance update, not a real blockchain transfer.'),createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:window.__ocAdminFirebase.auth.currentUser.uid,source:'admin-demo'});
+    for(const c of changes){
+     const txRef=doc(collection(db,c.symbol==='USDT'?'demoTransactions':'demoAssetTransactions'));
+     if(c.symbol==='USDT'){
+      batch.set(txRef,{uid,type:isDeposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:c.before,balanceAfterUSDT:c.after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:window.__ocAdminFirebase.auth.currentUser.uid,note,source:'admin-demo',status:'completed'});
+     }else{
+      batch.set(txRef,{uid,type:isDeposit?'deposit':'withdrawal',asset:c.symbol,amount,balanceBefore:c.before,balanceAfter:c.after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:window.__ocAdminFirebase.auth.currentUser.uid,note,source:'admin-demo',status:'completed'});
+     }
+    }
+    await batch.commit();
+    msg.textContent=(isDeposit?'Added ':'Deducted ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'of every supported asset':asset)+'. The user wallet has been published to Firebase.';
+    await renderDemoFinance(view);
+   }catch(err){msg.textContent='Could not publish wallet update ('+(err.code||err.message||'error')+'). Check admin verification and deploy the updated Firestore rules.';}
+   finally{const b=form.querySelector('button[type=submit]');if(b)b.disabled=false;}
+  });
+ }catch(error){body.innerHTML='<div class="notice"><strong>Could not load practice wallet ledger.</strong><p>Firestore access failed ('+esc(error.code||error.message||'unknown error')+'). Verify admin access and deploy the updated Firestore rules.</p></div>';}
+}
+
+async function renderWalletAddresses(){
+ const body=document.getElementById('detailBody');
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading saved wallet address settings…</p></div>';
+ const api=window.__ocAdminFirebase;
+ if(!api){body.innerHTML='<div class="notice">Firebase is not ready. Refresh the admin dashboard.</div>';return;}
+ const {db,collection,getDocs,doc,setDoc,deleteDoc,serverTimestamp}=api;
+ const escHtml=v=>String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+ const assets=['BTC','ETH','USDT','USDC','BNB','SOL','XRP','DOGE','TRX','TON','ADA','AVAX','SHIB','LINK','BCH','SUI','XLM','DOT','LTC','NEAR','UNI','ETC','ICP','APT','FIL','HBAR','ARB','OP','RENDER','ATOM','VET','INJ','MKR','DAI','FDUSD','PAXG','XAUT','XAU','POL','AAVE','GRT','ALGO','THETA','MANA','SAND','AXS','EOS','ZEC','XMR','DASH','QNT','CAKE','FLOKI','PEPE','BONK','FET','TAO','JUP','ONDO','SEI','KAS','STX','IMX','WLD'];
+ const networks=['Bitcoin','Ethereum','TRC20','ERC20','BEP20','Solana','Polygon','XRP Ledger','Arbitrum','Optimism','Base','Avalanche C-Chain'];
+ let records=[];
+ try{
+  const snap=await getDocs(collection(db,'walletAddresses'));
+  records=snap.docs.map(d=>({id:d.id,...d.data()})).sort((x,y)=>(x.asset||'').localeCompare(y.asset||'')||(x.network||'').localeCompare(y.network||''));
+ }catch(error){
+  body.innerHTML='<div class="notice"><strong>Could not load wallet address settings.</strong><p>Firestore returned '+escHtml(error.code||error.message||'an error')+'. Confirm admin verification and deploy the Firestore rules update.</p></div>';return;
+ }
+ const options=assets.map(x=>'<option value="'+x+'">'+x+'</option>').join('');
+ const networkOptions=networks.map(x=>'<option value="'+x+'">'+x+'</option>').join('');
+ body.innerHTML='<div style="display:grid;gap:16px">'+
+ '<div class="notice" style="border-color:#267b68;background:#0d332b;color:#c7f9e7"><strong style="color:#6ee7b7">PUBLISHED WALLET SETTINGS</strong><p style="margin:6px 0 0">Saved settings are shared with users through Firestore. Deposit addresses and QR images are public receiving instructions. Only publish addresses and QR codes that you have independently verified. This does not monitor blockchain payments or automatically credit balances.</p></div>'+
+ '<form id="walletAddressForm" class="content-panel" style="margin:0;display:grid;gap:12px;border-color:#267b68">'+
+ '<div><h3 style="margin:0 0 4px">＋ Add / edit coin wallet details</h3><p class="muted" style="margin:0">Create one record for each coin and network combination.</p></div>'+
+ '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">'+
+ '<label style="display:grid;gap:6px">Coin / asset<select name="asset" id="walletAddressAsset" required style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white">'+options+'</select></label>'+
+ '<label style="display:grid;gap:6px">Blockchain network<input name="network" id="walletAddressNetwork" list="walletNetworkOptions" maxlength="50" required placeholder="Auto-detected when possible" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><datalist id="walletNetworkOptions">'+networkOptions+'</datalist></label></div><p id="walletNetworkDetection" class="muted" role="status" aria-live="polite" style="margin:-4px 0 0;font-size:12px">Paste a wallet address below to detect its network where possible. Always verify the exact chain before publishing.</p>'+
+ '<label style="display:grid;gap:6px">Deposit address<input name="depositAddress" id="walletDepositAddress" maxlength="500" autocomplete="off" spellcheck="false" placeholder="Paste the public receiving address" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"></label>'+
+ '<label style="display:grid;gap:6px">Deposit QR-code image URL (optional)<input name="qrCodeUrl" id="walletQrCodeUrl" type="text" maxlength="500000" placeholder="https://… or upload a QR image below" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"></label>'+
+ '<label style="display:grid;gap:6px">Or upload QR-code image (PNG, JPG or WebP; maximum 300 KB)<input name="qrImageFile" id="walletQrImageFile" type="file" accept="image/png,image/jpeg,image/webp" style="padding:10px;border:1px solid #526878;border-radius:9px;background:#102333;color:white"><small class="muted">The small QR image is saved with this coin/network record in Firestore; Firebase Storage is not required.</small></label><div id="walletQrPreview" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px;border:1px dashed #526878;border-radius:10px"><span class="muted">QR preview will appear when a deposit address is entered.</span></div>'+
+ '<label style="display:grid;gap:6px">Withdrawal wallet address (admin-side payout source / reference)<input name="withdrawalAddress" id="walletWithdrawalAddress" maxlength="500" autocomplete="off" spellcheck="false" placeholder="Paste the public sending-wallet address" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"></label>'+
+ '<div style="display:flex;gap:18px;flex-wrap:wrap"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="depositEnabled" checked> Enable deposits</label><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="withdrawalEnabled" checked> Enable withdrawals</label></div>'+
+ '<div style="display:flex;gap:9px;flex-wrap:wrap"><button class="icon-btn" type="submit" style="background:linear-gradient(90deg,#087b56,#12a879);border:0;padding:13px 18px;font-weight:800">Save & publish for users</button><button class="icon-btn" id="walletAddressClear" type="button">Clear form</button></div><p id="walletAddressMessage" class="muted" role="status" aria-live="polite" style="margin:0"></p></form>'+
+ '<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Saved coin addresses</h3><span class="tag">'+records.length+' network record(s)</span></div><div class="table-wrap"><table style="min-width:850px"><thead><tr><th>Coin</th><th>Network</th><th>Deposit address</th><th>QR</th><th>Withdrawal address</th><th>Status</th><th>Actions</th></tr></thead><tbody id="walletAddressRows">'+
+ (records.length?records.map(r=>'<tr><td><strong>'+escHtml(r.asset)+'</strong></td><td>'+escHtml(r.network)+'</td><td style="max-width:180px;overflow-wrap:anywhere">'+escHtml(r.depositAddress||'—')+'</td><td>'+(r.qrCodeUrl?'Custom QR':'Generated QR')+'</td><td style="max-width:180px;overflow-wrap:anywhere">'+escHtml(r.withdrawalAddress||'—')+'</td><td>'+(r.depositEnabled?'Deposit on':'Deposit off')+' · '+(r.withdrawalEnabled?'Withdraw on':'Withdraw off')+'</td><td style="white-space:nowrap"><button type="button" class="icon-btn" data-wallet-edit="'+escHtml(r.id)+'">Edit</button> <button type="button" class="icon-btn" data-wallet-delete="'+escHtml(r.id)+'">Delete</button></td></tr>').join(''):'<tr><td colspan="7" class="empty">No coin addresses configured yet. Add the first one above.</td></tr>')+
+ '</tbody></table></div></div>'+
+ '<div class="notice">Important: the withdrawal address stored here is an administrator-side wallet reference. It is not shown as the customer’s withdrawal destination and does not send funds. Customer withdrawal requests still need a separately secured payout/approval process.</div></div>';
+ const form=document.getElementById('walletAddressForm');
+ const qrPreview=document.getElementById('walletQrPreview');
+ const networkField=form.elements.network,networkHint=document.getElementById('walletNetworkDetection');
+ function detectWalletNetwork(value){
+  const a=String(value||'').trim();if(!a)return null;
+  if(/^0x[a-fA-F0-9]{40}$/.test(a))return {network:null,message:'EVM-compatible address detected. This format is shared by Ethereum, BNB Smart Chain, Polygon, Arbitrum, Optimism, Base and Avalanche. Select the exact chain manually.'};
+  if(/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(a))return {network:'TRC20',message:'TRON address format detected (TRC20). Verify that this coin supports TRC20.'};
+  if(/^bc1[ac-hj-np-z02-9]{11,87}$/i.test(a)||/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(a))return {network:'Bitcoin',message:'Bitcoin address format detected. Verify the asset and network before publishing.'};
+  if(/^(EQ|UQ)[A-Za-z0-9_-]{30,}$/i.test(a))return {network:'TON',message:'TON address format detected. Verify the address and asset before publishing.'};
+  if(/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(a))return {network:'XRP Ledger',message:'XRP Ledger address format detected. A destination tag may also be required.'};
+  if(/^bitcoincash:(q|p)[a-z0-9]{20,}$/i.test(a))return {network:'Bitcoin Cash',message:'Bitcoin Cash address format detected.'};
+  if(/^ltc1[ac-hj-np-z02-9]{11,87}$/i.test(a)||/^[LM][a-km-zA-HJ-NP-Z1-9]{26,33}$/.test(a))return {network:'Litecoin',message:'Litecoin address format detected.'};
+  if(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a))return {network:null,message:'Base58 address detected. It may be Solana, but this format is not unique. Select the exact chain manually.'};
+  return {network:null,message:'Network not confidently recognized. Choose the exact network manually; do not guess.'};
+ }
+ function updateNetworkDetection(){
+  const dep=form.elements.depositAddress.value.trim(),wd=form.elements.withdrawalAddress.value.trim();
+  const d=dep?detectWalletNetwork(dep):null,w=wd?detectWalletNetwork(wd):null;
+  if(dep&&wd&&d&&w&&d.network&&w.network&&d.network!==w.network){networkHint.textContent='Deposit and withdrawal addresses appear to use different networks. Confirm both manually; one network setting applies to this record.';networkHint.style.color='#fbbf24';return;}
+  const result=dep?d:w;
+  if(!result){networkHint.textContent='Paste a wallet address to detect its network where possible.';networkHint.style.color='';return;}
+  networkHint.textContent=result.message;
+  networkHint.style.color=result.network?'#6ee7b7':'#fbbf24';
+  if(result.network&&(!networkField.value.trim()||networkField.dataset.autoDetected==='true')){networkField.value=result.network;networkField.dataset.autoDetected='true';}
+ }
+ networkField.addEventListener('input',()=>{networkField.dataset.autoDetected='false';});
+ form.elements.depositAddress.addEventListener('input',updateNetworkDetection);
+ form.elements.withdrawalAddress.addEventListener('input',updateNetworkDetection);
+ function updateQrPreview(){
+  const address=form.elements.depositAddress.value.trim(),url=form.elements.qrCodeUrl.value.trim();
+  if(url){qrPreview.innerHTML='<img alt="Deposit QR preview" src="'+escHtml(url)+'" style="width:150px;height:150px;object-fit:contain;background:white;border-radius:8px;padding:5px"><span class="muted">Custom QR image</span>';return;}
+  if(address){qrPreview.innerHTML='<img alt="Generated deposit QR preview" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent(address)+'" style="width:150px;height:150px;object-fit:contain;background:white;border-radius:8px;padding:5px"><span class="muted">QR generated from deposit address</span>';return;}
+  qrPreview.innerHTML='<span class="muted">QR preview will appear when a deposit address is entered.</span>';
+ }
+ form.elements.depositAddress.addEventListener('input',updateQrPreview);form.elements.qrCodeUrl.addEventListener('input',updateQrPreview);
+ form.elements.qrImageFile.addEventListener('change',()=>{
+  const file=form.elements.qrImageFile.files?.[0];if(!file)return;
+  if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>300000){form.elements.qrImageFile.value='';document.getElementById('walletAddressMessage').textContent='Choose a PNG, JPG or WebP QR image smaller than 300 KB.';return;}
+  const reader=new FileReader();reader.onload=()=>{form.elements.qrCodeUrl.value=String(reader.result||'');updateQrPreview();document.getElementById('walletAddressMessage').textContent='QR image loaded. Save & publish to share it with users.';};reader.onerror=()=>{document.getElementById('walletAddressMessage').textContent='Could not read that QR image. Try another file.';};reader.readAsDataURL(file);
+ });
+ document.getElementById('walletAddressClear').addEventListener('click',()=>{form.reset();form.elements.asset.value='BTC';networkField.dataset.autoDetected='false';updateNetworkDetection();updateQrPreview();document.getElementById('walletAddressMessage').textContent='Form cleared.';});
+ form.addEventListener('submit',async e=>{
+  e.preventDefault();const msg=document.getElementById('walletAddressMessage'),fd=new FormData(form);
+  const asset=String(fd.get('asset')||'').trim().toUpperCase(),network=String(fd.get('network')||'').trim(),depositAddress=String(fd.get('depositAddress')||'').trim(),qrCodeUrl=String(fd.get('qrCodeUrl')||'').trim(),withdrawalAddress=String(fd.get('withdrawalAddress')||'').trim();
+  if(!asset||!network){msg.textContent='Choose a coin and enter its blockchain network.';return;}
+  if(!depositAddress&&!withdrawalAddress){msg.textContent='Enter at least a deposit address or withdrawal wallet address.';return;}
+  if(qrCodeUrl&&!/^https:\/\/\S+$/i.test(qrCodeUrl)&&!/^data:image\/(png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(qrCodeUrl)){msg.textContent='Use an HTTPS QR image URL or upload a valid PNG/JPG/WebP image.';return;}
+  const id=(asset+'_'+network).toLowerCase().replace(/[^a-z0-9_-]+/g,'_');
+  const button=form.querySelector('button[type=submit]');button.disabled=true;msg.textContent='Saving securely to Firestore…';
+  try{
+   await setDoc(doc(db,'walletAddresses',id),{asset,network,depositAddress,qrCodeUrl,withdrawalAddress,depositEnabled:fd.has('depositEnabled'),withdrawalEnabled:fd.has('withdrawalEnabled'),updatedAt:serverTimestamp(),updatedBy:api.auth.currentUser?.email||''},{merge:true});
+   msg.textContent='Saved and published. Users will see the updated deposit address and QR code when they open their wallet.';
+   await renderWalletAddresses();
+  }catch(error){msg.textContent='Could not publish this address ('+(error.code||error.message||'error')+'). Confirm admin verification and deploy the updated Firestore rules.';button.disabled=false;}
+ });
+ body.querySelectorAll('[data-wallet-edit]').forEach(btn=>btn.addEventListener('click',()=>{
+  const r=records.find(x=>x.id===btn.dataset.walletEdit);if(!r)return;
+  form.elements.asset.value=r.asset||'BTC';form.elements.network.value=r.network||'Bitcoin';form.elements.depositAddress.value=r.depositAddress||'';form.elements.qrCodeUrl.value=r.qrCodeUrl||'';form.elements.withdrawalAddress.value=r.withdrawalAddress||'';networkField.dataset.autoDetected='false';updateNetworkDetection();form.elements.depositEnabled.checked=r.depositEnabled!==false;form.elements.withdrawalEnabled.checked=r.withdrawalEnabled!==false;updateQrPreview();form.scrollIntoView({behavior:'smooth',block:'start'});
+ }));
+ body.querySelectorAll('[data-wallet-delete]').forEach(btn=>btn.addEventListener('click',async()=>{
+  const r=records.find(x=>x.id===btn.dataset.walletDelete);if(!r||!confirm('Delete '+r.asset+' on '+r.network+' from published wallet settings?'))return;
+  try{await deleteDoc(doc(db,'walletAddresses',r.id));await renderWalletAddresses();}catch(error){alert('Could not delete address: '+(error.code||error.message||'error'));}
+ }));
+}
+
+let adminActivityUnsubscribe=null;
+function renderAdminActivity(view){
+ const body=document.getElementById('detailBody'),api=window.__ocAdminFirebase;
+ if(!api){body.textContent='Admin data connection is not ready. Refresh and sign in again.';return;}
+ if(adminActivityUnsubscribe){adminActivityUnsubscribe();adminActivityUnsubscribe=null;}
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading live account activity…</p></div>';
+ const {db,collection,query,limit,onSnapshot}=api;
+ adminActivityUnsubscribe=onSnapshot(query(collection(db,'adminActivityLogs'),limit(250)),snap=>{
+  const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((x,y)=>(y.createdAt?.seconds||0)-(x.createdAt?.seconds||0));
+  const badge=document.querySelector('#sideNav [data-view="Notifications"] .pill');
+  if(badge)badge.textContent=String(rows.length);
+  const topBadge=document.querySelector('#notifyBtn b');if(topBadge)topBadge.textContent=String(rows.length);
+  if(!rows.length){body.innerHTML='<div class="empty">No account activity has been recorded yet. New sign-ins and account events will appear here.</div>';return;}
+  const filtered=view==='Login History'?rows.filter(r=>['login','logout','registration'].includes(r.eventType)):rows;
+  body.innerHTML='<div class="content-panel" style="margin:0"><div class="panel-head"><h3>'+ (view==='Login History'?'Recent sign-ins and registrations':'Live account notifications') +'</h3><span class="tag">LIVE</span></div><p class="muted">Latest 250 events · refreshes automatically · device and timezone only; no GPS or raw IP address.</p><div class="table-wrap"><table><thead><tr><th>Account</th><th>Event</th><th>When</th><th>Device</th><th>Browser</th><th>Timezone</th></tr></thead><tbody>'+filtered.map(r=>{
+   const dt=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'Pending timestamp';
+   const label=String(r.eventType||'activity').replace(/_/g,' ');
+   return '<tr><td>'+esc(r.email||r.uid||'Unknown')+'</td><td><span class="tag">'+esc(label)+'</span></td><td>'+esc(dt)+'</td><td>'+esc(r.device||'—')+'</td><td>'+esc(r.browser||'—')+'</td><td>'+esc(r.timezone||'—')+'</td></tr>';
+  }).join('')+'</tbody></table></div></div>';
+ },error=>{body.innerHTML='<div class="notice">Activity feed unavailable: '+esc(error.code||error.message||'permission error')+'. Check Firestore rules and administrator verification.</div>';});
+}
+async function renderInternalTransfers(){
+ const body=document.getElementById('detailBody'),api=window.__ocAdminFirebase;
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading internal transfer requests…</p></div>';
+ if(!api){body.textContent='Admin Firebase connection is not ready.';return;}
+ const {db,collection,getDocs,query,limit,doc,serverTimestamp,runTransaction,auth}=api;
+ const escHtml=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ try{
+  let current=auth.currentUser;
+  if(!current)throw new Error('Verified administrator sign-in required.');
+  await current.reload();current=auth.currentUser;
+  if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('Verified administrator sign-in required.');
+  await current.getIdToken(true);
+  const snap=await getDocs(query(collection(db,'internalTransferRequests'),limit(200)));
+  const requests=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  const pending=requests.filter(r=>r.status==='pending').length;
+  body.innerHTML='<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Internal USDT transfer requests</h3><span class="tag">'+pending+' pending · '+requests.length+' total</span></div><p class="muted">Review each recipient and amount. Approval atomically debits and credits both demo wallets and records an immutable ledger entry. The sender balance is checked again at approval. No blockchain funds move.</p><div class="table-wrap"><table style="min-width:850px"><thead><tr><th>Sender</th><th>Recipient</th><th>Amount</th><th>Submitted</th><th>Status</th><th>Admin action</th></tr></thead><tbody>'+(requests.length?requests.map(r=>{
+   const when=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'—',state=String(r.status||'pending');
+   const action=state==='pending'?'<button type="button" class="icon-btn" data-transfer-action="approve" data-transfer-id="'+escHtml(r.id)+'" style="background:#087b56;border:0">Approve</button> <button type="button" class="icon-btn" data-transfer-action="reject" data-transfer-id="'+escHtml(r.id)+'">Reject</button>':'<span class="tag">'+escHtml(state.toUpperCase())+'</span>';
+   return '<tr><td>'+escHtml(r.senderName||'OnChain member')+'<br><small class="muted">'+escHtml(r.senderUid)+'</small></td><td>'+escHtml(r.recipientName||'OnChain member')+'<br><small class="muted">'+escHtml(r.recipientUid)+'</small></td><td><strong>'+Number(r.amount||0).toLocaleString(undefined,{maximumFractionDigits:8})+' USDT</strong></td><td>'+escHtml(when)+'</td><td>'+escHtml(state.toUpperCase())+'</td><td>'+action+'</td></tr>';
+  }).join(''):'<tr><td colspan="6" class="empty">No internal transfer requests have been submitted.</td></tr>')+'</tbody></table></div><p id="ocInternalTransferAdminMessage" class="muted" role="status" aria-live="polite"></p></div>';
+  body.querySelectorAll('[data-transfer-action]').forEach(button=>button.addEventListener('click',async()=>{
+   const action=button.dataset.transferAction,id=button.dataset.transferId,request=requests.find(r=>r.id===id);
+   if(!request||!['approve','reject'].includes(action)||request.status!=='pending')return;
+   const approved=action==='approve';
+   if(!confirm(approved?'Approve '+Number(request.amount).toLocaleString()+' USDT from '+(request.senderName||'sender')+' to '+(request.recipientName||'recipient')+'? Both demo balances will change only after this approval.':'Reject this internal USDT transfer request?'))return;
+   button.disabled=true;const msg=document.getElementById('ocInternalTransferAdminMessage');if(msg)msg.textContent=approved?'Checking balances and approving atomically…':'Rejecting request…';
+   try{
+    await current.getIdToken(true);
+    const requestRef=doc(db,'internalTransferRequests',id);
+    if(!approved){
+     await runTransaction(db,async tx=>{
+      const rs=await tx.get(requestRef);if(!rs.exists()||rs.data().status!=='pending')throw new Error('This request has already been processed.');
+      tx.update(requestRef,{status:'rejected',reviewedAt:serverTimestamp(),reviewedBy:current.email});
+     });
+    }else{
+     const senderRef=doc(db,'users',request.senderUid),recipientRef=doc(db,'users',request.recipientUid),transferRef=doc(collection(db,'internalTransfers'));
+     await runTransaction(db,async tx=>{
+      const [rs,ss,rr]=await Promise.all([tx.get(requestRef),tx.get(senderRef),tx.get(recipientRef)]);
+      if(!rs.exists()||rs.data().status!=='pending')throw new Error('This request has already been processed.');
+      if(!ss.exists()||!rr.exists())throw new Error('Sender or recipient account could not be found.');
+      const req=rs.data(),sender=ss.data(),recipient=rr.data(),amount=Number(req.amount);
+      if(!Number.isFinite(amount)||amount<=0||req.asset!=='USDT')throw new Error('The request amount or asset is invalid.');
+      if(sender.accountStatus==='suspended'||recipient.accountStatus==='suspended')throw new Error('A suspended account cannot receive or send internal transfers.');
+      const senderBefore=Number(sender.demoBalanceUSDT||0),recipientBefore=Number(recipient.demoBalanceUSDT||0);
+      if(!Number.isFinite(senderBefore)||!Number.isFinite(recipientBefore)||senderBefore<amount)throw new Error('Insufficient sender USDT balance. No balance was changed.');
+      const senderAfter=Number((senderBefore-amount).toFixed(8)),recipientAfter=Number((recipientBefore+amount).toFixed(8));
+      if(recipientAfter>1000000000)throw new Error('Recipient balance limit would be exceeded.');
+      tx.update(senderRef,{demoBalanceUSDT:senderAfter,demoBalanceUpdatedAt:serverTimestamp(),demoBalanceLastTransferId:transferRef.id});
+      tx.update(recipientRef,{demoBalanceUSDT:recipientAfter,demoBalanceUpdatedAt:serverTimestamp(),demoBalanceLastTransferId:transferRef.id});
+      tx.set(transferRef,{senderUid:req.senderUid,recipientUid:req.recipientUid,asset:'USDT',amount,senderBefore,senderAfter,recipientBefore,recipientAfter,senderName:req.senderName||'OnChain member',recipientName:req.recipientName||'OnChain member',createdAt:serverTimestamp(),transferRequestId:id,approvedBy:current.email});
+      tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email,transferId:transferRef.id});
+     });
+    }
+    if(msg)msg.textContent=approved?'Approved. Both practice balances and the transfer ledger were updated once.':'Request rejected. No wallet balance changed.';
+    await renderInternalTransfers();if(typeof window.adminRefreshDashboard==='function')await window.adminRefreshDashboard();
+   }catch(error){button.disabled=false;if(msg)msg.textContent='Could not '+(approved?'approve':'reject')+' request ('+(error.code||error.message||'error')+'). No partial balance update was made.';}
+  }));
+ }catch(error){body.innerHTML='<div class="notice">Could not load internal transfer requests ('+escHtml(error.code||error.message||'error')+'). Check administrator verification and Firestore rules.</div>';}
+}
+function renderModule(view){
+ const body=document.getElementById('detailBody');
+ if(view==='Login History'||view==='Notifications'){renderAdminActivity(view);return;}
+ if(view==='Transfers'){renderInternalTransfers();return;}
+ if(view==='Support'&&window.renderSupportInbox){window.renderSupportInbox();return;}
+ if(view==='Deposits'||view==='Withdrawals'){renderDemoFinance(view);return;}
+ if(view==='Assets'){renderDemoFinance('Deposits');return;}
+ if(view==='Addresses'){renderWalletAddresses();return;}
+ if(view==='Users'||view==='KYC'){renderLiveCollection(view);return;}
+ if(view==='Analytics'){
+  const data=loadAdminData();const counts=moduleNames.reduce((o,n)=>(o[n]=getRecords(n).length,o),{});
+  body.innerHTML='<div class="content-panel" style="margin:0"><h3>Workspace analytics</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">'+moduleNames.filter(n=>!['Analytics','Settings'].includes(n)).map(n=>'<div style="padding:15px;border:1px solid #ffffff20;border-radius:14px"><div class="muted">'+esc(n)+'</div><strong style="font-size:25px">'+counts[n]+'</strong></div>').join('')+'</div></div>';
+  return;
+ }
+ if(!moduleNames.includes(view)){body.textContent=descriptions[view]||'Choose a section from the menu.';return;}
+ const rows=getRecords(view);
+ const actionsAllowed=!['Login History','History','Analytics'].includes(view);
+ body.innerHTML='<div style="display:grid;gap:16px">'+
+ (actionsAllowed?'<form id="moduleAddForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;padding:16px;border:1px solid #ffffff20;border-radius:14px"><input name="title" required maxlength="100" placeholder="'+(view==='Email'?'Email subject':view==='Notifications'?'Notification title':'Record title')+'" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><input name="owner" maxlength="100" placeholder="User / recipient / category" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><input name="amount" maxlength="40" placeholder="Amount (optional)" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><button class="icon-btn" type="submit" style="background:#176b73;color:white">＋ Add demo record</button></form>':'')+
+ '<label style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="muted">Filter records</span><input id="adminRecordSearch" type="search" placeholder="Search title, user, amount or status…" style="flex:1;min-width:220px;padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><button type="button" id="resetDemoRecords" class="icon-btn">Reset sample data</button></label><div style="overflow:auto;border:1px solid #ffffff20;border-radius:14px"><table style="width:100%;border-collapse:collapse;min-width:600px"><thead><tr style="text-align:left;background:#102333"><th style="padding:12px">Record</th><th style="padding:12px">Owner / details</th><th style="padding:12px">Amount</th><th style="padding:12px">Status</th><th style="padding:12px">Actions</th></tr></thead><tbody id="adminRecordsBody">'+
+ (rows.length?rows.map((r,i)=>'<tr style="border-top:1px solid #ffffff16"><td style="padding:12px">'+esc(r.title)+'</td><td style="padding:12px">'+esc(r.owner||'—')+'</td><td style="padding:12px">'+esc(r.amount||'—')+'</td><td style="padding:12px"><span style="border:1px solid #ffffff25;padding:4px 8px;border-radius:14px">'+esc(r.status||'New')+'</span></td><td style="padding:12px;white-space:nowrap">'+(actionsAllowed?'<button type="button" data-record-action="status" data-record-index="'+i+'" class="icon-btn">Change status</button> <button type="button" data-record-action="delete" data-record-index="'+i+'" class="icon-btn">Delete</button>':'<span class="muted">Read only</span>')+'</td></tr>').join(''):'<tr><td colspan="5" style="padding:20px">No records yet. Add a demo record above.</td></tr>')+
+ '</tbody></table></div><p id="moduleMessage" class="muted" role="status" aria-live="polite"></p><button type="button" id="exportDemoRecords" class="icon-btn">Export visible records as CSV</button></div>';
+ const search=document.getElementById('adminRecordSearch');
+ if(search)search.addEventListener('input',()=>{const term=search.value.trim().toLowerCase();body.querySelectorAll('#adminRecordsBody tr').forEach(row=>row.classList.toggle('hidden',!row.textContent.toLowerCase().includes(term)));});
+ const reset=document.getElementById('resetDemoRecords');
+ if(reset)reset.addEventListener('click',()=>{if(!confirm('Reset only this browser’s sample records for '+view+'? Live Firebase records and real accounts will not be changed.'))return;const data=loadAdminData();delete data[view];saveAdminData(data);renderModule(view);});
+ const form=document.getElementById('moduleAddForm');
+ if(form)form.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(form);const data=loadAdminData();data[view]=getRecords(view);data[view].push({id:'record-'+Date.now(),title:String(fd.get('title')||'').trim(),owner:String(fd.get('owner')||'').trim(),amount:String(fd.get('amount')||'').trim(),status:view==='Email'?'Draft':view==='Notifications'?'Draft':view==='KYC'?'Pending':'New',createdAt:new Date().toISOString()});saveAdminData(data);renderModule(view);document.getElementById('moduleMessage').textContent='Demo record saved in this browser.';});
+ body.querySelectorAll('[data-record-action]').forEach(btn=>btn.addEventListener('click',()=>{const data=loadAdminData();data[view]=getRecords(view);const i=Number(btn.dataset.recordIndex);if(!data[view][i])return;if(btn.dataset.recordAction==='delete'){data[view].splice(i,1);}else{const cycle=['New','Pending','In review','Approved (demo)','Rejected (demo)','Completed (demo)'];const current=data[view][i].status||'New';data[view][i].status=cycle[(cycle.indexOf(current)+1+cycle.length)%cycle.length];}saveAdminData(data);renderModule(view);const msg=document.getElementById('moduleMessage');if(msg)msg.textContent='Demo record updated locally. No real transaction or account was changed.';}));
+ document.getElementById('exportDemoRecords').addEventListener('click',()=>{const csv=[['Record','Owner','Amount','Status'],...getRecords(view).map(r=>[r.title,r.owner,r.amount,r.status])].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=view.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-demo.csv';a.click();URL.revokeObjectURL(url);});
+}
+async function renderBrokerageRequests(){
+ const body=document.getElementById('detailBody'),api=window.__ocAdminFirebase;
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading brokerage requests…</p></div>';
+ if(!api){body.textContent='Firebase admin connection is not ready.';return;}
+ const {db,collection,getDocs,query,limit,doc,setDoc,serverTimestamp,auth}=api;
+ try{
+  let current=auth.currentUser;if(!current)throw new Error('Verified administrator sign-in required.');
+  await current.reload();current=auth.currentUser;
+  if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('Verified administrator sign-in required.');
+  await current.getIdToken(true);
+  const snap=await getDocs(query(collection(db,'brokerConnectionRequests'),limit(200))),rows=snap.docs.map(d=>({id:d.id,...d.data()}));
+  if(!rows.length){body.innerHTML='<div class="notice">No brokerage connection requests have been submitted.</div>';return;}
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  body.innerHTML='<div class="content-panel"><h3 style="margin-top:0">Brokerage connection requests</h3><p class="muted">Review customer eligibility. Marking a request eligible does not connect Alpaca or enable orders; provider authorization and secure server-side integration are still required.</p><div class="table-wrap"><table style="min-width:850px"><thead><tr><th>Customer</th><th>Provider</th><th>Submitted</th><th>Review status</th><th>Admin note</th><th>Action</th></tr></thead><tbody>'+rows.map(r=>{
+  const when=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'—',state=String(r.reviewStatus||'pending');
+  return '<tr><td>'+esc(r.fullName||'Customer')+'<br><small class="muted">'+esc(r.email||r.uid)+'</small></td><td>'+esc(r.provider||'Alpaca Broker API')+'</td><td>'+esc(when)+'</td><td><select data-broker-status="'+esc(r.id)+'" style="min-width:150px;padding:9px;border-radius:8px;background:#102333;color:white;border:1px solid #526878"><option value="pending" '+(state==='pending'?'selected':'')+'>Pending</option><option value="reviewing" '+(state==='reviewing'?'selected':'')+'>Reviewing</option><option value="eligible" '+(state==='eligible'?'selected':'')+'>Eligibility approved</option><option value="needs_info" '+(state==='needs_info'?'selected':'')+'>Needs information</option><option value="rejected" '+(state==='rejected'?'selected':'')+'>Not approved</option></select></td><td><input data-broker-note="'+esc(r.id)+'" maxlength="300" value="'+esc(r.adminNote||'')+'" placeholder="Optional note" style="min-width:180px;padding:9px;border-radius:8px;background:#102333;color:white;border:1px solid #526878"></td><td><button class="icon-btn" data-broker-save="'+esc(r.id)+'" style="background:#087b56;border:0">Save review</button></td></tr>';
+ }).join('')+'</tbody></table></div><p id="ocBrokerageAdminMessage" class="muted" role="status"></p></div>';
+ body.querySelectorAll('[data-broker-save]').forEach(btn=>btn.addEventListener('click',async()=>{
+  const id=btn.dataset.brokerSave,select=body.querySelector('[data-broker-status="'+id+'"]'),note=body.querySelector('[data-broker-note="'+id+'"]'),reviewStatus=select?.value||'pending';
+  if(!['pending','reviewing','eligible','needs_info','rejected'].includes(reviewStatus))return;
+  btn.disabled=true;btn.textContent='Saving…';
+  try{await setDoc(doc(db,'brokerConnectionRequests',id),{reviewStatus,adminNote:String(note?.value||'').slice(0,300),reviewedAt:serverTimestamp(),reviewedBy:current.email},{merge:true});const m=document.getElementById('ocBrokerageAdminMessage');if(m)m.textContent='Review saved. Customer status updates on refresh.';btn.textContent='Saved';}
+  catch(error){btn.disabled=false;btn.textContent='Save review';const m=document.getElementById('ocBrokerageAdminMessage');if(m)m.textContent='Could not save review: '+(error.code||error.message||'error');}
+ }));
+ }catch(error){body.innerHTML='<div class="notice">Could not load brokerage requests: '+String(error.code||error.message||'error').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))+'</div>';}
+}
+function showView(view){if(adminActivityUnsubscribe){adminActivityUnsubscribe();adminActivityUnsubscribe=null;}const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your Onchain administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent='';if(view==='Trade Controls')renderTradeControls();else if(view==='Brokerage')renderBrokerageRequests();else if(!isHome)renderModule(view);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+document.getElementById('menuToggle').addEventListener('click',()=>sidebar.classList.toggle('open'));
+document.getElementById('refreshBtn').addEventListener('click',()=>{const active=document.querySelector('[data-view].active')?.dataset.view||'Dashboard';showView(active);const b=document.getElementById('refreshBtn');b.textContent='✓ Refreshed';setTimeout(()=>b.textContent='↻ Refresh',1200);});
+document.getElementById('notifyBtn').addEventListener('click',()=>showView('Notifications'));
+document.getElementById('moreBtn').addEventListener('click',()=>showView('Settings'));
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, query, limit, doc, setDoc, deleteDoc, writeBatch, serverTimestamp, runTransaction, onSnapshot } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+const app=initializeApp({apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"});
+
+const auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
+window.__ocAdminFirebase={auth,db,collection,getDocs,query,limit,doc,setDoc,deleteDoc,writeBatch,serverTimestamp,runTransaction,onSnapshot};
+const safeText=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+window.adminGetLiveCollection=async function(view){
+ const body=byId('detailBody'),isUsers=view==='Users',collectionName=isUsers?'users':'kycSubmissions';
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading live Firebase data…</p></div>';
+ try{
+  const snap=await getDocs(query(collection(db,collectionName),limit(100))),rows=snap.docs.map(d=>({id:d.id,...d.data()}));
+  if(isUsers){
+   const heads=['Name','Email','Country','Firebase UID','Account status','Admin action'];
+   const html=rows.map(r=>{
+    const accountStatus=String(r.accountStatus||'active').toLowerCase()==='suspended'?'suspended':'active';
+    const actionLabel=accountStatus==='active'?'Suspend account':'Activate account';
+    const actionColor=accountStatus==='active'?'#8a3343':'#087b56';
+    return '<tr><td>'+safeText(r.displayName||[r.firstName,r.lastName].filter(Boolean).join(' ')||'—')+'</td><td>'+safeText(r.email||'—')+'</td><td>'+safeText(r.country||'—')+'</td><td>'+safeText(r.uid||r.id)+'</td><td><span style="display:inline-block;padding:4px 9px;border-radius:20px;background:'+(accountStatus==='active'?'#12372e':'#40242b')+';color:'+(accountStatus==='active'?'#6ee7b7':'#fda4af')+'">'+safeText(accountStatus.toUpperCase())+'</span></td><td><button type="button" class="oc-user-status-action icon-btn" data-uid="'+safeText(r.id)+'" data-status="'+accountStatus+'" style="background:'+actionColor+';border:0">'+actionLabel+'</button></td></tr>';
+   }).join('');
+   body.innerHTML='<div class="content-panel" style="margin:0"><h3>Live registered profiles</h3><p class="muted">Profiles read from Firestore; maximum 100 shown. New accounts default to ACTIVE until an admin changes their status.</p><strong>'+rows.length+' account(s) loaded</strong><div class="table-wrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(html||'<tr><td colspan="6">No registered accounts found.</td></tr>')+'</tbody></table></div><p id="ocUserAdminMessage" class="muted" role="status" aria-live="polite"></p></div>';
+   body.querySelectorAll('.oc-user-status-action').forEach(button=>button.addEventListener('click',async()=>{
+    const uid=button.dataset.uid,currentStatus=button.dataset.status,nextStatus=currentStatus==='active'?'suspended':'active',msg=byId('ocUserAdminMessage');
+    if(!uid||!['active','suspended'].includes(nextStatus))return;
+    if(!window.confirm((nextStatus==='suspended'?'Suspend':'Activate')+' this user account?'))return;
+    button.disabled=true;if(msg)msg.textContent='Saving account status…';
+    try{
+     const current=auth.currentUser;
+     if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('admin-session-not-authorized');
+     await setDoc(doc(db,'users',uid),{accountStatus:nextStatus,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:current.email},{merge:true});
+     if(msg)msg.textContent='Account status saved as '+nextStatus.toUpperCase()+'.';
+     await window.adminGetLiveCollection('Users');await window.adminRefreshDashboard();
+    }catch(error){button.disabled=false;if(msg)msg.textContent='Could not save account status ('+(error.code||error.message||'unknown error')+'). Check Firestore rules and administrator verification.';}
+   }));
+   return;
+  }
+  const pending=rows.filter(r=>(r.status||'pending')==='pending').length;
+  const html=rows.map(r=>{
+   const submitted=r.submittedAt&&typeof r.submittedAt.toDate==='function'?r.submittedAt.toDate().toLocaleString():'—',status=String(r.status||'pending');
+   const action=status==='pending'?'<button type="button" class="oc-kyc-review-action" data-kyc-action="approve" data-kyc-uid="'+safeText(r.id)+'">Approve</button> <button type="button" class="oc-kyc-review-action" data-kyc-action="reject" data-kyc-uid="'+safeText(r.id)+'">Reject</button>':'<span class="muted tiny">'+safeText(status)+'</span>';
+   return '<tr><td>'+safeText(r.legalName||'—')+'</td><td>'+safeText(r.email||'—')+'</td><td>'+safeText(r.country||'—')+'</td><td>'+safeText(r.documentType||'—')+'</td><td>'+safeText(r.documentNumber||'—')+'</td><td>'+safeText(status)+'</td><td>'+safeText(submitted)+'</td><td>'+action+'</td></tr>';
+  }).join('');
+  body.innerHTML='<div class="content-panel" style="margin:0"><h3>Identity verification review</h3><p class="muted">Check the submitted details before approving. ID images are not uploaded by this form.</p><strong>'+pending+' pending · '+rows.length+' total record(s)</strong><div class="table-wrap"><table><thead><tr>'+['Legal name','Email','Country','Document type','Document number','Status','Submitted','Admin action'].map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(html||'<tr><td colspan="8">No identity verification submissions found.</td></tr>')+'</tbody></table></div><p id="ocAdminKycMessage" class="muted tiny" role="status"></p></div>';
+  body.querySelectorAll('.oc-kyc-review-action').forEach(button=>button.addEventListener('click',async()=>{
+   const uid=button.dataset.kycUid,action=button.dataset.kycAction;if(!uid||!['approve','reject'].includes(action))return;
+   if(!window.confirm('Are you sure you want to '+action+' this identity verification submission?'))return;
+   const msg=byId('ocAdminKycMessage');button.disabled=true;if(msg)msg.textContent='Saving review decision…';
+   try{
+    const current=auth.currentUser;if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('admin-session-not-authorized');
+    await setDoc(doc(db,'kycSubmissions',uid),{status:action==='approve'?'approved':'rejected',reviewedAt:serverTimestamp(),reviewedBy:current.email,updatedAt:serverTimestamp()},{merge:true});
+    await setDoc(doc(collection(db,'userNotifications',uid,'items')),{kind:action==='approve'?'kyc_approved':'kyc_rejected',title:action==='approve'?'Identity verification approved':'Identity verification not approved',message:action==='approve'?'Your identity verification was approved. Your account now shows Successfully Verified.':'Your identity verification was not approved. Please review your details and resubmit them.',createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:current.uid});
+    if(msg)msg.textContent=action==='approve'?'Approved. The user will now see Successfully Verified.':'Rejected. The user can correct and resubmit.';
+    await window.adminGetLiveCollection('KYC');await window.adminRefreshDashboard();
+   }catch(error){button.disabled=false;if(msg)msg.textContent='Could not save decision ('+(error.code||error.message||'unknown error')+'). Check admin access and Firestore rules.';}
+  }));
+ }catch(error){body.innerHTML='<div class="notice"><strong>Could not load live '+(isUsers?'profiles':'KYC submissions')+'.</strong><p>Firebase denied access or Firestore is unavailable ('+safeText(error.code||'unknown error')+'). Check administrator access and Firestore rules.</p></div>';}
+};
+window.adminRefreshDashboard=async function(){
+ const api=window.__ocAdminFirebase;
+ if(api&&auth.currentUser){
+  // Keep the notification badge current even when the activity page is closed.
+  if(window.__ocActivityBadgeUnsubscribe)window.__ocActivityBadgeUnsubscribe();
+  window.__ocActivityBadgeUnsubscribe=onSnapshot(query(collection(db,'adminActivityLogs'),limit(250)),snap=>{
+   const count=snap.size,badge=document.querySelector('#sideNav [data-view="Notifications"] .pill'),top=document.querySelector('#notifyBtn b');
+   if(badge)badge.textContent=String(count);if(top)top.textContent=String(count);
+  },error=>console.warn('Admin activity badge unavailable:',error.code||error));
+ }
+ const users=byId('liveUsersCount'),kyc=byId('liveKycCount'),status=byId('dashboardDataStatus'),updated=byId('dashboardUpdatedAt'),totalAssets=byId('liveTotalDemoAssets'),totalAssetsStatus=byId('liveTotalDemoAssetsStatus'),depositCount=byId('liveDepositRequests'),withdrawCount=byId('liveWithdrawalRequests');
+ if(!users||!kyc||!status||!updated)return;
+ status.textContent='Loading';updated.textContent='Connecting to Firestore…';
+ try{
+  const results=await Promise.all([getDocs(query(collection(db,'users'),limit(1000))),getDocs(query(collection(db,'kycSubmissions'),limit(100))),getDocs(query(collection(db,'depositRequests'),limit(500))),getDocs(query(collection(db,'withdrawRequests'),limit(500)))]);
+  const u=results[0],k=results[1],d=results[2],w=results[3];
+  const dp=d.docs.filter(x=>(x.data().status||'pending')==='pending').length,wp=w.docs.filter(x=>(x.data().status||'pending')==='pending').length;
+  if(depositCount)depositCount.textContent=String(dp);if(withdrawCount)withdrawCount.textContent=String(wp);
+  if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Firestore connected · '+d.size+' total request(s)';
+  if(byId('liveWithdrawalStatus'))byId('liveWithdrawalStatus').textContent='Firestore connected · '+w.size+' total request(s)';
+  users.textContent=u.size===1000?'1000+':String(u.size);
+  byId('liveUsersStatus').textContent=u.size===1000?'1000 profiles loaded (display capped)':'Live profile records loaded';
+  const pending=k.docs.filter(d=>(d.data().status||'pending')==='pending').length;
+  kyc.textContent=k.size===100&&pending===k.size?'100+':String(pending);
+  byId('liveKycStatus').textContent=k.size===100?'Pending count from first 100 KYC records':'Pending submissions from Firestore';
+  const demoTotal=u.docs.reduce((sum,d)=>{const data=d.data()||{};const n=Number(data.demoBalanceUSDT||0);return sum+(Number.isFinite(n)&&n>0?n:0);},0);
+  if(totalAssets)totalAssets.textContent=demoTotal.toLocaleString(undefined,{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
+  if(totalAssetsStatus)totalAssetsStatus.textContent='Sum of user practice USDT balances; not real customer funds'+(u.size===1000?' (first 1000 profiles only)':'');
+  status.textContent='Connected';updated.textContent='Last updated '+new Date().toLocaleTimeString();
+ }catch(error){
+  users.textContent='—';kyc.textContent='—';status.textContent='Unavailable';updated.textContent='Firestore access failed: '+(error.code||'unknown error');
+  if(totalAssets)totalAssets.textContent='Unavailable';
+  if(totalAssetsStatus)totalAssetsStatus.textContent='Could not read practice wallet records';
+  byId('liveUsersStatus').textContent='Admin access or Firestore rules need attention';byId('liveKycStatus').textContent='Could not retrieve KYC records';if(depositCount)depositCount.textContent='Unavailable';if(withdrawCount)withdrawCount.textContent='Unavailable';if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Could not read Firestore requests';if(byId('liveWithdrawalStatus'))byId('liveWithdrawalStatus').textContent='Could not read Firestore requests';if(depositCount)depositCount.textContent='Unavailable';if(withdrawCount)withdrawCount.textContent='Unavailable';if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Could not read Firestore requests';if(byId('liveWithdrawalStatus'))byId('liveWithdrawalStatus').textContent='Could not read Firestore requests';
+ }
+};
+byId("adminSignIn").addEventListener("click",async()=>{
+ const email=byId("adminEmail").value.trim(),password=byId("adminPassword").value;
+ byId("adminAuthMessage").textContent="Checking your account…";byId("adminSignIn").disabled=true;
+ try{await signInWithEmailAndPassword(auth,email,password);byId("adminPassword").value="";}
+ catch(error){
+  const messages={
+   "auth/invalid-credential":"Email or password is incorrect. Use Forgot password below if needed.",
+   "auth/wrong-password":"Password is incorrect. Use Forgot password below to reset it.",
+   "auth/user-not-found":"No account found for this email. Check Authentication → Users in Firebase Console.",
+   "auth/invalid-email":"Enter a valid email address.",
+   "auth/too-many-requests":"Too many attempts. Wait a while before trying again.",
+   "auth/network-request-failed":"Network error. Check your internet connection and try again.",
+   "auth/operation-not-allowed":"Email/Password sign-in is disabled. Enable it in Firebase Console → Authentication → Sign-in method.",
+   "auth/unauthorized-domain":"This website domain is not authorized. Add getachew21injuni-bot.github.io under Firebase Authentication → Settings → Authorized domains."
+  };
+  byId("adminAuthMessage").textContent=messages[error.code]||("Sign-in failed ("+(error.code||"unknown-error")+"). Check Firebase Authentication settings.");
+ }
+ finally{byId("adminSignIn").disabled=false;}
+});
+byId("adminResetPassword").addEventListener("click",async()=>{
+ const email=byId("adminEmail").value.trim();
+ if(!email){byId("adminAuthMessage").textContent="Enter your account email first.";return;}
+ byId("adminAuthMessage").textContent="Sending password reset email…";
+ try{
+  await sendPasswordResetEmail(auth,email);
+  byId("adminAuthMessage").textContent="If this email is registered, a password reset email has been sent. Check inbox and spam.";
+ }catch(error){
+  const messages={"auth/invalid-email":"Enter a valid email address.","auth/user-not-found":"No account found for this email.","auth/unauthorized-continue-uri":"Firebase password-reset URL configuration needs attention."};
+  byId("adminAuthMessage").textContent=messages[error.code]||("Could not send reset email ("+(error.code||"unknown-error")+").");
+ }
+});
+byId("adminSignOut").addEventListener("click",()=>signOut(auth));
+onAuthStateChanged(auth,async user=>{
+ byId("adminWorkspace").classList.add("locked");byId("adminAuthGate").classList.remove("hidden");byId("adminSignOut").classList.add("hidden");
+ if(!user){byId("authState").textContent="Admin sign-in required";return;}
+ try{
+  const adminEmail="getachew21.INJ.UNI@gmail.com".toLowerCase();
+  if((user.email||"").toLowerCase()!==adminEmail){byId("authState").textContent="Access denied";byId("adminAuthMessage").textContent="This account is not the designated administrator. Sign in with getachew21.INJ.UNI@gmail.com.";await signOut(auth);return;} if(!user.emailVerified){byId("authState").textContent="Verify admin email";byId("adminAuthMessage").textContent="Verify the administrator email address before viewing live user or KYC records, then sign in again.";return;}
+  byId("authState").textContent="Admin email recognized";byId("adminAuthGate").classList.add("hidden");byId("adminWorkspace").classList.remove("locked");byId("adminSignOut").classList.remove("hidden");await window.adminRefreshDashboard();
+ }catch(error){byId("authState").textContent="Access check failed";byId("adminAuthMessage").textContent="Could not verify administrator permissions. Access remains locked.";await signOut(auth);}
+});
+</script>
+<script type="module" src="./support-admin.js"></script>
+
+<script id="oc-admin-forward-step-navigation">
+(function(){
+ "use strict";
+ if(window.__ocAdminForwardNavigation)return;
+ window.__ocAdminForwardNavigation=true;
+ function forward(el){
+  if(!el||el.disabled||!el.getClientRects().length)return;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   const r=el.getBoundingClientRect();if(r.top<=innerHeight*.72)return;
+   const d=r.top-innerHeight*.68;if(d>0)scrollBy({top:d,behavior:"smooth"});
+  }));
+ }
+ const sequences={
+  demoFinanceForm:["uid","asset","amount","note"],
+  walletAddressForm:["asset","network","depositAddress","qrCodeUrl","qrImageFile","withdrawalAddress"],
+  moduleAddForm:["title","owner","amount"]
+ };
+ function next(el){
+  const form=el.closest("form");if(!form||!sequences[form.id])return null;
+  const names=sequences[form.id],i=names.indexOf(el.name||el.id);
+  for(let n=i+1;n<names.length;n++){
+   const target=form.querySelector('[name="'+names[n]+'"],#'+names[n]);
+   if(target&&!target.disabled&&target.getClientRects().length)return target;
+  }
+  return form.querySelector('button[type="submit"]');
+ }
+ function advance(el){
+  if(!el||el.disabled)return;
+  if(el.type==="file"&&!(el.files&&el.files.length))return;
+  if(el.required&&!el.checkValidity())return;
+  if(el.tagName==="SELECT"&&!el.value)return;
+  if(el.type!=="file"&&!String(el.value||"").trim())return;
+  forward(next(el));
+ }
+ document.addEventListener("blur",e=>{if(e.target instanceof HTMLElement)advance(e.target)},true);
+ document.addEventListener("change",e=>{if(e.target instanceof HTMLElement&&(e.target.matches("select")||e.target.type==="file"))advance(e.target)},true);
+})();
+</script>
+
+</body>
+</html>
