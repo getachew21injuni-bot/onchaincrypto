@@ -1316,6 +1316,80 @@ body.oc-logged-out #page-register .auth-main-panel button.full { width:100%!impo
 }
 </style>
 
+<style id="oc-login-page-isolation-cleanup">
+/* One layout and visibility authority for the dedicated authentication page. */
+[hidden], .hidden { display:none !important; }
+body.oc-logged-out.oc-auth-screen main > section[id^="page-"]:not(#page-register),
+html.oc-auth-pending main > section[id^="page-"]:not(#page-register) {
+  display:none !important;
+}
+body.oc-logged-out.oc-auth-screen main > #page-register,
+html.oc-auth-pending main > #page-register {
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:12px !important;
+  width:100% !important;
+  max-width:520px !important;
+  min-height:100vh !important;
+  margin:0 auto !important;
+  padding:24px 16px !important;
+  grid-template-columns:none !important;
+}
+body.oc-logged-out.oc-auth-screen #page-register > .oc-public-auth-hero,
+html.oc-auth-pending #page-register > .oc-public-auth-hero { display:none !important; }
+body.oc-logged-out.oc-auth-screen #page-register > .auth-welcome,
+html.oc-auth-pending #page-register > .auth-welcome {
+  display:block !important;
+  width:100% !important;
+  margin:0 !important;
+  text-align:center !important;
+}
+body.oc-logged-out.oc-auth-screen #page-register > .content-grid,
+html.oc-auth-pending #page-register > .content-grid {
+  display:block !important;
+  width:100% !important;
+  max-width:480px !important;
+  margin:0 !important;
+}
+body.oc-logged-out.oc-auth-screen #page-register .auth-main-panel,
+html.oc-auth-pending #page-register .auth-main-panel {
+  display:block !important;
+  width:100% !important;
+  max-width:480px !important;
+  min-height:0 !important;
+  margin:0 !important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm:not(.hidden),
+body.oc-logged-out.oc-auth-screen #page-register #registerForm:not(.hidden),
+html.oc-auth-pending #page-register #signInForm:not(.hidden) {
+  display:block !important;
+  width:100% !important;
+}
+body.oc-logged-out.oc-auth-screen #page-register #signInForm.hidden,
+body.oc-logged-out.oc-auth-screen #page-register #registerForm.hidden,
+body.oc-logged-out.oc-auth-screen #page-register #authChoicePanel.hidden,
+body.oc-logged-out.oc-auth-screen #page-register #googleSignInBtn.hidden,
+html.oc-auth-pending #page-register #registerForm,
+html.oc-auth-pending #page-register #authChoicePanel {
+  display:none !important;
+}
+body.oc-logged-out.oc-auth-screen > header,
+body.oc-logged-out.oc-auth-screen > footer,
+body.oc-logged-out.oc-auth-screen > #bottomNav,
+body.oc-logged-out.oc-auth-screen > nav,
+html.oc-auth-pending body > header,
+html.oc-auth-pending body > footer,
+html.oc-auth-pending body > #bottomNav,
+html.oc-auth-pending body > nav {
+  display:none !important;
+}
+@media(max-width:680px) {
+  body.oc-logged-out.oc-auth-screen main > #page-register,
+  html.oc-auth-pending main > #page-register { padding:12px 8px !important; }
+}
+</style>
 </head>
 <body>
 <header>
@@ -8805,66 +8879,9 @@ html:not(.oc-light-theme) .oc-theme-toggle{
 }
 </style>
 
-<style id="oc-auth-form-only-on-login-page">
-/* Keep sign-in and registration forms exclusively on the dedicated Login page. */
-main .auth-welcome,
-main .auth-main-panel,
-main #signInForm,
-main #registerForm,
-main #authChoicePanel,
-main #googleSignInBtn,
-main .auth-google-hint,
-main #authPhoneDivider,
-main #phoneRegistrationPanel,
-main #authModeIntro {
-  display:none !important;
-}
-#page-register .auth-welcome,
-#page-register .auth-main-panel {
-  display:block !important;
-}
-#page-register #signInForm,
-#page-register #registerForm,
-#page-register #authChoicePanel,
-#page-register #googleSignInBtn,
-#page-register .auth-google-hint,
-#page-register #authPhoneDivider,
-#page-register #phoneRegistrationPanel,
-#page-register #authModeIntro {
-  display:block !important;
-}
-</style>
 
-<style id="oc-login-page-only-final">
-/* Sign-in and registration UI belongs only on the dedicated Login page. */
-main .auth-welcome,
-main .auth-main-panel,
-main #signInForm,
-main #registerForm,
-main #authChoicePanel,
-main #googleSignInBtn,
-main .auth-google-hint,
-main #authPhoneDivider,
-main #phoneRegistrationPanel,
-main #authModeIntro,
-main .oc-visitor-account-gate {
-  display:none !important;
-}
-#page-register .auth-welcome,
-#page-register .auth-main-panel {
-  display:block !important;
-}
-#page-register #signInForm,
-#page-register #registerForm,
-#page-register #authChoicePanel,
-#page-register #googleSignInBtn,
-#page-register .auth-google-hint,
-#page-register #authPhoneDivider,
-#page-register #phoneRegistrationPanel,
-#page-register #authModeIntro {
-  display:block !important;
-}
-</style>
+
+
 
 <style id="oc-gold-theme-full-contrast">
 /* Consistent gold canvas with separated, readable surfaces in dark mode. */
@@ -11049,58 +11066,7 @@ body.oc-logged-out.oc-auth-screen #page-register #registerForm.hidden,
 body.oc-logged-out.oc-auth-screen #page-register #signInForm.hidden,
 body.oc-logged-out.oc-auth-screen #page-register #googleSignInBtn.hidden{display:none!important}
 </style>
-<script id="oc-auth-blank-page-guard-script">
-(function(){
-  function syncAuthPage(){
-    const body=document.body;
-    if(!body||!body.classList.contains('oc-auth-screen'))return;
-    const creating=body.classList.contains('oc-register-mode');
-    const page=document.getElementById('page-register');
-    const register=document.getElementById('registerForm');
-    const login=document.getElementById('signInForm');
-    const choices=document.getElementById('authChoicePanel');
-    const google=document.getElementById('googleSignInBtn');
-    if(page){page.classList.remove('hidden');page.hidden=false;page.style.setProperty('display','block','important');page.style.setProperty('visibility','visible','important')}
-    if(choices){choices.classList.add('hidden');choices.hidden=true;choices.style.setProperty('display','none','important')}
-    if(register){
-      register.classList.toggle('hidden',!creating);register.hidden=!creating;
-      register.style.setProperty('display',creating?'block':'none','important');
-      register.style.setProperty('visibility',creating?'visible':'hidden','important');
-      register.querySelectorAll('input,select,textarea,button').forEach(el=>el.disabled=!creating);
-    }
-    if(login){
-      login.classList.toggle('hidden',creating);login.hidden=creating;
-      login.style.setProperty('display',creating?'none':'block','important');
-      login.style.setProperty('visibility',creating?'hidden':'visible','important');
-      login.querySelectorAll('input,select,textarea,button').forEach(el=>el.disabled=creating);
-    }
-    if(google){google.classList.add('hidden');google.hidden=true;google.style.setProperty('display','none','important')}
-    const hint=document.querySelector('#page-register .auth-google-hint');
-    if(hint){hint.classList.add('hidden');hint.hidden=true;hint.style.setProperty('display','none','important')}
-    const heading=document.getElementById('authHeading');
-    if(heading)heading.textContent=creating?'Create your Onchain account':'Welcome back to Onchain';
-  }
-  function start(){
-    syncAuthPage();
-    const observer=new MutationObserver(syncAuthPage);
-    observer.observe(document.body,{attributes:true,attributeFilter:['class']});
-    document.addEventListener('click',function(event){
-      const target=event.target instanceof Element?event.target:null;
-      if(!target)return;
-      if(target.closest('#authChoiceRegister,#showRegisterBtn')){
-        document.body.classList.add('oc-auth-screen','oc-register-mode');
-        setTimeout(syncAuthPage,0);
-      }else if(target.closest('#authChoiceLogin,#registerLoginBtn,#showSignInBtn')){
-        document.body.classList.add('oc-auth-screen');
-        document.body.classList.remove('oc-register-mode');
-        setTimeout(syncAuthPage,0);
-      }
-    },true);
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
-  else start();
-})();
-</script>
+
 
 
 <!-- Onchain unified mobile auth screen: final visibility and form-switch layer. -->
