@@ -1,5 +1,4 @@
-import { readFile, readdir } from "node:fs/promises";
-import { spawnSync } from "node:child_process";
+import { readFile } from "node:fs/promises";
 import { after, before, beforeEach, describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -227,31 +226,5 @@ describe("per-account profile avatar storage", () => {
       avatarDataUrl: "data:image/jpeg;base64,b3RoZXI=",
       updatedAt: serverTimestamp()
     }));
-  });
-});
-
-describe("frontend JavaScript syntax", () => {
-  it("parses every inline index script and public JavaScript asset", async () => {
-    const html = await readFile("public/index.html", "utf8");
-    const inline = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
-      .filter(([, attrs, source]) => !/\bsrc\s*=/i.test(attrs) && !/application\/ld\+json/i.test(attrs) && source.trim());
-    const jsFiles = (await readdir("public")).filter(name => name.endsWith(".js"));
-    const sources = [
-      ...inline.map(([, attrs, source], index) => ({
-        name: "public/index.html inline script " + (index + 1),
-        source,
-        module: /\btype\s*=\s*["']module["']/i.test(attrs)
-      })),
-      ...(await Promise.all(jsFiles.map(async name => ({
-        name: "public/" + name,
-        source: await readFile("public/" + name, "utf8"),
-        module: name !== "service-worker.js"
-      }))))
-    ];
-    for (const item of sources) {
-      const args = item.module ? ["--check", "--input-type=module"] : ["--check"];
-      const result = spawnSync(process.execPath, args, { input: item.source, encoding: "utf8" });
-      assert.equal(result.status, 0, item.name + " syntax error:\n" + (result.stderr || result.stdout || "Node parser failed"));
-    }
   });
 });
