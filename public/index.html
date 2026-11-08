@@ -8710,7 +8710,12 @@ byId("ocVerifyDeleteCode")?.addEventListener("click",async()=>{
   }
   network.disabled=false;
   choices.forEach(key=>{const option=document.createElement("option");option.value=key;option.textContent=optionLabels[key]||key;network.appendChild(option)});
-  network.value=choices.includes(previous)?previous:choices[0];
+  const evmChoices=choices.filter(key=>["Ethereum","ERC20","BEP20","Polygon","Avalanche","EthereumClassic"].includes(key));
+  if(choices.includes(previous))network.value=previous;
+  else network.value=evmChoices.length>1?"":choices[0];
+  if(network.value===""){
+   const option=document.createElement("option");option.value="";option.textContent="Select the exact network";option.selected=true;network.insertBefore(option,network.firstChild);
+  }
  }
  function detect(value){
   const candidates=[];
@@ -8732,11 +8737,11 @@ byId("ocVerifyDeleteCode")?.addEventListener("click",async()=>{
   const detected=detect(value);
   if(detected&&choices.includes(detected)&&network.value!==detected){network.value=detected;}
   const net=network.value,re=patterns[net];
-  if(!choices.includes(net)){output.textContent="Choose a network supported for "+symbol()+".";output.dataset.state="invalid";return false}
+  if(!choices.includes(net)){output.textContent=choices.length>1&&/^0x[a-fA-F0-9]{40}$/.test(value)?"Choose the exact network shown by the receiving wallet.":"Choose a network supported for "+symbol()+".";output.dataset.state="invalid";return false}
   if(!re||!re.test(value)){output.textContent="Address format does not match the selected network.";output.dataset.state="invalid";return false}
   const evmChoices=choices.filter(key=>["Ethereum","ERC20","BEP20","Polygon","Avalanche","EthereumClassic"].includes(key));
   if(/^0x[a-fA-F0-9]{40}$/.test(value)&&evmChoices.length>1){
-   output.textContent="Address format matches EVM networks. Confirm the exact network with the receiving wallet.";
+   output.textContent="EVM address format matches. Verify that "+(optionLabels[net]||net)+" is selected at the receiving wallet.";
   }else{
    output.textContent="Address format matches "+(optionLabels[net]||net)+".";
   }
