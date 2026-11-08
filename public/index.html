@@ -461,72 +461,6 @@ body:not(.oc-logged-out) #ocVisitorActions {display:none!important}
 body:not(.oc-logged-out) #page-home > .oc-get-started-hero {display:none!important}
 </style>
 
-<style id="oc-visitor-clean-header">
-/* Visitor landing page: no member navigation; keep the brand and clear account actions. */
-body:has(#page-public-market:not(.hidden)) header {
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  flex-wrap:nowrap!important;
-  gap:12px!important;
-}
-body:has(#page-public-market:not(.hidden)) header #nav {
-  display:none!important;
-}
-body:has(#page-public-market:not(.hidden)) header .brand {
-  justify-self:auto!important;
-  flex:0 1 auto;
-}
-body:has(#page-public-market:not(.hidden)) header .header-right {
-  display:flex!important;
-  align-items:center!important;
-  justify-content:flex-end!important;
-  gap:9px!important;
-  margin-left:auto!important;
-}
-body:has(#page-public-market:not(.hidden)) header #ocVisitorActions {
-  display:flex!important;
-  align-items:center!important;
-  gap:9px!important;
-}
-body:has(#page-public-market:not(.hidden)) header #ocVisitorActions button {
-  min-width:94px!important;
-  min-height:40px!important;
-  padding:10px 15px!important;
-  opacity:1!important;
-  visibility:visible!important;
-  font-size:13px!important;
-  font-weight:750!important;
-}
-body:has(#page-public-market:not(.hidden)) header #ocVisitorActions .primary {
-  background:#d6a84f!important;
-  color:#111820!important;
-  border:1px solid #edc875!important;
-}
-body:has(#page-public-market:not(.hidden)) header #ocVisitorActions .secondary {
-  background:#142a40!important;
-  color:#f3f7fb!important;
-  border:1px solid #55708b!important;
-}
-@media(max-width:600px) {
-  body:has(#page-public-market:not(.hidden)) header {
-    padding:10px 12px!important;
-    min-height:62px!important;
-  }
-  body:has(#page-public-market:not(.hidden)) header .brand {
-    font-size:17px!important;
-  }
-  body:has(#page-public-market:not(.hidden)) header #ocVisitorActions {
-    gap:6px!important;
-  }
-  body:has(#page-public-market:not(.hidden)) header #ocVisitorActions button {
-    min-width:72px!important;
-    padding:9px 10px!important;
-    font-size:11px!important;
-  }
-}
-</style>
-
 <style id="oc-binance-bitcoin-theme">
 :root{
   --bg:#0b0e11;--panel:#181a20;--panel2:#20242c;--line:#343a40;
@@ -898,8 +832,6 @@ html.oc-light-theme .oc-theme-toggle{background:#fff!important;color:#b8860b!imp
  html.oc-light-theme .panel,html.oc-light-theme .card{box-shadow:0 3px 12px rgba(30,35,41,.04)!important}
 }
 </style>
-<style id="oc-visitor-private-page-guard">/* Public visitors see only the public market overview; account screens and internal navigation remain private. */body.oc-visitor-mode main>section[id^="page-"]:not(#page-public-market):not(#page-register){display:none!important;visibility:hidden!important}body.oc-visitor-mode #nav,body.oc-visitor-mode #bottomNav,body.oc-visitor-mode #moreMenuBtn,body.oc-visitor-mode #refreshBtn,body.oc-visitor-mode #ocBackBtn{display:none!important}body.oc-visitor-mode .header-right{display:flex;align-items:center;gap:8px}body.oc-visitor-mode #ocVisitorActions{display:flex!important;align-items:center;gap:8px}body.oc-visitor-mode #moreMenu{display:none!important}body.oc-visitor-mode main>#page-public-market.hidden{display:none!important}body.oc-visitor-mode #ocVisitorSupportBot{display:block!important;right:18px!important;bottom:18px!important;z-index:99999!important}body.oc-visitor-mode #ocVisitorSupportBot .oc-support-panel{bottom:68px!important}body.oc-visitor-mode #ocVisitorSupportBot .oc-support-launch{display:grid!important}@media(max-width:560px){body.oc-visitor-mode #ocVisitorSupportBot{right:14px!important;bottom:calc(16px + env(safe-area-inset-bottom))!important}}</style>
-
 <style id="oc-stock-crypto-quick-style">.oc-stock-brand-card{cursor:pointer;transition:border-color .18s,transform .18s,background .18s}.oc-stock-brand-card:hover,.oc-stock-brand-card.selected,.oc-stock-brand-card[aria-pressed="true"]{border-color:var(--oc-gold,#d9ad55);background:rgba(217,173,85,.09);transform:translateY(-1px)}.oc-stock-brand-card:focus-visible{outline:2px solid var(--oc-gold,#d9ad55);outline-offset:3px}.oc-stock-order-summary a{color:var(--oc-gold,#e5bd67);text-decoration:none}.oc-crypto-quick-picks{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}.oc-crypto-quick-picks button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:8px 13px;font-weight:700}.oc-crypto-quick-picks button:hover{border-color:var(--yellow);color:var(--yellow)}</style>
 <style id="oc-home-promo-and-simple-auth-layout">
 #page-home .oc-home-promo-hero{grid-template-columns:minmax(0,1.08fr) minmax(280px,.92fr);gap:18px;min-height:450px}
@@ -1418,7 +1350,7 @@ html.oc-auth-pending body > nav {
       <h1>Your markets. Your insights. <em>Onchain.</em></h1>
       <p>Explore Bitcoin, Ethereum, Gold and leading digital assets. Follow market prices, compare performance and discover useful tools in one streamlined platform.</p>
 
-      <div class="oc-visitor-hero-actions"><button type="button" class="primary" id="ocVisitorHeroSignup">Create account</button><button type="button" class="secondary" id="ocVisitorHeroLogin">Login</button></div>
+      
       <div class="oc-visitor-proof"><span>● Public market prices</span><span>◆ Crypto + Gold</span><span>▤ Charts & market insights</span></div>
     </div>
     <div class="oc-visitor-visual" aria-label="Onchain floating market showcase with signal indicators">
@@ -1431,7 +1363,7 @@ html.oc-auth-pending body > nav {
         <div class="oc-visitor-phone">
         <div class="oc-visitor-phone-top"><span><b class="oc-visitor-mini-mark oc-onchain-round-mark">B</b> ONCHAIN</span><i></i></div>
         <div class="oc-visitor-device-subhead"><span>MARKETS</span><span>OVERVIEW</span><span>⋯</span></div>
-        <div class="oc-visitor-total-balance"><div><small>PORTFOLIO OVERVIEW</small><span class="oc-visitor-balance-live">● OVERVIEW</span></div><strong>Portfolio overview</strong><small class="oc-visitor-balance-caption">Account overview · no account balance shown</small></div>
+        <div class="oc-visitor-total-balance"><div><small>MARKET OVERVIEW</small><span class="oc-visitor-balance-live">● OVERVIEW</span></div><strong>Live market overview</strong><small class="oc-visitor-balance-caption">Crypto · Gold · market insights</small></div>
         <div class="oc-visitor-phone-asset"><div><small>BTC / USDT</small><strong id="ocVisitorHeroPrice">$25,478</strong></div><span id="ocVisitorHeroChange">Market overview</span></div>
         <div class="oc-visitor-phone-chart">
           <svg viewBox="0 0 420 170" role="img" aria-label="Market chart"><defs><linearGradient id="ocVisitorChartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#16d9a0" stop-opacity=".26"/><stop offset="1" stop-color="#16d9a0" stop-opacity="0"/></linearGradient></defs><path d="M0 135H420M0 90H420M0 45H420" stroke="#29435b" stroke-width="1" stroke-dasharray="4 6"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59 207 73 232 49 258 62 282 39 308 48 332 25 356 42 382 15 410 23V170H8Z" fill="url(#ocVisitorChartFill)"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59" fill="none" stroke="#16d9a0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M181 59L207 73 232 49 258 62 282 39" fill="none" stroke="#ff5573" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M282 39L308 48 332 25 356 42 382 15 410 23" fill="none" stroke="#16d9a0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><g stroke-width="3"><path d="M35 104V137m-5-23h10" stroke="#16d9a0"/><path d="M84 79v35m-5-25h10" stroke="#16d9a0"/><path d="M132 65v37m-5-25h10" stroke="#16d9a0"/><path d="M181 45v40m-5-25h10" stroke="#16d9a0"/><path d="M232 33v38m-5-22h10" stroke="#ff5573"/><path d="M282 24v37m-5-22h10" stroke="#ff5573"/><path d="M332 10v40m-5-25h10" stroke="#16d9a0"/><path d="M382 2v34m-5-20h10" stroke="#16d9a0"/></g></svg>
@@ -1439,7 +1371,7 @@ html.oc-auth-pending body > nav {
         <div class="oc-visitor-signal"><span class="oc-visitor-signal-dot"></span><div class="oc-visitor-signal-copy"><b>BTC MARKET SIGNALS</b><small>Market direction indicators</small></div><div class="oc-visitor-signal-pills"><span class="oc-signal-up">▲ UP</span><span class="oc-signal-down">▼ DOWN</span></div></div>
         <div class="oc-visitor-device-brandline"><span>ONCHAIN</span><strong>Get Onchain</strong></div>
         <div class="oc-visitor-phone-foot"><span>PRICE</span><span>24H CHANGE</span><span>MARKET WATCH</span></div>
-        <div class="oc-visitor-device-nav"><span class="active"><b>⌂</b>Home</span><span><b>⌁</b>Markets</span><span><b>⇄</b>Trade</span></div>
+        <div class="oc-visitor-device-nav"><span class="active"><b>⌁</b>Markets</span><span><b>⌖</b>Charts</span><span><b>◷</b>Insights</span></div>
         </div>
        </div>
        <div class="oc-visitor-device-side"></div>
@@ -1465,100 +1397,15 @@ html.oc-auth-pending body > nav {
       <div class="oc-visitor-detail-head"><div><div class="oc-visitor-kicker">ASSET OVERVIEW</div><h3 id="ocVisitorDetailName">Bitcoin</h3><span id="ocVisitorDetailSymbol">BTC / USD</span></div><button type="button" class="secondary" id="ocVisitorDetailClose" aria-label="Close asset details">✕</button></div>
       <div class="oc-visitor-detail-stats"><div><small>Current price</small><strong id="ocVisitorDetailPrice">—</strong></div><div><small>24H change</small><strong id="ocVisitorDetailChange">—</strong></div><div><small>Market cap</small><strong id="ocVisitorDetailCap">—</strong></div></div>
       <div class="oc-visitor-chart-wrap"><iframe id="ocVisitorTradingChart" title="Selected asset price chart" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-      <div class="oc-visitor-detail-action"><p>Ready to get started? Create your Onchain account and explore your personal trading workspace.</p><button type="button" class="primary" id="ocVisitorDetailBuy">Buy <span id="ocVisitorBuySymbol">BTC</span></button></div>
+      
     </section>
   </section>
 
-  <section class="oc-visitor-about">
-    <div><div class="oc-visitor-kicker">ABOUT ONCHAIN</div><h2>One destination to explore crypto, Gold and market insights.</h2><p>Onchain brings crypto and Gold market discovery, asset conversion tools, interactive charts and selected US stock information together in one clear experience. Explore supported assets, compare market prices, follow market movements and discover useful tools in one place.</p><div class="oc-visitor-about-actions"><button type="button" class="primary" id="ocVisitorAboutSignup">Join Onchain</button><button type="button" class="secondary" id="ocVisitorAboutExplore">View markets</button></div></div>
-    <div class="oc-visitor-feature-grid"><article><b>◷</b><h3>Market tracking</h3><p>Explore supported crypto markets, compare available prices and follow daily market movements.</p></article><article><b>⌁</b><h3>Market signals</h3><p>Explore momentum insights derived from price and volume data.</p></article><article><b>◉</b><h3>Crypto + Gold</h3><p>Discover supported digital assets and Gold (XAU) market information.</p></article><article><b>▣</b><h3>Simple experience</h3><p>Move easily from market discovery to your personal Onchain workspace.</p></article></div>
+  
+  
+  
+
   </section>
-  <section class="oc-visitor-products" id="oc-visitor-products-roadmap" aria-label="Onchain products and services">
-    <div class="oc-visitor-products-heading"><div class="oc-visitor-kicker">THE ONCHAIN EXPERIENCE</div><h2>Explore the Onchain platform</h2><p>Markets, asset tools and useful insights — all in one place.</p><span>Discover supported assets, compare market values and explore the Onchain experience.</span></div>
-    <div class="oc-visitor-products-grid">
-       <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">◈</div><div class="oc-visitor-product-top"><h3>Crypto &amp; Gold Markets</h3><span>Explore</span></div><p>Browse supported digital assets and Gold market information, compare daily moves and open detailed charts.</p><small>BTC · ETH · CRYPTO · XAU</small></article>
-       <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⇄</div><div class="oc-visitor-product-top"><h3>Copy Trading</h3><span>Trader strategies</span></div><p>Discover trader strategies, compare different approaches and explore how copy trading works before choosing what suits your goals.</p><small>FOLLOW · COMPARE · REVIEW</small></article>
-       <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⌁</div><div class="oc-visitor-product-top"><h3>Market Insights</h3><span>Discover</span></div><p>Review price movements, market activity and momentum indicators to support your own research.</p><small>PRICE · VOLUME · 24H MOVES</small></article>
-       <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">⇌</div><div class="oc-visitor-product-top"><h3>Crypto Convert</h3><span>Market rates</span></div><p>Compare supported assets using the latest available market prices. Choose what you want to convert and receive, then review the exchange rate, estimated amount and fee.</p><small>ASSET-TO-ASSET · MARKET RATES · ESTIMATES</small></article>
-       <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">▣</div><div class="oc-visitor-product-top"><h3>Portfolio Overview</h3><span>Overview</span></div><p>See how asset holdings, estimated values and account activity are organized in your personal workspace.</p><small>BALANCE · ASSETS · ACTIVITY</small></article>
-       <article class="oc-visitor-product-card"><div class="oc-visitor-product-icon">▤</div><div class="oc-visitor-product-top"><h3>US Stock Watch</h3><span>Market data</span></div><p>Explore selected US-listed companies with market quotes and charts for information and research.</p><small>NASDAQ · NYSE · QUOTES</small></article>
-     </div>
-    <p class="oc-visitor-roadmap-note">Explore markets, compare supported assets and discover the tools available across Onchain.</p>
-  </section>
-  <div class="oc-visitor-bottom-cta"><div><h2>Ready to explore Onchain?</h2><p>Create your account to explore markets, use asset tools and access your personal Onchain workspace.</p></div><button type="button" class="primary" id="ocVisitorBottomSignup">Sign up</button></div>
-
-  <style id="oc-visitor-platform-overview">
-    #page-public-market .oc-platform-overview{margin:clamp(42px,6vw,82px) auto 18px;max-width:1180px;color:#edf5ff}
-    #page-public-market .oc-platform-overview *{box-sizing:border-box}
-    #page-public-market .oc-platform-overview .oc-platform-eyebrow{color:#e8b95c;font-size:11px;font-weight:850;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
-    #page-public-market .oc-platform-overview h2{margin:0;color:#fff;font-size:clamp(26px,4vw,38px);line-height:1.14;font-weight:900;letter-spacing:-.7px;text-shadow:0 2px 15px #0009}
-    #page-public-market .oc-platform-overview .oc-platform-lead{max-width:720px;margin:12px 0 0;color:#aebed2;font-size:15px;line-height:1.75}
-    #page-public-market .oc-platform-highlights{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:28px 0 58px}
-    #page-public-market .oc-platform-highlight{padding:19px 17px;border:1px solid #263b55;border-radius:14px;background:linear-gradient(145deg,#10243a,#091522)}
-    #page-public-market .oc-platform-highlight strong{display:block;color:#fff;font-size:16px;font-weight:850;margin-bottom:7px}
-    #page-public-market .oc-platform-highlight span{display:block;color:#9eb2c9;font-size:13px;line-height:1.55}
-    #page-public-market .oc-platform-section-head{margin-bottom:22px}
-    #page-public-market .oc-platform-products{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 0 58px}
-    #page-public-market .oc-platform-product{min-height:190px;padding:22px;border:1px solid #263b55;border-radius:15px;background:linear-gradient(150deg,#10243a,#091522)}
-    #page-public-market .oc-platform-product .oc-platform-icon{display:grid;place-items:center;width:39px;height:39px;margin-bottom:18px;border-radius:12px;background:#d9a94318;color:#efc46d;font-size:21px}
-    #page-public-market .oc-platform-product h3{margin:0 0 9px;color:#fff;font-size:17px;font-weight:850}
-    #page-public-market .oc-platform-product p{margin:0;color:#aebed2;font-size:13px;line-height:1.7}
-    #page-public-market .oc-platform-product small{display:block;margin-top:16px;color:#e8b95c;font-size:10px;font-weight:850;letter-spacing:1.2px}
-    #page-public-market .oc-platform-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 58px}
-    #page-public-market .oc-platform-step{padding:20px 17px;border-top:2px solid #d5a744;background:linear-gradient(180deg,#10243a,#091522);border-radius:0 0 13px 13px}
-    #page-public-market .oc-platform-step .step-no{color:#e8b95c;font-size:11px;font-weight:900;letter-spacing:1.5px}
-    #page-public-market .oc-platform-step h3{margin:12px 0 8px;color:#fff;font-size:16px;font-weight:850}
-    #page-public-market .oc-platform-step p{margin:0;color:#aebed2;font-size:13px;line-height:1.65}
-    #page-public-market .oc-platform-final-cta{display:flex;align-items:center;justify-content:space-between;gap:22px;margin:0 0 30px;padding:clamp(22px,4vw,34px);border:1px solid #3d4b5c;border-radius:17px;background:linear-gradient(110deg,#172b40,#101b2a 65%,#2a2114)}
-    #page-public-market .oc-platform-final-cta p{margin:9px 0 0;color:#b4c2d3;font-size:14px;line-height:1.6}
-    #page-public-market .oc-platform-final-cta button{flex:0 0 auto;min-height:46px;padding:0 22px}
-    @media(max-width:850px){#page-public-market .oc-platform-highlights{grid-template-columns:repeat(2,minmax(0,1fr))}#page-public-market .oc-platform-products{grid-template-columns:repeat(2,minmax(0,1fr))}#page-public-market .oc-platform-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media(max-width:560px){#page-public-market .oc-platform-highlights,#page-public-market .oc-platform-products,#page-public-market .oc-platform-steps{grid-template-columns:1fr;gap:10px}#page-public-market .oc-platform-highlight{padding:16px}#page-public-market .oc-platform-product{min-height:0;padding:19px}#page-public-market .oc-platform-final-cta{align-items:flex-start;flex-direction:column}#page-public-market .oc-platform-final-cta button{width:100%}}
-  </style>
-  <section class="oc-platform-overview" aria-label="Onchain platform features and services">
-    <div class="oc-platform-eyebrow">THE ONCHAIN EXPERIENCE</div>
-    <h2>Trade, explore and manage your markets</h2>
-    <p class="oc-platform-lead">Discover crypto, Gold and selected US stock market information alongside practical tools for exploring strategies, tracking activity and managing your Onchain account.</p>
-
-    <div class="oc-platform-highlights">
-      <div class="oc-platform-highlight"><strong>Markets in one place</strong><span>Explore crypto, Gold and selected US stock market information.</span></div>
-      <div class="oc-platform-highlight"><strong>Market insights</strong><span>Follow price movements, charts, market research and active coin pairs.</span></div>
-      <div class="oc-platform-highlight"><strong>Trading tools</strong><span>Explore trading screens, order-book information and trading tools.</span></div>
-      <div class="oc-platform-highlight"><strong>Account overview</strong><span>Review your assets, account activity and portfolio information in one workspace.</span></div>
-    </div>
-
-    <div class="oc-platform-section-head">
-      <div class="oc-platform-eyebrow">PRODUCTS & TOOLS</div>
-      <h2>Explore the Onchain platform</h2>
-      <p class="oc-platform-lead">A connected set of market discovery and account tools for your crypto and investment journey.</p>
-    </div>
-    <div class="oc-platform-products">
-      <article class="oc-platform-product"><div class="oc-platform-icon">₿</div><h3>Crypto & Gold Markets</h3><p>Explore supported digital assets, Bitcoin, Ethereum and Gold market information with charts and price movements.</p><small>CRYPTO · XAU · MARKET DATA</small></article>
-      <article class="oc-platform-product"><div class="oc-platform-icon">▥</div><h3>US Stock Trading</h3><p>Discover selected US-listed stocks, follow market information and review available charts and research.</p><small>US STOCKS · WATCHLIST · RESEARCH</small></article>
-      <article class="oc-platform-product"><div class="oc-platform-icon">⇄</div><h3>Trading Workspace</h3><p>Explore the trading interface, review market direction and available trading tools.</p><small>MARKET VIEW · TRADING TOOLS</small></article>
-      <article class="oc-platform-product"><div class="oc-platform-icon">◎</div><h3>Copy Trading Discovery</h3><p>Browse trader strategy profiles, compare approaches and review risk information before deciding who to follow.</p><small>DISCOVER · COMPARE · FOLLOW</small></article>
-      <article class="oc-platform-product"><div class="oc-platform-icon">▱</div><h3>Wallet & Assets</h3><p>Review your asset overview, supported coin information and account activity from your personal workspace.</p><small>ASSETS · BALANCE · ACTIVITY</small></article>
-      <article class="oc-platform-product"><div class="oc-platform-icon">⌕</div><h3>Market Research</h3><p>Explore market insights, active coin pairs, momentum signals and useful information across supported markets.</p><small>INSIGHTS · SIGNALS · MARKETS</small></article>
-    </div>
-
-    <div class="oc-platform-section-head">
-      <div class="oc-platform-eyebrow">GET STARTED</div>
-      <h2>Your Onchain journey in four steps</h2>
-      <p class="oc-platform-lead">Create an account, get familiar with the platform and explore its tools at your own pace.</p>
-    </div>
-    <div class="oc-platform-steps">
-      <article class="oc-platform-step"><span class="step-no">STEP 01</span><h3>Create your account</h3><p>Register with your details and complete the account verification steps presented during sign-up.</p></article>
-      <article class="oc-platform-step"><span class="step-no">STEP 02</span><h3>Explore markets</h3><p>Discover crypto, Gold and selected US stock information, charts and market research.</p></article>
-      <article class="oc-platform-step"><span class="step-no">STEP 03</span><h3>Explore trading tools</h3><p>Review the trading interface and use the available trading tools to explore how the platform works.</p></article>
-      <article class="oc-platform-step"><span class="step-no">STEP 04</span><h3>Track your activity</h3><p>Visit your account workspace to review assets, portfolio information and recent activity.</p></article>
-    </div>
-
-    <div class="oc-platform-final-cta">
-      <div><div class="oc-platform-eyebrow">START WITH ONCHAIN</div><h2>Ready to explore your markets?</h2><p>Create your Onchain account and discover the tools available across the platform.</p></div>
-      <button type="button" class="primary" id="ocVisitorAboutSignupFooter">Create account <span aria-hidden="true">→</span></button>
-    </div>
-  </section>
-</section>
 
 <section id="page-home">
  <div class="page-title"><div><h1 id="homeGreeting">Onchain</h1></div></div>
@@ -2983,9 +2830,9 @@ $("manageSessionBtn").addEventListener("click",()=>{document.getElementById("ocS
 $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new Date().toISOString(),notice:"This export contains browser-local Onchain data only; it is not a full server-account export.",profile:JSON.parse(localStorage.getItem("oc_profile")||"{}"),notificationPreferences:JSON.parse(localStorage.getItem("oc_notification_preferences")||"{}"),localData:{}};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&(/onchain|wallet|trade|history|profile|asset/i.test(key))&&!["oc_profile","oc_notification_preferences"].includes(key)){try{data.localData[key]=JSON.parse(localStorage.getItem(key))}catch(_){data.localData[key]=localStorage.getItem(key)}}}const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="onchaincrypto-data-export.json";link.click();URL.revokeObjectURL(url);$("privacyMessage").textContent="Downloaded available browser-local data. This does not include all server records."});
 
 // Profile saving is handled once by the Firebase module below.
- document.querySelectorAll("#ocVisitorAboutSignup,#ocVisitorAboutSignupFooter").forEach(button=>button.addEventListener("click",()=>showPage("register")));
+
  document.getElementById("timedBoardClose")?.addEventListener("click",()=>{const board=document.getElementById("timedResultBoard");if(board)board.style.display="none";});
- document.getElementById("ocVisitorAboutExplore")?.addEventListener("click",()=>showPage("markets"));
+
  renderWallet();loadMarket();setInterval(loadMarket,120000);
  document.addEventListener("visibilitychange",()=>{if(!document.hidden&&(!window.ocMarketLastSuccess||Date.now()-window.ocMarketLastSuccess>60000))loadMarket()});
  window.addEventListener("focus",()=>{if(!window.ocMarketLastSuccess||Date.now()-window.ocMarketLastSuccess>60000)loadMarket()});
@@ -5873,8 +5720,8 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
  $("ocVisitorSearch")?.addEventListener("input",()=>{limit=6;renderTable()});
  $("ocVisitorMarketMore")?.addEventListener("click",()=>{limit=limit>6?6:999999;renderTable()});
  $("ocVisitorDetailClose")?.addEventListener("click",()=>{$("ocVisitorCoinDetail").classList.add("hidden");$("ocVisitorTradingChart").src="about:blank"});
- $("ocVisitorDetailBuy")?.addEventListener("click",()=>openAuth("signup"));
- ["ocVisitorHeroExplore","ocVisitorAboutExplore"].forEach(id=>$(id)?.addEventListener("click",()=>$("ocVisitorMarkets")?.scrollIntoView({behavior:"smooth",block:"start"})));
+
+
  window.addEventListener("load",()=>{window.ocRenderVisitorMarket?.();void loadVisitorGoldFallback()});
  window.addEventListener("market-updated",()=>window.ocRenderVisitorMarket?.());
  setInterval(()=>{window.ocRenderVisitorMarket?.();void loadVisitorGoldFallback()},30000);
@@ -7440,120 +7287,7 @@ html.oc-auth-pending body #bottomNav { display:none!important; }
 })();
 </script>
 
-<script id="oc-visitor-minimal-navigation-guard">
-(function(){
-  function isGuest(){return !(window.ocFirebaseAuth?.currentUser||window.onchaincryptoCurrentUser)&&window.ocLoggedOut!==false;}
-  function sync(){
-    if(!isGuest()){
-      document.body.classList.remove("oc-visitor-mode");
-      return;
-    }
-    document.body.classList.add("oc-visitor-mode");
-    const visible=document.querySelector('main>section[id^="page-"]:not(.hidden)');
-    if(visible&&!["page-public-market","page-register"].includes(visible.id)){
-      visible.classList.add("hidden");visible.setAttribute("hidden","");
-      const market=document.getElementById("page-public-market");
-      if(market){market.classList.remove("hidden");market.removeAttribute("hidden");}
-    }
-    const menu=document.getElementById("moreMenu");
-    if(menu){menu.classList.add("hidden");menu.setAttribute("aria-hidden","true");}
-    const trigger=document.getElementById("moreMenuBtn");
-    if(trigger)trigger.setAttribute("aria-expanded","false");
-  }
-  document.addEventListener("click",function(e){
-    if(!isGuest())return;
-    const el=e.target instanceof Element?e.target:null;if(!el)return;
-    const target=el.closest("[data-page],[data-bottom-page],[data-menu-page]");if(!target)return;
-    const p=target.dataset.page||target.dataset.bottomPage||target.dataset.menuPage||"";
-    if(["profile","wallet","markets","home","trade","browser","financial","settings","notifications","kyc","deposit","withdraw","history","convert","transfer","admin"].includes(p)){
-      e.preventDefault();e.stopImmediatePropagation();
-      const route=window.showPage;if(typeof route==="function")route("register");
-      document.getElementById("authChoicePanel")?.classList.add("hidden");
-      document.getElementById("authChoiceLogin")?.click();
-    }
-  },true);
-  sync();
-  document.addEventListener("DOMContentLoaded",sync,{once:true});
-  window.addEventListener("pageshow",sync);
-  window.addEventListener("popstate",sync);
-  if(window.MutationObserver){const observer=new MutationObserver(sync);observer.observe(document.body,{attributes:true,attributeFilter:["class"]});}
-})();
-</script>
 
-<style id="oc-visitor-clean-layout-final">
-/* Single, uncluttered visitor entry: public market overview + one auth pair. */
-body.oc-visitor-mode{padding-bottom:0!important;overflow-x:hidden!important}
-body.oc-visitor-mode>header{
-  position:relative!important;top:auto!important;z-index:20!important;
-  display:flex!important;align-items:center!important;justify-content:space-between!important;
-  gap:12px!important;min-height:68px!important;height:auto!important;
-  padding:10px clamp(12px,3vw,28px)!important;flex-wrap:nowrap!important;
-}
-body.oc-visitor-mode>header .brand{flex:0 1 auto!important;min-width:0!important;justify-self:auto!important;white-space:nowrap!important}
-body.oc-visitor-mode>header #nav,
-body.oc-visitor-mode>header #refreshBtn,
-body.oc-visitor-mode>header #ocBackBtn,
-body.oc-visitor-mode>header #moreMenuBtn,
-body.oc-visitor-mode>header #moreMenu,
-body.oc-visitor-mode>header #ocThemeToggle{display:none!important}
-body.oc-visitor-mode>header .header-right{
-  display:flex!important;flex:0 0 auto!important;align-items:center!important;
-  justify-content:flex-end!important;gap:8px!important;min-width:0!important;
-}
-body.oc-visitor-mode #ocVisitorActions{
-  display:flex!important;flex-wrap:nowrap!important;align-items:center!important;
-  justify-content:flex-end!important;gap:8px!important;margin:0!important;
-}
-body.oc-visitor-mode #ocVisitorActions button{
-  display:inline-flex!important;align-items:center!important;justify-content:center!important;
-  min-width:86px!important;min-height:40px!important;padding:8px 13px!important;
-  white-space:nowrap!important;flex:0 0 auto!important;
-}
-body.oc-visitor-mode main{
-  display:block!important;width:100%!important;max-width:none!important;
-  min-height:0!important;padding:0 0 100px!important;margin:0!important;
-}
-body.oc-visitor-mode main>section[id^="page-"]:not(#page-public-market):not(#page-register){
-  display:none!important;visibility:hidden!important;
-}
-body.oc-visitor-mode main>#page-public-market{
-  display:block!important;visibility:visible!important;width:100%!important;
-  max-width:none!important;margin:0 auto!important;
-}
-body.oc-visitor-mode #page-public-market .oc-visitor-hero-actions,
-body.oc-visitor-mode #page-public-market .oc-visitor-bottom-cta{display:none!important}
-body.oc-visitor-mode #ocVisitorSupportBot{
-  display:block!important;position:fixed!important;right:18px!important;
-  bottom:calc(18px + env(safe-area-inset-bottom))!important;
-  left:auto!important;top:auto!important;z-index:100000!important;
-  width:auto!important;max-width:calc(100vw - 28px)!important;
-  pointer-events:auto!important;
-}
-body.oc-visitor-mode #ocVisitorSupportBot .oc-support-launch{
-  display:grid!important;position:relative!important;margin:0!important;
-  width:56px!important;height:56px!important;min-width:56px!important;
-}
-body.oc-visitor-mode #ocVisitorSupportBot .oc-support-panel{
-  position:absolute!important;right:0!important;left:auto!important;
-  bottom:68px!important;width:min(360px,calc(100vw - 28px))!important;
-  max-width:calc(100vw - 28px)!important;max-height:65dvh!important;
-}
-@media(max-width:560px){
- body.oc-visitor-mode>header{min-height:62px!important;padding:8px 12px!important;gap:8px!important}
- body.oc-visitor-mode>header .brand{font-size:17px!important;letter-spacing:0!important}
- body.oc-visitor-mode>header .brand .header-logo-mark{width:30px!important;height:30px!important;flex-basis:30px!important}
- body.oc-visitor-mode #ocVisitorActions{gap:6px!important}
- body.oc-visitor-mode #ocVisitorActions button{min-width:76px!important;min-height:38px!important;padding:7px 9px!important;font-size:12px!important}
- body.oc-visitor-mode #ocVisitorSupportBot{right:14px!important;bottom:calc(14px + env(safe-area-inset-bottom))!important}
-}
-@media(max-width:360px){
- body.oc-visitor-mode>header .brand>span:last-child{font-size:14px!important}
- body.oc-visitor-mode #ocVisitorActions button{min-width:68px!important;padding-inline:7px!important}
-}
-</style>
-
-</body>
-</html>
 
 <style id="oc-register-contact-choice-style">
 .oc-register-contact-choice{margin:10px 0 14px;display:grid;gap:6px}
@@ -11961,113 +11695,89 @@ body:not(.oc-auth-screen) .wallet-summary-strip strong{color:#12486e!important}
 }
 </style>
 </style>
-
-
-
-
-
-<style id="oc-visitor-first-startup-override">
-html.oc-auth-pending main > :not(#page-public-market){display:none!important}
-html.oc-auth-pending main > #page-public-market{display:flex!important}
-html.oc-auth-pending body > header{display:flex!important}
-html.oc-auth-pending body > footer,html.oc-auth-pending body > #bottomNav,html.oc-auth-pending body > nav,html.oc-auth-pending body > aside{display:none!important}
-html.oc-auth-pending main{display:block!important;min-height:0!important;padding-top:0!important}
-html.oc-auth-pending #page-public-market.hidden{display:flex!important}
-html.oc-auth-pending #page-register{display:none!important}
-</style>
-<script id="oc-visitor-first-auth-actions">
-(function(){
- const ids="#ocVisitorSignup,#ocVisitorLogin,#ocVisitorHeroSignup,#ocVisitorHeroLogin";
- function openAuth(mode){
-  document.documentElement.classList.remove("oc-auth-pending");
-  document.body.classList.remove("oc-visitor-mode");
-  document.body.classList.add("oc-logged-out","oc-auth-screen");
-  document.body.classList.toggle("oc-register-mode",mode==="register");
-  window.__ocNavigatePage?.("register",{noStack:false,keepScroll:false});
-  document.getElementById(mode==="register"?"authChoiceRegister":"authChoiceLogin")?.click();
-  document.getElementById("authChoicePanel")?.classList.add("hidden");
-  document.body.classList.toggle("oc-register-mode",mode==="register");
-  document.getElementById(mode==="register"?"signInForm":"registerForm")?.classList.add("hidden");
-  document.getElementById(mode==="register"?"registerForm":"signInForm")?.classList.remove("hidden");
-  if(mode==="register")document.getElementById("registerFirstName")?.focus();
-  else document.getElementById("signInEmail")?.focus();
-  try{history.replaceState({ocAppRoute:true,ocPage:"register",ocAuthMode:mode,ocIndex:1,ocSignedOutBoundary:true},"",location.pathname+location.search+(mode==="register"?"#register":"#login"));}catch(_){}
- }
- document.addEventListener("click",function(event){
-  const button=event.target instanceof Element?event.target.closest(ids):null;
-  if(!button)return;
-  event.preventDefault();event.stopImmediatePropagation();
-  openAuth(button.id.toLowerCase().includes("signup")?"register":"login");
- },true);
- document.addEventListener("click",function(event){
-  const target=event.target instanceof Element?event.target:null;
-  if(target?.closest("#authChoiceLogin,#authChoiceRegister,#registerLoginBtn,#showRegisterBtn,#showSignInBtn,#authSwitchText")){
-   queueMicrotask(()=>document.getElementById("authChoicePanel")?.classList.add("hidden"));
-  }
- },true);
- if(window.ocLoggedOut===true&&!document.body.classList.contains("oc-auth-screen"))document.body.classList.add("oc-visitor-mode");
-})();
-</script>
-
-<style id="oc-visitor-layout-single-view-fix">
-/* Guest visitors get one scrollable public market page, never stacked app pages. */
-body.oc-visitor-mode:not(.oc-auth-screen){padding-bottom:0!important;overflow-x:hidden!important}
+<style id="oc-visitor-single-view">
+/* One visitor state: market showcase, one account-action pair and floating support. */
+html.oc-auth-pending body>header,
 body.oc-visitor-mode:not(.oc-auth-screen)>header{
   display:flex!important;align-items:center!important;justify-content:space-between!important;
-  gap:14px!important;min-height:68px!important;height:auto!important;padding:10px 18px!important;
-  position:relative!important;top:auto!important;flex-wrap:nowrap!important;
+  flex-wrap:nowrap!important;gap:12px!important;min-height:64px!important;height:auto!important;
+  padding:9px clamp(12px,3vw,26px)!important;position:relative!important;top:auto!important;
 }
-body.oc-visitor-mode:not(.oc-auth-screen)>header .brand{display:flex!important;align-items:center!important;justify-self:auto!important;min-width:0!important}
+html.oc-auth-pending body>header #nav,
+html.oc-auth-pending body>header #ocThemeToggle,
+html.oc-auth-pending body>header #refreshBtn,
+html.oc-auth-pending body>header #ocBackBtn,
+html.oc-auth-pending body>header .more-menu-wrap,
 body.oc-visitor-mode:not(.oc-auth-screen)>header #nav,
+body.oc-visitor-mode:not(.oc-auth-screen)>header #ocThemeToggle,
 body.oc-visitor-mode:not(.oc-auth-screen)>header #refreshBtn,
 body.oc-visitor-mode:not(.oc-auth-screen)>header #ocBackBtn,
 body.oc-visitor-mode:not(.oc-auth-screen)>header .more-menu-wrap,
-body.oc-visitor-mode:not(.oc-auth-screen)>header #ocThemeToggle,
 body.oc-visitor-mode:not(.oc-auth-screen)>#bottomNav{display:none!important}
+html.oc-auth-pending body>header .brand,
+body.oc-visitor-mode:not(.oc-auth-screen)>header .brand{display:flex!important;align-items:center!important;justify-self:auto!important;min-width:0!important;flex:0 1 auto!important}
+html.oc-auth-pending body>header .header-right,
 body.oc-visitor-mode:not(.oc-auth-screen)>header .header-right{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;margin-left:auto!important;min-width:0!important}
-body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorActions{display:flex!important;align-items:center!important;gap:8px!important;flex-wrap:nowrap!important}
-body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorActions button{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:88px!important;min-height:40px!important;white-space:nowrap!important}
-body.oc-visitor-mode:not(.oc-auth-screen)>main{
-  display:block!important;width:100%!important;min-height:0!important;
-  margin:0 auto!important;padding:0 16px 42px!important;overflow:visible!important;
+html.oc-auth-pending #ocVisitorActions,
+body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorActions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;flex-wrap:nowrap!important}
+html.oc-auth-pending #ocVisitorActions button,
+body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorActions button{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:82px!important;min-height:40px!important;white-space:nowrap!important;flex:0 0 auto!important}
+html.oc-auth-pending main,
+body.oc-visitor-mode:not(.oc-auth-screen) main{display:block!important;width:100%!important;max-width:none!important;min-height:0!important;margin:0!important;padding:0 0 32px!important;overflow:visible!important}
+html.oc-auth-pending main>section[id^="page-"]:not(#page-public-market),
+body.oc-visitor-mode:not(.oc-auth-screen) main>section[id^="page-"]:not(#page-public-market){display:none!important;visibility:hidden!important}
+html.oc-auth-pending main>#page-public-market,
+body.oc-visitor-mode:not(.oc-auth-screen) main>#page-public-market,
+body.oc-visitor-mode:not(.oc-auth-screen) main>#page-public-market.hidden{
+  display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;
+  inset:auto!important;transform:none!important;width:100%!important;max-width:1280px!important;
+  height:auto!important;min-height:0!important;margin:0 auto!important;padding:18px clamp(10px,2vw,22px) 38px!important;
+  overflow:visible!important;
 }
-body.oc-visitor-mode:not(.oc-auth-screen)>main>section[id^="page-"]:not(#page-public-market){display:none!important}
-body.oc-visitor-mode:not(.oc-auth-screen)>main>#page-public-market,
-body.oc-visitor-mode:not(.oc-auth-screen)>main>#page-public-market.hidden{
-  display:block!important;visibility:visible!important;opacity:1!important;
-  position:relative!important;inset:auto!important;transform:none!important;
-  width:min(100%,1280px)!important;max-width:1280px!important;
-  height:auto!important;min-height:0!important;margin:0 auto!important;
-  padding:22px 0 36px!important;overflow:visible!important;
+html.oc-auth-pending body>footer,
+html.oc-auth-pending body>#bottomNav,
+html.oc-auth-pending body>nav,
+html.oc-auth-pending body>aside,
+body.oc-visitor-mode:not(.oc-auth-screen)>footer,
+body.oc-visitor-mode:not(.oc-auth-screen)>#bottomNav{display:none!important}
+html.oc-auth-pending body>#ocVisitorSupportBot,
+body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorSupportBot{
+  display:block!important;position:fixed!important;right:16px!important;
+  bottom:calc(16px + env(safe-area-inset-bottom))!important;left:auto!important;top:auto!important;
+  z-index:100000!important;width:auto!important;max-width:calc(100vw - 28px)!important;pointer-events:auto!important;
 }
-body.oc-visitor-mode:not(.oc-auth-screen) #page-public-market .oc-visitor-hero-actions,
-body.oc-visitor-mode:not(.oc-auth-screen) #page-public-market .oc-visitor-bottom-cta{display:none!important}
-body.oc-visitor-mode:not(.oc-auth-screen)>footer{display:block!important;position:relative!important}
-@media(max-width:600px){
-  body.oc-visitor-mode:not(.oc-auth-screen)>header{padding:9px 12px!important;gap:8px!important}
-  body.oc-visitor-mode:not(.oc-auth-screen)>header .brand{font-size:17px!important}
-  body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorActions{gap:6px!important}
-  body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorActions button{min-width:72px!important;min-height:38px!important;padding:7px 10px!important;font-size:12px!important}
-  body.oc-visitor-mode:not(.oc-auth-screen)>main{padding:0 10px 32px!important}
-  body.oc-visitor-mode:not(.oc-auth-screen)>main>#page-public-market{padding-top:14px!important}
+html.oc-auth-pending #ocVisitorSupportBot .oc-support-launch,
+body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorSupportBot .oc-support-launch{
+  display:grid!important;position:relative!important;margin:0!important;width:54px!important;height:54px!important;min-width:54px!important;
+}
+html.oc-auth-pending #ocVisitorSupportBot .oc-support-panel,
+body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorSupportBot .oc-support-panel{
+  position:absolute!important;right:0!important;left:auto!important;bottom:66px!important;
+  width:min(360px,calc(100vw - 28px))!important;max-width:calc(100vw - 28px)!important;max-height:65dvh!important;
+}
+body.oc-auth-screen #ocVisitorSupportBot{display:none!important}
+@media(max-width:560px){
+ html.oc-auth-pending body>header,body.oc-visitor-mode:not(.oc-auth-screen)>header{min-height:60px!important;padding:8px 10px!important;gap:7px!important}
+ html.oc-auth-pending body>header .brand,body.oc-visitor-mode:not(.oc-auth-screen)>header .brand{font-size:16px!important}
+ html.oc-auth-pending #ocVisitorActions,body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorActions{gap:6px!important}
+ html.oc-auth-pending #ocVisitorActions button,body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorActions button{min-width:70px!important;min-height:37px!important;padding:7px 9px!important;font-size:11px!important}
+ html.oc-auth-pending body>#ocVisitorSupportBot,body.oc-visitor-mode:not(.oc-auth-screen) #ocVisitorSupportBot{right:12px!important;bottom:calc(12px + env(safe-area-inset-bottom))!important}
 }
 </style>
-<script id="oc-visitor-layout-single-view-controller">
+<script id="oc-visitor-single-auth-entry">
 (function(){
-  function applyGuestView(){
-    if(window.ocLoggedOut!==true || !document.body)return;
-    if(/#(?:login|register)$/i.test(location.hash))return;
-    document.body.classList.add("oc-visitor-mode");
-    document.body.classList.remove("oc-auth-screen","oc-register-mode");
-    document.documentElement.classList.remove("oc-auth-pending");
-    document.querySelectorAll('main>section[id^="page-"]').forEach(function(section){
-      section.classList.toggle("hidden",section.id!=="page-public-market");
-    });
-    var publicPage=document.getElementById("page-public-market");
-    if(publicPage)publicPage.classList.remove("hidden");
-  }
-  applyGuestView();
-  document.addEventListener("DOMContentLoaded",applyGuestView,{once:true});
-  window.addEventListener("pageshow",applyGuestView);
+  const actions=document.getElementById("ocVisitorActions");
+  if(!actions||actions.dataset.authBound==="1")return;
+  actions.dataset.authBound="1";
+  actions.addEventListener("click",function(event){
+    const button=event.target instanceof Element?event.target.closest("#ocVisitorSignup,#ocVisitorLogin"):null;
+    if(!button)return;
+    event.preventDefault();
+    const open=window.ocOpenVisitorAuth;
+    if(typeof open==="function")open(button.id==="ocVisitorSignup"?"signup":"login");
+  });
 })();
 </script>
+
+</body>
+</html>
