@@ -1391,9 +1391,10 @@ html.oc-auth-pending body > nav {
 }
 </style>
 <style id="oc-withdrawal-status-colors">
-#withdrawNotice[data-state="success"]{color:#16c784!important;font-weight:700}
-#withdrawNotice[data-state="pending"]{color:#f0b90b!important;font-weight:600}
-#withdrawNotice[data-state="error"]{color:#ff5573!important;font-weight:600}
+#withdrawNotice:not(:empty){display:block;padding:10px 12px;margin:10px 0;border:1px solid transparent;border-radius:9px;line-height:1.45}
+#withdrawNotice[data-state="success"]{color:#16c784!important;background:rgba(22,199,132,.12)!important;border-color:rgba(22,199,132,.38)!important;font-weight:700}
+#withdrawNotice[data-state="pending"]{color:#f0b90b!important;background:rgba(240,185,11,.10)!important;border-color:rgba(240,185,11,.32)!important;font-weight:600}
+#withdrawNotice[data-state="error"]{color:#ff5573!important;background:rgba(255,85,115,.10)!important;border-color:rgba(255,85,115,.32)!important;font-weight:600}
 </style>
 </head>
 <body>
