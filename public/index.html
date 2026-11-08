@@ -5566,7 +5566,7 @@ function watch(u){stops.push(onSnapshot(query(collection(db,"withdrawRequests"),
 setup();
 
 document.getElementById("withdrawAllBtn")?.addEventListener("click",()=>{const symbol=String(asset("withdraw")||"BTC").toUpperCase();const amount=typeof window.ocGetDisplayedAssetBalance==="function"?window.ocGetDisplayedAssetBalance(symbol):NaN;if(!Number.isFinite(amount)){const note=document.getElementById("withdrawNotice");if(note)note.textContent="Wallet balance is still loading. Refresh and try again.";return;}const field=document.getElementById("withdrawAmount");if(!field)return;field.value=amount>0?String(Number(amount.toFixed(8))):"";field.dispatchEvent(new Event("input",{bubbles:true}));field.dispatchEvent(new Event("change",{bubbles:true}));});
-function refreshWithdrawRequestButton(){const b=$("withdrawSubmit");if(!b)return;const valid=Number($("withdrawAmount")?.value)>0&&!!$("withdrawAddress")?.value.trim()&&$("withdrawAddressCheck")?.dataset.state==="valid"&&!!$("withdrawNetwork")?.value;b.disabled=!valid&&b.dataset.submitting!=="true";if(b.dataset.submitting!=="true")b.textContent="Continue";}["withdrawAmount","withdrawAddress","withdrawNetwork"].forEach(id=>$(id)?.addEventListener("input",refreshWithdrawRequestButton));["withdrawAmount","withdrawAddress","withdrawNetwork"].forEach(id=>$(id)?.addEventListener("change",refreshWithdrawRequestButton));refreshWithdrawRequestButton();
+function refreshWithdrawRequestButton(){const b=$("withdrawSubmit");if(!b)return;const valid=Number($("withdrawAmount")?.value)>0&&!!$("withdrawAddress")?.value.trim()&&$("withdrawAddressCheck")?.dataset.state==="valid"&&!!$("withdrawNetwork")?.value;b.disabled=!valid&&b.dataset.submitting!=="true";if(b.dataset.submitting!=="true")b.textContent="Continue";}window.ocUpdateWithdrawRequestButton=refreshWithdrawRequestButton;["withdrawAmount","withdrawAddress","withdrawNetwork"].forEach(id=>$(id)?.addEventListener("input",refreshWithdrawRequestButton));["withdrawAmount","withdrawAddress","withdrawNetwork"].forEach(id=>$(id)?.addEventListener("change",refreshWithdrawRequestButton));refreshWithdrawRequestButton();
 $("withdrawSubmit")?.addEventListener("click",async()=>{const b=$("withdrawSubmit"),m=$("withdrawNotice");if(!b||b.dataset.submitting==="true")return;b.dataset.submitting="true";b.disabled=true;b.textContent="Sending request…";m.textContent="Sending your withdrawal request…";m.dataset.state="";try{await withdraw();m.textContent="Withdrawal request sent successfully. Status: Pending.";m.dataset.state="pending";b.textContent="Request sent";}catch(e){m.textContent="Withdrawal request was not sent: "+(e.message||e.code||"Please try again.");m.dataset.state="error";b.textContent="Continue";}finally{delete b.dataset.submitting;refreshWithdrawRequestButton();if(m.dataset.state==="success")b.textContent="Continue";}});
 async function processDemoRequest(kind,requestId,decision){
  const requestRef=doc(db,kind==="deposit"?"depositRequests":"withdrawRequests",requestId);
@@ -8754,9 +8754,9 @@ byId("ocVerifyDeleteCode")?.addEventListener("click",async()=>{
   output.dataset.state="valid";
   return true;
  }
- function refresh(){syncNetworks();check();}
- address.addEventListener("input",check);
- network.addEventListener("change",check);
+ function refresh(){syncNetworks();check();window.ocUpdateWithdrawRequestButton?.();}
+ address.addEventListener("input",()=>{check();window.ocUpdateWithdrawRequestButton?.();});
+ network.addEventListener("change",()=>{check();window.ocUpdateWithdrawRequestButton?.();});
  document.getElementById("withdrawCoinList")?.addEventListener("click",()=>setTimeout(refresh,0));
  document.querySelectorAll('[data-quick-coin="withdraw"]').forEach(button=>button.addEventListener("click",()=>setTimeout(refresh,0)));
  refresh();
