@@ -152,3 +152,10 @@ test("Quick Trade saves the wallet update before displaying the completed result
   assert.ok(flow.includes("state.balance=Math.max(0,balanceBefore+balanceAdjustmentFunding)"), "Apply USDT balance changes");
   assert.ok(flow.includes("state.holdings[finished.funding]=Math.max(0,balanceBefore+balanceAdjustmentFunding)"), "Apply selected-coin balance changes");
 });
+
+test("Quick Trade confirmation uses one validator and waits for account wallet readiness", () => {
+  assert.ok(html.includes('if(typeof window.ocValidateQuickTradeForm==="function")window.ocValidateQuickTradeForm();'), "Estimate refreshes must not override trade validation");
+  assert.ok(html.includes('const walletReady=!!currentUser?.uid&&typeof tradeCloudReadyUid!=="undefined"&&tradeCloudReadyUid===currentUser.uid;'), "Confirmation must wait for the signed-in account wallet");
+  assert.ok(html.includes("const blocked=!walletReady||!Number.isFinite(stake)"), "The shared validator must block until wallet restore succeeds");
+  assert.ok((html.match(/window\.ocValidateQuickTradeForm\?\.\(\);/g) || []).length >= 3, "Wallet restore success and failure must refresh the confirmation state");
+});
