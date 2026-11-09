@@ -178,10 +178,10 @@ test("Quick Trade confirmation uses one validator and waits for account wallet r
 
 
 test("all inline JavaScript modules parse", async () => {
-  const scripts = [...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)];
+  const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
   const modules = scripts.filter(([, attributes, source]) =>
-    /\\btype\\s*=\\s*["']module["']/i.test(attributes) &&
-    !/\\bsrc\\s*=/.test(attributes) &&
+    /\btype\s*=\s*["']module["']/i.test(attributes) &&
+    !/\bsrc\s*=/.test(attributes) &&
     source.trim()
   );
   assert.ok(modules.length > 0, "Expected inline JavaScript modules to be checked");
@@ -190,7 +190,7 @@ test("all inline JavaScript modules parse", async () => {
   try {
     for (let index = 0; index < modules.length; index += 1) {
       const [, attributes, source] = modules[index];
-      const id = (attributes.match(/\\bid\\s*=\\s*["']([^"']+)/i) || [])[1] || "module-" + (index + 1);
+      const id = (attributes.match(/\bid\s*=\s*["']([^"']+)/i) || [])[1] || "module-" + (index + 1);
       const file = join(directory, index + ".mjs");
       await writeFile(file, source, "utf8");
       try {
