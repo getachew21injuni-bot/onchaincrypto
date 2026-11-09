@@ -1,4 +1,7 @@
-import { readFile } from "node:fs/promises";
+import { readFile, mkdtemp, writeFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { execFileSync } from "node:child_process";
 import { Script } from "node:vm";
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -171,4 +174,41 @@ test("Quick Trade confirmation uses one validator and waits for account wallet r
   assert.ok(!start.includes("auth.currentUser") && !start.includes("tradeCloudReadyUid!=="), "Classic trade code must not reference module-only Firebase variables");
   assert.ok(html.includes("const blocked=!walletReady||!tradingEnabled||!Number.isFinite(stake)"), "The shared validator must block until wallet restore succeeds and admin trading access is enabled");
   assert.ok((html.match(/window\.ocValidateQuickTradeForm\?\.\(\);/g) || []).length >= 3, "Wallet restore success and failure must refresh the confirmation state");
+});
+
+
+test("all inline JavaScript modules parse", async () => {
+  const scripts = [...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)];
+  const modules = scripts.filter(([, attributes, source]) =>
+    /\\btype\\s*=\\s*["']module["']/i.test(attributes) &&
+    !/\\bsrc\\s*=/.test(attributes) &&
+    source.trim()
+  );
+  assert.ok(modules.length > 0, "Expected inline JavaScript modules to be checked");
+  const directory = await mkdtemp(join(tmpdir(), "onchain-module-check-"));
+  const failures = [];
+  try {
+    for (let index = 0; index < modules.length; index += 1) {
+      const [, attributes, source] = modules[index];
+      const id = (attributes.match(/\\bid\\s*=\\s*["']([^"']+)/i) || [])[1] || "module-" + (index + 1);
+      const file = join(directory, index + ".mjs");
+      await writeFile(file, source, "utf8");
+      try {
+        execFileSync(process.execPath, ["--check", file], { stdio: "pipe" });
+      } catch (error) {
+        failures.push(id + ": " + String(error.stderr || error.message));
+      }
+    }
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+  assert.deepEqual(failures, [], failures.join("\\n"));
+});
+
+test("Quick Trade reads fresh admin outcome settings and atomically updates the cloud wallet", () => {
+  assert.ok(html.includes("window.ocLoadLatestTradeControls=async function(uid)"), "Expected a fresh Firestore read of user and global trade controls");
+  assert.ok(html.includes("latestControls=await window.ocLoadLatestTradeControls(currentUser.uid)"), "Trade confirmation must use current admin settings");
+  assert.ok(html.includes("window.ocCommitQuickTradeResult=async function({funding,adjustment,resultRecord})"), "Expected a dedicated cloud trade-result commit");
+  assert.ok(html.includes("return await runTransaction(db,async tx=>"), "Wallet result updates must use a Firestore transaction");
+  assert.ok(html.includes("await window.ocCommitQuickTradeResult({funding:finished.funding,adjustment:balanceAdjustmentFunding,resultRecord})"), "Completed trades must commit against the latest cloud balance");
 });
