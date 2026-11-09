@@ -1419,8 +1419,8 @@ body.oc-visitor-mode:not(.oc-auth-screen) main > :not(#page-public-market){
       <div class="oc-visitor-detail-head"><div><div class="oc-visitor-kicker">ASSET OVERVIEW</div><h3 id="ocVisitorDetailName">Bitcoin</h3><span id="ocVisitorDetailSymbol">BTC / USD</span></div><button type="button" class="secondary" id="ocVisitorDetailClose" aria-label="Close asset details">✕</button></div>
       <div class="oc-visitor-detail-stats"><div><small>Current price</small><strong id="ocVisitorDetailPrice">—</strong></div><div><small>24H change</small><strong id="ocVisitorDetailChange">—</strong></div><div><small>Market cap</small><strong id="ocVisitorDetailCap">—</strong></div></div>
       <div class="oc-visitor-chart-wrap"><iframe id="ocVisitorTradingChart" title="Selected asset price chart" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-      <div class="oc-visitor-detail-signal" aria-live="polite"><div><small>24H momentum</small><strong id="ocVisitorDetailSignal">Waiting for market data</strong></div><p>Based on recent price movement only; it is market information, not a personal trading recommendation.</p></div>
-      <button type="button" class="primary" data-visitor-buy id="ocVisitorBuyButton" style="width:100%;min-height:46px;font-weight:800">Buy <span id="ocVisitorBuySymbol">BTC</span> · Create account</button>
+      <div class="oc-visitor-detail-signal" aria-live="polite"><div><small>24H trend</small><strong id="ocVisitorDetailSignal">Waiting for market data</strong></div><p>A quick view of the asset’s recent price movement.</p></div>
+      <button type="button" class="primary" data-visitor-buy id="ocVisitorBuyButton" style="width:100%;min-height:46px;font-weight:800">Buy <span id="ocVisitorBuySymbol">BTC</span></button>
     </section>
   </section>
 
@@ -6027,7 +6027,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
   $("ocVisitorDetailCap").textContent=Number(a.market_cap)>0?compact(a.market_cap):"—";
   $("ocVisitorBuySymbol").textContent=String(a.symbol).toUpperCase();
   const momentum=$("ocVisitorDetailSignal"),move=Number(a.price_change_percentage_24h);
-  if(momentum){momentum.textContent=!Number.isFinite(move)?"Not available":move>0.5?"Positive momentum":move< -0.5?"Negative momentum":"Neutral momentum";momentum.style.color=!Number.isFinite(move)?"":move>0.5?"#16d9a0":move< -0.5?"#ff6b82":"#d7b875";}
+  if(momentum){momentum.textContent=!Number.isFinite(move)?"Not available":move>0.5?"Positive momentum":move< -0.5?"Market pullback":"Steady movement";momentum.style.color=!Number.isFinite(move)?"":move>0.5?"#16d9a0":move< -0.5?"#d7b875":"#16d9a0";}
   $("ocVisitorTradingChart").src=chartUrl(a);
   $("ocVisitorCoinDetail").classList.remove("hidden");
   $("ocVisitorCoinDetail").scrollIntoView({behavior:"smooth",block:"start"});
@@ -6036,7 +6036,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
   refreshVisitorPinnedQuotes();renderTicker();renderTable();
   const status=$("ocVisitorFeedStatus");if(status){const live=!!window.ocMarketLastSuccess,stale=!live&&getAssets().length>0;status.classList.toggle("is-live",live);status.classList.toggle("is-stale",stale);status.classList.toggle("is-offline",!live&&!stale);const label=status.querySelector("span");if(label)label.textContent=live?"Market feed active":stale?"Recent market snapshot":"Explore market overview";}
   const btc=findAsset("BTC");if(btc){$("ocVisitorHeroPrice").textContent=priceText(btc);const chg=Number(btc.price_change_percentage_24h)||0;$("ocVisitorHeroChange").textContent=fmtChange(chg)+" · 24H";$("ocVisitorHeroChange").style.color=chg>=0?"#16d9a0":"#ff6b82"}
-  if(selectedAsset){const current=findAsset(selectedAsset.symbol);if(current){$("ocVisitorDetailPrice").textContent=priceText(current);$("ocVisitorDetailChange").textContent=fmtChange(current.price_change_percentage_24h);$("ocVisitorDetailCap").textContent=compact(current.market_cap);const momentum=$("ocVisitorDetailSignal"),move=Number(current.price_change_percentage_24h);if(momentum){momentum.textContent=!Number.isFinite(move)?"Not available":move>0.5?"Positive momentum":move< -0.5?"Negative momentum":"Neutral momentum";momentum.style.color=!Number.isFinite(move)?"":move>0.5?"#16d9a0":move< -0.5?"#ff6b82":"#d7b875";}}}
+  if(selectedAsset){const current=findAsset(selectedAsset.symbol);if(current){$("ocVisitorDetailPrice").textContent=priceText(current);$("ocVisitorDetailChange").textContent=fmtChange(current.price_change_percentage_24h);$("ocVisitorDetailCap").textContent=compact(current.market_cap);const momentum=$("ocVisitorDetailSignal"),move=Number(current.price_change_percentage_24h);if(momentum){momentum.textContent=!Number.isFinite(move)?"Not available":move>0.5?"Positive momentum":move< -0.5?"Market pullback":"Steady movement";momentum.style.color=!Number.isFinite(move)?"":move>0.5?"#16d9a0":move< -0.5?"#d7b875":"#16d9a0";}}}
  };
  document.addEventListener("click",event=>{
   const detail=event.target.closest("[data-visitor-detail]");if(detail){showDetails(detail.dataset.visitorDetail);return}
