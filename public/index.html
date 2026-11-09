@@ -6641,7 +6641,7 @@ button?.addEventListener("click",async()=>{if(!user){if(message)message.textCont
 /* Visitor assistant remains available on public and auth screens. */
 #ocVisitorSupportBot{display:block!important}
 body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
-#oc-visitor-support-bot,#oc-support-button{display:none!important}
+#oc-visitor-support-bot{display:none!important}
 
 /* Clear, high-contrast support header and agent action */
 #ocVisitorSupportBot .oc-support-head{background:linear-gradient(110deg,#f4d98f,#ffe9b5)!important;border-bottom:1px solid #c49b43!important}
@@ -6700,17 +6700,22 @@ const answers=[
 ];
 const topics=[["Wallet",/\b(wallet|balance|holding)\b/i],["Markets",/\b(market|markets|price|chart|stock|stocks|gold|xau|crypto)\b/i],["Trading",/\b(trade|trading|buy|sell|order)\b/i],["History",/\b(history|activity|performance|transaction)\b/i]];
 const answer=q=>{
- const v=String(q||"").trim();if(!v)return "What would you like to explore?";
- if(typeof window.ocPoweredSupportAnswer==="function")return window.ocPoweredSupportAnswer(v,true);
- if(/^(hi|hello|hey|good morning|good afternoon|good evening)\b/i.test(v))return "Hello and welcome to OnChain! 👋 Great to have you here. Would you like to explore Stocks, Gold, Crypto, Live Markets or Wallet features?";
- if(/\b(who are you|what can you do|help|features|about onchain|what is onchain)\b/i.test(v))return "I’m the OnChain visitor assistant. I can introduce the platform, explain Stocks, Gold, Crypto, Markets, Wallet and Trading features, and answer general questions. Choose a topic below or ask me anything.";
- if(/\b(talk to agent|human agent|customer support|contact support)\b/i.test(v))return "For further assistance, email support@onchainspro.com. I can continue answering general questions about Onchain features here.";
- const matched=topics.filter(t=>t[1].test(v));
- if(matched.length>1)return "Happy to help! Which would you like to explore first: "+matched.map(t=>t[0]).join(" or ")+"?";
- for(const [pattern,reply] of answers){if(pattern.test(v))return reply;}
- if(/\b(thanks|thank you)\b/i.test(v))return "You’re very welcome! Enjoy exploring OnChain. What would you like to discover next?";
- if(/\b(what|how|why|where|when|can i|tell me)\b/i.test(v))return "Good question! Are you asking about Stocks, Gold, Crypto, Live Markets, Wallet features or Trading? I can explain whichever you mean.";
- return "I’m happy to help you explore OnChain. Ask me about Stocks, Gold, Crypto, Live Markets, Wallet or Trading—or choose one of the topics above.";
+ const v=String(q||"").trim();if(!v)return "Welcome to Onchain! What would you like to explore?";
+ if(/^(hi|hello|hey|good morning|good afternoon|good evening)\\b/i.test(v))return "Welcome to Onchain! 👋 Explore crypto, Gold, stocks, market charts and platform features. What would you like to discover?";
+ if(/\\b(register|registration|sign up|create account|login|log in|sign in|account)\\b/i.test(v))return "You can explore Onchain without signing in. To create an account, choose Sign Up; existing members can choose Login.";
+ if(/\\b(who are you|what can you do|help|features|about onchain|what is onchain|platform overview)\\b/i.test(v))return "I’m the Onchain visitor assistant. I can give quick answers about Markets, crypto, Gold, stocks, Wallet features and trading tools.";
+ if(/\\b(stock|stocks|share|shares|equity|equities)\\b/i.test(v))return "Explore stock-market information and available listings in the Markets area.";
+ if(/\\b(gold|\\bxau|\\bxaut|precious metal)\\b/i.test(v))return "Onchain includes Gold market information. XAU/USDT shows Gold priced in USDT.";
+ if(/\\b(bitcoin|\\bbtc|\\bxbt)\\b/i.test(v))return "Bitcoin (BTC) is a decentralised digital asset. Explore its price and chart in Markets.";
+ if(/\\b(ethereum|\\beth|ether)\\b/i.test(v))return "Ethereum supports smart contracts and decentralised applications. ETH is its native asset.";
+ if(/\\b(usdt|tether|stablecoin|stable coin)\\b/i.test(v))return "USDT is a stablecoin designed to track the US dollar and is commonly used in crypto markets.";
+ if(/\\b(crypto|cryptocurrency|digital asset|coins?)\\b/i.test(v))return "Browse crypto assets, prices and charts in Onchain Markets.";
+ if(/\\b(market|markets|price|chart|graph|live price)\\b/i.test(v))return "Open Markets to browse listed assets, compare prices and view charts.";
+ if(/\\b(wallet|balance|holdings)\\b/i.test(v))return "Wallet features help signed-in members review balances and supported assets. You can explore the platform without opening a wallet.";
+ if(/\\b(trad(e|ing)|buy|sell|order)\\b/i.test(v))return "Explore Trade to see available assets and the trade workflow. Review details before confirming any action.";
+ if(/\\b(history|activity|performance|transaction)\\b/i.test(v))return "Account history helps members review recorded activity and performance.";
+ if(/\\b(thanks|thank you)\\b/i.test(v))return "You’re welcome! Enjoy exploring Onchain.";
+ return "I can help with Onchain features, Markets, crypto, Gold, stocks, Wallet and Trade. Which would you like to know about?";
 };
 const open=()=>{root.classList.add("is-open");messages.scrollTop=messages.scrollHeight;input.focus();};
 root.querySelector(".oc-support-launch").addEventListener("click",()=>root.classList.contains("is-open")?root.classList.remove("is-open"):open());
@@ -12197,6 +12202,25 @@ body.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden){d
  const original=window.onchainBrowserSearch;
  if(typeof original==="function"&&!original.__ocRecentWrapped){const wrapped=function(q){saveRecent(q);return original.apply(this,arguments)};wrapped.__ocRecentWrapped=true;window.onchainBrowserSearch=wrapped}
  renderRecent();
+})();
+</script>
+
+<script id="oc-bot-dismiss-controller">
+(()=> {
+ const closeVisitor=()=>document.getElementById("ocVisitorSupportBot")?.classList.remove("is-open");
+ const closeFloating=()=>document.getElementById("oc-chat")?.classList.remove("open");
+ const closeAll=()=>{closeVisitor();closeFloating();};
+ window.ocCloseOnchainBots=closeAll;
+ document.addEventListener("pointerdown",event=>{
+  const target=event.target;
+  const visitor=document.getElementById("ocVisitorSupportBot");
+  const chat=document.getElementById("oc-chat");
+  const launch=document.getElementById("oc-support-button");
+  if(!visitor?.contains(target))closeVisitor();
+  if(!chat?.contains(target)&&!launch?.contains(target))closeFloating();
+ },true);
+ window.addEventListener("popstate",closeAll);
+ window.addEventListener("hashchange",closeAll);
 })();
 </script>
 </body>
