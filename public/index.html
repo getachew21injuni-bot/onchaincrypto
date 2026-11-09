@@ -6670,13 +6670,7 @@ body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
    </div></div>
   </div>
     <form class="oc-support-compose" id="ocSupportForm"><input id="ocSupportInput" type="text" maxlength="300" placeholder="Ask me anything about OnChain…" aria-label="Ask about OnChain" autocomplete="off"><button type="submit">Send</button></form>
-  <button type="button" class="oc-support-agent" id="ocSupportTalkAgent">Talk to Agent</button>
-  <form id="ocGuestAgentForm" class="oc-support-compose" style="display:none;flex-direction:column;gap:8px;padding:10px;border-top:1px solid rgba(255,255,255,.1)">
-   <input id="ocGuestAgentEmail" type="email" maxlength="160" required placeholder="Your email for the reply" aria-label="Your email">
-   <textarea id="ocGuestAgentMessage" maxlength="3000" required rows="3" placeholder="How can our team help?" aria-label="Message to support"></textarea>
-   <button type="submit">Send to support team</button>
-   <small id="ocGuestAgentStatus" aria-live="polite"></small>
-  </form>
+
  </section>
  <button class="oc-support-launch" type="button" aria-label="Open information assistant"><span class="oc-support-avatar" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M7 25v-4a17 17 0 0 1 34 0v4" stroke="#17253a" stroke-width="5" stroke-linecap="round"/><path d="M7 22h5a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-1a4 4 0 0 1-4-4zM41 22h-5a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4h1a4 4 0 0 0 4-4z" fill="#17253a" stroke="#e9c879" stroke-width="1.5"/><path d="M16 23c1.5-5 14.5-5 16 0v10c0 5-4 8-8 8s-8-3-8-8z" fill="#f1c98b" stroke="#17253a" stroke-width="2"/><path d="M20 30h.1M28 30h.1" stroke="#17253a" stroke-width="3" stroke-linecap="round"/><path d="M21 35q3 2 6 0" stroke="#9c542e" stroke-width="1.7" stroke-linecap="round"/><path d="M24 40v3" stroke="#17253a" stroke-width="2" stroke-linecap="round"/></svg></span></button>
 </div>
@@ -6707,9 +6701,10 @@ const answers=[
 const topics=[["Wallet",/\b(wallet|balance|holding)\b/i],["Markets",/\b(market|markets|price|chart|stock|stocks|gold|xau|crypto)\b/i],["Trading",/\b(trade|trading|buy|sell|order)\b/i],["History",/\b(history|activity|performance|transaction)\b/i]];
 const answer=q=>{
  const v=String(q||"").trim();if(!v)return "What would you like to explore?";
+ if(typeof window.ocPoweredSupportAnswer==="function")return window.ocPoweredSupportAnswer(v,true);
  if(/^(hi|hello|hey|good morning|good afternoon|good evening)\b/i.test(v))return "Hello and welcome to OnChain! 👋 Great to have you here. Would you like to explore Stocks, Gold, Crypto, Live Markets or Wallet features?";
  if(/\b(who are you|what can you do|help|features|about onchain|what is onchain)\b/i.test(v))return "I’m the OnChain visitor assistant. I can introduce the platform, explain Stocks, Gold, Crypto, Markets, Wallet and Trading features, and answer general questions. Choose a topic below or ask me anything.";
- if(/\b(talk to agent|human agent|customer support|contact support)\b/i.test(v))return "Tap Talk to Agent below to send a private message to our support team. Add your email so the team can reply directly.";
+ if(/\b(talk to agent|human agent|customer support|contact support)\b/i.test(v))return "For further assistance, email support@onchainspro.com. I can continue answering general questions about Onchain features here.";
  const matched=topics.filter(t=>t[1].test(v));
  if(matched.length>1)return "Happy to help! Which would you like to explore first: "+matched.map(t=>t[0]).join(" or ")+"?";
  for(const [pattern,reply] of answers){if(pattern.test(v))return reply;}
@@ -6720,20 +6715,7 @@ const answer=q=>{
 const open=()=>{root.classList.add("is-open");messages.scrollTop=messages.scrollHeight;input.focus();};
 root.querySelector(".oc-support-launch").addEventListener("click",()=>root.classList.contains("is-open")?root.classList.remove("is-open"):open());
 root.querySelector(".oc-support-close").addEventListener("click",()=>root.classList.remove("is-open"));
-const agentForm=root.querySelector("#ocGuestAgentForm");
-root.querySelector("#ocSupportTalkAgent").addEventListener("click",()=>{
- if(agentForm){agentForm.style.display=agentForm.style.display==="none"?"flex":"none";if(agentForm.style.display==="flex")root.querySelector("#ocGuestAgentEmail")?.focus();}
-});
-agentForm?.addEventListener("submit",async e=>{
- e.preventDefault();
- const email=root.querySelector("#ocGuestAgentEmail")?.value.trim()||"",message=root.querySelector("#ocGuestAgentMessage")?.value.trim()||"",status=root.querySelector("#ocGuestAgentStatus"),button=agentForm.querySelector("button[type=submit]");
- if(!email||!message){if(status)status.textContent="Please enter your email and message.";return;}
- if(typeof window.ocSubmitGuestSupport!=="function"){if(status)status.textContent="Support is connecting. Please try again in a moment.";return;}
- button.disabled=true;if(status)status.textContent="Sending securely…";
- try{await window.ocSubmitGuestSupport({email,message});add("Your message has been sent to our support team. We’ll reply to the email you provided.");agentForm.reset();agentForm.style.display="none";}
- catch(error){console.error("Visitor support submission failed:",error);if(status)status.textContent="Could not send right now. Please try again.";}
- finally{button.disabled=false;}
-});
+
 root.querySelectorAll("[data-oc-topic]").forEach(button=>button.addEventListener("click",()=>{const prompts={overview:"What is OnChain and what features does it offer?",stocks:"Tell me about stocks on OnChain.",gold:"Tell me about Gold and XAU on OnChain.",crypto:"Tell me about cryptocurrency on OnChain.",markets:"How do the markets and charts work?",wallet:"What can I do with the OnChain wallet?"};const q=prompts[button.dataset.ocTopic];if(q){add(q,"user");add(answer(q));}}));
 form.addEventListener("submit",e=>{e.preventDefault();const value=input.value.trim();if(!value)return;input.value="";add(value,"user");add(answer(value));});
 })();
