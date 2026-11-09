@@ -7,6 +7,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 const html = await readFile("public/index.html", "utf8");
+const supportChat = await readFile("public/support-chat.js", "utf8");
 
 test("all inline classic JavaScript parses", () => {
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
@@ -132,6 +133,12 @@ test("wallet state subscribes to Firestore for live cross-device balance and his
   assert.ok(html.includes("watchCloudTradeState(ref,user);"), "The listener must start after the account wallet restore");
   assert.ok(html.includes("if(stopTradeStateSync){stopTradeStateSync();stopTradeStateSync=null;}"), "The listener must stop when the signed-in account changes");
   assert.ok(html.includes("state={balance:Math.round(balance*100)/100,holdings,history};"), "Remote balance, holdings and trade history must replace the stale device view together");
+});
+
+test("visitor bot answers account questions without requesting sign-in", () => {
+  assert.ok(html.includes("window.ocPoweredSupportAnswer(v,true)"), "Visitor assistant must use information-only powered answers");
+  assert.ok(supportChat.includes('if(visitorMode&&item.title==="Account")return "The Onchain visitor assistant is available without signing in.'), "Visitor account answers must not ask visitors to log in or register");
+  assert.ok(supportChat.includes('if(visitorMode&&item.title==="Support")return "For further assistance, email support@onchainspro.com.'), "Visitor assistant must direct personal support to email, not agent chat");
 });
 
 test("visitor support uses an isolated Firebase session and submits through the admin inbox", () => {
