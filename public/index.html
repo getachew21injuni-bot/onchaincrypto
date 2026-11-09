@@ -2016,6 +2016,41 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
         <button type="button" data-browser-asset="SOL"><span>◎</span><strong>Solana</strong><small>SOL / USDT market</small></button>
       </div>
     </section>
+    <section class="panel browser-search-panel" aria-label="Blockchain explorer tools">
+      <div class="browser-search-heading"><div class="browser-search-icon">⌘</div><div><h2>Blockchain explorer</h2><p class="muted">Look up a public wallet address or transaction ID on its network.</p></div></div>
+      <form id="browserChainLookupForm" class="browser-google-search" role="search">
+        <label class="sr-only" for="browserChainNetwork">Blockchain network</label>
+        <select id="browserChainNetwork" aria-label="Choose blockchain network">
+          <option value="ethereum">Ethereum</option><option value="bsc">BNB Chain</option><option value="tron">TRON</option><option value="solana">Solana</option><option value="bitcoin">Bitcoin</option>
+        </select>
+        <label class="sr-only" for="browserChainQuery">Wallet address or transaction ID</label>
+        <input id="browserChainQuery" type="search" placeholder="Paste a public address or transaction ID" autocomplete="off" required>
+        <button type="submit" class="primary">Open explorer ↗</button>
+      </form>
+      <p class="muted tiny">This opens the selected network’s public explorer. Never enter a recovery phrase, private key or password.</p>
+      <div class="browser-chain-shortcuts">
+        <a href="https://etherscan.io/" target="_blank" rel="noopener noreferrer">Etherscan ↗</a>
+        <a href="https://bscscan.com/" target="_blank" rel="noopener noreferrer">BscScan ↗</a>
+        <a href="https://tronscan.org/" target="_blank" rel="noopener noreferrer">Tronscan ↗</a>
+        <a href="https://solscan.io/" target="_blank" rel="noopener noreferrer">Solscan ↗</a>
+        <a href="https://blockstream.info/" target="_blank" rel="noopener noreferrer">Blockstream ↗</a>
+      </div>
+    </section>
+    <section class="panel browser-search-panel" aria-label="Market news and research">
+      <div class="browser-search-heading"><div class="browser-search-icon">▤</div><div><h2>Market news & research</h2><p class="muted">Explore current reporting and research from external sources.</p></div></div>
+      <div class="browser-link-grid browser-research-grid">
+        <a href="https://news.google.com/search?q=cryptocurrency%20markets" target="_blank" rel="noopener noreferrer"><span>◈</span><strong>Crypto market news</strong><small>Latest cryptocurrency coverage</small></a>
+        <a href="https://news.google.com/search?q=Bitcoin" target="_blank" rel="noopener noreferrer"><span>₿</span><strong>Bitcoin news</strong><small>Bitcoin updates and analysis</small></a>
+        <a href="https://news.google.com/search?q=Ethereum" target="_blank" rel="noopener noreferrer"><span>◆</span><strong>Ethereum news</strong><small>Ethereum ecosystem updates</small></a>
+        <a href="https://news.google.com/search?q=Gold%20price" target="_blank" rel="noopener noreferrer"><span>Au</span><strong>Gold news</strong><small>Gold market reporting</small></a>
+      </div>
+      <p class="muted tiny">News and external research are provided by third-party websites, not published by Onchain.</p>
+    </section>
+    <section class="panel browser-search-panel" aria-label="Recently explored assets">
+      <div class="browser-search-heading"><div class="browser-search-icon">◷</div><div><h2>Recently explored</h2><p class="muted">Quickly return to assets you searched for on this device.</p></div></div>
+      <div id="browserRecentSearches" class="browser-recent-list"><p class="muted tiny">Your recent searches will appear here.</p></div>
+      <button type="button" class="secondary" id="browserClearRecent">Clear history</button>
+    </section>
   </section>
   <section id="page-register" class="hidden">
         <div class="auth-welcome">
@@ -12137,5 +12172,46 @@ body.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden){d
 }
 </style>
 
+<style id="oc-browser-research-tools-style">
+#page-browser #browserChainNetwork{min-width:150px;max-width:210px}
+#page-browser .browser-chain-shortcuts{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+#page-browser .browser-chain-shortcuts a{padding:9px 12px;border-radius:10px;background:var(--panel2,var(--panel));color:var(--text);text-decoration:none;border:1px solid var(--line);font-size:13px}
+#page-browser .browser-chain-shortcuts a:hover{border-color:#42e8ff}
+#page-browser .browser-research-grid a{display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-height:126px;padding:16px;text-decoration:none;color:var(--text);background:var(--panel2,var(--panel));border:1px solid var(--line);border-radius:13px}
+#page-browser .browser-research-grid a>span{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:#103548;color:#42e8ff;font-size:20px}
+#page-browser .browser-research-grid a strong{font-size:14px}
+#page-browser .browser-research-grid a small{font-size:11px;color:var(--muted)}
+#page-browser .browser-recent-list{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}
+#page-browser .browser-recent-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2,var(--panel))}
+#page-browser .browser-recent-item button{padding:3px 6px;min-height:28px}
+@media(max-width:560px){#page-browser #browserChainNetwork{max-width:none;width:100%}#page-browser .browser-chain-shortcuts a{flex:1 1 40%;text-align:center}}
+</style>
+<script id="oc-browser-research-tools">
+(function(){
+ const $=id=>document.getElementById(id);
+ const storageKey="onchainBrowserRecentV1";
+ const networks={
+  ethereum:q=>"https://etherscan.io/search?q="+encodeURIComponent(q),
+  bsc:q=>"https://bscscan.com/search? q=".replace(" ","")+encodeURIComponent(q),
+  tron:q=>"https://tronscan.org/#/search/"+encodeURIComponent(q),
+  solana:q=>"https://solscan.io/search? q=".replace(" ","")+encodeURIComponent(q),
+  bitcoin:q=>"https://blockstream.info/search/"+encodeURIComponent(q)
+ };
+ function readRecent(){try{const v=JSON.parse(localStorage.getItem(storageKey)||"[]");return Array.isArray(v)?v.filter(x=>typeof x==="string").slice(0,8):[]}catch(_){return []}}
+ function saveRecent(q){q=String(q||"").trim();if(!q)return;try{localStorage.setItem(storageKey,JSON.stringify([q,...readRecent().filter(x=>x.toLowerCase()!==q.toLowerCase())].slice(0,8)))}catch(_){}renderRecent()}
+ function renderRecent(){
+  const host=$("browserRecentSearches");if(!host)return;const items=readRecent();
+  if(!items.length){host.innerHTML='<p class="muted tiny">Your recent searches will appear here.</p>';return;}
+  host.innerHTML=items.map((q,i)=>'<span class="browser-recent-item"><button type="button" class="secondary" data-browser-recent="'+i+'">'+q.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))+'</button><button type="button" class="secondary" data-browser-copy-recent="'+i+'" aria-label="Copy search" title="Copy search">⧉</button></span>').join("");
+  host.querySelectorAll("[data-browser-recent]").forEach(b=>b.addEventListener("click",()=>{const q=readRecent()[Number(b.dataset.browserRecent)];if(q){$("browserSearchInput").value=q;window.onchainBrowserSearch?.(q)}}));
+  host.querySelectorAll("[data-browser-copy-recent]").forEach(b=>b.addEventListener("click",async()=>{const q=readRecent()[Number(b.dataset.browserCopyRecent)];if(!q)return;try{await navigator.clipboard.writeText(q);b.textContent="Copied"}catch(_){b.textContent="Copy unavailable"}}));
+ }
+ $("browserChainLookupForm")?.addEventListener("submit",e=>{e.preventDefault();const q=$("browserChainQuery")?.value.trim(),network=$("browserChainNetwork")?.value;if(!q)return;const url=networks[network]?.(q);if(url)window.open(url,"_blank","noopener,noreferrer")});
+ $("browserClearRecent")?.addEventListener("click",()=>{try{localStorage.removeItem(storageKey)}catch(_){}renderRecent()});
+ const original=window.onchainBrowserSearch;
+ if(typeof original==="function"&&!original.__ocRecentWrapped){const wrapped=function(q){saveRecent(q);return original.apply(this,arguments)};wrapped.__ocRecentWrapped=true;window.onchainBrowserSearch=wrapped}
+ renderRecent();
+})();
+</script>
 </body>
 </html>
