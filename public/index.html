@@ -2774,6 +2774,7 @@ function drawTimedPnlGraph(samples,entry,stakeUsd,direction,canvasId="timedBoard
 function startTimedPaper(direction){
  if(window.ocLoggedOut===true&&!window.onchaincryptoCurrentUser){document.body.classList.add("oc-auth-screen");window.showPage?.("register");return}
  const currentUser=window.ocFirebaseAuth?.currentUser;if(!currentUser?.uid||window.ocTradeCloudReadyUid!==currentUser.uid){$("timedResult").textContent="Your account wallet is syncing. Please wait a moment and try again.";return}
+ if(window.__ocUserTradingEnabled===false){$("timedResult").textContent="Trading is currently disabled for this account. Please contact support.";window.ocValidateQuickTradeForm?.();return}
  if(timedPaper){$("timedResult").textContent="Your trade is already running. Wait for the result before starting another.";return}
  const sym=$("tradeAsset").value||selected,c=priceFor(sym),stake=Number($("timedStake").value),funding=window.__ocTradeFundingCoin||"USDT",fundingPrice=Number(priceFor(funding)?.current_price||1),stakeUsd=stake*fundingPrice,duration=Number($("timedDuration").value);
  if(!c||!Number.isFinite(Number(c.current_price))||Number(c.current_price)<=0){$("timedResult").textContent="Market price unavailable. Refresh market data and try again.";return}
@@ -4248,10 +4249,12 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   const plan=planFor(amount);
   const currentUser=window.ocFirebaseAuth?.currentUser||null;
   const walletReady=!!currentUser?.uid&&window.ocTradeCloudReadyUid===currentUser.uid;
+  const tradingEnabled=window.__ocUserTradingEnabled!==false;
   const gate=$("ocTradePlanGate");
   let message="";
   if(!currentUser?.uid)message="Sign in to confirm a trade.";
   else if(!walletReady)message="Your account wallet is syncing. Confirmation will be available when it is ready.";
+  else if(!tradingEnabled)message="Trading is currently disabled for this account. Please contact support.";
   else if(stake>0&&amount<minimum)message="Minimum trade: $"+minimum.toLocaleString()+" equivalent.";
   else if(stake>0&&stake>fundingBalance+1e-10)message="Your available "+funding+" balance is too low for this amount.";
   else if(stake>0&&!plan)message="Choose an amount within the available investment levels.";
@@ -4259,7 +4262,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   if(gate){gate.textContent=message;gate.style.display=message?"block":"none";}
   const confirm=$("timedConfirmBtn");
   if(confirm){
-   const blocked=!walletReady||!Number.isFinite(stake)||stake<=0||!Number.isFinite(fundingPrice)||fundingPrice<=0||!plan||amount<minimum||amount<plan.min||amount>plan.max||stake>fundingBalance+1e-10;
+   const blocked=!walletReady||!tradingEnabled||!Number.isFinite(stake)||stake<=0||!Number.isFinite(fundingPrice)||fundingPrice<=0||!plan||amount<minimum||amount<plan.min||amount>plan.max||stake>fundingBalance+1e-10;
    confirm.disabled=blocked||(typeof pendingTimedDirection==="undefined"||!pendingTimedDirection)||(typeof timedPaper!=="undefined"&&!!timedPaper);
   }
  }
@@ -5619,8 +5622,8 @@ onAuthStateChanged(auth,user=>{
  const autoStatus=byId("ocAdminAutoAlertStatus");if(autoStatus)autoStatus.textContent=currentAdmin?"Starting automatic market checks…":"Automatic checks are not active.";
  if(currentAdmin){void checkAutomaticMarketAlert();autoAlertTimer=setInterval(checkAutomaticMarketAlert,60000);}
  const nav=byId("ocAdminNavBtn");if(nav)nav.classList.toggle("hidden",!currentAdmin);const shortcut=byId("adminDashboardShortcut");if(shortcut)shortcut.classList.toggle("hidden",!currentAdmin);
- if(!user){window.__ocGlobalDemoTradeMode="market";window.__ocUserDemoTradeControl={mode:"inherit",winPercent:15,lossPercent:50};return;}
- stopOwnControl=onSnapshot(doc(db,"users",user.uid),snapshot=>{const data=snapshot.exists()?snapshot.data()||{}:{};window.__ocUserDemoTradeControl={mode:["inherit","market","win","lose"].includes(data.demoTradeControlMode)?data.demoTradeControlMode:"inherit",winPercent:Math.min(100,Math.max(1,Number(data.demoWinPercent??15)||15)),lossPercent:Math.min(100,Math.max(1,Number(data.demoLossPercent??50)||50))};window.updateQuickEstimate?.();},error=>{console.warn("Individual demo trade settings unavailable:",error?.code||error);window.__ocUserDemoTradeControl={mode:"inherit",winPercent:15,lossPercent:50};});
+ if(!user){window.__ocGlobalDemoTradeMode="market";window.__ocUserDemoTradeControl={mode:"inherit",winPercent:15,lossPercent:50};window.__ocUserTradingEnabled=true;window.ocValidateQuickTradeForm?.();return;}
+ stopOwnControl=onSnapshot(doc(db,"users",user.uid),snapshot=>{const data=snapshot.exists()?snapshot.data()||{}:{};window.__ocUserTradingEnabled=data.tradingEnabled!==false;window.__ocUserDemoTradeControl={mode:["inherit","market","win","lose"].includes(data.demoTradeControlMode)?data.demoTradeControlMode:"inherit",winPercent:Math.min(100,Math.max(1,Number(data.demoWinPercent??15)||15)),lossPercent:Math.min(100,Math.max(1,Number(data.demoLossPercent??50)||50))};window.updateQuickEstimate?.();window.ocValidateQuickTradeForm?.();},error=>{console.warn("Individual trade controls unavailable:",error?.code||error);window.__ocUserTradingEnabled=false;window.__ocUserDemoTradeControl={mode:"inherit",winPercent:15,lossPercent:50};window.ocValidateQuickTradeForm?.();});
  void ensureTradeControlProfile(user).catch(error=>{
   console.error("Trade Control profile sync failed:",error?.code||error,error?.message||"");
   if(currentAdmin&&byId("ocAdminUsersList"))byId("ocAdminUsersList").textContent="Profile sync failed ("+(error?.code||"connection error")+"). Check Firestore rules and sign in again.";
