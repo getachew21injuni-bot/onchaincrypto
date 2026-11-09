@@ -144,6 +144,7 @@ test("one shared Onchain assistant serves visitors and signed-in users", () => {
   assert.ok(supportChat.includes("Welcome to Onchain! 👋"), "Visitors must receive a welcome without signing in");
   assert.ok(supportChat.includes("You can explore Onchain without signing in."), "Visitor registration guidance must not require sign-in");
   assert.ok(supportChat.includes("botAnswer(q,visitorMode)"), "Visitor questions must use the public information answers");
+  assert.ok(supportChat.includes('addBubble(botAnswer(q,visitorMode),"bot",!visitorMode)'), "Visitors must receive information without agent-contact email links");
   assert.ok(!supportChat.includes("signInAnonymously"), "Opening the visitor assistant must not create a login session");
   assert.ok(!supportChat.includes("if(!user||user.isAnonymous)newTicket()"), "Visitors must not be routed into agent ticket creation");
 });
@@ -198,6 +199,17 @@ test("Quick Trade confirmation uses one validator and waits for account wallet r
   assert.ok((html.match(/window\.ocValidateQuickTradeForm\?\.\(\);/g) || []).length >= 3, "Wallet restore success and failure must refresh the confirmation state");
 });
 
+
+test("the shared external support chat module parses", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "onchain-support-module-check-"));
+  const file = join(directory, "support-chat.mjs");
+  try {
+    await writeFile(file, supportChat, "utf8");
+    execFileSync(process.execPath, ["--check", file], { stdio: "pipe" });
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
 
 test("all inline JavaScript modules parse", async () => {
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
