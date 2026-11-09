@@ -122,6 +122,15 @@ test("wallet sync cannot trade on failed restore or overwrite results on unchang
 });
 
 
+test("wallet state subscribes to Firestore for live cross-device balance and history updates", () => {
+  assert.ok(html.includes("let stopTradeStateSync=null;"), "Expected a managed live wallet listener");
+  assert.ok(html.includes("function applyRemoteTradeState(snap,user){"), "Expected remote wallet snapshots to update the account view");
+  assert.ok(html.includes("stopTradeStateSync=onSnapshot(ref,{includeMetadataChanges:true}"), "Wallet must listen for server-confirmed Firestore changes");
+  assert.ok(html.includes("watchCloudTradeState(ref,user);"), "The listener must start after the account wallet restore");
+  assert.ok(html.includes("if(stopTradeStateSync){stopTradeStateSync();stopTradeStateSync=null;}"), "The listener must stop when the signed-in account changes");
+  assert.ok(html.includes("state={balance:Math.round(balance*100)/100,holdings,history};"), "Remote balance, holdings and trade history must replace the stale device view together");
+});
+
 test("visitor support uses an isolated Firebase session and submits through the admin inbox", () => {
   assert.ok(html.includes('initializeApp(config,"visitor-support")'), "Guest support must use a separate Firebase app");
   assert.ok(html.includes("const guestAuth=getAuth(guestApp),guestDb=getFirestore(guestApp);"), "Guest support must not change the main login session");
