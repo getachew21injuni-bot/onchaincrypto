@@ -4,12 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#06172a">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" sizes="96x96" href="/icons/onchain-favicon.png">
 <title>Onchain | Admin Dashboard</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0e11;--panel:#15191e;--panel2:#1e2329;--line:#2b3139;--text:#eaecef;--muted:#848e9c;--blue:#4c8dff;--cyan:#00e5ff;--purple:#7651e9;--red:#f6465d;--green:#0ecb81;--gold:#f0b90b}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 12% 0%,#0b2740 0%,#0b0e11 43%,#070b11 100%);background-attachment:fixed;color:var(--text);font:15px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif}button{font:inherit;cursor:pointer;color:inherit}.topbar{height:70px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 22px;background:linear-gradient(100deg,#030a17f5,#06172af5,#030a17f5);backdrop-filter:blur(14px);position:sticky;top:0;z-index:5}.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}.logo{width:38px;height:38px;border-radius:13px;background:linear-gradient(135deg,#00e5ff,#1265ff);display:grid;place-items:center;font-size:21px;box-shadow:0 0 22px #008cff60}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:1.5px}.top-actions{margin-left:auto;display:flex;gap:8px}.icon-btn{border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:9px 12px}.layout{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:calc(100vh - 70px)}aside{background:linear-gradient(180deg,#0b1b2d,#101418 72%);border-right:1px solid #17334e;padding:20px 14px}.admin-profile{display:flex;align-items:center;gap:12px;padding:4px 8px 24px;border-bottom:1px solid var(--line);margin-bottom:18px}.avatar{width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,#00e5ff,#1265ff);display:grid;place-items:center;font-size:22px;font-weight:800}.admin-profile strong{display:block;font-size:16px}.admin-profile small{color:#73aaff;letter-spacing:1.4px;font-size:10px}.nav{display:grid;gap:7px}.nav button{width:100%;border:1px solid transparent;background:transparent;color:#9ca9bd;border-radius:13px;text-align:left;padding:13px 12px;display:flex;align-items:center;gap:13px}.nav button .ico{width:24px;text-align:center;font-size:18px}.nav button.active,.nav button:hover{color:white;background:linear-gradient(100deg,#102c45,#111c30);border-color:#1e5a7b;box-shadow:inset 3px 0 var(--cyan)}.pill{margin-left:auto;border-radius:20px;background:var(--purple);color:white;padding:3px 9px;font-size:11px}.main{padding:24px;max-width:1500px;width:100%;margin:auto}.heading{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:23px}.heading h1{font-size:26px;margin:0 0 4px}.heading p{margin:0;color:var(--muted)}.status{font-size:12px;color:var(--cyan);border:1px solid #1b594d;background:#0b2826;border-radius:30px;padding:7px 11px;white-space:nowrap}.section-title{font-size:17px;margin:0 0 14px}.quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:26px}.quick{min-height:154px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(145deg,#151e28,#101418);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:15px;transition:.2s}.quick:hover{transform:translateY(-2px);border-color:#426da8}.quick .qicon{width:72px;height:72px;border-radius:25px;background:#172945;color:#68aaff;display:grid;place-items:center;font-size:29px}.quick:nth-child(3) .qicon{background:#301c31;color:#fb7185}.quick:nth-child(4) .qicon{background:#241f3e;color:#b197ff}.quick:nth-child(5) .qicon{background:#332b1d;color:var(--gold)}.quick span:last-child{font-size:18px}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.stat{padding:24px;border:1px solid var(--line);border-radius:23px;background:linear-gradient(145deg,#151e28,#101418);min-height:160px;position:relative}.stat .label{color:#9ba8bc;font-size:15px}.stat .value{font-size:36px;font-weight:800;margin:13px 0 8px}.stat .trend{color:var(--green)}.stat .sicon{position:absolute;right:24px;top:25px;font-size:31px;color:#4b8cff}.content-panel{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.panel-head h2{font-size:17px;margin:0}.muted{color:var(--muted)}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:520px}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-weight:600}.tag{display:inline-block;border-radius:30px;padding:4px 9px;background:#12372e;color:#6ee7b7;font-size:11px}.empty{padding:25px 5px;color:var(--muted);text-align:center}.mobile-menu{display:none}.notice{color:#c5d2e6;font-size:12px;margin-top:22px;padding:13px 15px;border:1px solid #263348;border-radius:13px;background:#0d1524}.bottomnav{display:none}.hidden{display:none!important}.layout.locked{display:none!important}.auth-gate{max-width:480px;margin:48px auto;padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 70px #0005}.auth-gate h1{margin-top:0}.auth-gate label{display:block;color:var(--muted);font-size:13px;margin:14px 0 6px}.auth-gate input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#080d16;color:var(--text)}.auth-gate .primary{margin-top:16px}.auth-gate p{color:var(--muted);font-size:13px}.auth-error{color:#fca5a5!important;min-height:20px}
 @media(min-width:900px){.quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:700px){.topbar{height:62px;padding:0 14px}.mobile-menu{display:inline-block}.brand{font-size:14px}.brand small{font-size:9px}.top-actions .hide-mobile{display:none}.layout{display:block}aside{position:fixed;z-index:10;left:0;top:62px;bottom:0;width:min(82vw,300px);overflow:auto;transform:translateX(-105%);transition:transform .2s;box-shadow:20px 0 50px #0008}aside.open{transform:translateX(0)}.main{padding:20px 14px 100px}.heading h1{font-size:23px}.heading p{font-size:13px}.status{font-size:10px}.quick-grid{gap:12px}.quick{min-height:140px;border-radius:22px}.quick .qicon{width:62px;height:62px;border-radius:22px}.quick span:last-child{font-size:16px}.stats{grid-template-columns:1fr}.stat{min-height:145px;padding:21px}.stat .value{font-size:32px}.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:6;display:flex;justify-content:space-around;align-items:center;height:70px;background:#101827f2;border-top:1px solid var(--line);backdrop-filter:blur(12px)}.bottomnav button{border:0;background:none;color:#8e9bb0;display:grid;gap:3px;justify-items:center;font-size:10px}.bottomnav .center{width:58px;height:58px;margin-top:-27px;border-radius:50%;background:linear-gradient(145deg,#3f82ff,#6748e9);border:6px solid #101827;box-shadow:0 0 0 2px #355a9e;font-size:23px;color:white}.content-panel{padding:15px}.notice{margin-bottom:10px}}
+.oc-action-status{display:block;margin:9px 0;padding:9px 12px;border:1px solid transparent;border-radius:9px;font-weight:650;line-height:1.5}.oc-action-status[data-state="success"]{color:#087a4b!important;background:rgba(22,199,132,.12)!important;border-color:rgba(22,199,132,.38)!important}.oc-action-status[data-state="rejected"],.oc-action-status[data-state="error"]{color:#c52e45!important;background:rgba(255,85,115,.10)!important;border-color:rgba(255,85,115,.34)!important}.oc-action-status[data-state="pending"]{color:#9a6a00!important;background:rgba(240,185,11,.12)!important;border-color:rgba(240,185,11,.34)!important} .logo{object-fit:cover;border-radius:50%;background:transparent;border:1px solid rgba(245,197,66,.7);box-shadow:0 0 16px rgba(245,197,66,.2)}
 </style>
 <style id="oc-admin-bitcoin-gold-atmosphere">
 :root{--oc-admin-gold:#d9ad55;--oc-admin-btc:#f7931a}
@@ -24,7 +27,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <body>
 <header class="topbar">
 <button class="icon-btn mobile-menu" id="menuToggle" aria-label="Open menu">☰</button>
-<div class="brand"><div class="logo">◉</div><div>Onchain<small>ADMIN CONTROL CENTER</small></div></div>
+<div class="brand"><img class="logo" src="/icons/onchainspro-profile.svg" alt="Onchain logo" width="38" height="38"><div>Onchain<small>ADMIN CONTROL CENTER</small></div></div>
 <div class="top-actions"><span id="authState" class="muted" style="font-size:12px">Admin sign-in required</span><button class="icon-btn hidden" id="adminSignOut">Sign out</button><a class="icon-btn" href="./" style="text-decoration:none">↗ Platform</a><button class="icon-btn" id="refreshBtn">↻ Refresh</button><button class="icon-btn hide-mobile" id="notifyBtn">♧ Notifications <b style="color:#34d399">0</b></button><button class="icon-btn" id="moreBtn">⋮</button></div>
 </header>
 <section id="adminAuthGate" class="auth-gate">
@@ -84,6 +87,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 </div>
 <nav class="bottomnav"><button data-view="Users"><span>♟</span>Users</button><button data-view="Support"><span>☏</span>Support</button><button class="center" data-view="Dashboard" aria-label="Dashboard">◉</button><button data-view="Email"><span>✉</span>Email</button><button data-view="Analytics"><span>◔</span>Stats</button></nav>
 <script>
+function setAdminActionStatus(element,message,state='info'){if(!element)return;element.classList.add('oc-action-status');element.dataset.state=state;element.textContent=message;}
 const sidebar=document.getElementById('sidebar'),dashboard=document.getElementById('dashboardView'),detail=document.getElementById('detailView');
 const descriptions={
 'Users':'Manage registered accounts after a secure user database is connected.',
@@ -112,7 +116,7 @@ function renderGlobalDemoControls(api,current){
  const names={market:'Market-Based',win:'Set Win Outcome',lose:'Set Loss Outcome'};
  const paint=mode=>{
   const valid=Object.hasOwn(names,mode)?mode:'market';
-  status.textContent='Shared setting active for all users: '+names[valid]+'.';
+  setAdminActionStatus(status,'Shared setting active for all users: '+names[valid]+'.','success');
   host.querySelectorAll('[data-global-demo-mode]').forEach(button=>{
    const active=button.dataset.globalDemoMode===valid;
    button.setAttribute('aria-pressed',String(active));
@@ -125,24 +129,24 @@ function renderGlobalDemoControls(api,current){
   paint(data.mode||'market');
  },error=>{
   console.error('Global Quick Trade setting could not be read:',error);
-  status.textContent='Could not load shared setting ('+(error.code||'connection error')+'). Check Firestore rules.';
+  setAdminActionStatus(status,'Could not load shared setting ('+(error.code||'connection error')+'). Check Firestore rules.','error');
  });
  host.querySelectorAll('[data-global-demo-mode]').forEach(button=>button.addEventListener('click',async()=>{
   const mode=button.dataset.globalDemoMode;
   if(!Object.hasOwn(names,mode))return;
   const signedIn=auth.currentUser;
   if(!signedIn||!signedIn.emailVerified||(signedIn.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){
-   status.textContent='Only the verified administrator can change the global outcome setting.';return;
+   setAdminActionStatus(status,'Only the verified administrator can change the global outcome setting.','error');return;
   }
   host.querySelectorAll('[data-global-demo-mode]').forEach(item=>item.disabled=true);
-  status.textContent='Publishing shared setting…';
+  setAdminActionStatus(status,'Publishing shared setting…','pending');
   try{
    await signedIn.getIdToken(true);
    await setDoc(doc(db,'platformSettings','demoTradeControl'),{mode,updatedAt:serverTimestamp(),updatedBy:signedIn.email},{merge:true});
-   status.textContent='Published. New Quick Trades will use '+names[mode]+'.';
+   setAdminActionStatus(status,'Successfully published. New Quick Trades will use '+names[mode]+'.','success');
   }catch(error){
    console.error('Global Quick Trade setting could not be published:',error);
-   status.textContent='Could not publish setting ('+(error.code||error.message||'error')+'). Check Firestore rules.';
+   setAdminActionStatus(status,'Could not publish setting ('+(error.code||error.message||'error')+'). Check Firestore rules.','error');
   }finally{
    host.querySelectorAll('[data-global-demo-mode]').forEach(item=>item.disabled=false);
   }
@@ -229,8 +233,8 @@ async function renderTradeControls(){
    const button=usersBody.querySelector('#saveTradeControl');button.disabled=true;message.textContent='Saving to Firebase…';
    try{
     await setDoc(doc(db,'users',u.id),{tradingEnabled:enabled.checked,demoTradeControlMode:demoMode,demoWinPercent:winPercent,demoLossPercent:lossPercent,tradeControlUpdatedAt:serverTimestamp(),tradeControlUpdatedBy:current.email},{merge:true});
-    u.tradingEnabled=enabled.checked;u.demoTradeControlMode=demoMode;u.demoWinPercent=winPercent;u.demoLossPercent=lossPercent;renderOutcomeLists();message.textContent='Saved to Firebase for '+(u.email||u.displayName||u.id)+'. New Quick Trades for this user will follow the selected setting.';
-   }catch(e){message.textContent='Could not save settings: '+(e.code||e.message||'permission error');}
+    u.tradingEnabled=enabled.checked;u.demoTradeControlMode=demoMode;u.demoWinPercent=winPercent;u.demoLossPercent=lossPercent;renderOutcomeLists();setAdminActionStatus(message,'Successfully saved to Firebase. New Quick Trades for this user will follow the selected setting.','success');
+   }catch(e){setAdminActionStatus(message,'Could not save settings: '+(e.code||e.message||'permission error'),'error');}
    finally{button.disabled=false;}
   });
  }catch(e){
@@ -298,9 +302,9 @@ async function renderRequestQueue(view){
      else tx.set(ledgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request account adjustment':'Withdrawal request account adjustment'),source:'admin-demo',status:'completed'});
      tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email});
     });
-    if(msg)msg.textContent=action==='approve'?'Approved. The account ledger was updated. No blockchain payment or payout occurred.':'Request rejected.';
+    if(msg)setAdminActionStatus(msg,action==='approve'?'Successfully approved. The account ledger was updated; no blockchain payment or payout occurred.':'Request rejected. No account balance was changed.',action==='approve'?'success':'rejected');
     await renderRequestQueue(view);if(typeof window.adminRefreshDashboard==='function')await window.adminRefreshDashboard();
-   }catch(error){button.disabled=false;if(msg)msg.textContent='Could not process request ('+(error.code||error.message||'error')+'). Check Firestore rules and user profile.';}
+   }catch(error){button.disabled=false;if(msg)setAdminActionStatus(msg,'Could not process request ('+(error.code||error.message||'error')+'). Check Firestore rules and user profile.','error');}
   }));
  }catch(error){const old=document.getElementById(queueId);if(old)old.remove();const panel=document.createElement('div');panel.className='notice';panel.textContent='Could not load '+kind+' requests from Firestore ('+(error.code||error.message||'error')+'). Check administrator permissions and Firestore rules.';body.prepend(panel);}
 }
@@ -398,7 +402,7 @@ async function renderDemoFinance(view){
     changes.push({symbol,before,after});
     if(symbol==='USDT')usdtAfter=Math.round(after*100)/100;else nextMap[symbol]=after;
    }
-   const btn=form.querySelector('button[type=submit]');btn.disabled=true;msg.textContent='Publishing wallet update to Firebase…';
+   const btn=form.querySelector('button[type=submit]');btn.disabled=true;setAdminActionStatus(msg,'Publishing wallet update to Firebase…','pending');
    try{
     const batch=writeBatch(db),userRef=doc(db,'users',uid),adminEmail=window.__ocAdminFirebase.auth.currentUser?.email||'';
     const userUpdate={demoAssetBalances:nextMap,demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:adminEmail,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:adminEmail};
@@ -415,9 +419,9 @@ async function renderDemoFinance(view){
      }
     }
     await batch.commit();
-    msg.textContent=(isDeposit?'Added ':'Deducted ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'of every supported asset':asset)+'. The user wallet has been published to Firebase.';
+    setAdminActionStatus(msg,(isDeposit?'Successfully added ':'Successfully deducted ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'of every supported asset':asset)+'. The user wallet has been published to Firebase.','success');
     await renderDemoFinance(view);
-   }catch(err){msg.textContent='Could not publish wallet update ('+(err.code||err.message||'error')+'). Check admin verification and deploy the updated Firestore rules.';}
+   }catch(err){setAdminActionStatus(msg,'Could not publish wallet update ('+(err.code||err.message||'error')+'). Check admin verification and deploy the updated Firestore rules.','error');}
    finally{const b=form.querySelector('button[type=submit]');if(b)b.disabled=false;}
   });
  }catch(error){body.innerHTML='<div class="notice"><strong>Could not load account ledger.</strong><p>Firestore access failed ('+esc(error.code||error.message||'unknown error')+'). Verify admin access and deploy the updated Firestore rules.</p></div>';}
@@ -509,9 +513,9 @@ async function renderWalletAddresses(){
   const button=form.querySelector('button[type=submit]');button.disabled=true;msg.textContent='Saving securely to Firestore…';
   try{
    await setDoc(doc(db,'walletAddresses',id),{asset,network,depositAddress,qrCodeUrl,withdrawalAddress,depositEnabled:fd.has('depositEnabled'),withdrawalEnabled:fd.has('withdrawalEnabled'),updatedAt:serverTimestamp(),updatedBy:api.auth.currentUser?.email||''},{merge:true});
-   msg.textContent='Saved and published. Users will see the updated deposit address and QR code when they open their wallet.';
+   setAdminActionStatus(msg,'Successfully saved and published. Users will see the updated deposit address and QR code when they open their wallet.','success');
    await renderWalletAddresses();
-  }catch(error){msg.textContent='Could not publish this address ('+(error.code||error.message||'error')+'). Confirm admin verification and deploy the updated Firestore rules.';button.disabled=false;}
+  }catch(error){setAdminActionStatus(msg,'Could not publish this address ('+(error.code||error.message||'error')+'). Confirm admin verification and deploy the updated Firestore rules.','error');button.disabled=false;}
  });
  body.querySelectorAll('[data-wallet-edit]').forEach(btn=>btn.addEventListener('click',()=>{
   const r=records.find(x=>x.id===btn.dataset.walletEdit);if(!r)return;
@@ -569,7 +573,7 @@ async function renderInternalTransfers(){
    if(!request||!['approve','reject'].includes(action)||request.status!=='pending')return;
    const approved=action==='approve';
    if(!confirm(approved?'Approve '+Number(request.amount).toLocaleString()+' USDT from '+(request.senderName||'sender')+' to '+(request.recipientName||'recipient')+'? Both account balances update only after this approval.':'Reject this internal USDT transfer request?'))return;
-   button.disabled=true;const msg=document.getElementById('ocInternalTransferAdminMessage');if(msg)msg.textContent=approved?'Checking balances and approving atomically…':'Rejecting request…';
+   button.disabled=true;const msg=document.getElementById('ocInternalTransferAdminMessage');if(msg)setAdminActionStatus(msg,approved?'Checking balances and approving atomically…':'Rejecting request…','pending');
    try{
     await current.getIdToken(true);
     const requestRef=doc(db,'internalTransferRequests',id);
@@ -597,9 +601,9 @@ async function renderInternalTransfers(){
       tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email,transferId:transferRef.id});
      });
     }
-    if(msg)msg.textContent=approved?'Approved. Both account balances and the transfer ledger were updated once.':'Request rejected. No wallet balance changed.';
+    if(msg)setAdminActionStatus(msg,approved?'Successfully approved. Both account balances and the transfer ledger were updated once.':'Request rejected. No wallet balance changed.',approved?'success':'rejected');
     await renderInternalTransfers();if(typeof window.adminRefreshDashboard==='function')await window.adminRefreshDashboard();
-   }catch(error){button.disabled=false;if(msg)msg.textContent='Could not '+(approved?'approve':'reject')+' request ('+(error.code||error.message||'error')+'). No partial balance update was made.';}
+   }catch(error){button.disabled=false;if(msg)setAdminActionStatus(msg,'Could not '+(approved?'approve':'reject')+' request ('+(error.code||error.message||'error')+'). No partial balance update was made.','error');}
   }));
  }catch(error){body.innerHTML='<div class="notice">Could not load internal transfer requests ('+escHtml(error.code||error.message||'error')+'). Check administrator verification and Firestore rules.</div>';}
 }
@@ -694,14 +698,14 @@ window.adminGetLiveCollection=async function(view){
     const uid=button.dataset.uid,currentStatus=button.dataset.status,nextStatus=currentStatus==='active'?'suspended':'active',msg=byId('ocUserAdminMessage');
     if(!uid||!['active','suspended'].includes(nextStatus))return;
     if(!window.confirm((nextStatus==='suspended'?'Suspend':'Activate')+' this user account?'))return;
-    button.disabled=true;if(msg)msg.textContent='Saving account status…';
+    button.disabled=true;if(msg)setAdminActionStatus(msg,'Saving account status…','pending');
     try{
      const current=auth.currentUser;
      if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('admin-session-not-authorized');
      await setDoc(doc(db,'users',uid),{accountStatus:nextStatus,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:current.email},{merge:true});
-     if(msg)msg.textContent='Account status saved as '+nextStatus.toUpperCase()+'.';
+     if(msg)setAdminActionStatus(msg,'Successfully saved. Account status is now '+nextStatus.toUpperCase()+'.','success');
      await window.adminGetLiveCollection('Users');await window.adminRefreshDashboard();
-    }catch(error){button.disabled=false;if(msg)msg.textContent='Could not save account status ('+(error.code||error.message||'unknown error')+'). Check Firestore rules and administrator verification.';}
+    }catch(error){button.disabled=false;if(msg)setAdminActionStatus(msg,'Could not save account status ('+(error.code||error.message||'unknown error')+'). Check Firestore rules and administrator verification.','error');}
    }));
    return;
   }
@@ -720,9 +724,9 @@ window.adminGetLiveCollection=async function(view){
     const current=auth.currentUser;if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('admin-session-not-authorized');
     await setDoc(doc(db,'kycSubmissions',uid),{status:action==='approve'?'approved':'rejected',reviewedAt:serverTimestamp(),reviewedBy:current.email,updatedAt:serverTimestamp()},{merge:true});
     await setDoc(doc(collection(db,'userNotifications',uid,'items')),{kind:action==='approve'?'kyc_approved':'kyc_rejected',title:action==='approve'?'Identity verification approved':'Identity verification not approved',message:action==='approve'?'Your identity verification was approved. Your account now shows Successfully Verified.':'Your identity verification was not approved. Please review your details and resubmit them.',createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:current.uid});
-    if(msg)msg.textContent=action==='approve'?'Approved. The user will now see Successfully Verified.':'Rejected. The user can correct and resubmit.';
+    if(msg)setAdminActionStatus(msg,action==='approve'?'Successfully approved. The user will now see Successfully Verified.':'Rejected. The user can correct and resubmit.',action==='approve'?'success':'rejected');
     await window.adminGetLiveCollection('KYC');await window.adminRefreshDashboard();
-   }catch(error){button.disabled=false;if(msg)msg.textContent='Could not save decision ('+(error.code||error.message||'unknown error')+'). Check admin access and Firestore rules.';}
+   }catch(error){button.disabled=false;if(msg)setAdminActionStatus(msg,'Could not save decision ('+(error.code||error.message||'unknown error')+'). Check admin access and Firestore rules.','error');}
   }));
  }catch(error){body.innerHTML='<div class="notice"><strong>Could not load live '+(isUsers?'profiles':'KYC submissions')+'.</strong><p>Firebase denied access or Firestore is unavailable ('+safeText(error.code||'unknown error')+'). Check administrator access and Firestore rules.</p></div>';}
 };

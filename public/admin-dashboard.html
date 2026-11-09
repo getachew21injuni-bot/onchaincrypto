@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" sizes="96x96" href="/icons/onchain-favicon.png">
 <title>Onchain | Admin Dashboard</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0e11;--panel:#15191e;--line:#2b3139;--text:#eaecef;--muted:#848e9c;--yellow:#f0b90b;--green:#0ecb81;--red:#f6465d}
@@ -9,7 +11,7 @@
 </style>
 </head>
 <body>
-<header><div><b>◆</b> Onchain <span class="muted">/ Admin</span></div><div><span id="authState" class="muted">Checking access…</span> <button id="signOut" class="hide">Sign out</button></div></header>
+<header><div><img src="/icons/onchainspro-profile.svg" alt="Onchain logo" width="30" height="30" style="vertical-align:middle;border-radius:50%;border:1px solid #f0b90b"> Onchain <span class="muted">/ Admin</span></div><div><span id="authState" class="muted">Checking access…</span> <button id="signOut" class="hide">Sign out</button></div></header>
 <main>
 <div class="warning"><strong>Safety lock:</strong> This admin page does not accept real deposits, approve money transfers, or credit account balances. Do not publish wallet addresses or accept funds until the server-side admin role, transaction verification, and security review are complete. QR codes are not proof of payment.</div>
 <section id="authBox" class="panel">

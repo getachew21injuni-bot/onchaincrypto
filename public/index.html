@@ -10,7 +10,11 @@
 <meta name="apple-mobile-web-app-title" content="Onchain">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" type="image/svg+xml" href="/icons/onchain-app.svg">
+<link rel="icon" type="image/png" sizes="96x96" href="/icons/onchain-favicon.png">
+<link rel="shortcut icon" href="/icons/onchain-favicon.png" type="image/png">
+<meta property="og:image" content="https://www.onchainspro.com/icons/onchain-favicon.png">
+<meta property="og:image:alt" content="Onchain logo">
+<meta name="twitter:image" content="https://www.onchainspro.com/icons/onchain-favicon.png">
 <meta name="description" content="Explore cryptocurrency and gold markets with Onchain. View cryptocurrency and gold market information, interactive charts and portfolio tools.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Onchain">
@@ -23,7 +27,7 @@
 <meta property="og:url" content="https://www.onchainspro.com/">
 <meta property="og:locale" content="en_US">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","name":"Onchain","url":"https://www.onchainspro.com/","description":"Cryptocurrency and gold market information, interactive charts and portfolio tools."}
+{"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"Onchain","url":"https://www.onchainspro.com/","description":"Cryptocurrency and gold market information, interactive charts and portfolio tools."},{"@type":"Organization","name":"Onchain","url":"https://www.onchainspro.com/","logo":"https://www.onchainspro.com/icons/onchain-favicon.png"}]}
 </script>
 <script id="oc-fail-closed-auth-startup">
   // Until Firebase restores and confirms a session, treat every visit as signed out.
@@ -1349,10 +1353,12 @@ body.oc-visitor-mode:not(.oc-auth-screen) main > :not(#page-public-market){
 .browser-asset-result button{width:100%;margin-top:6px}
 @media(max-width:560px){#page-browser .browser-google-search{flex-direction:column}#page-browser .browser-google-search button{width:100%}}
 </style>
+<style id="oc-shared-brand-image-fit">header .brand .header-logo-mark{display:block;object-fit:cover;border-radius:50%;background:transparent!important;box-shadow:0 0 16px rgba(245,197,66,.22)}#page-home .oc-home-brand-lockup .oc-home-bitcoin-mark{display:block;object-fit:cover;padding:0;border-radius:50%;background:transparent!important;box-shadow:0 0 18px rgba(245,197,66,.24)}#page-register .auth-logo-mark{object-fit:cover;border-radius:50%;background:transparent!important;border:0!important;padding:0!important}body.oc-logged-out #page-register .auth-welcome .auth-logo-mark{display:block!important;width:46px!important;height:46px!important;margin:0 auto 7px!important}</style>
+<style id="oc-semantic-action-status">.oc-action-status{display:block;margin:9px 0;padding:9px 12px;border:1px solid transparent;border-radius:9px;font-weight:650;line-height:1.5}.oc-action-status[data-state="success"]{color:#087a4b!important;background:rgba(22,199,132,.12)!important;border-color:rgba(22,199,132,.38)!important}.oc-action-status[data-state="rejected"],.oc-action-status[data-state="error"]{color:#c52e45!important;background:rgba(255,85,115,.10)!important;border-color:rgba(255,85,115,.34)!important}.oc-action-status[data-state="pending"]{color:#9a6a00!important;background:rgba(240,185,11,.12)!important;border-color:rgba(240,185,11,.34)!important}</style>
 </head>
 <body>
 <header>
-  <div class="brand"><span class="oc-onchain-round-mark header-logo-mark" aria-hidden="true">S</span><span><span style="color:#16c784">Onchain</span><span style="color:inherit">Spro</span></span></div>
+  <div class="brand"><img class="header-logo-mark" src="/icons/onchainspro-profile.svg" alt="" width="40" height="40"><span>Onchain</span></div>
   <nav id="nav">
     <button class="active" data-page="home">Home</button>
     <button data-page="markets">Markets</button>
@@ -1419,8 +1425,8 @@ body.oc-visitor-mode:not(.oc-auth-screen) main > :not(#page-public-market){
       <div class="oc-visitor-detail-head"><div><div class="oc-visitor-kicker">ASSET OVERVIEW</div><h3 id="ocVisitorDetailName">Bitcoin</h3><span id="ocVisitorDetailSymbol">BTC / USD</span></div><button type="button" class="secondary" id="ocVisitorDetailClose" aria-label="Close asset details">✕</button></div>
       <div class="oc-visitor-detail-stats"><div><small>Current price</small><strong id="ocVisitorDetailPrice">—</strong></div><div><small>24H change</small><strong id="ocVisitorDetailChange">—</strong></div><div><small>Market cap</small><strong id="ocVisitorDetailCap">—</strong></div></div>
       <div class="oc-visitor-chart-wrap"><iframe id="ocVisitorTradingChart" title="Selected asset price chart" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-      <div class="oc-visitor-detail-signal" aria-live="polite"><div><small>24H momentum</small><strong id="ocVisitorDetailSignal">Waiting for market data</strong></div><p>Based on recent price movement only; it is market information, not a personal trading recommendation.</p></div>
-      <button type="button" class="primary" data-visitor-buy id="ocVisitorBuyButton" style="width:100%;min-height:46px;font-weight:800">Buy <span id="ocVisitorBuySymbol">BTC</span> · Create account</button>
+      <div class="oc-visitor-detail-signal" aria-live="polite"><div><small>24H momentum</small><strong id="ocVisitorDetailSignal">Waiting for market data</strong></div><p>Explore recent price trends and market insights.</p></div>
+      <button type="button" class="primary" data-visitor-buy id="ocVisitorBuyButton" style="width:100%;min-height:46px;font-weight:800">Buy <span id="ocVisitorBuySymbol">BTC</span></button>
     </section>
   </section>
 
@@ -1435,7 +1441,7 @@ body.oc-visitor-mode:not(.oc-auth-screen) main > :not(#page-public-market){
   
  <section class="oc-invest-hero oc-get-started-hero oc-home-promo-hero" aria-label="Onchain digital asset trading platform">
   <div class="oc-hero-copy">
-   <div class="oc-public-auth-brand oc-home-brand-lockup"><span class="oc-auth-brand-mark oc-home-bitcoin-mark" aria-hidden="true">B</span><span>Onchain</span><small>CRYPTO · GOLD · INVESTMENTS</small></div>
+   <div class="oc-public-auth-brand oc-home-brand-lockup"><img class="oc-auth-brand-mark oc-home-bitcoin-mark" src="/icons/onchainspro-profile.svg" alt="Onchain logo" width="54" height="54"><span>Onchain</span><small>CRYPTO · GOLD · INVESTMENTS</small></div>
    <div class="oc-public-auth-copy">
     <div class="oc-public-auth-eyebrow"><i></i> YOUR ONCHAIN INVESTMENT STARTING POINT</div>
     <h2>Discover markets.<br><span>Build your investment strategy.</span></h2>
@@ -2055,7 +2061,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
   </section>
   <section id="page-register" class="hidden">
         <div class="auth-welcome">
-      <div class="auth-logo-mark oc-onchain-round-mark" aria-hidden="true"><span>B</span></div>
+      <img class="auth-logo-mark oc-onchain-round-mark" src="/icons/onchainspro-profile.svg" alt="Onchain logo" width="46" height="46">
       <div class="auth-brand">Onchain</div>
       <h1 id="authHeading">Welcome to Onchain</h1>
       <p id="authSubheading" class="hidden"></p>
@@ -2206,7 +2212,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
     <div class="page-title"><div><h1>Support</h1><div class="muted">Contact our support team.</div></div><span class="tag">SUPPORT</span></div><section class="panel" style="margin-bottom:16px;padding:16px"><h2>Chat with support</h2><p class="muted tiny">Send a private message to support.</p><button class="primary" type="button" data-oc-open-support>Open support chat</button></section>
     <section class="panel form-panel" id="ocDirectAdminMessageSection" style="margin-bottom:16px">
       <div class="section-head"><h2>✉ Message Admin Directly</h2><span class="tag">DIRECT SUPPORT</span></div>
-      <p class="muted tiny">Send a message straight to the OnChainsPro support team. No account is required; include an email address so the team can reply.</p>
+      <p class="muted tiny">Send a message straight to the Onchain support team. No account is required; include an email address so the team can reply.</p>
       <form id="ocDirectAdminMessageForm">
         <label for="ocDirectAdminEmail">Your email</label>
         <input id="ocDirectAdminEmail" class="field" type="email" maxlength="160" required autocomplete="email" placeholder="you@example.com">
@@ -3361,7 +3367,7 @@ saveProfileButton?.addEventListener("click", async () => {
   button.disabled = true;
   const originalLabel = button.textContent;
   button.textContent = "Saving…";
-  if (status) status.textContent = "Saving your profile…";
+  if (status) { status.classList.add("oc-action-status"); status.dataset.state="pending"; status.textContent = "Saving your profile…"; }
   try {
     await updateProfile(user, { displayName });
     // The cloud write must succeed before we report completion or navigate away.
@@ -3374,15 +3380,15 @@ saveProfileButton?.addEventListener("click", async () => {
     if (identity) identity.textContent = displayName;
     renderOwnProfileSummary(user, profile);
     if (typeof refreshProfileAccountInfo === "function") refreshProfileAccountInfo();
-    if (status) status.textContent = "Your profile is saved. Welcome to Onchain!";
+    if (status) { status.classList.add("oc-action-status"); status.dataset.state="success"; status.textContent = "Successfully saved. Welcome to Onchain!"; }
     // A single Save click completes the process and opens the signed-in user's Home.
     openHomeAfterAuth();
     showNewUserWelcomeOnce(credential.user.uid, name);
   } catch (error) {
     console.warn("Profile save failed:", error?.code || error, error?.message || "");
-    if (status) status.textContent = error?.code === "permission-denied"
+    if (status) { status.classList.add("oc-action-status"); status.dataset.state="error"; status.textContent = error?.code === "permission-denied"
       ? "Profile save blocked by Firestore permissions (permission-denied). Please refresh after the security-rules update."
-      : "Profile save failed (" + (error?.code || "connection error") + "). Please check your connection and try again.";
+      : "Profile save failed (" + (error?.code || "connection error") + "). Please check your connection and try again."; }
     button.disabled = false;
     button.textContent = originalLabel || "Save profile";
   }
@@ -3499,7 +3505,7 @@ function showNewUserWelcomeOnce(uid, displayName) {
   toast.setAttribute("aria-live", "polite");
   toast.style.cssText = "position:fixed;z-index:99999;top:18px;left:50%;transform:translateX(-50%);width:min(92vw,430px);padding:15px 18px;border:1px solid rgba(32,214,133,.5);border-radius:14px;background:linear-gradient(135deg,#092d25,#102b35);color:#f2fff8;box-shadow:0 14px 40px rgba(0,0,0,.38);font:600 14px/1.45 system-ui,sans-serif;text-align:center;opacity:0;transition:opacity .25s ease";
   const firstName = String(displayName || "").trim().split(/\s+/)[0];
-  toast.textContent = (firstName ? "Welcome to OnChainsPro, " + firstName + "! " : "Welcome to OnChainsPro! ") + "Your account is ready. We’re glad you’re here.";
+  toast.textContent = (firstName ? "Welcome to Onchain, " + firstName + "! " : "Welcome to Onchain! ") + "Your account is ready. We’re glad you’re here.";
   document.body.appendChild(toast);
   requestAnimationFrame(() => { toast.style.opacity = "1"; });
   const dismiss = () => { toast.style.opacity = "0"; window.setTimeout(() => toast.remove(), 300); };
@@ -5840,14 +5846,14 @@ async function processDemoRequest(kind,requestId,decision){
 }
 document.addEventListener("click",async e=>{
  const b=e.target.closest("[data-oc-review]");if(!b)return;
- const reportAdminRequest=message=>{let status=document.getElementById("ocAdminRequestMessage");if(!status){status=document.createElement("p");status.id="ocAdminRequestMessage";status.className="muted tiny";status.setAttribute("role","status");status.setAttribute("aria-live","polite");document.getElementById("adminTradeControl")?.after(status);}if(status)status.textContent=message;};
- if(!admin||!auth.currentUser?.emailVerified){reportAdminRequest("Verified administrator access is required.");return}
+ const reportAdminRequest=(message,state="info")=>{let status=document.getElementById("ocAdminRequestMessage");if(!status){status=document.createElement("p");status.id="ocAdminRequestMessage";status.setAttribute("role","status");status.setAttribute("aria-live","polite");document.getElementById("adminTradeControl")?.after(status);}if(status){status.className="tiny oc-action-status";status.dataset.state=state;status.textContent=message;}};
+ if(!admin||!auth.currentUser?.emailVerified){reportAdminRequest("Verified administrator access is required.","error");return}
  const kind=b.dataset.k,decision=b.dataset.ocReview;
  const confirmText=decision==="approve"?(kind==="deposit"?"This approval updates the internal account ledger only; it does not verify an on-chain deposit. Continue?":"This updates the internal account ledger only; it does not send cryptocurrency to an external wallet. Continue?"):"Reject this request?";
  if(!confirm(confirmText))return;
  b.disabled=true;
- try{await processDemoRequest(kind,b.dataset.id,decision);reportAdminRequest(decision==="approve"?"Request processed. The displayed balance and account ledger were updated.":"Request rejected.");b.textContent=decision==="approve"?"Approved":"Rejected";}
- catch(err){reportAdminRequest("Could not process request: "+(err.message||err.code));b.disabled=false}
+ try{await processDemoRequest(kind,b.dataset.id,decision);reportAdminRequest(decision==="approve"?"Successful: request approved and the displayed account ledger was updated.":"Request rejected. No balance adjustment was made.",decision==="approve"?"success":"rejected");b.textContent=decision==="approve"?"Approved":"Rejected";}
+ catch(err){reportAdminRequest("Could not complete the request: "+(err.message||err.code),"error");b.disabled=false}
 });
 onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(String(u.email||"").toLowerCase()));if(u)watch(u)});
 </script>
@@ -6657,19 +6663,20 @@ body.oc-home-actions-visible #ocVisitorSupportBot{display:block!important}
 #ocVisitorSupportBot .oc-support-suggestions button:hover{background:#d9f7e8!important;border-color:#20c77a!important;color:#07130d!important}
 </style>
 <div id="ocVisitorSupportBot" aria-live="polite">
- <section class="oc-support-panel" role="dialog" aria-label="OnChain information assistant" aria-modal="false">
+ <section class="oc-support-panel" role="dialog" aria-label="Onchain information assistant" aria-modal="false">
   <header class="oc-support-head">
    <span class="oc-support-avatar" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M7 25v-4a17 17 0 0 1 34 0v4" stroke="#17253a" stroke-width="5" stroke-linecap="round"/><path d="M7 22h5a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-1a4 4 0 0 1-4-4zM41 22h-5a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4h1a4 4 0 0 0 4-4z" fill="#17253a" stroke="#e9c879" stroke-width="1.5"/><path d="M16 23c1.5-5 14.5-5 16 0v10c0 5-4 8-8 8s-8-3-8-8z" fill="#f1c98b" stroke="#17253a" stroke-width="2"/><path d="M20 30h.1M28 30h.1" stroke="#17253a" stroke-width="3" stroke-linecap="round"/><path d="M21 35q3 2 6 0" stroke="#9c542e" stroke-width="1.7" stroke-linecap="round"/><path d="M24 40v3" stroke="#17253a" stroke-width="2" stroke-linecap="round"/></svg></span>
-   <span class="oc-support-headcopy"><strong>Customer Support</strong><small>Ask about OnChain features and account guidance</small></span>
+   <span class="oc-support-headcopy"><strong>Onchain Assistant</strong><small>Explore markets, charts and account features</small></span>
    <button class="oc-support-close" type="button" aria-label="Close assistant">×</button>
   </header>
-  <div class="oc-support-messages" id="ocSupportMessages" aria-live="polite" aria-relevant="additions"><div class="oc-support-msg bot">Welcome to OnChain! 👋 Explore crypto, stocks, Gold and our platform features. I’m here to answer questions and help you discover what OnChain offers. What interests you today? What would you like help with?</div></div>
+  <div class="oc-support-messages" id="ocSupportMessages" aria-live="polite" aria-relevant="additions"><div class="oc-support-msg bot">Hey, welcome to Onchain! 👋 Explore Bitcoin, Ethereum, Gold and market charts. I can explain how the platform works and how to get started. What would you like to discover?</div></div>
   <div class="oc-support-suggestions" id="ocSupportChoices" aria-label="Explore OnChain topics">
-   <div class="oc-support-menu-group"><span class="oc-support-menu-title">Explore OnChain</span><div class="oc-support-menu-items">
-    <button type="button" data-oc-topic="overview">Platform overview</button><button type="button" data-oc-topic="stocks">Stocks</button><button type="button" data-oc-topic="gold">Gold</button><button type="button" data-oc-topic="crypto">Cryptocurrency</button><button type="button" data-oc-topic="markets">Live markets</button><button type="button" data-oc-topic="wallet">Wallet features</button>
+   <div class="oc-support-menu-group"><span class="oc-support-menu-title">Explore Onchain</span><div class="oc-support-menu-items">
+    <button type="button" data-oc-topic="bitcoin">Bitcoin (BTC)</button><button type="button" data-oc-topic="ethereum">Ethereum (ETH)</button><button type="button" data-oc-topic="gold">Gold</button><button type="button" data-oc-topic="markets">Markets &amp; charts</button><button type="button" data-oc-topic="trade">How to trade</button><button type="button" data-oc-topic="account">Create an account</button>
    </div></div>
+   <button type="button" id="ocVisitorCreateAccount" style="width:100%;min-height:42px;margin-top:9px;padding:10px 12px;border:1px solid rgba(53,212,154,.55);border-radius:11px;background:linear-gradient(100deg,#087b56,#16a879);color:#fff;font-weight:800;cursor:pointer">Create your free account</button>
   </div>
-    <form class="oc-support-compose" id="ocSupportForm"><input id="ocSupportInput" type="text" maxlength="300" placeholder="Ask me anything about OnChain…" aria-label="Ask about OnChain" autocomplete="off"><button type="submit">Send</button></form>
+    <form class="oc-support-compose" id="ocSupportForm"><input id="ocSupportInput" type="text" maxlength="300" placeholder="Ask me anything about Onchain…" aria-label="Ask about Onchain" autocomplete="off"><button type="submit">Send</button></form>
 
  </section>
  <button class="oc-support-launch" type="button" aria-label="Open information assistant"><span class="oc-support-avatar" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M7 25v-4a17 17 0 0 1 34 0v4" stroke="#17253a" stroke-width="5" stroke-linecap="round"/><path d="M7 22h5a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-1a4 4 0 0 1-4-4zM41 22h-5a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4h1a4 4 0 0 0 4-4z" fill="#17253a" stroke="#e9c879" stroke-width="1.5"/><path d="M16 23c1.5-5 14.5-5 16 0v10c0 5-4 8-8 8s-8-3-8-8z" fill="#f1c98b" stroke="#17253a" stroke-width="2"/><path d="M20 30h.1M28 30h.1" stroke="#17253a" stroke-width="3" stroke-linecap="round"/><path d="M21 35q3 2 6 0" stroke="#9c542e" stroke-width="1.7" stroke-linecap="round"/><path d="M24 40v3" stroke="#17253a" stroke-width="2" stroke-linecap="round"/></svg></span></button>
@@ -6701,6 +6708,13 @@ const answers=[
 const topics=[["Wallet",/\b(wallet|balance|holding)\b/i],["Markets",/\b(market|markets|price|chart|stock|stocks|gold|xau|crypto)\b/i],["Trading",/\b(trade|trading|buy|sell|order)\b/i],["History",/\b(history|activity|performance|transaction)\b/i]];
 const answer=q=>{
  const v=String(q||"").trim();if(!v)return "What would you like to explore?";
+ if(/^(hi|hello|hey|good morning|good afternoon|good evening)\b/i.test(v))return "Hey, welcome to Onchain! 👋 Explore Bitcoin, Ethereum, Gold and market charts. I can explain how the platform works and help you get started.";
+ if(/\b(bitcoin|\bbtc\b|\bxbt\b)\b/i.test(v))return "Bitcoin (BTC) is a decentralised digital currency that runs on its own blockchain. It was the first cryptocurrency and has a maximum supply of 21 million.";
+ if(/\b(ethereum|\beth\b|ether)\b/i.test(v))return "Ethereum is a blockchain for smart contracts and decentralised applications. ETH is its native digital asset.";
+ if(/\b(gold|\bxau\b|precious metal)\b/i.test(v))return "Gold (XAU) is a globally traded precious metal. Onchain lets you explore its market information alongside cryptocurrency markets.";
+ if(/\b(markets?|charts?|price movement)\b/i.test(v))return "Explore listed assets, compare recent price movements and open charts for more market detail. Market information is for research and education.";
+ if(/\b(how to trade|how do i trade|trading|trade)\b/i.test(v))return "To get started, create an account or log in, open the Trade area, select an available asset and review the trade details before confirming.";
+ if(/\b(create an account|create account|sign up|register|registration)\b/i.test(v))return "Tap Create your free account below, choose Sign Up and complete the registration steps. If you already have an account, choose Login.";
  if(typeof window.ocPoweredSupportAnswer==="function")return window.ocPoweredSupportAnswer(v,true);
  if(/^(hi|hello|hey|good morning|good afternoon|good evening)\b/i.test(v))return "Hello and welcome to OnChain! 👋 Great to have you here. Would you like to explore Stocks, Gold, Crypto, Live Markets or Wallet features?";
  if(/\b(who are you|what can you do|help|features|about onchain|what is onchain)\b/i.test(v))return "I’m the OnChain visitor assistant. I can introduce the platform, explain Stocks, Gold, Crypto, Markets, Wallet and Trading features, and answer general questions. Choose a topic below or ask me anything.";
@@ -6712,11 +6726,14 @@ const answer=q=>{
  if(/\b(what|how|why|where|when|can i|tell me)\b/i.test(v))return "Good question! Are you asking about Stocks, Gold, Crypto, Live Markets, Wallet features or Trading? I can explain whichever you mean.";
  return "I’m happy to help you explore OnChain. Ask me about Stocks, Gold, Crypto, Live Markets, Wallet or Trading—or choose one of the topics above.";
 };
-const open=()=>{root.classList.add("is-open");messages.scrollTop=messages.scrollHeight;input.focus();};
+const open=(focus=true)=>{root.classList.add("is-open");messages.scrollTop=messages.scrollHeight;if(focus)input.focus();};
 root.querySelector(".oc-support-launch").addEventListener("click",()=>root.classList.contains("is-open")?root.classList.remove("is-open"):open());
 root.querySelector(".oc-support-close").addEventListener("click",()=>root.classList.remove("is-open"));
+root.querySelector("#ocVisitorCreateAccount")?.addEventListener("click",()=>{if(typeof window.ocOpenVisitorAuth==="function")window.ocOpenVisitorAuth("register");else if(typeof window.showPage==="function")window.showPage("register");});
+const greetVisitor=()=>{if(root.dataset.greeted==="1"||!document.body.classList.contains("oc-visitor-mode")||document.body.classList.contains("oc-auth-screen"))return;root.dataset.greeted="1";open(false);};
+const visitorObserver=new MutationObserver(greetVisitor);visitorObserver.observe(document.body,{attributes:true,attributeFilter:["class"]});window.setTimeout(greetVisitor,1800);
 
-root.querySelectorAll("[data-oc-topic]").forEach(button=>button.addEventListener("click",()=>{const prompts={overview:"What is OnChain and what features does it offer?",stocks:"Tell me about stocks on OnChain.",gold:"Tell me about Gold and XAU on OnChain.",crypto:"Tell me about cryptocurrency on OnChain.",markets:"How do the markets and charts work?",wallet:"What can I do with the OnChain wallet?"};const q=prompts[button.dataset.ocTopic];if(q){add(q,"user");add(answer(q));}}));
+root.querySelectorAll("[data-oc-topic]").forEach(button=>button.addEventListener("click",()=>{const prompts={bitcoin:"Tell me about Bitcoin (BTC).",ethereum:"Tell me about Ethereum (ETH).",gold:"Tell me about Gold (XAU).",markets:"How do markets and charts work?",trade:"How do I get started with trading?",account:"How do I create an account?"};const q=prompts[button.dataset.ocTopic];if(q){add(q,"user");add(answer(q));}}));
 form.addEventListener("submit",e=>{e.preventDefault();const value=input.value.trim();if(!value)return;input.value="";add(value,"user");add(answer(value));});
 })();
 </script>
