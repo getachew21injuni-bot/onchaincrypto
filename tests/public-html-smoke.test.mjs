@@ -8,6 +8,7 @@ import assert from "node:assert/strict";
 
 const html = await readFile("public/index.html", "utf8");
 const supportChat = await readFile("public/support-chat.js", "utf8");
+const admin = await readFile("public/admin.html", "utf8");
 
 test("all inline classic JavaScript parses", () => {
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
@@ -140,11 +141,11 @@ test("one shared Onchain assistant serves visitors and signed-in users", () => {
   assert.ok(!html.includes("oc-visitor-support-bot-script"), "The duplicate visitor-only answer script must be removed");
   assert.ok(supportChat.includes('btn.id="oc-support-button"'), "The shared assistant must create one launcher");
   assert.ok(supportChat.includes('box.id="oc-chat"'), "The shared assistant must create one chat panel");
-  assert.ok(supportChat.includes("const visitorMode=!user||user.isAnonymous"), "The same assistant must adapt its actions to the session");
-  assert.ok(supportChat.includes("Welcome to Onchain! 👋"), "Visitors must receive a welcome without signing in");
-  assert.ok(supportChat.includes("You can explore Onchain without signing in."), "Visitor registration guidance must not require sign-in");
-  assert.ok(supportChat.includes("botAnswer(q,visitorMode)"), "Visitor questions must use the public information answers");
-  assert.ok(supportChat.includes('addBubble(botAnswer(q,visitorMode),"bot",!visitorMode)'), "Visitors must receive information without agent-contact email links");
+  assert.ok(supportChat.includes("function botAnswer(q)"), "One shared knowledge engine must answer visitor and signed-in questions");
+  assert.ok(supportChat.includes("Welcome to Onchain! Ask about Markets"), "The shared assistant must show one welcome message");
+  assert.ok(supportChat.includes("Sign in to start a conversation with our support team."), "Visitors must be guided to sign in before agent contact");
+  assert.ok(supportChat.includes('addBubble(botAnswer(q),"bot")'), "All questions must use the same powered information answers");
+  assert.ok(!supportChat.includes("mailto:")&&!supportChat.includes("support@onchainspro.com"), "The floating assistant must not expose direct email contact");
   assert.ok(!supportChat.includes("signInAnonymously"), "Opening the visitor assistant must not create a login session");
   assert.ok(!supportChat.includes("if(!user||user.isAnonymous)newTicket()"), "Visitors must not be routed into agent ticket creation");
 });
@@ -160,11 +161,15 @@ test("the single assistant uses one theme and closes on outside clicks or naviga
   assert.ok(html.includes('window.addEventListener("hashchange",closeAssistant)'), "Hash navigation must close the assistant");
 });
 
-test("agent contact is available only inside the shared assistant for signed-in users", () => {
-  assert.ok(supportChat.includes("if(!user||user.isAnonymous)return"), "Visitors must not create agent tickets");
-  assert.ok(supportChat.includes("visitorMode?'':' <button class=\"oc-btn oc-secondary\" id=\"oc-agent\">Talk to an agent</button>'"), "Talk to an agent must be conditionally shown only for signed-in users");
+test("one Home-only assistant has agent contact and no direct email link", () => {
+  assert.ok(supportChat.includes("if(!user||user.isAnonymous){body.innerHTML="), "Visitors must sign in before agent tickets can be created");
+  assert.ok(supportChat.includes('id="oc-agent">Talk to an agent</button>'), "Talk to an agent must be visible in the one shared assistant");
   assert.ok(supportChat.includes("if(u&&!u.isAnonymous)offT=onSnapshot"), "Only signed-in accounts should subscribe to their support conversations");
   assert.ok(supportChat.includes('source:"website-chat"'), "Signed-in support tickets must retain the existing admin inbox source");
+  assert.ok(supportChat.includes("function isHomeSurfaceVisible()"), "The assistant must be limited to Home and visitor Home");
+  assert.ok(supportChat.includes("btn.style.display=visible?\"flex\":\"none\""), "The launcher must hide outside Home");
+  assert.ok(!supportChat.includes("mailto:")&&!supportChat.includes("support@onchainspro.com"), "The floating assistant must contain no direct email contact");
+  assert.ok(admin.includes("mailto:support@onchainspro.com"), "Direct email support must be available in the Admin Email section");
   assert.ok(!supportChat.includes("ocSubmitGuestSupport"), "The old separate visitor ticket workflow must not be used by the shared assistant");
 });
 
