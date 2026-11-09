@@ -1349,6 +1349,11 @@ body.oc-visitor-mode:not(.oc-auth-screen) main > :not(#page-public-market){
 .browser-asset-result button{width:100%;margin-top:6px}
 @media(max-width:560px){#page-browser .browser-google-search{flex-direction:column}#page-browser .browser-google-search button{width:100%}}
 </style>
+<style id="oc-auth-hide-footer-only">
+/* Keep the registration and login screen focused on its form; preserve the footer on all other pages. */
+body.oc-logged-out > footer,
+html.oc-auth-pending body > footer { display:none!important; }
+</style>
 </head>
 <body>
 <header>
