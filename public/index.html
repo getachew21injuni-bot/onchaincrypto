@@ -5507,6 +5507,7 @@ window.__ocGlobalDemoTradeMode="market";
 function renderMode(mode){
  const valid=Object.hasOwn(modeNames,mode)?mode:"market";
  window.__ocGlobalDemoTradeMode=valid;
+ window.updateQuickEstimate?.();
  const label=modeNames[valid],adminStatus=byId("ocAdminModeStatus");
  if(adminStatus)adminStatus.textContent=label;
  const notice=byId("ocGlobalDemoModeNotice");
@@ -5593,7 +5594,7 @@ onAuthStateChanged(auth,user=>{
  if(currentAdmin){void checkAutomaticMarketAlert();autoAlertTimer=setInterval(checkAutomaticMarketAlert,60000);}
  const nav=byId("ocAdminNavBtn");if(nav)nav.classList.toggle("hidden",!currentAdmin);const shortcut=byId("adminDashboardShortcut");if(shortcut)shortcut.classList.toggle("hidden",!currentAdmin);
  if(!user){window.__ocGlobalDemoTradeMode="market";window.__ocUserDemoTradeControl={mode:"inherit",winPercent:15,lossPercent:50};return;}
- stopOwnControl=onSnapshot(doc(db,"users",user.uid),snapshot=>{const data=snapshot.exists()?snapshot.data()||{}:{};window.__ocUserDemoTradeControl={mode:["inherit","market","win","lose"].includes(data.demoTradeControlMode)?data.demoTradeControlMode:"inherit",winPercent:Math.min(100,Math.max(1,Number(data.demoWinPercent??15)||15)),lossPercent:Math.min(100,Math.max(1,Number(data.demoLossPercent??50)||50))};},error=>{console.warn("Individual demo trade settings unavailable:",error?.code||error);window.__ocUserDemoTradeControl={mode:"inherit",winPercent:15,lossPercent:50};});
+ stopOwnControl=onSnapshot(doc(db,"users",user.uid),snapshot=>{const data=snapshot.exists()?snapshot.data()||{}:{};window.__ocUserDemoTradeControl={mode:["inherit","market","win","lose"].includes(data.demoTradeControlMode)?data.demoTradeControlMode:"inherit",winPercent:Math.min(100,Math.max(1,Number(data.demoWinPercent??15)||15)),lossPercent:Math.min(100,Math.max(1,Number(data.demoLossPercent??50)||50))};window.updateQuickEstimate?.();},error=>{console.warn("Individual demo trade settings unavailable:",error?.code||error);window.__ocUserDemoTradeControl={mode:"inherit",winPercent:15,lossPercent:50};});
  void ensureTradeControlProfile(user).catch(error=>{
   console.error("Trade Control profile sync failed:",error?.code||error,error?.message||"");
   if(currentAdmin&&byId("ocAdminUsersList"))byId("ocAdminUsersList").textContent="Profile sync failed ("+(error?.code||"connection error")+"). Check Firestore rules and sign in again.";
