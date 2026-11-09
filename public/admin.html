@@ -178,7 +178,7 @@ async function renderTradeControls(){
    <div id="tradeControlsPanel" style="display:grid;gap:16px;max-width:900px">
     <div class="content-panel">
      <h3 style="margin-top:0">Registered user trade controls</h3>
-     <p class="muted">Set trading permission, order limits and the Quick Trade outcome override for each registered user. Individual settings override the global outcome setting. These controls change platform results only.</p>
+     <p class="muted">Set trading permission, order limits and the Quick Trade outcome override for each registered user. A global forced Win/Loss applies to all accounts. Per-user outcome settings apply when the global setting is Market-Based. These controls change platform results only.</p>
      <label style="display:grid;gap:8px;font-weight:700">Select registered user
       <select id="tradeControlUser" style="width:100%;padding:13px;border:1px solid #5d8797;border-radius:12px;background:#10243a;color:white">
        ${users.map(u=>'<option value="'+esc(u.id)+'">'+esc((u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id)+' — '+(u.email||u.id))+'</option>').join('')}
@@ -192,10 +192,10 @@ async function renderTradeControls(){
       </select>
      </label>
      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:14px">
-      <label style="display:grid;gap:7px;font-weight:700">Win chance (%)
+      <label style="display:grid;gap:7px;font-weight:700">Win result (%)
        <input id="tradeControlWinPercent" type="number" min="1" max="100" step="1" value="15" style="width:100%;padding:12px;border:1px solid #5d8797;border-radius:10px;background:#10243a;color:white">
       </label>
-      <label style="display:grid;gap:7px;font-weight:700">Loss chance (%)
+      <label style="display:grid;gap:7px;font-weight:700">Loss result (%)
        <input id="tradeControlLossPercent" type="number" min="1" max="100" step="1" value="50" style="width:100%;padding:12px;border:1px solid #5d8797;border-radius:10px;background:#10243a;color:white">
       </label>
      </div>
