@@ -1,4 +1,4 @@
-# OnChainSpro
+# Onchain
 
 A Firebase-hosted platform for cryptocurrency and gold market information, account features and interactive trading tools. **The current Quick Trade workflow records account results; it does not submit orders to an external exchange or provide on-chain custody.**
 
