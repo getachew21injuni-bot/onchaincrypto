@@ -143,7 +143,7 @@ test("one shared Onchain assistant serves visitors and signed-in users", () => {
   assert.ok(supportChat.includes('box.id="oc-chat"'), "The shared assistant must create one chat panel");
   assert.ok(supportChat.includes("function botAnswer(q)"), "One shared knowledge engine must answer visitor and signed-in questions");
   assert.ok(supportChat.includes("Welcome to Onchain! Ask about Markets"), "The shared assistant must show one welcome message");
-  assert.ok(supportChat.includes("Sign in to start a conversation with our support team."), "Visitors must be guided to sign in before agent contact");
+  assert.ok(supportChat.includes("Please sign in to connect with our support team."), "Visitors must be guided to sign in before agent contact");
   assert.ok(supportChat.includes('addBubble(botAnswer(q),"bot")'), "All questions must use the same powered information answers");
   assert.ok(!supportChat.includes("mailto:")&&!supportChat.includes("support@onchainspro.com"), "The floating assistant must not expose direct email contact");
   assert.ok(!supportChat.includes("signInAnonymously"), "Opening the visitor assistant must not create a login session");
