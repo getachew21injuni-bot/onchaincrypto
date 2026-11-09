@@ -6701,20 +6701,20 @@ const answers=[
 const topics=[["Wallet",/\b(wallet|balance|holding)\b/i],["Markets",/\b(market|markets|price|chart|stock|stocks|gold|xau|crypto)\b/i],["Trading",/\b(trade|trading|buy|sell|order)\b/i],["History",/\b(history|activity|performance|transaction)\b/i]];
 const answer=q=>{
  const v=String(q||"").trim();if(!v)return "Welcome to Onchain! What would you like to explore?";
- if(/^(hi|hello|hey|good morning|good afternoon|good evening)\\b/i.test(v))return "Welcome to Onchain! 👋 Explore crypto, Gold, stocks, market charts and platform features. What would you like to discover?";
- if(/\\b(register|registration|sign up|create account|login|log in|sign in|account)\\b/i.test(v))return "You can explore Onchain without signing in. To create an account, choose Sign Up; existing members can choose Login.";
- if(/\\b(who are you|what can you do|help|features|about onchain|what is onchain|platform overview)\\b/i.test(v))return "I’m the Onchain visitor assistant. I can give quick answers about Markets, crypto, Gold, stocks, Wallet features and trading tools.";
- if(/\\b(stock|stocks|share|shares|equity|equities)\\b/i.test(v))return "Explore stock-market information and available listings in the Markets area.";
- if(/\\b(gold|\\bxau|\\bxaut|precious metal)\\b/i.test(v))return "Onchain includes Gold market information. XAU/USDT shows Gold priced in USDT.";
- if(/\\b(bitcoin|\\bbtc|\\bxbt)\\b/i.test(v))return "Bitcoin (BTC) is a decentralised digital asset. Explore its price and chart in Markets.";
- if(/\\b(ethereum|\\beth|ether)\\b/i.test(v))return "Ethereum supports smart contracts and decentralised applications. ETH is its native asset.";
- if(/\\b(usdt|tether|stablecoin|stable coin)\\b/i.test(v))return "USDT is a stablecoin designed to track the US dollar and is commonly used in crypto markets.";
- if(/\\b(crypto|cryptocurrency|digital asset|coins?)\\b/i.test(v))return "Browse crypto assets, prices and charts in Onchain Markets.";
- if(/\\b(market|markets|price|chart|graph|live price)\\b/i.test(v))return "Open Markets to browse listed assets, compare prices and view charts.";
- if(/\\b(wallet|balance|holdings)\\b/i.test(v))return "Wallet features help signed-in members review balances and supported assets. You can explore the platform without opening a wallet.";
- if(/\\b(trad(e|ing)|buy|sell|order)\\b/i.test(v))return "Explore Trade to see available assets and the trade workflow. Review details before confirming any action.";
- if(/\\b(history|activity|performance|transaction)\\b/i.test(v))return "Account history helps members review recorded activity and performance.";
- if(/\\b(thanks|thank you)\\b/i.test(v))return "You’re welcome! Enjoy exploring Onchain.";
+ if(/^(hi|hello|hey|good morning|good afternoon|good evening)\b/i.test(v))return "Welcome to Onchain! 👋 Explore crypto, Gold, stocks, market charts and platform features. What would you like to discover?";
+ if(/\b(register|registration|sign up|create account|login|log in|sign in|account)\b/i.test(v))return "You can explore Onchain without signing in. To create an account, choose Sign Up; existing members can choose Login.";
+ if(/\b(who are you|what can you do|help|features|about onchain|what is onchain|platform overview)\b/i.test(v))return "I’m the Onchain visitor assistant. I can give quick answers about Markets, crypto, Gold, stocks, Wallet features and trading tools.";
+ if(/\b(stock|stocks|share|shares|equity|equities)\b/i.test(v))return "Explore stock-market information and available listings in the Markets area.";
+ if(/\b(gold|\bxau|\bxaut|precious metal)\b/i.test(v))return "Onchain includes Gold market information. XAU/USDT shows Gold priced in USDT.";
+ if(/\b(bitcoin|\bbtc|\bxbt)\b/i.test(v))return "Bitcoin (BTC) is a decentralised digital asset. Explore its price and chart in Markets.";
+ if(/\b(ethereum|\beth|ether)\b/i.test(v))return "Ethereum supports smart contracts and decentralised applications. ETH is its native asset.";
+ if(/\b(usdt|tether|stablecoin|stable coin)\b/i.test(v))return "USDT is a stablecoin designed to track the US dollar and is commonly used in crypto markets.";
+ if(/\b(crypto|cryptocurrency|digital asset|coins?)\b/i.test(v))return "Browse crypto assets, prices and charts in Onchain Markets.";
+ if(/\b(market|markets|price|chart|graph|live price)\b/i.test(v))return "Open Markets to browse listed assets, compare prices and view charts.";
+ if(/\b(wallet|balance|holdings)\b/i.test(v))return "Wallet features help signed-in members review balances and supported assets. You can explore the platform without opening a wallet.";
+ if(/\b(trad(e|ing)|buy|sell|order)\b/i.test(v))return "Explore Trade to see available assets and the trade workflow. Review details before confirming any action.";
+ if(/\b(history|activity|performance|transaction)\b/i.test(v))return "Account history helps members review recorded activity and performance.";
+ if(/\b(thanks|thank you)\b/i.test(v))return "You’re welcome! Enjoy exploring Onchain.";
  return "I can help with Onchain features, Markets, crypto, Gold, stocks, Wallet and Trade. Which would you like to know about?";
 };
 const open=()=>{root.classList.add("is-open");messages.scrollTop=messages.scrollHeight;input.focus();};
@@ -6782,6 +6782,7 @@ html.oc-light-theme #page-register .auth-main-panel textarea.field{
 </style>
 
 
+<style id="oc-role-based-bot-visibility">body:not(.oc-logged-out) #ocVisitorSupportBot{display:none!important}body.oc-logged-out #oc-support-button,body.oc-logged-out #oc-chat{display:none!important}</style>
 <style id="oc-guest-support-single-widget">body.oc-logged-out #oc-support-button,body.oc-logged-out #oc-chat{display:none!important}</style>
 <style id="oc-platform-readable-hierarchy">
 :root{--oc-ink:#28251f;--oc-muted:#766f63;--oc-gold:#d9ad55;--oc-border:#e8dcc7}
