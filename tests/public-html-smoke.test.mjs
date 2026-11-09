@@ -297,3 +297,22 @@ test("Admin trade-control help matches the enforced global and per-user priority
   assert.ok(admin.includes("A global forced Win/Loss applies to all accounts. Per-user outcome settings apply when the global setting is Market-Based."), "Admin help must describe the actual precedence");
   assert.ok(admin.includes("Win result (%)") && admin.includes("Loss result (%)"), "Admin percentages must be described as result percentages, not chances");
 });
+
+test("long listings start with four items and keep More/Less controls", () => {
+  for (const marker of [
+    'id="homeCoinCount">Showing top 4 coins',
+    'id="marketListCount">Showing top 4 coins',
+    'id="depositCoinCount">Showing 4 coins',
+    'id="withdrawCoinCount">Showing 4 coins',
+    'id="signalCountLabel" class="muted tiny">Showing up to 4 coin pairs',
+    'const coinPickerExpanded={deposit:4,withdraw:4}',
+    'let signalVisibleCount=4',
+    'let category="crypto",limit=4,selectedAsset=null',
+    'assets.slice(0,4)',
+    'items.length>4&&!hidden',
+  ]) {
+    assert.ok(html.includes(marker), "Expected four-item listing behavior: " + marker);
+  }
+  assert.ok(html.includes('id="quickActionCount">Showing 4 quick actions'));
+  assert.ok(html.includes('id="homeActivePairsToggle"'), "Active Coin Pairs keeps its More/Less toggle");
+});
