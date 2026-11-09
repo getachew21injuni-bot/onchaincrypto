@@ -153,16 +153,16 @@ test("Quick Trade uses concise positive copy and its result Close button restore
   assert.ok(html.includes('if(board)board.style.display="none";'));
 });
 
-test("Quick Trade saves the wallet update before displaying the completed result", () => {
+test("Quick Trade commits the wallet update before displaying the completed result", () => {
   const start = html.indexOf("function startTimedPaper(");
   const end = html.indexOf("function finishedSymbolSafe", start);
   assert.ok(start >= 0 && end > start, "Expected the Quick Trade execution flow");
   const flow = html.slice(start, end);
-  assert.ok(flow.includes("await saveState()"), "Wallet and trade history must be saved");
-  assert.ok(flow.indexOf("await saveState()") < flow.indexOf('const board=$("timedResultBoard")'), "Show the result only after save succeeds");
+  assert.ok(flow.includes("await window.ocCommitQuickTradeResult("), "Wallet and trade history must be committed to Firestore");
+  assert.ok(flow.indexOf("await window.ocCommitQuickTradeResult(") < flow.indexOf('const board=$("timedResultBoard")'), "Show the result only after the cloud commit succeeds");
   assert.ok(flow.includes("renderWallet()"), "Refresh wallet display after the saved balance change");
-  assert.ok(flow.includes("state.balance=Math.max(0,balanceBefore+balanceAdjustmentFunding)"), "Apply USDT balance changes");
-  assert.ok(flow.includes("state.holdings[finished.funding]=Math.max(0,balanceBefore+balanceAdjustmentFunding)"), "Apply selected-coin balance changes");
+  assert.ok(html.includes("const before=asset==="), "Apply each balance adjustment to the latest cloud balance inside the transaction");
+  assert.ok(html.includes("tx.set(ref,{uid:user.uid,balance:nextBalance,holdings,history:nextHistory,updatedAt:serverTimestamp()},{merge:true})"), "Save balance, holdings and result history together");
 });
 
 test("Quick Trade confirmation uses one validator and waits for account wallet readiness", () => {
