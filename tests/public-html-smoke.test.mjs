@@ -239,6 +239,27 @@ test("all inline JavaScript modules parse", async () => {
   assert.deepEqual(failures, [], failures.join("\\n"));
 });
 
+test("Quick Trade settings use the shared primary Firebase session and wait for auth readiness", () => {
+  const start = html.indexOf('<script type="module" id="oc-global-demo-trade-admin">');
+  const end = html.indexOf("</script>", start);
+  assert.ok(start >= 0 && end > start, "Expected the trade admin module");
+  const module = html.slice(start, end);
+  assert.ok(module.includes('getApps().find(item=>item.name==="[DEFAULT]")'), "Trade settings must always use the primary Firebase app");
+  assert.ok(module.includes("auth=window.ocFirebaseAuth||getAuth(app)"), "Trade settings must share the main app Auth instance");
+  assert.ok(module.includes("const activeAuth=window.ocFirebaseAuth||auth;"), "The latest-settings read must use the shared Auth bridge");
+  assert.ok(module.includes('await activeAuth.authStateReady()'), "Wait for Firebase session restoration before validating the account");
+  assert.ok(module.includes("const verifiedUser=(window.ocFirebaseAuth||activeAuth).currentUser;"), "Recheck the same shared session after Firestore reads");
+  assert.ok(!module.includes("visitor-support") && !module.includes("signInAnonymously"), "The trade admin module must not initialize an unused visitor Auth session");
+  assert.ok(!html.includes("Could not confirm the latest account trade settings."), "Do not show technical Firebase error wording to users");
+  assert.ok(html.includes("Your session needs a quick refresh. Please sign in again to continue."), "Use short, clear session guidance");
+});
+
+test("Quick Trade confirmation has one start handler and no duplicate timer binding", () => {
+  assert.equal((html.match(/\$\("timedConfirmBtn"\)\.addEventListener\("click"/g) || []).length, 1, "Only one confirmation click handler should be registered");
+  assert.equal((html.match(/timedTimer=setInterval\(/g) || []).length, 1, "Only one timed trade interval should be created");
+  assert.ok(html.includes("if(timedPaper){"), "Prevent a second active trade from stacking on top of a running trade");
+});
+
 test("Quick Trade reads fresh admin outcome settings and atomically updates the cloud wallet", () => {
   assert.ok(html.includes("window.ocLoadLatestTradeControls=async function(uid)"), "Expected a fresh Firestore read of user and global trade controls");
   assert.ok(html.includes("latestControls=await window.ocLoadLatestTradeControls(currentUser.uid)"), "Trade confirmation must use current admin settings");
