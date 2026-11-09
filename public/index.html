@@ -12105,5 +12105,37 @@ body.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden){d
 #timedBoardTitle{font-size:18px;font-weight:850;color:#087c56!important}
 @media(max-width:560px){#timedConfirmBtn{min-height:50px}#timedPaperTrade .form-panel{padding:12px}}
 </style>
+<style id="oc-centered-auth-welcome-final">
+/* Center the existing welcome heading directly above the current auth form.
+   Presentation-only: authentication markup and handlers stay untouched. */
+#page-register > .auth-welcome {
+  display:block!important;
+  width:100%!important;
+  max-width:520px!important;
+  margin:10px auto 18px!important;
+  padding:8px 10px!important;
+  text-align:center!important;
+  align-self:center!important;
+  justify-self:center!important;
+}
+#page-register > .auth-welcome #authHeading {
+  display:block!important;
+  width:100%!important;
+  margin:0 auto!important;
+  text-align:center!important;
+  color:#12314d!important;
+  font-size:clamp(27px,5vw,36px)!important;
+  font-weight:900!important;
+  line-height:1.16!important;
+  letter-spacing:-.55px!important;
+  text-shadow:0 4px 18px rgba(20,112,190,.16)!important;
+}
+#page-register > .content-grid {
+  width:min(100%,520px)!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+</style>
+
 </body>
 </html>
