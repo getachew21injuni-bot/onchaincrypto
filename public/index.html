@@ -2163,6 +2163,18 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
 
   <section id="page-support" class="hidden">
     <div class="page-title"><div><h1>Support</h1><div class="muted">Contact our support team.</div></div><span class="tag">SUPPORT</span></div><section class="panel" style="margin-bottom:16px;padding:16px"><h2>Chat with support</h2><p class="muted tiny">Send a private message to support.</p><button class="primary" type="button" data-oc-open-support>Open support chat</button></section>
+    <section class="panel form-panel" id="ocDirectAdminMessageSection" style="margin-bottom:16px">
+      <div class="section-head"><h2>✉ Message Admin Directly</h2><span class="tag">DIRECT SUPPORT</span></div>
+      <p class="muted tiny">Send a message straight to the OnChainsPro support team. No account is required; include an email address so the team can reply.</p>
+      <form id="ocDirectAdminMessageForm">
+        <label for="ocDirectAdminEmail">Your email</label>
+        <input id="ocDirectAdminEmail" class="field" type="email" maxlength="160" required autocomplete="email" placeholder="you@example.com">
+        <label for="ocDirectAdminText">Your message</label>
+        <textarea id="ocDirectAdminText" class="field" rows="4" maxlength="3000" required placeholder="How can our team help? Do not include passwords, verification codes or wallet recovery phrases."></textarea>
+        <button class="primary full" id="ocDirectAdminSend" type="submit">Send message to Admin</button>
+        <p id="ocDirectAdminStatus" class="muted tiny" aria-live="polite">Your message will appear in the administrator support inbox.</p>
+      </form>
+    </section>
     <div class="notice"><strong>Private in-app support</strong><br><span class="tiny">Your support messages stay in Onchain.</span></div>
     <div class="content-grid">
       <section class="panel form-panel" id="support-ticket-section">
@@ -5426,14 +5438,14 @@ body.oc-logged-out .auth-welcome h1{ text-shadow:0 5px 28px rgba(240,185,11,.10)
 
 <script type="module" id="oc-global-demo-trade-admin">
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, serverTimestamp, runTransaction, addDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
 const guestApp=getApps().find(item=>item.name==="visitor-support")||initializeApp(config,"visitor-support");
 const guestAuth=getAuth(guestApp),guestDb=getFirestore(guestApp);
 window.ocSubmitGuestSupport=async({email,message})=>{
  const cleanEmail=String(email||"").trim().slice(0,160),cleanMessage=String(message||"").trim().slice(0,3000);
- if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(cleanEmail))throw new Error("Please enter a valid email address.");
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail))throw new Error("Please enter a valid email address.");
  if(cleanMessage.length<3)throw new Error("Please add a little more detail.");
  let visitor=guestAuth.currentUser;
  if(!visitor)visitor=(await signInAnonymously(guestAuth)).user;
@@ -6794,6 +6806,20 @@ function watchAdminTickets(){
   if(selectedAdminTicket&&!rows.some(row=>row.id===selectedAdminTicket.id)){selectedAdminTicket=null;setText("ocAdminSupportConversation","Select a customer conversation to read and reply.");}
  },error=>setText("ocAdminSupportTicketList","Could not load support inbox ("+(error.code||"connection error")+")."));
 }
+byId("ocDirectAdminMessageForm")?.addEventListener("submit",async event=>{
+ event.preventDefault();
+ const form=event.currentTarget,email=byId("ocDirectAdminEmail")?.value.trim()||"",message=byId("ocDirectAdminText")?.value.trim()||"",button=byId("ocDirectAdminSend");
+ if(!email||!message){setText("ocDirectAdminStatus","Please enter your email and message.");return;}
+ if(typeof window.ocSubmitGuestSupport!=="function"){setText("ocDirectAdminStatus","Support is connecting. Please try again in a moment.");return;}
+ button.disabled=true;setText("ocDirectAdminStatus","Sending your message securely…");
+ try{
+  await window.ocSubmitGuestSupport({email,message});
+  form.reset();setText("ocDirectAdminStatus","Message sent to the admin team. We’ll reply to the email you provided.");
+ }catch(error){
+  console.error("Direct admin message failed:",error);
+  setText("ocDirectAdminStatus","Could not send right now. Please try again.");
+ }finally{button.disabled=false;}
+});
 byId("sendSupportEmail")?.addEventListener("click",async()=>{
  if(!currentUser){setText("supportMessage","Please sign in before sending a private support request.");goToLogin();return;}
  const topic=byId("supportTopic")?.value||"General support",subject=byId("supportSubject")?.value.trim()||topic,details=byId("supportDetails")?.value.trim()||"";
