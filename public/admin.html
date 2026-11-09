@@ -39,7 +39,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 </section>
 <div class="layout locked" id="adminWorkspace">
 <aside id="sidebar">
-<div class="admin-profile"><div class="avatar">O</div><div><strong>OnChain Admin</strong><small>ADMIN DASHBOARD</small></div></div>
+<div class="admin-profile"><div class="avatar">O</div><div><strong>Onchain Admin</strong><small>ADMIN DASHBOARD</small></div></div>
 <nav class="nav" id="sideNav">
 <button class="active" data-view="Dashboard"><span class="ico">◉</span>Dashboard</button>
 <button data-view="Users"><span class="ico">♟</span>Users <span class="pill">0</span></button>
@@ -409,7 +409,7 @@ async function renderDemoFinance(view){
     if(targets.includes('USDT')){userUpdate.demoBalanceUSDT=usdtAfter;userUpdate.demoBalanceUpdatedAt=serverTimestamp();}
     batch.update(userRef,userUpdate);
     const notificationRef=doc(collection(db,'userNotifications',uid,'items'));
-    batch.set(notificationRef,{kind:isDeposit?'deposit':'withdrawal',title:isDeposit?'Account deposit adjustment recorded':'Account withdrawal adjustment recorded',message:(isDeposit?'Your account balance was adjusted by ':'An account balance adjustment of ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+'. '+(note?'Admin note: '+note:'This updates your OnChain account ledger only; no blockchain transfer is sent.'),createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:window.__ocAdminFirebase.auth.currentUser.uid,source:'admin-demo'});
+    batch.set(notificationRef,{kind:isDeposit?'deposit':'withdrawal',title:isDeposit?'Account deposit adjustment recorded':'Account withdrawal adjustment recorded',message:(isDeposit?'Your account balance was adjusted by ':'An account balance adjustment of ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+'. '+(note?'Admin note: '+note:'This updates your Onchain account ledger only; no blockchain transfer is sent.'),createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:window.__ocAdminFirebase.auth.currentUser.uid,source:'admin-demo'});
     for(const c of changes){
      const txRef=doc(collection(db,c.symbol==='USDT'?'demoTransactions':'demoAssetTransactions'));
      if(c.symbol==='USDT'){
@@ -566,7 +566,7 @@ async function renderInternalTransfers(){
   body.innerHTML='<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Internal USDT transfer requests</h3><span class="tag">'+pending+' pending · '+requests.length+' total</span></div><p class="muted">Review each recipient and amount. Approval atomically debits and credits both account balances and records an immutable ledger entry. The sender balance is checked again at approval. No blockchain funds move.</p><div class="table-wrap"><table style="min-width:850px"><thead><tr><th>Sender</th><th>Recipient</th><th>Amount</th><th>Submitted</th><th>Status</th><th>Admin action</th></tr></thead><tbody>'+(requests.length?requests.map(r=>{
    const when=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'—',state=String(r.status||'pending');
    const action=state==='pending'?'<button type="button" class="icon-btn" data-transfer-action="approve" data-transfer-id="'+escHtml(r.id)+'" style="background:#087b56;border:0">Approve</button> <button type="button" class="icon-btn" data-transfer-action="reject" data-transfer-id="'+escHtml(r.id)+'">Reject</button>':'<span class="tag">'+escHtml(state.toUpperCase())+'</span>';
-   return '<tr><td>'+escHtml(r.senderName||'OnChain member')+'<br><small class="muted">'+escHtml(r.senderUid)+'</small></td><td>'+escHtml(r.recipientName||'OnChain member')+'<br><small class="muted">'+escHtml(r.recipientUid)+'</small></td><td><strong>'+Number(r.amount||0).toLocaleString(undefined,{maximumFractionDigits:8})+' USDT</strong></td><td>'+escHtml(when)+'</td><td>'+escHtml(state.toUpperCase())+'</td><td>'+action+'</td></tr>';
+   return '<tr><td>'+escHtml(r.senderName||'Onchain member')+'<br><small class="muted">'+escHtml(r.senderUid)+'</small></td><td>'+escHtml(r.recipientName||'Onchain member')+'<br><small class="muted">'+escHtml(r.recipientUid)+'</small></td><td><strong>'+Number(r.amount||0).toLocaleString(undefined,{maximumFractionDigits:8})+' USDT</strong></td><td>'+escHtml(when)+'</td><td>'+escHtml(state.toUpperCase())+'</td><td>'+action+'</td></tr>';
   }).join(''):'<tr><td colspan="6" class="empty">No internal transfer requests have been submitted.</td></tr>')+'</tbody></table></div><p id="ocInternalTransferAdminMessage" class="muted" role="status" aria-live="polite"></p></div>';
   body.querySelectorAll('[data-transfer-action]').forEach(button=>button.addEventListener('click',async()=>{
    const action=button.dataset.transferAction,id=button.dataset.transferId,request=requests.find(r=>r.id===id);
@@ -597,7 +597,7 @@ async function renderInternalTransfers(){
       if(recipientAfter>1000000000)throw new Error('Recipient balance limit would be exceeded.');
       tx.update(senderRef,{demoBalanceUSDT:senderAfter,demoBalanceUpdatedAt:serverTimestamp(),demoBalanceLastTransferId:transferRef.id});
       tx.update(recipientRef,{demoBalanceUSDT:recipientAfter,demoBalanceUpdatedAt:serverTimestamp(),demoBalanceLastTransferId:transferRef.id});
-      tx.set(transferRef,{senderUid:req.senderUid,recipientUid:req.recipientUid,asset:'USDT',amount,senderBefore,senderAfter,recipientBefore,recipientAfter,senderName:req.senderName||'OnChain member',recipientName:req.recipientName||'OnChain member',createdAt:serverTimestamp(),transferRequestId:id,approvedBy:current.email});
+      tx.set(transferRef,{senderUid:req.senderUid,recipientUid:req.recipientUid,asset:'USDT',amount,senderBefore,senderAfter,recipientBefore,recipientAfter,senderName:req.senderName||'Onchain member',recipientName:req.recipientName||'Onchain member',createdAt:serverTimestamp(),transferRequestId:id,approvedBy:current.email});
       tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email,transferId:transferRef.id});
      });
     }
