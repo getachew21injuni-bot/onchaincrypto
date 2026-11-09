@@ -143,7 +143,7 @@ test("one shared Onchain assistant serves visitors and signed-in users", () => {
   assert.ok(supportChat.includes('box.id="oc-chat"'), "The shared assistant must create one chat panel");
   assert.ok(supportChat.includes("function botAnswer(q)"), "One shared knowledge engine must answer visitor and signed-in questions");
   assert.ok(supportChat.includes("Welcome to Onchain! Ask about Markets"), "The shared assistant must show one welcome message");
-  assert.ok(supportChat.includes("Sign in to start a conversation with our support team."), "Visitors must be guided to sign in before agent contact");
+  assert.ok(supportChat.includes("Please sign in to connect with our support team."), "Visitors must be guided to sign in before agent contact");
   assert.ok(supportChat.includes('addBubble(botAnswer(q),"bot")'), "All questions must use the same powered information answers");
   assert.ok(!supportChat.includes("mailto:")&&!supportChat.includes("support@onchainspro.com"), "The floating assistant must not expose direct email contact");
   assert.ok(!supportChat.includes("signInAnonymously"), "Opening the visitor assistant must not create a login session");
@@ -271,4 +271,21 @@ test("Quick Trade reads fresh admin outcome settings and atomically updates the 
   assert.ok(html.includes("window.ocCommitQuickTradeResult=async function({funding,adjustment,resultRecord})"), "Expected a dedicated cloud trade-result commit");
   assert.ok(html.includes("return await runTransaction(db,async tx=>"), "Wallet result updates must use a Firestore transaction");
   assert.ok(html.includes("await window.ocCommitQuickTradeResult({funding:finished.funding,adjustment:balanceAdjustmentFunding,resultRecord})"), "Completed trades must commit against the latest cloud balance");
+});
+
+
+test("Trade Gold keeps XAU selectable, loads a fresh quote, and uses the Gold chart", () => {
+  assert.ok(html.includes("async function refreshGoldMarketPrice()"), "Gold must load a current quote before confirmation");
+  assert.ok(html.includes('if(sym==="XAU")return goldMarketAsset;'), "Gold must resolve through its dedicated quote object");
+  assert.ok(html.includes('<option value="XAU">XAU — Gold</option>'), "Gold must remain selectable even when absent from the crypto market feed");
+  assert.ok(html.includes('if(sym==="XAU"){try{await refreshGoldMarketPrice()}'), "Gold confirmation must refresh its quote before starting");
+  assert.ok(html.includes('if(finished.symbol==="XAU"){try{await refreshGoldMarketPrice()}'), "Gold expiry must use a refreshed quote");
+  assert.ok(html.includes("BINANCE:XAUUSDT.P"), "Gold selection must update the chart to the Gold market");
+  assert.ok(supportChat.includes("Choose Trade Gold on Home"), "The assistant must explain the Gold shortcut");
+  assert.ok(supportChat.includes("Onchain market tools focus on cryptocurrency and Gold"), "The assistant must answer the Stocks topic accurately");
+});
+
+test("Admin trade-control help matches the enforced global and per-user priority", () => {
+  assert.ok(admin.includes("A global forced Win/Loss applies to all accounts. Per-user outcome settings apply when the global setting is Market-Based."), "Admin help must describe the actual precedence");
+  assert.ok(admin.includes("Win result (%)") && admin.includes("Loss result (%)"), "Admin percentages must be described as result percentages, not chances");
 });
