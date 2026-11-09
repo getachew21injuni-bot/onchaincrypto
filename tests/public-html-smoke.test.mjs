@@ -141,7 +141,8 @@ test("visitor support uses an isolated Firebase session and submits through the 
   assert.ok(html.includes("writeBatch(guestDb)"), "Guest support must write the ticket and first message together");
   assert.ok(html.includes("signInAnonymously, signOut"), "Guest auth methods must be imported");
   assert.ok(html.includes("addDoc, writeBatch"), "Firestore batch writer must be imported");
-  assert.ok(html.includes("Tap Talk to Agent below to send a private message"), "Bot must direct support requests to the Talk to Agent form");
+  assert.ok(html.includes("window.ocPoweredSupportAnswer(v,true)"), "Visitor bot must use the shared powered knowledge in information-only mode");
+  assert.ok(!html.includes("Talk to Agent"), "Visitor bot must not expose agent contact or messaging");
   assert.equal((html.match(/id="ocVisitorSupportBot"/g) || []).length, 1, "Only one visitor support bot should be present");
 });
 
