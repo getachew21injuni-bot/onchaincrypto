@@ -135,32 +135,37 @@ test("wallet state subscribes to Firestore for live cross-device balance and his
   assert.ok(html.includes("state={balance:Math.round(balance*100)/100,holdings,history};"), "Remote balance, holdings and trade history must replace the stale device view together");
 });
 
-test("visitor bot works independently without sign-in prompts", () => {
-  assert.ok(html.includes("You can explore Onchain without signing in."), "Visitor bot must explain browsing and registration without requiring sign-in");
-  assert.ok(html.includes("Welcome to Onchain! 👋"), "Visitor bot must welcome visitors");
-  assert.ok(!html.includes("window.ocPoweredSupportAnswer(v,true)"), "Visitor bot must not delegate to shared signed-in support answers");
-  assert.ok(html.includes('id="oc-visitor-support-bot-script"'), "Visitor information assistant must have its own working script");
+test("one shared Onchain assistant serves visitors and signed-in users", () => {
+  assert.ok(!html.includes("ocVisitorSupportBot"), "The duplicate visitor-only bot shell must be removed");
+  assert.ok(!html.includes("oc-visitor-support-bot-script"), "The duplicate visitor-only answer script must be removed");
+  assert.ok(supportChat.includes('btn.id="oc-support-button"'), "The shared assistant must create one launcher");
+  assert.ok(supportChat.includes('box.id="oc-chat"'), "The shared assistant must create one chat panel");
+  assert.ok(supportChat.includes("const visitorMode=!user||user.isAnonymous"), "The same assistant must adapt its actions to the session");
+  assert.ok(supportChat.includes("Welcome to Onchain! 👋"), "Visitors must receive a welcome without signing in");
+  assert.ok(supportChat.includes("You can explore Onchain without signing in."), "Visitor registration guidance must not require sign-in");
+  assert.ok(supportChat.includes("botAnswer(q,visitorMode)"), "Visitor questions must use the public information answers");
+  assert.ok(supportChat.includes('addBubble(botAnswer(q,visitorMode),"bot",!visitorMode)'), "Visitors must receive information without agent-contact email links");
+  assert.ok(!supportChat.includes("signInAnonymously"), "Opening the visitor assistant must not create a login session");
+  assert.ok(!supportChat.includes("if(!user||user.isAnonymous)newTicket()"), "Visitors must not be routed into agent ticket creation");
 });
 
-test("support bots are visible for their intended session and close on outside clicks", () => {
-  assert.ok(!html.includes("#oc-support-button{display:none!important}"), "Do not globally hide the signed-in floating support button");
-  assert.ok(html.includes("body:not(.oc-logged-out) #ocVisitorSupportBot{display:none!important}"), "Show the visitor assistant only in visitor mode");
-  assert.ok(html.includes('body.oc-logged-out #oc-support-button,body.oc-logged-out #oc-chat{display:none!important}'), "Keep agent chat out of the visitor experience");
-  assert.ok(html.includes('id="oc-bot-dismiss-controller"'), "Expected the shared bot dismissal controller");
-  assert.ok(html.includes('document.addEventListener("pointerdown"'), "Clicking outside a bot must close it");
-  assert.ok(html.includes('window.addEventListener("popstate",closeAll)'), "Browser navigation must close open bot panels");
+test("the single assistant uses one theme and closes on outside clicks or navigation", () => {
+  assert.ok(!html.includes("ocVisitorSupportBot"), "No second visitor bot launcher or panel should remain");
+  assert.ok(!html.includes("oc-role-based-bot-visibility"), "No competing role-based bot visibility rules should remain");
+  assert.ok(supportChat.includes('style.id="oc-single-assistant-theme"'), "One shared color theme must style the assistant");
+  assert.ok(supportChat.includes("#20d9ff") && supportChat.includes("#102641"), "The shared assistant must use the Onchain navy and cyan palette");
+  assert.ok(html.includes('id="oc-bot-dismiss-controller"'), "Expected one assistant dismissal controller");
+  assert.ok(html.includes('document.addEventListener("pointerdown"'), "Clicking outside the assistant must close it");
+  assert.ok(html.includes('window.addEventListener("popstate",closeAssistant)'), "Browser navigation must close the assistant");
+  assert.ok(html.includes('window.addEventListener("hashchange",closeAssistant)'), "Hash navigation must close the assistant");
 });
 
-test("visitor support uses an isolated Firebase session and submits through the admin inbox", () => {
-  assert.ok(html.includes('initializeApp(config,"visitor-support")'), "Guest support must use a separate Firebase app");
-  assert.ok(html.includes("const guestAuth=getAuth(guestApp),guestDb=getFirestore(guestApp);"), "Guest support must not change the main login session");
-  assert.ok(html.includes("signInAnonymously(guestAuth)"), "Guest support must authenticate its own visitor session");
-  assert.ok(html.includes("writeBatch(guestDb)"), "Guest support must write the ticket and first message together");
-  assert.ok(html.includes("signInAnonymously, signOut"), "Guest auth methods must be imported");
-  assert.ok(html.includes("addDoc, writeBatch"), "Firestore batch writer must be imported");
-  assert.ok(!html.includes("window.ocPoweredSupportAnswer(v,true)"), "Visitor bot must answer independently without the shared support or login flow");
-  assert.ok(!html.includes("Talk to Agent"), "Visitor bot must not expose agent contact or messaging");
-  assert.equal((html.match(/id="ocVisitorSupportBot"/g) || []).length, 1, "Only one visitor support bot should be present");
+test("agent contact is available only inside the shared assistant for signed-in users", () => {
+  assert.ok(supportChat.includes("if(!user||user.isAnonymous)return"), "Visitors must not create agent tickets");
+  assert.ok(supportChat.includes("visitorMode?'':' <button class=\"oc-btn oc-secondary\" id=\"oc-agent\">Talk to an agent</button>'"), "Talk to an agent must be conditionally shown only for signed-in users");
+  assert.ok(supportChat.includes("if(u&&!u.isAnonymous)offT=onSnapshot"), "Only signed-in accounts should subscribe to their support conversations");
+  assert.ok(supportChat.includes('source:"website-chat"'), "Signed-in support tickets must retain the existing admin inbox source");
+  assert.ok(!supportChat.includes("ocSubmitGuestSupport"), "The old separate visitor ticket workflow must not be used by the shared assistant");
 });
 
 
@@ -194,6 +199,17 @@ test("Quick Trade confirmation uses one validator and waits for account wallet r
   assert.ok((html.match(/window\.ocValidateQuickTradeForm\?\.\(\);/g) || []).length >= 3, "Wallet restore success and failure must refresh the confirmation state");
 });
 
+
+test("the shared external support chat module parses", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "onchain-support-module-check-"));
+  const file = join(directory, "support-chat.mjs");
+  try {
+    await writeFile(file, supportChat, "utf8");
+    execFileSync(process.execPath, ["--check", file], { stdio: "pipe" });
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
 
 test("all inline JavaScript modules parse", async () => {
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
