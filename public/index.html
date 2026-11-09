@@ -1664,16 +1664,22 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
           <iframe id="ocStockOrderChart" class="oc-stock-chart-frame" title="Selected stock market chart" loading="lazy" referrerpolicy="origin" src="https://www.tradingview.com/widgetembed/?symbol=NASDAQ%3AAAPL&interval=D&theme=dark&style=1&locale=en&hide_top_toolbar=true&allow_symbol_change=false&save_image=false"></iframe><div class="oc-stock-order-summary"><span id="ocStockSelectedLabel">Selected stock · AAPL</span><strong><a id="ocStockSignalLink" href="https://www.tradingview.com/symbols/NASDAQ-AAPL/technicals/" target="_blank" rel="noopener noreferrer">View AAPL technical signals ↗</a></strong></div>
         </div>
         <div class="oc-stock-ticket">
-          <div class="oc-stock-brokerage-head"><h3>Order ticket</h3><span class="tag">US EQUITIES</span></div>
+          <div class="oc-stock-brokerage-head"><h3>Stock order</h3><span class="tag">US STOCKS</span></div>
           <div class="oc-stock-side" role="group" aria-label="Order side"><button type="button" data-stock-side="buy" aria-pressed="true">Buy</button><button type="button" data-stock-side="sell" aria-pressed="false">Sell</button></div>
+          <label for="ocStockOrderType">Order type</label>
+          <select id="ocStockOrderType" class="field" aria-label="Order type"><option value="market">Market</option><option value="limit">Limit</option></select>
+          <div id="ocStockLimitPriceWrap" hidden>
+            <label for="ocStockLimitPrice">Limit price (USD per share)</label>
+            <input id="ocStockLimitPrice" type="number" min="0.01" step="0.01" placeholder="Enter limit price" inputmode="decimal">
+          </div>
           <label for="ocStockOrderShares">Number of shares</label>
-          <input id="ocStockOrderShares" type="number" min="0.001" step="0.001" value="1" inputmode="decimal">
-          <div class="oc-stock-order-summary"><span>Order</span><strong id="ocStockOrderSummary">Buy · 1 AAPL</strong></div>
-          <div class="oc-stock-order-summary"><span>Market price / total</span><strong>Available after broker connection</strong></div>
-          <p class="oc-stock-broker-note">Connect an approved broker to view quotes and place stock orders.</p>
-          <button type="button" class="oc-stock-submit" id="ocRequestBrokerConnection">Request brokerage connection</button>
-          <p class="muted tiny" id="ocBrokerRequestMessage" role="status" aria-live="polite">Broker access requires approval and provider authorization.</p>
-          <button type="button" class="oc-stock-submit" disabled aria-disabled="true">Brokerage connection required</button>
+          <input id="ocStockOrderShares" type="number" min="1" step="1" value="1" inputmode="numeric">
+          <div class="oc-stock-order-summary"><span>Order summary</span><strong id="ocStockOrderSummary">Buy · 1 AAPL · Market</strong></div>
+          <div class="oc-stock-order-summary"><span>Estimated price / total</span><strong id="ocStockOrderValue">Shown after broker connection</strong></div>
+          <p class="oc-stock-broker-note">Connect and authorize a supported broker to access executable quotes and place stock orders.</p>
+          <button type="button" class="oc-stock-submit" id="ocRequestBrokerConnection">Request broker connection</button>
+          <p class="muted tiny" id="ocBrokerRequestMessage" role="status" aria-live="polite">Sign in to request a broker connection. Requests are reviewed by OnChainSpro.</p>
+          <div class="oc-stock-broker-note"><strong>Broker connection required</strong><br>Stock orders become available after your broker connection is approved and authorized.</div>
         </div>
       </div>
       <p class="oc-stock-note">TradingView quotes and charts may be delayed. Stock orders require a broker connection.</p>
@@ -1684,6 +1690,10 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
       const chart=document.getElementById("ocStockOrderChart");
       const shares=document.getElementById("ocStockOrderShares");
       const summary=document.getElementById("ocStockOrderSummary");
+      const orderType=document.getElementById("ocStockOrderType");
+      const limitWrap=document.getElementById("ocStockLimitPriceWrap");
+      const limitPrice=document.getElementById("ocStockLimitPrice");
+      const orderValue=document.getElementById("ocStockOrderValue");
       const sideButtons=[...document.querySelectorAll("[data-stock-side]")];
       const signalLink=document.getElementById("ocStockSignalLink"),selectedLabel=document.getElementById("ocStockSelectedLabel");
       const stockTiles=[...document.querySelectorAll("[data-stock-pick]")];
@@ -1695,8 +1705,13 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
         if(selectedLabel)selectedLabel.textContent="Selected stock · "+ticker;
         stockTiles.forEach(tile=>{const active=tile.dataset.stockPick===ticker;tile.setAttribute("aria-pressed",String(active));tile.classList.toggle("selected",active);});
         const quantity=Number(shares.value);
-        const safeQuantity=Number.isFinite(quantity)&&quantity>0?quantity:0;
-        summary.textContent=(side==="buy"?"Buy":"Sell")+" · "+(safeQuantity?String(safeQuantity):"—")+" "+ticker;
+        const safeQuantity=Number.isFinite(quantity)&&quantity>0?String(quantity):"—";
+        const type=orderType?.value||"market";
+        const price=Number(limitPrice?.value);
+        if(limitWrap)limitWrap.hidden=type!=="limit";
+        const orderDetail=type==="limit"?(Number.isFinite(price)&&price>0?"Limit $"+price.toFixed(2):"Limit price needed"):"Market";
+        summary.textContent=(side==="buy"?"Buy":"Sell")+" · "+safeQuantity+" "+ticker+" · "+orderDetail;
+        if(orderValue)orderValue.textContent="Shown after broker connection";
       }
       function selectStock(ticker){
         if(![...symbol.options].some(option=>option.value===ticker))return;
@@ -1705,6 +1720,8 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
       symbol.addEventListener("change",()=>selectStock(symbol.value));
       stockTiles.forEach(tile=>{const pick=()=>selectStock(tile.dataset.stockPick);tile.addEventListener("click",pick);tile.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();pick();}});});
       shares.addEventListener("input",update);
+      orderType?.addEventListener("change",update);
+      limitPrice?.addEventListener("input",update);
       sideButtons.forEach(function(button){button.addEventListener("click",function(){
         side=button.dataset.stockSide;
         sideButtons.forEach(function(item){item.setAttribute("aria-pressed",String(item===button));});
@@ -6593,9 +6610,9 @@ import {getFirestore,doc,getDoc,setDoc,serverTimestamp} from "https://www.gstati
 const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
 const app=getApps()[0]||initializeApp(config),auth=getAuth(app),db=getFirestore(app),button=document.getElementById("ocRequestBrokerConnection"),message=document.getElementById("ocBrokerRequestMessage"),status=document.getElementById("ocStockBrokerStatus");
 let user=null,existing=null;
-function render(data){existing=data||null;if(!data){if(button){button.disabled=!user;button.textContent="Request brokerage connection";}if(status)status.textContent="BROKER CONNECTION PENDING";return;}const state=String(data.reviewStatus||"pending"),labels={pending:"REQUEST RECEIVED",reviewing:"UNDER ADMIN REVIEW",eligible:"ELIGIBILITY APPROVED · SETUP PENDING",rejected:"REQUEST NOT APPROVED",needs_info:"MORE INFORMATION REQUIRED"};if(status)status.textContent=labels[state]||"REQUEST RECEIVED";if(button){button.disabled=true;button.textContent=state==="eligible"?"Broker setup pending":"Request submitted";}if(message)message.textContent=state==="eligible"?"Eligibility approved by Onchain admin. Secure Alpaca authorization and server-side order integration are still required before trading.":state==="rejected"?"Your request was not approved. Contact support if you need more information.":state==="needs_info"?"Please contact support to provide the requested information.":"Your Alpaca brokerage request is with the Onchain admin for review.";}
-onAuthStateChanged(auth,async current=>{user=current||null;if(button)button.disabled=!user||!!existing;if(!user){if(message)message.textContent="Sign in to request a brokerage connection.";if(status)status.textContent="SIGN-IN REQUIRED";return;}try{const snap=await getDoc(doc(db,"brokerConnectionRequests",user.uid));render(snap.exists()?snap.data():null);}catch(error){if(message)message.textContent="Could not load your request. Refresh and try again.";console.warn("Broker request:",error.code||error.message);}});
-button?.addEventListener("click",async()=>{if(!user){if(message)message.textContent="Please sign in first.";return;}if(existing)return;button.disabled=true;button.textContent="Submitting…";try{const ref=doc(db,"brokerConnectionRequests",user.uid),snap=await getDoc(ref);if(snap.exists()){render(snap.data());return;}await setDoc(ref,{uid:user.uid,email:user.email||"",fullName:user.displayName||"",provider:"Alpaca Broker API",reviewStatus:"pending",createdAt:serverTimestamp()});render({reviewStatus:"pending"});}catch(error){button.disabled=false;button.textContent="Request brokerage connection";if(message)message.textContent="Request failed ("+(error.code||"connection error")+"). Please try again.";}});</script>
+function render(data){existing=data||null;if(!data){if(button){button.disabled=!user;button.textContent="Request broker connection";}if(status)status.textContent="BROKER NOT CONNECTED";return;}const state=String(data.reviewStatus||"pending"),labels={pending:"REQUEST RECEIVED",reviewing:"UNDER REVIEW",eligible:"APPROVED · SETUP REQUIRED",rejected:"REQUEST NOT APPROVED",needs_info:"MORE INFORMATION REQUIRED"};if(status)status.textContent=labels[state]||"REQUEST RECEIVED";if(button){button.disabled=true;button.textContent=state==="eligible"?"Broker setup pending":"Request received";}if(message)message.textContent=state==="eligible"?"Your request is approved. Complete broker authorization before placing stock orders.":state==="rejected"?"Your request was not approved. Contact support if you need more information.":state==="needs_info"?"Please contact support to provide the requested information.":"Your broker connection request is with the OnChainSpro team for review.";}
+onAuthStateChanged(auth,async current=>{user=current||null;if(button)button.disabled=!user||!!existing;if(!user){if(message)message.textContent="Sign in to request a broker connection.";if(status)status.textContent="SIGN-IN REQUIRED";return;}try{const snap=await getDoc(doc(db,"brokerConnectionRequests",user.uid));render(snap.exists()?snap.data():null);}catch(error){if(message)message.textContent="Could not load your request. Refresh and try again.";console.warn("Broker request:",error.code||error.message);}});
+button?.addEventListener("click",async()=>{if(!user){if(message)message.textContent="Please sign in first.";return;}if(existing)return;button.disabled=true;button.textContent="Submitting…";try{const ref=doc(db,"brokerConnectionRequests",user.uid),snap=await getDoc(ref);if(snap.exists()){render(snap.data());return;}await setDoc(ref,{uid:user.uid,email:user.email||"",fullName:user.displayName||"",provider:"Alpaca Broker API",reviewStatus:"pending",createdAt:serverTimestamp()});render({reviewStatus:"pending"});}catch(error){button.disabled=false;button.textContent="Request broker connection";if(message)message.textContent="Request failed ("+(error.code||"connection error")+"). Please try again.";}});</script>
 <script id="oc-platform-wide-forward-navigation">
 (function(){
  "use strict";
@@ -6606,7 +6623,7 @@ button?.addEventListener("click",async()=>{if(!user){if(message)message.textCont
   register:["registerFirstName","registerLastName","registerEmail","registerEmailCode","registerPassword","referralCode"],
   signin:["signInEmail","signInPassword"],
   kyc:["ocKycForm:legalName","ocKycForm:country","ocKycForm:documentType","ocKycForm:documentNumber","ocKycForm:frontImage","ocKycForm:backImage"],
-  stock:["ocStockOrderSymbol","ocStockOrderShares","ocRequestBrokerConnection"],
+  stock:["ocStockOrderSymbol","ocStockOrderType","ocStockLimitPrice","ocStockOrderShares","ocRequestBrokerConnection"],
   trade:["tradeAsset","ocTradeFundingCoin","timedStake","timedUpBtn","timedConfirmBtn"],
   deposit:["depositNetwork"],
   withdraw:["withdrawNetwork","withdrawAddress","withdrawAmount","withdrawSubmit"],
