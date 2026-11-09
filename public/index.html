@@ -3737,7 +3737,6 @@ window.ocSubmitKycDetails=async function(data){
 };
 let stopAdminWalletSync=null;
 let tradeCloudReadyUid=null;
-  window.ocTradeCloudReadyUid=null;
 window.ocTradeCloudReadyUid=null;
 let tradeCloudWriteChain=Promise.resolve();
 window.ocPersistTradeState=function(){
@@ -3787,7 +3786,7 @@ async function restoreCloudTradeState(user){
     // Fail closed: never allow a trade to overwrite cloud balances until the
     // signed-in account wallet has been read successfully.
     tradeCloudReadyUid=null;
-  window.ocTradeCloudReadyUid=null;
+    window.ocTradeCloudReadyUid=null;
     window.ocValidateQuickTradeForm?.();
     const result=document.getElementById("timedResult");
     if(result)result.textContent="Your account wallet could not sync. Refresh and try again before trading.";
