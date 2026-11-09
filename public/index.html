@@ -2724,7 +2724,7 @@ function showPage(page){const guest=window.ocLoggedOut===true&&!auth.currentUser
 window.showPage = showPage;
 let timedPaper=null,timedTimer=null,pendingTimedDirection=null;
 function quickPlan(){const amount=Number($("timedStake")?.value||0)*Number(priceFor(window.__ocTradeFundingCoin||"USDT")?.current_price||1),isGold=($("tradeAsset")?.value||selected)==="XAU",minimum=isGold?500:100;const levels=[{rate:12,min:minimum,max:5000,duration:30,label:"Level 1"},{rate:15,min:5000,max:10000,duration:60,label:"Level 2"},{rate:18,min:10000,max:25000,duration:90,label:"Level 3"},{rate:21,min:25000,max:50000,duration:120,label:"Level 4"},{rate:24,min:50000,max:100000,duration:180,label:"Level 5"},{rate:27,min:100000,max:Infinity,duration:360,label:"Level 6"}];return levels.find((p,i)=>amount>=p.min&&(amount<p.max||i===levels.length-1&&amount<=p.max))||levels[0]}
-function updateQuickEstimate(){const coin=window.__ocTradeFundingCoin||"USDT",amount=Number($("timedStake")?.value||0),fundingPrice=Number(priceFor(coin)?.current_price||1),p=quickPlan(),profit=amount*fundingPrice*p.rate/100;const planSel=$("timedPlan");if(planSel)planSel.value=String(p.rate);const durationSel=$("timedDuration");if(durationSel)durationSel.value=String(p.duration);const level=$("quickAutoLevel");if(level)level.textContent=p.label+" · "+p.rate+"%";const range=$("quickAutoRange");if(range)range.textContent=p.min.toLocaleString()+"–"+p.max.toLocaleString()+" USDT";const expiry=$("quickAutoDuration");if(expiry)expiry.textContent=p.duration+" seconds";const countdown=$("timedCountdown");if(countdown&&!timedPaper)countdown.textContent=timedFormat(p.duration);const out=$("quickEstimatedProfit");if(out)out.textContent=(Number.isFinite(profit)?profit:0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+" USDT";const note=$("quickPlanNote");if(note)note.textContent=p.rate+"% estimated plan outcome · not guaranteed";const bal=$("quickAvailableBalance");const qty=coin==="USDT"?Number(state.balance||0):Number(state.holdings?.[coin]||0);if(bal){bal.textContent=qty.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:8})+" "+coin;}const tradeSym=$("tradeAsset")?.value||"",isGold=tradeSym==="XAU",tradePrice=tradeSym?Number(priceFor(tradeSym)?.current_price||0):0,minimumUsd=isGold?500:100,minCoin=tradePrice>0?minimumUsd/tradePrice:0;const minAccess=$("quickMinimumAccess");if(minAccess){const fmtCoin=n=>Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:8}),tradeName=isGold?"XAU (Gold)":tradeSym;if(!tradeSym){minAccess.textContent="Select a crypto coin to see its minimum trade amount (≈ $100 equivalent).";}else if(tradePrice>0){minAccess.textContent="Minimum "+tradeName+" trade: "+fmtCoin(minCoin)+" "+tradeSym+" (≈ $"+minimumUsd.toLocaleString()+" equivalent).";}else{minAccess.textContent="Minimum "+tradeName+" trade: $"+minimumUsd.toLocaleString()+" equivalent; waiting for market price.";}}const balLabel=$("quickBalanceLabel");if(balLabel)balLabel.textContent="Available "+coin+" balance";const stakeLabel=$("timedStakeLabel");if(stakeLabel)stakeLabel.textContent="Trade amount ("+coin+")";const confirm=$("timedConfirmBtn");if(confirm)confirm.disabled=!pendingTimedDirection||!!timedPaper}
+function updateQuickEstimate(){const coin=window.__ocTradeFundingCoin||"USDT",amount=Number($("timedStake")?.value||0),fundingPrice=Number(priceFor(coin)?.current_price||1),p=quickPlan(),profit=amount*fundingPrice*p.rate/100;const planSel=$("timedPlan");if(planSel)planSel.value=String(p.rate);const durationSel=$("timedDuration");if(durationSel)durationSel.value=String(p.duration);const level=$("quickAutoLevel");if(level)level.textContent=p.label+" · "+p.rate+"%";const range=$("quickAutoRange");if(range)range.textContent=p.min.toLocaleString()+"–"+p.max.toLocaleString()+" USDT";const expiry=$("quickAutoDuration");if(expiry)expiry.textContent=p.duration+" seconds";const countdown=$("timedCountdown");if(countdown&&!timedPaper)countdown.textContent=timedFormat(p.duration);const out=$("quickEstimatedProfit");if(out)out.textContent=(Number.isFinite(profit)?profit:0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+" USDT";const note=$("quickPlanNote");if(note)note.textContent=p.rate+"% estimated plan outcome · not guaranteed";const bal=$("quickAvailableBalance");const qty=coin==="USDT"?Number(state.balance||0):Number(state.holdings?.[coin]||0);if(bal){bal.textContent=qty.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:8})+" "+coin;}const tradeSym=$("tradeAsset")?.value||"",isGold=tradeSym==="XAU",tradePrice=tradeSym?Number(priceFor(tradeSym)?.current_price||0):0,minimumUsd=isGold?500:100,minCoin=tradePrice>0?minimumUsd/tradePrice:0;const minAccess=$("quickMinimumAccess");if(minAccess){const fmtCoin=n=>Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:8}),tradeName=isGold?"XAU (Gold)":tradeSym;if(!tradeSym){minAccess.textContent="Select a crypto coin to see its minimum trade amount (≈ $100 equivalent).";}else if(tradePrice>0){minAccess.textContent="Minimum "+tradeName+" trade: "+fmtCoin(minCoin)+" "+tradeSym+" (≈ $"+minimumUsd.toLocaleString()+" equivalent).";}else{minAccess.textContent="Minimum "+tradeName+" trade: $"+minimumUsd.toLocaleString()+" equivalent; waiting for market price.";}}const balLabel=$("quickBalanceLabel");if(balLabel)balLabel.textContent="Available "+coin+" balance";const stakeLabel=$("timedStakeLabel");if(stakeLabel)stakeLabel.textContent="Trade amount ("+coin+")";const confirm=$("timedConfirmBtn");if(confirm){if(typeof window.ocValidateQuickTradeForm==="function")window.ocValidateQuickTradeForm();else confirm.disabled=!pendingTimedDirection||!!timedPaper}}
 function timedFormat(seconds){const n=Math.max(0,Math.ceil(seconds));return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0")}
 function drawTimedTradeGraph(samples,entry,canvasId="timedTradeChart"){
  const canvas=$(canvasId);if(!canvas)return;const w=Math.max(280,canvas.clientWidth||600),h=190,dpr=window.devicePixelRatio||1;canvas.width=w*dpr;canvas.height=h*dpr;const ctx=canvas.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);const vals=samples.map(p=>Number(p.price)).filter(v=>Number.isFinite(v)&&v>0);ctx.fillStyle="#91a7bd";ctx.font="11px Arial";if(!vals.length){ctx.fillText("Waiting for public price samples…",14,28);return}const min=Math.min(...vals,entry),max=Math.max(...vals,entry),range=max-min||Math.max(Math.abs(entry)*0.00002,0.00000001),left=48,right=12,top=22,bottom=25,x=i=>left+(w-left-right)*(samples.length<2?0:i/(samples.length-1)),y=v=>top+(h-top-bottom)*(1-(v-min)/range);ctx.strokeStyle="#26384b";ctx.lineWidth=1;for(let i=0;i<4;i++){const yy=top+(h-top-bottom)*i/3;ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(w-right,yy);ctx.stroke();const value=max-(max-min)*i/3;ctx.fillStyle="#91a7bd";ctx.fillText(value.toLocaleString("en-US",{maximumFractionDigits:Math.abs(value)<1?6:2}),3,yy+4)}ctx.strokeStyle="#f0b90b";ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(left,y(entry));ctx.lineTo(w-right,y(entry));ctx.stroke();ctx.setLineDash([]);const latest=vals[vals.length-1];ctx.strokeStyle=latest>=entry?"#0ecb81":"#f6465d";ctx.lineWidth=2.5;ctx.beginPath();samples.forEach((p,i)=>{if(i===0)ctx.moveTo(x(i),y(p.price));else ctx.lineTo(x(i),y(p.price))});ctx.stroke();ctx.fillStyle=ctx.strokeStyle;samples.forEach((p,i)=>{if(i===samples.length-1){ctx.beginPath();ctx.arc(x(i),y(p.price),3.5,0,Math.PI*2);ctx.fill()}});ctx.fillStyle="#f0b90b";ctx.fillText("Entry "+money(entry),left,12);ctx.fillStyle="#91a7bd";ctx.fillText("Latest "+money(latest),Math.max(left,w-145),h-6)
@@ -3763,12 +3763,14 @@ async function restoreCloudTradeState(user){
       saveState(false);
       renderWallet();renderTradeHistory();renderWalletCoinList();renderPnl();renderTradeOutcomes();updateTradePreview();
       tradeCloudReadyUid=user.uid;
+      window.ocValidateQuickTradeForm?.();
       syncAdminDemoBalance(user,true);
     }else{
       const localHasTradeData=(Number(state.balance)||0)>0
         || (state.history||[]).length>0
         || Object.values(state.holdings||{}).some(value=>Number(value)>0);
       tradeCloudReadyUid=user.uid;
+      window.ocValidateQuickTradeForm?.();
       // First sign-in after this upgrade: preserve the current device's account
       // state and upload it. Only seed from the admin balance when no local
       // trading state exists, so an old local profit is not overwritten.
@@ -3780,6 +3782,7 @@ async function restoreCloudTradeState(user){
     // Fail closed: never allow a trade to overwrite cloud balances until the
     // signed-in account wallet has been read successfully.
     tradeCloudReadyUid=null;
+    window.ocValidateQuickTradeForm?.();
     const result=document.getElementById("timedResult");
     if(result)result.textContent="Your account wallet could not sync. Refresh and try again before trading.";
   }
@@ -4183,16 +4186,20 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   const symbol=$("tradeAsset")?.value||"";
   const minimum=symbol==="XAU"?500:100;
   const plan=planFor(amount);
+  const currentUser=window.ocFirebaseAuth?.currentUser||null;
+  const walletReady=!!currentUser?.uid&&typeof tradeCloudReadyUid!=="undefined"&&tradeCloudReadyUid===currentUser.uid;
   const gate=$("ocTradePlanGate");
   let message="";
-  if(stake>0&&amount<minimum)message="Minimum trade: $"+minimum.toLocaleString()+" equivalent.";
+  if(!currentUser?.uid)message="Sign in to confirm a trade.";
+  else if(!walletReady)message="Your account wallet is syncing. Confirmation will be available when it is ready.";
+  else if(stake>0&&amount<minimum)message="Minimum trade: $"+minimum.toLocaleString()+" equivalent.";
   else if(stake>0&&stake>fundingBalance+1e-10)message="Your available "+funding+" balance is too low for this amount.";
   else if(stake>0&&!plan)message="Choose an amount within the available investment levels.";
   else if(stake>0&&plan&&amount>plan.max)message="This amount is above the selected investment level.";
   if(gate){gate.textContent=message;gate.style.display=message?"block":"none";}
   const confirm=$("timedConfirmBtn");
   if(confirm){
-   const blocked=!Number.isFinite(stake)||stake<=0||!Number.isFinite(fundingPrice)||fundingPrice<=0||!plan||amount<minimum||amount<plan.min||amount>plan.max||stake>fundingBalance+1e-10;
+   const blocked=!walletReady||!Number.isFinite(stake)||stake<=0||!Number.isFinite(fundingPrice)||fundingPrice<=0||!plan||amount<minimum||amount<plan.min||amount>plan.max||stake>fundingBalance+1e-10;
    confirm.disabled=blocked||(typeof pendingTimedDirection==="undefined"||!pendingTimedDirection)||(typeof timedPaper!=="undefined"&&!!timedPaper);
   }
  }
