@@ -169,6 +169,6 @@ test("Quick Trade confirmation uses one validator and waits for account wallet r
   const start = html.slice(html.indexOf("function startTimedPaper(direction){"), html.indexOf("function finishedSymbolSafe()", html.indexOf("function startTimedPaper(direction){")));
   assert.ok(start.includes("window.ocFirebaseAuth?.currentUser"), "Trade start must read Firebase Auth from the shared window bridge");
   assert.ok(!start.includes("auth.currentUser") && !start.includes("tradeCloudReadyUid!=="), "Classic trade code must not reference module-only Firebase variables");
-  assert.ok(html.includes("const blocked=!walletReady||!Number.isFinite(stake)"), "The shared validator must block until wallet restore succeeds");
+  assert.ok(html.includes("const blocked=!walletReady||!tradingEnabled||!Number.isFinite(stake)"), "The shared validator must block until wallet restore succeeds and admin trading access is enabled");
   assert.ok((html.match(/window\.ocValidateQuickTradeForm\?\.\(\);/g) || []).length >= 3, "Wallet restore success and failure must refresh the confirmation state");
 });
