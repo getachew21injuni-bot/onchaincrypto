@@ -2445,7 +2445,7 @@ function updateTradingViewChart(symbol){
  const frame=$("tradingViewChart");if(!frame)return;
  const sym=String(symbol||"BTC").toUpperCase();
  /* Gold uses a real spot-gold chart, not a crypto ticker symbol. */
- const tvSymbol=sym==="XAU"?"OANDA:XAUUSD":"BINANCE:"+((sym==="USDT"||sym==="USDC")?"BTCUSDT":sym+"USDT");
+ const tvSymbol=sym==="XAU"?"BINANCE:XAUUSDT.P":"BINANCE:"+((sym==="USDT"||sym==="USDC")?"BTCUSDT":sym+"USDT");
  frame.src="https://www.tradingview.com/widgetembed/?symbol="+encodeURIComponent(tvSymbol)+"&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=true&save_image=false";
  const title=$("tradePairTitle");if(title)title.innerHTML=(sym==="XAU"?"XAU / USDT":" "+sym+" / USDT")+" <span aria-hidden=\"true\">▾</span>";
  const name=$("tradeAssetName");if(name)name.textContent=sym==="XAU"?"Gold (XAU)":(priceFor(sym)?.name||sym);
