@@ -5566,6 +5566,38 @@ function renderMode(mode,settings={}){
  const message=byId("ocAdminModeMessage");if(message)message.textContent="Shared setting active for all users: "+label+".";
  document.querySelectorAll("[data-admin-demo-mode]").forEach(button=>{const active=button.dataset.adminDemoMode===valid;button.setAttribute("aria-pressed",String(active));button.style.outline=active?"2px solid #f0b90b":"";});
 }
+window.ocLoadLatestTradeControls=async function(uid){
+ const user=auth.currentUser;
+ if(!user?.uid||user.uid!==uid)throw new Error("The signed-in account changed. Please sign in again.");
+ const [userSnap,globalSnap]=await Promise.all([getDoc(doc(db,"users",uid)),getDoc(doc(db,"platformSettings","demoTradeControl"))]);
+ if(auth.currentUser?.uid!==uid)throw new Error("The signed-in account changed. Please try again.");
+ const userData=userSnap.exists()?userSnap.data()||{}:{},globalData=globalSnap.exists()?globalSnap.data()||{}:{};
+ const userMode=["inherit","market","win","lose"].includes(userData.demoTradeControlMode)?userData.demoTradeControlMode:"inherit";
+ const globalMode=Object.hasOwn(modeNames,globalData.mode)?globalData.mode:"market";
+ const mode=(globalMode==="win"||globalMode==="lose")?globalMode:(userMode!=="inherit"?userMode:globalMode);
+ return {mode,globalMode,winPercent:Math.min(100,Math.max(1,Number(globalMode==="win"?globalData.winPercent:userData.demoWinPercent)||15)),lossPercent:Math.min(100,Math.max(1,Number(globalMode==="lose"?globalData.lossPercent:userData.demoLossPercent)||50)),tradingEnabled:userData.tradingEnabled!==false};
+};
+window.ocCommitQuickTradeResult=async function({funding,adjustment,resultRecord}){
+ const user=auth.currentUser;
+ if(!user?.uid||window.ocTradeCloudReadyUid!==user.uid)throw new Error("Account wallet is not ready. Please refresh and try again.");
+ const asset=String(funding||"USDT").toUpperCase(),delta=Number(adjustment);
+ if(!Number.isFinite(delta)||!resultRecord?.id)throw new Error("Trade result details are invalid.");
+ const ref=doc(db,"userTradeState",user.uid);
+ return await runTransaction(db,async tx=>{
+  const snap=await tx.get(ref);
+  if(!snap.exists())throw new Error("The cloud wallet record is missing. No balance was changed.");
+  const saved=snap.data()||{},balance=Math.max(0,Number(saved.balance)||0);
+  const holdings=saved.holdings&&typeof saved.holdings==="object"&&!Array.isArray(saved.holdings)?{...saved.holdings}:{};
+  const history=Array.isArray(saved.history)?saved.history.slice(0,300):[];
+  if(history.some(item=>item?.id===resultRecord.id))return {balance,holdings,history,balanceBefore:asset==="USDT"?balance:Number(holdings[asset]||0)};
+  const before=asset==="USDT"?balance:Number(holdings[asset]||0),after=Math.max(0,before+delta);
+  let nextBalance=balance;
+  if(asset==="USDT")nextBalance=after;else if(after>1e-10)holdings[asset]=after;else delete holdings[asset];
+  const nextHistory=[{...resultRecord,balanceBefore:before,balanceAfter:after},...history].slice(0,300);
+  tx.set(ref,{uid:user.uid,balance:nextBalance,holdings,history:nextHistory,updatedAt:serverTimestamp()},{merge:true});
+  return {balance:nextBalance,holdings,history:nextHistory,balanceBefore:before,balanceAfter:after};
+ });
+};
 function renderUsers(snapshot){
  const host=byId("ocAdminUsersList"),count=byId("ocAdminUserCount");if(!host)return;
  snapshot.docs.forEach(item=>{const data=item.data()||{};if(data.adminAssigned!==true){void setDoc(doc(db,"users",item.id),{adminAssigned:true},{merge:true}).catch(error=>console.warn("Existing user admin assignment could not be backfilled:",item.id,error.code||error));}});
@@ -5650,7 +5682,7 @@ onAuthStateChanged(auth,user=>{
   console.error("Trade Control profile sync failed:",error?.code||error,error?.message||"");
   if(currentAdmin&&byId("ocAdminUsersList"))byId("ocAdminUsersList").textContent="Profile sync failed ("+(error?.code||"connection error")+"). Check Firestore rules and sign in again.";
  });
- stopMode=onSnapshot(doc(db,"platformSettings","demoTradeControl"),snapshot=>{const data=snapshot.exists()?snapshot.data():{};renderMode(data.mode||"market",data);,error=>{console.error("Global demo mode listener failed:",error);if(byId("ocAdminModeMessage"))byId("ocAdminModeMessage").textContent="Could not read shared settings: "+(error.code||"connection error")+". Check Firestore rules.";});
+ stopMode=onSnapshot(doc(db,"platformSettings","demoTradeControl"),snapshot=>{const data=snapshot.exists()?snapshot.data():{};renderMode(data.mode||"market",data);},error=>{console.error("Global demo mode listener failed:",error);if(byId("ocAdminModeMessage"))byId("ocAdminModeMessage").textContent="Could not read shared settings: "+(error.code||"connection error")+". Check Firestore rules.";});
  if(currentAdmin){
   if(byId("ocAdminUsersList"))byId("ocAdminUsersList").textContent="Loading connected user profiles…";
   stopUsers=onSnapshot(collection(db,"users"),renderUsers,error=>{console.error("Admin user directory listener failed:",error);if(byId("ocAdminUsersList"))byId("ocAdminUsersList").textContent="Could not load users ("+(error.code||"connection error")+"). Check that the administrator email is verified and Firestore rules are deployed.";});
