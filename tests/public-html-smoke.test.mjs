@@ -280,7 +280,7 @@ test("Trade Gold keeps XAU selectable, loads a fresh quote, and uses the Gold ch
   assert.ok(html.includes('<option value="XAU">XAU — Gold</option>'), "Gold must remain selectable even when absent from the crypto market feed");
   assert.ok(html.includes('if(sym==="XAU"){try{await refreshGoldMarketPrice()}'), "Gold confirmation must refresh its quote before starting");
   assert.ok(html.includes('if(finished.symbol==="XAU"){try{await refreshGoldMarketPrice()}'), "Gold expiry must use a refreshed quote");
-  assert.ok(html.includes("OANDA:XAUUSD"), "Gold selection must update the chart to the Gold market");
+  assert.ok(html.includes("BINANCE:XAUUSDT.P"), "Gold selection must update the chart to the Gold market");
   assert.ok(supportChat.includes("Choose Trade Gold on Home"), "The assistant must explain the Gold shortcut");
   assert.ok(supportChat.includes("Onchain market tools focus on cryptocurrency and Gold"), "The assistant must answer the Stocks topic accurately");
 });
