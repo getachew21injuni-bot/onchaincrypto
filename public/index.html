@@ -3104,7 +3104,7 @@ const {
   getAuth, initializeAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider,
   signInWithPopup, onAuthStateChanged, signOut, RecaptchaVerifier,
-  signInWithPhoneNumber, updateProfile, reload,
+  signInWithPhoneNumber, updateProfile, reload, setPersistence,
   browserLocalPersistence
 } = firebaseAuthSdk;
 window.ocFirebaseModuleStarted = true;
@@ -3134,7 +3134,17 @@ try {
 // the entire application module on authStateReady() or a persistence migration:
 // either can stall on a browser's local storage/IndexedDB and freeze the login UI.
 window.ocFirebaseAuth = auth;
-window.ocAuthPersistenceConfirmed = true; // initializeAuth already uses browserLocalPersistence.
+window.ocAuthPersistenceConfirmed = false;
+// Explicitly select device-local persistence even when Auth had to be reused
+// from an earlier Firebase module. Each device keeps its own session until logout.
+const authPersistenceReady = setPersistence(auth, browserLocalPersistence).then(() => {
+  window.ocAuthPersistenceConfirmed = true;
+  return true;
+}).catch(error => {
+  console.error("Persistent sign-in could not be enabled:", error?.code || error);
+  window.ocAuthPersistenceConfirmed = false;
+  return false;
+});
 window.ocAuthReady = new Promise(resolve => {
   let settled = false;
   let unsubscribe = () => {};
@@ -3536,6 +3546,8 @@ document.getElementById("registerForm").addEventListener("submit", async (event)
   if (submitButton) { submitButton.disabled = true; submitButton.textContent = "Creating account…"; }
   msg("Creating your secure account…");
   try {
+    await authPersistenceReady;
+    if (!window.ocAuthPersistenceConfirmed) throw new Error("This browser could not save your sign-in session. Enable site storage and try again.");
     const credential = await createUserWithEmailAndPassword(auth, email, password);
     window.onchaincryptoCurrentUser = credential.user;
     void window.ocLogUserActivity?.("registration");
@@ -3581,6 +3593,8 @@ document.getElementById("googleSignInBtn").addEventListener("click", async () =>
   const suppliedName = (first + " " + last).trim();
   msg("Opening Google sign-in…");
   try {
+    await authPersistenceReady;
+    if (!window.ocAuthPersistenceConfirmed) throw new Error("This browser could not save your sign-in session. Enable site storage and try again.");
     const credential = await signInWithPopup(auth, new GoogleAuthProvider());
     const user = credential.user;
     // Keep Google sign-in resilient if the optional profile-name update fails.
@@ -3651,6 +3665,8 @@ document.getElementById("signInForm").addEventListener("submit", async (event) =
   msg("Connecting securely to Firebase Authentication…");
   if (status) status.textContent = "Checking your sign-in details…";
   try {
+    await authPersistenceReady;
+    if (!window.ocAuthPersistenceConfirmed) throw new Error("This browser could not save your sign-in session. Enable site storage and try again.");
     const credential = await signInWithEmailAndPassword(auth, email, password);
     void window.ocLogUserActivity?.("login");
     document.getElementById("signInPassword").value = "";
@@ -3703,6 +3719,8 @@ document.getElementById("sendPhoneCodeBtn").addEventListener("click", async () =
   if (!/^\+[1-9]\d{7,14}$/.test(phone)) { msg("Enter a valid phone number in international format, such as +2519…"); return; }
   msg("Preparing SMS verification…");
   try {
+    await authPersistenceReady;
+    if (!window.ocAuthPersistenceConfirmed) throw new Error("This browser could not save your sign-in session. Enable site storage and try again.");
     const verifier = await getRecaptcha();
     confirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
     msg("SMS sent. Enter the code received on your phone.");
@@ -7419,7 +7437,11 @@ html.oc-auth-pending body #bottomNav { display:none!important; }
 <script id="oc-visitor-private-route-guard">
 (function(){
   const privatePages=new Set(["home","markets","trade","wallet","profile","deposit","withdraw","transfer","convert","history","notifications","settings","kyc","admin","browser"]);
-  function signedIn(){return !!(window.ocFirebaseAuth?.currentUser||window.onchaincryptoCurrentUser)&&window.ocLoggedOut!==true;}
+  function signedIn(){
+    const currentUser=window.ocFirebaseAuth?.currentUser||window.onchaincryptoCurrentUser||null;
+    if(currentUser){window.ocLoggedOut=false;return true;}
+    return false;
+  }
   function protectRoute(page){
     if(!privatePages.has(String(page||""))||signedIn())return false;
     window.ocLoggedOut=true;
@@ -7442,7 +7464,7 @@ html.oc-auth-pending body #bottomNav { display:none!important; }
   },true);
   function applyGuestGuard(){
     if(signedIn()){
-      document.body.classList.remove("oc-visitor-mode");
+      document.body.classList.remove("oc-visitor-mode","oc-logged-out","oc-auth-screen");
       return;
     }
     document.body.classList.add("oc-visitor-mode");

@@ -136,20 +136,28 @@ test("wallet state subscribes to Firestore for live cross-device balance and his
   assert.ok(html.includes("state={balance:Math.round(balance*100)/100,holdings,history};"), "Remote balance, holdings and trade history must replace the stale device view together");
 });
 
-test("one shared Onchain assistant serves visitors and signed-in users", () => {
+test("the floating assistant is restricted to signed-in Home", () => {
   assert.ok(!html.includes("ocVisitorSupportBot"), "The duplicate visitor-only bot shell must be removed");
   assert.ok(!html.includes("oc-visitor-support-bot-script"), "The duplicate visitor-only answer script must be removed");
-  assert.ok(supportChat.includes('btn.id="oc-support-button"'), "The shared assistant must create one launcher");
-  assert.ok(supportChat.includes('box.id="oc-chat"'), "The shared assistant must create one chat panel");
-  assert.ok(supportChat.includes("function botAnswer(q)"), "One shared knowledge engine must answer visitor and signed-in questions");
-  assert.ok(supportChat.includes("Welcome to Onchain! Ask about Markets"), "The shared assistant must show one welcome message");
-  assert.ok(supportChat.includes("Please sign in to connect with our support team."), "Visitors must be guided to sign in before agent contact");
-  assert.ok(supportChat.includes('addBubble(botAnswer(q),"bot")'), "All questions must use the same powered information answers");
+  assert.ok(supportChat.includes('btn.id="oc-support-button"'), "The assistant must create one launcher");
+  assert.ok(supportChat.includes('box.id="oc-chat"'), "The assistant must create one chat panel");
+  assert.ok(supportChat.includes("function botAnswer(q)"), "One shared knowledge engine must answer signed-in questions");
+  assert.ok(supportChat.includes("Welcome to Onchain! Ask about Markets"), "The assistant must show one welcome message");
+  assert.ok(supportChat.includes('if(!activeUser||activeUser.isAnonymous)return false;'), "Visitors must not see the assistant launcher");
+  assert.ok(supportChat.includes('const page=document.getElementById("page-home")'), "The assistant must be limited to signed-in Home, not visitor Home");
+  assert.ok(supportChat.includes('addBubble(botAnswer(q),"bot")'), "Questions must use the powered information answers");
   assert.ok(!supportChat.includes("mailto:")&&!supportChat.includes("support@onchainspro.com"), "The floating assistant must not expose direct email contact");
-  assert.ok(!supportChat.includes("signInAnonymously"), "Opening the visitor assistant must not create a login session");
+  assert.ok(!supportChat.includes("signInAnonymously"), "Opening the assistant must not create a login session");
   assert.ok(!supportChat.includes("if(!user||user.isAnonymous)newTicket()"), "Visitors must not be routed into agent ticket creation");
 });
 
+
+test("Firebase auth persistence is local and the visitor route guard trusts the live Firebase user", () => {
+  assert.ok(html.includes("setPersistence,") && html.includes("setPersistence(auth, browserLocalPersistence)"), "Use Firebase browser-local persistence explicitly");
+  assert.ok(html.includes("await authPersistenceReady;"), "Wait for persistent storage before starting a sign-in flow");
+  assert.ok(html.includes("const currentUser=window.ocFirebaseAuth?.currentUser||window.onchaincryptoCurrentUser||null;"), "Route protection must check the actual Firebase user");
+  assert.ok(html.includes("if(currentUser){window.ocLoggedOut=false;return true;}"), "A restored Firebase session must override a stale guest flag");
+});
 test("the single assistant uses one theme and closes on outside clicks or navigation", () => {
   assert.ok(!html.includes("ocVisitorSupportBot"), "No second visitor bot launcher or panel should remain");
   assert.ok(!html.includes("oc-role-based-bot-visibility"), "No competing role-based bot visibility rules should remain");
