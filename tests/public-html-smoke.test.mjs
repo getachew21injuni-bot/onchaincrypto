@@ -272,3 +272,20 @@ test("Quick Trade reads fresh admin outcome settings and atomically updates the 
   assert.ok(html.includes("return await runTransaction(db,async tx=>"), "Wallet result updates must use a Firestore transaction");
   assert.ok(html.includes("await window.ocCommitQuickTradeResult({funding:finished.funding,adjustment:balanceAdjustmentFunding,resultRecord})"), "Completed trades must commit against the latest cloud balance");
 });
+
+
+test("Trade Gold keeps XAU selectable, loads a fresh quote, and uses the Gold chart", () => {
+  assert.ok(html.includes("async function refreshGoldMarketPrice()"), "Gold must load a current quote before confirmation");
+  assert.ok(html.includes('if(sym==="XAU")return goldMarketAsset;'), "Gold must resolve through its dedicated quote object");
+  assert.ok(html.includes('<option value="XAU">XAU — Gold</option>'), "Gold must remain selectable even when absent from the crypto market feed");
+  assert.ok(html.includes('if(sym==="XAU"){try{await refreshGoldMarketPrice()}'), "Gold confirmation must refresh its quote before starting");
+  assert.ok(html.includes('if(finished.symbol==="XAU"){try{await refreshGoldMarketPrice()}'), "Gold expiry must use a refreshed quote");
+  assert.ok(html.includes("OANDA:XAUUSD"), "Gold selection must update the chart to the Gold market");
+  assert.ok(supportChat.includes("Choose Trade Gold on Home"), "The assistant must explain the Gold shortcut");
+  assert.ok(supportChat.includes("Onchain market tools focus on cryptocurrency and Gold"), "The assistant must answer the Stocks topic accurately");
+});
+
+test("Admin trade-control help matches the enforced global and per-user priority", () => {
+  assert.ok(admin.includes("A global forced Win/Loss applies to all accounts. Per-user outcome settings apply when the global setting is Market-Based."), "Admin help must describe the actual precedence");
+  assert.ok(admin.includes("Win result (%)") && admin.includes("Loss result (%)"), "Admin percentages must be described as result percentages, not chances");
+});
