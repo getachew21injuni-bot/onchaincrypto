@@ -3763,9 +3763,33 @@ window.ocSubmitKycDetails=async function(data){
   return {ok:true,status:"pending"};
 };
 let stopAdminWalletSync=null;
+let stopTradeStateSync=null;
 let tradeCloudReadyUid=null;
 window.ocTradeCloudReadyUid=null;
 let tradeCloudWriteChain=Promise.resolve();
+function applyRemoteTradeState(snap,user){
+  if(auth.currentUser?.uid!==user.uid||!snap.exists())return;
+  // Ignore cached or locally pending snapshots; only another server-confirmed
+  // account update may replace this device's wallet view.
+  if(snap.metadata?.fromCache||snap.metadata?.hasPendingWrites)return;
+  const saved=snap.data()||{},balance=Number(saved.balance);
+  if(!Number.isFinite(balance)||balance<0){console.warn("Remote account wallet data is invalid.");return;}
+  const holdings=saved.holdings&&typeof saved.holdings==="object"&&!Array.isArray(saved.holdings)?saved.holdings:{};
+  const history=Array.isArray(saved.history)?saved.history.slice(0,300):[];
+  state={balance:Math.round(balance*100)/100,holdings,history};
+  saveState(false);
+  renderWallet();renderTradeHistory();renderWalletCoinList();renderPnl();renderTradeOutcomes();updateTradePreview();
+  tradeCloudReadyUid=user.uid;
+  window.ocTradeCloudReadyUid=user.uid;
+  window.ocValidateQuickTradeForm?.();
+}
+function watchCloudTradeState(ref,user){
+  if(stopTradeStateSync){stopTradeStateSync();stopTradeStateSync=null;}
+  stopTradeStateSync=onSnapshot(ref,{includeMetadataChanges:true},snap=>{
+    if(auth.currentUser?.uid!==user.uid)return;
+    applyRemoteTradeState(snap,user);
+  },error=>console.warn("Live account wallet sync unavailable:",error?.code||error));
+}
 window.ocPersistTradeState=function(){
   const user=auth.currentUser;
   if(!user?.uid||tradeCloudReadyUid!==user.uid)return Promise.reject(new Error("Account wallet is still loading. Please wait and try again."));
@@ -3782,6 +3806,7 @@ async function restoreCloudTradeState(user){
     const ref=doc(db,"userTradeState",user.uid);
     const snap=await getDoc(ref);
     if(auth.currentUser?.uid!==user.uid)return;
+    watchCloudTradeState(ref,user);
     if(snap.exists()){
       const saved=snap.data()||{};
       const balance=Number(saved.balance);
@@ -3830,6 +3855,7 @@ onAuthStateChanged(auth, (user) => {
     homeGreeting.textContent = user ? "Hi " + firstName : "Onchain";
   }
   if(stopAdminWalletSync){stopAdminWalletSync();stopAdminWalletSync=null;}
+  if(stopTradeStateSync){stopTradeStateSync();stopTradeStateSync=null;}
   tradeCloudReadyUid=null;
   window.ocTradeCloudReadyUid=null;
   const previousUser = window.onchaincryptoCurrentUser || null;
