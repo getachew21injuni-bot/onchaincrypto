@@ -1823,7 +1823,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
   </div>
   <div id="buyHoldEstimate" class="muted tiny" aria-live="polite" style="margin:12px 0">Choose a coin and enter an amount to preview your portfolio order.</div>
   <div style="display:flex;flex-wrap:wrap;gap:10px"><button class="primary" type="button" id="buyHoldBuy">Buy &amp; Hold</button><button class="secondary" type="button" id="buyHoldSell">Sell from Holdings</button></div>
-  <p class="muted tiny" style="margin-top:12px">Orders update your OnChainSpro portfolio and account ledger using displayed market reference prices. They do not place orders on an external exchange or transfer cryptocurrency on-chain.</p>
+  <p class="muted tiny" style="margin-top:12px">Buy and sell coins at market prices. Your portfolio updates automatically. Minimum: 1 USDT.</p>
   <div id="buyHoldMessage" class="muted tiny" role="status" aria-live="polite" style="margin-top:10px"></div>
 </section>
 
@@ -2773,7 +2773,7 @@ async function executeBuyHoldOrder(side){
  if(!user?.uid||window.ocTradeCloudReadyUid!==user.uid||typeof window.ocPersistTradeState!=="function"){show("Please sign in and wait until your cloud wallet has finished syncing before placing an order.");return}
  const sym=String($("buyHoldAsset")?.value||"").toUpperCase(),coin=priceFor(sym),price=Number(coin?.current_price||0),amount=Number($("buyHoldAmount")?.value);
  if(!sym||!coin||!Number.isFinite(price)||price<=0){show("A current market price is not available. Refresh market prices and try again.");return}
- if(!Number.isFinite(amount)||amount<1){show("Enter an order value of at least 1 USDT.");return}
+ if(!Number.isFinite(amount)||amount<1){show("Minimum order: 1 USDT.");return}
  const qty=amount/price,owned=Number(state.holdings?.[sym]||0),balance=Number(state.balance||0);
  if(side==="buy"&&amount>balance){show("Insufficient available USDT. Available balance: "+usdtMoney(balance)+".");return}
  if(side==="sell"&&qty>owned+1e-10){show("Your holding is too small for this sell amount. Current holding: "+owned.toFixed(8)+" "+sym+".");return}
