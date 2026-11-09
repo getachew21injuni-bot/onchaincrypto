@@ -2835,7 +2835,8 @@ async function startTimedPaper(direction){
   window.updateQuickEstimate?.();
  }catch(error){
   pendingTimedDirection=direction;$("timedUpBtn").disabled=false;$("timedDownBtn").disabled=false;
-  $("timedResult").textContent="Could not confirm the latest account trade settings. "+(error?.message||"Please refresh and try again.");
+  const reason=String(error?.message||"");
+  $("timedResult").textContent=/session|signed-in account changed/i.test(reason)?"Your session needs a quick refresh. Please sign in again to continue.":"Your trade settings are being refreshed. Please try again in a moment.";
   window.ocValidateQuickTradeForm?.();return;
  }
  const started=Date.now(),entry=Number(c.current_price),effectiveMode=latestControls.mode,effectiveWinPercent=latestControls.winPercent,effectiveLossPercent=latestControls.lossPercent;timedPaper={symbol:sym,funding,fundingPrice,direction,stake,stakeUsd,duration,entry,ends:started+duration*1000,payoutRate:plan.rate,adminMode:effectiveMode,adminWinPercent:effectiveWinPercent||15,adminLossPercent:effectiveLossPercent||50,samples:[{time:started,price:entry}]};recordActivity("trade","Quick trade started · "+(direction==="up"?"BUY ":"SELL ")+sym,usdtMoney(stake)+" · Entry "+usdtMoney(entry)+" · Duration "+timedFormat(duration),"Running");
@@ -5576,25 +5577,10 @@ body.oc-logged-out .auth-welcome h1{ text-shadow:0 5px 28px rgba(240,185,11,.10)
 
 <script type="module" id="oc-global-demo-trade-admin">
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, serverTimestamp, runTransaction, addDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, serverTimestamp, runTransaction, addDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
-const guestApp=getApps().find(item=>item.name==="visitor-support")||initializeApp(config,"visitor-support");
-const guestAuth=getAuth(guestApp),guestDb=getFirestore(guestApp);
-window.ocSubmitGuestSupport=async({email,message})=>{
- const cleanEmail=String(email||"").trim().slice(0,160),cleanMessage=String(message||"").trim().slice(0,3000);
- if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail))throw new Error("Please enter a valid email address.");
- if(cleanMessage.length<3)throw new Error("Please add a little more detail.");
- let visitor=guestAuth.currentUser;
- if(!visitor)visitor=(await signInAnonymously(guestAuth)).user;
- const ticketRef=doc(collection(guestDb,"supportTickets")),messageRef=doc(collection(guestDb,"supportTickets",ticketRef.id,"messages")),batch=writeBatch(guestDb);
- batch.set(ticketRef,{ownerUid:visitor.uid,customerEmail:cleanEmail,customerName:"Website visitor",subject:"Website visitor support",status:"open",createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:cleanMessage,source:"visitor-bot"});
- batch.set(messageRef,{senderUid:visitor.uid,senderRole:"customer",senderName:"Website visitor",text:cleanMessage,createdAt:serverTimestamp()});
- await batch.commit();
- try{await signOut(guestAuth);}catch(error){console.warn("Guest support session cleanup deferred:",error?.code||error);}
- return true;
-};
-const app=getApps()[0]||initializeApp(config),auth=getAuth(app),db=getFirestore(app);
+const app=getApps().find(item=>item.name==="[DEFAULT]")||initializeApp(config),auth=window.ocFirebaseAuth||getAuth(app),db=getFirestore(app);
 const adminEmails=new Set(["getachew21.inj.uni@gmail.com"]);
 const byId=id=>document.getElementById(id);
 const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
@@ -5617,10 +5603,13 @@ function renderMode(mode,settings={}){
  document.querySelectorAll("[data-admin-demo-mode]").forEach(button=>{const active=button.dataset.adminDemoMode===valid;button.setAttribute("aria-pressed",String(active));button.style.outline=active?"2px solid #f0b90b":"";});
 }
 window.ocLoadLatestTradeControls=async function(uid){
- const user=auth.currentUser;
- if(!user?.uid||user.uid!==uid)throw new Error("The signed-in account changed. Please sign in again.");
+ const activeAuth=window.ocFirebaseAuth||auth;
+ if(typeof activeAuth.authStateReady==="function")await activeAuth.authStateReady();
+ const user=activeAuth.currentUser;
+ if(!user?.uid||String(user.uid)!==String(uid))throw new Error("Your session needs a quick refresh. Please sign in again to continue.");
  const [userSnap,globalSnap]=await Promise.all([getDoc(doc(db,"users",uid)),getDoc(doc(db,"platformSettings","demoTradeControl"))]);
- if(auth.currentUser?.uid!==uid)throw new Error("The signed-in account changed. Please try again.");
+ const verifiedUser=(window.ocFirebaseAuth||activeAuth).currentUser;
+ if(!verifiedUser?.uid||String(verifiedUser.uid)!==String(uid))throw new Error("Your session changed. Please sign in again to continue.");
  const userData=userSnap.exists()?userSnap.data()||{}:{},globalData=globalSnap.exists()?globalSnap.data()||{}:{};
  const userMode=["inherit","market","win","lose"].includes(userData.demoTradeControlMode)?userData.demoTradeControlMode:"inherit";
  const globalMode=Object.hasOwn(modeNames,globalData.mode)?globalData.mode:"market";
