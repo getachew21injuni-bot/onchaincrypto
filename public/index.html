@@ -1814,7 +1814,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
         <!-- Internal plan/expiry are calculated silently; no level list or auto-selection labels are shown to customers. --><select id="timedPlan" class="field" style="display:none" aria-hidden="true" tabindex="-1"><option value="12" data-min="100" data-max="5000">Level 1</option><option value="15" data-min="5000" data-max="10000">Level 2</option><option value="18" data-min="10000" data-max="25000">Level 3</option><option value="21" data-min="25000" data-max="50000">Level 4</option><option value="24" data-min="50000" data-max="100000">Level 5</option><option value="27" data-min="100000" data-max="unlimited">Level 6</option></select>
         <div class="card" style="margin:10px 0"><div class="label">Estimated profit (USDT)</div><div class="big green" id="quickEstimatedProfit">0.00 USDT</div><div class="muted tiny" id="quickPlanNote"></div></div>
         <select id="timedDuration" class="field" style="display:none" aria-hidden="true" tabindex="-1"><option value="30">30 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="120">120 seconds</option><option value="180">180 seconds</option><option value="270">270 seconds</option><option value="360">360 seconds</option></select>
-        <label>Trade direction</label><div class="two-buttons"><button type="button" class="buy" id="timedUpBtn" aria-pressed="false">↗ Buy</button><button type="button" class="sell" id="timedDownBtn" aria-pressed="false">↘ Sell</button></div><div class="two-buttons" style="margin-top:10px"><button type="button" class="primary" id="timedConfirmBtn" disabled>Confirm Trade</button><button type="button" class="secondary" id="timedCancelBtn">Cancel</button></div>
+        <label>Trade direction</label><div class="two-buttons" id="timedDirectionButtons"><button type="button" class="buy" id="timedUpBtn" aria-pressed="false">↗ Buy</button><button type="button" class="sell" id="timedDownBtn" aria-pressed="false">↘ Sell</button></div><div id="timedDirectionSummary" hidden style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0;padding:12px 14px;border:1px solid #167c58;border-radius:10px;background:#0c2a25;color:#d7fff0"><span class="muted tiny">Selected direction</span><strong id="timedDirectionLabel">—</strong></div><div class="two-buttons" style="margin-top:10px"><button type="button" class="primary" id="timedConfirmBtn" disabled>Confirm Trade</button><button type="button" class="secondary" id="timedCancelBtn">Cancel</button></div>
         <p class="muted tiny"></p></div>
         <div class="cards"><div class="card"><div class="label">Trading pair</div><div class="big" id="timedPair">BTC / USDT</div></div><div class="card"><div class="label">Entry price</div><div class="big" id="timedEntryPrice">—</div></div><div class="card"><div class="label">Time remaining</div><div class="big yellow" id="timedCountdown">00:30</div></div></div></div>
         <div class="cards" style="margin-top:14px"><div class="card"><div class="label">Trade start time</div><div class="big tiny" id="timedStartTime">—</div></div><div class="card"><div class="label">Expiry time</div><div class="big tiny" id="timedEndTime">—</div></div><div class="card"><div class="label">Estimated P/L</div><div class="big" id="timedPnl">—</div></div></div>
@@ -2965,7 +2965,7 @@ async function showTimedTradeIssue(message,finished=null){
   const canvas=$("timedBoardPnlChart");if(canvas){const w=Math.max(280,canvas.clientWidth||600),h=150,dpr=window.devicePixelRatio||1;canvas.width=w*dpr;canvas.height=h*dpr;const ctx=canvas.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);ctx.fillStyle="#c53232";ctx.font="12px Arial";ctx.fillText("Profit/loss was not recorded.",12,26);}
  }));
 }
-function startTimedPaper(direction){
+async function startTimedPaper(direction){
  if(window.ocLoggedOut===true&&!window.onchaincryptoCurrentUser){document.body.classList.add("oc-auth-screen");window.showPage?.("register");return}
  const currentUser=window.ocFirebaseAuth?.currentUser;if(!currentUser?.uid||window.ocTradeCloudReadyUid!==currentUser.uid){$("timedResult").textContent="Your account wallet is syncing. Please wait a moment and try again.";return}
  if(window.__ocUserTradingEnabled===false){$("timedResult").textContent="Trading is currently disabled for this account. Please contact support.";window.ocValidateQuickTradeForm?.();return}
@@ -8173,6 +8173,12 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
 }
 #page-trade #timedPaperTrade.oc-stage-config .oc-trade-amount-row{display:flex!important}
 </style>
+<style id="oc-orderbook-confirm-step-style">
+#timedPaperTrade.oc-orderbook-confirm-step #timedDirectionButtons,
+#timedPaperTrade.oc-orderbook-confirm-step .form-panel>label:has(+ #timedDirectionButtons){display:none!important}
+#timedPaperTrade.oc-orderbook-confirm-step #timedDirectionSummary{display:flex!important}
+</style>
+
 <style id="oc-customer-sequential-flow-v2">
 /* Keep the trading experience in one modal and reveal only the current step. */
 #timedPaperTrade .form-panel .cards[style*="margin-top:10px"]{display:none!important}
@@ -8234,6 +8240,10 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
   form.classList.add('oc-stage-config');document.body.classList.add('oc-trade-overlay-open');
   const board=$('timedResultBoard');if(board)board.style.display='none';
   setAssetFromActivePair();
+  form.classList.add('oc-orderbook-confirm-step');
+  const directionLabel=$('timedDirectionLabel'),directionSummary=$('timedDirectionSummary');
+  if(directionLabel)directionLabel.textContent=(direction==='buy'?'BUY':'SELL')+' · '+(($('tradeAsset')?.value)||'BTC')+'/USDT';
+  if(directionSummary)directionSummary.hidden=false;
   if(typeof window.chooseTimedDirection==='function')window.chooseTimedDirection(direction==='buy'?'up':'down');
   step(1);form.scrollTop=0;
  }
@@ -8247,7 +8257,8 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  if(cancel)cancel.addEventListener('click',function(){
   setTimeout(function(){
    if(!($('timedUpBtn')?.disabled&&$('timedDownBtn')?.disabled)){
-    form.classList.remove('oc-stage-config','oc-stage-running','oc-stage-complete');
+    form.classList.remove('oc-stage-config','oc-stage-running','oc-stage-complete','oc-orderbook-confirm-step');
+    const directionSummary=$('timedDirectionSummary');if(directionSummary)directionSummary.hidden=true;
     document.body.classList.remove('oc-trade-overlay-open');
    }
   },100);
@@ -8257,7 +8268,8 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
   closeBtn=document.createElement('button');closeBtn.type='button';closeBtn.className='primary oc-close-trade';closeBtn.textContent='Close trade';
   closeBtn.addEventListener('click',function(){
    document.body.classList.remove('oc-trade-overlay-open');
-   form.classList.remove('oc-stage-config','oc-stage-running','oc-stage-complete','hidden');
+   form.classList.remove('oc-stage-config','oc-stage-running','oc-stage-complete','oc-orderbook-confirm-step','hidden');
+   const directionSummary=$('timedDirectionSummary');if(directionSummary)directionSummary.hidden=true;
    form.classList.add('hidden');
    if($('timedUpBtn'))$('timedUpBtn').disabled=false;
    if($('timedDownBtn'))$('timedDownBtn').disabled=false;
