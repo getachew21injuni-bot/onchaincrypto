@@ -282,6 +282,13 @@ test("Quick Trade reads fresh admin outcome settings and atomically updates the 
 });
 
 
+test("Wallet and trade copy uses clear account-balance wording", () => {
+  assert.ok(!html.includes("Insufficient virtual balance"), "Avoid confusing virtual-balance wording");
+  assert.ok(!html.includes("displayed holdings"), "Use clear available-balance wording");
+  assert.ok(html.includes("Your available balances and transaction updates are shown here."), "Wallet copy should be concise and positive");
+  assert.ok(html.includes("Completed · USDT result recorded"), "Completed trade activity should identify the USDT result");
+});
+
 test("Quick Trade records the calculated USDT profit or loss and leaves other holdings untouched", () => {
   assert.ok(html.includes("const won=pnl>0,lost=pnl<0;const balanceAdjustment=pnl;"), "Wallet adjustment must equal calculated trade P/L");
   assert.ok(!html.includes('if(forcedMode==="market"&&pnl<=0)pnl=-finished.stakeUsd'), "Market losses must not be replaced by a full-stake loss");
