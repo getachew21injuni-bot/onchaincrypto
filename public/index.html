@@ -4989,65 +4989,6 @@ main:has(> #page-browser:not(.hidden)) #quickAutoRange {
 /* Keep the account privacy/security controls and meaningful financial safety notices available. */
 </style>
 
-<!-- OC BUY/SELL VISIBILITY RECOVERY -->
-<style id="oc-buy-sell-visibility-recovery">
-#page-trade #timedPaperTrade{display:none!important;visibility:hidden!important;opacity:0!important}
-body.oc-trade-overlay-open #page-trade #timedPaperTrade{display:block!important;visibility:visible!important;opacity:1!important;position:fixed!important;z-index:10020!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;width:min(720px,calc(100vw - 24px))!important;max-width:720px!important;max-height:calc(100dvh - 28px)!important;overflow-y:auto!important;margin:0!important;box-shadow:0 24px 90px #000b!important;border:1px solid #3b6584!important;border-radius:16px!important;background:#071321!important;padding:16px!important}
-body.oc-trade-overlay-open #page-trade #timedPaperTrade .form-panel{display:block!important;visibility:visible!important}
-body.oc-trade-overlay-open:after{content:"";position:fixed;inset:0;z-index:10010;background:rgba(1,7,15,.78);backdrop-filter:blur(4px)}
-#page-trade #timedPaperTrade .oc-trade-overlay-close{position:sticky;top:0;float:right;z-index:2;border:1px solid #46637a;border-radius:9px;background:#15283a;color:#fff;font-size:20px;font-weight:800;width:38px;height:38px;cursor:pointer;margin:-5px -5px 6px 10px}
-body.oc-trade-overlay-open{overflow:hidden}
-</style>
-<script id="oc-buy-sell-visibility-recovery-script">
-(function(){
-  function revealTrade(direction){
-    var pages=document.querySelectorAll('main>section[id^="page-"]');
-    pages.forEach(function(p){p.classList.toggle('hidden',p.id!=='page-trade');});
-    var page=document.getElementById('page-trade');
-    var form=document.getElementById('timedPaperTrade');
-    if(page)page.classList.remove('hidden');
-    document.querySelectorAll('#nav button,[data-bottom-page]').forEach(function(b){
-      b.classList.toggle('active',b.dataset.page==='trade'||b.dataset.bottomPage==='trade');
-    });
-    if(typeof window.showPage==='function'){try{window.showPage('trade')}catch(e){}}
-    if(page)page.classList.remove('hidden');
-    if(form){
-      form.classList.remove('hidden');
-      document.body.classList.add('oc-trade-overlay-open');
-      form.style.removeProperty('display');
-      if(!form.querySelector('.oc-trade-overlay-close')){
-        var close=document.createElement('button');
-        close.type='button';close.className='oc-trade-overlay-close';close.setAttribute('aria-label','Close Quick Trade');close.textContent='×';
-        close.addEventListener('click',function(){document.body.classList.remove('oc-trade-overlay-open');});
-        form.insertBefore(close,form.firstChild);
-      }
-    }
-    if(direction && typeof window.chooseTimedDirection==='function'){
-      window.chooseTimedDirection(direction==='buy'?'up':'down');
-    }
-  }
-  document.addEventListener('click',function(e){
-    var t=e.target instanceof Element?e.target:null;if(!t)return;
-    var close=t.closest('.oc-trade-overlay-close');
-    if(close){e.preventDefault();e.stopPropagation();document.body.classList.remove('oc-trade-overlay-open');return;}
-    if(document.body.classList.contains('oc-trade-overlay-open') && t===document.body){document.body.classList.remove('oc-trade-overlay-open');return;}
-    var b=t.closest('[data-oc-book-direction]');
-    if(!b)return;
-    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-    revealTrade(b.dataset.ocBookDirection==='sell'?'sell':'buy');
-  },true);
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')document.body.classList.remove('oc-trade-overlay-open');});
-  document.addEventListener('click',function(e){
-    if(document.body.classList.contains('oc-trade-overlay-open') && e.target===document.getElementById('page-trade'))document.body.classList.remove('oc-trade-overlay-open');
-  });
-  document.addEventListener('click',function(e){
-    var t=e.target instanceof Element?e.target:null;if(!t)return;
-    if(t.closest('#timedUpBtn')){revealTrade(null);}
-    else if(t.closest('#timedDownBtn')){revealTrade(null);}
-  },true);
-})();
-</script>
-
 <style id="oc-short-labels-cleanup">
 /* Keep customer-facing pages concise; preserve the controls and core actions. */
 .wallet-summary-strip,.wallet-usd-note{display:none!important}
@@ -8142,7 +8083,6 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
   const form=document.getElementById('timedPaperTrade');
   if(layout&&orderBook&&form){
    layout.classList.add('oc-trade-split');
-   // Put Order Book beside the graph/signal panel, and Quick Trade directly below it.
    const graphPanel=layout.querySelector(':scope > .panel:not(#liveOrderBookPanel):not(#timedPaperTrade)');
    if(graphPanel&&orderBook.parentElement!==layout)graphPanel.insertAdjacentElement('afterend',orderBook);
    if(orderBook.parentElement===layout&&form.parentElement!==layout)orderBook.insertAdjacentElement('afterend',form);
@@ -8151,28 +8091,6 @@ main:has(> #page-browser:not(.hidden)) #pnlRows {
   }
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',arrange);else arrange();
- document.addEventListener('click',function(e){
-  const target=e.target instanceof Element?e.target:null;if(!target)return;
-  const bookBtn=target.closest('[data-oc-book-direction]');
-  const quickBtn=target.closest('#timedUpBtn,#timedDownBtn');
-  // Buy/Sell buttons inside the already-open Quick Trade panel belong to the
-  // trade form's own handlers. Do not reopen the overlay or reset its stage.
-  if(quickBtn)return;
-  if(!bookBtn)return;
-  e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-  const direction=bookBtn.dataset.ocBookDirection;
-  const tradeForm=document.getElementById('timedPaperTrade');
-  if(!tradeForm)return;
-  arrange();
-  if(typeof window.showPage==='function')window.showPage('trade');
-  tradeForm.classList.remove('hidden');
-  document.body.classList.add('oc-trade-overlay-open');
-  tradeForm.classList.remove('oc-stage-running','oc-stage-complete');
-  tradeForm.classList.add('oc-stage-config');
-  const resultBoard=document.getElementById('timedResultBoard');if(resultBoard)resultBoard.style.display='none';
-  if(typeof window.chooseTimedDirection==='function')window.chooseTimedDirection(direction==='buy'?'up':'down');
-  window.setTimeout(function(){tradeForm.scrollTop=0;tradeForm.scrollIntoView({behavior:'smooth',block:'center'});},180);
- },true);
 })();
 </script>
 
@@ -8207,52 +8125,7 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
 #timedPaperTrade .form-panel{display:block!important}
 @media(max-width:560px){body.oc-trade-overlay-open #page-trade #timedPaperTrade{padding:12px!important;max-height:calc(100dvh - 14px)!important}}
 </style>
-<script id="oc-sequential-quick-trade-flow-script">
-(function(){
- if(window.__ocSequentialQuickTradeFlow)return;window.__ocSequentialQuickTradeFlow=true;
- const $=id=>document.getElementById(id);
- const form=$('timedPaperTrade');if(!form)return;
- function stage(name){
-  form.classList.remove('oc-stage-config','oc-stage-running','oc-stage-complete');
-  form.classList.add('oc-stage-'+name);
-  if(name==='running'){
-   const status=$('timedGraphStatus');if(status)status.textContent='IN PROGRESS';
-   const result=$('timedResult');if(result)result.textContent='Trade confirmed. Countdown and live sampled market graph are running.';
-  }
- }
- function closeOverlay(){
-  if($('timedUpBtn')?.disabled&&$('timedDownBtn')?.disabled)return;
-  document.body.classList.remove('oc-trade-overlay-open');
-  form.classList.remove('oc-stage-config','oc-stage-running','oc-stage-complete');
-  form.classList.add('hidden');
- }
- $('timedConfirmBtn')?.addEventListener('click',function(){
-  setTimeout(function(){
-   if($('timedUpBtn')?.disabled&&$('timedDownBtn')?.disabled){stage('running');form.scrollTop=0;}
-  },80);
- });
- $('timedCancelBtn')?.addEventListener('click',function(){
-  setTimeout(function(){
-   if(!($('timedUpBtn')?.disabled&&$('timedDownBtn')?.disabled))closeOverlay();
-  },80);
- });
- // When the existing countdown reaches zero, reveal the graph result and details as the final step.
- const countdown=$('timedCountdown');
- if(countdown){
-  const observer=new MutationObserver(function(){
-   if(form.classList.contains('oc-stage-running')&&countdown.textContent.trim()==='00:00'){
-    stage('complete');
-    const status=$('timedGraphStatus');if(status)status.textContent='COMPLETED';
-    form.scrollTop=0;
-   }
-  });
-  observer.observe(countdown,{childList:true,characterData:true,subtree:true});
- }
- document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'&&document.body.classList.contains('oc-trade-overlay-open')&&!window.timedPaper)closeOverlay();
- });
-})();
-</script>
+
 
 <style id="oc-buy-sell-form-visibility-fix">
 /* Ensure the amount-entry screen is visible immediately after Order Book Buy/Sell. */
@@ -12081,8 +11954,6 @@ body.oc-auth-screen:not(.oc-register-mode) #page-register #signInForm:not(.hidde
 body.oc-auth-screen.oc-register-mode #page-register #signInForm{display:none!important}
 body.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden){display:block!important}
 </style>
-
-</script>
 
 <style id="oc-trade-flow-clarity">
 #timedConfirmBtn{min-height:48px;font-size:15px;font-weight:800;letter-spacing:.2px;width:100%;box-shadow:0 8px 22px rgba(32,217,160,.18)}
