@@ -43,7 +43,7 @@ test("HTML element IDs are unique", () => {
 });
 
 test("market, trade summary, and withdrawal validation elements are present", () => {
-  for (const id of ["marketRows", "priceChart", "timedTradeChart", "timedBoardChart", "timedResultBoard", "timedBoardClose", "withdrawNetwork", "withdrawAddressCheck"]) {
+  for (const id of ["marketRows", "priceChart", "timedTradeChart", "timedBoardPnlChart", "timedResultBoard", "timedBoardClose", "withdrawNetwork", "withdrawAddressCheck"]) {
     assert.ok(html.includes('id="' + id + '"') || html.includes("id='" + id + "'"), "Missing required element: " + id);
   }
   assert.ok(html.includes("data-api.binance.vision/api/v3/klines"), "Expected an independent chart-history fallback");
@@ -278,16 +278,39 @@ test("Quick Trade reads fresh admin outcome settings and atomically updates the 
   assert.ok(html.includes("latestControls=await window.ocLoadLatestTradeControls(currentUser.uid)"), "Trade confirmation must use current admin settings");
   assert.ok(html.includes("window.ocCommitQuickTradeResult=async function({funding,adjustment,resultRecord})"), "Expected a dedicated cloud trade-result commit");
   assert.ok(html.includes("return await runTransaction(db,async tx=>"), "Wallet result updates must use a Firestore transaction");
-  assert.ok(html.includes("await window.ocCommitQuickTradeResult({funding:finished.funding,adjustment:balanceAdjustmentFunding,resultRecord})"), "Completed trades must commit against the latest cloud balance");
+  assert.ok(html.includes('await window.ocCommitQuickTradeResult({funding:"USDT",adjustment:balanceAdjustment,resultRecord})'), "Completed trades must settle their P/L directly to the USDT wallet balance");
 });
 
+
+test("Wallet and trade copy uses clear account-balance wording", () => {
+  assert.ok(!html.includes("Insufficient virtual balance"), "Avoid confusing virtual-balance wording");
+  assert.ok(!html.includes("displayed holdings"), "Use clear available-balance wording");
+  assert.ok(html.includes("Your available balances and transaction updates are shown here."), "Wallet copy should be concise and positive");
+  assert.ok(html.includes("Completed · USDT result recorded"), "Completed trade activity should identify the USDT result");
+});
+
+test("Quick Trade records the calculated USDT profit or loss and leaves other holdings untouched", () => {
+  assert.ok(html.includes("const won=pnl>0,lost=pnl<0;const balanceAdjustment=pnl;"), "Wallet adjustment must equal calculated trade P/L");
+  assert.ok(!html.includes('if(forcedMode==="market"&&pnl<=0)pnl=-finished.stakeUsd'), "Market losses must not be replaced by a full-stake loss");
+  assert.ok(html.includes('window.ocCommitQuickTradeResult({funding:"USDT",adjustment:balanceAdjustment,resultRecord})'), "Trade P/L must settle directly to USDT");
+  assert.ok(html.includes('if(asset==="USDT")nextBalance=after;else if(after>1e-10)holdings[asset]=after;'), "Other coin holdings must remain unchanged");
+});
+
+test("Completed Quick Trade result board is outside the hidden form and uses one visible P/L graph", () => {
+  assert.ok(html.includes('</div>\n      <section id="timedResultBoard"'), "Result board must be outside the form panel hidden after completion");
+  assert.ok(html.includes('#timedPaperTrade.oc-stage-complete>#timedResultBoard{display:block!important;visibility:visible!important'), "Result board must be visible after expiry");
+  assert.ok(html.includes('id="timedBoardPnlChart"') && !html.includes('id="timedBoardChart"'), "Result screen should show one USDT P/L graph");
+  assert.ok(html.includes('canvas.parentElement?.getBoundingClientRect?.().width'), "Graph must size after the result panel is visible");
+  assert.ok(html.includes('drawTimedPnlGraph(finished.samples,finished.entry,finished.stakeUsd,finished.direction,"timedBoardPnlChart",pnl)'), "Graph must include the settled USDT result");
+});
 
 test("Trade Gold keeps XAU selectable, loads a fresh quote, and uses the Gold chart", () => {
   assert.ok(html.includes("async function refreshGoldMarketPrice()"), "Gold must load a current quote before confirmation");
   assert.ok(html.includes('if(sym==="XAU")return goldMarketAsset;'), "Gold must resolve through its dedicated quote object");
   assert.ok(html.includes('<option value="XAU">XAU — Gold</option>'), "Gold must remain selectable even when absent from the crypto market feed");
   assert.ok(html.includes('if(sym==="XAU"){try{await refreshGoldMarketPrice()}'), "Gold confirmation must refresh its quote before starting");
-  assert.ok(html.includes('if(finished.symbol==="XAU"){try{await refreshGoldMarketPrice()}'), "Gold expiry must use a refreshed quote");
+  assert.ok(html.includes('const tickerUrl=tickerSymbol==="XAU"?"https://fapi.binance.com/fapi/v1/ticker/price?symbol=XAUUSDT"'), "Gold expiry must request a fresh XAU quote");
+  assert.ok(html.includes('const response=await fetch(tickerUrl,{signal:AbortSignal.timeout(4000)});if(response.ok){const ticker=await response.json(),expiryQuote=Number(ticker.price);if(Number.isFinite(expiryQuote)&&expiryQuote>0)finalPrice=expiryQuote;}'), "Gold expiry must apply the refreshed quote");
   assert.ok(html.includes("BINANCE:XAUUSDT.P"), "Gold selection must update the chart to the Gold market");
   assert.ok(supportChat.includes("Choose Trade Gold on Home"), "The assistant must explain the Gold shortcut");
   assert.ok(supportChat.includes("Onchain market tools focus on cryptocurrency and Gold"), "The assistant must answer the Stocks topic accurately");
