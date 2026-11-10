@@ -683,14 +683,27 @@ window.adminGetLiveCollection=async function(view){
  try{
   const snap=await getDocs(query(collection(db,collectionName),limit(100))),rows=snap.docs.map(d=>({id:d.id,...d.data()}));
   if(isUsers){
-   const heads=['Name','Email','Country','Firebase UID','Account status','Admin action'];
+   let walletMap=new Map(),walletReadError=false;
+   try{
+    const walletSnap=await getDocs(query(collection(db,'userTradeState'),limit(500)));
+    walletMap=new Map(walletSnap.docs.map(d=>[d.id,d.data()||{}]));
+   }catch(walletError){
+    walletReadError=true;
+    console.warn('Admin Users wallet balances could not be read:',walletError);
+   }
+   const heads=['Name','Email','Country','Firebase UID','Account status','Wallet balance','Admin action'];
    const html=rows.map(r=>{
     const accountStatus=String(r.accountStatus||'active').toLowerCase()==='suspended'?'suspended':'active';
     const actionLabel=accountStatus==='active'?'Suspend account':'Activate account';
     const actionColor=accountStatus==='active'?'#8a3343':'#087b56';
-    return '<tr><td>'+safeText(r.displayName||[r.firstName,r.lastName].filter(Boolean).join(' ')||'—')+'</td><td>'+safeText(r.email||'—')+'</td><td>'+safeText(r.country||'—')+'</td><td>'+safeText(r.uid||r.id)+'</td><td><span style="display:inline-block;padding:4px 9px;border-radius:20px;background:'+(accountStatus==='active'?'#12372e':'#40242b')+';color:'+(accountStatus==='active'?'#6ee7b7':'#fda4af')+'">'+safeText(accountStatus.toUpperCase())+'</span></td><td><button type="button" class="oc-user-status-action icon-btn" data-uid="'+safeText(r.id)+'" data-status="'+accountStatus+'" style="background:'+actionColor+';border:0">'+actionLabel+'</button></td></tr>';
+    const wallet=walletMap.get(r.id);
+    const balance=wallet&&typeof wallet.balance==='number'?wallet.balance:null;
+    const holdings=wallet?.holdings&&typeof wallet.holdings==='object'?Object.entries(wallet.holdings).filter(([asset,value])=>asset!=='USDT'&&Number.isFinite(Number(value))&&Number(value)!==0).map(([asset,value])=>safeText(asset.toUpperCase())+': '+safeText(Number(value).toLocaleString(undefined,{maximumFractionDigits:8}))).join(' · '):'';
+    const walletUpdated=wallet?.updatedAt&&typeof wallet.updatedAt.toDate==='function'?wallet.updatedAt.toDate().toLocaleString():'';
+    const walletCell=walletReadError?'<span class="muted">Unavailable · check permissions</span>':balance===null?'<strong>—</strong><br><small class="muted">No wallet ledger record</small>':'<strong>'+safeText(balance.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}))+' USDT</strong>'+(holdings?'<br><small class="muted">'+holdings+'</small>':'')+(walletUpdated?'<br><small class="muted">Updated '+safeText(walletUpdated)+'</small>':'');
+    return '<tr><td>'+safeText(r.displayName||[r.firstName,r.lastName].filter(Boolean).join(' ')||'—')+'</td><td>'+safeText(r.email||'—')+'</td><td>'+safeText(r.country||'—')+'</td><td>'+safeText(r.uid||r.id)+'</td><td><span style="display:inline-block;padding:4px 9px;border-radius:20px;background:'+(accountStatus==='active'?'#12372e':'#40242b')+';color:'+(accountStatus==='active'?'#6ee7b7':'#fda4af')+'">'+safeText(accountStatus.toUpperCase())+'</span></td><td>'+walletCell+'</td><td><button type="button" class="oc-user-status-action icon-btn" data-uid="'+safeText(r.id)+'" data-status="'+accountStatus+'" style="background:'+actionColor+';border:0">'+actionLabel+'</button></td></tr>';
    }).join('');
-   body.innerHTML='<div class="content-panel" style="margin:0"><h3>Live registered profiles</h3><p class="muted">Profiles read from Firestore; maximum 100 shown. New accounts default to ACTIVE until an admin changes their status.</p><strong>'+rows.length+' account(s) loaded</strong><div class="table-wrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(html||'<tr><td colspan="6">No registered accounts found.</td></tr>')+'</tbody></table></div><p id="ocUserAdminMessage" class="muted" role="status" aria-live="polite"></p></div>';
+   body.innerHTML='<div class="content-panel" style="margin:0"><h3>Live registered profiles</h3><p class="muted">Profiles read from Firestore; maximum 100 shown. Wallet balances are read-only and sourced from each account\'s userTradeState ledger. New accounts default to ACTIVE until an admin changes their status.</p><strong>'+rows.length+' account(s) loaded</strong><div class="table-wrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(html||'<tr><td colspan="7">No registered accounts found.</td></tr>')+'</tbody></table></div><p id="ocUserAdminMessage" class="muted" role="status" aria-live="polite"></p></div>';
    body.querySelectorAll('.oc-user-status-action').forEach(button=>button.addEventListener('click',async()=>{
     const uid=button.dataset.uid,currentStatus=button.dataset.status,nextStatus=currentStatus==='active'?'suspended':'active',msg=byId('ocUserAdminMessage');
     if(!uid||!['active','suspended'].includes(nextStatus))return;
