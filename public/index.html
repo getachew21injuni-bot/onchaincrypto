@@ -4501,18 +4501,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
-<style id="oc-trade-summary-compact">
-#timedResultBoard[style*="display: block"]{width:min(680px,calc(100vw - 20px))!important;max-height:calc(100dvh - 20px)!important;padding:12px!important;overflow:hidden!important}
-#timedResultBoard #timedBoardChart,#timedResultBoard #timedBoardPnlChart{display:none!important}
-#timedResultBoard #timedBoardChart,#timedResultBoard #timedBoardPnlChart{height:0!important}
-#timedResultBoard p#timedBoardSummary{margin:5px 0 8px!important;font-size:12px}
-#timedResultBoard [style*="grid-template-columns"]{gap:6px!important}
-#timedResultBoard [style*="grid-template-columns"]>div{padding:8px!important}
-#timedResultBoard [style*="grid-template-columns"]>div div{font-size:11px!important}
-#timedResultBoard [style*="grid-template-columns"]>div strong{font-size:13px!important}
-#timedResultBoard>div:has(>#timedBoardChart),#timedResultBoard>div:has(>#timedBoardPnlChart){display:none!important}
-@media(max-width:560px){#timedResultBoard[style*="display: block"]{max-height:calc(100dvh - 12px)!important;width:calc(100vw - 12px)!important;padding:9px!important}#timedResultBoard [style*="grid-template-columns"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-</style>
+
 <style id="oc-trade-choice-modal-fix">
 #timedUpBtn,#timedDownBtn{transition:filter .12s ease,box-shadow .12s ease,transform .12s ease,outline-color .12s ease;outline:2px solid transparent;outline-offset:2px}
 #timedUpBtn.oc-direction-selected{filter:brightness(1.12);box-shadow:0 0 0 3px rgba(22,217,160,.24),inset 0 0 0 2px rgba(255,255,255,.65);outline-color:#16d9a0;transform:translateY(-1px)}
@@ -12064,6 +12053,24 @@ body.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden){d
 #timedPaperTrade.oc-stage-complete #timedResultBoard>div:has(>#timedBoardPnlChart){display:block!important}
 #timedPaperTrade.oc-stage-complete #timedBoardChart,
 #timedPaperTrade.oc-stage-complete #timedBoardPnlChart{display:block!important;width:100%!important;height:auto!important;min-height:120px!important}
+</style>
+
+<style id="oc-home-only-footer-and-trade-graphs">
+/* Keep the shared footer on Home only; other app pages use their own page layouts. */
+body:has(main > #page-home:not(.hidden)) > footer.oc-trust-footer{display:block!important}
+body:has(main > section[id^="page-"]:not(.hidden):not(#page-home)) > footer.oc-trust-footer{display:none!important}
+
+/* Keep the live trade graph visible while a confirmed trade is running. */
+#timedPaperTrade.oc-stage-running > .chart-wrap:has(#timedTradeChart),
+#timedPaperTrade.oc-stage-complete > .chart-wrap:has(#timedTradeChart){display:block!important;visibility:visible!important}
+#timedPaperTrade.oc-stage-running #timedTradeChart,
+#timedPaperTrade.oc-stage-complete #timedTradeChart{display:block!important;width:100%!important;height:190px!important;min-height:190px!important}
+
+/* Show both completed-trade graphs in the existing result summary. */
+#timedPaperTrade.oc-stage-complete #timedResultBoard > div:has(>#timedBoardChart),
+#timedPaperTrade.oc-stage-complete #timedResultBoard > div:has(>#timedBoardPnlChart){display:block!important;visibility:visible!important}
+#timedPaperTrade.oc-stage-complete #timedBoardChart{display:block!important;width:100%!important;height:190px!important;min-height:170px!important}
+#timedPaperTrade.oc-stage-complete #timedBoardPnlChart{display:block!important;width:100%!important;height:150px!important;min-height:140px!important}
 </style>
 </body>
 </html>
