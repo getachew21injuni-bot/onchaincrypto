@@ -12181,5 +12181,18 @@ body.oc-auth-screen.oc-register-mode #page-register #registerForm:not(.hidden){d
  window.addEventListener("hashchange",closeAssistant);
 })();
 </script>
+
+<style id="oc-quick-trade-single-stage-final">
+/* Keep Quick Trade to one clear action at each stage; remove the duplicate injected close control. */
+#timedPaperTrade .oc-flow-step{display:none!important}
+#timedPaperTrade.oc-stage-config .form-panel{display:block!important}
+#timedPaperTrade.oc-stage-config #timedConfirmBtn{display:block!important;width:100%!important;min-height:50px!important}
+#timedPaperTrade.oc-stage-complete .oc-close-trade{display:none!important}
+#timedPaperTrade.oc-stage-complete>#timedResultBoard{display:block!important;max-height:calc(100dvh - 32px)!important;overflow-y:auto!important}
+#timedPaperTrade.oc-stage-complete #timedResultBoard>div:has(>#timedBoardChart),
+#timedPaperTrade.oc-stage-complete #timedResultBoard>div:has(>#timedBoardPnlChart){display:block!important}
+#timedPaperTrade.oc-stage-complete #timedBoardChart,
+#timedPaperTrade.oc-stage-complete #timedBoardPnlChart{display:block!important;width:100%!important;height:auto!important;min-height:120px!important}
+</style>
 </body>
 </html>
