@@ -6144,7 +6144,7 @@ onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(
 
  window.addEventListener("load",()=>{window.ocRenderVisitorMarket?.();void loadVisitorGoldFallback()});
  window.addEventListener("market-updated",()=>window.ocRenderVisitorMarket?.());
- setInterval(()=>{window.ocRenderVisitorMarket?.();void loadVisitorGoldFallback()},30000);
+ setInterval(()=>{void loadVisitorGoldFallback()},30000);
  window.ocRenderVisitorMarket();
 })();
 </script>
@@ -9807,19 +9807,23 @@ main > section[id^="page-"]:not(#page-register) .oc-signup-prompt {
   const observer = new MutationObserver(records=>{
     for(const record of records){
       for(const node of record.addedNodes){
-        if(node.nodeType===1){
-          if(node.matches?.('main > section[id^="page-"]:not(#page-register)')) clearInlineAuth(document);
-          else if(node.closest?.('main > section[id^="page-"]:not(#page-register)')) {
-            const section=node.closest('main > section[id^="page-"]:not(#page-register)');
-            if(node.matches?.(selector)) node.remove();
-            else node.querySelectorAll?.(selector).forEach(item=>item.remove());
-            if(section) section.querySelectorAll(selector).forEach(item=>item.remove());
-          }
+        if(node.nodeType!==1) continue;
+        if(node.matches?.('main > section[id^="page-"]:not(#page-register)')) {
+          clearInlineAuth(node);
+          continue;
+        }
+        const section=node.closest?.('main > section[id^="page-"]:not(#page-register)');
+        if(section){
+          if(node.matches?.(selector)) node.remove();
+          else node.querySelectorAll?.(selector).forEach(item=>item.remove());
+        } else {
+          node.querySelectorAll?.('main > section[id^="page-"]:not(#page-register)').forEach(clearInlineAuth);
         }
       }
     }
   });
-  if(document.body) observer.observe(document.body,{childList:true,subtree:true});
+  const main=document.querySelector("main");
+  if(main) observer.observe(main,{childList:true,subtree:true});
 })();
 </script>
 
@@ -9883,8 +9887,22 @@ main > section[id^="page-"]:not(#page-register) .oc-signup-prompt {
     });
   }
   clean();
-  if(window.MutationObserver && document.body){
-    new MutationObserver(clean).observe(document.body,{childList:true,subtree:true});
+  if(window.MutationObserver){
+    const main=document.querySelector("main");
+    if(main)new MutationObserver(records=>{
+      for(const record of records){
+        for(const node of record.addedNodes){
+          if(node.nodeType!==1)continue;
+          const page=node.matches?.(pageSelector)?node:node.closest?.(pageSelector);
+          if(page){
+            if(node.matches?.(removeSelector))node.remove();
+            else node.querySelectorAll?.(removeSelector).forEach(el=>el.remove());
+          }else{
+            node.querySelectorAll?.(pageSelector).forEach(clean);
+          }
+        }
+      }
+    }).observe(main,{childList:true,subtree:true});
   }
 })();
 </script>
