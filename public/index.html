@@ -2976,7 +2976,7 @@ async function startTimedPaper(direction){
   $("timedResult").textContent=/session|signed-in account changed/i.test(reason)?"Your session needs a quick refresh. Please sign in again to continue.":"Your trade settings are being refreshed. Please try again in a moment.";
   window.ocValidateQuickTradeForm?.();return;
  }
- const started=Date.now(),entry=Number(c.current_price),effectiveMode=latestControls.mode,effectiveWinPercent=latestControls.winPercent,effectiveLossPercent=latestControls.lossPercent;timedPaper={symbol:sym,funding,fundingPrice,direction,stake,stakeUsd,duration,entry,ends:started+duration*1000,payoutRate:plan.rate,adminMode:effectiveMode,adminWinPercent:effectiveWinPercent||15,adminLossPercent:effectiveLossPercent||50,samples:[{time:started,price:entry}]};recordActivity("trade","Quick trade started · "+(direction==="up"?"BUY ":"SELL ")+sym,usdtMoney(stake)+" · Entry "+usdtMoney(entry)+" · Duration "+timedFormat(duration),"Running");
+ const started=Date.now(),entry=Number(c.current_price),effectiveMode=latestControls.mode,effectiveWinPercent=latestControls.winPercent,effectiveLossPercent=latestControls.lossPercent;timedPaper={symbol:sym,funding,fundingPrice,direction,stake,stakeUsd,duration,entry,ends:started+duration*1000,payoutRate:plan.rate,adminMode:effectiveMode,adminWinPercent:effectiveWinPercent||15,adminLossPercent:effectiveLossPercent||50,samples:[{time:started,price:entry}]};const tradeForm=$("timedPaperTrade");if(tradeForm){tradeForm.classList.remove("oc-stage-config","oc-stage-complete");tradeForm.classList.add("oc-stage-running");}recordActivity("trade","Quick trade started · "+(direction==="up"?"BUY ":"SELL ")+sym,usdtMoney(stake)+" · Entry "+usdtMoney(entry)+" · Duration "+timedFormat(duration),"Running");
  $("timedPair").textContent=sym+" / USDT";$("timedEntryPrice").textContent=money(entry);$("timedCountdown").textContent=timedFormat(duration);
  $("timedStartTime").textContent=new Date(started).toLocaleString();$("timedEndTime").textContent=new Date(timedPaper.ends).toLocaleString();$("timedDirection").textContent=direction==="up"?"BUY":"SELL";$("timedAmountDetail").textContent=money(stake);$("timedEntryDetail").textContent=money(entry);$("timedEndPriceDetail").textContent="Waiting…";$("timedMoveDetail").textContent="—";$("timedPnl").textContent="—";$("timedPnl").className="big";$("timedStatusDetail").textContent="RUNNING";$("timedGraphStatus").textContent="RUNNING";$("timedResult").className="muted tiny";$("timedResult").textContent="Trade running · "+(direction==="up"?"BUY":"SELL")+" "+sym+" · "+money(stake)+" · Started "+new Date(started).toLocaleTimeString();
  $("timedUpBtn").disabled=true;$("timedDownBtn").disabled=true;drawTimedTradeGraph(timedPaper.samples,entry);
@@ -8222,16 +8222,7 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
   const b=t.closest('[data-oc-book-direction]');if(!b)return;
   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openFlow(b.dataset.ocBookDirection);
  },true);
- const confirm=$('timedConfirmBtn');
- if(confirm)confirm.addEventListener('click',function(){
-  setTimeout(function(){
-   if($('timedUpBtn')?.disabled&&$('timedDownBtn')?.disabled&&window.__ocCustomerSequentialFlowV2){
-    if(form.classList.contains('oc-trade-overlay-open')||document.body.classList.contains('oc-trade-overlay-open')){
-     form.classList.remove('oc-stage-config','oc-stage-complete');form.classList.add('oc-stage-running');step(3);form.scrollTop=0;
-    }
-   }
-  },180);
- });
+ // startTimedPaper changes the stage after all checks pass and the trade is created.
  const cancel=$('timedCancelBtn');
  if(cancel)cancel.addEventListener('click',function(){
   setTimeout(function(){
