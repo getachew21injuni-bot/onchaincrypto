@@ -42,6 +42,12 @@ test("HTML element IDs are unique", () => {
   assert.deepEqual([...duplicates], [], "Duplicate IDs: " + [...duplicates].join(", "));
 });
 
+test("live market status is not downgraded while another provider has fresh prices", () => {
+  assert.ok(html.includes('const hasFreshMarketData=()=>{const last=Number(window.ocMarketLastSuccess||0);return last>0&&Date.now()-last<90000}'));
+  assert.ok(html.includes('if(state!=="live"&&state!=="offline"&&lastSuccess>0&&Date.now()-lastSuccess<90000)return;'));
+  assert.ok(html.includes('hasFreshMarketData?"Live market prices are updating."'));
+});
+
 test("market, trade summary, and withdrawal validation elements are present", () => {
   for (const id of ["marketRows", "priceChart", "timedTradeChart", "timedBoardPnlChart", "timedResultBoard", "timedBoardClose", "withdrawNetwork", "withdrawAddressCheck"]) {
     assert.ok(html.includes('id="' + id + '"') || html.includes("id='" + id + "'"), "Missing required element: " + id);
