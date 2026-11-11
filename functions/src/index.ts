@@ -1,4 +1,6 @@
 import { initializeApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { createHash } from "node:crypto";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { setGlobalOptions } from "firebase-functions/v2";
@@ -233,5 +235,216 @@ export const adminReviewDepositRequest = onCall(
     });
 
     return { requestId, status: decision, balanceCredited: false };
+  }
+);
+
+
+/**
+ * Permanently removes a member's sign-in and profile details while retaining
+ * financial/audit records under a one-way pseudonymous reference.
+ * This callable is restricted to the verified dashboard administrator.
+ */
+export const adminDeleteUser = onCall(
+  { enforceAppCheck: false, cors: true, timeoutSeconds: 540, memory: "512MiB" },
+  async (request) => {
+    const admin = requireSignedIn(request);
+    const adminEmail = typeof admin.token.email === "string" ? admin.token.email.toLowerCase() : "";
+    if (admin.token.email_verified !== true || adminEmail !== "getachew21.inj.uni@gmail.com") {
+      throw new HttpsError("permission-denied", "Verified administrator access is required.");
+    }
+
+    const targetUid = typeof request.data?.uid === "string" ? request.data.uid.trim() : "";
+    if (!/^[A-Za-z0-9_-]{20,128}$/.test(targetUid)) {
+      throw new HttpsError("invalid-argument", "Select a valid user account.");
+    }
+    if (targetUid === admin.uid) {
+      throw new HttpsError("failed-precondition", "You cannot delete the administrator account currently in use.");
+    }
+    if (request.data?.confirmation !== "DELETE") {
+      throw new HttpsError("failed-precondition", "Deletion confirmation is required.");
+    }
+    const authTime = Number(admin.token.auth_time || 0);
+    if (!authTime || Date.now() / 1000 - authTime > 10 * 60) {
+      throw new HttpsError("failed-precondition", "For security, sign in again before deleting an account.");
+    }
+
+    const auth = getAuth();
+    let targetAuth;
+    try {
+      targetAuth = await auth.getUser(targetUid);
+    } catch {
+      throw new HttpsError("not-found", "The selected sign-in account was not found.");
+    }
+    if (targetAuth.customClaims?.admin === true || targetAuth.email?.toLowerCase() === "getachew21.inj.uni@gmail.com") {
+      throw new HttpsError("failed-precondition", "Administrator accounts cannot be deleted from this user list.");
+    }
+
+    const pseudonymousUid = "deleted_" + createHash("sha256").update(targetUid).digest("hex").slice(0, 32);
+    const auditRef = db.collection("adminAuditLogs").doc();
+    await auditRef.set({
+      adminUid: admin.uid,
+      action: "user_deletion_started",
+      targetReference: pseudonymousUid,
+      status: "in_progress",
+      createdAt: FieldValue.serverTimestamp(),
+    });
+    await auth.updateUser(targetUid, { disabled: true });
+
+    const counts: Record<string, number> = {};
+    const personalFields = [
+      "email", "customerEmail", "customerName", "displayName", "firstName", "lastName",
+      "phone", "phoneNumber", "country", "dateOfBirth", "gender", "address",
+      "avatarDataUrl", "destinationAddress", "legalName", "documentNumber",
+      "documentType", "receiptImage", "receiptFileName", "timezone", "senderName",
+      "recipientName", "createdByEmail",
+    ];
+    const financialCollections = [
+      { name: "demoAssetTransactions", fields: ["uid"] },
+      { name: "demoTransactions", fields: ["uid"] },
+      { name: "depositRequests", fields: ["uid"] },
+      { name: "withdrawRequests", fields: ["uid"] },
+      { name: "internalTransferRequests", fields: ["senderUid", "recipientUid"] },
+      { name: "internalTransfers", fields: ["senderUid", "recipientUid"] },
+      { name: "adminActivityLogs", fields: ["uid"] },
+    ];
+
+    // Keep amounts, timestamps, statuses and transaction references; replace
+    // account identifiers and remove direct personal fields from each record.
+    for (const entry of financialCollections) {
+      const found = new Map<string, any>();
+      for (const field of entry.fields) {
+        const snap = await db.collection(entry.name).where(field, "==", targetUid).get();
+        for (const item of snap.docs) found.set(item.ref.path, item);
+      }
+      let batch = db.batch();
+      let writes = 0;
+      for (const item of found.values()) {
+        const scrub: Record<string, unknown> = {};
+        for (const field of entry.fields) {
+          if (item.get(field) === targetUid) scrub[field] = pseudonymousUid;
+        }
+        for (const field of personalFields) scrub[field] = FieldValue.delete();
+        batch.set(item.ref, scrub, { merge: true });
+        writes++;
+        counts[entry.name] = (counts[entry.name] || 0) + 1;
+        if (writes >= 400) {
+          await batch.commit();
+          batch = db.batch();
+          writes = 0;
+        }
+      }
+      if (writes) await batch.commit();
+    }
+
+    // Keep the wallet snapshot for reconciliation, but detach it from the
+    // deleted authentication UID and strip any profile fields.
+    const tradeStateRef = db.collection("userTradeState").doc(targetUid);
+    const tradeState = await tradeStateRef.get();
+    if (tradeState.exists) {
+      const scrub: Record<string, unknown> = { uid: pseudonymousUid };
+      for (const field of personalFields) scrub[field] = FieldValue.delete();
+      await db.collection("userTradeState").doc(pseudonymousUid).set({ ...tradeState.data(), ...scrub }, { merge: true });
+      await tradeStateRef.delete();
+      counts.userTradeState = 1;
+    }
+
+    // Remove profile, directory, identity-verification and broker-onboarding data.
+    for (const collectionName of ["users", "userDirectory", "kycSubmissions", "brokerConnectionRequests"]) {
+      const ref = db.collection(collectionName).doc(targetUid);
+      const snap = await ref.get();
+      if (snap.exists) {
+        await ref.delete();
+        counts[collectionName] = 1;
+      }
+    }
+
+    // Remove private support conversations and their message subcollections.
+    const ticketMap = new Map<string, any>();
+    for (const ownerField of ["ownerUid", "uid"]) {
+      const ticketSnap = await db.collection("supportTickets").where(ownerField, "==", targetUid).get();
+      for (const ticket of ticketSnap.docs) ticketMap.set(ticket.ref.path, ticket);
+    }
+    for (const ticket of ticketMap.values()) {
+      const messages = await ticket.ref.collection("messages").get();
+      let batch = db.batch();
+      let writes = 0;
+      for (const message of messages.docs) {
+        batch.delete(message.ref);
+        writes++;
+        if (writes >= 400) {
+          await batch.commit();
+          batch = db.batch();
+          writes = 0;
+        }
+      }
+      if (writes) await batch.commit();
+      await ticket.ref.delete();
+    }
+    counts.supportTickets = ticketMap.size;
+
+    // Remove private account notifications.
+    const notifications = await db.collection("userNotifications").doc(targetUid).collection("items").get();
+    let notificationBatch = db.batch();
+    let notificationWrites = 0;
+    for (const item of notifications.docs) {
+      notificationBatch.delete(item.ref);
+      notificationWrites++;
+      if (notificationWrites >= 400) {
+        await notificationBatch.commit();
+        notificationBatch = db.batch();
+        notificationWrites = 0;
+      }
+    }
+    if (notificationWrites) await notificationBatch.commit();
+    await db.collection("userNotifications").doc(targetUid).delete().catch(() => undefined);
+    counts.userNotifications = notifications.size;
+
+    await auth.deleteUser(targetUid);
+    await auditRef.update({
+      action: "user_deleted",
+      status: "completed",
+      retainedFinancialRecordCounts: counts,
+      completedAt: FieldValue.serverTimestamp(),
+    });
+    return { ok: true, reference: pseudonymousUid, retainedFinancialRecordCounts: counts };
+  }
+);
+
+
+/** Enables or disables a member's Firebase sign-in from the verified Admin panel. */
+export const adminSetUserAccess = onCall(
+  { enforceAppCheck: false, cors: true },
+  async (request) => {
+    const admin = requireSignedIn(request);
+    const adminEmail = typeof admin.token.email === "string" ? admin.token.email.toLowerCase() : "";
+    if (admin.token.email_verified !== true || adminEmail !== "getachew21.inj.uni@gmail.com") {
+      throw new HttpsError("permission-denied", "Verified administrator access is required.");
+    }
+    const uid = typeof request.data?.uid === "string" ? request.data.uid.trim() : "";
+    const status = request.data?.status;
+    if (!/^[A-Za-z0-9_-]{20,128}$/.test(uid) || (status !== "active" && status !== "suspended")) {
+      throw new HttpsError("invalid-argument", "Choose a valid account and status.");
+    }
+    if (uid === admin.uid) throw new HttpsError("failed-precondition", "You cannot change access for the administrator account currently in use.");
+    const auth = getAuth();
+    let target;
+    try { target = await auth.getUser(uid); }
+    catch { throw new HttpsError("not-found", "The selected sign-in account was not found."); }
+    if (target.customClaims?.admin === true || target.email?.toLowerCase() === "getachew21.inj.uni@gmail.com") {
+      throw new HttpsError("failed-precondition", "Administrator account access cannot be changed here.");
+    }
+    await auth.updateUser(uid, { disabled: status === "suspended" });
+    await db.collection("users").doc(uid).set({
+      accountStatus: status,
+      adminUpdatedAt: FieldValue.serverTimestamp(),
+      adminUpdatedBy: adminEmail,
+    }, { merge: true });
+    await db.collection("adminAuditLogs").add({
+      adminUid: admin.uid,
+      action: status === "suspended" ? "user_access_suspended" : "user_access_reactivated",
+      targetReference: "member_" + createHash("sha256").update(uid).digest("hex").slice(0, 32),
+      createdAt: FieldValue.serverTimestamp(),
+    });
+    return { ok: true, uid, status };
   }
 );
