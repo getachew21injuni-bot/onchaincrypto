@@ -3084,7 +3084,7 @@ document.getElementById("admin-login-link")?.addEventListener("click",()=>{showP
 // Support requests are submitted and answered inside Onchain by the in-app support module.
 document.querySelectorAll("#marketTabs button").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.filter;document.querySelectorAll("#marketTabs button").forEach(x=>x.classList.toggle("active",x===b));renderMarket()}));
 $("refreshSignalsBtn")?.addEventListener("click",loadMarket);
-$("marketSearch").addEventListener("input",renderMarket);$("refreshBtn").addEventListener("click",loadMarket);$("retryBtn").addEventListener("click",loadMarket);$("tradeAsset").addEventListener("change",()=>{selected=$("tradeAsset").value;updateTradePreview();if(typeof updateQuickEstimate==="function")updateQuickEstimate();if(selected)updateTradingViewChart(selected);if(!$("page-trade").classList.contains("hidden")&&selected)loadPriceHistory()});
+$("marketSearch").addEventListener("input",renderMarket);$("refreshBtn").addEventListener("click",()=>{if(marketRequestInProgress){marketRefreshQueued=true;if($("marketHint"))$("marketHint").textContent="Refresh queued; market prices will update next.";return;}if($("marketHint"))$("marketHint").textContent="Refreshing market prices…";loadMarket()});$("retryBtn").addEventListener("click",loadMarket);$("tradeAsset").addEventListener("change",()=>{selected=$("tradeAsset").value;updateTradePreview();if(typeof updateQuickEstimate==="function")updateQuickEstimate();if(selected)updateTradingViewChart(selected);if(!$("page-trade").classList.contains("hidden")&&selected)loadPriceHistory()});
 (function(){
  const renderHomePairs=()=>{
   const list=Array.isArray(window.market)?window.market:[];
@@ -12127,9 +12127,10 @@ body:has(main > section[id^="page-"]:not(.hidden):not(#page-home)) > footer.oc-t
 #timedPaperTrade.oc-stage-complete>#timedResultBoard #timedBoardPnlChart{display:block!important;width:100%!important;height:160px!important;min-height:160px!important}
 </style>
 
-<style id="oc-top-refresh-visitor-visibility">
-/* Keep the existing header market refresh available on the public visitor page. */
-body.oc-visitor-mode:not(.oc-auth-screen) #refreshBtn{display:inline-flex!important;visibility:visible!important;pointer-events:auto!important}
+<style id="oc-home-only-market-refresh">
+/* Show the market refresh control only while an authenticated user is on Home. */
+#refreshBtn{display:none!important;visibility:hidden!important;pointer-events:none!important}
+body:not(.oc-visitor-mode):not(.oc-auth-screen):not(.oc-logged-out):has(#page-home:not(.hidden)) #refreshBtn{display:inline-flex!important;visibility:visible!important;pointer-events:auto!important}
 </style>
 </body>
 </html>
