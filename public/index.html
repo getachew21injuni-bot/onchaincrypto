@@ -5732,9 +5732,23 @@ body.oc-logged-out .auth-welcome h1{ text-shadow:0 5px 28px rgba(240,185,11,.10)
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, serverTimestamp, runTransaction, addDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
+
 const config={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
-const app=getApps().find(item=>item.name==="[DEFAULT]")||initializeApp(config),auth=window.ocFirebaseAuth||getAuth(app),db=getFirestore(app),functions=getFunctions(app,"us-central1"),callAdminDeleteUser=httpsCallable(functions,"adminDeleteUser"),callAdminSetUserAccess=httpsCallable(functions,"adminSetUserAccess");
+const app=getApps().find(item=>item.name==="[DEFAULT]")||initializeApp(config),auth=window.ocFirebaseAuth||getAuth(app),db=getFirestore(app);
+const ADMIN_API_URL="https://onchain-admin-api.getachew21-inj-uni.workers.dev";
+async function callAdminSetUserAccess({uid,status}){
+ const user=auth.currentUser;
+ if(!user)throw new Error("Administrator login required");
+ const token=await user.getIdToken(true);
+ const response=await fetch(ADMIN_API_URL+"/admin/user-access",{
+  method:"POST",
+  headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},
+  body:JSON.stringify({uid,disabled:status==="suspended"})
+ });
+ const result=await response.json().catch(()=>({}));
+ if(!response.ok||!result.success)throw new Error(result.error||"Account access update failed");
+ return result;
+}
 const adminEmails=new Set(["getachew21.inj.uni@gmail.com"]);
 const byId=id=>document.getElementById(id);
 const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
@@ -5891,17 +5905,7 @@ document.addEventListener("click",async event=>{
   const row=accountActionButton.closest("[data-user-control-row]");if(!row)return;
   const uid=row.getAttribute("data-user-control-row"),action=accountActionButton.dataset.userAccountAction;
   if(action==="delete"){
-   const confirmation=window.prompt("Permanently delete this account and remove its personal details? Financial and audit records will be retained under an anonymous reference. Type DELETE to continue.");
-   if(confirmation!=="DELETE")return;
-   accountActionButton.disabled=true;
-   if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent="Securing account and retaining required financial records…";
-   try{
-    await callAdminDeleteUser({uid,confirmation:"DELETE"});
-    if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent="Account deleted. Financial and audit records were retained under an anonymous reference.";
-   }catch(error){
-    console.error("Admin account deletion failed:",error);
-    if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent="Account deletion was not confirmed ("+(error.code||error.message||"error")+"). If the account was disabled, contact support before retrying.";
-   }finally{accountActionButton.disabled=false;}
+   if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent="Permanent deletion is temporarily unavailable while financial-record retention is being verified. No account data was deleted.";
    return;
   }
   const nextStatus=action==="suspend"?"suspended":"active";
