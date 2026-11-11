@@ -166,10 +166,23 @@ service cloud.firestore {
 
     // Private customer-support conversations.
     match /supportTickets/{ticketId} {
-      allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid
+      allow create: if (
+        signedIn() && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.status == 'open'
         && request.resource.data.keys().hasOnly(['ownerUid','customerEmail','customerName','subject','status','createdAt','updatedAt','lastMessage','source'])
-        && request.resource.data.subject is string && request.resource.data.subject.size() > 0 && request.resource.data.subject.size() <= 100;
+        && request.resource.data.subject is string && request.resource.data.subject.size() > 0 && request.resource.data.subject.size() <= 100
+      ) || (
+        isAdmin()
+        && request.resource.data.ownerUid is string
+        && exists(/databases/$(database)/documents/users/$(request.resource.data.ownerUid))
+        && request.resource.data.status == 'open'
+        && request.resource.data.source == 'admin-direct'
+        && request.resource.data.keys().hasOnly(['ownerUid','customerEmail','customerName','subject','status','createdAt','updatedAt','lastMessage','source'])
+        && request.resource.data.customerEmail is string && request.resource.data.customerEmail.size() <= 160
+        && request.resource.data.customerName is string && request.resource.data.customerName.size() <= 100
+        && request.resource.data.subject is string && request.resource.data.subject == 'Message from Onchain Support'
+        && request.resource.data.lastMessage is string && request.resource.data.lastMessage.size() > 0 && request.resource.data.lastMessage.size() <= 3000
+      );
       allow get, list: if isAdmin() || (signedIn() && resource.data.ownerUid == request.auth.uid);
       allow update: if (isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt','lastMessage']) && request.resource.data.status in ['open','in_progress','resolved']) || (signedIn() && resource.data.ownerUid == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['updatedAt','lastMessage']));
       allow delete: if false;
