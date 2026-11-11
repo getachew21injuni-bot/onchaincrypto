@@ -12126,5 +12126,10 @@ body:has(main > section[id^="page-"]:not(.hidden):not(#page-home)) > footer.oc-t
 #timedPaperTrade.oc-stage-complete>#timedResultBoard{display:block!important;visibility:visible!important}
 #timedPaperTrade.oc-stage-complete>#timedResultBoard #timedBoardPnlChart{display:block!important;width:100%!important;height:160px!important;min-height:160px!important}
 </style>
+
+<style id="oc-top-refresh-visitor-visibility">
+/* Keep the existing header market refresh available on the public visitor page. */
+body.oc-visitor-mode:not(.oc-auth-screen) #refreshBtn{display:inline-flex!important;visibility:visible!important;pointer-events:auto!important}
+</style>
 </body>
 </html>
