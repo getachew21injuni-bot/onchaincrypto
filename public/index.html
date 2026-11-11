@@ -7066,7 +7066,8 @@ async function sendReply(adminView){
  finally{button.disabled=false;}
 }
 byId("ocSupportReplySend")?.addEventListener("click",()=>sendReply(false));
-byId("ocAdminSupportReplySend")?.addEventListener("click",()=>sendReply(true));\nbyId("ocAdminNewMessageSend")?.addEventListener("click",async()=>{
+byId("ocAdminSupportReplySend")?.addEventListener("click",()=>sendReply(true));
+byId("ocAdminNewMessageSend")?.addEventListener("click",async()=>{
  if(!currentUser||!isAdmin){setText("ocAdminNewMessageStatus","Verified administrator access is required.");return;}
  const recipient=selectedNewMessageRecipient,message=byId("ocAdminNewMessageText")?.value.trim()||"",button=byId("ocAdminNewMessageSend");
  if(!recipient){setText("ocAdminNewMessageStatus","Select a registered user first.");return;}
