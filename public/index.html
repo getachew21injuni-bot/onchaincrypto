@@ -3141,7 +3141,7 @@ $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new 
   const streams=assets.map(coin=>coin.symbol.toLowerCase()+"usdt@ticker");
   if(!streams.length)return;
   const endpoint="wss://stream.binance.com:9443/stream?streams="+streams.join("/");
-  let socket=null,retryTimer=null,retryDelay=3000,lastMessageAt=0,lastPaintAt=0,lastCacheAt=0,attempt=0;
+  let socket=null,retryTimer=null,retryDelay=3000,lastMessageAt=0,lastPaintAt=0,lastCacheAt=0,lastWalletPaintAt=0,attempt=0;
   const status=(state,message)=>{
     const indicator=document.getElementById("marketLiveIndicator");
     if(indicator){indicator.className="oc-chart-live "+(state==="live"?"is-live":"is-stale");const label=indicator.querySelector("span");if(label)label.textContent=state==="live"?"LIVE":state==="offline"?"OFFLINE":"RECONNECTING";indicator.title=message;}
@@ -3162,6 +3162,8 @@ $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new 
     if(Number.isFinite(volume))item.total_volume=volume;
     window.market=market;
     const now=Date.now();lastMessageAt=now;window.ocMarketLastSuccess=now;
+    // Refresh estimated wallet valuations from the same live prices, without changing balances or ledger records.
+    if(now-lastWalletPaintAt>=2500&&!document.getElementById("page-wallet")?.classList.contains("hidden")){lastWalletPaintAt=now;try{renderWallet();}catch(error){console.warn("Live wallet valuation refresh delayed:",error);}}
     status("live","Connected · Binance live prices");
     const updated=document.getElementById("lastUpdate");if(updated)updated.textContent=new Date(now).toLocaleTimeString();
     const hint=document.getElementById("marketHint");if(hint)hint.textContent="Live market prices update automatically, 24/7 while connected.";
@@ -3178,7 +3180,7 @@ $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new 
     if(!navigator.onLine){status("offline","Internet connection unavailable · automatic retry enabled");scheduleReconnect();return;}
     try{
       socket=new WebSocket(endpoint);
-      socket.onopen=()=>{attempt=0;retryDelay=3000;status("connecting","Live feed connected · waiting for first price update");};
+      socket.onopen=()=>{attempt=0;retryDelay=3000;lastMessageAt=Date.now();status("connecting","Live feed connected · waiting for first price update");};
       socket.onmessage=event=>{
         try{const packet=JSON.parse(event.data),ticker=packet.data||packet;if(ticker&&ticker.s)publish(ticker);}catch(_){}
       };
@@ -3186,6 +3188,13 @@ $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new 
       socket.onclose=()=>{status(market.length?"connecting":"offline","Live feed reconnecting · automatic market refresh remains active");scheduleReconnect();};
     }catch(_){status(market.length?"connecting":"offline","Live feed unavailable · automatic market refresh remains active");scheduleReconnect();}
   }
+  // Detect a half-open/stalled socket: an OPEN connection without fresh tickers is not live.
+  setInterval(()=>{
+    if(socket&&socket.readyState===WebSocket.OPEN&&lastMessageAt&&Date.now()-lastMessageAt>25000){
+      status("connecting","Live feed stalled · reconnecting automatically");
+      try{socket.close();}catch(_){}
+    }
+  },10000);
   function scheduleReconnect(){
     if(retryTimer)return;
     const delay=Math.min(30000,retryDelay);
