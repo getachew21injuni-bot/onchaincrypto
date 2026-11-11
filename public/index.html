@@ -7065,7 +7065,34 @@ async function sendReply(adminView){
  finally{button.disabled=false;}
 }
 byId("ocSupportReplySend")?.addEventListener("click",()=>sendReply(false));
-byId("ocAdminSupportReplySend")?.addEventListener("click",()=>sendReply(true));\nbyId("ocAdminNewMessageSend")?.addEventListener("click",async()=>{\n if(!currentUser||!isAdmin){setText("ocAdminNewMessageStatus","Verified administrator access is required.");return;}\n const recipient=selectedNewMessageRecipient,message=byId("ocAdminNewMessageText")?.value.trim()||"",button=byId("ocAdminNewMessageSend");\n if(!recipient){setText("ocAdminNewMessageStatus","Select a registered user first.");return;}\n if(!message){setText("ocAdminNewMessageStatus","Write a message before sending.");byId("ocAdminNewMessageText")?.focus();return;}\n button.disabled=true;setText("ocAdminNewMessageStatus","Sending private message…");\n try{\n  const ticketRef=doc(collection(db,"supportTickets")),messageRef=doc(collection(db,"supportTickets",ticketRef.id,"messages")),batch=writeBatch(db);\n  batch.set(ticketRef,{ownerUid:recipient.uid,customerEmail:recipient.email,customerName:recipient.name,subject:"Message from Onchain Support",status:"open",createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:message,source:"admin-direct"});\n  batch.set(messageRef,{senderUid:currentUser.uid,senderRole:"admin",senderName:"Onchain Support",text:message,createdAt:serverTimestamp()});\n  await batch.commit();\n  selectedAdminTicket={id:ticketRef.id,ownerUid:recipient.uid,customerEmail:recipient.email,customerName:recipient.name,subject:"Message from Onchain Support",status:"open"};\n  watchMessages(selectedAdminTicket,byId("ocAdminSupportConversation"),true);\n  byId("ocAdminNewMessageText").value="";setText("ocAdminNewMessageStatus","Private message sent to "+(recipient.name||recipient.email||"the selected user")+".");\n  setText("ocAdminSupportStatus","New conversation created for "+(recipient.email||recipient.uid)+".");\n }catch(error){console.error("Admin direct in-app message failed:",error);setText("ocAdminNewMessageStatus","Could not send message ("+(error.code||"connection error")+").");}\n finally{button.disabled=!isAdmin;}\n});\ndocument.addEventListener("click",event=>{\n const button=event.target instanceof Element?event.target.closest("[data-oc-admin-message-user]"):null;if(!button)return;\n event.preventDefault();if(!currentUser||!isAdmin){setText("ocAdminNewMessageStatus","Verified administrator access is required.");return;}\n selectedNewMessageRecipient={uid:button.getAttribute("data-oc-admin-message-user")||"",email:button.getAttribute("data-user-email")||"",name:button.getAttribute("data-user-name")||""};\n if(!selectedNewMessageRecipient.uid){setText("ocAdminNewMessageStatus","Could not identify this user. Refresh the dashboard and try again.");return;}\n setText("ocAdminNewMessageRecipient","To: "+(selectedNewMessageRecipient.name||"User")+" · "+(selectedNewMessageRecipient.email||selectedNewMessageRecipient.uid));\n setText("ocAdminNewMessageStatus","Recipient selected. Write your message above.");\n const send=byId("ocAdminNewMessageSend");if(send)send.disabled=false;\n byId("ocAdminNewMessageText")?.focus();byId("ocAdminSupportInbox")?.scrollIntoView({behavior:"smooth",block:"start"});\n});
+byId("ocAdminSupportReplySend")?.addEventListener("click",()=>sendReply(true));\nbyId("ocAdminNewMessageSend")?.addEventListener("click",async()=>{
+ if(!currentUser||!isAdmin){setText("ocAdminNewMessageStatus","Verified administrator access is required.");return;}
+ const recipient=selectedNewMessageRecipient,message=byId("ocAdminNewMessageText")?.value.trim()||"",button=byId("ocAdminNewMessageSend");
+ if(!recipient){setText("ocAdminNewMessageStatus","Select a registered user first.");return;}
+ if(!message){setText("ocAdminNewMessageStatus","Write a message before sending.");byId("ocAdminNewMessageText")?.focus();return;}
+ button.disabled=true;setText("ocAdminNewMessageStatus","Sending private message…");
+ try{
+  const ticketRef=doc(collection(db,"supportTickets")),messageRef=doc(collection(db,"supportTickets",ticketRef.id,"messages")),batch=writeBatch(db);
+  batch.set(ticketRef,{ownerUid:recipient.uid,customerEmail:recipient.email,customerName:recipient.name,subject:"Message from Onchain Support",status:"open",createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:message,source:"admin-direct"});
+  batch.set(messageRef,{senderUid:currentUser.uid,senderRole:"admin",senderName:"Onchain Support",text:message,createdAt:serverTimestamp()});
+  await batch.commit();
+  selectedAdminTicket={id:ticketRef.id,ownerUid:recipient.uid,customerEmail:recipient.email,customerName:recipient.name,subject:"Message from Onchain Support",status:"open"};
+  watchMessages(selectedAdminTicket,byId("ocAdminSupportConversation"),true);
+  byId("ocAdminNewMessageText").value="";setText("ocAdminNewMessageStatus","Private message sent to "+(recipient.name||recipient.email||"the selected user")+".");
+  setText("ocAdminSupportStatus","New conversation created for "+(recipient.email||recipient.uid)+".");
+ }catch(error){console.error("Admin direct in-app message failed:",error);setText("ocAdminNewMessageStatus","Could not send message ("+(error.code||"connection error")+").");}
+ finally{button.disabled=!isAdmin;}
+});
+document.addEventListener("click",event=>{
+ const button=event.target instanceof Element?event.target.closest("[data-oc-admin-message-user]"):null;if(!button)return;
+ event.preventDefault();if(!currentUser||!isAdmin){setText("ocAdminNewMessageStatus","Verified administrator access is required.");return;}
+ selectedNewMessageRecipient={uid:button.getAttribute("data-oc-admin-message-user")||"",email:button.getAttribute("data-user-email")||"",name:button.getAttribute("data-user-name")||""};
+ if(!selectedNewMessageRecipient.uid){setText("ocAdminNewMessageStatus","Could not identify this user. Refresh the dashboard and try again.");return;}
+ setText("ocAdminNewMessageRecipient","To: "+(selectedNewMessageRecipient.name||"User")+" · "+(selectedNewMessageRecipient.email||selectedNewMessageRecipient.uid));
+ setText("ocAdminNewMessageStatus","Recipient selected. Write your message above.");
+ const send=byId("ocAdminNewMessageSend");if(send)send.disabled=false;
+ byId("ocAdminNewMessageText")?.focus();byId("ocAdminSupportInbox")?.scrollIntoView({behavior:"smooth",block:"start"});
+});
 byId("ocAdminDirectEmailSend")?.addEventListener("click",async()=>{
  const button=byId("ocAdminDirectEmailSend"),status=byId("ocAdminDirectEmailStatus");
  if(!currentUser||!isAdmin){setText("ocAdminDirectEmailStatus","Verified administrator sign-in is required.");return;}
