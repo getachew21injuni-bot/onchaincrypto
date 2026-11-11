@@ -1136,7 +1136,25 @@ if (supportSendButton) supportSendButton.addEventListener("click", () => {
 });
 document.querySelectorAll("#marketTabs button").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.filter;document.querySelectorAll("#marketTabs button").forEach(x=>x.classList.toggle("active",x===b));renderMarket()}));
 $("refreshSignalsBtn")?.addEventListener("click",loadMarket);
-$("marketSearch").addEventListener("input",renderMarket);$("refreshBtn").addEventListener("click",loadMarket);$("retryBtn").addEventListener("click",loadMarket);$("tradeAsset").addEventListener("change",()=>{selected=$("tradeAsset").value;updateTradePreview();updateTradingViewChart(selected);if(!$("page-trade").classList.contains("hidden"))loadPriceHistory()});
+async function refreshPlatformData(){
+ if(marketRequestInProgress)return;
+ const button=$("refreshBtn"),originalText=button?.textContent||"↻";
+ if(button){button.disabled=true;button.textContent="Refreshing…"}
+ try{
+  await loadMarket();
+  // Re-render the existing account state against the newest available prices.
+  // This deliberately does not write balances, holdings, orders, or history.
+  try{if(typeof renderWallet==="function")renderWallet()}catch(e){console.warn("Wallet display refresh skipped",e)}
+  const tradePage=$("page-trade");
+  if(tradePage&&!tradePage.classList.contains("hidden")){
+   const pair=$("tradeAsset")?.value||selected;
+   try{updateTradePreview();updateTradingViewChart(pair);await loadPriceHistory()}catch(e){console.warn("Trade chart refresh skipped",e)}
+  }
+ }finally{
+  if(button){button.disabled=false;button.textContent=originalText}
+ }
+}
+$("marketSearch").addEventListener("input",renderMarket);$("refreshBtn").addEventListener("click",refreshPlatformData);$("retryBtn").addEventListener("click",loadMarket);$("tradeAsset").addEventListener("change",()=>{selected=$("tradeAsset").value;updateTradePreview();updateTradingViewChart(selected);if(!$("page-trade").classList.contains("hidden"))loadPriceHistory()});
 (function(){
  const renderHomePairs=()=>{
   const list=Array.isArray(window.market)?window.market:[];
