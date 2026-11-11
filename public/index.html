@@ -2587,7 +2587,9 @@ async function loadMarket(){
  marketRequestInProgress=true;
  // Show the last saved prices immediately while fresh providers reconnect.
  if(!market.length)restoreCachedMarket();
- const refreshButtons=[$("refreshBtn"),$("retryBtn"),$("refreshSignalsBtn")].filter(Boolean);
+ const refreshButtons=[$("retryBtn"),$("refreshSignalsBtn")].filter(Boolean);
+ // Keep the Home refresh control clickable during an in-flight market request.
+ // Its click handler queues one more refresh instead of disabling the control.
  refreshButtons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent=b.dataset.originalText});
  $("connection").textContent="Connecting";setHeaderMarketStatus("connecting");if($("apiStatus"))$("apiStatus").textContent="";$("marketHint").textContent="Connecting to live prices…";
  const finish=()=>{marketRequestInProgress=false;refreshButtons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.originalText||"Refresh";delete b.dataset.originalText});if(marketRefreshQueued){marketRefreshQueued=false;setTimeout(loadMarket,0)}};
