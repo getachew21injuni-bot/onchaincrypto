@@ -343,7 +343,8 @@ export const adminDeleteUser = onCall(
     if (tradeState.exists) {
       const scrub: Record<string, unknown> = { uid: pseudonymousUid };
       for (const field of personalFields) scrub[field] = FieldValue.delete();
-      await tradeStateRef.set(scrub, { merge: true });
+      await db.collection("userTradeState").doc(pseudonymousUid).set({ ...tradeState.data(), ...scrub }, { merge: true });
+      await tradeStateRef.delete();
       counts.userTradeState = 1;
     }
 
@@ -358,8 +359,12 @@ export const adminDeleteUser = onCall(
     }
 
     // Remove private support conversations and their message subcollections.
-    const tickets = await db.collection("supportTickets").where("ownerUid", "==", targetUid).get();
-    for (const ticket of tickets.docs) {
+    const ticketMap = new Map<string, any>();
+    for (const ownerField of ["ownerUid", "uid"]) {
+      const ticketSnap = await db.collection("supportTickets").where(ownerField, "==", targetUid).get();
+      for (const ticket of ticketSnap.docs) ticketMap.set(ticket.ref.path, ticket);
+    }
+    for (const ticket of ticketMap.values()) {
       const messages = await ticket.ref.collection("messages").get();
       let batch = db.batch();
       let writes = 0;
@@ -375,7 +380,7 @@ export const adminDeleteUser = onCall(
       if (writes) await batch.commit();
       await ticket.ref.delete();
     }
-    counts.supportTickets = tickets.size;
+    counts.supportTickets = ticketMap.size;
 
     // Remove private account notifications.
     const notifications = await db.collection("userNotifications").doc(targetUid).collection("items").get();
