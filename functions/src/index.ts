@@ -404,3 +404,42 @@ export const adminDeleteUser = onCall(
     return { ok: true, reference: pseudonymousUid, retainedFinancialRecordCounts: counts };
   }
 );
+
+
+/** Enables or disables a member's Firebase sign-in from the verified Admin panel. */
+export const adminSetUserAccess = onCall(
+  { enforceAppCheck: false, cors: true },
+  async (request) => {
+    const admin = requireSignedIn(request);
+    const adminEmail = typeof admin.token.email === "string" ? admin.token.email.toLowerCase() : "";
+    if (admin.token.email_verified !== true || adminEmail !== "getachew21.inj.uni@gmail.com") {
+      throw new HttpsError("permission-denied", "Verified administrator access is required.");
+    }
+    const uid = typeof request.data?.uid === "string" ? request.data.uid.trim() : "";
+    const status = request.data?.status;
+    if (!/^[A-Za-z0-9_-]{20,128}$/.test(uid) || (status !== "active" && status !== "suspended")) {
+      throw new HttpsError("invalid-argument", "Choose a valid account and status.");
+    }
+    if (uid === admin.uid) throw new HttpsError("failed-precondition", "You cannot change access for the administrator account currently in use.");
+    const auth = getAuth();
+    let target;
+    try { target = await auth.getUser(uid); }
+    catch { throw new HttpsError("not-found", "The selected sign-in account was not found."); }
+    if (target.customClaims?.admin === true || target.email?.toLowerCase() === "getachew21.inj.uni@gmail.com") {
+      throw new HttpsError("failed-precondition", "Administrator account access cannot be changed here.");
+    }
+    await auth.updateUser(uid, { disabled: status === "suspended" });
+    await db.collection("users").doc(uid).set({
+      accountStatus: status,
+      adminUpdatedAt: FieldValue.serverTimestamp(),
+      adminUpdatedBy: adminEmail,
+    }, { merge: true });
+    await db.collection("adminAuditLogs").add({
+      adminUid: admin.uid,
+      action: status === "suspended" ? "user_access_suspended" : "user_access_reactivated",
+      targetReference: "member_" + createHash("sha256").update(uid).digest("hex").slice(0, 32),
+      createdAt: FieldValue.serverTimestamp(),
+    });
+    return { ok: true, uid, status };
+  }
+);
