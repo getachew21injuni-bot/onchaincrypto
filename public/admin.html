@@ -672,9 +672,10 @@ document.getElementById('moreBtn').addEventListener('click',()=>showView('Settin
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { getFirestore, collection, getDocs, query, limit, doc, setDoc, deleteDoc, writeBatch, serverTimestamp, runTransaction, onSnapshot } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
 const app=initializeApp({apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"});
 
-const auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
+const auth=getAuth(app),db=getFirestore(app),functions=getFunctions(app,"us-central1"),adminDeleteUserCall=httpsCallable(functions,"adminDeleteUser"),byId=id=>document.getElementById(id);
 window.__ocAdminFirebase={auth,db,collection,getDocs,query,limit,doc,setDoc,deleteDoc,writeBatch,serverTimestamp,runTransaction,onSnapshot};
 const safeText=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 window.adminGetLiveCollection=async function(view){
@@ -701,7 +702,7 @@ window.adminGetLiveCollection=async function(view){
     const holdings=wallet?.holdings&&typeof wallet.holdings==='object'?Object.entries(wallet.holdings).filter(([asset,value])=>asset!=='USDT'&&Number.isFinite(Number(value))&&Number(value)!==0).map(([asset,value])=>safeText(asset.toUpperCase())+': '+safeText(Number(value).toLocaleString(undefined,{maximumFractionDigits:8}))).join(' · '):'';
     const walletUpdated=wallet?.updatedAt&&typeof wallet.updatedAt.toDate==='function'?wallet.updatedAt.toDate().toLocaleString():'';
     const walletCell=walletReadError?'<span class="muted">Unavailable · check permissions</span>':balance===null?'<strong>—</strong><br><small class="muted">No wallet ledger record</small>':'<strong>'+safeText(balance.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}))+' USDT</strong>'+(holdings?'<br><small class="muted">'+holdings+'</small>':'')+(walletUpdated?'<br><small class="muted">Updated '+safeText(walletUpdated)+'</small>':'');
-    return '<tr><td>'+safeText(r.displayName||[r.firstName,r.lastName].filter(Boolean).join(' ')||'—')+'</td><td>'+safeText(r.email||'—')+'</td><td>'+safeText(r.country||'—')+'</td><td>'+safeText(r.uid||r.id)+'</td><td><span style="display:inline-block;padding:4px 9px;border-radius:20px;background:'+(accountStatus==='active'?'#12372e':'#40242b')+';color:'+(accountStatus==='active'?'#6ee7b7':'#fda4af')+'">'+safeText(accountStatus.toUpperCase())+'</span></td><td>'+walletCell+'</td><td><button type="button" class="oc-user-status-action icon-btn" data-uid="'+safeText(r.id)+'" data-status="'+accountStatus+'" style="background:'+actionColor+';border:0">'+actionLabel+'</button></td></tr>';
+    return '<tr><td>'+safeText(r.displayName||[r.firstName,r.lastName].filter(Boolean).join(' ')||'—')+'</td><td>'+safeText(r.email||'—')+'</td><td>'+safeText(r.country||'—')+'</td><td>'+safeText(r.uid||r.id)+'</td><td><span style="display:inline-block;padding:4px 9px;border-radius:20px;background:'+(accountStatus==='active'?'#12372e':'#40242b')+';color:'+(accountStatus==='active'?'#6ee7b7':'#fda4af')+'">'+safeText(accountStatus.toUpperCase())+'</span></td><td>'+walletCell+'</td><td><button type="button" class="oc-user-status-action icon-btn" data-uid="'+safeText(r.id)+'" data-status="'+accountStatus+'" style="background:'+actionColor+';border:0">'+actionLabel+'</button> <button type="button" class="oc-user-remove-action icon-btn" data-uid="'+safeText(r.id)+'" style="background:#6b2634;border:0;margin-top:6px">Remove profile</button></td></tr>';
    }).join('');
    body.innerHTML='<div class="content-panel" style="margin:0"><h3>Live registered profiles</h3><p class="muted">Profiles read from Firestore; maximum 100 shown. Wallet balances are read-only and sourced from each account\'s userTradeState ledger. New accounts default to ACTIVE until an admin changes their status.</p><strong>'+rows.length+' account(s) loaded</strong><div class="table-wrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(html||'<tr><td colspan="7">No registered accounts found.</td></tr>')+'</tbody></table></div><p id="ocUserAdminMessage" class="muted" role="status" aria-live="polite"></p></div>';
    body.querySelectorAll('.oc-user-status-action').forEach(button=>button.addEventListener('click',async()=>{
@@ -716,6 +717,25 @@ window.adminGetLiveCollection=async function(view){
      if(msg)msg.textContent='Account status saved as '+nextStatus.toUpperCase()+'.';
      await window.adminGetLiveCollection('Users');await window.adminRefreshDashboard();
     }catch(error){button.disabled=false;if(msg)msg.textContent='Could not save account status ('+(error.code||error.message||'unknown error')+'). Check Firestore rules and administrator verification.';}
+   }));
+   body.querySelectorAll('.oc-user-remove-action').forEach(button=>button.addEventListener('click',async()=>{
+    const uid=button.dataset.uid,msg=byId('ocUserAdminMessage'),current=auth.currentUser;
+    if(!uid)return;
+    if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){
+     if(msg)msg.textContent='Verified administrator access is required.';return;
+    }
+    if(!window.confirm('Remove this user account and personal information? Financial and audit records will be retained under a pseudonymous reference. This action cannot be undone.'))return;
+    const confirmation=window.prompt('Type DELETE to confirm removal of this account.');
+    if(confirmation!=='DELETE'){if(msg)msg.textContent='Removal cancelled. No account data was changed.';return;}
+    button.disabled=true;if(msg)msg.textContent='Removing account and protecting retained financial records…';
+    try{
+     await adminDeleteUserCall({uid,confirmation:'DELETE'});
+     if(msg)msg.textContent='Account removed. Financial and audit records were retained under a pseudonymous reference.';
+     await window.adminGetLiveCollection('Users');await window.adminRefreshDashboard();
+    }catch(error){
+     button.disabled=false;
+     if(msg)msg.textContent='Removal was not completed ('+(error.code||error.message||'unknown error')+'). No success is being reported; check backend deployment and administrator re-authentication.';
+    }
    }));
    return;
   }
