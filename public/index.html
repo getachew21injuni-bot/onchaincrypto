@@ -5911,9 +5911,13 @@ document.addEventListener("click",async event=>{
   const nextStatus=action==="suspend"?"suspended":"active";
   accountActionButton.disabled=true;
   try{
-   await callAdminSetUserAccess({uid,status:nextStatus});
-   if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent="Account "+(nextStatus==="suspended"?"suspended. Sign-in access is disabled.":"reactivated. Sign-in access is restored.");
-  }catch(error){if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent="Could not update account status ("+(error.code||"error")+").";}
+   const accessResult=await callAdminSetUserAccess({uid,status:nextStatus});
+   if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent=accessResult.auditLogged===false
+    ?"Account access changed, but its audit record could not be finalized. Please review the admin audit records."
+    :"Account "+(nextStatus==="suspended"?"suspended. Sign-in access is disabled and the action was recorded.":"reactivated. Sign-in access is restored and the action was recorded.");
+  }catch(error){
+   if(byId("ocAdminUserControlMessage"))byId("ocAdminUserControlMessage").textContent=error.message||"Could not update account status. Please sign in again if administrator verification has expired.";
+  }
   finally{accountActionButton.disabled=false;}
   return;
  }
