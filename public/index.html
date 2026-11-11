@@ -2566,7 +2566,7 @@ function renderHotCoinTab(category=hotCoinCategory){
  result.innerHTML=items.length?items.slice(0,5).map(c=>'<div class="mini-row"><div class="mini-left">'+coinIcon(c,22)+'<span>'+safe(c.symbol.toUpperCase())+'</span></div><div class="mini-price '+((c.price_change_percentage_24h||0)>=0?"green":"red")+'">'+pct(c.price_change_percentage_24h)+'</div></div>').join(""):'<div class="muted tiny">No market data available</div>';
 }
 document.querySelectorAll("[data-hot-tab]").forEach(tab=>tab.addEventListener("click",()=>renderHotCoinTab(tab.dataset.hotTab)));
-let marketRequestInProgress=false;
+let marketRequestInProgress=false,marketRefreshQueued=false;
 function restoreCachedMarket(){
  try{
   const saved=JSON.parse(localStorage.getItem("oc_market_cache")||"null");
@@ -2583,14 +2583,14 @@ function restoreCachedMarket(){
 }
 function setHeaderMarketStatus(state){const dot=document.querySelector(".header-right .status-dot");if(!dot)return;dot.classList.toggle("is-live",state==="live");dot.classList.toggle("is-offline",state==="offline");dot.title=state==="live"?"Live market data connected":state==="offline"?"Live market data unavailable":state==="stale"?"Showing cached market data":"Connecting to market data";}
 async function loadMarket(){
- if(marketRequestInProgress)return;
+ if(marketRequestInProgress){marketRefreshQueued=true;return;}
  marketRequestInProgress=true;
  // Show the last saved prices immediately while fresh providers reconnect.
  if(!market.length)restoreCachedMarket();
  const refreshButtons=[$("refreshBtn"),$("retryBtn"),$("refreshSignalsBtn")].filter(Boolean);
  refreshButtons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent=b.dataset.originalText});
  $("connection").textContent="Connecting";setHeaderMarketStatus("connecting");if($("apiStatus"))$("apiStatus").textContent="";$("marketHint").textContent="Connecting to live prices…";
- const finish=()=>{marketRequestInProgress=false;refreshButtons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.originalText||"Refresh";delete b.dataset.originalText})};
+ const finish=()=>{marketRequestInProgress=false;refreshButtons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.originalText||"Refresh";delete b.dataset.originalText});if(marketRefreshQueued){marketRefreshQueued=false;setTimeout(loadMarket,0)}};
  const fetchJson=async(url,ms=12000)=>{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),ms);try{const res=await fetch(url,{headers:{accept:"application/json"},signal:controller.signal,cache:"no-store"});if(!res.ok)throw new Error("HTTP "+res.status);return await res.json()}finally{clearTimeout(timer)}};
  const mergeBinance=(base,tickers)=>{
   const merged=new Map((base||[]).map(item=>[String(item.symbol||"").toUpperCase(),item]));
