@@ -281,7 +281,6 @@ export const adminDeleteUser = onCall(
 
     const pseudonymousUid = "deleted_" + createHash("sha256").update(targetUid).digest("hex").slice(0, 32);
     const auditRef = db.collection("adminAuditLogs").doc();
-    await auth.updateUser(targetUid, { disabled: true });
     await auditRef.set({
       adminUid: admin.uid,
       action: "user_deletion_started",
@@ -289,6 +288,7 @@ export const adminDeleteUser = onCall(
       status: "in_progress",
       createdAt: FieldValue.serverTimestamp(),
     });
+    await auth.updateUser(targetUid, { disabled: true });
 
     const counts: Record<string, number> = {};
     const personalFields = [
