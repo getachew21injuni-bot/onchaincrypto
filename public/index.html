@@ -3142,8 +3142,8 @@ $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new 
   const assets=COINS.filter(coin=>coin.symbol&&coin.symbol!=="USDT"&&coin.symbol!=="XAU");
   const streams=assets.map(coin=>coin.symbol.toLowerCase()+"usdt@ticker");
   if(!streams.length)return;
-  const endpoint="wss://stream.binance.com:9443/stream?streams="+streams.join("/");
-  let socket=null,retryTimer=null,retryDelay=3000,lastMessageAt=0,lastPaintAt=0,lastCacheAt=0,lastWalletPaintAt=0,attempt=0;
+  const endpoints=["wss://data-stream.binance.vision:443/stream?streams="+streams.join("/"),"wss://stream.binance.com:443/stream?streams="+streams.join("/")];
+  let endpointIndex=0,socket=null,retryTimer=null,retryDelay=3000,lastMessageAt=0,lastPaintAt=0,lastCacheAt=0,lastWalletPaintAt=0,attempt=0;
   const status=(state,message)=>{
     const indicator=document.getElementById("marketLiveIndicator");
     if(indicator){indicator.className="oc-chart-live "+(state==="live"?"is-live":"is-stale");const label=indicator.querySelector("span");if(label)label.textContent=state==="live"?"LIVE":state==="offline"?"OFFLINE":"RECONNECTING";indicator.title=message;}
@@ -3151,6 +3151,8 @@ $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new 
     const connection=document.getElementById("connection");if(connection)connection.textContent=state==="live"?"Live data":"Reconnecting";
     const api=document.getElementById("apiStatus");if(api)api.textContent="";
   };
+  const hasRecentMarketData=()=>Number(window.ocMarketLastSuccess)>0&&Date.now()-Number(window.ocMarketLastSuccess)<180000;
+  const streamStatus=(state,message)=>{if(state!=="live"&&hasRecentMarketData())status("live","Market prices remain available from the public REST feed; the live stream is reconnecting.");else status(state,message);};
   function publish(ticker){
     const symbol=String(ticker.s||"").toUpperCase();
     if(!symbol.endsWith("USDT"))return;
@@ -3181,14 +3183,14 @@ $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new 
   function connect(){
     if(!navigator.onLine){status("offline","Internet connection unavailable · automatic retry enabled");scheduleReconnect();return;}
     try{
-      socket=new WebSocket(endpoint);
-      socket.onopen=()=>{attempt=0;retryDelay=3000;lastMessageAt=Date.now();status("connecting","Live feed connected · waiting for first price update");};
+      socket=new WebSocket(endpoints[endpointIndex]);
+      socket.onopen=()=>{attempt=0;retryDelay=3000;lastMessageAt=Date.now();streamStatus("connecting","Live feed connected · waiting for first price update");};
       socket.onmessage=event=>{
         try{const packet=JSON.parse(event.data),ticker=packet.data||packet;if(ticker&&ticker.s)publish(ticker);}catch(_){}
       };
       socket.onerror=()=>{try{socket.close();}catch(_){}};
-      socket.onclose=()=>{status(market.length?"connecting":"offline","Live feed reconnecting · automatic market refresh remains active");scheduleReconnect();};
-    }catch(_){status(market.length?"connecting":"offline","Live feed unavailable · automatic market refresh remains active");scheduleReconnect();}
+      socket.onclose=()=>{streamStatus(market.length?"connecting":"offline","Live feed reconnecting · automatic market refresh remains active");endpointIndex=(endpointIndex+1)%endpoints.length;scheduleReconnect();};
+    }catch(_){streamStatus(market.length?"connecting":"offline","Live feed unavailable · automatic market refresh remains active");endpointIndex=(endpointIndex+1)%endpoints.length;scheduleReconnect();}
   }
   // Detect a half-open/stalled socket: an OPEN connection without fresh tickers is not live.
   setInterval(()=>{
@@ -4394,8 +4396,30 @@ document.querySelectorAll("[data-browser-asset]").forEach(btn=>btn.addEventListe
   c.strokeStyle="#25c985";c.lineWidth=2.5;c.beginPath();vals.forEach((v,i)=>{const x=pad+i*(w-2*pad)/6,y=base-v/max*(h/2-pad);i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke();
   vals.forEach((v,i)=>{const x=pad+i*(w-2*pad)/6,y=base-v/max*(h/2-pad);c.fillStyle=v>=0?"#25c985":"#f6465d";c.beginPath();c.arc(x,y,3,0,Math.PI*2);c.fill()});
  }
- let bookSocket=null,bookSymbol="",bookRetry=null,bookRetryDelay=1500,bookLastUpdate=0;
- function renderBookRows(data){
+ let bookSocket=null,bookSymbol="",bookRetry=null,bookRetryDelay=1500,bookLastUpdate=0,bookRestTimer=null,bookConnectTimer=null,bookRestBusy=false;
+ function stopBookRestFallback(){if(bookRestTimer){clearInterval(bookRestTimer);bookRestTimer=null}}
+ async function loadBookRestSnapshot(sym){
+  if(bookRestBusy||bookSymbol!==sym)return;bookRestBusy=true;
+  const timeoutFetch=async(url)=>{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),7000);try{const response=await fetch(url,{headers:{accept:"application/json"},cache:"no-store",signal:controller.signal});if(!response.ok)throw new Error("HTTP "+response.status);return await response.json()}finally{clearTimeout(timer)}};
+  try{
+   let data=null;
+   if(sym==="XAU")data=await timeoutFetch("https://fapi.binance.com/fapi/v1/depth?symbol=XAUUSDT&limit=20");
+   else data=await timeoutFetch("https://data-api.binance.vision/api/v3/depth?symbol="+encodeURIComponent(sym+"USDT")+"&limit=20");
+   if(Array.isArray(data?.bids)&&Array.isArray(data?.asks)&&data.bids.length&&data.asks.length){renderBookRows(data,"REST · auto refresh");return}
+   throw new Error("No depth snapshot returned");
+  }catch(primaryError){
+   const krakenPairs={BTC:"XBTUSD",ETH:"ETHUSD",SOL:"SOLUSD",XRP:"XRPUSD",ADA:"ADAUSD",DOGE:"DOGEUSD",DOT:"DOTUSD",LTC:"LTCUSD",BCH:"BCHUSD",LINK:"LINKUSD",AVAX:"AVAXUSD",ATOM:"ATOMUSD",TRX:"TRXUSD",ETC:"ETCUSD",FIL:"FILUSD",UNI:"UNIUSD",AAVE:"AAVEUSD",NEAR:"NEARUSD",SUI:"SUIUSD",SHIB:"SHIBUSD",XLM:"XLMUSD",HBAR:"HBARUSD",ICP:"ICPUSD",APT:"APTUSD"};
+   const pair=krakenPairs[sym];
+   if(pair){try{const response=await timeoutFetch("https://api.kraken.com/0/public/Depth?pair="+encodeURIComponent(pair)+"&count=20");const book=Object.values(response?.result||{}).find(value=>Array.isArray(value?.bids)&&Array.isArray(value?.asks));if(book){renderBookRows({bids:book.bids,asks:book.asks},"REST · auto refresh");return}}catch(_){} }
+   if(bookSymbol===sym&&$("orderBookStatus"))$("orderBookStatus").textContent="RECONNECTING";
+  }finally{bookRestBusy=false}
+ }
+ function startBookRestFallback(sym){
+  if(bookRestTimer||bookSymbol!==sym)return;
+  loadBookRestSnapshot(sym);
+  bookRestTimer=setInterval(()=>{if(bookSymbol===sym&&!document.hidden)loadBookRestSnapshot(sym)},5000);
+ }
+ function renderBookRows(data,source="LIVE"){
   const host=$("liveOrderBookRows");if(!host)return;
   const fmtPrice=n=>Number(n).toLocaleString("en-US",{minimumFractionDigits:n<1?6:2,maximumFractionDigits:n<1?8:2});
   const asks=(data.asks||[]).slice(0,6).sort((a,b)=>Number(a[0])-Number(b[0]));
@@ -4407,11 +4431,13 @@ document.querySelectorAll("[data-browser-asset]").forEach(btn=>btn.addEventListe
   const spread=bestAsk>0&&bestBid>0?bestAsk-bestBid:0;
   const caption=$("orderBookPair");
   if(caption)caption.textContent=bookSymbol+"/USDT · spread "+(spread?fmtPrice(spread):"—");
-  if($("orderBookStatus"))$("orderBookStatus").textContent="LIVE";
+  if($("orderBookStatus"))$("orderBookStatus").textContent=source;
   bookLastUpdate=Date.now();
  }
  function stopBookSocket(){
   if(bookRetry){clearTimeout(bookRetry);bookRetry=null}
+  if(bookConnectTimer){clearTimeout(bookConnectTimer);bookConnectTimer=null}
+  stopBookRestFallback();
   if(bookSocket){const old=bookSocket;bookSocket=null;old.onclose=null;old.onerror=null;old.onmessage=null;try{old.close()}catch(_){}}
  }
  function connectLiveBook(){
@@ -4423,23 +4449,25 @@ document.querySelectorAll("[data-browser-asset]").forEach(btn=>btn.addEventListe
   if($("orderBookPair"))$("orderBookPair").textContent=sym+"/USDT";
   if($("orderBookStatus"))$("orderBookStatus").textContent="CONNECTING";
   host.innerHTML='<tr><td colspan="3" class="empty">Connecting to live exchange order book…</td></tr>';
-  if(!("WebSocket" in window)){if($("orderBookStatus"))$("orderBookStatus").textContent="UNAVAILABLE";return}
   const isGold=sym==="XAU";
-  const stream=isGold?"wss://fstream.binance.com/ws/xauusdt@depth20@100ms":"wss://stream.binance.com:9443/ws/"+sym.toLowerCase()+"usdt@depth20@100ms";
+  const stream=isGold?"wss://fstream.binance.com/ws/xauusdt@depth20@100ms":"wss://data-stream.binance.vision:443/ws/"+sym.toLowerCase()+"usdt@depth20@100ms";
+  if(!("WebSocket" in window)){startBookRestFallback(sym);return}
   try{
    const ws=new WebSocket(stream);bookSocket=ws;
-   ws.onopen=()=>{if(bookSocket!==ws)return;bookRetryDelay=1500;if($("orderBookStatus"))$("orderBookStatus").textContent="LIVE";};
+   bookConnectTimer=setTimeout(()=>{if(bookSocket===ws&&bookSymbol===sym)startBookRestFallback(sym)},8000);
+   ws.onopen=()=>{if(bookSocket!==ws)return;bookRetryDelay=1500;if($("orderBookStatus"))$("orderBookStatus").textContent="CONNECTING";};
    ws.onmessage=event=>{
     if(bookSocket!==ws||bookSymbol!==sym)return;
-    try{const packet=JSON.parse(event.data);if(Array.isArray(packet.bids)&&Array.isArray(packet.asks))renderBookRows({bids:packet.bids,asks:packet.asks});}catch(_){}
+    try{const packet=JSON.parse(event.data);if(Array.isArray(packet.bids)&&Array.isArray(packet.asks)){if(bookConnectTimer){clearTimeout(bookConnectTimer);bookConnectTimer=null}stopBookRestFallback();renderBookRows({bids:packet.bids,asks:packet.asks},"LIVE");}}catch(_){}
    };
-   ws.onerror=()=>{if(bookSocket===ws&&$("orderBookStatus"))$("orderBookStatus").textContent="RECONNECTING"};
+   ws.onerror=()=>{if(bookSocket===ws){if($("orderBookStatus"))$("orderBookStatus").textContent="RECONNECTING";startBookRestFallback(sym)}};
    ws.onclose=()=>{
     if(bookSocket!==ws)return;bookSocket=null;
+    if(bookConnectTimer){clearTimeout(bookConnectTimer);bookConnectTimer=null}
     if($("orderBookStatus"))$("orderBookStatus").textContent="RECONNECTING";
-    if(host.isConnected){bookRetry=setTimeout(()=>{if(bookSymbol===sym)connectLiveBook()},bookRetryDelay);bookRetryDelay=Math.min(bookRetryDelay*2,15000)}
+    if(host.isConnected){startBookRestFallback(sym);bookRetry=setTimeout(()=>{if(bookSymbol===sym)connectLiveBook()},bookRetryDelay);bookRetryDelay=Math.min(bookRetryDelay*2,15000)}
    };
-  }catch(_){if($("orderBookStatus"))$("orderBookStatus").textContent="UNAVAILABLE"}
+  }catch(_){startBookRestFallback(sym)}
  }
  function renderBook(){connectLiveBook()}
  window.addEventListener("load",()=>{renderPerformance();renderBook()});
