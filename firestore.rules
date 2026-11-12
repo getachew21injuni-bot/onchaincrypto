@@ -439,7 +439,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['uid','email','type','title','details','status','createdAt'])
         && request.resource.data.email is string
         && request.resource.data.email.size() <= 180
-        && request.resource.data.type in ['trade','deposit','withdraw','activity']
+        && request.resource.data.type in ['trade','deposit','withdraw','convert','transfer','page_view','watchlist','profile_update','kyc','support','activity']
         && request.resource.data.title is string
         && request.resource.data.title.size() <= 180
         && request.resource.data.details is string
