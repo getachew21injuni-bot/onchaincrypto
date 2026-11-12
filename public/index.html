@@ -7521,6 +7521,7 @@ byId("transferSubmit")?.addEventListener("click",async()=>{
    senderUid:user.uid,recipientUid:recipient.uid,asset:"USDT",amount,
    senderName:myName,recipientName:recipient.displayName,status:"pending",createdAt:serverTimestamp()
   });
+  if(typeof recordActivity==="function")recordActivity("transfer","USDT transfer request submitted",amountText(amount)+" USDT to "+recipient.displayName+" · Request "+requestRef.id,"Pending admin approval");
   notice("Transfer request submitted for admin approval. No balance has changed. Request ID: "+requestRef.id);
   byId("transferAmount").value="";byId("transferDestination").value="";recipient=null;
   if(byId("transferRecipientPreview"))byId("transferRecipientPreview").textContent="Request submitted. You can track its status below.";
@@ -12242,7 +12243,7 @@ if(app){
   const user=auth.currentUser;
   if(!user)return;
   const item=event.detail||{};
-  const allowed=["trade","deposit","withdraw","activity"];
+  const allowed=["trade","deposit","withdraw","convert","transfer","page_view","watchlist","profile_update","kyc","support","activity"];
   try{
    await addDoc(collection(db,"userActivityEvents"),{
     uid:user.uid,email:String(user.email||"").slice(0,180),
