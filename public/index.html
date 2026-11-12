@@ -2410,7 +2410,7 @@ if(localStorage.getItem("oc_demo_credit_10000_v1")==="granted"){
 }
 // Preserve existing wallet balances and activity. Automatic first-load resets can erase locally stored account data.
 function readActivity(){try{return JSON.parse(localStorage.getItem("oc_activity_history")||"[]")}catch(e){return []}}
-function recordActivity(type,title,details,status="Recorded"){const items=readActivity();items.unshift({id:Date.now()+"-"+Math.random().toString(36).slice(2,7),type,title,details,status,time:new Date().toISOString()});localStorage.setItem("oc_activity_history",JSON.stringify(items.slice(0,1000)));renderActivityHistory()}
+function recordActivity(type,title,details,status="Recorded"){const event={type,title,details,status,time:new Date().toISOString()};const items=readActivity();items.unshift({id:Date.now()+"-"+Math.random().toString(36).slice(2,7),...event});localStorage.setItem("oc_activity_history",JSON.stringify(items.slice(0,1000)));try{window.dispatchEvent(new CustomEvent("oc-user-activity",{detail:event}))}catch(e){}renderActivityHistory()}
 function renderActivityHistory(){
  const homeHost=$("homeActivityHistoryRows");
  const homeFilter=$("homeHistoryFilter")?.value||"7days";
@@ -2816,7 +2816,7 @@ $("saveAnnouncement").addEventListener("click",()=>{
  $("announcementSaveMessage").textContent="Saved on this device. To publish for all visitors, connect a secured backend.";
 });
 function renderTradeSelect(){const old=$("tradeAsset").value||selected,options=market.map(c=>'<option value="'+safe(c.symbol)+'">'+safe(c.symbol+' — '+c.name)+'</option>');if(!market.some(c=>String(c.symbol||"").toUpperCase()==="XAU"))options.push('<option value="XAU">XAU — Gold</option>');$("tradeAsset").innerHTML=options.join("");if(old==="XAU"||selected==="XAU")$("tradeAsset").value="XAU";else if(market.some(c=>c.symbol===old))$("tradeAsset").value=old;else if(market.some(c=>c.symbol===selected))$("tradeAsset").value=selected;updateTradePreview()}
-function updateTradePreview(){const sym=$("tradeAsset")?.value||selected;const c=priceFor(sym);const pair=(sym==="USDT"||sym==="USDC")?"BTC/USDT":sym+"/USDT";if($("tradePairTitle"))$("tradePairTitle").textContent=pair.replace("/"," / ");if($("timedPair"))$("timedPair").textContent=pair.replace("/"," / ");if($("tradeAssetName"))$("tradeAssetName").textContent=c?.name||sym;if($("tradeCurrentPrice"))$("tradeCurrentPrice").textContent=c?money(c.current_price):"—";if($("tradeCurrentChange")){$("tradeCurrentChange").textContent=c?pct(c.price_change_percentage_24h):"Waiting for market data";$("tradeCurrentChange").className=(c?.price_change_percentage_24h||0)>=0?"green":"red"}if($("tradeAvailable"))$("tradeAvailable").textContent=money(state.balance);}function doTrade(side){const sym=$("tradeAsset").value,c=priceFor(sym),amount=Number($("tradeUsd").value);const msg=$("tradeMessage");if(!c||!Number.isFinite(Number(c.current_price))||Number(c.current_price)<=0){msg.textContent="Market price unavailable. Refresh and try again.";msg.className="muted tiny red";return}if(!Number.isFinite(amount)||amount<1){msg.textContent="Enter an amount of at least $1.";msg.className="muted tiny red";return}const qty=amount/Number(c.current_price);state.holdings[sym]=Number(state.holdings[sym]||0);if(side==="buy"){if(amount>state.balance){msg.textContent="Insufficient USDT balance. Available: "+money(state.balance)+".";msg.className="muted tiny red";return}state.balance-=amount;state.holdings[sym]+=qty}else{if(qty>state.holdings[sym]+1e-10){msg.textContent="Insufficient "+sym+" balance. Available: "+state.holdings[sym].toFixed(8)+" "+sym+".";msg.className="muted tiny red";return}state.holdings[sym]=Math.max(0,state.holdings[sym]-qty);state.balance+=amount}const trade={side,symbol:sym,amount,qty,price:Number(c.current_price),time:new Date().toISOString(),demo:true};state.history.unshift(trade);saveState();renderWallet();updateTradePreview();msg.className="muted tiny green";msg.textContent="TRADE RESULT RECORDED · "+side.toUpperCase()+" "+qty.toFixed(8)+" "+sym+" at "+money(c.current_price)+" per coin. Total: "+money(amount)+". Your OnChainSpro account result has been recorded.";renderTradeHistory();renderWalletCoinList();renderPnl();renderTradeOutcomes()}
+function updateTradePreview(){const sym=$("tradeAsset")?.value||selected;const c=priceFor(sym);const pair=(sym==="USDT"||sym==="USDC")?"BTC/USDT":sym+"/USDT";if($("tradePairTitle"))$("tradePairTitle").textContent=pair.replace("/"," / ");if($("timedPair"))$("timedPair").textContent=pair.replace("/"," / ");if($("tradeAssetName"))$("tradeAssetName").textContent=c?.name||sym;if($("tradeCurrentPrice"))$("tradeCurrentPrice").textContent=c?money(c.current_price):"—";if($("tradeCurrentChange")){$("tradeCurrentChange").textContent=c?pct(c.price_change_percentage_24h):"Waiting for market data";$("tradeCurrentChange").className=(c?.price_change_percentage_24h||0)>=0?"green":"red"}if($("tradeAvailable"))$("tradeAvailable").textContent=money(state.balance);}function doTrade(side){const sym=$("tradeAsset").value,c=priceFor(sym),amount=Number($("tradeUsd").value);const msg=$("tradeMessage");if(!c||!Number.isFinite(Number(c.current_price))||Number(c.current_price)<=0){msg.textContent="Market price unavailable. Refresh and try again.";msg.className="muted tiny red";return}if(!Number.isFinite(amount)||amount<1){msg.textContent="Enter an amount of at least $1.";msg.className="muted tiny red";return}const qty=amount/Number(c.current_price);state.holdings[sym]=Number(state.holdings[sym]||0);if(side==="buy"){if(amount>state.balance){msg.textContent="Insufficient USDT balance. Available: "+money(state.balance)+".";msg.className="muted tiny red";return}state.balance-=amount;state.holdings[sym]+=qty}else{if(qty>state.holdings[sym]+1e-10){msg.textContent="Insufficient "+sym+" balance. Available: "+state.holdings[sym].toFixed(8)+" "+sym+".";msg.className="muted tiny red";return}state.holdings[sym]=Math.max(0,state.holdings[sym]-qty);state.balance+=amount}const trade={side,symbol:sym,amount,qty,price:Number(c.current_price),time:new Date().toISOString(),demo:true};state.history.unshift(trade);recordActivity("trade",(side||"trade").toUpperCase()+" "+sym,money(amount)+" · "+Number(qty).toFixed(8)+" coins @ "+money(c.current_price),"Recorded · Paper trade");saveState();renderWallet();updateTradePreview();msg.className="muted tiny green";msg.textContent="TRADE RESULT RECORDED · "+side.toUpperCase()+" "+qty.toFixed(8)+" "+sym+" at "+money(c.current_price)+" per coin. Total: "+money(amount)+". Your OnChainSpro account result has been recorded.";renderTradeHistory();renderWalletCoinList();renderPnl();renderTradeOutcomes()}
 
 function renderBuyHoldOptions(){
  const select=$("buyHoldAsset");if(!select)return;
@@ -12230,5 +12230,31 @@ body:has(main > section[id^="page-"]:not(.hidden):not(#page-home)) > footer.oc-t
 #refreshBtn{display:none!important;visibility:hidden!important;pointer-events:none!important}
 body:not(.oc-visitor-mode):not(.oc-auth-screen):not(.oc-logged-out):has(#page-home:not(.hidden)) #refreshBtn{display:inline-flex!important;visibility:visible!important;pointer-events:auto!important}
 </style>
+
+<script type="module" id="oc-user-activity-firestore-sync">
+import { getApps } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+const app=getApps()[0];
+if(app){
+ const auth=getAuth(app),db=getFirestore(app);
+ window.addEventListener("oc-user-activity",async event=>{
+  const user=auth.currentUser;
+  if(!user)return;
+  const item=event.detail||{};
+  const allowed=["trade","deposit","withdraw","activity"];
+  try{
+   await addDoc(collection(db,"userActivityEvents"),{
+    uid:user.uid,email:String(user.email||"").slice(0,180),
+    type:allowed.includes(item.type)?item.type:"activity",
+    title:String(item.title||"User activity").slice(0,180),
+    details:String(item.details||"").slice(0,1000),
+    status:String(item.status||"Recorded").slice(0,80),
+    createdAt:serverTimestamp()
+   });
+  }catch(error){console.warn("User activity sync unavailable:",error.code||error);}
+ });
+}
+</script>
 </body>
 </html>
