@@ -778,7 +778,7 @@ if(localStorage.getItem("oc_demo_credit_10000_v1")==="granted"){
 }
 // Demo balance is not automatically credited; each user starts with zero unless explicitly granted.
 function readActivity(){try{return JSON.parse(localStorage.getItem("oc_activity_history")||"[]")}catch(e){return []}}
-function recordActivity(type,title,details,status="Recorded"){const items=readActivity();items.unshift({id:Date.now()+"-"+Math.random().toString(36).slice(2,7),type,title,details,status,time:new Date().toISOString()});localStorage.setItem("oc_activity_history",JSON.stringify(items.slice(0,1000)));renderActivityHistory()}
+function recordActivity(type,title,details,status="Recorded"){const event={type,title,details,status,time:new Date().toISOString()};const items=readActivity();items.unshift({id:Date.now()+"-"+Math.random().toString(36).slice(2,7),...event});localStorage.setItem("oc_activity_history",JSON.stringify(items.slice(0,1000)));try{window.dispatchEvent(new CustomEvent("oc-user-activity",{detail:event}))}catch(e){}renderActivityHistory()}
 function renderActivityHistory(){const el=$("walletHistory");if(!el)return;const filter=$("historyFilter")?.value||"all";const trades=state.history.map(t=>({type:"trade",title:(t.side||"trade").toUpperCase()+" "+String(t.symbol||""),details:money(t.amount)+" · "+Number(t.qty||0).toFixed(8)+" coins @ "+money(t.price),status:"Paper trade",time:t.time||new Date().toISOString()}));const all=[...trades,...readActivity()].sort((a,b)=>new Date(b.time)-new Date(a.time));const rows=all.filter(x=>filter==="all"||x.type===filter||((filter==="activity")&&x.type==="activity"));el.innerHTML=rows.length?rows.map(x=>'<div class="list-row"><div><strong>'+safe(x.title||x.type)+'</strong><div class="muted tiny">'+new Date(x.time).toLocaleString()+' · '+safe(x.status||"Recorded")+'</div><div class="muted tiny">'+safe(x.details||"") +'</div></div><span class="tag">'+safe((x.type||"activity").toUpperCase())+'</span></div>').join(""):'<div class="empty">No '+(filter==="all"?"activity":safe(filter)+" activity")+' recorded yet.</div>'}
 function priceFor(symbol){return market.find(c=>c.symbol.toUpperCase()===symbol.toUpperCase())}
 function coinIcon(c,size=29){return c?.image?'<span class="coin-icon"><img alt="" loading="lazy" src="'+safe(c.image)+'"></span>':'<span class="coin-icon">'+safe((c?.symbol||"?").slice(0,3).toUpperCase())+'</span>'}
@@ -2134,7 +2134,34 @@ main:has(> #page-browser:not(.hidden)) #quickAutoRange {
  if(source)new MutationObserver(showBalance).observe(source,{childList:true,characterData:true,subtree:true});
  setInterval(showBalance,5000);
  showBalance();
-})();</script></body>
+})();</script>
+<script type="module" id="oc-user-activity-firestore-sync">
+import { getApps } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+const app=getApps()[0];
+if(app){
+ const auth=getAuth(app),db=getFirestore(app);
+ window.addEventListener("oc-user-activity",async event=>{
+  const user=auth.currentUser;
+  if(!user)return;
+  const item=event.detail||{};
+  const allowed=["trade","deposit","withdraw","activity"];
+  try{
+   await addDoc(collection(db,"userActivityEvents"),{
+    uid:user.uid,
+    email:String(user.email||"").slice(0,180),
+    type:allowed.includes(item.type)?item.type:"activity",
+    title:String(item.title||"User activity").slice(0,180),
+    details:String(item.details||"").slice(0,1000),
+    status:String(item.status||"Recorded").slice(0,80),
+    createdAt:serverTimestamp()
+   });
+  }catch(error){console.warn("User activity sync unavailable:",error.code||error);}
+ });
+}
+</script>
+</body>
 </html>
 
 <style id="activity-history-compact-styles">
