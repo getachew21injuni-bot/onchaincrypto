@@ -32,7 +32,6 @@
 <button class="active" data-view="Dashboard"><span class="ico">◉</span>Dashboard</button>
 <button data-view="Users"><span class="ico">♟</span>Users <span class="pill">0</span></button>
 <button data-view="Login History"><span class="ico">◴</span>Login History</button>
-<button data-view="User Activity"><span class="ico">◷</span>User Activity</button>
 <button data-view="Notifications"><span class="ico">♧</span>Notification <span class="pill" style="background:#1d6b53">0</span></button>
 <button data-view="KYC"><span class="ico">▣</span>KYC <span class="pill">0</span></button>
 <button data-view="Email"><span class="ico">✉</span>Email</button>
@@ -53,7 +52,6 @@
 <h2 class="section-title">Quick Actions</h2>
 <div class="quick-grid">
 <button class="quick" data-view="Users"><span class="qicon">♟</span><span>Users</span></button>
-<button class="quick" data-view="User Activity"><span class="qicon">◷</span><span>User Activity</span></button>
 <button class="quick" data-view="Deposits"><span class="qicon">↓</span><span>Deposit</span></button>
 <button class="quick" data-view="Withdrawals"><span class="qicon">↑</span><span>Withdraw</span></button>
 <button class="quick" data-view="Transfers"><span class="qicon">⇄</span><span>Transfer</span></button>
@@ -78,7 +76,6 @@ const sidebar=document.getElementById('sidebar'),dashboard=document.getElementBy
 const descriptions={
 'Users':'Manage registered accounts after a secure user database is connected.',
 'Login History':'Review sign-in events through a server-side audit log.',
-'User Activity':'Review user trades and account activity recorded across devices.',
 'Notifications':'Create and review platform notices after notification services are connected.',
 'KYC':'Review identity-verification submissions securely. Do not upload identity documents to this preview.',
 'Email':'Prepare account announcements after a verified email service is configured.',
@@ -165,7 +162,6 @@ function renderLiveCollection(view){if(window.adminGetLiveCollection)window.admi
 function renderModule(view){
  const body=document.getElementById('detailBody');
  if(view==='Support'&&window.renderSupportInbox){window.renderSupportInbox();return;}
- if(view==='User Activity'){if(window.adminGetUserActivity)window.adminGetUserActivity();else body.textContent='Activity service is not ready. Refresh and sign in again.';return;}
  if(view==='Users'||view==='KYC'){renderLiveCollection(view);return;}
  if(view==='Analytics'){
   const data=loadAdminData();const counts=moduleNames.reduce((o,n)=>(o[n]=getRecords(n).length,o),{});
@@ -219,26 +215,6 @@ window.adminGetLiveCollection=async function(view){
  body.querySelectorAll('[data-kyc-review]').forEach(button=>button.addEventListener('click',async()=>{const decision=button.dataset.kycReview,id=button.dataset.kycId;if(!confirm('Save KYC decision: '+decision.toUpperCase()+'?'))return;button.disabled=true;try{await updateDoc(doc(db,'kycSubmissions',id),{status:decision,reviewedAt:serverTimestamp(),reviewedBy:auth.currentUser.email,updatedAt:serverTimestamp()});byId('kycReviewMessage').textContent='KYC '+decision+' and saved.';window.adminRefreshDashboard();window.adminGetLiveCollection('KYC');}catch(error){byId('kycReviewMessage').textContent='Could not save decision ('+(error.code||'unknown error')+'). Check that the updated Firestore rules have deployed.';button.disabled=false;}}));
  }catch(error){
   body.innerHTML='<div class="notice"><strong>Could not load live '+(isUsers?'profiles':'KYC submissions')+'.</strong><p>Firebase denied access or Firestore is unavailable ('+safeText(error.code||'unknown error')+'). Confirm the administrator email is verified and Firestore rules permit admin reads.</p></div>';
- }
-};
-window.adminGetUserActivity=async function(){
- const body=byId('detailBody');
- body.innerHTML='<div class="content-panel"><p class="muted">Loading user activity from Firestore…</p></div>';
- try{
-  const snap=await getDocs(query(collection(db,'userActivityEvents'),limit(300)));
-  const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>{
-   const at=a.createdAt&&typeof a.createdAt.toDate==='function'?a.createdAt.toDate().getTime():0;
-   const bt=b.createdAt&&typeof b.createdAt.toDate==='function'?b.createdAt.toDate().getTime():0;
-   return bt-at;
-  });
-  const esc= safeText;
-  const html=rows.map(r=>{
-   const when=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'—';
-   return '<tr><td>'+esc(r.email||'—')+'<div class="muted" style="font-size:11px">'+esc(r.uid||'')+'</div></td><td>'+esc(r.title||r.type||'Activity')+'</td><td>'+esc(r.details||'—')+'</td><td>'+esc(r.status||'Recorded')+'</td><td>'+esc(when)+'</td></tr>';
-  }).join('');
-  body.innerHTML='<div class="content-panel" style="margin:0"><div class="panel-head"><h3>User activity</h3><strong>'+rows.length+(rows.length===300?'+':'')+' event(s)</strong></div><p class="muted">Activity submitted by signed-in users and stored centrally in Firestore. Latest 300 events are shown.</p><div class="table-wrap"><table style="min-width:760px"><thead><tr><th>User</th><th>Activity</th><th>Details</th><th>Status</th><th>Time</th></tr></thead><tbody>'+(html||'<tr><td colspan="5" class="empty">No user activity has been recorded yet. New activity will appear here after users trade or open tracked account actions.</td></tr>')+'</tbody></table></div><p class="muted" id="userActivityMessage" role="status" aria-live="polite"></p></div>';
- }catch(error){
-  body.innerHTML='<div class="notice"><strong>Could not load user activity.</strong><p>Firestore denied access or the activity collection is unavailable ('+safeText(error.code||'unknown error')+'). Confirm the updated Firestore rules are deployed and sign in with the designated administrator account.</p></div>';
  }
 };
 window.adminRefreshDashboard=async function(){
