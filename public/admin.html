@@ -772,24 +772,46 @@ window.adminGetLiveCollection=async function(view){
   }));
  }catch(error){body.innerHTML='<div class="notice"><strong>Could not load live '+(isUsers?'profiles':'KYC submissions')+'.</strong><p>Firebase denied access or Firestore is unavailable ('+safeText(error.code||'unknown error')+'). Check administrator access and Firestore rules.</p></div>';}
 };
-window.adminGetUserActivity=async function(){
- const body=byId('detailBody');
- body.innerHTML='<div class="content-panel"><p class="muted">Loading user activity from Firestore…</p></div>';
- try{
-  const snap=await getDocs(query(collection(db,'userActivityEvents'),limit(300)));
-  const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>{
-   const at=a.createdAt&&typeof a.createdAt.toDate==='function'?a.createdAt.toDate().getTime():0;
-   const bt=b.createdAt&&typeof b.createdAt.toDate==='function'?b.createdAt.toDate().getTime():0;
-   return bt-at;
-  });
-  const html=rows.map(r=>{
-   const when=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'—';
-   return '<tr><td>'+safeText(r.email||'—')+'<div class="muted" style="font-size:11px">'+safeText(r.uid||'')+'</div></td><td>'+safeText(r.title||r.type||'Activity')+'</td><td>'+safeText(r.details||'—')+'</td><td>'+safeText(r.status||'Recorded')+'</td><td>'+safeText(when)+'</td></tr>';
-  }).join('');
-  body.innerHTML='<div class="content-panel" style="margin:0"><div class="panel-head"><h3>User activity</h3><strong>'+rows.length+(rows.length===300?'+':'')+' event(s)</strong></div><p class="muted">Latest 300 events stored centrally in Firestore. Events are associated with the signed-in user account.</p><div class="table-wrap"><table style="min-width:760px"><thead><tr><th>User</th><th>Activity</th><th>Details</th><th>Status</th><th>Time</th></tr></thead><tbody>'+(html||'<tr><td colspan="5" class="empty">No activity has been recorded yet.</td></tr>')+'</tbody></table></div></div>';
- }catch(error){
-  body.innerHTML='<div class="notice"><strong>Could not load user activity.</strong><p>Firestore denied access or the activity collection is unavailable ('+safeText(error.code||'unknown error')+'). Confirm Firestore rules are deployed and sign in with the administrator account.</p></div>';
- }
+let adminUserActivityUnsubs=[];
+window.adminGetUserActivity=function(){
+ const body=byId('detailBody'),api=window.__ocAdminFirebase;
+ adminUserActivityUnsubs.forEach(stop=>{try{stop();}catch(_){}});adminUserActivityUnsubs=[];
+ if(!api){body.textContent='Admin data connection is not ready. Refresh and sign in again.';return;}
+ const {db,collection,query,limit,onSnapshot}=api;
+ let general=[],audit=[],searchTerm='',typeFilter='all';
+ body.innerHTML='<div class="content-panel" style="margin:0"><div class="panel-head"><h3>User Activity Monitor</h3><span class="tag">CONNECTING</span></div><p class="muted">Combines trade and wallet events with sign-in, registration, profile, KYC, deposit, withdrawal and support audit events.</p><div class="oc-activity-tools" style="display:flex;flex-wrap:wrap;gap:9px;margin:14px 0"><input id="ocActivitySearch" type="search" placeholder="Search email, UID or activity…" aria-label="Search activity" style="flex:1;min-width:190px;padding:11px;border:1px solid var(--line);border-radius:10px;background:#080d16;color:var(--text)"><select id="ocActivityType" aria-label="Filter activity type" style="padding:11px;border:1px solid var(--line);border-radius:10px;background:#080d16;color:var(--text)"><option value="all">All activity</option><option value="trade">Trades</option><option value="deposit">Deposits</option><option value="withdraw">Withdrawals</option><option value="login">Logins</option><option value="logout">Logouts</option><option value="registration">Registrations</option><option value="profile_update">Profile updates</option><option value="kyc_submit">KYC</option><option value="deposit_request">Deposit requests</option><option value="withdrawal_request">Withdrawal requests</option><option value="support_message">Support messages</option><option value="activity">Other activity</option></select><button class="icon-btn" id="ocActivityExport" type="button">Export CSV</button><button class="icon-btn" id="ocActivityRefresh" type="button">Refresh view</button></div><div id="ocActivitySummary" class="muted" style="margin:8px 0 12px">Waiting for Firestore…</div><div class="table-wrap"><table style="min-width:900px"><thead><tr><th>User</th><th>Activity</th><th>Details</th><th>Status</th><th>Time</th><th>Source</th></tr></thead><tbody id="ocActivityRows"><tr><td colspan="6" class="empty">Connecting to activity feeds…</td></tr></tbody></table></div><p class="muted" style="font-size:11px;margin-top:12px">Live updates · Up to 300 events from each feed · No GPS or raw IP tracking. Export includes only the events currently loaded and filtered.</p></div>';
+ const search=byId('ocActivitySearch'),type=byId('ocActivityType'),rowsHost=byId('ocActivityRows'),summary=byId('ocActivitySummary');
+ const normalise=(r,source)=>{
+  const eventType=String(r.eventType||r.type||'activity').toLowerCase();
+  const map={deposit_request:'deposit_request',withdrawal_request:'withdrawal_request',kyc_submit:'kyc_submit',profile_update:'profile_update',support_message:'support_message'};
+  const title=r.title||r.eventTitle||eventType.replace(/_/g,' ');
+  const details=r.details||r.description||[r.device,r.browser,r.timezone].filter(Boolean).join(' · ')||'—';
+  return {email:r.email||r.uid||'Unknown',uid:r.uid||'',type:map[eventType]||eventType,title,details,status:r.status||'Recorded',createdAt:r.createdAt||null,source};
+ };
+ const timestamp=r=>r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().getTime():r.createdAt&&r.createdAt.seconds?r.createdAt.seconds*1000:0;
+ const allRows=()=>[...general.map(r=>normalise(r,'User events')),...audit.map(r=>normalise(r,'Account audit'))].sort((a,b)=>timestamp(b)-timestamp(a));
+ const filtered=()=>allRows().filter(r=>(typeFilter==='all'||r.type===typeFilter)&&(!searchTerm||[r.email,r.uid,r.type,r.title,r.details,r.status].join(' ').toLowerCase().includes(searchTerm)));
+ const render=()=>{
+  const list=filtered();
+  summary.textContent=list.length+' matching event(s) · '+general.length+' user events · '+audit.length+' account audit events';
+  rowsHost.innerHTML=list.length?list.map(r=>{
+   const when=timestamp(r)?new Date(timestamp(r)).toLocaleString():'Timestamp pending';
+   return '<tr><td>'+safeText(r.email)+'<div class="muted" style="font-size:11px">'+safeText(r.uid)+'</div></td><td><strong>'+safeText(r.title)+'</strong><div class="muted" style="font-size:11px">'+safeText(r.type.replace(/_/g,' '))+'</div></td><td>'+safeText(r.details)+'</td><td>'+safeText(r.status)+'</td><td>'+safeText(when)+'</td><td>'+safeText(r.source)+'</td></tr>';
+  }).join(''):'<tr><td colspan="6" class="empty">No matching events. New events will appear here when recorded.</td></tr>';
+ };
+ search.addEventListener('input',()=>{searchTerm=search.value.trim().toLowerCase();render();});
+ type.addEventListener('change',()=>{typeFilter=type.value;render();});
+ byId('ocActivityRefresh').addEventListener('click',render);
+ byId('ocActivityExport').addEventListener('click',()=>{
+  const list=filtered(),fields=['email','uid','type','title','details','status','time','source'];
+  const quote=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const csv=[fields.join(','),...list.map(r=>[r.email,r.uid,r.type,r.title,r.details,r.status,timestamp(r)?new Date(timestamp(r)).toISOString():'',r.source].map(quote).join(','))].join('\r\n');
+  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');
+  a.href=url;a.download='onchainspro-user-activity-'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+ });
+ const onError=label=>error=>{summary.textContent=label+' feed unavailable ('+(error.code||error.message||'permission error')+'). Check Firestore rules and administrator access.';};
+ adminUserActivityUnsubs.push(onSnapshot(query(collection(db,'userActivityEvents'),limit(300)),snap=>{general=snap.docs.map(d=>({id:d.id,...d.data()}));render();},onError('User events')));
+ adminUserActivityUnsubs.push(onSnapshot(query(collection(db,'adminActivityLogs'),limit(300)),snap=>{audit=snap.docs.map(d=>({id:d.id,...d.data()}));render();},onError('Account audit')));
 };
 window.adminRefreshDashboard=async function(){
  const api=window.__ocAdminFirebase;
