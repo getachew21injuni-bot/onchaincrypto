@@ -431,6 +431,26 @@ service cloud.firestore {
 
     // User-submitted account activity. Members can append only their own
     // limited event metadata; only verified administrators can read the feed.
+    // Central user activity feed. Users may append only their own events;
+    // only the designated administrator can read events across accounts.
+    match /userActivityEvents/{eventId} {
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid','email','type','title','details','status','createdAt'])
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 180
+        && request.resource.data.type in ['trade','deposit','withdraw','activity']
+        && request.resource.data.title is string
+        && request.resource.data.title.size() <= 180
+        && request.resource.data.details is string
+        && request.resource.data.details.size() <= 1000
+        && request.resource.data.status is string
+        && request.resource.data.status.size() <= 80
+        && request.resource.data.createdAt == request.time;
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow update, delete: if false;
+    }
+
     match /adminActivityLogs/{logId} {
       allow create: if signedIn()
         && request.resource.data.uid == request.auth.uid
