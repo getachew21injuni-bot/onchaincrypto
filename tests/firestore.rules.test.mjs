@@ -169,6 +169,63 @@ describe("admin-approved internal USDT transfer security", () => {
 });
 
 
+describe("administrator-initiated private support messages", () => {
+  it("lets the verified admin message one registered user and lets only that user reply", async () => {
+    const admin = adminDb();
+    const ticketId = "admin-direct-recipient";
+    const ticketRef = doc(admin, "supportTickets", ticketId);
+    await assertSucceeds(setDoc(ticketRef, {
+      ownerUid: "recipient",
+      customerEmail: "recipient@example.com",
+      customerName: "Recipient",
+      subject: "Message from Onchain Support",
+      status: "open",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      lastMessage: "Your account update is ready.",
+      source: "admin-direct"
+    }));
+    await assertSucceeds(setDoc(doc(admin, "supportTickets", ticketId, "messages", "admin-message"), {
+      senderUid: "admin",
+      senderRole: "admin",
+      senderName: "Onchain Support",
+      text: "Your account update is ready.",
+      createdAt: serverTimestamp()
+    }));
+
+    const recipient = testEnv.authenticatedContext("recipient").firestore();
+    const savedTicket = await assertSucceeds(getDoc(doc(recipient, "supportTickets", ticketId)));
+    assert.equal(savedTicket.data().ownerUid, "recipient");
+    const messages = await assertSucceeds(getDocs(collection(recipient, "supportTickets", ticketId, "messages")));
+    assert.equal(messages.size, 1);
+    await assertSucceeds(setDoc(doc(recipient, "supportTickets", ticketId, "messages", "customer-reply"), {
+      senderUid: "recipient",
+      senderRole: "customer",
+      senderName: "Recipient",
+      text: "Thank you.",
+      createdAt: serverTimestamp()
+    }));
+
+    const otherCustomer = testEnv.authenticatedContext("sender").firestore();
+    await assertFails(getDoc(doc(otherCustomer, "supportTickets", ticketId)));
+  });
+
+  it("blocks a customer from creating an administrator-originated conversation", async () => {
+    const customer = testEnv.authenticatedContext("recipient").firestore();
+    await assertFails(setDoc(doc(customer, "supportTickets", "forged-admin-message"), {
+      ownerUid: "sender",
+      customerEmail: "sender@example.com",
+      customerName: "Sender",
+      subject: "Message from Onchain Support",
+      status: "open",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      lastMessage: "Forged admin message",
+      source: "admin-direct"
+    }));
+  });
+});
+
 describe("per-account trade wallet persistence", () => {
   it("allows a member to save and reload only their own trade balance, holdings and history", async () => {
     const db = testEnv.authenticatedContext("wallet-owner").firestore();
