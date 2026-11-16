@@ -322,7 +322,7 @@ async function deleteAccount(request, env) {
 
     stage = "remove-private-and-profile-records";
     const deleteWrites = [
-      "users", "userDirectory", "kycSubmissions", "brokerConnectionRequests"
+      "userDirectory", "kycSubmissions", "brokerConnectionRequests"
     ].map((collection) => deleteWrite(
       `projects/${PROJECT_ID}/databases/(default)/documents/${collection}/${uid}`
     ));
@@ -365,6 +365,13 @@ async function deleteAccount(request, env) {
       )];
       if (tradeState) archiveWrites.push(deleteWrite(tradeState.name));
       await commitWrites(accessToken, archiveWrites);
+    }
+
+    // Delete the personal profile only after its financial/admin balance fields
+    // have been safely copied to the pseudonymous retained record.
+    stage = "remove-personal-profile";
+    if (userProfile) {
+      await commitWrites(accessToken, [deleteWrite(userProfile.name)]);
     }
 
     stage = "delete-auth-account";
