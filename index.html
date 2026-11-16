@@ -846,17 +846,18 @@ document.addEventListener("click",function(event){
  signalVisibleCount=signalVisibleCount>=total?5:Math.min(signalVisibleCount+5,total);
  renderSignalScanner();
 });
-function tradePairFor(symbol){const sym=String(symbol||"BTC").trim().toUpperCase();return sym==="USDT"?"USDT/USDC":sym+"/USDT"}
+function tradePairFor(symbol){const sym=String(symbol||"BTC").trim().toUpperCase();return sym==="USDT"?"USDT · Quick Trade unavailable":sym+"/USDT"}
 function updateTradingViewChart(symbol){
  const frame=$("tradingViewChart");if(!frame)return;
  const sym=String(symbol||"BTC").trim().toUpperCase();
- const pair=sym==="USDT"?"USDTUSDC":sym+"USDT";
+ if(sym==="USDT"){frame.src="about:blank";frame.title="USDT Quick Trade is unavailable until a verified direct pair is supported.";return}
+ const pair=sym+"USDT";
  frame.src="https://www.tradingview.com/widgetembed/?symbol="+encodeURIComponent("BINANCE:"+pair)+"&interval=15&theme=dark&style=1&locale=en&hide_top_toolbar=false&allow_symbol_change=false&save_image=false";
 }
 function renderTradePairOptions(query=""){
  const host=$("tradePairOptions");if(!host)return;
  const q=String(query||"").trim().toLowerCase();
- const rows=market.filter(c=>c&&c.symbol&&(!q||String(c.symbol).toLowerCase().includes(q)||String(c.name||"").toLowerCase().includes(q))).slice(0,150);
+ const rows=market.filter(c=>c&&c.symbol&&String(c.symbol).toUpperCase()!=="USDT"&&(!q||String(c.symbol).toLowerCase().includes(q)||String(c.name||"").toLowerCase().includes(q))).slice(0,150);
  host.innerHTML=rows.length?rows.map(c=>{const sym=String(c.symbol).toUpperCase();const active=(($("tradeAsset")?.value||selected).toUpperCase()===sym);return '<button type="button" role="option" aria-selected="'+active+'" class="trade-pair-option '+(active?"selected":"")+'" data-trade-pair="'+safe(sym)+'">'+coinIcon(c,30)+'<span class="trade-pair-option-name"><strong>'+safe(tradePairFor(sym).replace("/"," / "))+'</strong><small>'+safe(c.name||sym)+'</small></span><span class="trade-pair-price">'+money(c.current_price)+'</span></button>'}).join(""):'<div class="trade-pair-empty">No matching coins found.</div>';
 }
 function openTradePairMenu(open){
