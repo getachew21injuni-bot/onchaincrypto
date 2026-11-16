@@ -22,7 +22,7 @@ The worker intentionally preflights record counts before disabling the account. 
 1. In Cloudflare, create a new Worker named `onchaincrypto-admin-api`.
 2. Deploy `worker.js` as the Worker entry point. You can paste the file into the dashboard editor or deploy it with Wrangler.
 3. In **Settings → Variables and Secrets**, add a **Secret** named `FIREBASE_SERVICE_ACCOUNT`.
-4. Set its value to the JSON contents of the Firebase service-account key. The key must remain a Cloudflare Secret; never commit it to GitHub or paste it into chat. You may use the existing service-account key already held by the `onchaincrypto-deposit-verifier` Worker, but first confirm that its service account has the permissions below.
+4. Set its value to the complete JSON contents of a Firebase service-account key. The key must remain a Cloudflare Secret; never commit it to GitHub or paste it into chat. Cloudflare does not reveal a saved secret again, so you cannot copy the value back out of the existing Worker. If you no longer have the original JSON key file, create a new key for the existing service account (or create a dedicated service account) in Google Cloud IAM, then add the required roles below.
 5. Deploy the Worker after adding the secret.
 6. Confirm `GET https://<your-worker-subdomain>.workers.dev/health` returns `{"ok":true,"service":"onchainspro-admin-api"}`.
 
