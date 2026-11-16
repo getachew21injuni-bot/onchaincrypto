@@ -419,7 +419,10 @@ async function renderDemoFinance(view){
     if(targets.includes('USDT')){userUpdate.demoBalanceUSDT=usdtAfter;userUpdate.demoBalanceUpdatedAt=serverTimestamp();}
     batch.update(userRef,userUpdate);
     const notificationRef=doc(collection(db,'userNotifications',uid,'items'));
-    batch.set(notificationRef,{kind:isDeposit?'deposit':'withdrawal',title:isDeposit?'Account deposit adjustment recorded':'Account withdrawal adjustment recorded',message:(isDeposit?'Your account balance was adjusted by ':'An account balance adjustment of ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+'. '+(note?'Admin note: '+note:'This updates your OnChain account ledger only; no blockchain transfer is sent.'),createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:window.__ocAdminFirebase.auth.currentUser.uid,source:'admin-demo'});
+    const adminUser=window.__ocAdminFirebase.auth.currentUser;
+    const activityRef=doc(collection(db,'userActivityEvents'));
+    batch.set(notificationRef,{kind:isDeposit?'deposit':'withdrawal',title:isDeposit?'Account deposit adjustment recorded':'Account withdrawal adjustment recorded',message:(isDeposit?'Your account balance was adjusted by ':'An account balance adjustment of ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+'. '+(note?'Admin note: '+note:'This updates your OnChain account ledger only; no blockchain transfer is sent.'),createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:adminUser.uid,source:'admin-demo'});
+    batch.set(activityRef,{uid,email:selected.email||selected.emailAddress||'Unknown',type:isDeposit?'deposit':'withdraw',title:isDeposit?'Admin deposit successful':'Admin withdrawal successful',details:'Admin '+(isDeposit?'credited ':'debited ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' · Internal account ledger adjustment'+(note?' · Note: '+note:''),status:'Successful',createdAt:serverTimestamp(),createdBy:adminUser.uid,source:'admin-wallet-adjustment'});
     for(const c of changes){
      const txRef=doc(collection(db,c.symbol==='USDT'?'demoTransactions':'demoAssetTransactions'));
      if(c.symbol==='USDT'){
@@ -429,9 +432,20 @@ async function renderDemoFinance(view){
      }
     }
     await batch.commit();
-    msg.textContent=(isDeposit?'Added ':'Deducted ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'of every supported asset':asset)+'. The user wallet has been published to Firebase.';
+    msg.textContent=(isDeposit?'Deposit successful: ':'Withdrawal successful: ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'of every supported asset':asset)+'. Wallet, transaction ledger, user notification, and live User Activity event were saved together.';
     await renderDemoFinance(view);
-   }catch(err){msg.textContent='Could not publish wallet update ('+(err.code||err.message||'error')+'). Check admin verification and deploy the updated Firestore rules.';}
+   }catch(err){
+    const failure='Could not publish wallet update ('+(err.code||err.message||'error')+').';
+    try{
+     const adminUser=window.__ocAdminFirebase.auth.currentUser;
+     await window.__ocAdminFirebase.setDoc(doc(collection(db,'userActivityEvents')),{uid,email:selected.email||selected.emailAddress||'Unknown',type:isDeposit?'deposit':'withdraw',title:isDeposit?'Admin deposit failed':'Admin withdrawal failed',details:'Admin '+(isDeposit?'deposit':'withdrawal')+' adjustment was not completed. '+String(err.code||err.message||'Unknown error').slice(0,300),status:'Failed',createdAt:serverTimestamp(),createdBy:adminUser.uid,source:'admin-wallet-adjustment'});
+    }catch(logError){console.error('Could not record failed admin wallet adjustment:',logError);}
+    msg.textContent=failure+' No successful wallet update was recorded. Check administrator permissions and Firestore rules.';btn.disabled=false;
+   }
+  }); 
+ }
+}
+erification and deploy the updated Firestore rules.';}
    finally{const b=form.querySelector('button[type=submit]');if(b)b.disabled=false;}
   });
  }catch(error){body.innerHTML='<div class="notice"><strong>Could not load account ledger.</strong><p>Firestore access failed ('+esc(error.code||error.message||'unknown error')+'). Verify admin access and deploy the updated Firestore rules.</p></div>';}
