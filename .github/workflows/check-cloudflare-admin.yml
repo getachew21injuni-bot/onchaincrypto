@@ -1,0 +1,28 @@
+name: Check Cloudflare admin worker
+
+on:
+  push:
+    branches:
+      - feature/cloudflare-admin-delete
+    paths:
+      - "cloudflare/admin-api/**"
+      - ".github/workflows/check-cloudflare-admin.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-worker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check Worker JavaScript syntax
+        run: node --check cloudflare/admin-api/worker.js
+      - name: Check Wrangler configuration
+        run: |
+          npm install --global wrangler
+          wrangler deploy --dry-run --outdir /tmp/onchainspro-admin-worker --config cloudflare/admin-api/wrangler.toml
