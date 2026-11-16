@@ -434,7 +434,8 @@ service cloud.firestore {
     // Central user activity feed. Users may append only their own events;
     // only the designated administrator can read events across accounts.
     match /userActivityEvents/{eventId} {
-      allow create: if signedIn()
+      allow create: if (
+        signedIn()
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.keys().hasOnly(['uid','email','type','title','details','status','createdAt'])
         && request.resource.data.email is string
@@ -446,7 +447,23 @@ service cloud.firestore {
         && request.resource.data.details.size() <= 1000
         && request.resource.data.status is string
         && request.resource.data.status.size() <= 80
-        && request.resource.data.createdAt == request.time;
+        && request.resource.data.createdAt == request.time
+      ) || (
+        isAdmin()
+        && request.resource.data.uid is string
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 180
+        && request.resource.data.type in ['deposit','withdraw']
+        && request.resource.data.title is string
+        && request.resource.data.title.size() <= 180
+        && request.resource.data.details is string
+        && request.resource.data.details.size() <= 1000
+        && request.resource.data.status in ['Successful','Failed']
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.source == 'admin-wallet-adjustment'
+        && request.resource.data.keys().hasOnly(['uid','email','type','title','details','status','createdAt','createdBy','source'])
+      );
       allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
       allow update, delete: if false;
     }
