@@ -699,7 +699,7 @@ window.adminGetLiveCollection=async function(view){
  const body=byId('detailBody'),isUsers=view==='Users',collectionName=isUsers?'users':'kycSubmissions';
  body.innerHTML='<div class="content-panel"><p class="muted">Loading live Firebase data…</p></div>';
  try{
-  const snap=await getDocs(query(collection(db,collectionName),limit(100))),rows=snap.docs.map(d=>({id:d.id,...d.data()}));
+  const snap=await getDocs(query(collection(db,collectionName),limit(100))),rows=snap.docs.map(d=>({...d.data(),id:d.id}));
   if(isUsers){
    let walletMap=new Map(),walletReadError=false;
    try{
