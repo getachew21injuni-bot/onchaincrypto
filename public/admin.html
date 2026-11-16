@@ -686,13 +686,11 @@ document.getElementById('moreBtn').addEventListener('click',()=>showView('Settin
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
 import { getFirestore, collection, getDocs, query, limit, doc, setDoc, deleteDoc, writeBatch, serverTimestamp, runTransaction, onSnapshot } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"});
 
 const auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
-const functions=getFunctions(app,'us-central1');
-const adminDeleteUserCall=httpsCallable(functions,'adminDeleteUser');
+const ADMIN_DELETE_API='https://onchain-admin-api.getachew21-inj-uni.workers.dev/admin/delete-user';
 window.__ocAdminFirebase={auth,db,collection,getDocs,query,limit,doc,setDoc,deleteDoc,writeBatch,serverTimestamp,runTransaction,onSnapshot};
 const safeText=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 window.adminGetLiveCollection=async function(view){
@@ -912,9 +910,17 @@ document.addEventListener('click', async (event) => {
  const oldText = button.textContent;
  button.textContent = 'Deleting...';
  try {
-  const result = await adminDeleteUserCall({uid:uid, confirmation:'DELETE'});
-  if (!result.data?.ok) throw new Error('Server did not confirm deletion.');
-  alert('Account deleted. Audit reference: ' + (result.data.reference || 'retained'));
+  const idToken = await current.getIdToken(true);
+  const response = await fetch(ADMIN_DELETE_API, {
+   method: 'POST',
+   headers: {'Authorization':'Bearer '+idToken,'Content-Type':'application/json'},
+   body: JSON.stringify({uid:uid, confirmation:'DELETE'})
+  });
+  const result = await response.json().catch(()=>({}));
+  if (!response.ok || result.ok !== true) {
+   throw new Error((result.error || 'Server did not confirm deletion.') + (result.stage ? ' (stage: '+result.stage+')' : ''));
+  }
+  alert('Account deleted. Audit reference: ' + (result.reference || 'retained'));
   await window.adminGetLiveCollection('Users');
   await window.adminRefreshDashboard();
  } catch (error) {
