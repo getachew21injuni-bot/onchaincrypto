@@ -440,13 +440,8 @@ async function renderDemoFinance(view){
      const adminUser=window.__ocAdminFirebase.auth.currentUser;
      await window.__ocAdminFirebase.setDoc(doc(collection(db,'userActivityEvents')),{uid,email:selected.email||selected.emailAddress||'Unknown',type:isDeposit?'deposit':'withdraw',title:isDeposit?'Admin deposit failed':'Admin withdrawal failed',details:'Admin '+(isDeposit?'deposit':'withdrawal')+' adjustment was not completed. '+String(err.code||err.message||'Unknown error').slice(0,300),status:'Failed',createdAt:serverTimestamp(),createdBy:adminUser.uid,source:'admin-wallet-adjustment'});
     }catch(logError){console.error('Could not record failed admin wallet adjustment:',logError);}
-    msg.textContent=failure+' No successful wallet update was recorded. Check administrator permissions and Firestore rules.';btn.disabled=false;
-   }
-  }); 
- }
-}
-erification and deploy the updated Firestore rules.';}
-   finally{const b=form.querySelector('button[type=submit]');if(b)b.disabled=false;}
+    msg.textContent=failure+' No successful wallet update was recorded. Check administrator permissions and Firestore rules.';
+   }finally{const b=form.querySelector('button[type=submit]');if(b)b.disabled=false;}
   });
  }catch(error){body.innerHTML='<div class="notice"><strong>Could not load account ledger.</strong><p>Firestore access failed ('+esc(error.code||error.message||'unknown error')+'). Verify admin access and deploy the updated Firestore rules.</p></div>';}
 }
