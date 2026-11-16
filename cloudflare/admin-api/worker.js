@@ -1,6 +1,6 @@
 const PROJECT_ID = "onchaincrypto-d976b";
 const ADMIN_EMAIL = "getachew21inj.uni@gmail.com";
-const AUTH_API = "https://identitytoolkit.googleapis.com/v1";
+const AUTH_API = `https://identitytoolkit.googleapis.com/v1/projects/${PROJECT_ID}`;
 const FIRESTORE_API = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const JWKS_URL = "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com";
@@ -240,7 +240,7 @@ async function deleteAccount(request, env) {
   let stage = "account-check";
   try {
     const accountInfo = await googleJson(AUTH_API + "/accounts:lookup", accessToken, {
-      localId: [uid], targetProjectId: PROJECT_ID
+      localId: [uid]
     });
     const target = (accountInfo.users || [])[0];
     if (!target) return json({ error: "The selected sign-in account was not found." }, 404, origin);
@@ -309,7 +309,7 @@ async function deleteAccount(request, env) {
 
     stage = "disable-account";
     await googleJson(AUTH_API + "/accounts:update", accessToken, {
-      localId: uid, disableUser: true, targetProjectId: PROJECT_ID
+      localId: uid, disableUser: true
     });
 
     stage = "scrub-financial-records";
@@ -347,7 +347,7 @@ async function deleteAccount(request, env) {
 
     stage = "delete-auth-account";
     await googleJson(AUTH_API + "/accounts:delete", accessToken, {
-      localId: uid, targetProjectId: PROJECT_ID
+      localId: uid
     });
 
     stage = "audit-complete";
