@@ -156,8 +156,7 @@ async function googleJson(url, accessToken, body, method = "POST") {
 }
 
 async function runQuery(accessToken, collection, field, uid, parent = "") {
-  const parentPath = parent ? "/documents/" + parent : "/documents";
-  const url = FIRESTORE_API + parentPath + ":runQuery";
+  const url = FIRESTORE_API + (parent ? "/" + parent : "") + ":runQuery";
   const result = await googleJson(url, accessToken, {
     structuredQuery: {
       from: [{ collectionId: collection }],
