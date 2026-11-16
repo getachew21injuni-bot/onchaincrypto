@@ -248,6 +248,7 @@ async function deleteAccount(request, env) {
     }
 
     // Read and preflight all records before changing account access.
+    const pseudonymousUid = "deleted_" + await sha256(uid);
     stage = "preflight-financial-records";
     const financialDocs = new Map();
     for (const entry of FINANCIAL_COLLECTIONS) {
@@ -261,7 +262,7 @@ async function deleteAccount(request, env) {
         const fields = {};
         const mask = new Set([...entry.fields, ...PERSONAL_FIELDS]);
         for (const field of entry.fields) {
-          if (doc.fields?.[field]?.stringValue === uid) fields[field] = str("deleted_" + await sha256(uid));
+          if (doc.fields?.[field]?.stringValue === uid) fields[field] = str(pseudonymousUid);
         }
         financialDocs.set(name, updateWrite(name, fields, [...mask]));
       }
@@ -279,6 +280,7 @@ async function deleteAccount(request, env) {
     for (const ticket of ticketMap.values()) {
       const ticketPath = ticket.name.split("/documents/")[1];
       const messages = await listDocuments(accessToken, ticketPath, "messages");
+      if (messages.length >= 1000) throw new Error("private-record-limit-exceeded");
       messageNames.push(...messages.map((item) => item.name));
       if (messageNames.length > 1000) throw new Error("private-record-limit-exceeded");
     }
@@ -286,7 +288,6 @@ async function deleteAccount(request, env) {
     if (notifications.length >= 1000) throw new Error("private-record-limit-exceeded");
     const tradeState = await getDocument(accessToken, "userTradeState/" + uid);
 
-    const pseudonymousUid = "deleted_" + await sha256(uid);
     const auditId = crypto.randomUUID();
     auditName = `projects/${PROJECT_ID}/databases/(default)/documents/adminAuditLogs/${auditId}`;
     stage = "audit-start";
