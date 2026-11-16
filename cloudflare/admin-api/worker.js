@@ -1,5 +1,5 @@
 const PROJECT_ID = "onchaincrypto-d976b";
-const ADMIN_EMAIL = "getachew21inj.uni@gmail.com";
+const ADMIN_EMAIL = "getachew21.inj.uni@gmail.com";
 const AUTH_API = `https://identitytoolkit.googleapis.com/v1/projects/${PROJECT_ID}`;
 const FIRESTORE_API = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
@@ -24,7 +24,9 @@ const FINANCIAL_COLLECTIONS = [
   { name: "withdrawRequests", fields: ["uid"] },
   { name: "internalTransferRequests", fields: ["senderUid", "recipientUid"] },
   { name: "internalTransfers", fields: ["senderUid", "recipientUid"] },
-  { name: "adminActivityLogs", fields: ["uid"] }
+  { name: "adminActivityLogs", fields: ["uid"] },
+  { name: "userActivityEvents", fields: ["uid"] },
+  { name: "adminWalletResetLogs", fields: ["uid"] }
 ];
 let jwksCache = null;
 let jwksExpiresAt = 0;
@@ -251,7 +253,7 @@ async function deleteAccount(request, env) {
     }
 
     // Read and preflight all records before changing account access.
-    const pseudonymousUid = "deleted_" + await sha256(uid);
+    const pseudonymousUid = "deleted_" + (await sha256(uid)).slice(0, 32);
     stage = "preflight-financial-records";
     const financialDocs = new Map();
     for (const entry of FINANCIAL_COLLECTIONS) {
@@ -290,6 +292,9 @@ async function deleteAccount(request, env) {
     const notifications = await listDocuments(accessToken, "userNotifications/" + uid, "items");
     if (notifications.length >= 1000) throw new Error("private-record-limit-exceeded");
     const tradeState = await getDocument(accessToken, "userTradeState/" + uid);
+    const userProfile = await getDocument(accessToken, "users/" + uid);
+    const archivedTradeState = await getDocument(accessToken, "userTradeState/" + pseudonymousUid);
+    if (archivedTradeState) throw new Error("pseudonymous-record-already-exists");
 
     const auditId = crypto.randomUUID();
     auditName = `projects/${PROJECT_ID}/databases/(default)/documents/adminAuditLogs/${auditId}`;
@@ -329,20 +334,37 @@ async function deleteAccount(request, env) {
     ));
     await commitWrites(accessToken, deleteWrites);
 
-    if (tradeState) {
-      const fields = { ...(tradeState.fields || {}) };
+    {
+      const fields = { ...(tradeState?.fields || {}) };
       for (const field of PERSONAL_FIELDS) delete fields[field];
+      // Preserve admin-managed wallet balances and trading controls from users/{uid}
+      // before the personal profile is removed. The archived record is inaccessible
+      // to the deleted account and remains available for reconciliation.
+      const retainedProfileFields = [
+        "demoBalanceUSDT", "demoBalanceUpdatedAt", "demoAssetBalances",
+        "demoAssetBalancesUpdatedAt", "demoWalletResetAt", "demoBalanceLastTransferId",
+        "tradingEnabled", "maxTradeAmountUSDT", "demoTradeControlMode",
+        "demoWinPercent", "demoLossPercent", "tradeControlUpdatedAt",
+        "tradeControlUpdatedBy"
+      ];
+      for (const field of retainedProfileFields) {
+        if (userProfile?.fields?.[field] !== undefined) fields[field] = userProfile.fields[field];
+      }
       fields.uid = str(pseudonymousUid);
-      const mask = [...new Set([...Object.keys(tradeState.fields || {}), ...PERSONAL_FIELDS, "uid"])];
+      const mask = [...new Set([
+        ...Object.keys(tradeState?.fields || {}),
+        ...PERSONAL_FIELDS,
+        ...retainedProfileFields,
+        "uid"
+      ])];
       stage = "preserve-wallet-ledger";
-      await commitWrites(accessToken, [
-        updateWrite(
-          `projects/${PROJECT_ID}/databases/(default)/documents/userTradeState/${pseudonymousUid}`,
-          fields,
-          mask
-        ),
-        deleteWrite(tradeState.name)
-      ]);
+      const archiveWrites = [updateWrite(
+        `projects/${PROJECT_ID}/databases/(default)/documents/userTradeState/${pseudonymousUid}`,
+        fields,
+        mask
+      )];
+      if (tradeState) archiveWrites.push(deleteWrite(tradeState.name));
+      await commitWrites(accessToken, archiveWrites);
     }
 
     stage = "delete-auth-account";
@@ -393,9 +415,11 @@ async function deleteAccount(request, env) {
         }]);
       } catch {}
     }
-    const limitError = ["record-limit-exceeded", "support-ticket-limit-exceeded", "private-record-limit-exceeded"].includes(error.message);
+    const limitError = ["record-limit-exceeded", "support-ticket-limit-exceeded", "private-record-limit-exceeded", "pseudonymous-record-already-exists"].includes(error.message);
     return json({
-      error: limitError
+      error: error.message === "pseudonymous-record-already-exists"
+        ? "A retained archive already exists for this account. Deletion was stopped to prevent overwriting it."
+        : limitError
         ? "This account has more records than the safe one-request cleanup limit. No deletion was started."
         : "Account deletion could not be completed. The member may have been disabled; check the admin audit log before retrying.",
       stage,
