@@ -155,7 +155,7 @@ service cloud.firestore {
       allow read: if owns(uid) || isAdmin();
       allow create: if isAdmin()
         && request.resource.data.keys().hasOnly(['kind','title','message','createdAt','createdAtText','readAt','createdBy','source'])
-        && request.resource.data.kind in ['kyc_approved','kyc_rejected','deposit','withdrawal']
+        && request.resource.data.kind in ['kyc_approved','kyc_rejected','deposit','withdrawal','withdrawal_approved']
         && request.resource.data.title is string && request.resource.data.title.size() <= 120
         && request.resource.data.message is string && request.resource.data.message.size() <= 500
         && request.resource.data.createdBy == request.auth.uid
