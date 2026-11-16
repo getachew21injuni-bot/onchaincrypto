@@ -200,7 +200,10 @@ const app=initializeApp({apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDo
 
 const auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
 const safeText=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const adminCollectionLoads=new Set();
 window.adminGetLiveCollection=async function(view){
+ if(adminCollectionLoads.has(view))return;
+ adminCollectionLoads.add(view);
  const body=byId('detailBody'),collectionName=view==='Users'?'users':'kycSubmissions',isUsers=view==='Users';
  body.innerHTML='<div class="content-panel"><p class="muted">Loading live Firebase data…</p></div>';
  try{
@@ -215,7 +218,7 @@ window.adminGetLiveCollection=async function(view){
  body.querySelectorAll('[data-kyc-review]').forEach(button=>button.addEventListener('click',async()=>{const decision=button.dataset.kycReview,id=button.dataset.kycId;if(!confirm('Save KYC decision: '+decision.toUpperCase()+'?'))return;button.disabled=true;try{await updateDoc(doc(db,'kycSubmissions',id),{status:decision,reviewedAt:serverTimestamp(),reviewedBy:auth.currentUser.email,updatedAt:serverTimestamp()});byId('kycReviewMessage').textContent='KYC '+decision+' and saved.';window.adminRefreshDashboard();window.adminGetLiveCollection('KYC');}catch(error){byId('kycReviewMessage').textContent='Could not save decision ('+(error.code||'unknown error')+'). Check that the updated Firestore rules have deployed.';button.disabled=false;}}));
  }catch(error){
   body.innerHTML='<div class="notice"><strong>Could not load live '+(isUsers?'profiles':'KYC submissions')+'.</strong><p>Firebase denied access or Firestore is unavailable ('+safeText(error.code||'unknown error')+'). Confirm the administrator email is verified and Firestore rules permit admin reads.</p></div>';
- }
+ }finally{adminCollectionLoads.delete(view)}
 };
 let adminDashboardRefreshPromise=null;
 window.adminRefreshDashboard=async function(){
