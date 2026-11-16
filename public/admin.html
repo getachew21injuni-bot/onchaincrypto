@@ -912,11 +912,9 @@ document.addEventListener('click', async (event) => {
  const oldText = button.textContent;
  button.textContent = 'Deleting...';
  try {
-  const password = prompt('For security, re-enter the administrator password to continue:');
-  if (password === null || !password) throw new Error('Deletion cancelled. Administrator re-authentication is required.');
-  const credential = EmailAuthProvider.credential(current.email, password);
-  const reauthenticated = await reauthenticateWithCredential(current, credential);
-  const idToken = await reauthenticated.user.getIdToken(true);
+  // Use the current administrator session. The server independently enforces
+  // a recent sign-in (auth_time); do not ask for the password a second time here.
+  const idToken = await current.getIdToken(true);
   const response = await fetch('https://onchain-admin-api.getachew21-inj-uni.workers.dev/admin/delete-user', {
    method: 'POST',
    headers: {
