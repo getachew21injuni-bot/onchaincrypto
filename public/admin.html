@@ -295,7 +295,7 @@ async function renderRequestQueue(view){
    if(!confirm(action==='approve'?'Approve this request as an internal account-balance adjustment? No blockchain payment or payout will occur.':'Reject this request?'))return;
    button.disabled=true;const msg=document.getElementById('ocRequestMessage');if(msg)msg.textContent='Processing request securely…';
    try{
-    const requestRef=doc(db,collectionName,id),userRef=doc(db,'users',req.uid);
+    const requestRef=doc(db,collectionName,id),userRef=doc(db,'users',req.uid),notificationRef=doc(collection(db,'userNotifications',req.uid,'items'));
     const ledgerRef=doc(collection(db,'demoAssetTransactions')),usdtLedgerRef=doc(collection(db,'demoTransactions'));
     await runTransaction(db,async tx=>{
      const rs=await tx.get(requestRef);if(!rs.exists()||(rs.data().status||'pending')!=='pending')throw new Error('request-already-processed');
@@ -310,9 +310,10 @@ async function renderRequestQueue(view){
      else tx.update(userRef,{demoAssetBalances:{...(data.demoAssetBalances||{}),[asset]:after},demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:current.email});
      if(asset==='USDT')tx.set(usdtLedgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request account adjustment':'Withdrawal request account adjustment'),source:'admin-demo',status:'completed'});
      else tx.set(ledgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request account adjustment':'Withdrawal request account adjustment'),source:'admin-demo',status:'completed'});
+     tx.set(notificationRef,{kind:deposit?'deposit':'withdrawal_approved',title:deposit?'Successfully deposited '+amount.toLocaleString()+' '+asset:'Withdrawal successfully processed',message:deposit?'Successfully deposited '+amount.toLocaleString()+' '+asset+' to your account. Your account balance has been updated.':'Your withdrawal of '+amount.toLocaleString()+' '+asset+' was successfully processed as an account balance adjustment. This dashboard does not send an external blockchain payout.',createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:current.uid,source:'admin-demo'});
      tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email});
     });
-    if(msg)msg.textContent=action==='approve'?'Approved. The account ledger was updated. No blockchain payment or payout occurred.':'Request rejected.';
+    if(msg)msg.textContent=action==='approve'?(kind==='deposit'?'Deposit approved and credited. The user was notified.':'Withdrawal approved and account balance adjusted. The user was notified; no external payout was sent.'):'Request rejected.';
     await renderRequestQueue(view);if(typeof window.adminRefreshDashboard==='function')await window.adminRefreshDashboard();
    }catch(error){button.disabled=false;if(msg)msg.textContent='Could not process request ('+(error.code||error.message||'error')+'). Check Firestore rules and user profile.';}
   }));
@@ -421,7 +422,7 @@ async function renderDemoFinance(view){
     const notificationRef=doc(collection(db,'userNotifications',uid,'items'));
     const adminUser=window.__ocAdminFirebase.auth.currentUser;
     const activityRef=doc(collection(db,'userActivityEvents'));
-    batch.set(notificationRef,{kind:isDeposit?'deposit':'withdrawal',title:isDeposit?'Account deposit adjustment recorded':'Account withdrawal adjustment recorded',message:(isDeposit?'Your account balance was adjusted by ':'An account balance adjustment of ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+'. '+(note?'Admin note: '+note:'This updates your OnChain account ledger only; no blockchain transfer is sent.'),createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:adminUser.uid,source:'admin-demo'});
+    batch.set(notificationRef,{kind:isDeposit?'deposit':'withdrawal_approved',title:isDeposit?'Successfully deposited '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset):'Withdrawal successfully processed',message:isDeposit?'Successfully deposited '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' to your account. Your account balance has been updated.':'Your withdrawal of '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' was successfully processed as an account balance adjustment. This dashboard does not send an external blockchain payout.'+(note?' Admin note: '+note:''),createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:adminUser.uid,source:'admin-demo'});
     batch.set(activityRef,{uid,email:selected.email||selected.emailAddress||'Unknown',type:isDeposit?'deposit':'withdraw',title:isDeposit?'Admin deposit successful':'Admin withdrawal successful',details:'Admin '+(isDeposit?'credited ':'debited ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' · Internal account ledger adjustment'+(note?' · Note: '+note:''),status:'Successful',createdAt:serverTimestamp(),createdBy:adminUser.uid,source:'admin-wallet-adjustment'});
     for(const c of changes){
      const txRef=doc(collection(db,c.symbol==='USDT'?'demoTransactions':'demoAssetTransactions'));
