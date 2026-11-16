@@ -185,10 +185,10 @@ function renderModule(view){
  body.querySelectorAll('[data-record-action]').forEach(btn=>btn.addEventListener('click',()=>{const data=loadAdminData();data[view]=getRecords(view);const i=Number(btn.dataset.recordIndex);if(!data[view][i])return;if(btn.dataset.recordAction==='delete'){data[view].splice(i,1);}else if(btn.dataset.recordAction==='approve'){if(!confirm('Approve this DEMO '+view.toLowerCase()+' record in this browser only? No funds will move.'))return;data[view][i].status='Approved (demo)';}else if(btn.dataset.recordAction==='reject'){if(!confirm('Reject this DEMO '+view.toLowerCase()+' record in this browser only? No funds will move.'))return;data[view][i].status='Rejected (demo)';}else{const cycle=['New','Pending','In review','Approved (demo)','Rejected (demo)','Completed (demo)'];const current=data[view][i].status||'New';data[view][i].status=cycle[(cycle.indexOf(current)+1+cycle.length)%cycle.length];}saveAdminData(data);renderModule(view);const msg=document.getElementById('moduleMessage');if(msg)msg.textContent='Demo record updated locally. No real transaction, payment, balance, or account was changed.';}));
  document.getElementById('exportDemoRecords').addEventListener('click',()=>{const csv=[['Record','Owner','Amount','Status'],...getRecords(view).map(r=>[r.title,r.owner,r.amount,r.status])].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=view.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-demo.csv';a.click();URL.revokeObjectURL(url);});
 }
-function showView(view){const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your Onchain administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent='';if(view==='Trade Controls')renderTradeControls();else if(!isHome)renderModule(view);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
+function showView(view){if(view!=='Support')window.disposeSupportInbox?.();const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your Onchain administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent='';if(view==='Trade Controls')renderTradeControls();else if(!isHome)renderModule(view);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
 document.getElementById('menuToggle').addEventListener('click',()=>sidebar.classList.toggle('open'));
-document.getElementById('refreshBtn').addEventListener('click',()=>{const active=document.querySelector('[data-view].active')?.dataset.view||'Dashboard';showView(active);const b=document.getElementById('refreshBtn');b.textContent='✓ Refreshed';setTimeout(()=>b.textContent='↻ Refresh',1200);});
+document.getElementById('refreshBtn').addEventListener('click',()=>{const active=document.querySelector('[data-view].active')?.dataset.view||'Dashboard';showView(active);if(active==='Dashboard')window.adminRefreshDashboard?.();const b=document.getElementById('refreshBtn');b.textContent='✓ Refreshed';setTimeout(()=>b.textContent='↻ Refresh',1200);});
 document.getElementById('notifyBtn').addEventListener('click',()=>showView('Notifications'));
 document.getElementById('moreBtn').addEventListener('click',()=>showView('Settings'));
 </script>
@@ -200,7 +200,10 @@ const app=initializeApp({apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDo
 
 const auth=getAuth(app),db=getFirestore(app),byId=id=>document.getElementById(id);
 const safeText=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const adminCollectionLoads=new Set();
 window.adminGetLiveCollection=async function(view){
+ if(adminCollectionLoads.has(view))return;
+ adminCollectionLoads.add(view);
  const body=byId('detailBody'),collectionName=view==='Users'?'users':'kycSubmissions',isUsers=view==='Users';
  body.innerHTML='<div class="content-panel"><p class="muted">Loading live Firebase data…</p></div>';
  try{
@@ -215,9 +218,12 @@ window.adminGetLiveCollection=async function(view){
  body.querySelectorAll('[data-kyc-review]').forEach(button=>button.addEventListener('click',async()=>{const decision=button.dataset.kycReview,id=button.dataset.kycId;if(!confirm('Save KYC decision: '+decision.toUpperCase()+'?'))return;button.disabled=true;try{await updateDoc(doc(db,'kycSubmissions',id),{status:decision,reviewedAt:serverTimestamp(),reviewedBy:auth.currentUser.email,updatedAt:serverTimestamp()});byId('kycReviewMessage').textContent='KYC '+decision+' and saved.';window.adminRefreshDashboard();window.adminGetLiveCollection('KYC');}catch(error){byId('kycReviewMessage').textContent='Could not save decision ('+(error.code||'unknown error')+'). Check that the updated Firestore rules have deployed.';button.disabled=false;}}));
  }catch(error){
   body.innerHTML='<div class="notice"><strong>Could not load live '+(isUsers?'profiles':'KYC submissions')+'.</strong><p>Firebase denied access or Firestore is unavailable ('+safeText(error.code||'unknown error')+'). Confirm the administrator email is verified and Firestore rules permit admin reads.</p></div>';
- }
+ }finally{adminCollectionLoads.delete(view)}
 };
+let adminDashboardRefreshPromise=null;
 window.adminRefreshDashboard=async function(){
+ if(adminDashboardRefreshPromise)return adminDashboardRefreshPromise;
+ adminDashboardRefreshPromise=(async()=>{
  const users=byId('liveUsersCount'),kyc=byId('liveKycCount'),status=byId('dashboardDataStatus'),updated=byId('dashboardUpdatedAt');
  if(!users||!kyc||!status||!updated)return;
  status.textContent='Loading';updated.textContent='Connecting to Firestore…';
@@ -233,6 +239,9 @@ window.adminRefreshDashboard=async function(){
   users.textContent='—';kyc.textContent='—';status.textContent='Unavailable';updated.textContent='Firestore access failed: '+(error.code||'unknown error');
   byId('liveUsersStatus').textContent='Admin access or Firestore rules need attention';byId('liveKycStatus').textContent='Could not retrieve KYC records';
  }
+ })();
+ try{return await adminDashboardRefreshPromise}
+ finally{adminDashboardRefreshPromise=null;}
 };
 byId("adminSignIn").addEventListener("click",async()=>{
  const email=byId("adminEmail").value.trim(),password=byId("adminPassword").value;
