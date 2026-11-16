@@ -857,7 +857,7 @@ function renderTradePairOptions(query=""){
  const host=$("tradePairOptions");if(!host)return;
  const q=String(query||"").trim().toLowerCase();
  const rows=market.filter(c=>c&&c.symbol&&(!q||String(c.symbol).toLowerCase().includes(q)||String(c.name||"").toLowerCase().includes(q))).slice(0,150);
- host.innerHTML=rows.length?rows.map(c=>{const sym=String(c.symbol).toUpperCase();const active=(($("tradeAsset")?.value||selected).toUpperCase()===sym);return '<button type="button" role="option" aria-selected="'+active+'" class="trade-pair-option '+(active?"selected":"")+'" data-trade-pair="'+safe(sym)+'">'+coinIcon(c,30)+'<span class="trade-pair-option-name"><strong>'+safe(sym)+' / USDT</strong><small>'+safe(c.name||sym)+'</small></span><span class="trade-pair-price">'+money(c.current_price)+'</span></button>'}).join(""):'<div class="trade-pair-empty">No matching coins found.</div>';
+ host.innerHTML=rows.length?rows.map(c=>{const sym=String(c.symbol).toUpperCase();const active=(($("tradeAsset")?.value||selected).toUpperCase()===sym);return '<button type="button" role="option" aria-selected="'+active+'" class="trade-pair-option '+(active?"selected":"")+'" data-trade-pair="'+safe(sym)+'">'+coinIcon(c,30)+'<span class="trade-pair-option-name"><strong>'+safe(tradePairFor(sym).replace("/"," / "))+'</strong><small>'+safe(c.name||sym)+'</small></span><span class="trade-pair-price">'+money(c.current_price)+'</span></button>'}).join(""):'<div class="trade-pair-empty">No matching coins found.</div>';
 }
 function openTradePairMenu(open){
  const menu=$("tradePairMenu"),button=$("tradePairTitle");if(!menu||!button)return;
