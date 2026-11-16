@@ -177,7 +177,10 @@ async function runQuery(accessToken, collection, field, uid, parent = "") {
 
 async function listDocuments(accessToken, parentPath, collection) {
   const url = FIRESTORE_API + "/" + parentPath + "/" + collection + "?pageSize=1000";
-  const result = await googleJson(url, accessToken, undefined, "GET");
+  const response = await fetch(url, { headers: { authorization: "Bearer " + accessToken } });
+  if (response.status === 404) return [];
+  if (!response.ok) throw new Error("firestore-list-failed-" + response.status);
+  const result = await response.json();
   return result.documents || [];
 }
 
