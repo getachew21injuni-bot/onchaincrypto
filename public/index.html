@@ -4493,7 +4493,7 @@ const cfg={XAU:[['TradingOnly','Gold (XAU/USDT) · trading only']],XAUT:[['ERC20
 const times={Bitcoin:'10–60 min',Ethereum:'2–10 min',ERC20:'2–10 min',TRC20:'1–5 min',BEP20:'1–5 min',Solana:'Usually under 1 min',Polygon:'2–10 min',XRP:'1–5 min',Dogecoin:'10–60 min',Cardano:'5–20 min',Litecoin:'5–30 min',Avalanche:'Usually under 5 min',TON:'1–10 min',Stellar:'1–5 min',BitcoinCash:'10–60 min',Polkadot:'2–10 min',EthereumClassic:'5–30 min'};
 function sym(kind){return window.__ocSelectedCoins[kind]||$(kind+'CoinName')?.textContent.match(/\(([A-Z0-9]+)\)/)?.[1]||'BTC'}
 function box(kind,html){let id=kind+'NetworkEstimate',el=$(id);if(!el){el=document.createElement('div');el.id=id;el.className='network-estimate '+kind+'-estimate';$(kind+'Network')?.insertAdjacentElement('afterend',el)}el.innerHTML=html}
-function update(kind){const sel=$(kind+'Network');if(!sel)return;const s=sym(kind);if(kind==='withdraw'){if(sel.disabled||!sel.value){box(kind,'<strong>Network unavailable</strong><div class="muted tiny">A verified withdrawal network is not configured for '+s+'. Choose another asset.</div>');return}box(kind,'<strong>Estimated processing time</strong><div class="estimate-line"><span>Up to 72 hours</span></div>');return}const nets=cfg[s]||[];if(s==='XAU'||!nets.length){sel.innerHTML='<option value="">'+(s==='XAU'?'Trading asset · transfers unavailable':'Network unavailable for '+s)+'</option>';sel.value='';sel.disabled=true;if(typeof window.refreshDepositAddress==='function')window.refreshDepositAddress();box(kind,s==='XAU'?'':'<strong>Network unavailable</strong><div class="muted tiny">A verified deposit network is not configured for '+s+'. Choose another asset.</div>');return}sel.disabled=false;const old=sel.value;sel.innerHTML=nets.map(n=>'<option value="'+n[0]+'">'+n[1]+'</option>').join('');sel.value=nets.some(n=>n[0]===old)?old:nets[0][0];const label=nets.find(n=>n[0]===sel.value)?.[1]||sel.value;if(typeof window.refreshDepositAddress==='function')window.refreshDepositAddress();box(kind,'<strong>Check network</strong><div class="muted tiny">Send only '+s+' via '+label+'. Confirm the network and deposit address before transferring.</div>')}
+function update(kind){const sel=$(kind+'Network');if(!sel)return;const s=sym(kind);if(kind==='withdraw'){const estimate=$('withdrawNetworkEstimate');if(estimate)estimate.remove();if(sel.disabled||!sel.value){box(kind,'<strong>Network unavailable</strong><div class="muted tiny">A verified withdrawal network is not configured for '+s+'. Choose another asset.</div>');return}return}const nets=cfg[s]||[];if(s==='XAU'||!nets.length){sel.innerHTML='<option value="">'+(s==='XAU'?'Trading asset · transfers unavailable':'Network unavailable for '+s)+'</option>';sel.value='';sel.disabled=true;if(typeof window.refreshDepositAddress==='function')window.refreshDepositAddress();box(kind,s==='XAU'?'':'<strong>Network unavailable</strong><div class="muted tiny">A verified deposit network is not configured for '+s+'. Choose another asset.</div>');return}sel.disabled=false;const old=sel.value;sel.innerHTML=nets.map(n=>'<option value="'+n[0]+'">'+n[1]+'</option>').join('');sel.value=nets.some(n=>n[0]===old)?old:nets[0][0];const label=nets.find(n=>n[0]===sel.value)?.[1]||sel.value;if(typeof window.refreshDepositAddress==='function')window.refreshDepositAddress();box(kind,'<strong>Check network</strong><div class="muted tiny">Send only '+s+' via '+label+'. Confirm the network and deposit address before transferring.</div>')}
 function hook(){if(typeof window.updateSelectedCoin==='function'&&!window.updateSelectedCoin.__ocWrapped){const old=window.updateSelectedCoin;const wrap=function(kind){const r=old.apply(this,arguments);window.__ocSelectedCoins[kind]=($(kind+'CoinName')?.textContent.match(/\(([A-Z0-9]+)\)/)||[])[1]||'BTC';update(kind);return r};wrap.__ocWrapped=true;window.updateSelectedCoin=wrap}['deposit','withdraw'].forEach(k=>{const n=$(k+'Network');if(n&&!n.dataset.ocBound){n.addEventListener('change',()=>{if(k==='deposit'&&typeof window.refreshDepositAddress==='function')window.refreshDepositAddress();update(k)});n.dataset.ocBound='1'}});update('deposit');update('withdraw')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hook);else hook();
 })();
@@ -5976,39 +5976,53 @@ async function withdraw(){const u=auth.currentUser,a=Number($("withdrawAmount")?
 function stop(){stops.forEach(f=>f());stops=[]}
 function ensureGlobalWithdrawalStatus(){
  let host=$("oc-withdrawal-status-global");
- if(host)return host;
- host=document.createElement("aside");host.id="oc-withdrawal-status-global";host.setAttribute("aria-label","Withdrawal request status");host.hidden=true;
- host.style.cssText="position:fixed;z-index:9998;right:16px;bottom:16px;width:min(390px,calc(100vw - 32px));max-height:42vh;overflow:auto;padding:12px;border:1px solid rgba(35,160,130,.55);border-radius:14px;background:rgba(5,19,34,.97);box-shadow:0 12px 36px rgba(0,0,0,.38);color:#f5f8fc";
- document.body.appendChild(host);
- const style=document.createElement("style");style.textContent="#oc-withdrawal-status-global[hidden]{display:none!important}#oc-withdrawal-status-global .oc-ws-item{margin:8px 0;padding:10px;border:1px solid rgba(150,180,210,.2);border-radius:10px}#oc-withdrawal-status-global summary{cursor:pointer;font-weight:750;list-style:none;display:flex;gap:8px;align-items:center;justify-content:space-between}#oc-withdrawal-status-global summary::-webkit-details-marker{display:none}#oc-withdrawal-status-global .oc-ws-pending{color:#f4c84a}#oc-withdrawal-status-global .oc-ws-approved{color:#20d6a0}#oc-withdrawal-status-global .oc-ws-rejected{color:#ff7187}#oc-withdrawal-status-global .oc-ws-meta{font-size:12px;line-height:1.55;color:#c4d0dc;margin-top:8px;overflow-wrap:anywhere}#oc-withdrawal-status-global [data-oc-open-withdrawal]{border:0;background:none;color:inherit;font:inherit;font-weight:750;text-align:left;cursor:pointer;padding:0}#withdrawNotice [data-oc-open-withdrawal]{border:0;background:none;color:inherit;font:inherit;font-weight:750;text-align:left;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}@media(max-width:600px){#oc-withdrawal-status-global{right:8px;bottom:8px;width:calc(100vw - 16px);max-height:36vh}}";document.head.appendChild(style);
+ if(!host){
+  host=document.createElement("aside");host.id="oc-withdrawal-status-global";host.setAttribute("aria-label","Withdrawal request details");host.hidden=true;
+  host.style.cssText="position:fixed;z-index:9998;right:16px;bottom:72px;width:min(390px,calc(100vw - 32px));max-height:42vh;overflow:auto;padding:12px;border:1px solid rgba(35,160,130,.55);border-radius:14px;background:rgba(5,19,34,.97);box-shadow:0 12px 36px rgba(0,0,0,.38);color:#f5f8fc";
+  document.body.appendChild(host);
+ }
+ let trigger=$("oc-withdrawal-status-trigger");
+ if(!trigger){trigger=document.createElement("button");trigger.id="oc-withdrawal-status-trigger";trigger.type="button";trigger.hidden=true;trigger.setAttribute("data-oc-toggle-withdrawal-panel","");trigger.style.cssText="position:fixed;z-index:9997;right:16px;bottom:16px;max-width:calc(100vw - 32px);padding:11px 15px;border:1px solid rgba(35,210,160,.65);border-radius:999px;background:#0c2a31;color:#caffeb;font:700 13px/1.25 inherit;box-shadow:0 8px 24px rgba(0,0,0,.32);cursor:pointer";document.body.appendChild(trigger);}
+ const style=document.getElementById("oc-withdrawal-status-popup-style")||document.createElement("style");style.id="oc-withdrawal-status-popup-style";style.textContent="#oc-withdrawal-status-global[hidden],#oc-withdrawal-status-trigger[hidden]{display:none!important}#oc-withdrawal-status-global .oc-ws-head{display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:800;margin-bottom:8px}#oc-withdrawal-status-global .oc-ws-close{border:1px solid rgba(190,210,230,.3);border-radius:8px;background:rgba(255,255,255,.07);color:#f5f8fc;padding:5px 10px;font:600 12px inherit;cursor:pointer}#oc-withdrawal-status-global .oc-ws-item{margin:8px 0;padding:10px;border:1px solid rgba(150,180,210,.2);border-radius:10px}#oc-withdrawal-status-global summary{cursor:pointer;font-weight:750;list-style:none;display:flex;gap:8px;align-items:center;justify-content:space-between}#oc-withdrawal-status-global summary::-webkit-details-marker{display:none}#oc-withdrawal-status-global .oc-ws-pending{color:#f4c84a}#oc-withdrawal-status-global .oc-ws-approved{color:#20d6a0}#oc-withdrawal-status-global .oc-ws-rejected{color:#ff7187}#oc-withdrawal-status-global .oc-ws-meta{font-size:12px;line-height:1.55;color:#c4d0dc;margin-top:8px;overflow-wrap:anywhere}#oc-withdrawal-status-global [data-oc-open-withdrawal]{border:0;background:none;color:inherit;font:inherit;font-weight:750;text-align:left;cursor:pointer;padding:0}#withdrawNotice [data-oc-open-withdrawal]{border:0;background:none;color:inherit;font:inherit;font-weight:750;text-align:left;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}@media(max-width:600px){#oc-withdrawal-status-global{right:8px;bottom:66px;width:calc(100vw - 16px);max-height:36vh}#oc-withdrawal-status-trigger{right:8px;bottom:8px;max-width:calc(100vw - 16px)}}";if(!style.isConnected)document.head.appendChild(style);
  return host;
 }
 function renderWithdrawalStatuses(docs){
  const rows=docs.slice().sort((a,b)=>(b.data().createdAt?.seconds||0)-(a.data().createdAt?.seconds||0));
- const host=ensureGlobalWithdrawalStatus(),latest=rows[0],notice=$("withdrawNotice");
- if(!rows.length){host.hidden=true;host.innerHTML="";if(notice){notice.textContent="";notice.dataset.state="";}return;}
+ const host=ensureGlobalWithdrawalStatus(),trigger=$("oc-withdrawal-status-trigger"),wasOpen=!host.hidden,latest=rows[0],notice=$("withdrawNotice");
+ if(!rows.length){host.hidden=true;trigger.hidden=true;host.innerHTML="";if(notice){notice.textContent="";notice.dataset.state="";}return;}
  const statusLabel=x=>x==="approved"?"Approved":x==="rejected"?"Rejected":"Pending";
  const statusClass=x=>x==="approved"?"approved":x==="rejected"?"rejected":"pending";
  const dateText=x=>{const t=x?.toDate?.()||(x?.seconds?new Date(x.seconds*1000):null);return t?t.toLocaleString():"Submitted date unavailable";};
  const markup=rows.map(d=>{
   const x=d.data()||{},st=["approved","rejected"].includes(x.status)?x.status:"pending";
   const amount=esc(x.amount)+" "+esc(x.asset||"");
-  return '<details class="oc-ws-item" data-oc-withdrawal-row="'+esc(d.id)+'"><summary><span class="oc-ws-'+statusClass(st)+'">Withdrawal status: '+statusLabel(st)+'</span><span>'+amount+'</span></summary><div class="oc-ws-meta"><div><strong>Amount:</strong> '+amount+'</div><div><strong>Destination address:</strong> '+esc(x.destinationAddress||"Not recorded")+'</div><div><strong>Network:</strong> '+esc(x.network||"Not recorded")+'</div><div><strong>Submitted:</strong> '+esc(dateText(x.createdAt))+'</div><div><strong>Status:</strong> '+statusLabel(st)+'</div>'+(x.reviewedAt?'<div><strong>Last updated:</strong> '+esc(dateText(x.reviewedAt))+'</div>':"")+'</div></details>';
+  const estimate=st==="pending"?'<div><strong>Estimated processing:</strong> Usually within 30 minutes · Maximum 24 hours</div>':"";
+  return '<details class="oc-ws-item" data-oc-withdrawal-row="'+esc(d.id)+'"><summary><span class="oc-ws-'+statusClass(st)+'">Withdrawal status: '+statusLabel(st)+'</span><span>'+amount+'</span></summary><div class="oc-ws-meta"><div><strong>Amount:</strong> '+amount+'</div><div><strong>Destination address:</strong> '+esc(x.destinationAddress||"Not recorded")+'</div><div><strong>Network:</strong> '+esc(x.network||"Not recorded")+'</div><div><strong>Submitted:</strong> '+esc(dateText(x.createdAt))+'</div><div><strong>Status:</strong> '+statusLabel(st)+'</div>'+estimate+(x.reviewedAt?'<div><strong>Last updated:</strong> '+esc(dateText(x.reviewedAt))+'</div>':"")+'</div></details>';
  }).join("");
  const pendingCount=rows.filter(d=>(d.data().status||"pending")==="pending").length;
- host.innerHTML='<div style="font-weight:800;margin-bottom:6px">Withdrawal requests'+(pendingCount?' · '+pendingCount+' pending':'')+'</div>'+markup;
- host.hidden=false;
+ const x=latest.data()||{},st=["approved","rejected"].includes(x.status)?x.status:"pending";
+ host.innerHTML='<div class="oc-ws-head"><span>Withdrawal requests'+(pendingCount?' · '+pendingCount+' pending':'')+'</span><button type="button" class="oc-ws-close" data-oc-close-withdrawal>Close</button></div>'+markup;
+ host.hidden=!wasOpen;
+ trigger.hidden=false;trigger.textContent='Withdrawal status: '+statusLabel(st)+' · '+String(x.amount??"")+' '+String(x.asset||"")+' · View';
+ trigger.setAttribute("data-oc-open-withdrawal",latest.id);
  if(notice&&latest){
-  const x=latest.data()||{},st=["approved","rejected"].includes(x.status)?x.status:"pending";
   notice.innerHTML='<button type="button" data-oc-open-withdrawal="'+esc(latest.id)+'">Withdrawal status: '+statusLabel(st)+' · '+esc(x.amount)+' '+esc(x.asset||"")+' — View details</button>';
-  notice.dataset.state=st==="rejected"?"error":"pending";
+  notice.dataset.state=st==="rejected"?"error":st==="approved"?"success":"pending";
  }
 }
 document.addEventListener("click",event=>{
- const opener=event.target.closest("[data-oc-open-withdrawal]");if(!opener)return;
- const id=opener.getAttribute("data-oc-open-withdrawal"),host=$("oc-withdrawal-status-global");
- const row=host?.querySelector('[data-oc-withdrawal-row="'+CSS.escape(id)+'"]');
- if(row){row.open=true;host.hidden=false;row.scrollIntoView({behavior:"smooth",block:"nearest"});}
+ const host=$("oc-withdrawal-status-global"),trigger=$("oc-withdrawal-status-trigger");
+ const close=event.target.closest("[data-oc-close-withdrawal]");
+ if(close){host.hidden=true;return;}
+ const toggle=event.target.closest("[data-oc-toggle-withdrawal-panel]");
+ if(toggle){host.hidden=!host.hidden;return;}
+ const opener=event.target.closest("[data-oc-open-withdrawal]");
+ if(opener){
+  const id=opener.getAttribute("data-oc-open-withdrawal"),row=host?.querySelector('[data-oc-withdrawal-row="'+CSS.escape(id)+'"]');
+  if(row){host.hidden=false;row.open=true;row.scrollIntoView({behavior:"smooth",block:"nearest"});}
+  return;
+ }
+ if(host&&!host.hidden&&!host.contains(event.target)&&!trigger?.contains(event.target))host.hidden=true;
 });
 function watch(u){stops.push(onSnapshot(query(collection(db,"withdrawRequests"),where("uid","==",u.uid)),s=>renderWithdrawalStatuses(s.docs),e=>console.warn("Could not refresh withdrawal status:",e.code)));if(admin){stops.push(onSnapshot(collection(db,"depositRequests"),s=>adminRows("ocAdminDeposits",s.docs,"deposit"),e=>{$("ocAdminDeposits").textContent="Could not load deposit requests ("+e.code+")."}));stops.push(onSnapshot(collection(db,"withdrawRequests"),s=>adminRows("ocAdminWithdrawals",s.docs,"withdraw"),e=>{$("ocAdminWithdrawals").textContent="Could not load withdrawal requests ("+e.code+")."}));}}
 setup();
@@ -8131,7 +8145,11 @@ main:has(> #page-withdraw:not(.hidden)) #timedPaperTrade {
 #page-withdraw .form-panel > button:not(:disabled),
 #page-withdraw #withdrawSubmit:not(:disabled) {
   background: var(--green, #16d9a0) !important; border-color: var(--green, #16d9a0) !important; color: #071b16 !important;
+  transition:background-color .18s ease,border-color .18s ease,filter .18s ease,transform .18s ease;
 }
+#page-withdraw #withdrawSubmit:not(:disabled):hover{filter:brightness(1.08);transform:translateY(-1px)}
+#page-withdraw #withdrawSubmit:not(:disabled):active{filter:brightness(.94);transform:translateY(0)}
+#page-withdraw #withdrawSubmit[data-submitting="true"]{background:#20d6a0!important;border-color:#20d6a0!important;color:#06251b!important;opacity:1!important;}
 #page-wallet .wallet-action:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 </style>
 
