@@ -1946,7 +1946,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
        const filterBtn=e.target.closest("[data-wallet-activity-filter]");
        if(filterBtn){filter=filterBtn.dataset.walletActivityFilter;document.querySelectorAll("[data-wallet-activity-filter]").forEach(b=>b.setAttribute("aria-pressed",String(b===filterBtn)));window.ocRenderWalletActivity();return;}
        const copy=e.target.closest("[data-wallet-copy]");
-       if(copy){const value=copy.dataset.walletCopy||"";try{await navigator.clipboard.writeText(value);copy.textContent="Copied";setTimeout(()=>{copy.textContent="Copy"},1400)}catch(_){copy.textContent="Select address to copy";}}
+       if(copy){const value=copy.dataset.walletCopy||"";let copied=false;try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(value);copied=true}}catch(_){}if(!copied){const field=document.createElement("textarea");field.value=value;field.setAttribute("readonly","");field.style.position="fixed";field.style.opacity="0";document.body.appendChild(field);field.select();try{copied=document.execCommand("copy")}catch(_){}field.remove()}copy.textContent=copied?"Copied":"Copy address manually";setTimeout(()=>{copy.textContent="Copy"},1600)}
       });
       window.ocRenderWalletActivity();
     })();
