@@ -1436,7 +1436,7 @@ html.oc-auth-pending body > footer { display:none!important; }
   </section>
 
 <section id="page-home">
- <div class="page-title"><div><h1 id="homeGreeting">Onchain</h1></div></div>
+ <div class="page-title oc-home-page-title"><div class="oc-home-title-start"><button type="button" id="ocHomeProfileShortcut" class="oc-home-profile-shortcut" aria-label="Open your profile" title="Your profile"><img id="ocHomeProfileAvatar" alt="" hidden><span id="ocHomeProfileInitial" aria-hidden="true">O</span></button><div><h1 id="homeGreeting">Onchain</h1></div></div></div>
   
  <section class="oc-invest-hero oc-get-started-hero oc-home-promo-hero" aria-label="Onchain digital asset trading platform">
   <div class="oc-hero-copy">
@@ -3471,8 +3471,12 @@ function renderOwnProfileSummary(user, saved = {}) {
 let ocCurrentAvatarDataUrl = "";
 let ocPendingAvatarDataUrl;
 function updateProfileAvatarDisplay(value) {
- const src=typeof value==="string"&&value.startsWith("data:image/")?value:"/icons/onchainspro-profile.svg";
+ const hasCustom=typeof value==="string"&&value.startsWith("data:image/");
+ const src=hasCustom?value:"/icons/onchainspro-profile.svg";
  ["ocProfileAvatarPreview","ocProfileSectionAvatar","ocProfileMenuAvatar"].forEach(id=>{const img=document.getElementById(id);if(img)img.src=src;});
+ const homeAvatar=document.getElementById("ocHomeProfileAvatar"),homeInitial=document.getElementById("ocHomeProfileInitial");
+ if(homeAvatar){homeAvatar.src=src;homeAvatar.hidden=!hasCustom;}
+ if(homeInitial){const user=auth.currentUser;const label=String(user?.displayName||user?.email||user?.phoneNumber||"Onchain").trim();homeInitial.textContent=(Array.from(label)[0]||"O").toUpperCase();homeInitial.hidden=hasCustom;}
 }
 function compressProfileAvatar(file) {
  return new Promise((resolve,reject)=>{
@@ -12271,5 +12275,5 @@ header .brand.oc-brand-header .oc-brand-verified{display:block!important;width:2
 html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#17202b!important}
 @media(max-width:720px){header .brand.oc-brand-header{font-size:19px!important;gap:6px!important}header .brand.oc-brand-header .oc-brand-verified{width:18px!important;height:18px!important;flex-basis:18px!important}}
 </style>
-</body>
+\n<style id="oc-home-profile-shortcut-style">\n#page-home .oc-home-page-title{justify-content:flex-start;min-height:58px;margin-bottom:14px}\n#page-home .oc-home-title-start{display:flex;align-items:center;gap:13px;min-width:0}\n#page-home .oc-home-profile-shortcut{width:54px;height:54px;flex:0 0 54px;display:grid;place-items:center;position:relative;overflow:hidden;padding:0;border:1px solid rgba(120,145,170,.24);border-radius:50%;background:var(--panel);color:var(--text);box-shadow:0 3px 12px rgba(0,0,0,.12);font-size:23px;font-weight:800;cursor:pointer}\n#page-home .oc-home-profile-shortcut img{width:100%;height:100%;object-fit:cover;border-radius:50%}\n#page-home .oc-home-profile-shortcut img[hidden],#page-home .oc-home-profile-shortcut span[hidden]{display:none!important}\n#page-home .oc-home-profile-shortcut:focus-visible{outline:3px solid #438dff;outline-offset:3px}\n#page-home .oc-home-title-start h1{margin:0}\n@media(max-width:600px){#page-home .oc-home-page-title{min-height:54px;margin-bottom:12px}#page-home .oc-home-profile-shortcut{width:50px;height:50px;flex-basis:50px}}\n</style>\n<script id="oc-home-profile-shortcut-action">\n(function(){\n const button=document.getElementById("ocHomeProfileShortcut");\n if(!button||button.dataset.ocBound==="1")return;\n button.dataset.ocBound="1";\n button.addEventListener("click",function(){\n  if(!auth.currentUser){if(typeof window.showPage==="function")window.showPage("register");return;}\n  if(typeof window.showPage==="function")window.showPage("profile");\n });\n})();\n</script>\n</body>
 </html>
