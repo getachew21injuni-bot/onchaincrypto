@@ -1833,6 +1833,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-top:10px"><div style="border:1px solid #dbe3ee;border-radius:10px;padding:12px"><div style="font-size:12px;color:#5c6678">USDT balance before</div><strong id="timedBoardBefore">—</strong></div><div style="border:1px solid #dbe3ee;border-radius:10px;padding:12px"><div style="font-size:12px;color:#5c6678">USDT balance after</div><strong id="timedBoardAfter">—</strong></div></div>
       </section>
     </section>
+    <section class="panel"><div class="section-head"><h2>Withdrawal activity</h2><span class="tag">STATUS</span></div><div id="ocWithdrawalHistoryStatus" style="padding:0 18px 12px"><div class="empty">Your withdrawal updates will appear here.</div></div></section>
     <section class="panel"><div class="section-head"><h2>Recent trades</h2></div><div id="tradeHistory" style="padding:0 18px"><div class="empty">No trades recorded yet.</div></div></section>
 
     <section class="panel performance-panel"><div class="section-head"><div><h2>Trading performance</h2><div class="muted tiny">Estimated P/L on market-linked positions</div></div><span class="tag">LIVE ESTIMATE</span></div><div class="performance-stats"><div><div class="label">Estimated P/L</div><div class="big" id="estimatedPnl">$0.00</div></div><div><div class="label">Positions</div><div class="big" id="openPositions">0</div></div><div><div class="label">Market refresh</div><div class="big tiny" id="pnlUpdated">Waiting for prices</div></div></div><canvas id="pnlChart" height="150" aria-label="Estimated profit and loss by coin"></canvas><div class="section-head"><div><h2>Trade win / loss history</h2><div class="muted tiny">Market-linked sell results vs. average cost.</div></div><span class="tag">ESTIMATED RESULTS</span></div><div class="performance-stats"><div><div class="label">Winning sells</div><div class="big green" id="winningTrades">0</div></div><div><div class="label">Losing sells</div><div class="big red" id="losingTrades">0</div></div><div><div class="label">Realized P/L</div><div class="big" id="realizedPnl">$0.00</div></div></div><canvas id="tradeOutcomeChart" height="150" aria-label="Estimated win and loss graph"></canvas><div id="tradeOutcomeRows" class="pnl-rows"><div class="empty">Completed sell results will appear here.</div></div><div id="pnlRows" class="pnl-rows"><div class="empty">Record a trade to view performance.</div></div></section>
@@ -5982,17 +5983,24 @@ function withdrawalStatusMarkup(data){
 function watch(u){
  stops.push(onSnapshot(query(collection(db,"withdrawRequests"),where("uid","==",u.uid)),s=>{
   const rows=s.docs.slice().sort((a,b)=>(b.data().createdAt?.seconds||0)-(a.data().createdAt?.seconds||0));
-  const latest=rows[0]?.data(),m=$("withdrawNotice");
-  let persistent=$("ocWithdrawPersistentNotice");
-  if(!persistent){persistent=document.createElement("div");persistent.id="ocWithdrawPersistentNotice";persistent.style.cssText="display:none;position:fixed;z-index:99999;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(440px,calc(100vw - 24px));padding:12px 14px;border:1px solid rgba(240,185,11,.42);border-radius:12px;background:#10243b;color:#fff;box-shadow:0 8px 30px #0008;";document.body.appendChild(persistent);}
-  if(!latest){if(m){m.innerHTML="";m.dataset.state="";}persistent.innerHTML="";persistent.style.display="none";return;}
-  const status=String(latest.status||"pending").toLowerCase(),state=status==="rejected"?"error":status==="approved"?"success":"pending";
-  const markup=withdrawalStatusMarkup(latest);
-  if(m){m.innerHTML=markup;m.dataset.state=state;}
-  persistent.innerHTML=markup;persistent.dataset.state=state;persistent.style.display="block";
-  persistent.style.borderColor=state==="pending"?"rgba(240,185,11,.55)":state==="success"?"rgba(22,199,132,.55)":"rgba(255,85,115,.55)";
-  persistent.style.color=state==="pending"?"#f0b90b":state==="success"?"#16c784":"#ff7189";
- },e=>console.warn("Could not refresh withdrawal status:",e.code)));
+  const history=$("ocWithdrawalHistoryStatus");
+  if(history){
+   history.innerHTML=rows.length?rows.map(doc=>{
+    const data=doc.data(),status=String(data.status||"pending").toLowerCase();
+    const amount=Number(data.amount)||0,coin=String(data.asset||"").toUpperCase();
+    const network=String(data.network||"Not provided"),address=String(data.destinationAddress||"Not provided");
+    const pending=status!=="approved"&&status!=="rejected";
+    const label=status==="approved"?"Successful":status==="rejected"?"Rejected":"Pending";
+    const color=status==="approved"?"#16a36a":status==="rejected"?"#e5484d":"#b78103";
+    const border=status==="approved"?"rgba(22,163,106,.25)":status==="rejected"?"rgba(229,72,77,.25)":"rgba(183,129,3,.25)";
+    const heading=pending
+     ? '<button type="button" data-oc-withdraw-estimate aria-expanded="false" style="display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;padding:0;border:0;background:transparent;color:'+color+';font:inherit;font-weight:750;text-align:left;cursor:pointer"><span>Withdrawal · '+label+'</span><span aria-hidden="true">＋</span></button>'
+     : '<div style="display:flex;justify-content:space-between;gap:12px;color:'+color+';font-weight:750"><span>Withdrawal · '+label+'</span><span>'+(status==="approved"?"✓":"!")+'</span></div>';
+    const details=pending?'<div data-oc-withdraw-estimate-details hidden style="padding:10px 0 0;line-height:1.65;font-size:13px;color:var(--muted,#667085)"><div><strong>Amount:</strong> '+esc(amount)+' '+esc(coin)+'</div><div><strong>Network:</strong> '+esc(network)+'</div><div style="overflow-wrap:anywhere"><strong>Address:</strong> '+esc(address)+'</div><div><strong>Estimated time:</strong> Usually within 30 minutes · Maximum 24 hours.</div></div>':"";
+    return '<article style="padding:12px 14px;margin:8px 0;border:1px solid '+border+';border-radius:10px;background:var(--panel2,rgba(127,127,127,.04))">'+heading+'<div style="margin-top:5px;font-size:13px;color:var(--muted,#667085)">'+esc(amount)+' '+esc(coin)+'</div>'+details+'</article>';
+   }).join(""):'<div class="empty">No withdrawal requests yet.</div>';
+  }
+ },e=>console.warn("Could not refresh withdrawal history:",e.code)));
  if(admin){stops.push(onSnapshot(collection(db,"depositRequests"),s=>adminRows("ocAdminDeposits",s.docs,"deposit"),e=>{$("ocAdminDeposits").textContent="Could not load deposit requests ("+e.code+")."}));stops.push(onSnapshot(collection(db,"withdrawRequests"),s=>adminRows("ocAdminWithdrawals",s.docs,"withdraw"),e=>{$("ocAdminWithdrawals").textContent="Could not load withdrawal requests ("+e.code+")."}));}
 }
 document.addEventListener("click",event=>{
