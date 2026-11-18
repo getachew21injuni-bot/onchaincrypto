@@ -232,6 +232,7 @@ document.addEventListener('DOMContentLoaded',function(){
  const goSignIn=()=>openAuth('signin');
  document.getElementById('landingGetStarted')?.addEventListener('click',goRegister);
  document.getElementById('landingSignIn')?.addEventListener('click',goSignIn);
+ document.querySelectorAll('[data-visitor-register]').forEach(button=>button.addEventListener('click',goRegister));
  document.getElementById('ocHomeCreateAccount')?.addEventListener('click',goRegister);
  document.getElementById('ocHomeLogin')?.addEventListener('click',goSignIn);
  document.getElementById('mobileRegisterBtn')?.addEventListener('click',goRegister);
@@ -1375,13 +1376,12 @@ html.oc-auth-pending body > footer { display:none!important; }
     <div class="oc-visitor-hero-copy">
       <div class="oc-visitor-kicker"><span></span> ONCHAIN · CRYPTO & GOLD MARKETS</div>
       <h1>Your markets. Your insights. <em>Onchain.</em></h1>
-      <p>Explore crypto and Gold markets, prices and charts.</p>
-
-      
+      <p>Explore crypto and gold markets, follow price movements, and discover the tools available on OnChainSpro.</p>
+      <div class="oc-visitor-hero-actions"><button type="button" class="primary" id="landingGetStarted">Create free account <span aria-hidden="true">→</span></button><button type="button" class="secondary" id="landingSignIn">Log in</button></div>
       <div class="oc-visitor-proof"><span>● Public market prices</span><span>◆ Crypto + Gold</span><span>▤ Charts & market insights</span></div>
     </div>
     <div class="oc-visitor-visual" aria-label="Onchain floating market showcase with signal indicators">
-      <div class="oc-visitor-floating-signal"><span></span><b>ONCHAIN SIGNAL</b><small>Market momentum</small></div>
+      <div class="oc-visitor-floating-signal"><span></span><b>MARKET WATCH</b><small>Live market overview</small></div>
       <div class="oc-visitor-visual-glow"></div>
       <div class="oc-visitor-device" role="img" aria-label="Onchain mobile trading interface displayed inside a premium smartphone frame">
        <div class="oc-visitor-device-island"></div>
@@ -1391,11 +1391,12 @@ html.oc-auth-pending body > footer { display:none!important; }
         <div class="oc-visitor-phone-top"><span><b class="oc-visitor-mini-mark oc-onchain-round-mark">B</b> ONCHAIN</span><i></i></div>
         <div class="oc-visitor-device-subhead"><span>MARKETS</span><span>OVERVIEW</span><span>⋯</span></div>
         <div class="oc-visitor-total-balance"><div><small>MARKET OVERVIEW</small><span class="oc-visitor-balance-live">● OVERVIEW</span></div><strong>Live market overview</strong><small class="oc-visitor-balance-caption">Crypto · Gold · market insights</small></div>
-        <div class="oc-visitor-phone-asset"><div><small>BTC / USDT</small><strong id="ocVisitorHeroPrice">$25,478</strong></div><span id="ocVisitorHeroChange">Market overview</span></div>
+        <div class="oc-visitor-phone-asset"><div><small>BTC / USDT</small><strong id="ocVisitorHeroPrice">Loading…</strong></div><span id="ocVisitorHeroChange">Market overview</span></div>
         <div class="oc-visitor-phone-chart">
           <svg viewBox="0 0 420 170" role="img" aria-label="Market chart"><defs><linearGradient id="ocVisitorChartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#16d9a0" stop-opacity=".26"/><stop offset="1" stop-color="#16d9a0" stop-opacity="0"/></linearGradient></defs><path d="M0 135H420M0 90H420M0 45H420" stroke="#29435b" stroke-width="1" stroke-dasharray="4 6"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59 207 73 232 49 258 62 282 39 308 48 332 25 356 42 382 15 410 23V170H8Z" fill="url(#ocVisitorChartFill)"/><path d="M8 128L35 119 58 125 84 93 108 103 132 79 155 88 181 59" fill="none" stroke="#16d9a0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M181 59L207 73 232 49 258 62 282 39" fill="none" stroke="#ff5573" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M282 39L308 48 332 25 356 42 382 15 410 23" fill="none" stroke="#16d9a0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><g stroke-width="3"><path d="M35 104V137m-5-23h10" stroke="#16d9a0"/><path d="M84 79v35m-5-25h10" stroke="#16d9a0"/><path d="M132 65v37m-5-25h10" stroke="#16d9a0"/><path d="M181 45v40m-5-25h10" stroke="#16d9a0"/><path d="M232 33v38m-5-22h10" stroke="#ff5573"/><path d="M282 24v37m-5-22h10" stroke="#ff5573"/><path d="M332 10v40m-5-25h10" stroke="#16d9a0"/><path d="M382 2v34m-5-20h10" stroke="#16d9a0"/></g></svg>
         </div>
-        <div class="oc-visitor-signal"><span class="oc-visitor-signal-dot"></span><div class="oc-visitor-signal-copy"><b>BTC MARKET SIGNALS</b><small>Market direction indicators</small></div><div class="oc-visitor-signal-pills"><span class="oc-signal-up">▲ UP</span><span class="oc-signal-down">▼ DOWN</span></div></div>
+        <small style="display:block;margin-top:5px;color:#8fa8bd;font-size:9px;text-align:right">Illustrative chart preview</small>
+        <div class="oc-visitor-signal"><span class="oc-visitor-signal-dot"></span><div class="oc-visitor-signal-copy"><b>MARKET SNAPSHOT</b><small>Explore real market price movements</small></div><div class="oc-visitor-signal-pills"><span class="oc-signal-up">24H</span></div></div>
         <div class="oc-visitor-device-brandline"><span>ONCHAIN</span><strong>Get Onchain</strong></div>
         <div class="oc-visitor-phone-foot"><span>PRICE</span><span>24H CHANGE</span><span>MARKET WATCH</span></div>
         <div class="oc-visitor-device-nav"><span class="active"><b>⌁</b>Markets</span><span><b>⌖</b>Charts</span><span><b>◷</b>Insights</span></div>
@@ -1429,11 +1430,26 @@ html.oc-auth-pending body > footer { display:none!important; }
     </section>
   </section>
 
-  
-  
-  
-
+  <section class="oc-visitor-about" aria-label="About OnChainSpro">
+    <div>
+      <div class="oc-visitor-kicker">THE ONCHAINSpro EXPERIENCE</div>
+      <h2>Explore markets with clarity</h2>
+      <p>OnChainSpro brings crypto and gold market information together with charts and account tools in one place. Start by exploring public market information, then sign in when you are ready to use your account features.</p>
+      <p class="oc-visitor-about-note">Market prices can change quickly. Review information carefully before making financial decisions.</p>
+    </div>
+    <div class="oc-visitor-feature-grid">
+      <article><b>01</b><h3>Market discovery</h3><p>Explore crypto and gold prices, market movements, and asset charts.</p></article>
+      <article><b>02</b><h3>Trading tools</h3><p>Access the platform trading interface after signing in.</p></article>
+      <article><b>03</b><h3>Portfolio tools</h3><p>View and manage your account activity and assets in your account.</p></article>
+    </div>
   </section>
+  <section class="oc-visitor-bottom-cta" aria-label="Create an OnChainSpro account">
+    <div><h2>Ready to explore more?</h2><p>Create an account to access your OnChainSpro platform tools.</p></div>
+    <button type="button" class="primary" data-visitor-register>Create free account <span aria-hidden="true">→</span></button>
+  </section>
+  <p class="oc-visitor-disclaimer">Market information is provided for general informational purposes and may be delayed. It is not investment advice.</p>
+
+</section>
 
 <section id="page-home">
  <div class="page-title oc-home-page-title"><div class="oc-home-title-start"><button type="button" id="ocHomeProfileShortcut" class="oc-home-profile-shortcut" aria-label="Open your profile" title="Your profile"><img id="ocHomeProfileAvatar" alt="" hidden><span id="ocHomeProfileInitial" aria-hidden="true">O</span></button><div><h1 id="homeGreeting">Onchain</h1></div></div></div>
