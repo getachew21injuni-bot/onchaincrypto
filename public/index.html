@@ -6076,21 +6076,42 @@ async function processDemoRequest(kind,requestId,decision){
   const amount=Number(request.amount);
   if(!uid||!asset||!(amount>0&&Number.isFinite(amount)))throw Error("Request details are incomplete.");
   const userRef=doc(db,"users",uid);
+  const walletRef=doc(db,"userTradeState",uid);
   const userSnap=await tx.get(userRef);
+  const walletSnap=await tx.get(walletRef);
   if(!userSnap.exists())throw Error("User profile is missing. Ask the user to sign in before this approval.");
   const user=userSnap.data()||{};
-  const before=asset==="USDT"?Number(user.demoBalanceUSDT||0):Number((user.demoAssetBalances||{})[asset]||0);
+  const wallet=walletSnap.exists()?walletSnap.data()||{}:{};
+  const walletHoldings=wallet.holdings&&typeof wallet.holdings==="object"&&!Array.isArray(wallet.holdings)?{...wallet.holdings}:{};
+  const profileHoldings=user.demoAssetBalances&&typeof user.demoAssetBalances==="object"&&!Array.isArray(user.demoAssetBalances)?user.demoAssetBalances:{};
+  const before=asset==="USDT"
+   ?(walletSnap.exists()?Number(wallet.balance||0):Number(user.demoBalanceUSDT||0))
+   :(walletSnap.exists()?Number(walletHoldings[asset]||0):Number(profileHoldings[asset]||0));
   const after=decision==="approve"?(kind==="deposit"?before+amount:before-amount):before;
   if(kind==="withdraw"&&after<0)throw Error("Insufficient displayed "+asset+" balance. No changes were made.");
   const nowText=new Date().toISOString();
   const ledger={uid,type:kind==="deposit"?"deposit":"withdrawal",asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:nowText,createdBy:auth.currentUser.uid,note:"Admin-approved balance adjustment "+kind,source:"admin-demo",status:"completed"};
+  let nextBalance=walletSnap.exists()?Math.max(0,Number(wallet.balance)||0):Math.max(0,Number(user.demoBalanceUSDT)||0);
+  let nextHoldings=walletHoldings;
   if(asset==="USDT"){
+   nextBalance=after;
    tx.set(userRef,{demoBalanceUSDT:after,demoBalanceUpdatedAt:serverTimestamp()},{merge:true});
    tx.set(usdtLedgerRef,{uid,type:kind==="deposit"?"deposit":"withdrawal",amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:nowText,createdBy:auth.currentUser.uid,note:"Admin-approved balance adjustment "+kind,source:"admin-demo",status:"completed"});
   }else{
-   const balances={...(user.demoAssetBalances||{}),[asset]:after};
-   tx.set(userRef,{demoAssetBalances:balances,demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:auth.currentUser.email},{merge:true});
+   if(walletSnap.exists())nextHoldings[asset]=after;
+   const profileAssets={...(user.demoAssetBalances||{}),[asset]:after};
+   tx.set(userRef,{demoAssetBalances:profileAssets,demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:auth.currentUser.email},{merge:true});
   }
+  // Keep the cloud wallet itself in step with the approved balance change.
+  // The pending request never changes the wallet; this transaction runs only
+  // after admin approval and the pending-status guard prevents double deduction.
+  tx.set(walletRef,{
+   uid,
+   balance:nextBalance,
+   holdings:nextHoldings,
+   history:Array.isArray(wallet.history)?wallet.history.slice(0,300):[],
+   updatedAt:serverTimestamp()
+  },{merge:true});
   tx.set(ledgerRef,ledger);
   tx.update(requestRef,{status:"approved",reviewedAt:serverTimestamp(),reviewedBy:auth.currentUser.email});
  });
