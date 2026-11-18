@@ -12264,5 +12264,26 @@ if(app){
  });
 }
 </script>
+
+<style id="oc-withdraw-continue-button-style">
+/* Keep Continue clearly blue even while the form is waiting for valid details. */
+#page-withdraw #withdrawSubmit {
+  opacity:1!important;
+  color:#fff!important;
+  background:linear-gradient(110deg,#168cff,#0757d9)!important;
+  border:1px solid #58b5ff!important;
+  box-shadow:0 5px 18px rgba(22,140,255,.28)!important;
+}
+#page-withdraw #withdrawSubmit:disabled {
+  opacity:1!important;
+  cursor:not-allowed!important;
+}
+#page-withdraw #withdrawSubmit[data-submitting="true"] {
+  background:linear-gradient(110deg,#155fba,#12458f)!important;
+  border-color:#2869b5!important;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.22)!important;
+}
+</style>
+
 </body>
 </html>
