@@ -5986,10 +5986,29 @@ function ensureGlobalWithdrawalStatus(){
  const style=document.getElementById("oc-withdrawal-status-popup-style")||document.createElement("style");style.id="oc-withdrawal-status-popup-style";style.textContent="#oc-withdrawal-status-global[hidden],#oc-withdrawal-status-trigger[hidden]{display:none!important}#oc-withdrawal-status-global .oc-ws-head{display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:800;margin-bottom:8px}#oc-withdrawal-status-global .oc-ws-close{border:1px solid rgba(190,210,230,.3);border-radius:8px;background:rgba(255,255,255,.07);color:#f5f8fc;padding:5px 10px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer}#oc-withdrawal-status-global .oc-ws-item{margin:8px 0;padding:10px;border:1px solid rgba(150,180,210,.2);border-radius:10px}#oc-withdrawal-status-global summary{cursor:pointer;font-weight:750;list-style:none;display:flex;gap:8px;align-items:center;justify-content:space-between}#oc-withdrawal-status-global summary::-webkit-details-marker{display:none}#oc-withdrawal-status-global .oc-ws-pending{color:#f4c84a}#oc-withdrawal-status-global .oc-ws-approved{color:#20d6a0}#oc-withdrawal-status-global .oc-ws-rejected{color:#ff7187}#oc-withdrawal-status-global .oc-ws-meta{font-size:12px;line-height:1.55;color:#c4d0dc;margin-top:8px;overflow-wrap:anywhere}#oc-withdrawal-status-global [data-oc-open-withdrawal]{border:0;background:none;color:inherit;font:inherit;font-weight:750;text-align:left;cursor:pointer;padding:0}#withdrawNotice [data-oc-open-withdrawal]{border:0;background:none;color:inherit;font:inherit;font-weight:750;text-align:left;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}@media(max-width:600px){#oc-withdrawal-status-global{right:8px;bottom:66px;width:calc(100vw - 16px);max-height:36vh}#oc-withdrawal-status-trigger{right:8px;bottom:8px;max-width:calc(100vw - 16px)}}";if(!style.isConnected)document.head.appendChild(style);
  return host;
 }
+function withdrawalViewedKey(){
+ const uid=auth.currentUser?.uid||"guest";
+ return "ocWithdrawalViewedV1:"+uid;
+}
+function readViewedWithdrawals(){
+ try{const value=JSON.parse(localStorage.getItem(withdrawalViewedKey())||"[]");return new Set(Array.isArray(value)?value.filter(x=>typeof x==="string"):[]);}catch(_){return new Set();}
+}
+function markWithdrawalViewed(id){
+ if(!id)return;
+ const viewed=readViewedWithdrawals();viewed.add(String(id));
+ try{localStorage.setItem(withdrawalViewedKey(),JSON.stringify(Array.from(viewed).slice(-300)));}catch(_){}
+ const notice=document.getElementById("oc-withdrawal-activity-notice");
+ if(notice?.dataset.requestId===String(id))notice.remove();
+}
 function renderWithdrawalStatuses(docs){
  const rows=docs.slice().sort((a,b)=>(b.data().createdAt?.seconds||0)-(a.data().createdAt?.seconds||0));
- const host=ensureGlobalWithdrawalStatus(),trigger=$("oc-withdrawal-status-trigger"),wasOpen=!host.hidden,latest=rows[0],notice=$("withdrawNotice");
- if(!rows.length){host.hidden=true;trigger.hidden=true;host.innerHTML="";if(notice){notice.textContent="";notice.dataset.state="";}return;}
+ const host=ensureGlobalWithdrawalStatus(),trigger=$("oc-withdrawal-status-trigger"),wasOpen=!host.hidden,notice=$("withdrawNotice");
+ if(notice){notice.textContent="";notice.dataset.state="";notice.hidden=true;}
+ const activity=document.getElementById("homeActivityHistory");
+ let activityNotice=document.getElementById("oc-withdrawal-activity-notice");
+ if(!activityNotice&&activity){activityNotice=document.createElement("div");activityNotice.id="oc-withdrawal-activity-notice";activityNotice.style.cssText="margin:0 0 12px;padding:10px 12px;border:1px solid rgba(120,160,190,.28);border-radius:10px;background:rgba(35,120,170,.08);";}
+ if(activityNotice&&activity&&!activityNotice.isConnected)activity.prepend(activityNotice);
+ if(!rows.length){host.hidden=true;trigger.hidden=true;host.innerHTML="";activityNotice?.remove();return;}
  const statusLabel=x=>x==="approved"?"Approved":x==="rejected"?"Rejected":"Pending";
  const statusClass=x=>x==="approved"?"approved":x==="rejected"?"rejected":"pending";
  const dateText=x=>{const t=x?.toDate?.()||(x?.seconds?new Date(x.seconds*1000):null);return t?t.toLocaleString():"Submitted date unavailable";};
@@ -5999,15 +6018,27 @@ function renderWithdrawalStatuses(docs){
   const estimate=st==="pending"?'<div><strong>Estimated processing:</strong> Usually within 30 minutes · Maximum 24 hours</div>':"";
   return '<details class="oc-ws-item" data-oc-withdrawal-row="'+esc(d.id)+'"><summary><span class="oc-ws-'+statusClass(st)+'">Withdrawal status: '+statusLabel(st)+'</span><span>'+amount+'</span></summary><div class="oc-ws-meta"><div><strong>Amount:</strong> '+amount+'</div><div><strong>Destination address:</strong> '+esc(x.destinationAddress||"Not recorded")+'</div><div><strong>Network:</strong> '+esc(x.network||"Not recorded")+'</div><div><strong>Submitted:</strong> '+esc(dateText(x.createdAt))+'</div><div><strong>Status:</strong> '+statusLabel(st)+'</div>'+estimate+(x.reviewedAt?'<div><strong>Last updated:</strong> '+esc(dateText(x.reviewedAt))+'</div>':"")+'</div></details>';
  }).join("");
- const pendingCount=rows.filter(d=>(d.data().status||"pending")==="pending").length;
- const x=latest.data()||{},st=["approved","rejected"].includes(x.status)?x.status:"pending";
+ const pendingRows=rows.filter(d=>(d.data().status||"pending")==="pending");
+ const pendingCount=pendingRows.length;
  host.innerHTML='<div class="oc-ws-head"><span>Withdrawal requests'+(pendingCount?' · '+pendingCount+' pending':'')+'</span><button type="button" class="oc-ws-close" data-oc-close-withdrawal>Close</button></div>'+markup;
  host.hidden=!wasOpen;
- trigger.hidden=false;trigger.textContent='Withdrawal status: '+statusLabel(st)+' · '+String(x.amount??"")+' '+String(x.asset||"")+' · View';
- trigger.setAttribute("data-oc-open-withdrawal",latest.id);
- if(notice&&latest){
-  notice.innerHTML='<button type="button" data-oc-open-withdrawal="'+esc(latest.id)+'">Withdrawal status: '+statusLabel(st)+' · '+esc(x.amount)+' '+esc(x.asset||"")+' — View details</button>';
-  notice.dataset.state=st==="rejected"?"error":st==="approved"?"success":"pending";
+ if(pendingRows.length){
+  const active=pendingRows[0],x=active.data()||{};
+  trigger.hidden=false;trigger.textContent='Active withdrawal · '+String(x.amount??"")+' '+String(x.asset||"")+' · View';
+  trigger.setAttribute("data-oc-open-withdrawal",active.id);
+ }else{
+  trigger.hidden=true;trigger.removeAttribute("data-oc-open-withdrawal");
+ }
+ const viewed=readViewedWithdrawals();
+ const latestUnviewed=rows.find(d=>!viewed.has(String(d.id)));
+ if(activityNotice){
+  if(latestUnviewed){
+   const x=latestUnviewed.data()||{},st=["approved","rejected"].includes(x.status)?x.status:"pending";
+   activityNotice.dataset.requestId=latestUnviewed.id;
+   activityNotice.innerHTML='<button type="button" data-oc-open-withdrawal="'+esc(latestUnviewed.id)+'" style="border:0;background:none;padding:0;color:inherit;font:inherit;font-weight:750;text-align:left;cursor:pointer">Withdrawal status: '+statusLabel(st)+' · '+esc(x.amount)+' '+esc(x.asset||"")+' — View details</button>';
+   activityNotice.style.color=st==="rejected"?"#ff7187":st==="approved"?"#20b981":"#d9ad45";
+   activityNotice.hidden=false;
+  }else{activityNotice.remove();}
  }
 }
 document.addEventListener("click",event=>{
@@ -6019,7 +6050,7 @@ document.addEventListener("click",event=>{
  const opener=event.target.closest("[data-oc-open-withdrawal]");
  if(opener){
   const id=opener.getAttribute("data-oc-open-withdrawal"),row=host?.querySelector('[data-oc-withdrawal-row="'+CSS.escape(id)+'"]');
-  if(row){host.hidden=false;row.open=true;row.scrollIntoView({behavior:"smooth",block:"nearest"});}
+  if(row){host.hidden=false;row.open=true;row.scrollIntoView({behavior:"smooth",block:"nearest"});markWithdrawalViewed(id);}
   return;
  }
  if(host&&!host.hidden&&!host.contains(event.target)&&!trigger?.contains(event.target))host.hidden=true;
