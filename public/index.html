@@ -1357,7 +1357,7 @@ html.oc-auth-pending body > footer { display:none!important; }
 </head>
 <body>
 <header>
-  <div class="brand"><span class="oc-onchain-round-mark header-logo-mark" aria-hidden="true">S</span><span><span style="color:#16c784">Onchain</span><span style="color:inherit">Spro</span></span></div>
+  <div class="brand oc-brand-header"><span class="oc-brand-wordmark">Onchain</span><svg class="oc-brand-verified" viewBox="0 0 24 24" role="img" aria-label="Onchain brand mark"><circle cx="12" cy="12" r="11" fill="#2388ed"/><path d="m6.8 12.3 3.3 3.2 7.2-7.1" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
   <nav id="nav">
     <button class="active" data-page="home">Home</button>
     <button data-page="markets">Markets</button>
@@ -12262,5 +12262,14 @@ if(app){
  });
 }
 </script>
+
+<style id="oc-brand-header-refresh">
+/* Platform identity: clean Onchain wordmark with a blue check-style brand mark. */
+header .brand.oc-brand-header{display:flex!important;align-items:center!important;justify-self:start!important;gap:7px!important;font-size:22px!important;letter-spacing:-.45px!important;text-shadow:none!important}
+header .brand.oc-brand-header .oc-brand-wordmark{font-weight:900!important;color:#f4f8ff!important;background:none!important;-webkit-text-fill-color:currentColor!important;letter-spacing:-.55px!important}
+header .brand.oc-brand-header .oc-brand-verified{display:block!important;width:20px!important;height:20px!important;flex:0 0 20px!important;filter:drop-shadow(0 1px 4px rgba(35,136,237,.28))}
+html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#17202b!important}
+@media(max-width:720px){header .brand.oc-brand-header{font-size:19px!important;gap:6px!important}header .brand.oc-brand-header .oc-brand-verified{width:18px!important;height:18px!important;flex-basis:18px!important}}
+</style>
 </body>
 </html>
