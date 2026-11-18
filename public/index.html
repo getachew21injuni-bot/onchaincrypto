@@ -5956,8 +5956,8 @@ document.addEventListener("click",async event=>{
 </script>
 <script type="module" id="oc-deposit-withdraw-requests">
 import {getApps,initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInAnonymously} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import {getFirestore,collection,doc,addDoc,updateDoc,onSnapshot,query,where,serverTimestamp,runTransaction} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import {getAuth,onAuthStateChanged,signInAnonymously,EmailAuthProvider,reauthenticateWithCredential} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import {getFirestore,collection,doc,addDoc,updateDoc,onSnapshot,query,where,getDocs,serverTimestamp,runTransaction} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const cfg={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
 const app=getApps()[0]||initializeApp(cfg),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id),esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const admins=["getachew21.inj.uni@gmail.com"];let admin=false,stops=[];
@@ -5977,7 +5977,50 @@ setup();
 
 document.getElementById("withdrawAllBtn")?.addEventListener("click",()=>{const symbol=String(asset("withdraw")||"BTC").toUpperCase();const amount=typeof window.ocGetDisplayedAssetBalance==="function"?window.ocGetDisplayedAssetBalance(symbol):NaN;if(!Number.isFinite(amount)){const note=document.getElementById("withdrawNotice");if(note)note.textContent="Wallet balance is still loading. Refresh and try again.";return;}const field=document.getElementById("withdrawAmount");if(!field)return;field.value=amount>0?String(Number(amount.toFixed(8))):"";field.dispatchEvent(new Event("input",{bubbles:true}));field.dispatchEvent(new Event("change",{bubbles:true}));});
 function refreshWithdrawRequestButton(){const b=$("withdrawSubmit");if(!b)return;const valid=Number($("withdrawAmount")?.value)>0&&!!$("withdrawAddress")?.value.trim()&&$("withdrawAddressCheck")?.dataset.state==="valid"&&!!$("withdrawNetwork")?.value;b.disabled=!valid&&b.dataset.submitting!=="true";if(b.dataset.submitting!=="true")b.textContent="Continue";}window.ocUpdateWithdrawRequestButton=refreshWithdrawRequestButton;["withdrawAmount","withdrawAddress","withdrawNetwork"].forEach(id=>$(id)?.addEventListener("input",refreshWithdrawRequestButton));["withdrawAmount","withdrawAddress","withdrawNetwork"].forEach(id=>$(id)?.addEventListener("change",refreshWithdrawRequestButton));refreshWithdrawRequestButton();
-$("withdrawSubmit")?.addEventListener("click",async()=>{const b=$("withdrawSubmit"),m=$("withdrawNotice");if(!b||b.dataset.submitting==="true")return;b.dataset.submitting="true";b.disabled=true;b.textContent="Sending request…";m.textContent="Sending your withdrawal request…";m.dataset.state="";try{await withdraw();m.textContent="Withdrawal request sent successfully. Status: Pending.";m.dataset.state="pending";b.textContent="Request sent";}catch(e){m.textContent="Withdrawal request was not sent: "+(e.message||e.code||"Please try again.");m.dataset.state="error";b.textContent="Continue";}finally{delete b.dataset.submitting;refreshWithdrawRequestButton();if(m.dataset.state==="success")b.textContent="Continue";}});
+async function requestWithdrawalPassword(user){
+ const providers=(user.providerData||[]).map(item=>item.providerId);
+ if(!user.email||!providers.includes("password"))throw Error("This account does not use an email password. Sign in with your account's original method before requesting a withdrawal.");
+ return await new Promise((resolve,reject)=>{
+  const dialog=document.createElement("dialog");
+  dialog.setAttribute("aria-labelledby","ocWithdrawPasswordTitle");
+  dialog.style.cssText="width:min(420px,calc(100vw - 32px));border:1px solid #58b5ff;border-radius:16px;padding:22px;background:#0b1b30;color:#eaf6ff;box-shadow:0 20px 70px #000b";
+  dialog.innerHTML='<form method="dialog" style="display:grid;gap:12px"><strong id="ocWithdrawPasswordTitle" style="font-size:18px">Confirm your password</strong><p style="margin:0;color:#a9bfd4;font-size:13px">Enter your account password to confirm this withdrawal request.</p><input id="ocWithdrawConfirmPassword" type="password" autocomplete="current-password" required placeholder="Account password" style="width:100%;padding:13px;border:1px solid #315777;border-radius:9px;background:#071426;color:#fff"><div style="display:flex;gap:9px;justify-content:flex-end"><button type="button" data-cancel style="background:#233c56;color:#fff">Cancel</button><button type="submit" style="background:#168cff;color:#fff">Confirm</button></div></form>';
+  document.body.appendChild(dialog);
+  const form=dialog.querySelector("form"),field=dialog.querySelector("input");
+  const finish=(fn,value)=>{dialog.close();dialog.remove();fn(value);};
+  dialog.querySelector("[data-cancel]").addEventListener("click",()=>finish(resolve,null));
+  form.addEventListener("submit",event=>{event.preventDefault();const password=field.value;if(!password){field.focus();return;}finish(resolve,password);});
+  dialog.addEventListener("cancel",event=>{event.preventDefault();finish(resolve,null);},{once:true});
+  dialog.showModal();field.focus();
+ });
+}
+$("withdrawSubmit")?.addEventListener("click",async()=>{
+ const b=$("withdrawSubmit"),m=$("withdrawNotice");
+ if(!b||b.dataset.submitting==="true")return;
+ const user=auth.currentUser;
+ if(!user){m.textContent="Please sign in again.";m.dataset.state="error";return;}
+ b.dataset.submitting="true";b.disabled=true;b.textContent="Confirming…";m.textContent="";m.dataset.state="";
+ try{
+  const password=await requestWithdrawalPassword(user);
+  if(password===null){m.textContent="Withdrawal request cancelled.";m.dataset.state="";return;}
+  const credential=EmailAuthProvider.credential(user.email,password);
+  await reauthenticateWithCredential(user,credential);
+  b.textContent="Sending request…";
+  await withdraw();
+  m.textContent="Withdrawal status: Pending";
+  m.dataset.state="pending";
+  b.textContent="Request sent";
+ }catch(e){
+  const message=e.code==="auth/wrong-password"||e.code==="auth/invalid-credential"?"The password is incorrect. Please try again.":(e.message||e.code||"Please try again.");
+  m.textContent="Withdrawal request was not sent: "+message;
+  m.dataset.state="error";
+  b.textContent="Continue";
+ }finally{
+  delete b.dataset.submitting;
+  refreshWithdrawRequestButton();
+  if(m.dataset.state==="pending")b.textContent="Request sent";
+ }
+});
 async function processDemoRequest(kind,requestId,decision){
  const requestRef=doc(db,kind==="deposit"?"depositRequests":"withdrawRequests",requestId);
  const ledgerRef=doc(collection(db,"demoAssetTransactions"));
