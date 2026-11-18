@@ -12275,5 +12275,26 @@ header .brand.oc-brand-header .oc-brand-verified{display:block!important;width:2
 html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#17202b!important}
 @media(max-width:720px){header .brand.oc-brand-header{font-size:19px!important;gap:6px!important}header .brand.oc-brand-header .oc-brand-verified{width:18px!important;height:18px!important;flex-basis:18px!important}}
 </style>
-\n<style id="oc-home-profile-shortcut-style">\n#page-home .oc-home-page-title{justify-content:flex-start;min-height:58px;margin-bottom:14px}\n#page-home .oc-home-title-start{display:flex;align-items:center;gap:13px;min-width:0}\n#page-home .oc-home-profile-shortcut{width:54px;height:54px;flex:0 0 54px;display:grid;place-items:center;position:relative;overflow:hidden;padding:0;border:1px solid rgba(120,145,170,.24);border-radius:50%;background:var(--panel);color:var(--text);box-shadow:0 3px 12px rgba(0,0,0,.12);font-size:23px;font-weight:800;cursor:pointer}\n#page-home .oc-home-profile-shortcut img{width:100%;height:100%;object-fit:cover;border-radius:50%}\n#page-home .oc-home-profile-shortcut img[hidden],#page-home .oc-home-profile-shortcut span[hidden]{display:none!important}\n#page-home .oc-home-profile-shortcut:focus-visible{outline:3px solid #438dff;outline-offset:3px}\n#page-home .oc-home-title-start h1{margin:0}\n@media(max-width:600px){#page-home .oc-home-page-title{min-height:54px;margin-bottom:12px}#page-home .oc-home-profile-shortcut{width:50px;height:50px;flex-basis:50px}}\n</style>\n<script id="oc-home-profile-shortcut-action">\n(function(){\n const button=document.getElementById("ocHomeProfileShortcut");\n if(!button||button.dataset.ocBound==="1")return;\n button.dataset.ocBound="1";\n button.addEventListener("click",function(){\n  if(!auth.currentUser){if(typeof window.showPage==="function")window.showPage("register");return;}\n  if(typeof window.showPage==="function")window.showPage("profile");\n });\n})();\n</script>\n</body>
+\n<style id="oc-home-profile-shortcut-style">
+#page-home .oc-home-page-title{justify-content:flex-start;min-height:58px;margin-bottom:14px}
+#page-home .oc-home-title-start{display:flex;align-items:center;gap:13px;min-width:0}
+#page-home .oc-home-profile-shortcut{width:54px;height:54px;flex:0 0 54px;display:grid;place-items:center;position:relative;overflow:hidden;padding:0;border:1px solid rgba(120,145,170,.24);border-radius:50%;background:var(--panel);color:var(--text);box-shadow:0 3px 12px rgba(0,0,0,.12);font-size:23px;font-weight:800;cursor:pointer}
+#page-home .oc-home-profile-shortcut img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+#page-home .oc-home-profile-shortcut img[hidden],#page-home .oc-home-profile-shortcut span[hidden]{display:none!important}
+#page-home .oc-home-profile-shortcut:focus-visible{outline:3px solid #438dff;outline-offset:3px}
+#page-home .oc-home-title-start h1{margin:0}
+@media(max-width:600px){#page-home .oc-home-page-title{min-height:54px;margin-bottom:12px}#page-home .oc-home-profile-shortcut{width:50px;height:50px;flex-basis:50px}}
+</style>
+<script id="oc-home-profile-shortcut-action">
+(function(){
+ const button=document.getElementById("ocHomeProfileShortcut");
+ if(!button||button.dataset.ocBound==="1")return;
+ button.dataset.ocBound="1";
+ button.addEventListener("click",function(){
+  if(!auth.currentUser){if(typeof window.showPage==="function")window.showPage("register");return;}
+  if(typeof window.showPage==="function")window.showPage("profile");
+ });
+})();
+</script>
+</body>
 </html>
