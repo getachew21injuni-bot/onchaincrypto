@@ -120,6 +120,21 @@ async function readDocument(token, collection, id) {
   const doc = await response.json();
   return { data: fieldsFromFirestore(doc.fields), updateTime: doc.updateTime, name: doc.name };
 }
+async function queryDocuments(token, collection, field, value, limit = 200) {
+  const response = await fetch(ROOT + ":runQuery", {
+    method: "POST", headers: { authorization: "Bearer " + token, "content-type": "application/json" },
+    body: JSON.stringify({ structuredQuery: {
+      from: [{ collectionId: collection }],
+      where: { fieldFilter: { field: { fieldPath: field }, op: "EQUAL", value: toFirestore(value) } },
+      limit
+    } })
+  });
+  if (!response.ok) throw new HttpError("Firestore could not query " + collection + ".", 502);
+  const rows = await response.json();
+  return rows.filter(row => row.document).map(row => ({
+    id: row.document.name.split("/").pop(), ...fieldsFromFirestore(row.document.fields || {})
+  }));
+}
 async function commitWrites(token, writes) {
   const response = await fetch(ROOT + ":commit", {
     method: "POST", headers: { authorization: "Bearer " + token, "content-type": "application/json" },
@@ -593,6 +608,12 @@ export default {
         const wallet = await readWallet(access, claims.sub);
         if (!wallet) throw new HttpError("Canonical wallet record is missing; no balance was created.", 404);
         return json({ uid: claims.sub, wallet: wallet.data, updateTime: wallet.updateTime }, 200, cors);
+      }
+      if (url.pathname === "/v1/wallet/ledger" && request.method === "GET") {
+        const access = await serviceToken(env);
+        const rows = await queryDocuments(access, "walletLedger", "uid", claims.sub, 200);
+        rows.sort((a, b) => String(b.createdAtText || "").localeCompare(String(a.createdAtText || "")));
+        return json({ uid: claims.sub, rows }, 200, cors);
       }
       if (url.pathname === "/v1/quick-trade/active" && request.method === "GET") {
         const access = await serviceToken(env);
