@@ -4275,7 +4275,7 @@ onAuthStateChanged(auth, (user) => {
   window.ocTradeCloudReadyUid=null;
   const previousUser = window.onchaincryptoCurrentUser || null;
   window.onchaincryptoCurrentUser = user || null;
-  if (user) { window.ocLoggedOut = false; window.__ocSignedOutHistoryBoundary=false; document.documentElement.classList.remove("oc-auth-pending"); document.body.classList.remove("oc-logged-out"); window.ocSetAuthScreenVisibility?.(true); void restoreCloudTradeState(user).then(ready=>{if(ready)void resumeActiveQuickTrade();}); void (async () => {
+  if (user) { window.ocLoggedOut = false; window.__ocSignedOutHistoryBoundary=false; document.documentElement.classList.remove("oc-auth-pending"); document.body.classList.remove("oc-logged-out"); window.ocSetAuthScreenVisibility?.(true); void restoreCloudTradeState(user).then(ready=>{if(ready){void resumeActiveQuickTrade();if(typeof window.ocLoadWalletLedger==="function")void window.ocLoadWalletLedger();}}); void (async () => {
     await loadSavedUserProfile(user);
     // Legacy cloud credits are no longer copied into customer wallet views.
     try { await saveBasicUserProfile(user); }
@@ -8878,8 +8878,7 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
    });
    state={balance:Number(result.wallet.balance)||0,holdings:result.wallet.holdings||{},history:Array.isArray(result.wallet.history)?result.wallet.history:[]};
    const item={...result.conversion,status:'Completed · server wallet ledger'};
-   let history=[];try{history=JSON.parse(localStorage.getItem('oc_convert_history')||'[]')}catch(_){}
-   history.unshift(item);localStorage.setItem('oc_convert_history',JSON.stringify(history.slice(0,100)));window.ocRenderWalletActivity?.();
+   if(typeof window.ocLoadWalletLedger==="function")void window.ocLoadWalletLedger();
    if(typeof recordActivity==='function')recordActivity('convert','Converted '+a+' to '+b,fmt(item.amount,8)+' '+a+' → '+fmt(item.received,8)+' '+b+' · fee '+fmt(item.feeUSDT,8)+' USDT','Completed · trusted wallet ledger');
    if(typeof renderWallet==='function')renderWallet();
    if(typeof renderWalletCoinList==='function')renderWalletCoinList();
