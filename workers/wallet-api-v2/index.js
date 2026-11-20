@@ -288,6 +288,8 @@ async function adminAdjustment(env, claims, body) {
   await commitWrites(access, writes);
   return { ok: true, uid, balance: next, requestId, ledger: "walletLedger/" + requestId };
 }
+export const walletApiInternals = Object.freeze({ toFirestore, fieldsFromFirestore, validId, isAdmin, walletWrite, createLedgerWrite });
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
