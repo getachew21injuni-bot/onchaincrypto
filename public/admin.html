@@ -593,21 +593,22 @@ async function renderInternalTransfers(){
       tx.update(requestRef,{status:'rejected',reviewedAt:serverTimestamp(),reviewedBy:current.email});
      });
     }else{
-     const senderRef=doc(db,'users',request.senderUid),recipientRef=doc(db,'users',request.recipientUid),transferRef=doc(collection(db,'internalTransfers'));
+     const senderRef=doc(db,'users',request.senderUid),recipientRef=doc(db,'users',request.recipientUid),senderWalletRef=doc(db,'userTradeState',request.senderUid),recipientWalletRef=doc(db,'userTradeState',request.recipientUid),transferRef=doc(collection(db,'internalTransfers'));
      await runTransaction(db,async tx=>{
-      const [rs,ss,rr]=await Promise.all([tx.get(requestRef),tx.get(senderRef),tx.get(recipientRef)]);
+      const [rs,ss,rr,sw,rw]=await Promise.all([tx.get(requestRef),tx.get(senderRef),tx.get(recipientRef),tx.get(senderWalletRef),tx.get(recipientWalletRef)]);
       if(!rs.exists()||rs.data().status!=='pending')throw new Error('This request has already been processed.');
       if(!ss.exists()||!rr.exists())throw new Error('Sender or recipient account could not be found.');
-      const req=rs.data(),sender=ss.data(),recipient=rr.data(),amount=Number(req.amount);
+      if(!sw.exists()||!rw.exists())throw new Error('Sender or recipient canonical Firestore wallet is missing. No legacy profile balance was used.');
+      const req=rs.data(),sender=ss.data(),recipient=rr.data(),senderWallet=sw.data(),recipientWallet=rw.data(),amount=Number(req.amount);
       if(!Number.isFinite(amount)||amount<=0||req.asset!=='USDT')throw new Error('The request amount or asset is invalid.');
       if(sender.accountStatus==='suspended'||recipient.accountStatus==='suspended')throw new Error('A suspended account cannot receive or send internal transfers.');
-      const senderBefore=Number(sender.demoBalanceUSDT||0),recipientBefore=Number(recipient.demoBalanceUSDT||0);
-      if(!Number.isFinite(senderBefore)||!Number.isFinite(recipientBefore)||senderBefore<amount)throw new Error('Insufficient sender USDT balance. No balance was changed.');
+      const senderBefore=Number(senderWallet.balance||0),recipientBefore=Number(recipientWallet.balance||0);
+      if(!Number.isFinite(senderBefore)||!Number.isFinite(recipientBefore)||senderBefore<amount)throw new Error('Insufficient sender Firestore wallet balance. No balance was changed.');
       const senderAfter=Number((senderBefore-amount).toFixed(8)),recipientAfter=Number((recipientBefore+amount).toFixed(8));
       if(recipientAfter>1000000000)throw new Error('Recipient balance limit would be exceeded.');
-      tx.update(senderRef,{demoBalanceUSDT:senderAfter,demoBalanceUpdatedAt:serverTimestamp(),demoBalanceLastTransferId:transferRef.id});
-      tx.update(recipientRef,{demoBalanceUSDT:recipientAfter,demoBalanceUpdatedAt:serverTimestamp(),demoBalanceLastTransferId:transferRef.id});
-      tx.set(transferRef,{senderUid:req.senderUid,recipientUid:req.recipientUid,asset:'USDT',amount,senderBefore,senderAfter,recipientBefore,recipientAfter,senderName:req.senderName||'OnChain member',recipientName:req.recipientName||'OnChain member',createdAt:serverTimestamp(),transferRequestId:id,approvedBy:current.email});
+      tx.update(senderWalletRef,{balance:senderAfter,updatedAt:serverTimestamp()});
+      tx.update(recipientWalletRef,{balance:recipientAfter,updatedAt:serverTimestamp()});
+      tx.set(transferRef,{senderUid:req.senderUid,recipientUid:req.recipientUid,asset:'USDT',amount,senderBefore,senderAfter,recipientBefore,recipientAfter,senderName:req.senderName||'OnChain member',recipientName:req.recipientName||'OnChain member',createdAt:serverTimestamp(),transferRequestId:id,approvedBy:current.email,source:'firestore-wallet'});
       tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email,transferId:transferRef.id});
      });
     }
@@ -830,8 +831,8 @@ window.adminRefreshDashboard=async function(){
  if(!users||!kyc||!status||!updated)return;
  status.textContent='Loading';updated.textContent='Connecting to Firestore…';
  try{
-  const results=await Promise.all([getDocs(query(collection(db,'users'),limit(1000))),getDocs(query(collection(db,'kycSubmissions'),limit(100))),getDocs(query(collection(db,'depositRequests'),limit(500))),getDocs(query(collection(db,'withdrawRequests'),limit(500)))]);
-  const u=results[0],k=results[1],d=results[2],w=results[3];
+  const results=await Promise.all([getDocs(query(collection(db,'users'),limit(1000))),getDocs(query(collection(db,'userTradeState'),limit(1000))),getDocs(query(collection(db,'kycSubmissions'),limit(100))),getDocs(query(collection(db,'depositRequests'),limit(500))),getDocs(query(collection(db,'withdrawRequests'),limit(500)))]);
+  const u=results[0],wallets=results[1],k=results[2],d=results[3],w=results[4];
   const dp=d.docs.filter(x=>(x.data().status||'pending')==='pending').length,wp=w.docs.filter(x=>(x.data().status||'pending')==='pending').length;
   if(depositCount)depositCount.textContent=String(dp);if(withdrawCount)withdrawCount.textContent=String(wp);
   if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Firestore connected · '+d.size+' total request(s)';
@@ -841,9 +842,9 @@ window.adminRefreshDashboard=async function(){
   const pending=k.docs.filter(d=>(d.data().status||'pending')==='pending').length;
   kyc.textContent=k.size===100&&pending===k.size?'100+':String(pending);
   byId('liveKycStatus').textContent=k.size===100?'Pending count from first 100 KYC records':'Pending submissions from Firestore';
-  const demoTotal=u.docs.reduce((sum,d)=>{const data=d.data()||{};const n=Number(data.demoBalanceUSDT||0);return sum+(Number.isFinite(n)&&n>0?n:0);},0);
-  if(totalAssets)totalAssets.textContent=demoTotal.toLocaleString(undefined,{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
-  if(totalAssetsStatus)totalAssetsStatus.textContent='Sum of internal account balances; not proof of on-chain funds'+(u.size===1000?' (first 1000 profiles only)':'');
+  const walletTotal=wallets.docs.reduce((sum,d)=>{const n=Number(d.data()?.balance||0);return sum+(Number.isFinite(n)&&n>0?n:0);},0);
+  if(totalAssets)totalAssets.textContent=walletTotal.toLocaleString(undefined,{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
+  if(totalAssetsStatus)totalAssetsStatus.textContent='Sum of canonical Firestore wallet balances; not proof of on-chain funds'+(wallets.size===1000?' (first 1000 wallets only)':'');
   status.textContent='Connected';updated.textContent='Last updated '+new Date().toLocaleTimeString();
  }catch(error){
   users.textContent='—';kyc.textContent='—';status.textContent='Unavailable';updated.textContent='Firestore access failed: '+(error.code||'unknown error');
