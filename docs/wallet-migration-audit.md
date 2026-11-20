@@ -59,3 +59,26 @@ The current branch now contains a first frontend/admin source-of-truth pass:
 - Missing or conflicting legacy records still require a reviewed reconciliation/migration. This code does not migrate or change Firestore customer data.
 
 Do not merge or deploy this branch, deploy its Firestore rules, or treat its balances as production-safe until those blockers are completed and tested. No Firestore customer balance documents were changed by these GitHub edits.
+
+
+## Backend replacement preparation — 2026-11-20
+
+A separate Cloudflare Worker folder, `workers/wallet-api-v2/`, is being prepared as the replacement wallet API. It has its own `wrangler.toml`; it does not overwrite the existing deposit-verifier Worker or the read-only reconciliation Worker. No Cloudflare deployment has been performed.
+
+Current v2 implementation:
+- Authenticated read of `userTradeState/{uid}` only.
+- A narrowly scoped administrator USDT adjustment route with an existing-wallet requirement, wallet update-time precondition, and create-only `walletLedger/{requestId}` record.
+- Firebase ID-token verification and a dedicated service-account secret contract.
+- No automatic profile/demo balance fallback, wallet seeding, or customer-data migration.
+
+Newly documented product rules that the backend must enforce:
+- Quick Trade is demo USDT only; simulated profit is not withdrawable.
+- Outcome controls are server-side. The browser must not submit a trusted outcome or P/L.
+- Admin-configured win/loss percentages and the previously specified 10-minute inactivity rule must be evaluated server-side and written to an auditable ledger.
+- Coin quantities must be preserved; USDT-equivalent display valuation must use trusted prices, not browser-supplied prices.
+
+**Still not complete:** customer buy/sell and timed-trade settlement, conversion, deposit crediting, withdrawal reservation/approval/payout, internal transfers, admin approvals/adjustments integration, full client migration, and final read-only Firestore rules. The staged v2 Worker is not yet a full backend replacement and must not be connected to the live frontend or deployed as production.
+
+A syntax-only npm command has been added: `npm run check:wallet-api-v2`. It has not yet been run in this environment. No integration tests have been run. The Worker service account, IAM permissions, exact Firestore schema, price source, and chain payout verification still require staging validation.
+
+No customer Firestore documents, balances, profile fields, or historical ledgers were modified by these GitHub commits. No merge, production deployment, Worker deployment, or Firestore rules deployment was performed.
