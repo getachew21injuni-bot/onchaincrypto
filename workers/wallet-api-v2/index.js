@@ -194,7 +194,7 @@ function requireRequestId(value) {
 }
 async function walletOrder(env, claims, body) {
   const requestId = requireRequestId(body.requestId), uid = claims.sub;
-  const side = body.side, symbol = String(body.symbol || "").toUpperCase(), amount = Number(body.amountUSDT);
+  const side = body.side, symbol = String(body.symbol || "").toUpperCase(), amount = Number(body.amountUSDT), kind = body.kind === "trade" ? "trade" : "buy-hold";
   if (!["buy", "sell"].includes(side) || (!COIN_IDS[symbol] && !["XAU","PAXG","XAUT"].includes(symbol)) ||
       !Number.isFinite(amount) || amount < 1 || amount > 1000000000) throw new HttpError("Order details are invalid.");
   const access = await serviceToken(env), [wallet, prices] = await Promise.all([
@@ -217,7 +217,7 @@ async function walletOrder(env, claims, body) {
   holdings[symbol] = nextAsset;
   if (nextAsset <= 1e-12) delete holdings[symbol];
   const createdAt = new Date().toISOString();
-  const entry = { id: requestId, side, symbol, amount, qty, price, time: createdAt, demo: true, kind: "buy-hold", source: "wallet-api-v2" };
+  const entry = { id: requestId, side, symbol, amount, qty, price, time: createdAt, demo: true, kind, source: "wallet-api-v2" };
   const history = [{ ...entry }, ...(Array.isArray(wallet.data.history) ? wallet.data.history : [])].slice(0, 300);
   await commitWrites(access, [
     walletWrite(uid, wallet.data, wallet.updateTime, nextBalance, holdings, history),
