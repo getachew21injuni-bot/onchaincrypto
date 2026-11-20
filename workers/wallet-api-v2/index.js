@@ -363,7 +363,7 @@ async function settleQuickTrade(env, claims, body) {
       createdAtText: completedAt, createdAt: { timestampValue: completedAt }
     })
   ]);
-  return { ok: true, alreadySettled: false, trade: completedTrade, result, wallet: { uid, balance: nextBalance,
+  return { ok: true, alreadySettled: false, trade: completedTrade, result: { ...result, balanceBefore: balance, balanceAfter: nextBalance }, wallet: { uid, balance: nextBalance,
     holdings: wallet.data.holdings || {}, history } };
 }
 async function reviewDepositWithdrawal(env, claims, body) {
