@@ -2955,8 +2955,8 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-wallet-act
 document.addEventListener("click",e=>{const b=e.target.closest("[data-profile-financial]");if(b)showPage(b.dataset.profileFinancial);if(e.target.closest("#profileSecurityDetailsBtn")){const settings=document.getElementById("profileSettingsSection");if(settings)settings.open=true;document.getElementById("changePasswordBtn")?.focus()}});
 function refreshProfileAccountInfo(){const badge=$("profileAccountStatusBadge"),status=$("profileAccountStatusText"),member=$("profileMemberSince");const user=window.onchaincryptoCurrentUser||null;if(badge)badge.textContent=user?"Signed in":"Guest";if(status)status.textContent=user?(user.emailVerified?"Active · Email verified":"Active · Email not verified"):"Guest · Not signed in";if(member){const created=user&&user.metadata&&user.metadata.creationTime;if(created){const d=new Date(created);member.textContent=isNaN(d.getTime())?"Available after sign-in":d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"})}else member.textContent="Available after sign-in"}}
 function renderWalletMarket(){const el=$("walletMarketRows");if(!el)return;const q=String($("walletCoinSearch")?.value||"").trim().toLowerCase();const limitValue=String(window.walletCoinExpanded||4);const filter=document.querySelector("#walletCoinFilters [data-wallet-filter].active")?.dataset.walletFilter||"all";let rows=[...market].filter(c=>String(c.name||"").toLowerCase().includes(q)||String(c.symbol||"").toLowerCase().includes(q)).sort((a,b)=>(b.market_cap||0)-(a.market_cap||0));if(filter==="gainers")rows=rows.filter(c=>(c.price_change_percentage_24h||0)>0).sort((a,b)=>(b.price_change_percentage_24h||0)-(a.price_change_percentage_24h||0));if(filter==="losers")rows=rows.filter(c=>(c.price_change_percentage_24h||0)<0).sort((a,b)=>(a.price_change_percentage_24h||0)-(b.price_change_percentage_24h||0));const total=rows.length;rows=rows.slice(0,Number(limitValue)||4);el.innerHTML=rows.length?rows.map(c=>'<tr><td>'+coinAsset(c)+'</td><td>'+money(c.current_price)+'</td><td class="'+((c.price_change_percentage_24h||0)>=0?'green':'red')+'">'+pct(c.price_change_percentage_24h)+'</td><td><button class="secondary" type="button" data-wallet-market-trade="'+safe(c.symbol)+'">Trade</button></td></tr>').join(""):'<tr><td colspan="4" class="empty">No matching coins found. Try another search or filter.</td></tr>';const count=$("walletCoinCount");if(count)count.textContent="Showing "+rows.length+" of "+total+" matching coins";const less=$("walletCoinLess"),more=$("walletCoinMore");if(less)less.disabled=(window.walletCoinExpanded||4)<=4;if(more)more.disabled=rows.length>=total;el.querySelectorAll("[data-wallet-market-trade]").forEach(b=>b.addEventListener("click",()=>{const sel=$("tradeAsset");if(sel)sel.value=b.dataset.walletMarketTrade;showPage("trade");updateTradePreview()}))}
-window.ocApplyAdminDemoBalance=function(amount){const n=Number(amount);if(!Number.isFinite(n)||n<0)return;state.balance=Math.round(n*100)/100;saveState();renderWallet();const summary=document.getElementById("summaryBalance");if(summary)summary.textContent=usdtMoney(state.balance);};
-window.ocApplyAdminDemoAssets=function(balances){if(!balances||typeof balances!=="object"||Array.isArray(balances))return;let changed=false;for(const [rawSymbol,rawAmount] of Object.entries(balances)){const symbol=String(rawSymbol||"").toUpperCase();const amount=Number(rawAmount);if(!/^[A-Z0-9]{2,12}$/.test(symbol)||!Number.isFinite(amount)||amount<0)continue;state.holdings[symbol]=amount;changed=true;}if(changed){saveState();renderWallet();}};
+window.ocApplyAdminDemoBalance=function(){console.warn("Legacy profile balance updates are ignored. Read the canonical Firestore wallet instead.");};
+window.ocApplyAdminDemoAssets=function(){console.warn("Legacy profile asset updates are ignored. Read the canonical Firestore wallet instead.");};
 function renderWallet(){if(!walletLoaded||walletOwnerUid!==auth.currentUser?.uid){const note=$("walletBalanceNote");if(note)note.textContent="Loading your Firestore wallet…";const balance=$("summaryBalance");if(balance)balance.textContent="—";const total=$("walletBalance");if(total)total.textContent="—";return;}const pricedHoldings=Object.entries(state.holdings).reduce((out,[sym,qty])=>{const symbol=String(sym).toUpperCase(),amount=Number(qty)||0;if(amount<=0||symbol==="USDT")return out;const price=Number(priceFor(symbol)?.current_price||0);if(price>0){out.value+=amount*price;out.priced++;}else out.unpriced++;return out;},{value:0,priced:0,unpriced:0});const totalValue=(Number(state.balance)||0)+pricedHoldings.value;$("summaryBalance").textContent=usdtMoney(state.balance);$("walletBalance").textContent=usdtMoney(totalValue);$("walletBalanceNote").textContent="Estimated total value in USDT · "+pricedHoldings.priced+" priced coin holding"+(pricedHoldings.priced===1?"":"s")+(pricedHoldings.unpriced?"; "+pricedHoldings.unpriced+" asset price"+(pricedHoldings.unpriced===1?" is":"s are")+" unavailable and excluded":"")+" · estimated portfolio";$("holdingsValue").textContent=usdtMoney(pricedHoldings.value);const rows=Object.entries(state.holdings).filter(([sym,qty])=>String(sym).toUpperCase()!=="USDT"&&Number(qty)>0.0000000001&&(! $("hideSmallBalances")?.checked||Number(qty)*(priceFor(sym)?.current_price||0)>=1));$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym,current_price:0},price=Number(c.current_price||0);return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+' '+safe(sym.toUpperCase())+'</td><td>'+(price>0?usdtMoney(Number(qty)*price):"Price unavailable")+'</td></tr>'}).join(''):'<tr><td colspan="3" class="empty">No coin holdings yet. Your USDT balance is shown above.</td></tr>';renderActivityHistory();renderTradeHistory();renderPnl();renderWalletMarket();renderBuyHoldOptions()}
 document.addEventListener("change",e=>{if(e.target&&e.target.id==="hideSmallBalances")renderWallet();if(e.target&&e.target.id==="homeHistoryFilter")renderActivityHistory()});
 function showPage(page){const guest=window.ocLoggedOut===true&&!auth.currentUser;if(guest&&page!=="register"&&page!=="public-market")page="public-market";document.body.classList.toggle("oc-visitor-mode",guest);document.body.classList.toggle("oc-auth-screen",guest&&page==="register");if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));window.ocSyncHomeActions?.();document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
@@ -4077,7 +4077,6 @@ window.ocSubmitKycDetails=async function(data){
   },{merge:true});
   return {ok:true,status:"pending"};
 };
-let stopAdminWalletSync=null;
 let stopTradeStateSync=null;
 let tradeCloudReadyUid=null;
 window.ocTradeCloudReadyUid=null;
@@ -6103,27 +6102,24 @@ async function processDemoRequest(kind,requestId,decision){
   const userSnap=await tx.get(userRef);
   const walletSnap=await tx.get(walletRef);
   if(!userSnap.exists())throw Error("User profile is missing. Ask the user to sign in before this approval.");
+  if(!walletSnap.exists())throw Error("Canonical Firestore wallet is missing. No legacy profile balance was copied or changed.");
   const user=userSnap.data()||{};
-  const wallet=walletSnap.exists()?walletSnap.data()||{}:{};
+  if(user.accountStatus==="suspended")throw Error("This account is suspended.");
+  const wallet=walletSnap.data()||{};
   const walletHoldings=wallet.holdings&&typeof wallet.holdings==="object"&&!Array.isArray(wallet.holdings)?{...wallet.holdings}:{};
-  const profileHoldings=user.demoAssetBalances&&typeof user.demoAssetBalances==="object"&&!Array.isArray(user.demoAssetBalances)?user.demoAssetBalances:{};
-  const before=asset==="USDT"
-   ?(walletSnap.exists()?Number(wallet.balance||0):Number(user.demoBalanceUSDT||0))
-   :(walletSnap.exists()?Number(walletHoldings[asset]||0):Number(profileHoldings[asset]||0));
+  const before=asset==="USDT"?Number(wallet.balance||0):Number(walletHoldings[asset]||0);
   const after=decision==="approve"?(kind==="deposit"?before+amount:before-amount):before;
   if(kind==="withdraw"&&after<0)throw Error("Insufficient displayed "+asset+" balance. No changes were made.");
   const nowText=new Date().toISOString();
   const ledger={uid,type:kind==="deposit"?"deposit":"withdrawal",asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:nowText,createdBy:auth.currentUser.uid,note:"Admin-approved balance adjustment "+kind,source:"admin-demo",status:"completed"};
-  let nextBalance=walletSnap.exists()?Math.max(0,Number(wallet.balance)||0):Math.max(0,Number(user.demoBalanceUSDT)||0);
+  let nextBalance=Math.max(0,Number(wallet.balance)||0);
   let nextHoldings=walletHoldings;
   if(asset==="USDT"){
    nextBalance=after;
-   tx.set(userRef,{demoBalanceUSDT:after,demoBalanceUpdatedAt:serverTimestamp()},{merge:true});
-   tx.set(usdtLedgerRef,{uid,type:kind==="deposit"?"deposit":"withdrawal",amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:nowText,createdBy:auth.currentUser.uid,note:"Admin-approved balance adjustment "+kind,source:"admin-demo",status:"completed"});
+   tx.set(usdtLedgerRef,{uid,type:kind==="deposit"?"deposit":"withdrawal",amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:nowText,createdBy:auth.currentUser.uid,note:"Admin-approved balance adjustment "+kind,source:"firestore-wallet",status:"completed"});
   }else{
-   if(walletSnap.exists())nextHoldings[asset]=after;
-   const profileAssets={...(user.demoAssetBalances||{}),[asset]:after};
-   tx.set(userRef,{demoAssetBalances:profileAssets,demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:auth.currentUser.email},{merge:true});
+   nextHoldings[asset]=after;
+   tx.set(ledgerRef,{uid,type:kind==="deposit"?"deposit":"withdrawal",asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:nowText,createdBy:auth.currentUser.uid,note:"Admin-approved balance adjustment "+kind,source:"firestore-wallet",status:"completed"});
   }
   // Keep the cloud wallet itself in step with the approved balance change.
   // The pending request never changes the wallet; this transaction runs only
@@ -7575,7 +7571,9 @@ async function publishDirectoryEntry(current){
  myName=[profile.firstName,profile.lastName].filter(Boolean).join(" ").trim()||profile.displayName||current.displayName||current.email?.split("@")[0]||"OnChain member";
  await setDoc(doc(db,"userDirectory",current.uid),{uid:current.uid,displayName:String(myName).slice(0,80),updatedAt:serverTimestamp()},{merge:true});
  if(byId("transferMyId"))byId("transferMyId").textContent=current.uid;
- showAvailable(Number(profile.demoBalanceUSDT||0));
+ const walletSnap=await getDoc(doc(db,"userTradeState",current.uid));
+ if(!walletSnap.exists())throw new Error("Your Firestore wallet record was not found.");
+ showAvailable(Number(walletSnap.data()?.balance||0));
 }
 function renderHistory(){
  const host=byId("transferHistoryRows");if(!host)return;
@@ -7616,7 +7614,7 @@ onAuthStateChanged(auth,async current=>{
  if(byId("transferAmount"))byId("transferAmount").value="";
  updateButton();watchHistory();
  if(!user){showAvailable(0);notice("Sign in to send USDT.",true);return;}
- try{await publishDirectoryEntry(user);stopBalance=onSnapshot(doc(db,"users",user.uid),snap=>{if(snap.exists())showAvailable(Number(snap.data()?.demoBalanceUSDT||0));},()=>{});notice("Internal account transfer request. It updates the OnChain ledger and does not send cryptocurrency to an external wallet.");}
+ try{await publishDirectoryEntry(user);stopBalance=onSnapshot(doc(db,"userTradeState",user.uid),snap=>{if(snap.exists())showAvailable(Number(snap.data()?.balance||0));},()=>{});notice("Internal account transfer request. It updates the OnChain ledger and does not send cryptocurrency to an external wallet.");}
  catch(error){console.warn("OnChain directory setup:",error?.code||error?.message);notice("Your account ID could not be prepared. Refresh and try again.",true);}
 });
 byId("transferDestination")?.addEventListener("input",()=>{recipient=null;if(byId("transferRecipientPreview"))byId("transferRecipientPreview").textContent="Check the recipient before sending.";updateButton();});
