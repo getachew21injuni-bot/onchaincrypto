@@ -332,20 +332,24 @@ async function renderDemoFinance(view){
  try{
   const {collection,getDocs,query,limit,doc,setDoc,writeBatch,serverTimestamp,runTransaction}=window.__ocAdminFirebase;
   const db=window.__ocAdminFirebase.db;
-  const [us,usdtSnap,assetSnap]=await Promise.all([
+  const [us,ws,usdtSnap,assetSnap]=await Promise.all([
    getDocs(query(collection(db,'users'),limit(200))),
+   getDocs(query(collection(db,'userTradeState'),limit(500))),
    getDocs(query(collection(db,'demoTransactions'),limit(200))),
    getDocs(query(collection(db,'demoAssetTransactions'),limit(300)))
   ]);
   const users=us.docs.map(d=>({id:d.id,...d.data()}));
+  const walletMap=new Map(ws.docs.map(d=>[d.id,d.data()||{}]));
   const allTx=[...usdtSnap.docs.map(d=>({id:d.id,...d.data(),asset:'USDT',amount:d.data().amountUSDT,balanceAfter:d.data().balanceAfterUSDT})),...assetSnap.docs.map(d=>({id:d.id,...d.data()}))];
   const txs=allTx.filter(t=>!t.adminHiddenFromHistory&&(view==='Deposits'?t.type==='deposit':t.type==='withdrawal')).sort((a,b)=>String(b.createdAtText||'').localeCompare(String(a.createdAtText||''))).slice(0,100);
   if(!users.length){body.innerHTML='<div class="notice">No registered user profiles were found. A user must register before an account adjustment can be assigned.</div>';return;}
   const opts=users.map(u=>'<option value="'+esc(u.id)+'">'+esc((u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id)+' — '+(u.email||u.id))+'</option>').join('');
   const assetOptions=assets.map(a=>'<option value="'+a+'">'+a+'</option>').join('');
   const userRows=users.map(u=>{
-   const extra=Object.entries(u.demoAssetBalances||{}).filter(([a,n])=>a!=='USDT'&&Number(n)>0).map(([a,n])=>a+' '+Number(n).toLocaleString(undefined,{maximumFractionDigits:8})).join(' · ');
-   return '<tr><td>'+esc(u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||'—')+'</td><td>'+esc(u.email||'—')+'</td><td>'+Number(u.demoBalanceUSDT||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT</td><td>'+esc(extra||'—')+'</td><td>'+esc(u.accountStatus||'active')+'</td></tr>';
+   const wallet=walletMap.get(u.id),holdings=wallet?.holdings&&typeof wallet.holdings==='object'?wallet.holdings:{};
+   const extra=Object.entries(holdings).filter(([a,n])=>a!=='USDT'&&Number(n)>0).map(([a,n])=>a+' '+Number(n).toLocaleString(undefined,{maximumFractionDigits:8})).join(' · ');
+   const balance=wallet&&Number.isFinite(Number(wallet.balance))?Number(wallet.balance).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT':'Wallet record missing';
+   return '<tr><td>'+esc(u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||'—')+'</td><td>'+esc(u.email||'—')+'</td><td>'+balance+'</td><td>'+esc(extra||'—')+'</td><td>'+esc(u.accountStatus||'active')+'</td></tr>';
   }).join('');
   const txRows=txs.map(t=>'<tr><td>'+esc(t.createdAtText||'Recorded')+'</td><td>'+esc(t.uid||'—')+'</td><td>'+esc(t.type)+'</td><td>'+Number(t.amount??0).toLocaleString(undefined,{maximumFractionDigits:8})+' '+esc(t.asset||'USDT')+'</td><td>'+Number(t.balanceAfter??0).toLocaleString(undefined,{maximumFractionDigits:8})+' '+esc(t.asset||'USDT')+'</td><td>'+esc(t.note||'—')+'</td></tr>').join('');
   body.innerHTML='<div style="display:grid;gap:16px">'+
@@ -357,7 +361,7 @@ async function renderDemoFinance(view){
    '<label style="display:grid;gap:6px;font-weight:700">AMOUNT<input name="amount" type="number" min="0.00000001" max="1000000000" step="any" required placeholder="Enter quantity for selected coin(s)" style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label>'+
    '<label style="display:grid;gap:6px;font-weight:700">ADMIN NOTE (OPTIONAL)<input name="note" maxlength="200" placeholder="Reason for this account adjustment" style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label>'+
    '<button class="icon-btn" type="submit" style="background:'+(view==='Deposits'?'linear-gradient(90deg,#087b56,#12a879)':'linear-gradient(90deg,#813246,#bd4058)')+';border:0;padding:16px;font-size:16px;font-weight:850;box-shadow:0 8px 22px #0004">'+(view==='Deposits'?'＋ ADD TO USER WALLET':'− CONFIRM BALANCE DEDUCTION')+'</button><p id="demoFinanceMessage" class="muted" role="status" aria-live="polite" style="margin:0"></p></form>'+
-   '<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Registered user wallet balances</h3><span class="tag">'+users.length+' profiles</span></div><div style="display:grid;gap:10px;margin:12px 0 16px"><label style="display:grid;gap:6px;font-weight:700">Select user to reset all wallet balances<select id="resetWalletUser" style="width:100%;padding:12px;border-radius:10px;background:#102333;color:white;border:1px solid #526878">'+opts+'</select></label><button id="resetWalletBalanceBtn" class="icon-btn" type="button" style="background:#9a3048;border:0;padding:14px;font-weight:800">Reset selected user wallet to zero</button><p id="resetWalletMessage" class="muted" role="status" aria-live="polite" style="margin:0">Resets USDT and all recorded coin balances. The admin audit log is retained.</p></div><div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>USDT balance</th><th>Other coin balances</th><th>Status</th></tr></thead><tbody>'+userRows+'</tbody></table></div></div>'+
+   '<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Registered user wallet balances</h3><span class="tag">'+users.length+' profiles</span></div><div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>USDT balance</th><th>Other coin balances</th><th>Status</th></tr></thead><tbody>'+userRows+'</tbody></table></div></div>'+
    '<div class="content-panel" style="margin:0"><h3 style="margin-top:0">Recent account '+(view==='Deposits'?'credits':'deductions')+'</h3><div class="table-wrap"><table><thead><tr><th>Time</th><th>User UID</th><th>Type</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody>'+(txRows||'<tr><td colspan="6">No account adjustments recorded yet.</td></tr>')+'</tbody></table></div></div></div>';
   await renderRequestQueue(view);
   if(view==='Deposits'){
@@ -380,27 +384,6 @@ async function renderDemoFinance(view){
     }catch(err){msg.textContent='Archive failed: '+(err.code||err.message||'unknown error');btn.disabled=false;}
    });
   }
-  const resetButton=document.getElementById('resetWalletBalanceBtn');
-  if(resetButton)resetButton.addEventListener('click',async()=>{
-   const current=window.__ocAdminFirebase?.auth?.currentUser,select=document.getElementById('resetWalletUser'),msg=document.getElementById('resetWalletMessage');
-   if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){alert('Verified administrator sign-in required.');return;}
-   const target=users.find(u=>u.id===select.value);if(!target){msg.textContent='Select a registered user.';return;}
-   if(!confirm('Set '+(target.displayName||target.email||target.id)+' USDT and all coin balances to ZERO? This does not delete the account.'))return;
-   resetButton.disabled=true;msg.textContent='Resetting wallet…';
-   try{
-    await current.getIdToken(true);
-    const userRef=doc(db,'users',target.id),logRef=doc(collection(db,'adminWalletResetLogs'));
-    await runTransaction(db,async tx=>{
-     const snap=await tx.get(userRef);if(!snap.exists())throw Error('User profile not found');
-     const data=snap.data(),beforeAssets={...(data.demoAssetBalances||{})},zeroAssets={};
-     for(const sym of new Set([...Object.keys(beforeAssets),...assets]))zeroAssets[sym]=0;
-     tx.update(userRef,{demoBalanceUSDT:0,demoAssetBalances:zeroAssets,demoBalanceUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:current.email,demoWalletResetAt:serverTimestamp(),demoWalletResetBy:current.email,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:current.email});
-     tx.set(logRef,{uid:target.id,userEmail:target.email||'',beforeUSDT:Number(data.demoBalanceUSDT)||0,beforeAssetBalances:beforeAssets,afterUSDT:0,afterAssetBalances:zeroAssets,createdAt:serverTimestamp(),createdBy:current.uid,createdByEmail:current.email,source:'admin-dashboard'});
-    });
-    msg.textContent='Wallet reset confirmed by Firebase. USDT and all coin balances are zero; audit record saved.';
-    await renderDemoFinance(view);
-   }catch(err){msg.textContent='Wallet reset failed: '+(err.code||err.message||'unknown error');resetButton.disabled=false;}
-  });
   const form=document.getElementById('demoFinanceForm');
   form.addEventListener('submit',async e=>{
    e.preventDefault();
@@ -409,37 +392,38 @@ async function renderDemoFinance(view){
    const selected=users.find(u=>u.id===uid);if(!selected){msg.textContent='Selected user no longer exists. Refresh and try again.';return;}
    const targets=asset==='__ALL__'?assets:[asset];
    if(!targets.length||targets.some(a=>!assets.includes(a))){msg.textContent='Select a supported coin.';return;}
-   const isDeposit=view==='Deposits',oldMap={...(selected.demoAssetBalances||{})},nextMap={...oldMap};
-   let usdtBefore=Math.max(0,Number(selected.demoBalanceUSDT)||0),usdtAfter=usdtBefore;
-   const changes=[];
-   for(const symbol of targets){
-    const before=symbol==='USDT'?usdtBefore:Math.max(0,Number(oldMap[symbol])||0);
-    const after=Math.round((before+(isDeposit?amount:-amount))*100000000)/100000000;
-    if(after<0){msg.textContent='Insufficient '+symbol+' account balance. No changes were saved.';return;}
-    changes.push({symbol,before,after});
-    if(symbol==='USDT')usdtAfter=Math.round(after*100)/100;else nextMap[symbol]=after;
-   }
-   const btn=form.querySelector('button[type=submit]');btn.disabled=true;msg.textContent='Publishing wallet update to Firebase…';
+   const isDeposit=view==='Deposits';
+   const btn=form.querySelector('button[type=submit]');btn.disabled=true;msg.textContent='Updating the canonical Firestore wallet…';
    try{
-    const batch=writeBatch(db),userRef=doc(db,'users',uid),adminEmail=window.__ocAdminFirebase.auth.currentUser?.email||'';
-    const userUpdate={demoAssetBalances:nextMap,demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:adminEmail,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:adminEmail};
-    if(targets.includes('USDT')){userUpdate.demoBalanceUSDT=usdtAfter;userUpdate.demoBalanceUpdatedAt=serverTimestamp();}
-    batch.update(userRef,userUpdate);
+    const walletRef=doc(db,'userTradeState',uid),adminUser=window.__ocAdminFirebase.auth.currentUser;
     const notificationRef=doc(collection(db,'userNotifications',uid,'items'));
-    const adminUser=window.__ocAdminFirebase.auth.currentUser;
     const activityRef=doc(collection(db,'userActivityEvents'));
-    batch.set(notificationRef,{kind:isDeposit?'deposit':'withdrawal_approved',title:isDeposit?'Successfully deposited '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset):'Withdrawal successfully processed',message:isDeposit?'Successfully deposited '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' to your account. Your account balance has been updated.':'Your withdrawal of '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' was successfully processed as an account balance adjustment. This dashboard does not send an external blockchain payout.'+(note?' Admin note: '+note:''),createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:adminUser.uid,source:'admin-demo'});
-    batch.set(activityRef,{uid,email:selected.email||selected.emailAddress||'Unknown',type:isDeposit?'deposit':'withdraw',title:isDeposit?'Admin deposit successful':'Admin withdrawal successful',details:'Admin '+(isDeposit?'credited ':'debited ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' · Internal account ledger adjustment'+(note?' · Note: '+note:''),status:'Successful',createdAt:serverTimestamp(),createdBy:adminUser.uid,source:'admin-wallet-adjustment'});
-    for(const c of changes){
-     const txRef=doc(collection(db,c.symbol==='USDT'?'demoTransactions':'demoAssetTransactions'));
-     if(c.symbol==='USDT'){
-      batch.set(txRef,{uid,type:isDeposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:c.before,balanceAfterUSDT:c.after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:window.__ocAdminFirebase.auth.currentUser.uid,note,source:'admin-demo',status:'completed'});
-     }else{
-      batch.set(txRef,{uid,type:isDeposit?'deposit':'withdrawal',asset:c.symbol,amount,balanceBefore:c.before,balanceAfter:c.after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:window.__ocAdminFirebase.auth.currentUser.uid,note,source:'admin-demo',status:'completed'});
+    const ledgerRefs=targets.map(symbol=>({symbol,ref:doc(collection(db,symbol==='USDT'?'demoTransactions':'demoAssetTransactions'))}));
+    await runTransaction(db,async tx=>{
+     const walletSnap=await tx.get(walletRef);
+     if(!walletSnap.exists())throw new Error('canonical-firestore-wallet-not-found-no-legacy-balance-was-used');
+     const wallet=walletSnap.data()||{},holdings=wallet.holdings&&typeof wallet.holdings==='object'&&!Array.isArray(wallet.holdings)?{...wallet.holdings}:{};
+     let balance=Number(wallet.balance||0);
+     if(!Number.isFinite(balance)||balance<0)throw new Error('invalid-canonical-wallet-balance');
+     const changes=[];
+     for(const symbol of targets){
+      const before=symbol==='USDT'?balance:Number(holdings[symbol]||0);
+      if(!Number.isFinite(before)||before<0)throw new Error('invalid-wallet-asset-balance-'+symbol);
+      const after=Number((before+(isDeposit?amount:-amount)).toFixed(symbol==='USDT'?2:8));
+      if(after<0)throw new Error('insufficient-firestore-wallet-balance-'+symbol);
+      changes.push({symbol,before,after});
+      if(symbol==='USDT')balance=after;else holdings[symbol]=after;
      }
-    }
-    await batch.commit();
-    msg.textContent=(isDeposit?'Deposit successful: ':'Withdrawal successful: ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'of every supported asset':asset)+'. Wallet, transaction ledger, user notification, and live User Activity event were saved together.';
+     tx.set(walletRef,{uid,balance,holdings,history:Array.isArray(wallet.history)?wallet.history.slice(0,300):[],updatedAt:serverTimestamp()},{merge:true});
+     for(const change of changes){
+      const ledgerRef=ledgerRefs.find(item=>item.symbol===change.symbol).ref;
+      if(change.symbol==='USDT')tx.set(ledgerRef,{uid,type:isDeposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:change.before,balanceAfterUSDT:change.after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:adminUser.uid,note,source:'firestore-wallet',status:'completed'});
+      else tx.set(ledgerRef,{uid,type:isDeposit?'deposit':'withdrawal',asset:change.symbol,amount,balanceBefore:change.before,balanceAfter:change.after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:adminUser.uid,note,source:'firestore-wallet',status:'completed'});
+     }
+     tx.set(notificationRef,{kind:isDeposit?'deposit':'withdrawal_approved',title:isDeposit?'Successfully deposited '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset):'Withdrawal successfully processed',message:isDeposit?'Successfully deposited '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' to your account. Your Firestore wallet has been updated.':'Your withdrawal of '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' was approved as an account balance adjustment. No external blockchain payout was sent.'+(note?' Admin note: '+note:''),createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:adminUser.uid,source:'firestore-wallet'});
+     tx.set(activityRef,{uid,email:selected.email||selected.emailAddress||'Unknown',type:isDeposit?'deposit':'withdraw',title:isDeposit?'Admin deposit successful':'Admin withdrawal successful',details:'Admin '+(isDeposit?'credited ':'debited ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' · Firestore wallet adjustment'+(note?' · Note: '+note:''),status:'Successful',createdAt:serverTimestamp(),createdBy:adminUser.uid,source:'firestore-wallet'});
+    });
+    msg.textContent=(isDeposit?'Deposit successful: ':'Withdrawal successful: ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'of every supported asset':asset)+'. Canonical Firestore wallet, transaction ledger, notification, and activity record were saved together.';
     await renderDemoFinance(view);
    }catch(err){
     const failure='Could not publish wallet update ('+(err.code||err.message||'error')+').';
