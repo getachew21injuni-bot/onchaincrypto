@@ -39,3 +39,23 @@ The current `userTradeState/{uid}` rules allow owners to create/update their own
 
 ## Current state
 This audit records verified code paths only. It does not change user data, published rules, or the live platform. No wallet migration or balance correction is performed by this document.
+
+## Staged implementation status — review only, not production-ready
+
+The current branch now contains a first frontend/admin source-of-truth pass:
+
+- `public/index.html` no longer initializes the customer wallet from `localStorage.oc_demo_state`, subtracts the old local $10,000 grant, or imports balances from `users.demoBalanceUSDT` / `users.demoAssetBalances`.
+- Customer wallet loading now reads `userTradeState/{uid}` only. A missing or unconfirmed Firestore wallet fails closed; it is not silently created or seeded from another source.
+- The in-app admin user balance panel reads the canonical wallet only.
+- `public/admin.html` deposit/withdrawal approvals, manual admin balance adjustments, internal transfer approvals, and dashboard totals now target `userTradeState/{uid}`.
+- The destructive admin wallet-reset control was removed from the finance screen.
+- Firestore rules in this branch allow the verified admin role to write canonical wallet documents so these staged admin flows can be tested. Account owners still have write permission because existing customer trade flows still write from the browser.
+
+**Remaining production blockers:**
+
+- The customer browser still writes wallet state directly through `ocPersistTradeState`, buy/sell actions, and timed trade settlement. A customer can therefore still tamper with their own wallet document under the current rules.
+- The Cloudflare Worker remains read-only reconciliation code. It is not yet a trusted wallet mutation API.
+- Conversions, other customer balance-changing paths, and all admin balance operations must be moved behind authenticated, idempotent server-side ledger operations before owner write access is removed.
+- Missing or conflicting legacy records still require a reviewed reconciliation/migration. This code does not migrate or change Firestore customer data.
+
+Do not merge or deploy this branch, deploy its Firestore rules, or treat its balances as production-safe until those blockers are completed and tested. No Firestore customer balance documents were changed by these GitHub edits.
