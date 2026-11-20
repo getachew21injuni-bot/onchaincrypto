@@ -277,15 +277,12 @@ service cloud.firestore {
         && request.resource.data.receiptImage.matches('^data:image/jpeg;base64,.*')
         && request.resource.data.receiptFileName is string && request.resource.data.receiptFileName.size() <= 120;
       allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
-      allow update: if isAdmin() && (
-        (resource.data.status == 'pending'
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reviewedAt','reviewedBy'])
-          && request.resource.data.status in ['approved','rejected']
-          && request.resource.data.reviewedBy == request.auth.token.email)
-        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminHiddenFromHistory','historyClearedAt','historyClearedBy'])
-          && request.resource.data.adminHiddenFromHistory == true
-          && request.resource.data.historyClearedBy == request.auth.token.email)
-      );
+      // Approval/rejection is performed by the trusted Worker. Admins may
+      // only archive legacy history rows; this never changes wallet balances.
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminHiddenFromHistory','historyClearedAt','historyClearedBy'])
+        && request.resource.data.adminHiddenFromHistory == true
+        && request.resource.data.historyClearedBy == request.auth.token.email;
       allow delete: if false;
     }
     // Withdrawal request submission and review. A separate payout process is required.
@@ -297,10 +294,7 @@ service cloud.firestore {
         && request.resource.data.amount is number && request.resource.data.amount > 0 && request.resource.data.amount <= 1000000000
         && request.resource.data.destinationAddress is string && request.resource.data.destinationAddress.size() >= 10 && request.resource.data.destinationAddress.size() <= 500;
       allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
-      allow update: if isAdmin() && resource.data.status == 'pending'
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reviewedAt','reviewedBy'])
-        && request.resource.data.status in ['approved','rejected']
-        && request.resource.data.reviewedBy == request.auth.token.email;
+      // Review status and wallet adjustment are performed by the trusted Worker.\n      allow update: if false;
       allow delete: if false;
     }
 
@@ -341,23 +335,7 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time;
       allow get, list: if isAdmin()
         || (signedIn() && (resource.data.senderUid == request.auth.uid || resource.data.recipientUid == request.auth.uid));
-      allow update: if isAdmin()
-        && resource.data.status == 'pending'
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reviewedAt','reviewedBy','transferId'])
-        && request.resource.data.status in ['approved','rejected']
-        && request.resource.data.reviewedAt == request.time
-        && request.resource.data.reviewedBy == request.auth.token.email
-        && (
-          (request.resource.data.status == 'rejected' && !('transferId' in request.resource.data))
-          || (
-            request.resource.data.status == 'approved'
-            && request.resource.data.transferId is string
-            && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.transferId)).data.transferRequestId == requestId
-            && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.transferId)).data.senderUid == resource.data.senderUid
-            && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.transferId)).data.recipientUid == resource.data.recipientUid
-            && getAfter(/databases/$(database)/documents/internalTransfers/$(request.resource.data.transferId)).data.amount == resource.data.amount
-          )
-        );
+      // Only the trusted Worker may approve or reject a transfer request.\n      allow update: if false;
       allow delete: if false;
     }
 
