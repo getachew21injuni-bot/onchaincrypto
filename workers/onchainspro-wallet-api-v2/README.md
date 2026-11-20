@@ -92,6 +92,8 @@ origins in `ALLOWED_ORIGINS`:
 The Firebase service account needs permission to read and write the Firestore
 collections used here. Never put its private key in GitHub or browser code.
 
+**Expiry precision note:** a one-minute Cron Trigger checks due trades once per minute. A trade is settled on the first successful check after `expiresAt`, so settlement and its exit quote can be up to roughly 60 seconds late (longer during a price-provider outage). This is independent of the browser and survives closed devices, but it is not second-accurate. If exact-to-the-second expiry is required, use a per-trade Cloudflare Durable Object alarm or another scheduled execution service before enabling production trades.
+
 ## Firestore collections
 
 | Collection | Purpose |
