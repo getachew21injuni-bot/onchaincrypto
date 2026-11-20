@@ -3146,6 +3146,57 @@ async function startTimedPaper(direction){
   }
  },1000);
 }
+async function resumeActiveQuickTrade(){
+ if(timedPaper||typeof window.ocWalletApiGet!=="function")return;
+ try{
+  const active=await window.ocWalletApiGet("/v1/quick-trade/active");
+  if(!active?.active||!active.trade)return;
+  const t=active.trade,startedMs=new Date(t.startedAt).getTime(),endsMs=new Date(t.endsAt).getTime(),entry=Number(t.entryPrice);
+  if(!Number.isFinite(endsMs)||!Number.isFinite(entry)||entry<=0)return;
+  timedPaper={...t,entry,stakeUsd:Number(t.stakeUSD),started:startedMs,ends:endsMs,samples:[{time:startedMs,price:entry}]};
+  const form=$("timedPaperTrade");if(form){form.classList.remove("oc-stage-config","oc-stage-complete","oc-stage-error");form.classList.add("oc-stage-running");}
+  $("timedPair").textContent=t.symbol+" / USDT";$("timedEntryPrice").textContent=money(entry);
+  $("timedStartTime").textContent=new Date(startedMs).toLocaleString();$("timedEndTime").textContent=new Date(endsMs).toLocaleString();
+  $("timedDirection").textContent=t.direction==="up"?"BUY":"SELL";$("timedAmountDetail").textContent=money(t.stake)+" "+t.funding;
+  $("timedEntryDetail").textContent=money(entry);$("timedStatusDetail").textContent="RUNNING";$("timedGraphStatus").textContent="RUNNING";
+  $("timedResult").textContent="Restored your server-confirmed active Quick Trade after reconnecting.";
+  $("timedUpBtn").disabled=true;$("timedDownBtn").disabled=true;$("timedConfirmBtn").disabled=true;
+  timedTimer=setInterval(async()=>{
+   if(!timedPaper)return;
+   const running=timedPaper,remaining=Math.max(0,Math.ceil((running.ends-Date.now())/1000));
+   $("timedCountdown").textContent=timedFormat(remaining);
+   const price=Number(priceFor(running.symbol)?.current_price)||running.entry;
+   running.samples.push({time:Date.now(),price});if(running.samples.length>240)running.samples.shift();
+   drawTimedTradeGraph(running.samples,running.entry);
+   if(Date.now()<running.ends)return;
+   clearInterval(timedTimer);timedTimer=null;const finished={...running,samples:[...running.samples]};timedPaper=null;
+   try{
+    const settled=await window.ocWalletApiPost("/v1/quick-trade/settle",{tradeId:finished.tradeId});
+    if(!settled.result||!settled.wallet)throw new Error("The server did not return a confirmed settlement.");
+    const result=settled.result,exit=Number(result.price||settled.trade.exitPrice),pnl=Number(result.pnl)||0;
+    state={balance:Number(settled.wallet.balance)||0,holdings:settled.wallet.holdings||{},history:Array.isArray(settled.wallet.history)?settled.wallet.history:[]};
+    finished.samples.push({time:Date.now(),price:exit});const won=pnl>0,lost=pnl<0;
+    const status=won?"WIN +"+Math.abs(pnl).toFixed(2)+" USDT":lost?"LOSS -"+Math.abs(pnl).toFixed(2)+" USDT":"EVEN 0.00 USDT";
+    renderWallet();renderTradeHistory();renderTradeOutcomes();renderWalletCoinList();updateTradePreview();
+    $("timedPnl").textContent=(pnl>=0?"+":"-")+money(Math.abs(pnl))+" USDT";$("timedPnl").className="big "+(won?"green":lost?"red":"");
+    $("timedEndPriceDetail").textContent=money(exit);$("timedStatusDetail").textContent=status;$("timedGraphStatus").textContent="COMPLETED";
+    $("timedResult").className="tiny "+(won?"green":lost?"red":"muted");$("timedResult").textContent=status+" · Restored trade settled by the server.";
+    const board=$("timedResultBoard");if(board){
+     board.style.display="block";$("timedBoardOutcome").textContent=status;$("timedBoardOutcome").style.color=won?"#07804b":lost?"#c53232":"#586579";
+     $("timedBoardSummary").textContent="Completed "+new Date(result.time).toLocaleString()+" · Duration "+timedFormat(finished.duration);
+     $("timedBoardPair").textContent=finished.symbol+" / USDT · "+(finished.direction==="up"?"BUY":"SELL");
+     $("timedBoardAmount").textContent=money(finished.stake)+" "+finished.funding;$("timedBoardEntry").textContent=money(finished.entry);$("timedBoardExit").textContent=money(exit);
+     $("timedBoardMove").textContent=(((exit-finished.entry)/finished.entry)*100).toFixed(5)+"%";
+     const pnlEl=$("timedBoardProfitLoss");if(pnlEl){pnlEl.textContent=(pnl>=0?"+":"-")+money(Math.abs(pnl))+" USDT";pnlEl.style.color=won?"#07804b":lost?"#c53232":"#586579";}
+     $("timedBoardBefore").textContent=money(result.balanceBefore??settled.trade.balanceBefore)+" USDT";$("timedBoardAfter").textContent=money(state.balance)+" USDT";
+     const title=$("timedBoardTitle");if(title)title.textContent=won?"🎉 Congratulations! You Won!":lost?"Trade Complete — Loss":"Trade Complete";
+     const tradeForm=$("timedPaperTrade");if(tradeForm){tradeForm.classList.remove("oc-stage-config","oc-stage-running");tradeForm.classList.add("oc-stage-complete");}
+     requestAnimationFrame(()=>requestAnimationFrame(()=>drawTimedPnlGraph(finished.samples,finished.entry,finished.stakeUsd,finished.direction,"timedBoardPnlChart",pnl)));
+    }
+   }catch(error){showTimedTradeIssue("The restored Quick Trade could not be confirmed. Check the wallet again before starting another trade. "+(error.message||""),finished);}
+  },1000);
+ }catch(error){console.warn("Active Quick Trade recovery unavailable:",error?.message||error);}
+}
 function finishedSymbolSafe(){return timedPaper?.symbol||$("tradeAsset")?.value||selected}
 function chooseTimedDirection(direction){pendingTimedDirection=direction;$("timedUpBtn").setAttribute("aria-pressed",String(direction==="up"));$("timedDownBtn").setAttribute("aria-pressed",String(direction==="down"));$("timedConfirmBtn").disabled=!!timedPaper;const result=$("timedResult");if(result)result.textContent=(direction==="up"?"Buy":"Sell")+" selected. Review your amount and plan, then confirm.";requestAnimationFrame(()=>ocForwardStepTo($("timedConfirmBtn")))}
 $("timedUpBtn").addEventListener("click",()=>chooseTimedDirection("up"));
@@ -4218,7 +4269,7 @@ onAuthStateChanged(auth, (user) => {
   window.ocTradeCloudReadyUid=null;
   const previousUser = window.onchaincryptoCurrentUser || null;
   window.onchaincryptoCurrentUser = user || null;
-  if (user) { window.ocLoggedOut = false; window.__ocSignedOutHistoryBoundary=false; document.documentElement.classList.remove("oc-auth-pending"); document.body.classList.remove("oc-logged-out"); window.ocSetAuthScreenVisibility?.(true); void restoreCloudTradeState(user); void (async () => {
+  if (user) { window.ocLoggedOut = false; window.__ocSignedOutHistoryBoundary=false; document.documentElement.classList.remove("oc-auth-pending"); document.body.classList.remove("oc-logged-out"); window.ocSetAuthScreenVisibility?.(true); void restoreCloudTradeState(user).then(ready=>{if(ready)void resumeActiveQuickTrade();}); void (async () => {
     await loadSavedUserProfile(user);
     // Legacy cloud credits are no longer copied into customer wallet views.
     try { await saveBasicUserProfile(user); }
