@@ -263,7 +263,7 @@ function saveAdminData(data){localStorage.setItem(moduleKey,JSON.stringify(data)
 function esc(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function getRecords(view){const data=loadAdminData();return Array.isArray(data[view])?data[view]:[];}
 async function ocAdminWalletPost(path,payload,current){
- const base=String(window.ONCHAINSPRO_WALLET_API_URL||"").replace(/\\/+$/,"");
+ const base=String(window.ONCHAINSPRO_WALLET_API_URL||"").replace(/\/+$/,"");
  if(!base)throw new Error("The trusted Cloudflare Wallet API URL has not been configured yet.");
  if(!current)throw new Error("Verified administrator sign-in required.");
  const token=await current.getIdToken(true);
