@@ -16,7 +16,23 @@ The admin adjustment route is included as a narrowly scoped first write path. Be
 
 ## Cloudflare staging configuration
 
-Create a NEW staging Worker; do not overwrite `onchaincrypto-deposit-verifier` or the existing reconciliation Worker.
+A separate Wrangler configuration is included at `wrangler.toml`. It names this Worker `onchainspro-wallet-api-v2` and does not bind it to the production domain. Create/configure it as a NEW staging Worker; do not overwrite `onchaincrypto-deposit-verifier` or the existing reconciliation Worker.
+
+From this directory, the syntax-only check is run from the repository root with:
+
+```sh
+npm run check:wallet-api-v2
+```
+
+The following commands are examples for a later, separately approved staging deployment only; they have NOT been run:
+
+```sh
+cd workers/wallet-api-v2
+npx wrangler secret put FIREBASE_SERVICE_ACCOUNT
+npx wrangler deploy
+```
+
+Set `ALLOWED_ORIGINS` and `ADMIN_EMAILS` as Worker variables in the Cloudflare dashboard before any staging test. Keep the allowed origin limited to a dedicated staging site. Do not add the live OnChainSpro domain until the complete migration has passed review.
 
 Variables:
 - `ALLOWED_ORIGINS`: exact staging origin(s), comma-separated. Do not add the production domain during staging.
@@ -42,6 +58,18 @@ Adjustment ledger: `walletLedger/{requestId}`
 - records UID, type, asset, amount, before/after USDT balances, reason, actor UID/email, and timestamp
 
 Do not assume a missing wallet means zero. The API returns 404 and does not seed it. Do not reconcile profile/demo balances automatically. Existing conflicting records require a separately reviewed migration.
+
+## Trade and wallet behavior that must be enforced by the trusted backend
+
+The previously specified Quick Trade behavior is a server-side rule, not a client authority:
+
+- The existing Quick Trade balance/outcome model is demo USDT only. A simulated profit must never become withdrawable funds or be credited by the deposit/withdrawal system.
+- Administrator outcome controls include market-based behavior and configured win/loss percentages, with the configured win probability capped at 100%.
+- The previously specified inactivity behavior (10 minutes inactive: 25% win / 75% loss) must be applied by the backend only if the existing product logic still defines that inactivity condition; the browser must not submit its own win/loss outcome or P/L.
+- Every result must be recorded in an append-only audit ledger with the applied control, stake, asset, quote/reference, result, and before/after balances.
+- Holdings and portfolio valuation must preserve per-asset quantities; USDT-equivalent display values must use a trusted current price source. A browser-provided price or P/L is not authoritative.
+
+These rules are documented as migration requirements, not as implemented routes in this staged Worker. The current code intentionally does not expose Quick Trade settlement, conversion, or withdrawal endpoints.
 
 ## Validation still required before any deployment
 
