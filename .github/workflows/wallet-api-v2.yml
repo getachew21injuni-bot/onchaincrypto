@@ -1,0 +1,31 @@
+name: Wallet API v2 checks
+
+on:
+  push:
+    branches:
+      - fix/canonical-wallet-worker-migration
+    paths:
+      - "workers/wallet-api-v2/**"
+      - "tests/wallet-api-v2.test.mjs"
+      - "package.json"
+      - ".github/workflows/wallet-api-v2.yml"
+  pull_request:
+    paths:
+      - "workers/wallet-api-v2/**"
+      - "tests/wallet-api-v2.test.mjs"
+      - "package.json"
+      - ".github/workflows/wallet-api-v2.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  wallet-api-v2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check Worker syntax and unit tests
+        run: npm run test:wallet-api-v2
