@@ -277,7 +277,7 @@ async function walletConvert(env, claims, body) {
   await commitWrites(access, [
     walletWrite(uid, wallet.data, wallet.updateTime, nextBalance, holdings, Array.isArray(wallet.data.history) ? wallet.data.history.slice(0, 300) : []),
     createLedgerWrite("convert-" + requestId, {
-      uid, type: "conversion", asset: from + "->" + to, amount, received, feeUSDT,
+      uid, type: "conversion", status: "completed", asset: from + "->" + to, from, to, amount, received, fromQty: amount, toQty: received, feeUSDT, feeUsdt: feeUSDT,
       priceFrom: prices[from], priceTo: prices[to], balanceBefore: beforeFrom,
       balanceAfter: from === "USDT" ? nextBalance : holdings[from] || 0,
       requestId, source: "wallet-api-v2", createdAtText: createdAt, createdAt: { timestampValue: createdAt }
@@ -426,7 +426,7 @@ async function reviewDepositWithdrawal(env, claims, body) {
   if (asset !== "USDT") holdings[asset] = after;
   const ledgerId = `admin-${kind}-${requestId}`, ledgerType = kind === "withdraw" ? "withdrawal" : "deposit";
   const ledger = createLedgerWrite(ledgerId, {
-    uid, type: ledgerType, asset, amount, balanceBefore: before, balanceAfter: after,
+    uid, type: ledgerType, status: "approved", asset, amount, balanceBefore: before, balanceAfter: after,
     source: "admin-request-review", requestId, actorUid: claims.sub, actorEmail: reviewedBy, createdAtText: reviewedAt,
     createdAt: { timestampValue: reviewedAt }
   });
@@ -480,7 +480,7 @@ async function adminAdjustAssets(env, claims, body) {
   const writes = [
     walletWrite(uid, wallet.data, wallet.updateTime, nextBalance, holdings, Array.isArray(wallet.data.history) ? wallet.data.history.slice(0, 300) : []),
     ...changes.map(change => createLedgerWrite("admin-" + requestId + "-" + change.asset, {
-      uid, type: operation, asset: change.asset, amount, balanceBefore: change.before, balanceAfter: change.after,
+      uid, type: operation, status: "approved", asset: change.asset, amount, balanceBefore: change.before, balanceAfter: change.after,
       reason, requestId, actorUid: claims.sub, actorEmail, source: "admin-finance-adjustment", createdAtText: createdAt,
       createdAt: { timestampValue: createdAt }
     })),
