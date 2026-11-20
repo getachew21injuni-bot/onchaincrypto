@@ -1,7 +1,7 @@
-// OnChainSpro trusted wallet API v2 — staged backend foundation.
-// This worker intentionally exposes wallet reads and audited administrator USDT adjustments only.
-// Customer trading, conversions, transfers, deposits and withdrawals remain disabled until their
-// server-side business rules and source records are migrated. Never trust client-supplied P/L.
+// OnChainSpro trusted wallet API v2 — isolated staging implementation.
+// All customer/admin balance mutations in this branch are routed through this Worker.
+// userTradeState/{uid} is the only canonical wallet; walletLedger is append-only audit history.
+// Never trust browser-supplied prices, Quick Trade outcomes or P/L.
 const PROJECT_ID = "onchaincrypto-d976b";
 const ROOT = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 const ISSUER = `https://securetoken.google.com/${PROJECT_ID}`;
