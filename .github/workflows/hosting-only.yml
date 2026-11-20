@@ -1,4 +1,4 @@
-name: Deploy Firebase Hosting only
+name: Deploy Firebase Hosting and Firestore rules
 
 on:
   push:
@@ -43,5 +43,5 @@ jobs:
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
 
-      - name: Deploy Hosting plus Firestore and Storage security rules (no Cloud Functions changes)
-        run: firebase deploy --project onchaincrypto-d976b --only hosting,firestore:rules,storage --non-interactive
+      - name: Deploy Hosting and Firestore security rules (no Cloud Functions or Storage changes)
+        run: firebase deploy --project onchaincrypto-d976b --only hosting,firestore:rules --non-interactive
