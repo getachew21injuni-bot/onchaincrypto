@@ -1,0 +1,30 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function owns(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'getachew21.inj.uni@gmail.com';
+    }
+
+    // Private identity documents: owners may upload/replace their own two
+    // image files; only the verified administrator may read them.
+    match /kycDocuments/{uid}/{side} {
+      allow read: if isAdmin();
+      allow create, update: if owns(uid)
+        && side in ['front', 'back']
+        && request.resource.size > 0
+        && request.resource.size <= 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)')
+        && request.resource.metadata.uid == uid
+        && request.resource.metadata.side == side;
+      allow delete: if false;
+    }
+  }
+}
