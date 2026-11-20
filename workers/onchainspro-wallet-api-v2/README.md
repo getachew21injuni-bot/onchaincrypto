@@ -20,6 +20,14 @@ the current browser still has direct Firestore wallet-write paths.
   This makes settlement idempotent under retries and concurrent cron invocations.
 - Lists the signed-in user's active and recent completed trades.
 
+The companion `public/server-trades.js` adapter intercepts the existing Confirm Trade action,
+submits only the selected symbol/direction/funding amount, restores running trades after
+sign-in or refresh, and displays server-returned settlement data. It deliberately prevents
+the old browser timer/result handler from running and has no local fallback.
+
+The create request body is `{ symbol, direction, amount, fundingAsset }`; the server derives
+the USDT-equivalent stake, entry quote, tier, duration, expiry, and outcome settings.
+
 The module keeps the existing Quick Trade plan tiers, 30/60/90/120/180/360 second
 durations, global/user market-win-loss controls, and USDT P/L accounting. For non-USDT
 funding assets, the server obtains the funding asset's USDT quote and validates the
@@ -97,12 +105,11 @@ Required composite indexes were added to the branch's `firestore.indexes.json`.
 
 ## Important deployment blockers (must be resolved before production)
 
-1. **Frontend is not migrated yet.** The existing `startTimedPaper` function still runs
-   the countdown, obtains expiry quotes, calculates P/L, and calls the browser-side
-   `ocCommitQuickTradeResult`. It must be replaced with calls to `POST /v1/trades`
-   and `GET /v1/trades`; on sign-in/refresh it must recover active trades from Firestore
-   and render the server-provided `expiresAt`. The browser must never calculate or submit
-   a result.
+1. **Worker routes are not integrated yet.** The frontend adapter is staged, but the
+   existing deployed Worker still does not import this engine or expose `/v1/trades`.
+   Apply the integration snippet above before deploying the Hosting change. The adapter
+   intercepts Confirm Trade and uses `POST /v1/trades` and `GET /v1/trades`; it restores
+   active trades and renders server-provided expiry/settlement data.
 2. **Wallet writes are still allowed from the browser.** The current Firestore rules let
    a user update their own `userTradeState`, and the current Buy & Hold flow plus wallet
    restore code write that document directly. Do not tighten the rule until those flows
