@@ -47,7 +47,7 @@ test("wallet writes require an updateTime precondition and preserve only the sup
   const write = api.walletWrite("user-1", {}, "2026-11-20T12:00:00Z", 50, { BTC: 0.1 }, []);
   assert.equal(write.currentDocument.updateTime, "2026-11-20T12:00:00Z");
   assert.deepEqual(write.updateMask.fieldPaths, ["uid", "balance", "holdings", "history", "updatedAt"]);
-  assert.equal(write.update.fields.balance.doubleValue, 50);
+  assert.equal(write.update.fields.balance.integerValue, "50");
   assert.equal(write.update.fields.holdings.mapValue.fields.BTC.doubleValue, 0.1);
 });
 
