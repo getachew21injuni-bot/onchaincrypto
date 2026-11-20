@@ -5,7 +5,7 @@
   "scripts": {
     "test": "node --test tests/firestore.rules.test.mjs",
     "test:rules": "firebase emulators:exec --project demo-onchaincrypto-rules-test --only firestore \"npm test\"",
-    "test:reconciliation": "node --test tests/wallet-reconciliation.test.mjs"
+    "test:reconciliation": "node --check workers/wallet-api/index.js && node --test tests/wallet-reconciliation.test.mjs"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",
