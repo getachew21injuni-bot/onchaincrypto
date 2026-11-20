@@ -1,9 +1,10 @@
 # Persistent Quick Trade migration (staged)
 
-This folder contains the first server-side trade engine module for the existing
-`onchainspro-wallet-api-v2` Cloudflare Worker. It is intentionally **not live yet**.
-Do not deploy this module by itself: the current Worker does not import it, and
-the current browser still has direct Firestore wallet-write paths.
+This folder contains the integrated source for the existing `onchainspro-wallet-api-v2`
+Cloudflare Worker: `worker.js` preserves the uploaded wallet-read and administrator
+adjustment routes, imports `trade-engine.js`, exposes the authenticated trade routes, and
+runs scheduled settlement. The companion frontend adapter is also staged. This code is
+on a review branch only and is **not deployed**.
 
 ## What the module does
 
@@ -34,18 +35,17 @@ funding assets, the server obtains the funding asset's USDT quote and validates 
 user's recorded holding. The existing product's accounting model credits/debits P/L
 in USDT; this module does not sell or consume the funding coin.
 
-## Required integration in the existing Worker
+## Worker integration included in this branch
 
-Keep the existing Firebase JWT verification, service-account token function,
-Firestore conversion helpers, wallet read route, and administrator adjustment route.
-Import the module near the top of the existing Worker source:
+The integrated `worker.js` already keeps the existing Firebase JWT verification,
+service-account token function, Firestore conversion helpers, wallet read route, and
+administrator adjustment route. It imports the trade module near the top:
 
 ```js
 import { createTradeEngine } from "./trade-engine.js";
 ```
 
-Inside `fetch(request, env)`, after Firebase token verification and URL parsing,
-construct the engine:
+Inside `fetch(request, env)`, after Firebase token verification and URL parsing, it constructs the engine:
 
 ```js
 const trades = createTradeEngine({
@@ -56,7 +56,7 @@ const trades = createTradeEngine({
 });
 ```
 
-Add these authenticated routes before the existing 404 response:
+The integrated entrypoint adds these authenticated routes before the existing 404 response:
 
 ```js
 if (url.pathname === "/v1/trades" && request.method === "POST") {
@@ -68,8 +68,7 @@ if (url.pathname === "/v1/trades" && request.method === "GET") {
 }
 ```
 
-Add a `scheduled` handler to the same default export (do not replace the existing
-`fetch` handler):
+The same default export adds this `scheduled` handler without replacing the existing `fetch` handler:
 
 ```js
 async scheduled(event, env, ctx) {
@@ -83,9 +82,9 @@ async scheduled(event, env, ctx) {
 }
 ```
 
-Configure a Cloudflare Cron Trigger for every minute (`* * * * *`). The Worker must
-retain the existing `FIREBASE_SERVICE_ACCOUNT` secret and include both production
-origins in `ALLOWED_ORIGINS`:
+The included `wrangler.toml` configures a Cloudflare Cron Trigger for every minute (`* * * * *`)
+and both production origins in `ALLOWED_ORIGINS`. Deploy it to the existing Worker name
+so its already-configured `FIREBASE_SERVICE_ACCOUNT` secret remains available:
 - `https://onchainspro.com`
 - `https://www.onchainspro.com`
 
@@ -107,11 +106,11 @@ Required composite indexes were added to the branch's `firestore.indexes.json`.
 
 ## Important deployment blockers (must be resolved before production)
 
-1. **Worker routes are not integrated yet.** The frontend adapter is staged, but the
-   existing deployed Worker still does not import this engine or expose `/v1/trades`.
-   Apply the integration snippet above before deploying the Hosting change. The adapter
-   intercepts Confirm Trade and uses `POST /v1/trades` and `GET /v1/trades`; it restores
-   active trades and renders server-provided expiry/settlement data.
+1. **The Worker still needs to be deployed.** The branch now includes the integrated
+   Worker entrypoint and Cron configuration, but the live Cloudflare Worker has not been
+   changed. Deploy this Worker source to the existing `onchainspro-wallet-api-v2` Worker
+   before deploying Hosting. The adapter uses `POST /v1/trades` and `GET /v1/trades`; it
+   restores active trades and renders server-provided expiry/settlement data.
 2. **Wallet writes are still allowed from the browser.** The current Firestore rules let
    a user update their own `userTradeState`, and the current Buy & Hold flow plus wallet
    restore code write that document directly. Do not tighten the rule until those flows
@@ -130,7 +129,7 @@ Required composite indexes were added to the branch's `firestore.indexes.json`.
 
 ## Verification checklist before merging or deploying
 
-- [ ] Import and route integration builds in the existing Worker without removing wallet/admin routes.
+- [ ] Integrated Worker entrypoint passes `node --check` and preserves existing wallet/admin routes.
 - [ ] Cron trigger is active and a test invocation reports scanned/settled/failed counts.
 - [ ] Authenticated user can create a trade; another UID cannot list or read it.
 - [ ] Two simultaneous confirmations cannot exceed the account's available USDT-equivalent exposure.
@@ -141,4 +140,4 @@ Required composite indexes were added to the branch's `firestore.indexes.json`.
 - [ ] Other wallet features (Buy & Hold, deposits, withdrawals, profile, support) still pass regression checks.
 - [ ] Firestore client wallet writes are denied only after all browser wallet-write paths are migrated.
 
-No live Worker, Firestore rules, Hosting site, or production wallet was changed by this staged module.
+No live Worker, Firestore rules, Hosting site, or production wallet was changed by this staged branch.
