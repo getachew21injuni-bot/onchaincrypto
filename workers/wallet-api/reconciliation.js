@@ -34,14 +34,15 @@ function checkChain(rows, beforeKey, afterKey, timeKey = "createdAtText") {
   };
 }
 
-export function buildWalletReconciliationReport({ uid, profile, wallet, demoTransactions = [], tradeHistory = [], transfers = [], depositRequests = [], withdrawRequests = [] }) {
+export function buildWalletReconciliationReport({ uid, wallet, walletLedger = [], tradeHistory = [], transfers = [], depositRequests = [], withdrawRequests = [] }) {
   if (!uid || typeof uid !== "string") throw new TypeError("A user UID is required.");
-  const profileBalance = profile && finite(profile.demoBalanceUSDT) ? profile.demoBalanceUSDT : null;
   const walletBalance = wallet && finite(wallet.balance) ? wallet.balance : null;
-  const difference = profileBalance === null || walletBalance === null
-    ? null : Number((walletBalance - profileBalance).toFixed(8));
-
-  const usdtRows = demoTransactions.filter(row => row.uid === uid && row.type && finite(row.balanceBeforeUSDT) && finite(row.balanceAfterUSDT));
+  const rows = walletLedger.filter(row => row.uid === uid && row.asset && finite(row.balanceBefore) && finite(row.balanceAfter));
+  const assets = [...new Set(rows.map(row => String(row.asset)))].sort();
+  const ledgerChecksByAsset = Object.fromEntries(assets.map(asset => [
+    asset,
+    checkChain(rows.filter(row => String(row.asset) === asset), "balanceBefore", "balanceAfter", "createdAtText")
+  ]));
   const tradeRows = tradeHistory.filter(row => finite(row.balanceBefore) && finite(row.balanceAfter));
   const sent = transfers.filter(row => row.senderUid === uid && finite(row.senderBefore) && finite(row.senderAfter));
   const received = transfers.filter(row => row.recipientUid === uid && finite(row.recipientBefore) && finite(row.recipientAfter));
@@ -49,15 +50,15 @@ export function buildWalletReconciliationReport({ uid, profile, wallet, demoTran
   return {
     uid,
     readOnly: true,
-    balances: { profileDemoBalanceUSDT: profileBalance, canonicalWalletBalanceUSDT: walletBalance, canonicalMinusProfileUSDT: difference },
+    balances: { canonicalWalletBalanceUSDT: walletBalance, source: "userTradeState/{uid}" },
     ledgerChecks: {
-      adminUSDT: checkChain(usdtRows, "balanceBeforeUSDT", "balanceAfterUSDT"),
+      canonicalWalletLedgerByAsset: ledgerChecksByAsset,
       tradeHistory: checkChain(tradeRows, "balanceBefore", "balanceAfter", "time"),
       outgoingTransfers: checkChain(sent, "senderBefore", "senderAfter"),
       incomingTransfers: checkChain(received, "recipientBefore", "recipientAfter")
     },
     evidenceCounts: {
-      adminUSDTLedgerEntries: usdtRows.length,
+      walletLedgerEntries: walletLedger.filter(row => row.uid === uid).length,
       tradeHistoryEntriesWithBalanceSnapshots: tradeRows.length,
       outgoingTransfers: sent.length,
       incomingTransfers: received.length,
@@ -65,10 +66,10 @@ export function buildWalletReconciliationReport({ uid, profile, wallet, demoTran
       pendingWithdrawalRequests: withdrawRequests.filter(row => row.uid === uid && row.status === "pending").length
     },
     limitations: [
-      "A balance difference is not proof that either stored balance is correct.",
-      "Requests are not proof of a completed deposit or payout.",
+      "userTradeState/{uid} is the only wallet balance source.",
+      "Requests are not proof of a completed deposit or external payout.",
       "Ledger continuity does not prove completeness if records are missing.",
-      "No balance is selected, merged, seeded, or modified by this report."
+      "This report is read-only and never reconciles or changes balances."
     ]
   };
 }
