@@ -197,10 +197,15 @@ async function walletOrder(env, claims, body) {
   const side = body.side, symbol = String(body.symbol || "").toUpperCase(), amount = Number(body.amountUSDT), kind = body.kind === "trade" ? "trade" : "buy-hold";
   if (!["buy", "sell"].includes(side) || (!COIN_IDS[symbol] && !["XAU","PAXG","XAUT"].includes(symbol)) ||
       !Number.isFinite(amount) || amount < 1 || amount > 1000000000) throw new HttpError("Order details are invalid.");
-  const access = await serviceToken(env), [wallet, prices] = await Promise.all([
-    readWallet(access, uid), trustedPrices([symbol])
+  const access = await serviceToken(env), [wallet, profile, prices] = await Promise.all([
+    readWallet(access, uid), readDocument(access, "users", uid), trustedPrices([symbol])
   ]);
   if (!wallet || !wallet.updateTime) throw new HttpError("Canonical wallet is missing. No balance was created.", 409);
+  if (!profile || profile.data.accountStatus === "suspended" || profile.data.tradingEnabled === false)
+    throw new HttpError("Trading is disabled for this account.", 403);
+  const maxOrder = Number(profile.data.maxTradeAmountUSDT);
+  if (Number.isFinite(maxOrder) && maxOrder > 0 && amount > maxOrder)
+    throw new HttpError("This order exceeds the account's configured trading limit.", 403);
   const balance = Number(wallet.data.balance), holdings = wallet.data.holdings && typeof wallet.data.holdings === "object" ? { ...wallet.data.holdings } : {};
   if (!Number.isFinite(balance) || balance < 0) throw new HttpError("Canonical wallet balance is invalid.", 409);
   const price = prices[symbol], qty = Number((amount / price).toFixed(8));
