@@ -41,5 +41,5 @@
     "providers": {
       "emailPassword": true
     }
-  },
+  }
 }
