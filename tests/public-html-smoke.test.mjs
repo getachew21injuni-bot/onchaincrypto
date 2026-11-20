@@ -121,10 +121,11 @@ test("Quick Trade confirmation validates the selected funding asset", () => {
   assert.ok(html.includes('if(typeof window.ocValidateQuickTradeForm==="function")window.ocValidateQuickTradeForm();'), "Expected the secondary control to reuse the shared validator");
 });
 
-test("wallet sync cannot trade on failed restore or overwrite results on unchanged admin snapshots", () => {
+test("wallet sync blocks trading on failed restore and never imports profile balances", () => {
   assert.ok(html.includes("tradeCloudReadyUid=null;"), "A failed wallet restore must block trading");
-  assert.ok(html.includes("lastAdminBalance"), "Admin wallet snapshots must track the last applied balance");
-  assert.ok(html.includes("data.demoBalanceUSDT!==lastAdminBalance"), "Unchanged admin profile snapshots must not overwrite trade results");
+  assert.ok(!html.includes("demoBalanceUSDT"), "Legacy profile balances must not be read as a wallet source");
+  assert.ok(!html.includes("demoAssetBalances"), "Legacy profile asset balances must not be read as a wallet source");
+  assert.ok(!html.includes("ocApplyAdminDemoBalance") && !html.includes("syncAdminDemoBalance"), "Profile snapshots must not overwrite canonical wallet results");
 });
 
 
