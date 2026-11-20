@@ -400,9 +400,9 @@ async function reviewDepositWithdrawal(env, claims, body) {
   if (after < 0) throw new HttpError("Insufficient canonical wallet balance.", 409);
   const nextBalance = asset === "USDT" ? after : balance;
   if (asset !== "USDT") holdings[asset] = after;
-  const ledgerId = `admin-${kind}-${requestId}`;
+  const ledgerId = `admin-${kind}-${requestId}`, ledgerType = kind === "withdraw" ? "withdrawal" : "deposit";
   const ledger = createLedgerWrite(ledgerId, {
-    uid, type: kind, asset, amount, balanceBefore: before, balanceAfter: after,
+    uid, type: ledgerType, asset, amount, balanceBefore: before, balanceAfter: after,
     source: "admin-request-review", requestId, actorUid: claims.sub, actorEmail: reviewedBy, createdAtText: reviewedAt,
     createdAt: { timestampValue: reviewedAt }
   });
@@ -412,7 +412,16 @@ async function reviewDepositWithdrawal(env, claims, body) {
       status: toFirestore("approved"), reviewedAt: { timestampValue: reviewedAt },
       reviewedBy: toFirestore(reviewedBy), walletLedgerId: toFirestore(ledgerId)
     } }, updateMask: { fieldPaths: ["status", "reviewedAt", "reviewedBy", "walletLedgerId"] }, currentDocument: { updateTime: request.updateTime } },
-    ledger
+    ledger,
+    { update: { name: docPath("userNotifications/" + uid + "/items", ledgerId), fields: {
+      kind: toFirestore(kind === "deposit" ? "deposit" : "withdrawal_approved"),
+      title: toFirestore(kind === "deposit" ? "Deposit request approved" : "Withdrawal request approved"),
+      message: toFirestore(kind === "deposit"
+        ? "Your " + amount + " " + asset + " deposit request was approved and credited to your OnChain account."
+        : "Your " + amount + " " + asset + " withdrawal request was approved as an internal account adjustment. No external blockchain payout was sent."),
+      createdAt: { timestampValue: reviewedAt }, readAt: { nullValue: null },
+      createdBy: toFirestore(claims.sub), source: toFirestore("wallet-api-v2")
+    } }, currentDocument: { exists: false } }
   ]);
   return { ok: true, status: "approved", uid, asset, amount, balanceAfter: after, ledgerId };
 }
