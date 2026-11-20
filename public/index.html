@@ -9033,6 +9033,7 @@ async function submitKycDetails(data){
  const ref=doc(db,"kycSubmissions",user.uid);
  const existing=await getDoc(ref);
  if(existing.exists()&&existing.data()?.status==="approved")throw new Error("kyc-already-approved");
+ if(existing.exists()&&existing.data()?.status==="pending")throw new Error("kyc-already-pending");
  const [front,back]=await Promise.all([compressKycImage(frontFile),compressKycImage(backFile)]);
  const common={uid:user.uid,contentType:"image/jpeg",updatedAt:serverTimestamp()};
  await setDoc(doc(db,"kycSubmissions",user.uid,"documents","front"),{...common,side:"front",dataUrl:front.dataUrl,fileName:String(frontFile.name||"ID front").slice(0,120)});
@@ -9124,7 +9125,7 @@ if(kyc){
    if(state==="approved"){
     statusHost.innerHTML='<div class="panel" style="padding:16px;margin-bottom:14px;border:1px solid #0ecb81"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:30px;color:#0ecb81">✓</span><div><h3 style="margin:0;color:#0ecb81">Successfully Verified</h3><p style="margin:4px 0 0">Your identity has been approved by the Onchain admin team.</p></div></div><p class="muted tiny" style="margin:12px 0 0">Your identity verification status is approved.</p></div>';if(form)form.hidden=true;
    }else if(state==="pending"){
-    statusHost.innerHTML='<div class="panel" style="padding:14px;margin-bottom:14px;border:1px solid #d6a84b"><strong style="color:#e7b84b">⏳ Verification Pending</strong><p class="muted tiny" style="margin:6px 0 0">Your details were submitted successfully and are waiting for admin review. This status updates automatically.</p></div>';if(form)form.hidden=false;
+    statusHost.innerHTML='<div class="panel" style="padding:14px;margin-bottom:14px;border:1px solid #d6a84b"><strong style="color:#e7b84b">⏳ Submitted · Pending review</strong><p class="muted tiny" style="margin:6px 0 0">Your documents were submitted successfully. The form is closed while our admin team reviews them.</p></div>';if(form)form.hidden=true;
    }else if(state==="rejected"){
     statusHost.innerHTML='<div class="notice" style="margin-bottom:14px"><strong>Verification not approved</strong><p>Your submission was not approved. Please review your details and submit them again.</p></div>';if(form)form.hidden=false;
    }else{
@@ -9171,12 +9172,13 @@ if(kyc){
       if(!data.frontFile||!data.backFile)throw new Error("Please attach both the front and back of your identity document.");
       status.textContent="Uploading your identity documents securely…";
       await submitKycDetails(data);
-      status.textContent="Your identity details and both ID images were securely submitted. Your verification is waiting for admin review.";
+      status.textContent="Submitted successfully. Your verification is waiting for admin review.";form.hidden=true;
     }catch(err){
       const code=err?.code||err?.message||"unknown-error";
       const messages={
         "auth/session-missing":"Your sign-in session is not ready. Sign in again, reopen Identity Verification and retry.",
         "kyc-already-approved":"Your identity verification is already approved. Contact support if your details need correction.",
+        "kyc-already-pending":"Your documents have already been submitted and are waiting for admin review.",
         "permission-denied":"The database denied this submission. Check that the latest Firestore rules are deployed.",
         "unavailable":"Connection problem. Check your internet connection and try again."
       };

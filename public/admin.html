@@ -709,7 +709,7 @@ window.adminGetLiveCollection=async function(view){
  const body=byId('detailBody'),isUsers=view==='Users',collectionName=isUsers?'users':'kycSubmissions';
  body.innerHTML='<div class="content-panel"><p class="muted">Loading live Firebase data…</p></div>';
  try{
-  const snap=await getDocs(query(collection(db,collectionName),limit(100))),rows=snap.docs.map(d=>({...d.data(),id:d.id}));
+  const snap=await getDocs(query(collection(db,collectionName),limit(1000))),rows=snap.docs.map(d=>({...d.data(),id:d.id}));
   if(isUsers){
    let walletMap=new Map(),walletReadError=false;
    try{
@@ -842,40 +842,60 @@ window.adminGetUserActivity=function(){
  adminUserActivityUnsubs.push(onSnapshot(query(collection(db,'userActivityEvents'),limit(300)),snap=>{general=snap.docs.map(d=>({id:d.id,...d.data()}));render();},onError('User events')));
  adminUserActivityUnsubs.push(onSnapshot(query(collection(db,'adminActivityLogs'),limit(300)),snap=>{audit=snap.docs.map(d=>({id:d.id,...d.data()}));render();},onError('Account audit')));
 };
+window.__ocAdminQueueUnsubs=window.__ocAdminQueueUnsubs||[];
 window.adminRefreshDashboard=async function(){
  const api=window.__ocAdminFirebase;
- if(api&&auth.currentUser){
-  // Keep the notification badge current even when the activity page is closed.
-  if(window.__ocActivityBadgeUnsubscribe)window.__ocActivityBadgeUnsubscribe();
-  window.__ocActivityBadgeUnsubscribe=onSnapshot(query(collection(db,'adminActivityLogs'),limit(250)),snap=>{
-   const count=snap.size,badge=document.querySelector('#sideNav [data-view="Notifications"] .pill'),top=document.querySelector('#notifyBtn b');
-   if(badge)badge.textContent=String(count);if(top)top.textContent=String(count);
-  },error=>console.warn('Admin activity badge unavailable:',error.code||error));
- }
- const users=byId('liveUsersCount'),kyc=byId('liveKycCount'),status=byId('dashboardDataStatus'),updated=byId('dashboardUpdatedAt'),totalAssets=byId('liveTotalDemoAssets'),totalAssetsStatus=byId('liveTotalDemoAssetsStatus'),depositCount=byId('liveDepositRequests'),withdrawCount=byId('liveWithdrawalRequests');
- if(!users||!kyc||!status||!updated)return;
+ if(!api||!auth.currentUser)return;
+ window.__ocAdminQueueUnsubs.forEach(stop=>{try{stop();}catch(_){}});
+ window.__ocAdminQueueUnsubs=[];
+ if(window.__ocActivityBadgeUnsubscribe)window.__ocActivityBadgeUnsubscribe();
+ window.__ocActivityBadgeUnsubscribe=onSnapshot(query(collection(db,'adminActivityLogs'),limit(250)),snap=>{
+  const count=snap.size,badge=document.querySelector('#sideNav [data-view="Notifications"] .pill'),top=document.querySelector('#notifyBtn b');
+  if(badge)badge.textContent=count>=250?'250+':String(count);
+  if(top)top.textContent=count>=250?'250+':String(count);
+ },error=>console.warn('Admin activity badge unavailable:',error.code||error));
+ const setBadge=(view,count)=>{
+  const button=document.querySelector('#sideNav [data-view="'+view+'"]');
+  if(!button)return;
+  let pill=button.querySelector('.pill');
+  if(!pill){pill=document.createElement('span');pill.className='pill';button.appendChild(pill);}
+  pill.textContent=count>=1000?'1000+':String(count);
+  pill.hidden=count===0;
+ };
+ const bindQueue=(name,view,statId,statusId,filter)=>{
+  const stop=onSnapshot(query(collection(db,name),limit(1000)),snap=>{
+   const count=snap.docs.filter(d=>filter(d.data()||{})).length;
+   setBadge(view,count);
+   if(statId&&byId(statId))byId(statId).textContent=count>=1000?'1000+':String(count);
+   if(statusId&&byId(statusId))byId(statusId).textContent='Live Firestore queue · '+(snap.size>=1000?'first 1000 records':snap.size+' total record(s)');
+  },error=>{
+   if(statId&&byId(statId))byId(statId).textContent='—';
+   if(statusId&&byId(statusId))byId(statusId).textContent='Queue unavailable ('+(error.code||'permission error')+')';
+   console.warn(name+' dashboard counter unavailable:',error.code||error);
+  });
+  window.__ocAdminQueueUnsubs.push(stop);
+ };
+ bindQueue('kycSubmissions','KYC','liveKycCount','liveKycStatus',r=>(r.status||'pending')==='pending');
+ bindQueue('depositRequests','Deposits','liveDepositRequests','liveDepositStatus',r=>(r.status||'pending')==='pending');
+ bindQueue('withdrawRequests','Withdrawals','liveWithdrawalRequests','liveWithdrawalStatus',r=>(r.status||'pending')==='pending');
+ bindQueue('internalTransferRequests','Transfers',null,null,r=>(r.status||'pending')==='pending');
+ bindQueue('supportTickets','Support',null,null,r=>(r.status||'open')!=='resolved');
+ const users=byId('liveUsersCount'),status=byId('dashboardDataStatus'),updated=byId('dashboardUpdatedAt'),totalAssets=byId('liveTotalDemoAssets'),totalAssetsStatus=byId('liveTotalDemoAssetsStatus');
+ if(!users||!status||!updated)return;
  status.textContent='Loading';updated.textContent='Connecting to Firestore…';
  try{
-  const results=await Promise.all([getDocs(query(collection(db,'users'),limit(1000))),getDocs(query(collection(db,'kycSubmissions'),limit(100))),getDocs(query(collection(db,'depositRequests'),limit(500))),getDocs(query(collection(db,'withdrawRequests'),limit(500)))]);
-  const u=results[0],k=results[1],d=results[2],w=results[3];
-  const dp=d.docs.filter(x=>(x.data().status||'pending')==='pending').length,wp=w.docs.filter(x=>(x.data().status||'pending')==='pending').length;
-  if(depositCount)depositCount.textContent=String(dp);if(withdrawCount)withdrawCount.textContent=String(wp);
-  if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Firestore connected · '+d.size+' total request(s)';
-  if(byId('liveWithdrawalStatus'))byId('liveWithdrawalStatus').textContent='Firestore connected · '+w.size+' total request(s)';
-  users.textContent=u.size===1000?'1000+':String(u.size);
-  byId('liveUsersStatus').textContent=u.size===1000?'1000 profiles loaded (display capped)':'Live profile records loaded';
-  const pending=k.docs.filter(d=>(d.data().status||'pending')==='pending').length;
-  kyc.textContent=k.size===100&&pending===k.size?'100+':String(pending);
-  byId('liveKycStatus').textContent=k.size===100?'Pending count from first 100 KYC records':'Pending submissions from Firestore';
-  const demoTotal=u.docs.reduce((sum,d)=>{const data=d.data()||{};const n=Number(data.demoBalanceUSDT||0);return sum+(Number.isFinite(n)&&n>0?n:0);},0);
+  const snap=await getDocs(query(collection(db,'users'),limit(1000)));
+  users.textContent=snap.size>=1000?'1000+':String(snap.size);
+  byId('liveUsersStatus').textContent=snap.size>=1000?'1000+ profiles loaded':'Live profile records loaded';
+  const demoTotal=snap.docs.reduce((sum,d)=>{const n=Number((d.data()||{}).demoBalanceUSDT||0);return sum+(Number.isFinite(n)&&n>0?n:0);},0);
   if(totalAssets)totalAssets.textContent=demoTotal.toLocaleString(undefined,{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
-  if(totalAssetsStatus)totalAssetsStatus.textContent='Sum of internal account balances; not proof of on-chain funds'+(u.size===1000?' (first 1000 profiles only)':'');
-  status.textContent='Connected';updated.textContent='Last updated '+new Date().toLocaleTimeString();
+  if(totalAssetsStatus)totalAssetsStatus.textContent='Sum of internal account balances; not proof of on-chain funds'+(snap.size>=1000?' (first 1000 profiles only)':'');
+  status.textContent='Connected';updated.textContent='Live queue counters · '+new Date().toLocaleTimeString();
  }catch(error){
-  users.textContent='—';kyc.textContent='—';status.textContent='Unavailable';updated.textContent='Firestore access failed: '+(error.code||'unknown error');
+  users.textContent='—';status.textContent='Unavailable';updated.textContent='Firestore access failed: '+(error.code||'unknown error');
   if(totalAssets)totalAssets.textContent='Unavailable';
   if(totalAssetsStatus)totalAssetsStatus.textContent='Could not read account records';
-  byId('liveUsersStatus').textContent='Admin access or Firestore rules need attention';byId('liveKycStatus').textContent='Could not retrieve KYC records';if(depositCount)depositCount.textContent='Unavailable';if(withdrawCount)withdrawCount.textContent='Unavailable';if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Could not read Firestore requests';if(byId('liveWithdrawalStatus'))byId('liveWithdrawalStatus').textContent='Could not read Firestore requests';if(depositCount)depositCount.textContent='Unavailable';if(withdrawCount)withdrawCount.textContent='Unavailable';if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Could not read Firestore requests';if(byId('liveWithdrawalStatus'))byId('liveWithdrawalStatus').textContent='Could not read Firestore requests';
+  byId('liveUsersStatus').textContent='Admin access or Firestore rules need attention';
  }
 };
 byId("adminSignIn").addEventListener("click",async()=>{
