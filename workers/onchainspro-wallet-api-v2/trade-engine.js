@@ -123,7 +123,14 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
       ? writeDoc(enc("activeTradeGuards", uid), nextGuard, { updateTime: guard.updateTime })
       : writeDoc(enc("activeTradeGuards", uid), nextGuard, { exists: false });
     try {
+      // A no-balance-change wallet write with updateTime precondition serializes
+      // trade creation against concurrent wallet changes and other trade starts.
       await commit(access, [
+        writeDoc(enc("userTradeState", uid), {
+          uid, balance, holdings: wallet.data.holdings || {},
+          history: Array.isArray(wallet.data.history) ? wallet.data.history : [],
+          updatedAt: new Date(now)
+        }, { updateTime: wallet.updateTime }),
         guardWrite,
         writeDoc(enc("activeTrades", id), { ...trade, tradeId: id }, { exists: false })
       ]);
