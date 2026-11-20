@@ -1,7 +1,23 @@
 // Server-authoritative Quick Trade engine for the OnChainSpro wallet Worker.
 // Firestore is the source of truth. The browser may request a trade and display it;
 // only this module creates, prices, expires, and settles it.
-const ASSETS = new Set(["BTC","ETH","BNB","XRP","SOL","ADA","DOGE","LTC","TRX","XAU"]);
+const PRICE_IDS = {
+  BTC:"bitcoin", ETH:"ethereum", BNB:"binancecoin", USDT:"tether", SOL:"solana", XRP:"ripple",
+  USDC:"usd-coin", DOGE:"dogecoin", TRX:"tron", TON:"the-open-network", ADA:"cardano",
+  AVAX:"avalanche-2", SHIB:"shiba-inu", LINK:"chainlink", BCH:"bitcoin-cash", SUI:"sui",
+  XLM:"stellar", DOT:"polkadot", LTC:"litecoin", NEAR:"near", UNI:"uniswap",
+  ETC:"ethereum-classic", ICP:"internet-computer", APT:"aptos", FIL:"filecoin",
+  HBAR:"hedera-hashgraph", ARB:"arbitrum", OP:"optimism", RENDER:"render-token",
+  ATOM:"cosmos", VET:"vechain", INJ:"injective-protocol", MKR:"maker", AAVE:"aave",
+  GRT:"the-graph", ALGO:"algorand", THETA:"theta-token", MANA:"decentraland",
+  SAND:"sandbox", AXS:"axie-infinity", EOS:"eos", ZEC:"zcash", XMR:"monero",
+  DASH:"dash", QNT:"quant-network", CAKE:"pancakeswap-token", FLOKI:"floki",
+  PEPE:"pepe", BONK:"bonk", FET:"fetch-ai", TAO:"bittensor",
+  JUP:"jupiter-exchange-solana", ONDO:"ondo-finance", SEI:"sei-network",
+  KAS:"kaspa", STX:"stacks", IMX:"immutable-x", WLD:"worldcoin-wld",
+  DAI:"dai", FDUSD:"first-digital-usd", PAXG:"pax-gold", XAUT:"tether-gold"
+};
+const ASSETS = new Set([...Object.keys(PRICE_IDS), "XAU"]);
 const round2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
 const safeNumber = n => Number.isFinite(Number(n)) ? Number(n) : 0;
 
@@ -28,16 +44,28 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
     });
   }
   async function quote(symbol) {
-    if (symbol === "USDT" || symbol === "USDC") return 1;
-    const pair = symbol === "XAU" ? "XAUUSDT" : symbol + "USDT";
-    const url = symbol === "XAU"
-      ? "https://fapi.binance.com/fapi/v1/ticker/price?symbol=" + pair
-      : "https://data-api.binance.vision/api/v3/ticker/price?symbol=" + pair;
-    const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
-    if (!response.ok) throw new Error("The server price feed is temporarily unavailable.");
-    const result = await response.json();
-    const price = Number(result.price);
-    if (!(price > 0) || !Number.isFinite(price)) throw new Error("The server returned an invalid market price.");
+    if (symbol === "USDT" || symbol === "USDC" || symbol === "DAI" || symbol === "FDUSD") return 1;
+    if (symbol === "XAU") {
+      const response = await fetch("https://fapi.binance.com/fapi/v1/ticker/price?symbol=XAUUSDT", { signal: AbortSignal.timeout(5000) });
+      if (!response.ok) throw new Error("The server gold price feed is temporarily unavailable.");
+      const result = await response.json(), price = Number(result.price);
+      if (!(price > 0) || !Number.isFinite(price)) throw new Error("The server returned an invalid gold price.");
+      return price;
+    }
+    const pair = symbol + "USDT";
+    try {
+      const response = await fetch("https://data-api.binance.vision/api/v3/ticker/price?symbol=" + pair, { signal: AbortSignal.timeout(4000) });
+      if (response.ok) {
+        const result = await response.json(), price = Number(result.price);
+        if (price > 0 && Number.isFinite(price)) return price;
+      }
+    } catch (_) { /* Use the public CoinGecko spot fallback below. */ }
+    const id = PRICE_IDS[symbol];
+    if (!id) throw new Error("No trusted server price source is configured for " + symbol + ".");
+    const fallback = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=" + encodeURIComponent(id) + "&vs_currencies=usd", { signal: AbortSignal.timeout(5000) });
+    if (!fallback.ok) throw new Error("The server price feed is temporarily unavailable for " + symbol + ".");
+    const data = await fallback.json(), price = Number(data?.[id]?.usd);
+    if (!(price > 0) || !Number.isFinite(price)) throw new Error("The server returned an invalid market price for " + symbol + ".");
     return price;
   }
   function plan(amount, symbol) {
