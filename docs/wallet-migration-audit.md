@@ -126,3 +126,10 @@ The branch's Firestore rules now make `userTradeState/{uid}` client-read-only, d
 6. External blockchain deposit verification and withdrawal payout are separate systems and are not implemented by these internal account-ledger endpoints.
 
 No customer wallet balances, user profiles or historical records were migrated or changed by these GitHub edits. No Firestore rules were deployed, no Cloudflare Worker was deployed, no merge to `main`, and no Firebase Hosting deployment occurred.
+
+
+## Legacy reconciliation reader cleanup — 2026-11-20
+
+The existing read-only `workers/wallet-api` reconciliation endpoint was also updated. It no longer reads `users/{uid}.demoBalanceUSDT`, `demoAssetBalances`, `demoTransactions`, or `demoAssetTransactions`. It reads the canonical `userTradeState/{uid}`, `walletLedger`, transfer records and pending request records only. Its report now identifies `userTradeState/{uid}` as the only wallet balance source and groups ledger continuity checks by asset.
+
+This legacy Worker remains read-only; it does not write balances. The new v2 Worker is the sole wallet mutation service in the migration branch. Do not deploy both as competing wallet writers. The legacy reconciliation route may remain temporarily as a read-only audit endpoint until the v2 Worker is staged and the old Cloudflare service is safely retired.
