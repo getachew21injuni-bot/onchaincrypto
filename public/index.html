@@ -1931,7 +1931,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
         const result=await window.ocWalletApiGet("/v1/wallet/ledger");
         window.ocWalletLedgerRows=Array.isArray(result.rows)?result.rows:[];
        }catch(error){console.warn("Wallet ledger refresh unavailable:",error?.message||error);}
-       window.ocRenderWalletActivity();
+       window.ocRenderWalletActivity();window.ocRenderConvertHistory?.();
       };
       window.ocRenderWalletActivity=function(){
        const host=document.getElementById("ocWalletActivityRows");if(!host)return;
@@ -8858,9 +8858,10 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  }
  function renderHistory(){
   const el=$('convertHistory');if(!el)return;
-  let rows=[];try{rows=JSON.parse(localStorage.getItem('oc_convert_history')||'[]')}catch(_){}
-  el.innerHTML=rows.length?rows.slice(0,10).map(x=>'<div class="list-row"><div><strong>'+safeText(x.fromQty)+' '+safeText(x.from) +' → '+safeText(x.toQty)+' '+safeText(x.to)+'</strong><div class="muted tiny">'+safeText(new Date(x.time).toLocaleString())+' · '+safeText(x.status)+'</div></div><span class="tag" style="color:#c4a1ff">CONVERT</span></div>').join(''):'<div class="empty">No conversions yet.</div>';
+  const rows=(window.ocWalletLedgerRows||[]).filter(x=>x.type==="conversion").slice(0,10);
+  el.innerHTML=rows.length?rows.map(x=>'<div class="list-row"><div><strong>'+safeText(x.fromQty??x.amount)+' '+safeText(x.from||'')+' → '+safeText(x.toQty??x.received)+' '+safeText(x.to||'')+'</strong><div class="muted tiny">'+safeText(new Date(x.createdAtText||0).toLocaleString())+' · '+safeText(x.status||'Completed')+'</div></div><span class="tag" style="color:#c4a1ff">CONVERT</span></div>').join(''):'<div class="empty">No conversions yet.</div>';
  }
+ window.ocRenderConvertHistory=renderHistory;
  from.addEventListener('change',()=>{if(from.value===to.value){const alternative=assets().find(c=>c.symbol!==from.value);to.value=alternative?.symbol||''}preview()});
  to.addEventListener('change',()=>{if(from.value===to.value){const alternative=assets().find(c=>c.symbol!==to.value);from.value=alternative?.symbol||''}preview()});
  amount.addEventListener('input',preview);
