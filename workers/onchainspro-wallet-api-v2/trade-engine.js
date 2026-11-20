@@ -29,6 +29,7 @@ export function createTradeEngine({ ROOT, serviceToken, fromFirestore, toFiresto
     });
   }
   async function quote(symbol) {
+    if (symbol === "USDT" || symbol === "USDC") return 1;
     const pair = symbol === "XAU" ? "XAUUSDT" : symbol + "USDT";
     const url = symbol === "XAU"
       ? "https://fapi.binance.com/fapi/v1/ticker/price?symbol=" + pair
@@ -88,15 +89,19 @@ export function createTradeEngine({ ROOT, serviceToken, fromFirestore, toFiresto
     if (!uid) throw new Error("Sign in before starting a trade.");
     const symbol = String(body?.symbol || "").toUpperCase();
     const direction = String(body?.direction || "");
-    const stake = round2(safeNumber(body?.amountUSDT));
-    if (!ASSETS.has(symbol) || !["up","down"].includes(direction) || !(stake > 0) || stake > 1000000) {
+    const fundingAsset = String(body?.fundingAsset || "USDT").toUpperCase();
+    const fundingAmount = round2(safeNumber(body?.amount));
+    if (!ASSETS.has(symbol) || !["up","down"].includes(direction) || !(fundingAmount > 0) || fundingAmount > 1000000 || (!ASSETS.has(fundingAsset) && !["USDT","USDC"].includes(fundingAsset)) || fundingAsset === "XAU") {
       throw new Error("Invalid trade details.");
     }
     const access = await serviceToken();
-    const [wallet, setting] = await Promise.all([readDoc(access, "userTradeState", uid), controls(access, uid)]);
+    const [wallet, setting, fundingPrice] = await Promise.all([readDoc(access, "userTradeState", uid), controls(access, uid), quote(fundingAsset)]);
     if (!wallet || !wallet.updateTime) throw new Error("Your cloud wallet is unavailable. No trade was created.");
     const balance = safeNumber(wallet.data.balance);
     if (balance < 0) throw new Error("Your cloud wallet balance is invalid.");
+    const stake = round2(fundingAmount * fundingPrice);
+    const availableFunding = fundingAsset === "USDT" ? balance : safeNumber(wallet.data.holdings?.[fundingAsset]);
+    if (fundingAmount > availableFunding + 1e-8) throw new Error("Insufficient " + fundingAsset + " balance.");
     const p = plan(stake, symbol);
     if (!p) throw new Error("The amount does not fit an available investment level.");
     const user = await readDoc(access, "users", uid);
@@ -108,7 +113,7 @@ export function createTradeEngine({ ROOT, serviceToken, fromFirestore, toFiresto
     if (balance - reserved + 1e-8 < stake) throw new Error("Insufficient available USDT after accounting for your other active trades.");
     const now = Date.now(), id = crypto.randomUUID(), expiresAt = now + p.duration * 1000;
     const trade = {
-      uid, symbol, direction, amountUSDT: stake, entryPrice: entry, exitPrice: null,
+      uid, symbol, direction, amountUSDT: stake, amountFunding: fundingAmount, fundingAsset, fundingPriceAtStart: fundingPrice, entryPrice: entry, exitPrice: null,
       startedAt: new Date(now), expiresAt: new Date(expiresAt),
       durationSeconds: p.duration, planLevel: p.label, payoutRate: p.rate,
       outcomeMode: setting.mode, winPercent: setting.winPercent, lossPercent: setting.lossPercent,
