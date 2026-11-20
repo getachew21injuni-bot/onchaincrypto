@@ -162,6 +162,17 @@
     }
   }
 
+  // A running trade belongs to the server and cannot be cancelled by closing or
+  // navigating away from the browser.
+  document.addEventListener("click", event => {
+    const cancel = event.target?.closest?.("#timedCancelBtn");
+    if (cancel && activeTrade) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      showMessage("This confirmed trade continues on the server until its expiry.");
+    }
+  }, true);
+
   // Capture phase prevents the old browser-only timer and client-side P/L handler
   // from running. There is deliberately no local fallback.
   document.addEventListener("click", event => {
