@@ -322,7 +322,7 @@ async function settleQuickTrade(env, claims, body) {
   if (!tradeDoc || tradeDoc.data.uid !== uid) throw new HttpError("Quick Trade was not found for this account.", 404);
   if (tradeDoc.data.status === "completed") {
     const wallet = await readWallet(access, uid);
-    return { ok: true, alreadySettled: true, trade: tradeDoc.data, wallet: wallet?.data || null };
+    return { ok: true, alreadySettled: true, trade: tradeDoc.data, result: tradeDoc.data.resultRecord || null, wallet: wallet?.data || null };
   }
   if (tradeDoc.data.status !== "running") throw new HttpError("Quick Trade is not active.", 409);
   const ends = new Date(tradeDoc.data.endsAt).getTime();
@@ -348,12 +348,12 @@ async function settleQuickTrade(env, claims, body) {
     status: appliedPnl > 0 ? "win" : appliedPnl < 0 ? "loss" : "even"
   };
   const history = [result, ...(Array.isArray(wallet.data.history) ? wallet.data.history : [])].slice(0, 300);
-  const completedTrade = { ...tradeDoc.data, status: "completed", exitPrice, calculatedPnl, appliedPnl, completedAt };
+  const completedTrade = { ...tradeDoc.data, status: "completed", exitPrice, calculatedPnl, appliedPnl, completedAt, resultRecord: result, balanceBefore: balance, balanceAfter: nextBalance };
   await commitWrites(access, [
     walletWrite(uid, wallet.data, wallet.updateTime, nextBalance,
       wallet.data.holdings && typeof wallet.data.holdings === "object" ? wallet.data.holdings : {}, history),
     { update: { name: docPath("quickTrades", tradeId), fields: Object.fromEntries(Object.entries(completedTrade).map(([k,v]) => [k, toFirestore(v)])) },
-      updateMask: { fieldPaths: ["status","exitPrice","calculatedPnl","appliedPnl","completedAt"] }, currentDocument: { updateTime: tradeDoc.updateTime } },
+      updateMask: { fieldPaths: ["status","exitPrice","calculatedPnl","appliedPnl","completedAt","resultRecord","balanceBefore","balanceAfter"] }, currentDocument: { updateTime: tradeDoc.updateTime } },
     { delete: docPath("activeQuickTrades", uid), currentDocument: { updateTime: active.updateTime } },
     createLedgerWrite("quick-trade-" + tradeId, {
       uid, type: "quick_trade_settlement", asset: "USDT", amount: appliedPnl,
