@@ -196,6 +196,52 @@ async function reviewDepositWithdrawal(env, claims, body) {
   ]);
   return { ok: true, status: "approved", uid, asset, amount, balanceAfter: after, ledgerId };
 }
+async function adminAdjustAssets(env, claims, body) {
+  if (!isAdmin(env, claims)) throw new HttpError("Administrator access is required.", 403);
+  const uid = String(body.uid || "").trim(), requestId = String(body.requestId || "").trim();
+  const operation = body.operation, amount = Number(body.amount);
+  const reason = String(body.reason || "").trim().slice(0, 240);
+  const assets = Array.isArray(body.assets) ? [...new Set(body.assets.map(x => String(x || "").toUpperCase()))] : [];
+  if (!validId(uid) || !/^[A-Za-z0-9_-]{16,100}$/.test(requestId) ||
+      !["deposit", "withdrawal"].includes(operation) || !Number.isFinite(amount) || amount <= 0 || amount > 1000000000 ||
+      !reason || !assets.length || assets.length > 40 || assets.some(x => !/^[A-Z0-9]{2,12}$/.test(x))) {
+    throw new HttpError("A valid user, request ID, operation, asset list, amount and reason are required.");
+  }
+  const access = await serviceToken(env);
+  const wallet = await readWallet(access, uid);
+  if (!wallet || !wallet.updateTime) throw new HttpError("Canonical wallet is missing. No balance was created.", 409);
+  const balance = Number(wallet.data.balance);
+  if (!Number.isFinite(balance) || balance < 0) throw new HttpError("Canonical USDT balance is invalid.", 409);
+  const holdings = wallet.data.holdings && typeof wallet.data.holdings === "object" && !Array.isArray(wallet.data.holdings) ? { ...wallet.data.holdings } : {};
+  let nextBalance = balance;
+  const changes = [];
+  for (const asset of assets) {
+    const before = asset === "USDT" ? nextBalance : Number(holdings[asset] || 0);
+    if (!Number.isFinite(before) || before < 0) throw new HttpError("Canonical " + asset + " balance is invalid.", 409);
+    const after = Number((before + (operation === "deposit" ? amount : -amount)).toFixed(asset === "USDT" ? 2 : 8));
+    if (after < 0) throw new HttpError("Insufficient " + asset + " balance. No assets were changed.", 409);
+    if (asset === "USDT") nextBalance = after; else holdings[asset] = after;
+    changes.push({ asset, before, after });
+  }
+  const createdAt = new Date().toISOString(), actorEmail = String(claims.email || claims.sub);
+  const writes = [
+    walletWrite(uid, wallet.data, wallet.updateTime, nextBalance, holdings, Array.isArray(wallet.data.history) ? wallet.data.history.slice(0, 300) : {}),
+    ...changes.map(change => createLedgerWrite("admin-" + requestId + "-" + change.asset, {
+      uid, type: operation, asset: change.asset, amount, balanceBefore: change.before, balanceAfter: change.after,
+      reason, requestId, actorUid: claims.sub, actorEmail, source: "admin-finance-adjustment",
+      createdAt: { timestampValue: createdAt }
+    })),
+    { update: { name: docPath("userNotifications/" + uid + "/items", requestId), fields: {
+      kind: toFirestore(operation === "deposit" ? "deposit" : "withdrawal_approved"),
+      title: toFirestore(operation === "deposit" ? "Account deposit credited" : "Account withdrawal adjustment"),
+      message: toFirestore("Admin " + operation + " adjustment: " + changes.map(x => x.asset + " " + amount).join(", ") + ". " + reason),
+      createdAt: { timestampValue: createdAt }, readAt: { nullValue: null },
+      createdBy: toFirestore(claims.sub), source: toFirestore("wallet-api-v2")
+    } }, currentDocument: { exists: false } }
+  ];
+  await commitWrites(access, writes);
+  return { ok: true, uid, operation, changes, requestId };
+}
 async function reviewInternalTransfer(env, claims, body) {
   if (!isAdmin(env, claims)) throw new HttpError("Administrator access is required.", 403);
   const requestId = String(body.requestId || "").trim(), decision = body.decision;
@@ -316,6 +362,7 @@ export default {
       if (url.pathname === "/v1/admin/adjust-usdt") result = await adminAdjustment(env, claims, body);
       else if (url.pathname === "/v1/admin/review-request") result = await reviewDepositWithdrawal(env, claims, body);
       else if (url.pathname === "/v1/admin/review-transfer") result = await reviewInternalTransfer(env, claims, body);
+      else if (url.pathname === "/v1/admin/adjust-assets") result = await adminAdjustAssets(env, claims, body);
       else throw new HttpError("Route not found or not enabled in this migration stage.", 404);
       return json(result, 200, cors);
     } catch (error) {
