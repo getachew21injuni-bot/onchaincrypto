@@ -74,8 +74,10 @@ function bytesToBase64Url(bytes) {
   return btoa(binary).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 }
 function decodeBase64Url(value) {
-  if (typeof value !== "string" || !/^[A-Za-z0-9_-]+$/.test(value)) throw new Error("Malformed token encoding.");
-  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  if (typeof value !== "string") throw new Error("Malformed token encoding.");
+  const unpadded = value.replace(/=+$/g, "");
+  if (!/^[A-Za-z0-9_-]+$/.test(unpadded)) throw new Error("Malformed token encoding.");
+  const normalized = unpadded.replace(/-/g, "+").replace(/_/g, "/");
   const padded = normalized + "=".repeat((4 - normalized.length % 4) % 4);
   return Uint8Array.from(atob(padded), character => character.charCodeAt(0));
 }
