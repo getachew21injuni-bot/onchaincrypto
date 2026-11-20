@@ -27,14 +27,14 @@ function pemDer(pem) {
 }
 async function verifyUserToken(token) {
   const parts = String(token || "").split(".");
-  if (parts.length !== 3) throw new Error("A valid Firebase sign-in token is required.");
+  if (parts.length !== 3) throw new HttpError("A valid Firebase sign-in token is required.", 401);
   const head = decodePart(parts[0]), claims = decodePart(parts[1]);
-  if (head.alg !== "RS256" || !head.kid) throw new Error("Unsupported token signature.");
+  if (head.alg !== "RS256" || !head.kid) throw new HttpError("Unsupported Firebase token signature.", 401);
   const response = await fetch(JWKS_URL, { cf: { cacheTtl: 300 } });
-  if (!response.ok) throw new Error("Firebase token verification is temporarily unavailable.");
+  if (!response.ok) throw new HttpError("Firebase token verification is temporarily unavailable.", 503);
   const keys = await response.json();
   const jwk = keys.keys?.find(k => k.kid === head.kid && k.alg === "RS256");
-  if (!jwk) throw new Error("Firebase token signing key was not found.");
+  if (!jwk) throw new HttpError("Firebase token signing key was not found.", 401);
   const key = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
   const valid = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, decode64(parts[2]), new TextEncoder().encode(parts[0] + "." + parts[1]));
   const now = Math.floor(Date.now() / 1000);
@@ -44,7 +44,7 @@ async function verifyUserToken(token) {
       !Number.isFinite(claims.exp) || claims.exp <= now ||
       !Number.isFinite(claims.iat) || claims.iat > now + 60 || now - claims.iat > 3600 ||
       !Number.isFinite(claims.auth_time) || claims.auth_time > now + 60 || claims.auth_time > claims.iat + 60) {
-    throw new Error("Firebase sign-in token is invalid or expired.");
+    throw new HttpError("Firebase sign-in token is invalid or expired.", 401);
   }
   return claims;
 }
@@ -603,7 +603,7 @@ export default {
         return json({ active: true, trade: trade.data }, 200, cors);
       }
       if (request.method !== "POST") throw new HttpError("Method not allowed.", 405);
-      const body = await request.json();
+      let body;\n      try { body = await request.json(); } catch { throw new HttpError("Request body must be valid JSON."); }
       let result;
       if (url.pathname === "/v1/wallet/order") result = await walletOrder(env, claims, body);
       else if (url.pathname === "/v1/wallet/convert") result = await walletConvert(env, claims, body);
