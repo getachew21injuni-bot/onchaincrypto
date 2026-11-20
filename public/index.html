@@ -8877,29 +8877,31 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  amount.addEventListener('input',preview);
  $('convertMax')?.addEventListener('click',()=>{amount.value=String(holding(from.value));preview()});
  $('convertSwapDirection')?.addEventListener('click',()=>{const old=from.value;from.value=to.value;to.value=old;preview()});
- confirmBtn.addEventListener('click',()=>{
+ confirmBtn.addEventListener('click',async()=>{
   if(typeof state==='undefined'||!state)return;
-  const a=from.value,b=to.value,q=Number(amount.value||0),pa=price(a),pb=price(b),available=holding(a);
+  const a=from.value,b=to.value,q=Number(amount.value||0),available=holding(a);
   const owned=assets().map(c=>c.symbol),active=activeAssets().map(c=>c.symbol);
-  if(!owned.includes(a)||!active.includes(b)||!a||!b||a===b||!(q>0)||!pa||!pb||q>available+1e-10){preview();return}
-  const feeUsdt=q*pa*0.001,receive=Math.max(0,(q*pa-feeUsdt)/pb);
-  if(a==='USDT')state.balance=Number(state.balance||0)-q;
-  else state.holdings[a]=Math.max(0,Number(state.holdings[a]||0)-q);
-  if(b==='USDT')state.balance=Number(state.balance||0)+receive;
-  else state.holdings[b]=Number(state.holdings[b]||0)+receive;
-  if(!state.holdings[a]||state.holdings[a]<1e-12)delete state.holdings[a];
-  if(!Array.isArray(state.history))state.history=[];
-  const item={from:a,to:b,fromQty:q,toQty:receive,feeUsdt,time:new Date().toISOString(),status:'Updated · displayed balance'};
-  let history=[];try{history=JSON.parse(localStorage.getItem('oc_convert_history')||'[]')}catch(_){}
-  history.unshift(item);localStorage.setItem('oc_convert_history',JSON.stringify(history.slice(0,100)));window.ocRenderWalletActivity?.();
-  if(typeof saveState==='function')saveState();
-  if(typeof recordActivity==='function')recordActivity('convert','Converted '+a+' to '+b,fmt(q,8)+' '+a+' → '+fmt(receive,8)+' '+b+' · fee '+fmt(feeUsdt,8)+' USDT','Updated · displayed balance');
-  if(typeof renderWallet==='function')renderWallet();
-  if(typeof renderWalletCoinList==='function')renderWalletCoinList();
-  if(typeof renderPnl==='function')renderPnl();
-  if(typeof window.__ocSelectWalletAsset==='function')window.__ocSelectWalletAsset(b);
-  amount.value='';fillSelects();renderHistory();preview();
-  const msg=$('convertMessage');if(msg)msg.textContent='Conversion record updated. Displayed balances and history were updated; no real funds were moved.';
+  if(!owned.includes(a)||!active.includes(b)||!a||!b||a===b||!(q>0)||q>available+1e-10){preview();return}
+  confirmBtn.disabled=true;confirmBtn.textContent='Processing securely…';
+  const message=$('convertMessage');if(message)message.textContent='Submitting conversion to the trusted wallet service…';
+  try{
+   const result=await window.ocWalletApiPost('/v1/wallet/convert',{
+    requestId:crypto.randomUUID().replace(/-/g,''),from:a,to:b,amount:q
+   });
+   state={balance:Number(result.wallet.balance)||0,holdings:result.wallet.holdings||{},history:Array.isArray(result.wallet.history)?result.wallet.history:[]};
+   const item={...result.conversion,status:'Completed · server wallet ledger'};
+   let history=[];try{history=JSON.parse(localStorage.getItem('oc_convert_history')||'[]')}catch(_){}
+   history.unshift(item);localStorage.setItem('oc_convert_history',JSON.stringify(history.slice(0,100)));window.ocRenderWalletActivity?.();
+   if(typeof recordActivity==='function')recordActivity('convert','Converted '+a+' to '+b,fmt(item.amount,8)+' '+a+' → '+fmt(item.received,8)+' '+b+' · fee '+fmt(item.feeUSDT,8)+' USDT','Completed · trusted wallet ledger');
+   if(typeof renderWallet==='function')renderWallet();
+   if(typeof renderWalletCoinList==='function')renderWalletCoinList();
+   if(typeof renderPnl==='function')renderPnl();
+   if(typeof window.__ocSelectWalletAsset==='function')window.__ocSelectWalletAsset(b);
+   amount.value='';fillSelects();renderHistory();preview();
+   if(message)message.textContent='Conversion confirmed by the trusted wallet service. The canonical account wallet and transaction ledger were updated; no external exchange order was placed.';
+  }catch(error){
+   if(message)message.textContent='Conversion not completed: '+(error.message||'Trusted wallet service unavailable.');
+  }finally{confirmBtn.disabled=false;preview();}
  });
  window.ocRefreshConvert=function(){fillSelects();renderHistory();preview()};
  const oldShowPage=window.showPage;
