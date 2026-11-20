@@ -10,6 +10,7 @@ const html = await readFile("public/index.html", "utf8");
 const supportChat = await readFile("public/support-chat.js", "utf8");
 const admin = await readFile("public/admin.html", "utf8");
 const walletWorker = await readFile("workers/wallet-api-v2/index.js", "utf8");
+const rules = await readFile("firestore.rules", "utf8");
 
 test("all inline classic JavaScript parses", () => {
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
@@ -189,6 +190,18 @@ test("Quick Trade uses concise positive copy and its result Close button restore
   assert.ok(html.includes('form.classList.remove("oc-stage-complete","oc-stage-running");form.classList.add("oc-stage-config");'));
   assert.ok(html.includes('document.getElementById("timedBoardClose")?.addEventListener("click"'));
   assert.ok(html.includes('if(board)board.style.display="none";'));
+});
+
+test("all browser wallet mutations use the trusted Worker and Firestore wallet writes are denied", () => {
+  assert.ok(html.includes('window.ocWalletApiPost("/v1/wallet/order"'), "Customer orders must use the trusted Worker");
+  assert.ok(html.includes('window.ocWalletApiPost("/v1/wallet/convert"'), "Conversions must use the trusted Worker");
+  assert.ok(html.includes('window.ocWalletApiPost("/v1/quick-trade/settle"'), "Quick Trade settlement must use the trusted Worker");
+  assert.ok(!html.includes('setDoc(doc(db,"userTradeState"'), "Customer code must not write canonical wallet documents directly");
+  assert.ok(html.includes("Direct browser wallet writes are disabled"), "Legacy snapshot writer must fail closed");
+  assert.ok(admin.includes('ocAdminWalletPost("/v1/admin/review-request"'), "Admin request review must use the trusted Worker");
+  assert.ok(admin.includes('ocAdminWalletPost("/v1/admin/review-transfer"'), "Internal transfers must use the trusted Worker");
+  assert.ok(admin.includes('ocAdminWalletPost("/v1/admin/adjust-assets"'), "Manual admin balance adjustments must use the trusted Worker");
+  assert.match(rules, /match \/userTradeState\/\{uid\} \{[\s\S]*?allow read: if owns\(uid\) \|\| isAdmin\(\);[\s\S]*?allow create, update, delete: if false;/);
 });
 
 test("Quick Trade settles through the trusted Worker before displaying the completed result", () => {
