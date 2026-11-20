@@ -8991,23 +8991,36 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, doc, getDoc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getStorage, ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 const cfg={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
 const app=getApps()[0]||initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
+const storage=getStorage(app);
 const byId=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 async function submitKycDetails(data){
  if(typeof auth.authStateReady==="function") await auth.authStateReady();
  const user=auth.currentUser;
  if(!user||user.uid!==data.uid) throw new Error("auth/session-missing");
+ const frontFile=data.frontFile,backFile=data.backFile;
+ const validFile=file=>file&&/^image\/(jpeg|png|webp)$/.test(file.type)&&file.size>0&&file.size<=8*1024*1024;
+ if(!validFile(frontFile)||!validFile(backFile))throw new Error("Choose both front and back ID images (JPG, PNG or WebP, maximum 8 MB each).");
  const ref=doc(db,"kycSubmissions",user.uid);
  const existing=await getDoc(ref);
  if(existing.exists()&&existing.data()?.status==="approved") throw new Error("kyc-already-approved");
+ const frontPath="kycDocuments/"+user.uid+"/front";
+ const backPath="kycDocuments/"+user.uid+"/back";
+ await uploadBytes(storageRef(storage,frontPath),frontFile,{contentType:frontFile.type,customMetadata:{uid:user.uid,side:"front"}});
+ await uploadBytes(storageRef(storage,backPath),backFile,{contentType:backFile.type,customMetadata:{uid:user.uid,side:"back"}});
  await setDoc(ref,{
   uid:user.uid,email:user.email||"",
   legalName:String(data.legalName||"").trim(),
   country:String(data.country||"").trim(),
   documentType:String(data.documentType||"").trim(),
   documentNumber:String(data.documentNumber||"").trim(),
+  frontImagePath:frontPath,backImagePath:backPath,
+  frontFileName:String(frontFile.name||"ID front").slice(0,120),
+  backFileName:String(backFile.name||"ID back").slice(0,120),
+  frontContentType:frontFile.type,backContentType:backFile.type,
   status:"pending",submittedAt:serverTimestamp(),updatedAt:serverTimestamp()
  },{merge:true});
  return {ok:true,status:"pending"};
@@ -9093,7 +9106,7 @@ if(kyc){
    }
   },error=>{statusHost.innerHTML='<div class="notice">Could not load verification status. Refresh the page and try again.</div>';console.warn("KYC status listener:",error?.code||error);});
  };
- panel.innerHTML='<section class="panel about-section" style="margin-top:12px;padding:16px"><h3 class="feature-heading">Identity verification</h3><p class="muted tiny">Enter your details exactly as shown on your identity document. You can choose an image or drag it into each box to check the selected file.</p><div id="ocKycReviewStatus" aria-live="polite"></div><form id="ocKycForm" style="display:grid;gap:14px" autocomplete="off"><label>Full legal name<input name="legalName" required maxlength="120" autocomplete="name" placeholder="Name as shown on your ID" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:12px;border-radius:9px;background:var(--panel2);color:var(--text);border:1px solid var(--line)"></label><label>Country of issue<input name="country" required maxlength="80" autocomplete="country-name" placeholder="Country that issued the document" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:12px;border-radius:9px;background:var(--panel2);color:var(--text);border:1px solid var(--line)"></label><label>Document type<select name="documentType" required style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:12px;border-radius:9px;background:var(--panel2);color:var(--text);border:1px solid var(--line)"><option value="">Select document type</option><option>National ID</option><option>Passport</option><option>Driving licence</option><option>Residence permit</option></select></label><label>Document number<input name="documentNumber" required maxlength="80" autocapitalize="characters" placeholder="Document number" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:12px;border-radius:9px;background:var(--panel2);color:var(--text);border:1px solid var(--line)"></label><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px"><label class="oc-kyc-drop" data-kyc-side="front" style="display:block;border:2px dashed var(--line);border-radius:12px;padding:14px;text-align:center;cursor:pointer"><strong>Front of ID</strong><span style="display:block;font-size:12px;margin:8px 0;color:var(--muted)">Drag image here or tap to choose</span><input name="frontImage" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" style="display:block;width:100%;font-size:12px"><img data-kyc-preview="front" alt="Front of ID" hidden style="display:block;max-width:100%;max-height:180px;margin:12px auto 0;border-radius:8px"><span data-kyc-file="front" class="muted tiny">No image selected</span></label><label class="oc-kyc-drop" data-kyc-side="back" style="display:block;border:2px dashed var(--line);border-radius:12px;padding:14px;text-align:center;cursor:pointer"><strong>Back of ID</strong><span style="display:block;font-size:12px;margin:8px 0;color:var(--muted)">Drag image here or tap to choose</span><input name="backImage" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" style="display:block;width:100%;font-size:12px"><img data-kyc-preview="back" alt="Back of ID" hidden style="display:block;max-width:100%;max-height:180px;margin:12px auto 0;border-radius:8px"><span data-kyc-file="back" class="muted tiny">No image selected</span></label></div><p class="muted tiny" style="margin:0">Images are not uploaded; your verification submission currently includes the text details.</p><button type="submit" class="primary" style="padding:13px">Submit identity details</button><p id="ocKycStatus" class="muted tiny" role="status" aria-live="polite"></p></form></section>';
+ panel.innerHTML='<section class="panel about-section" style="margin-top:12px;padding:16px"><h3 class="feature-heading">Identity verification</h3><p class="muted tiny">Enter your details exactly as shown on your identity document. You can choose an image or drag it into each box to check the selected file.</p><div id="ocKycReviewStatus" aria-live="polite"></div><form id="ocKycForm" style="display:grid;gap:14px" autocomplete="off"><label>Full legal name<input name="legalName" required maxlength="120" autocomplete="name" placeholder="Name as shown on your ID" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:12px;border-radius:9px;background:var(--panel2);color:var(--text);border:1px solid var(--line)"></label><label>Country of issue<input name="country" required maxlength="80" autocomplete="country-name" placeholder="Country that issued the document" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:12px;border-radius:9px;background:var(--panel2);color:var(--text);border:1px solid var(--line)"></label><label>Document type<select name="documentType" required style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:12px;border-radius:9px;background:var(--panel2);color:var(--text);border:1px solid var(--line)"><option value="">Select document type</option><option>National ID</option><option>Passport</option><option>Driving licence</option><option>Residence permit</option></select></label><label>Document number<input name="documentNumber" required maxlength="80" autocapitalize="characters" placeholder="Document number" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:12px;border-radius:9px;background:var(--panel2);color:var(--text);border:1px solid var(--line)"></label><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px"><label class="oc-kyc-drop" data-kyc-side="front" style="display:block;border:2px dashed var(--line);border-radius:12px;padding:14px;text-align:center;cursor:pointer"><strong>Front of ID</strong><span style="display:block;font-size:12px;margin:8px 0;color:var(--muted)">Drag image here or tap to choose</span><input name="frontImage" type="file" required accept="image/jpeg,image/png,image/webp" capture="environment" style="display:block;width:100%;font-size:12px"><img data-kyc-preview="front" alt="Front of ID" hidden style="display:block;max-width:100%;max-height:180px;margin:12px auto 0;border-radius:8px"><span data-kyc-file="front" class="muted tiny">No image selected</span></label><label class="oc-kyc-drop" data-kyc-side="back" style="display:block;border:2px dashed var(--line);border-radius:12px;padding:14px;text-align:center;cursor:pointer"><strong>Back of ID</strong><span style="display:block;font-size:12px;margin:8px 0;color:var(--muted)">Drag image here or tap to choose</span><input name="backImage" type="file" required accept="image/jpeg,image/png,image/webp" capture="environment" style="display:block;width:100%;font-size:12px"><img data-kyc-preview="back" alt="Back of ID" hidden style="display:block;max-width:100%;max-height:180px;margin:12px auto 0;border-radius:8px"><span data-kyc-file="back" class="muted tiny">No image selected</span></label></div><p class="muted tiny" style="margin:0">Both ID images are uploaded privately and can only be opened by authorized administrators.</p><button type="submit" class="primary" style="padding:13px">Submit identity details</button><p id="ocKycStatus" class="muted tiny" role="status" aria-live="polite"></p></form></section>';
  const form=panel.querySelector("#ocKycForm");
  if(form){
   const urls={};
@@ -9124,11 +9137,15 @@ if(kyc){
         legalName:String(values.get("legalName")||"").trim(),
         country:String(values.get("country")||"").trim(),
         documentType:String(values.get("documentType")||"").trim(),
-        documentNumber:String(values.get("documentNumber")||"").trim()
+        documentNumber:String(values.get("documentNumber")||"").trim(),
+        frontFile:form.elements.frontImage?.files?.[0]||null,
+        backFile:form.elements.backImage?.files?.[0]||null
       };
       if(!data.legalName||!data.country||!data.documentType||!data.documentNumber)throw new Error("Please complete all required fields.");
+      if(!data.frontFile||!data.backFile)throw new Error("Please attach both the front and back of your identity document.");
+      status.textContent="Uploading your identity documents securely…";
       await submitKycDetails(data);
-      status.textContent="Your identity details were submitted and are awaiting admin review. ID images have not been uploaded.";
+      status.textContent="Your identity details and both ID images were securely submitted. Your verification is waiting for admin review.";
     }catch(err){
       const code=err?.code||err?.message||"unknown-error";
       const messages={
