@@ -342,8 +342,8 @@ test("long listings start with four items and keep More/Less controls", () => {
 
 test("KYC documents use private Firestore storage without Firebase Storage", () => {
   assert.ok(html.includes("async function compressKycImage(file)"), "KYC images must be compressed before saving");
-  assert.ok(html.includes("kycSubmissions", "documents", "front"), "Front ID must use a private Firestore subdocument");
-  assert.ok(html.includes("kycSubmissions", "documents", "back"), "Back ID must use a private Firestore subdocument");
+  assert.ok(html.includes('doc(db,"kycSubmissions",user.uid,"documents","front")'), "Front ID must use a private Firestore subdocument");
+  assert.ok(html.includes('doc(db,"kycSubmissions",user.uid,"documents","back")'), "Back ID must use a private Firestore subdocument");
   assert.ok(!html.includes("firebase-storage.js") && !html.includes("uploadBytes"), "The public KYC flow must not depend on Firebase Storage");
   assert.ok(admin.includes("getDoc(doc(db,'kycSubmissions',record.id,'documents',spec.side))"), "Admin review must fetch each ID image only when details are opened");
   assert.ok(!admin.includes("firebase-storage.js") && !admin.includes("getBytes("), "The admin review must not depend on Firebase Storage");
