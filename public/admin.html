@@ -765,7 +765,7 @@ window.adminGetLiveCollection=async function(view){
      const imageSnap=await getDoc(doc(db,'kycSubmissions',record.id,'documents',spec.side));
      if(imageSnap.exists()){
       const imageData=imageSnap.data()||{};
-      if(imageData.uid!==record.id||imageData.side!==spec.side||typeof imageData.dataUrl!=='string'||!/^data:image\\/jpeg;base64,/.test(imageData.dataUrl)||imageData.dataUrl.length>440000)throw new Error('invalid-private-image-record');
+      if(imageData.uid!==record.id||imageData.side!==spec.side||typeof imageData.dataUrl!=='string'||!/^data:image\/jpeg;base64,/.test(imageData.dataUrl)||imageData.dataUrl.length>440000)throw new Error('invalid-private-image-record');
       images.push({...spec,url:imageData.dataUrl});
      }
     }
