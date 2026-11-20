@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "OnChainSpro",
-  "short_name": "OnChainSpro",
-  "description": "OnChainSpro — cryptocurrency and gold market information, charts and account tools.",
+  "name": "Onchain",
+  "short_name": "Onchain",
+  "description": "Onchain — cryptocurrency and gold market information, charts and account tools.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
@@ -10,12 +10,6 @@
   "background_color": "#06101f",
   "theme_color": "#071426",
   "icons": [
-    {
-      "src": "/icons/onchainspro-icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
     {
       "src": "/icons/onchain-app.svg",
       "sizes": "any",
