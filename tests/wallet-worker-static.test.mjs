@@ -28,4 +28,11 @@ describe("read-only reconciliation Worker safeguards", () => {
     assert.match(source, /ledgerChecks/);
     assert.doesNotMatch(source, /history:\s*wallet\.history/);
   });
+
+  it("uses the canonical wallet and walletLedger without reading legacy profile balances", () => {
+    assert.match(source, /userTradeState/);
+    assert.match(source, /walletLedger/);
+    assert.doesNotMatch(source, /demoBalanceUSDT|demoAssetBalances/);
+    assert.doesNotMatch(source, /demoTransactions|demoAssetTransactions/);
+  });
 });
