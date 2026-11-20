@@ -16,7 +16,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Check Worker module syntax
+      - name: Check Worker entrypoint syntax
+        run: node --check workers/onchainspro-wallet-api-v2/worker.js
+      - name: Check Worker trade module syntax
         run: node --check workers/onchainspro-wallet-api-v2/trade-engine.js
       - name: Check browser adapter syntax
         run: node --check public/server-trades.js
