@@ -295,22 +295,28 @@ async function renderRequestQueue(view){
    if(!confirm(action==='approve'?'Approve this request as an internal account-balance adjustment? No blockchain payment or payout will occur.':'Reject this request?'))return;
    button.disabled=true;const msg=document.getElementById('ocRequestMessage');if(msg)msg.textContent='Processing request securely…';
    try{
-    const requestRef=doc(db,collectionName,id),userRef=doc(db,'users',req.uid),notificationRef=doc(collection(db,'userNotifications',req.uid,'items'));
+    const requestRef=doc(db,collectionName,id),userRef=doc(db,'users',req.uid),walletRef=doc(db,'userTradeState',req.uid),notificationRef=doc(collection(db,'userNotifications',req.uid,'items'));
     const ledgerRef=doc(collection(db,'demoAssetTransactions')),usdtLedgerRef=doc(collection(db,'demoTransactions'));
     await runTransaction(db,async tx=>{
      const rs=await tx.get(requestRef);if(!rs.exists()||(rs.data().status||'pending')!=='pending')throw new Error('request-already-processed');
      if(action==='reject'){tx.update(requestRef,{status:'rejected',reviewedAt:serverTimestamp(),reviewedBy:current.email});return;}
-     const us=await tx.get(userRef);if(!us.exists())throw new Error('user-profile-not-found');
-     const data=us.data(),asset=String(req.asset||'USDT').toUpperCase(),amount=Number(req.amount);
+     const [us,ws]=await Promise.all([tx.get(userRef),tx.get(walletRef)]);
+     if(!us.exists())throw new Error('user-profile-not-found');
+     if(!ws.exists())throw new Error('canonical-firestore-wallet-not-found-no-legacy-balance-was-used');
+     const profile=us.data()||{},wallet=ws.data()||{},asset=String(req.asset||'USDT').toUpperCase(),amount=Number(req.amount);
+     if(profile.accountStatus==='suspended')throw new Error('account-suspended');
      if(!Number.isFinite(amount)||amount<=0)throw new Error('invalid-request-amount');
-     const deposit=kind==='deposit',before=asset==='USDT'?Number(data.demoBalanceUSDT||0):Number((data.demoAssetBalances||{})[asset]||0);
+     const holdings=wallet.holdings&&typeof wallet.holdings==='object'&&!Array.isArray(wallet.holdings)?{...wallet.holdings}:{};
+     const deposit=kind==='deposit',before=asset==='USDT'?Number(wallet.balance||0):Number(holdings[asset]||0);
+     if(!Number.isFinite(before)||before<0)throw new Error('invalid-canonical-wallet-balance');
      const after=Number((before+(deposit?amount:-amount)).toFixed(asset==='USDT'?2:8));
-     if(after<0)throw new Error('insufficient-demo-balance');
-     if(asset==='USDT')tx.update(userRef,{demoBalanceUSDT:after,demoBalanceUpdatedAt:serverTimestamp()});
-     else tx.update(userRef,{demoAssetBalances:{...(data.demoAssetBalances||{}),[asset]:after},demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:current.email});
-     if(asset==='USDT')tx.set(usdtLedgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request account adjustment':'Withdrawal request account adjustment'),source:'admin-demo',status:'completed'});
-     else tx.set(ledgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request account adjustment':'Withdrawal request account adjustment'),source:'admin-demo',status:'completed'});
-     tx.set(notificationRef,{kind:deposit?'deposit':'withdrawal_approved',title:deposit?'Successfully deposited '+amount.toLocaleString()+' '+asset:'Withdrawal successfully processed',message:deposit?'Successfully deposited '+amount.toLocaleString()+' '+asset+' to your account. Your account balance has been updated.':'Your withdrawal of '+amount.toLocaleString()+' '+asset+' was successfully processed as an account balance adjustment. This dashboard does not send an external blockchain payout.',createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:current.uid,source:'admin-demo'});
+     if(after<0)throw new Error('insufficient-firestore-wallet-balance');
+     let balance=Math.max(0,Number(wallet.balance)||0);
+     if(asset==='USDT')balance=after;else holdings[asset]=after;
+     tx.set(walletRef,{uid:req.uid,balance,holdings,history:Array.isArray(wallet.history)?wallet.history.slice(0,300):[],updatedAt:serverTimestamp()},{merge:true});
+     if(asset==='USDT')tx.set(usdtLedgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request account adjustment':'Withdrawal request account adjustment'),source:'firestore-wallet',status:'completed'});
+     else tx.set(ledgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request account adjustment':'Withdrawal request account adjustment'),source:'firestore-wallet',status:'completed'});
+     tx.set(notificationRef,{kind:deposit?'deposit':'withdrawal_approved',title:deposit?'Successfully deposited '+amount.toLocaleString()+' '+asset:'Withdrawal successfully processed',message:deposit?'Successfully deposited '+amount.toLocaleString()+' '+asset+' to your account. Your Firestore wallet has been updated.':'Your withdrawal of '+amount.toLocaleString()+' '+asset+' was approved as an account balance adjustment. No external blockchain payout was sent.',createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:current.uid,source:'firestore-wallet'});
      tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email});
     });
     if(msg)msg.textContent=action==='approve'?(kind==='deposit'?'Deposit approved and credited. The user was notified.':'Withdrawal approved and account balance adjusted. The user was notified; no external payout was sent.'):'Request rejected.';
