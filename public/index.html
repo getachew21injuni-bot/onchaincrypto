@@ -6083,7 +6083,7 @@ $("withdrawSubmit")?.addEventListener("click",async()=>{
 async function processDemoRequest(kind,requestId,decision){
  const current=auth.currentUser;
  if(!current||!current.emailVerified)throw new Error("Verified administrator access is required.");
- const base=String(window.ONCHAINSPRO_WALLET_API_URL||"").replace(/\\/+$/,"");
+ const base=String(window.ONCHAINSPRO_WALLET_API_URL||"").replace(/\/+$/,"");
  if(!base)throw new Error("The trusted Cloudflare Wallet API URL has not been configured yet.");
  const token=await current.getIdToken(true);
  const response=await fetch(base+"/v1/admin/review-request",{
