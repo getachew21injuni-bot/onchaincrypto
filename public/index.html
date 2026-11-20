@@ -2910,7 +2910,7 @@ function updateTradePreview(){const sym=$("tradeAsset")?.value||selected;const c
   const result=await window.ocWalletApiPost("/v1/wallet/order",{requestId:crypto.randomUUID().replace(/-/g,""),side,symbol:sym,amountUSDT:amount,kind:"trade"});
   state={balance:Number(result.wallet.balance)||0,holdings:result.wallet.holdings||{},history:Array.isArray(result.wallet.history)?result.wallet.history:[]};
   recordActivity("trade",(side||"trade").toUpperCase()+" "+sym,money(amount)+" · "+Number(result.order.qty).toFixed(8)+" coins @ "+money(result.order.price),"Recorded · trusted wallet ledger");
-  renderWallet();updateTradePreview();msg.className="muted tiny green";
+  renderWallet();void window.ocLoadWalletLedger?.();updateTradePreview();msg.className="muted tiny green";
   msg.textContent="TRADE RESULT RECORDED · "+side.toUpperCase()+" "+Number(result.order.qty).toFixed(8)+" "+sym+" at "+money(result.order.price)+" per coin. Total: "+money(amount)+".";
   renderTradeHistory();renderWalletCoinList();renderPnl();renderTradeOutcomes();
  }catch(error){msg.className="muted tiny red";msg.textContent="Order not completed: "+(error.message||"Trusted wallet service unavailable.");}
@@ -2945,7 +2945,7 @@ async function executeBuyHoldOrder(side){
  try{
   const result=await window.ocWalletApiPost("/v1/wallet/order",{requestId:crypto.randomUUID().replace(/-/g,""),side,symbol:sym,amountUSDT:amount,kind:"buy-hold"});
   state={balance:Number(result.wallet.balance)||0,holdings:result.wallet.holdings||{},history:Array.isArray(result.wallet.history)?result.wallet.history:[]};
-  renderWallet();renderTradeHistory();renderPnl();renderTradeOutcomes();updateTradePreview();updateBuyHoldPreview();
+  renderWallet();void window.ocLoadWalletLedger?.();renderTradeHistory();renderPnl();renderTradeOutcomes();updateTradePreview();updateBuyHoldPreview();
   show((side==="buy"?"Buy & Hold recorded: ":"Sell recorded: ")+Number(result.order.qty).toFixed(8)+" "+sym+" at "+money(result.order.price)+" per coin · "+usdtMoney(amount)+". Your account wallet has been updated.",true);
   $("buyHoldAmount").value="";updateBuyHoldPreview();
  }catch(error){show("Order not completed: "+(error.message||"Trusted wallet service unavailable."));}
@@ -3127,7 +3127,7 @@ async function startTimedPaper(direction){
    state={balance:Number(settled.wallet.balance)||0,holdings:settled.wallet.holdings||{},history:Array.isArray(settled.wallet.history)?settled.wallet.history:[]};
    finished.samples.push({time:Date.now(),price:finalPrice});drawTimedTradeGraph(finished.samples,finished.entry);
    const won=pnl>0,lost=pnl<0,status=won?"WIN +"+Math.abs(pnl).toFixed(2)+" USDT":lost?"LOSS -"+Math.abs(pnl).toFixed(2)+" USDT":"EVEN 0.00 USDT";
-   renderWallet();if(typeof renderSummary==="function")renderSummary();if(typeof renderWalletSummary==="function")renderWalletSummary();updateQuickEstimate();
+   renderWallet();void window.ocLoadWalletLedger?.();if(typeof renderSummary==="function")renderSummary();if(typeof renderWalletSummary==="function")renderWalletSummary();updateQuickEstimate();
    recordActivity("trade","Quick trade completed · "+status,finished.symbol+" · "+(finished.direction==="up"?"BUY":"SELL")+" · Amount "+money(finished.stake)+" "+finished.funding+" · Entry "+money(finished.entry)+" · End "+money(finalPrice)+" · Server P/L "+(pnl>=0?"+":"-")+money(Math.abs(pnl))+" USDT · Balance "+money(balanceBefore)+" → "+money(state.balance),"Completed · USDT result recorded · server settled");
    $("timedPnl").textContent=(pnl>0?"+":"-")+money(Math.abs(pnl))+" USDT";$("timedPnl").className="big "+(won?"green":lost?"red":"");
    $("timedEndPriceDetail").textContent=money(finalPrice);$("timedStatusDetail").textContent=status;$("timedGraphStatus").textContent="COMPLETED";
@@ -3183,7 +3183,7 @@ async function resumeActiveQuickTrade(){
     state={balance:Number(settled.wallet.balance)||0,holdings:settled.wallet.holdings||{},history:Array.isArray(settled.wallet.history)?settled.wallet.history:[]};
     finished.samples.push({time:Date.now(),price:exit});const won=pnl>0,lost=pnl<0;
     const status=won?"WIN +"+Math.abs(pnl).toFixed(2)+" USDT":lost?"LOSS -"+Math.abs(pnl).toFixed(2)+" USDT":"EVEN 0.00 USDT";
-    renderWallet();renderTradeHistory();renderTradeOutcomes();renderWalletCoinList();updateTradePreview();
+    renderWallet();void window.ocLoadWalletLedger?.();renderTradeHistory();renderTradeOutcomes();renderWalletCoinList();updateTradePreview();
     $("timedPnl").textContent=(pnl>=0?"+":"-")+money(Math.abs(pnl))+" USDT";$("timedPnl").className="big "+(won?"green":lost?"red":"");
     $("timedEndPriceDetail").textContent=money(exit);$("timedStatusDetail").textContent=status;$("timedGraphStatus").textContent="COMPLETED";
     $("timedResult").className="tiny "+(won?"green":lost?"red":"muted");$("timedResult").textContent=status+" · Restored trade settled by the server.";
