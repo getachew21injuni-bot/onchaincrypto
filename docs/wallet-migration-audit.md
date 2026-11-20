@@ -1,4 +1,7 @@
-# Wallet migration audit — staging only
+# Wallet migration audit
+
+> Chronological note: the initial findings below describe the pre-migration baseline. Later dated sections at the end of this document record the implemented changes and supersede earlier statements about direct browser writes and legacy profile-balance reads.
+ — staging only
 
 ## Safety constraints
 - This branch is `fix/canonical-wallet-worker-migration`.
