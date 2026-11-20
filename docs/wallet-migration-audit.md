@@ -136,3 +136,8 @@ No customer wallet balances, user profiles or historical records were migrated o
 The existing read-only `workers/wallet-api` reconciliation endpoint was also updated. It no longer reads `users/{uid}.demoBalanceUSDT`, `demoAssetBalances`, `demoTransactions`, or `demoAssetTransactions`. It reads the canonical `userTradeState/{uid}`, `walletLedger`, transfer records and pending request records only. Its report now identifies `userTradeState/{uid}` as the only wallet balance source and groups ledger continuity checks by asset.
 
 This legacy Worker remains read-only; it does not write balances. The new v2 Worker is the sole wallet mutation service in the migration branch. Do not deploy both as competing wallet writers. The legacy reconciliation route may remain temporarily as a read-only audit endpoint until the v2 Worker is staged and the old Cloudflare service is safely retired.
+
+
+## Persistent customer ledger display — 2026-11-20
+
+The v2 Worker now exposes authenticated `GET /v1/wallet/ledger`, which queries `walletLedger` for the signed-in UID only. The customer activity and Convert history panels now render conversion records from that canonical ledger instead of browser `localStorage`. The customer page refreshes the ledger after wallet restore and after balance-changing operations. The ledger query is currently capped at 200 records per request.
