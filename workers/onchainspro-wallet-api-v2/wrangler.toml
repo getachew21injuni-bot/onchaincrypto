@@ -1,0 +1,10 @@
+name = "onchainspro-wallet-api-v2"
+main = "worker.js"
+compatibility_date = "2026-11-20"
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGINS = "https://onchainspro.com,https://www.onchainspro.com"
+
+[triggers]
+crons = ["* * * * *"]
