@@ -118,7 +118,7 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
     const direction = String(body?.direction || "");
     const fundingAsset = String(body?.fundingAsset || "USDT").toUpperCase();
     const fundingAmount = round2(safeNumber(body?.amount));
-    if (!ASSETS.has(symbol) || ["USDT","USDC"].includes(symbol) || !["up","down"].includes(direction) || !(fundingAmount > 0) || fundingAmount > 1000000 || (!ASSETS.has(fundingAsset) && !["USDT","USDC"].includes(fundingAsset)) || fundingAsset === "XAU") {
+    if (!ASSETS.has(symbol) || ["USDT","USDC","DAI","FDUSD"].includes(symbol) || !["up","down"].includes(direction) || !(fundingAmount > 0) || fundingAmount > 1000000 || (!ASSETS.has(fundingAsset) && !["USDT","USDC"].includes(fundingAsset)) || fundingAsset === "XAU") {
       throw new Error("Invalid trade details.");
     }
     const access = await serviceToken();
