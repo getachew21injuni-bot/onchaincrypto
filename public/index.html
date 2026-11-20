@@ -9028,7 +9028,7 @@ async function submitKycDetails(data){
  const user=auth.currentUser;
  if(!user||user.uid!==data.uid)throw new Error("auth/session-missing");
  const frontFile=data.frontFile,backFile=data.backFile;
- const validFile=file=>file&&/^image\\/(jpeg|png|webp)$/.test(file.type)&&file.size>0&&file.size<=8*1024*1024;
+ const validFile=file=>file&&/^image\/(jpeg|png|webp)$/.test(file.type)&&file.size>0&&file.size<=8*1024*1024;
  if(!validFile(frontFile)||!validFile(backFile))throw new Error("Choose both front and back ID images (JPG, PNG or WebP, maximum 8 MB each).");
  const ref=doc(db,"kycSubmissions",user.uid);
  const existing=await getDoc(ref);
