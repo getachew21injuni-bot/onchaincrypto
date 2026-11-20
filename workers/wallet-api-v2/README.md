@@ -1,6 +1,6 @@
 # Wallet API v2 — isolated staging implementation
 
-This Worker is a staged replacement candidate for OnChainSpro's wallet mutation backend. It is deliberately isolated from production: it has its own Wrangler name and is not wired to the live customer or admin pages. It does not overwrite `onchaincrypto-deposit-verifier` or `workers/wallet-api/index.js`.
+This Worker is a staged replacement candidate for OnChainSpro's wallet mutation backend. It is the only wallet mutation service in this migration branch. The older `workers/wallet-api` service is now read-only reconciliation against the same canonical wallet and ledger; it is not a second balance writer and should be retired after the v2 staging cutover. It is deliberately isolated from production: it has its own Wrangler name and is not wired to the live customer or admin pages. It does not overwrite `onchaincrypto-deposit-verifier` or `workers/wallet-api/index.js`.
 
 ## Implemented routes
 
