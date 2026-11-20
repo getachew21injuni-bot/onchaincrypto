@@ -45,9 +45,8 @@ async function verifyFirebaseIdToken(token) {
     throw new Error("Firebase token claims are invalid or expired.");
   }
   const email = typeof claims.email === "string" ? claims.email.toLowerCase() : "";
-  const allowed = (DEFAULT_ADMIN_EMAILS.concat((globalThis.__unused || []))).map(v => String(v).toLowerCase());
   const configured = (globalThis.__adminEmails || []);
-  const admins = allowed.concat(configured.map(v => String(v).toLowerCase()));
+  const admins = DEFAULT_ADMIN_EMAILS.map(v => v.toLowerCase()).concat(configured.map(v => String(v).toLowerCase()));
   if (claims.admin !== true && !(claims.email_verified === true && admins.includes(email))) {
     throw new Error("Administrator access is required.");
   }
@@ -194,7 +193,9 @@ async function reconcile(env, uid) {
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
-    const allowedOrigin = env.ALLOWED_ORIGIN || "https://onchaincrypto-d976b.web.app";
+    const allowedOrigins = (env.ALLOWED_ORIGINS || "https://onchaincrypto-d976b.web.app,https://onchaincrypto-d976b.firebaseapp.com,https://onchainspro.com,https://www.onchainspro.com")
+      .split(",").map(value => value.trim()).filter(Boolean);
+    const allowedOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
     const headers = {
       "content-type": "application/json; charset=utf-8",
       "cache-control": "no-store",
@@ -204,7 +205,7 @@ export default {
       "vary": "Origin"
     };
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers });
-    if (origin && origin !== allowedOrigin) return new Response(JSON.stringify({ error: "Origin not allowed." }), { status: 403, headers });
+    if (origin && !allowedOrigins.includes(origin)) return new Response(JSON.stringify({ error: "Origin not allowed." }), { status: 403, headers });
     const url = new URL(request.url);
     if (url.pathname === "/health" && request.method === "GET") {
       return new Response(JSON.stringify({ ok: true, mode: "read-only-reconciliation" }), { headers });
