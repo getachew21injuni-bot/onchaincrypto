@@ -2,13 +2,13 @@ import { createTradeEngine } from "./trade-engine.js";
 
 
 
-// OnChainSpro trusted wallet API v2 — staged backend foundation.
+// OnChainSpro trusted wallet API v2 — wallet and server-side Quick Trade API.
 
 //
 
-// This worker intentionally exposes wallet reads and audited administrator USDT adjustments only.
+// This Worker exposes authenticated wallet reads, audited administrator USDT adjustments, and server-owned Quick Trade lifecycle.
 
-// Customer trading, conversions, transfers, deposits and withdrawals remain disabled until their
+// Conversions, transfers, deposits and withdrawals remain disabled until their
 
 // server-side business rules and source records are migrated. Never trust client-supplied P/L.
 
