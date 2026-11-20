@@ -5,6 +5,7 @@ workers_dev = true
 
 [vars]
 ALLOWED_ORIGINS = "https://onchainspro.com,https://www.onchainspro.com"
+ADMIN_EMAILS = "getachew21.inj.uni@gmail.com"
 
 [triggers]
 crons = ["* * * * *"]
