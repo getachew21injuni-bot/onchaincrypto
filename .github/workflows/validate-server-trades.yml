@@ -1,0 +1,22 @@
+name: Validate persistent trade engine
+
+on:
+  push:
+    branches:
+      - feature/firestore-server-trades
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check Worker module syntax
+        run: node --check workers/onchainspro-wallet-api-v2/trade-engine.js
+      - name: Validate Firestore index JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('firestore.indexes.json', 'utf8'))"
