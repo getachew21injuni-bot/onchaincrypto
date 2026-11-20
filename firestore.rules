@@ -9,7 +9,11 @@ service cloud.firestore {
     // platform ledger snapshot, separate from admin-controlled deposit credits.
     match /userTradeState/{uid} {
       allow read: if owns(uid) || isAdmin();
-      allow create, update: if owns(uid)
+      // Customer wallet snapshots remain writable by the owner for the
+      // current client trade workflow; verified admins may also apply
+      // approved balance adjustments. Admin UI now writes this canonical
+      // document instead of legacy users.demoBalanceUSDT fields.
+      allow create, update: if (owns(uid) || isAdmin())
         && request.resource.data.uid == uid
         && request.resource.data.keys().hasOnly(['uid','balance','holdings','history','updatedAt'])
         && request.resource.data.balance is number
