@@ -3110,7 +3110,7 @@ async function startTimedPaper(direction){
    state={balance:Number(settled.wallet.balance)||0,holdings:settled.wallet.holdings||{},history:Array.isArray(settled.wallet.history)?settled.wallet.history:[]};
    finished.samples.push({time:Date.now(),price:finalPrice});drawTimedTradeGraph(finished.samples,finished.entry);
    const won=pnl>0,lost=pnl<0,status=won?"WIN +"+Math.abs(pnl).toFixed(2)+" USDT":lost?"LOSS -"+Math.abs(pnl).toFixed(2)+" USDT":"EVEN 0.00 USDT";
-   renderWallet();renderSummary?.();renderWalletSummary?.();updateQuickEstimate();
+   renderWallet();if(typeof renderSummary==="function")renderSummary();if(typeof renderWalletSummary==="function")renderWalletSummary();updateQuickEstimate();
    recordActivity("trade","Quick trade completed · "+status,finished.symbol+" · "+(finished.direction==="up"?"BUY":"SELL")+" · Amount "+money(finished.stake)+" "+finished.funding+" · Entry "+money(finished.entry)+" · End "+money(finalPrice)+" · Server P/L "+(pnl>=0?"+":"-")+money(Math.abs(pnl))+" USDT · Balance "+money(balanceBefore)+" → "+money(state.balance),"Completed · server settled");
    $("timedPnl").textContent=(pnl>0?"+":"-")+money(Math.abs(pnl))+" USDT";$("timedPnl").className="big "+(won?"green":lost?"red":"");
    $("timedEndPriceDetail").textContent=money(finalPrice);$("timedStatusDetail").textContent=status;$("timedGraphStatus").textContent="COMPLETED";
