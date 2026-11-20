@@ -576,6 +576,14 @@ export default {
         if (!wallet) throw new HttpError("Canonical wallet record is missing; no balance was created.", 404);
         return json({ uid: claims.sub, wallet: wallet.data, updateTime: wallet.updateTime }, 200, cors);
       }
+      if (url.pathname === "/v1/quick-trade/active" && request.method === "GET") {
+        const access = await serviceToken(env);
+        const active = await readDocument(access, "activeQuickTrades", claims.sub);
+        if (!active) return json({ active: false }, 200, cors);
+        const trade = await readDocument(access, "quickTrades", String(active.data.tradeId || ""));
+        if (!trade || trade.data.uid !== claims.sub || trade.data.status !== "running") return json({ active: false }, 200, cors);
+        return json({ active: true, trade: trade.data }, 200, cors);
+      }
       if (request.method !== "POST") throw new HttpError("Method not allowed.", 405);
       const body = await request.json();
       let result;
