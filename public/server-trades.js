@@ -20,7 +20,7 @@
     const auth = window.ocFirebaseAuth;
     const user = auth?.currentUser;
     if (!user?.uid) throw new Error("Please sign in before using Quick Trade.");
-    const token = await user.getIdToken(true);
+    const token = await user.getIdToken();
     const response = await fetch(API + path, {
       method: options.method || "GET",
       cache: "no-store",
@@ -180,12 +180,17 @@
   };
   window.addEventListener("focus", () => { void refreshTrades(); });
   document.addEventListener("visibilitychange", () => { if (!document.hidden) void refreshTrades(); });
+  let lastIdlePoll = 0;
   pollTimer = setInterval(() => {
+    if (document.hidden) return;
     const uid = window.ocFirebaseAuth?.currentUser?.uid;
     if (uid && window.ocTradeCloudReadyUid === uid) {
       if (restoredUid !== uid) void window.ocRestoreServerTrades();
-      else void refreshTrades();
+      else if (activeTrade || Date.now() - lastIdlePoll >= 15000) {
+        if (!activeTrade) lastIdlePoll = Date.now();
+        void refreshTrades();
+      }
     } else if (!uid) restoredUid = null;
-  }, 3000);
+  }, 5000);
   void pollTimer;
 })();
