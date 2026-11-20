@@ -285,7 +285,8 @@ test("Quick Trade reads fresh admin outcome settings and atomically updates the 
 test("Wallet and trade copy uses clear account-balance wording", () => {
   assert.ok(!html.includes("Insufficient virtual balance"), "Avoid confusing virtual-balance wording");
   assert.ok(!html.includes("displayed holdings"), "Use clear available-balance wording");
-  assert.ok(html.includes("Your available balances and transaction updates are shown here."), "Wallet copy should be concise and positive");
+  assert.ok(!html.includes("Your available balances and transaction updates are shown here."), "Do not show explanatory copy in the wallet summary");
+  assert.ok(html.includes("<h2>Wallet</h2>") || html.includes("walletQuickActions"), "Wallet controls must remain present");
   assert.ok(html.includes("Completed · USDT result recorded"), "Completed trade activity should identify the USDT result");
 });
 
