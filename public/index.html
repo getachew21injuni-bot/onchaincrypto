@@ -2472,6 +2472,17 @@ window.ocWalletApiPost=async function(path,payload){
  if(!response.ok)throw new Error(result.error||"The trusted wallet service could not process this request.");
  return result;
 };
+window.ocWalletApiGet=async function(path){
+ const base=String(window.ONCHAINSPRO_WALLET_API_URL||"").replace(/\/+$/,"");
+ if(!base)throw new Error("The trusted Cloudflare Wallet API URL has not been configured yet.");
+ const activeAuth=window.ocFirebaseAuth||auth,user=activeAuth?.currentUser;
+ if(!user?.uid)throw new Error("Please sign in before reading your active trade.");
+ const token=await user.getIdToken(true);
+ const response=await fetch(base+path,{headers:{authorization:"Bearer "+token}});
+ const result=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(result.error||"The trusted wallet service could not load your active trade.");
+ return result;
+};
 function saveState(){return Promise.reject(new Error("Direct browser wallet writes are disabled. Use the trusted wallet API."));}
 // Preserve existing wallet balances and activity. Automatic first-load resets can erase locally stored account data.
 function readActivity(){try{return JSON.parse(localStorage.getItem("oc_activity_history")||"[]")}catch(e){return []}}
