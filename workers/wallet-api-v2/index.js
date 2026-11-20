@@ -225,7 +225,7 @@ async function adminAdjustAssets(env, claims, body) {
   }
   const createdAt = new Date().toISOString(), actorEmail = String(claims.email || claims.sub);
   const writes = [
-    walletWrite(uid, wallet.data, wallet.updateTime, nextBalance, holdings, Array.isArray(wallet.data.history) ? wallet.data.history.slice(0, 300) : {}),
+    walletWrite(uid, wallet.data, wallet.updateTime, nextBalance, holdings, Array.isArray(wallet.data.history) ? wallet.data.history.slice(0, 300) : []),
     ...changes.map(change => createLedgerWrite("admin-" + requestId + "-" + change.asset, {
       uid, type: operation, asset: change.asset, amount, balanceBefore: change.before, balanceAfter: change.after,
       reason, requestId, actorUid: claims.sub, actorEmail, source: "admin-finance-adjustment",
