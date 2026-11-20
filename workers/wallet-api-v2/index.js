@@ -192,6 +192,180 @@ function requireRequestId(value) {
   if (!/^[A-Za-z0-9_-]{16,100}$/.test(id)) throw new HttpError("A unique request ID is required.");
   return id;
 }
+async function walletOrder(env, claims, body) {
+  const requestId = requireRequestId(body.requestId), uid = claims.sub;
+  const side = body.side, symbol = String(body.symbol || "").toUpperCase(), amount = Number(body.amountUSDT);
+  if (!["buy", "sell"].includes(side) || (!COIN_IDS[symbol] && !["XAU","PAXG","XAUT"].includes(symbol)) ||
+      !Number.isFinite(amount) || amount < 1 || amount > 1000000000) throw new HttpError("Order details are invalid.");
+  const access = await serviceToken(env), [wallet, prices] = await Promise.all([
+    readWallet(access, uid), trustedPrices([symbol])
+  ]);
+  if (!wallet || !wallet.updateTime) throw new HttpError("Canonical wallet is missing. No balance was created.", 409);
+  const balance = Number(wallet.data.balance), holdings = wallet.data.holdings && typeof wallet.data.holdings === "object" ? { ...wallet.data.holdings } : {};
+  if (!Number.isFinite(balance) || balance < 0) throw new HttpError("Canonical wallet balance is invalid.", 409);
+  const price = prices[symbol], qty = Number((amount / price).toFixed(8));
+  const beforeUsdt = balance, beforeAsset = Number(holdings[symbol] || 0);
+  if (!Number.isFinite(beforeAsset) || beforeAsset < 0) throw new HttpError("Canonical " + symbol + " balance is invalid.", 409);
+  let nextBalance = balance, nextAsset = beforeAsset;
+  if (side === "buy") {
+    if (amount > balance) throw new HttpError("Insufficient USDT balance.", 409);
+    nextBalance = Number((balance - amount).toFixed(8)); nextAsset = Number((beforeAsset + qty).toFixed(8));
+  } else {
+    if (qty > beforeAsset + 1e-10) throw new HttpError("Insufficient " + symbol + " balance.", 409);
+    nextBalance = Number((balance + amount).toFixed(8)); nextAsset = Number(Math.max(0, beforeAsset - qty).toFixed(8));
+  }
+  holdings[symbol] = nextAsset;
+  if (nextAsset <= 1e-12) delete holdings[symbol];
+  const createdAt = new Date().toISOString();
+  const entry = { id: requestId, side, symbol, amount, qty, price, time: createdAt, demo: true, kind: "buy-hold", source: "wallet-api-v2" };
+  const history = [{ ...entry }, ...(Array.isArray(wallet.data.history) ? wallet.data.history : [])].slice(0, 300);
+  await commitWrites(access, [
+    walletWrite(uid, wallet.data, wallet.updateTime, nextBalance, holdings, history),
+    createLedgerWrite("order-" + requestId, {
+      uid, type: side, asset: symbol, amountUSDT: amount, quantity: qty, price,
+      balanceBefore: beforeUsdt, balanceAfter: nextBalance, assetBefore: beforeAsset, assetAfter: nextAsset,
+      requestId, source: "wallet-api-v2", createdAtText: createdAt, createdAt: { timestampValue: createdAt }
+    })
+  ]);
+  return { ok: true, wallet: { uid, balance: nextBalance, holdings, history }, order: entry };
+}
+async function walletConvert(env, claims, body) {
+  const requestId = requireRequestId(body.requestId), uid = claims.sub;
+  const from = String(body.from || "").toUpperCase(), to = String(body.to || "").toUpperCase(), amount = Number(body.amount);
+  if (!from || !to || from === to || !Number.isFinite(amount) || amount <= 0 || amount > 1000000000 ||
+      (!["USDT","USDC","DAI","FDUSD"].includes(from) && !COIN_IDS[from] && !["XAU","PAXG","XAUT"].includes(from)) ||
+      (!["USDT","USDC","DAI","FDUSD"].includes(to) && !COIN_IDS[to] && !["XAU","PAXG","XAUT"].includes(to))) {
+    throw new HttpError("Conversion details are invalid.");
+  }
+  const access = await serviceToken(env), [wallet, prices] = await Promise.all([
+    readWallet(access, uid), trustedPrices([from, to])
+  ]);
+  if (!wallet || !wallet.updateTime) throw new HttpError("Canonical wallet is missing. No balance was created.", 409);
+  const balance = Number(wallet.data.balance), holdings = wallet.data.holdings && typeof wallet.data.holdings === "object" ? { ...wallet.data.holdings } : {};
+  if (!Number.isFinite(balance) || balance < 0) throw new HttpError("Canonical wallet balance is invalid.", 409);
+  const beforeFrom = from === "USDT" ? balance : Number(holdings[from] || 0);
+  if (!Number.isFinite(beforeFrom) || beforeFrom < amount) throw new HttpError("Insufficient " + from + " balance.", 409);
+  const feeUSDT = amount * prices[from] * 0.001;
+  const received = Number(Math.max(0, (amount * prices[from] - feeUSDT) / prices[to]).toFixed(8));
+  let nextBalance = balance;
+  if (from === "USDT") nextBalance = Number((nextBalance - amount).toFixed(8));
+  else holdings[from] = Number(Math.max(0, beforeFrom - amount).toFixed(8));
+  if (to === "USDT") nextBalance = Number((nextBalance + received).toFixed(8));
+  else holdings[to] = Number((Number(holdings[to] || 0) + received).toFixed(8));
+  if (holdings[from] !== undefined && holdings[from] <= 1e-12) delete holdings[from];
+  const createdAt = new Date().toISOString();
+  await commitWrites(access, [
+    walletWrite(uid, wallet.data, wallet.updateTime, nextBalance, holdings, Array.isArray(wallet.data.history) ? wallet.data.history.slice(0, 300) : []),
+    createLedgerWrite("convert-" + requestId, {
+      uid, type: "conversion", asset: from + "->" + to, amount, received, feeUSDT,
+      priceFrom: prices[from], priceTo: prices[to], balanceBefore: beforeFrom,
+      balanceAfter: from === "USDT" ? nextBalance : holdings[from] || 0,
+      requestId, source: "wallet-api-v2", createdAtText: createdAt, createdAt: { timestampValue: createdAt }
+    })
+  ]);
+  return { ok: true, wallet: { uid, balance: nextBalance, holdings, history: wallet.data.history || [] },
+    conversion: { from, to, amount, received, feeUSDT, priceFrom: prices[from], priceTo: prices[to], time: createdAt } };
+}
+async function startQuickTrade(env, claims, body) {
+  const tradeId = requireRequestId(body.tradeId), uid = claims.sub;
+  const symbol = String(body.symbol || "").toUpperCase(), funding = String(body.funding || "USDT").toUpperCase();
+  const direction = body.direction, stake = Number(body.stake);
+  if (!["up","down"].includes(direction) || !Number.isFinite(stake) || stake <= 0 ||
+      (!COIN_IDS[symbol] && !["XAU","PAXG","XAUT"].includes(symbol)) ||
+      (!["USDT","USDC","DAI","FDUSD"].includes(funding) && !COIN_IDS[funding] && !["XAU","PAXG","XAUT"].includes(funding))) {
+    throw new HttpError("Quick Trade details are invalid.");
+  }
+  const access = await serviceToken(env);
+  const [wallet, profile, global] = await Promise.all([
+    readWallet(access, uid), readDocument(access, "users", uid), readDocument(access, "platformSettings", "demoTradeControl")
+  ]);
+  if (!wallet || !wallet.updateTime) throw new HttpError("Canonical wallet is missing. No balance was created.", 409);
+  if (profile?.data.accountStatus === "suspended" || profile?.data.tradingEnabled === false) throw new HttpError("Trading is disabled for this account.", 403);
+  const prices = await trustedPrices([symbol, funding]), fundingPrice = prices[funding], stakeUSD = stake * fundingPrice;
+  const available = funding === "USDT" ? Number(wallet.data.balance) : Number(wallet.data.holdings?.[funding] || 0);
+  if (!Number.isFinite(available) || stake > available + 1e-10) throw new HttpError("Insufficient " + funding + " wallet balance.", 409);
+  const minimum = symbol === "XAU" ? 500 : 100;
+  const levels = [
+    { rate:12,min:minimum,max:5000,duration:30 }, { rate:15,min:5000,max:10000,duration:60 },
+    { rate:18,min:10000,max:25000,duration:90 }, { rate:21,min:25000,max:50000,duration:120 },
+    { rate:24,min:50000,max:100000,duration:180 }, { rate:27,min:100000,max:Infinity,duration:360 }
+  ];
+  const plan = levels.find((p,i) => stakeUSD >= p.min && (stakeUSD < p.max || i === levels.length - 1)) || null;
+  if (!plan) throw new HttpError("Trade amount does not meet the minimum for this asset.", 422);
+  const userMode = ["inherit","market","win","lose"].includes(profile?.data.demoTradeControlMode) ? profile.data.demoTradeControlMode : "inherit";
+  const globalData = global?.data || {}, globalMode = ["market","win","lose"].includes(globalData.mode) ? globalData.mode : "market";
+  const mode = globalMode === "win" || globalMode === "lose" ? globalMode : (userMode !== "inherit" ? userMode : globalMode);
+  const winPercent = Math.min(100, Math.max(1, Number(globalMode === "win" ? globalData.winPercent : profile?.data.demoWinPercent) || 15));
+  const lossPercent = Math.min(100, Math.max(1, Number(globalMode === "lose" ? globalData.lossPercent : profile?.data.demoLossPercent) || 50));
+  const startedAt = new Date(), endsAt = new Date(startedAt.getTime() + plan.duration * 1000);
+  const trade = {
+    tradeId, uid, symbol, funding, fundingPrice, direction, stake, stakeUSD,
+    entryPrice: prices[symbol], payoutRate: plan.rate, duration: plan.duration,
+    adminMode: mode, adminWinPercent: winPercent, adminLossPercent: lossPercent,
+    status: "running", startedAt: startedAt.toISOString(), endsAt: endsAt.toISOString()
+  };
+  const fields = Object.fromEntries(Object.entries(trade).map(([k,v]) => [k, toFirestore(v)]));
+  await commitWrites(access, [
+    { update: { name: docPath("quickTrades", tradeId), fields }, currentDocument: { exists: false } },
+    { update: { name: docPath("activeQuickTrades", uid), fields: {
+      uid: toFirestore(uid), tradeId: toFirestore(tradeId), endsAt: toFirestore(endsAt.toISOString()),
+      startedAt: toFirestore(startedAt.toISOString())
+    } }, currentDocument: { exists: false } }
+  ]);
+  return { ok: true, trade };
+}
+async function settleQuickTrade(env, claims, body) {
+  const tradeId = String(body.tradeId || "").trim();
+  if (!validId(tradeId)) throw new HttpError("A valid Quick Trade ID is required.");
+  const uid = claims.sub, access = await serviceToken(env);
+  const tradeDoc = await readDocument(access, "quickTrades", tradeId);
+  if (!tradeDoc || tradeDoc.data.uid !== uid) throw new HttpError("Quick Trade was not found for this account.", 404);
+  if (tradeDoc.data.status === "completed") {
+    const wallet = await readWallet(access, uid);
+    return { ok: true, alreadySettled: true, trade: tradeDoc.data, wallet: wallet?.data || null };
+  }
+  if (tradeDoc.data.status !== "running") throw new HttpError("Quick Trade is not active.", 409);
+  const ends = new Date(tradeDoc.data.endsAt).getTime();
+  if (!Number.isFinite(ends) || Date.now() < ends) throw new HttpError("Quick Trade has not reached its server-confirmed expiry.", 409);
+  const [wallet, prices, active] = await Promise.all([
+    readWallet(access, uid), trustedPrices([tradeDoc.data.symbol]), readDocument(access, "activeQuickTrades", uid)
+  ]);
+  if (!wallet || !wallet.updateTime || !active || active.data.tradeId !== tradeId) throw new HttpError("Active trade or canonical wallet record is missing.", 409);
+  const balance = Number(wallet.data.balance);
+  if (!Number.isFinite(balance) || balance < 0) throw new HttpError("Canonical wallet balance is invalid.", 409);
+  const exitPrice = prices[tradeDoc.data.symbol], entryPrice = Number(tradeDoc.data.entryPrice), stakeUSD = Number(tradeDoc.data.stakeUSD);
+  if (!(entryPrice > 0) || !(stakeUSD > 0)) throw new HttpError("Stored Quick Trade details are invalid.", 409);
+  const move = (exitPrice - entryPrice) / entryPrice;
+  let calculatedPnl = stakeUSD * (tradeDoc.data.direction === "up" ? move : -move);
+  if (tradeDoc.data.adminMode === "win") calculatedPnl = stakeUSD * Math.min(100, Math.max(1, Number(tradeDoc.data.adminWinPercent) || 15)) / 100;
+  else if (tradeDoc.data.adminMode === "lose") calculatedPnl = -stakeUSD * Math.min(100, Math.max(1, Number(tradeDoc.data.adminLossPercent) || 50)) / 100;
+  const nextBalance = Number(Math.max(0, balance + calculatedPnl).toFixed(2)), appliedPnl = Number((nextBalance - balance).toFixed(2));
+  const completedAt = new Date().toISOString(), result = {
+    id: "quick-" + tradeId, kind: "quick-result", side: tradeDoc.data.direction === "up" ? "buy" : "sell",
+    symbol: tradeDoc.data.symbol, amount: stakeUSD, qty: stakeUSD / entryPrice, price: exitPrice,
+    entry: entryPrice, pnl: appliedPnl, time: completedAt, funding: tradeDoc.data.funding,
+    balanceAdjustment: appliedPnl, settlementAsset: "USDT",
+    status: appliedPnl > 0 ? "win" : appliedPnl < 0 ? "loss" : "even"
+  };
+  const history = [result, ...(Array.isArray(wallet.data.history) ? wallet.data.history : [])].slice(0, 300);
+  const completedTrade = { ...tradeDoc.data, status: "completed", exitPrice, calculatedPnl, appliedPnl, completedAt };
+  await commitWrites(access, [
+    walletWrite(uid, wallet.data, wallet.updateTime, nextBalance,
+      wallet.data.holdings && typeof wallet.data.holdings === "object" ? wallet.data.holdings : {}, history),
+    { update: { name: docPath("quickTrades", tradeId), fields: Object.fromEntries(Object.entries(completedTrade).map(([k,v]) => [k, toFirestore(v)])) },
+      updateMask: { fieldPaths: ["status","exitPrice","calculatedPnl","appliedPnl","completedAt"] }, currentDocument: { updateTime: tradeDoc.updateTime } },
+    { delete: docPath("activeQuickTrades", uid), currentDocument: { updateTime: active.updateTime } },
+    createLedgerWrite("quick-trade-" + tradeId, {
+      uid, type: "quick_trade_settlement", asset: "USDT", amount: appliedPnl,
+      balanceBefore: balance, balanceAfter: nextBalance, symbol: tradeDoc.data.symbol,
+      direction: tradeDoc.data.direction, stakeUSD, entryPrice, exitPrice,
+      controlMode: tradeDoc.data.adminMode, requestId: tradeId, source: "wallet-api-v2",
+      createdAtText: completedAt, createdAt: { timestampValue: completedAt }
+    })
+  ]);
+  return { ok: true, alreadySettled: false, trade: completedTrade, result, wallet: { uid, balance: nextBalance,
+    holdings: wallet.data.holdings || {}, history } };
+}
 async function reviewDepositWithdrawal(env, claims, body) {
   if (!isAdmin(env, claims)) throw new HttpError("Administrator access is required.", 403);
   const kind = body.kind === "deposit" ? "deposit" : body.kind === "withdraw" ? "withdraw" : "";
@@ -405,7 +579,11 @@ export default {
       if (request.method !== "POST") throw new HttpError("Method not allowed.", 405);
       const body = await request.json();
       let result;
-      if (url.pathname === "/v1/admin/adjust-usdt") result = await adminAdjustment(env, claims, body);
+      if (url.pathname === "/v1/wallet/order") result = await walletOrder(env, claims, body);
+      else if (url.pathname === "/v1/wallet/convert") result = await walletConvert(env, claims, body);
+      else if (url.pathname === "/v1/quick-trade/start") result = await startQuickTrade(env, claims, body);
+      else if (url.pathname === "/v1/quick-trade/settle") result = await settleQuickTrade(env, claims, body);
+      else if (url.pathname === "/v1/admin/adjust-usdt") result = await adminAdjustment(env, claims, body);
       else if (url.pathname === "/v1/admin/review-request") result = await reviewDepositWithdrawal(env, claims, body);
       else if (url.pathname === "/v1/admin/review-transfer") result = await reviewInternalTransfer(env, claims, body);
       else if (url.pathname === "/v1/admin/adjust-assets") result = await adminAdjustAssets(env, claims, body);
