@@ -6,6 +6,11 @@ This Worker is a staged replacement candidate for OnChainSpro's wallet mutation 
 
 - `GET /health`: reports staged mode only.
 - `GET /v1/wallet`: verifies a Firebase ID token and reads only `userTradeState/{authenticated uid}`. A missing wallet returns 404; it is never seeded.
+- `GET /v1/quick-trade/active`: recovers the signed-in user's active server-side timed trade after refresh/reconnect.
+- `POST /v1/wallet/order`: server-priced Buy/Sell and Buy & Hold orders. The Worker computes quantity and price and updates the canonical wallet and ledger.
+- `POST /v1/wallet/convert`: server-priced asset conversion with the existing 0.1% fee. The Worker calculates output and updates the canonical wallet and ledger.
+- `POST /v1/quick-trade/start`: server validates balance, trade level, controls and entry price, then creates a server-owned active trade.
+- `POST /v1/quick-trade/settle`: server enforces expiry, obtains its own exit quote, computes P/L, updates the wallet, records the result and closes the active trade. Client-supplied P/L and prices are not accepted.
 - `POST /v1/admin/adjust-usdt`: verified admin adjustment against an existing canonical wallet. Uses a wallet update-time precondition and create-only `walletLedger/{requestId}`.
 - `POST /v1/admin/review-request`: admin approves/rejects a pending deposit or withdrawal request. Approval changes the canonical wallet, request status, and append-only `walletLedger` record in one Firestore commit. It records an internal account adjustment only; it does not verify an on-chain deposit or pay an external withdrawal.
 - `POST /v1/admin/adjust-assets`: atomically applies an admin deposit/withdrawal adjustment across one or more assets, creates one append-only ledger row per asset, and writes a user notification.
@@ -15,18 +20,9 @@ All admin routes require a Firebase ID token with `admin: true`, or a verified e
 
 ## Not yet implemented — do not connect to production
 
-Customer balance-changing paths are not yet migrated. The following still need trusted backend implementations and customer/admin frontend integration:
+Customer and admin wallet mutation paths in the current branch have been switched to the trusted Worker, and `userTradeState/{uid}` is client-read-only in the branch's Firestore rules. Customer deposit/withdrawal request submission and internal-transfer request creation remain client writes to request documents only; they do not change balances. External deposit verification and actual blockchain withdrawal payout are not implemented by these account-adjustment routes.
 
-- Buy/sell and Buy & Hold orders.
-- Timed Quick Trade start/settlement. The browser currently computes outcome and P/L; the server must instead own the trade record, trusted market quote, control settings, expiry and settlement.
-- Asset conversion and fees.
-- Customer deposit/withdrawal request submission and payout verification.
-- Customer internal-transfer request creation.
-- All remaining admin finance adjustments and request queue UI integration.
-- Removal of every browser-side write to `userTradeState/{uid}`.
-- Final Firestore rules that allow client reads but deny client wallet writes.
-
-Do not tighten wallet rules before all direct customer/admin write paths have been migrated. Doing so would break existing flows. Do not merge or deploy this branch as a production cutover.
+The frontend Worker URL is intentionally not configured yet. Until the Worker is deployed to Cloudflare staging and its URL is set in `window.ONCHAINSPRO_WALLET_API_URL`, wallet-changing actions fail closed. Do not deploy the read-only wallet rules to production before the Worker is available and the frontend points to it.
 
 ## Cloudflare staging configuration
 
@@ -83,4 +79,4 @@ Run from the repository root:
 npm run test:wallet-api-v2
 ```
 
-The tests have been added but have not yet been executed in this environment. They are unit tests for primitives, not end-to-end Firestore or Cloudflare integration tests. Before deployment, still test forged/expired tokens, role enforcement, duplicate requests, missing wallet documents, concurrent wallet writes, Firestore REST preconditions, atomic failure behavior, and real staging data shapes.
+The tests have been added but have not yet been executed in this environment. They are unit tests for serialization, authorization and write preconditions, not end-to-end Firestore or Cloudflare integration tests. Before deployment, still test forged/expired tokens, role enforcement, duplicate requests, missing wallet documents, concurrent wallet writes, Firestore REST preconditions, atomic failure behavior, and real staging data shapes.
