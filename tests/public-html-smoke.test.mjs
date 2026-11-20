@@ -194,7 +194,7 @@ test("Quick Trade uses concise positive copy and its result Close button restore
 
 test("all browser wallet mutations use the trusted Worker and Firestore wallet writes are denied", () => {
   assert.ok(html.includes('window.ocWalletApiPost("/v1/wallet/order"'), "Customer orders must use the trusted Worker");
-  assert.ok(html.includes('window.ocWalletApiPost("/v1/wallet/convert"'), "Conversions must use the trusted Worker");
+  assert.ok(html.includes("window.ocWalletApiPost('/v1/wallet/convert'"), "Conversions must use the trusted Worker");
   assert.ok(html.includes('window.ocWalletApiPost("/v1/quick-trade/settle"'), "Quick Trade settlement must use the trusted Worker");
   assert.ok(!html.includes('setDoc(doc(db,"userTradeState"'), "Customer code must not write canonical wallet documents directly");
   assert.ok(html.includes("Direct browser wallet writes are disabled"), "Legacy snapshot writer must fail closed");
