@@ -101,3 +101,28 @@ A unit-test file and a GitHub Actions workflow were added for Worker primitives.
 **Still not production-complete:** customer Buy/Sell, Buy & Hold, timed Quick Trade start/settlement, and Convert still contain browser-side wallet mutation paths. Customer internal-transfer request creation remains a direct request-only write (it does not alter balances). Final `userTradeState` client write denial must wait until all customer wallet mutation paths have been moved behind the Worker and tested. The Worker URL is intentionally not configured in either frontend yet; these new admin calls fail closed until Cloudflare staging is deployed and its URL is configured.
 
 No customer balances or Firestore documents were changed. No Firestore rules were deployed. No Cloudflare Worker was deployed. No merge to `main` or production deployment occurred.
+
+
+## Customer wallet mutation migration — 2026-11-20
+
+The current branch has now moved these customer operations behind `workers/wallet-api-v2`:
+
+- Simple Buy/Sell orders.
+- Buy & Hold orders.
+- Asset conversion (0.1% fee calculated by the Worker).
+- Timed Quick Trade start and settlement. Entry/exit prices, admin outcome mode, expiry and P/L are server-controlled. Active trades are stored in Firestore and can be recovered after refresh.
+- The legacy browser functions that wrote complete wallet snapshots and browser-computed Quick Trade results now reject instead of writing.
+
+The Admin dashboard's deposit/withdrawal approvals, internal transfer approvals and manual multi-asset adjustments now call the Worker. The embedded admin request review handler does the same. Admin finance history reads the canonical append-only `walletLedger`.
+
+The branch's Firestore rules now make `userTradeState/{uid}` client-read-only, deny client writes to `walletLedger`, and deny client writes to `internalTransfers`. Legacy profile balance fields and old profile-based internal-transfer checks were removed from the active rules. Existing `users/{uid}` profile documents and historical `demoTransactions` / `demoAssetTransactions` records were not deleted.
+
+**Still required before production cutover:**
+1. Run the new unit tests and perform real staging integration tests against a staging Firestore database and Cloudflare Worker.
+2. Review the Worker implementation and quote-provider availability/rate limits. CoinGecko and Binance are the current server-side quote sources.
+3. Deploy the isolated Worker to Cloudflare staging, configure its service-account secret, exact allowed origins and admin allowlist, then set `window.ONCHAINSPRO_WALLET_API_URL` in both frontend pages.
+4. Verify every customer and admin workflow end to end, including retries, concurrent orders, active Quick Trade recovery, admin adjustments, deposit/withdrawal request review and internal transfers.
+5. Only after staging verification, plan the coordinated production cutover: Worker first, frontend URL/config, then read-only Firestore rules. Do not deploy the rules alone.
+6. External blockchain deposit verification and withdrawal payout are separate systems and are not implemented by these internal account-ledger endpoints.
+
+No customer wallet balances, user profiles or historical records were migrated or changed by these GitHub edits. No Firestore rules were deployed, no Cloudflare Worker was deployed, no merge to `main`, and no Firebase Hosting deployment occurred.
