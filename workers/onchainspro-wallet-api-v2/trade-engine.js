@@ -2,7 +2,6 @@
 // Firestore is the source of truth. The browser may request a trade and display it;
 // only this module creates, prices, expires, and settles it.
 const ASSETS = new Set(["BTC","ETH","BNB","XRP","SOL","ADA","DOGE","LTC","TRX","XAU"]);
-const DURATIONS = [30,60,90,120,180,360];
 const round2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
 const safeNumber = n => Number.isFinite(Number(n)) ? Number(n) : 0;
 
