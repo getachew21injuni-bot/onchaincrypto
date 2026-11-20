@@ -41,9 +41,8 @@ service cloud.firestore {
         && (!('avatarDataUrl' in request.resource.data) || (request.resource.data.avatarDataUrl is string && request.resource.data.avatarDataUrl.size() <= 160000))
       ) || (
         isAdmin()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminAssigned','demoBalanceUSDT','demoBalanceUpdatedAt','demoAssetBalances','demoAssetBalancesUpdatedAt','demoAssetBalancesUpdatedBy','demoWalletResetAt','demoWalletResetBy','demoBalanceLastTransferId','adminUpdatedAt','adminUpdatedBy','accountStatus','tradingEnabled','maxTradeAmountUSDT','demoTradeControlMode','demoWinPercent','demoLossPercent','tradeControlUpdatedAt','tradeControlUpdatedBy'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminAssigned','adminUpdatedAt','adminUpdatedBy','accountStatus','tradingEnabled','maxTradeAmountUSDT','demoTradeControlMode','demoWinPercent','demoLossPercent','tradeControlUpdatedAt','tradeControlUpdatedBy'])
         && (!('adminAssigned' in request.resource.data) || request.resource.data.adminAssigned == true)
-        && (!('demoBalanceUSDT' in request.resource.data) || (request.resource.data.demoBalanceUSDT is number && request.resource.data.demoBalanceUSDT >= 0 && request.resource.data.demoBalanceUSDT <= 1000000000))
         && (!('accountStatus' in request.resource.data) || request.resource.data.accountStatus in ['active','suspended'])
         && (!('tradingEnabled' in request.resource.data) || request.resource.data.tradingEnabled is bool)
         && (!('maxTradeAmountUSDT' in request.resource.data) || (request.resource.data.maxTradeAmountUSDT is number && request.resource.data.maxTradeAmountUSDT >= 100 && request.resource.data.maxTradeAmountUSDT <= 1000000))
@@ -51,9 +50,6 @@ service cloud.firestore {
         && (!('demoWinPercent' in request.resource.data) || (request.resource.data.demoWinPercent is int && request.resource.data.demoWinPercent >= 1 && request.resource.data.demoWinPercent <= 100))
         && (!('demoLossPercent' in request.resource.data) || (request.resource.data.demoLossPercent is int && request.resource.data.demoLossPercent >= 1 && request.resource.data.demoLossPercent <= 100))
         && (!('tradeControlUpdatedBy' in request.resource.data) || request.resource.data.tradeControlUpdatedBy == request.auth.token.email)
-        && (!('demoAssetBalances' in request.resource.data) || request.resource.data.demoAssetBalances is map)
-        && (!('demoAssetBalancesUpdatedBy' in request.resource.data) || request.resource.data.demoAssetBalancesUpdatedBy == request.auth.token.email)
-        && (!('demoWalletResetBy' in request.resource.data) || request.resource.data.demoWalletResetBy == request.auth.token.email)
         && (!('adminUpdatedBy' in request.resource.data) || request.resource.data.adminUpdatedBy == request.auth.token.email)
       );
       allow delete: if false;
@@ -367,49 +363,12 @@ service cloud.firestore {
 
     // Immutable ledger. Only an administrator can approve a pending request;
     // both wallet updates, request status, and ledger must commit atomically.
+    // Internal transfer records are created only by the trusted wallet Worker.
+    // Existing records remain readable by the sender, recipient and administrators.
     match /internalTransfers/{transferId} {
-      allow get, list: if signedIn()
+      allow read: if signedIn()
         && (isAdmin() || resource.data.senderUid == request.auth.uid || resource.data.recipientUid == request.auth.uid);
-      allow create: if isAdmin()
-        && request.resource.data.keys().hasOnly(['senderUid','recipientUid','asset','amount','senderBefore','senderAfter','recipientBefore','recipientAfter','senderName','recipientName','createdAt','transferRequestId','approvedBy'])
-        && request.resource.data.senderUid is string
-        && request.resource.data.recipientUid is string
-        && request.resource.data.senderUid != request.resource.data.recipientUid
-        && request.resource.data.asset == 'USDT'
-        && request.resource.data.amount is number
-        && request.resource.data.amount > 0
-        && request.resource.data.amount <= 1000000000
-        && request.resource.data.senderBefore is number
-        && request.resource.data.senderAfter is number
-        && request.resource.data.recipientBefore is number
-        && request.resource.data.recipientAfter is number
-        && request.resource.data.senderBefore >= request.resource.data.amount
-        && request.resource.data.senderAfter == request.resource.data.senderBefore - request.resource.data.amount
-        && request.resource.data.recipientAfter == request.resource.data.recipientBefore + request.resource.data.amount
-        && request.resource.data.senderAfter >= 0
-        && request.resource.data.recipientAfter <= 1000000000
-        && request.resource.data.senderName is string
-        && request.resource.data.senderName.size() <= 80
-        && request.resource.data.recipientName is string
-        && request.resource.data.recipientName.size() <= 80
-        && request.resource.data.transferRequestId is string
-        && request.resource.data.approvedBy == request.auth.token.email
-        && request.resource.data.createdAt == request.time
-        && get(/databases/$(database)/documents/internalTransferRequests/$(request.resource.data.transferRequestId)).data.status == 'pending'
-        && get(/databases/$(database)/documents/internalTransferRequests/$(request.resource.data.transferRequestId)).data.senderUid == request.resource.data.senderUid
-        && get(/databases/$(database)/documents/internalTransferRequests/$(request.resource.data.transferRequestId)).data.recipientUid == request.resource.data.recipientUid
-        && get(/databases/$(database)/documents/internalTransferRequests/$(request.resource.data.transferRequestId)).data.amount == request.resource.data.amount
-        && getAfter(/databases/$(database)/documents/internalTransferRequests/$(request.resource.data.transferRequestId)).data.status == 'approved'
-        && getAfter(/databases/$(database)/documents/internalTransferRequests/$(request.resource.data.transferRequestId)).data.transferId == transferId
-        && get(/databases/$(database)/documents/users/$(request.resource.data.senderUid)).data.get('demoBalanceUSDT', 0) == request.resource.data.senderBefore
-        && get(/databases/$(database)/documents/users/$(request.resource.data.recipientUid)).data.get('demoBalanceUSDT', 0) == request.resource.data.recipientBefore
-        && get(/databases/$(database)/documents/users/$(request.resource.data.senderUid)).data.get('accountStatus', 'active') == 'active'
-        && get(/databases/$(database)/documents/users/$(request.resource.data.recipientUid)).data.get('accountStatus', 'active') == 'active'
-        && getAfter(/databases/$(database)/documents/users/$(request.resource.data.senderUid)).data.demoBalanceUSDT == request.resource.data.senderAfter
-        && getAfter(/databases/$(database)/documents/users/$(request.resource.data.recipientUid)).data.demoBalanceUSDT == request.resource.data.recipientAfter
-        && getAfter(/databases/$(database)/documents/users/$(request.resource.data.senderUid)).data.demoBalanceLastTransferId == transferId
-        && getAfter(/databases/$(database)/documents/users/$(request.resource.data.recipientUid)).data.demoBalanceLastTransferId == transferId;
-      allow update, delete: if false;
+      allow create, update, delete: if false;
     }
 
     match /brokerConnectionRequests/{uid} {
