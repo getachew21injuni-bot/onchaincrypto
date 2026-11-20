@@ -285,8 +285,12 @@ async function startQuickTrade(env, claims, body) {
     readWallet(access, uid), readDocument(access, "users", uid), readDocument(access, "platformSettings", "demoTradeControl")
   ]);
   if (!wallet || !wallet.updateTime) throw new HttpError("Canonical wallet is missing. No balance was created.", 409);
-  if (profile?.data.accountStatus === "suspended" || profile?.data.tradingEnabled === false) throw new HttpError("Trading is disabled for this account.", 403);
+  if (!profile || profile.data.accountStatus === "suspended" || profile.data.tradingEnabled === false)
+    throw new HttpError("Trading is disabled for this account.", 403);
   const prices = await trustedPrices([symbol, funding]), fundingPrice = prices[funding], stakeUSD = stake * fundingPrice;
+  const maxTradeAmount = Number(profile.data.maxTradeAmountUSDT);
+  if (Number.isFinite(maxTradeAmount) && maxTradeAmount > 0 && stakeUSD > maxTradeAmount)
+    throw new HttpError("This trade exceeds the account's configured trading limit.", 403);
   const available = funding === "USDT" ? Number(wallet.data.balance) : Number(wallet.data.holdings?.[funding] || 0);
   if (!Number.isFinite(available) || stake > available + 1e-10) throw new HttpError("Insufficient " + funding + " wallet balance.", 409);
   const minimum = symbol === "XAU" ? 500 : 100;
