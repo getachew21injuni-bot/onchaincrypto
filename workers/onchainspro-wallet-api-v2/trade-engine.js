@@ -79,9 +79,8 @@ export function createTradeEngine({ ROOT, serviceToken, fromFirestore, toFiresto
     return response.json();
   }
   const enc = (collection, id) => docUrl(collection, id);
-  const timestamp = value => ({ timestampValue: new Date(value).toISOString() });
   const writeDoc = (name, data, currentDocument) => ({
-    update: { name, fields: Object.fromEntries(Object.entries(data).map(([k,v]) => [k, toFirestore(v)])) },
+    update: { name, fields: Object.fromEntries(Object.entries(data).map(([k,v]) => [k, v instanceof Date ? { timestampValue: v.toISOString() } : toFirestore(v)])) },
     currentDocument
   });
 
@@ -110,12 +109,12 @@ export function createTradeEngine({ ROOT, serviceToken, fromFirestore, toFiresto
     const now = Date.now(), id = crypto.randomUUID(), expiresAt = now + p.duration * 1000;
     const trade = {
       uid, symbol, direction, amountUSDT: stake, entryPrice: entry, exitPrice: null,
-      startedAt: new Date(now).toISOString(), expiresAt: new Date(expiresAt).toISOString(),
+      startedAt: new Date(now), expiresAt: new Date(expiresAt),
       durationSeconds: p.duration, planLevel: p.label, payoutRate: p.rate,
       outcomeMode: setting.mode, winPercent: setting.winPercent, lossPercent: setting.lossPercent,
-      status: "active", pnlUSDT: null, createdAt: new Date(now).toISOString(), updatedAt: new Date(now).toISOString()
+      status: "active", pnlUSDT: null, createdAt: new Date(now), updatedAt: new Date(now)
     };
-    const nextGuard = { uid, reservedUSDT: round2(reserved + stake), activeCount: safeNumber(guard?.data?.activeCount) + 1, updatedAt: new Date(now).toISOString() };
+    const nextGuard = { uid, reservedUSDT: round2(reserved + stake), activeCount: safeNumber(guard?.data?.activeCount) + 1, updatedAt: new Date(now) };
     const guardWrite = guard
       ? writeDoc(enc("activeTradeGuards", uid), nextGuard, { updateTime: guard.updateTime })
       : writeDoc(enc("activeTradeGuards", uid), nextGuard, { exists: false });
@@ -161,11 +160,11 @@ export function createTradeEngine({ ROOT, serviceToken, fromFirestore, toFiresto
       pnl = round2(pnl);
       const before = safeNumber(wallet.data.balance), after = round2(Math.max(0, before + pnl));
       const history = Array.isArray(wallet.data.history) ? wallet.data.history.slice(0, 299) : [];
-      const completedAt = new Date().toISOString();
+      const completedAt = new Date();
       const result = {
         id: "quick-" + item.id, kind: "quick-result", side: trade.data.direction === "up" ? "buy" : "sell",
         symbol: trade.data.symbol, amount: trade.data.amountUSDT, qty: Number(trade.data.amountUSDT) / Number(trade.data.entryPrice),
-        price: exit, entry: Number(trade.data.entryPrice), pnl, time: completedAt, funding: "USDT",
+        price: exit, entry: Number(trade.data.entryPrice), pnl, time: completedAt.toISOString(), funding: "USDT",
         balanceAdjustment: pnl, settlementAsset: "USDT", status: pnl > 0 ? "win" : pnl < 0 ? "loss" : "even",
         serverTradeId: item.id
       };
@@ -196,7 +195,7 @@ export function createTradeEngine({ ROOT, serviceToken, fromFirestore, toFiresto
 
   async function settleDue() {
     const access = await serviceToken();
-    const now = new Date().toISOString();
+    const now = new Date();
     const due = await query(access, {
       from: [{ collectionId: "activeTrades" }],
       where: { compositeFilter: { op: "AND", filters: [
