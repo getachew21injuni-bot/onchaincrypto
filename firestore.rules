@@ -117,27 +117,37 @@ service cloud.firestore {
     // Members may submit/read their own KYC details. They cannot set an
     // approved/rejected status themselves. Review status changes require
     // a trusted Admin SDK backend or an admin custom claim.
+    // KYC details and private Storage object paths. Users can submit only
+    // their own pending record; only the verified admin can make a decision.
     match /kycSubmissions/{uid} {
       allow read: if owns(uid) || isAdmin();
       allow create: if owns(uid)
         && request.resource.data.uid == uid
         && request.resource.data.status == 'pending'
+        && request.resource.data.frontImagePath == 'kycDocuments/' + uid + '/front'
+        && request.resource.data.backImagePath == 'kycDocuments/' + uid + '/back'
         && request.resource.data.keys().hasOnly([
           'uid','email','legalName','country','documentType','documentNumber',
-          'status','submittedAt','updatedAt'
+          'frontImagePath','backImagePath','frontFileName','backFileName',
+          'frontContentType','backContentType','status','submittedAt','updatedAt'
         ]);
       allow update: if (
         owns(uid)
         && resource.data.status in ['pending','rejected']
         && request.resource.data.uid == uid
         && request.resource.data.status == 'pending'
+        && request.resource.data.frontImagePath == 'kycDocuments/' + uid + '/front'
+        && request.resource.data.backImagePath == 'kycDocuments/' + uid + '/back'
         && request.resource.data.keys().hasOnly([
           'uid','email','legalName','country','documentType','documentNumber',
-          'status','submittedAt','updatedAt','reviewedAt','reviewedBy'
+          'frontImagePath','backImagePath','frontFileName','backFileName',
+          'frontContentType','backContentType','status','submittedAt','updatedAt',
+          'reviewedAt','reviewedBy'
         ])
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'email','legalName','country','documentType','documentNumber',
-          'status','submittedAt','updatedAt'
+          'frontImagePath','backImagePath','frontFileName','backFileName',
+          'frontContentType','backContentType','status','submittedAt','updatedAt'
         ])
       ) || (
         isAdmin()
