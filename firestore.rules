@@ -25,6 +25,13 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Canonical append-only wallet transaction ledger. The trusted Worker
+    // service account writes these records; clients can only read their own rows.
+    match /walletLedger/{transactionId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create, update, delete: if false;
+    }
+
     // Each member may read and update only their own profile.
     match /users/{uid} {
       allow read: if owns(uid) || isAdmin();
