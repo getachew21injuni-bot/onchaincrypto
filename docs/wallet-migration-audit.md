@@ -82,3 +82,22 @@ Newly documented product rules that the backend must enforce:
 A syntax-only npm command has been added: `npm run check:wallet-api-v2`. It has not yet been run in this environment. No integration tests have been run. The Worker service account, IAM permissions, exact Firestore schema, price source, and chain payout verification still require staging validation.
 
 No customer Firestore documents, balances, profile fields, or historical ledgers were modified by these GitHub commits. No merge, production deployment, Worker deployment, or Firestore rules deployment was performed.
+
+
+## Trusted admin wallet routes — implementation update 2026-11-20
+
+The isolated `workers/wallet-api-v2/index.js` now includes these server-side routes:
+
+- `GET /v1/wallet`: authenticated canonical wallet read.
+- `POST /v1/admin/adjust-usdt`: idempotent USDT adjustment.
+- `POST /v1/admin/adjust-assets`: atomic one-or-many asset adjustment, canonical wallet update, append-only `walletLedger` rows, and a user notification.
+- `POST /v1/admin/review-request`: admin approval/rejection for a deposit or withdrawal request. Approval updates the canonical wallet, request status, and wallet ledger atomically.
+- `POST /v1/admin/review-transfer`: admin approval/rejection for internal USDT transfers. Approval updates both canonical wallets, request status, transfer record, and both ledger legs atomically.
+
+The customer page's embedded deposit/withdrawal review handler and the Admin dashboard's deposit/withdrawal review, internal transfer approval, and manual finance adjustment handlers now call these Worker routes instead of directly changing wallet balances. The Admin finance history view now reads the canonical `walletLedger` collection. Firestore rules grant users/admins read access to their allowed ledger rows and deny client ledger writes.
+
+A unit-test file and a GitHub Actions workflow were added for Worker primitives. The workflow run has not yet appeared in the repository's Actions API, and tests have not been executed in this environment.
+
+**Still not production-complete:** customer Buy/Sell, Buy & Hold, timed Quick Trade start/settlement, and Convert still contain browser-side wallet mutation paths. Customer internal-transfer request creation remains a direct request-only write (it does not alter balances). Final `userTradeState` client write denial must wait until all customer wallet mutation paths have been moved behind the Worker and tested. The Worker URL is intentionally not configured in either frontend yet; these new admin calls fail closed until Cloudflare staging is deployed and its URL is configured.
+
+No customer balances or Firestore documents were changed. No Firestore rules were deployed. No Cloudflare Worker was deployed. No merge to `main` or production deployment occurred.
