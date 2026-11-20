@@ -2461,12 +2461,18 @@ window.ocGetDisplayedAssetBalance=function(symbol){
  return key==="USDT"?Number(state.balance)||0:Number(state.holdings?.[key])||0;
 };
 let profile=JSON.parse(localStorage.getItem("oc_profile")||'{"name":"","currency":"USD"}');
-function saveState(persistCloud=true){
- if(!persistCloud)return Promise.resolve(false);
- if(!walletLoaded||walletOwnerUid!==auth.currentUser?.uid)return Promise.reject(new Error("Firestore wallet is not loaded."));
- if(typeof window.ocPersistTradeState!=="function")return Promise.reject(new Error("Firestore wallet writer is unavailable."));
- return window.ocPersistTradeState();
-}
+window.ocWalletApiPost=async function(path,payload){
+ const base=String(window.ONCHAINSPRO_WALLET_API_URL||"").replace(/\/+$/,"");
+ if(!base)throw new Error("The trusted Cloudflare Wallet API URL has not been configured yet.");
+ const activeAuth=window.ocFirebaseAuth||auth,user=activeAuth?.currentUser;
+ if(!user?.uid)throw new Error("Please sign in before changing your wallet.");
+ const token=await user.getIdToken(true);
+ const response=await fetch(base+path,{method:"POST",headers:{authorization:"Bearer "+token,"content-type":"application/json"},body:JSON.stringify(payload)});
+ const result=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(result.error||"The trusted wallet service could not process this request.");
+ return result;
+};
+function saveState(){return Promise.reject(new Error("Direct browser wallet writes are disabled. Use the trusted wallet API."));}
 // Preserve existing wallet balances and activity. Automatic first-load resets can erase locally stored account data.
 function readActivity(){try{return JSON.parse(localStorage.getItem("oc_activity_history")||"[]")}catch(e){return []}}
 function recordActivity(type,title,details,status="Recorded"){const event={type,title,details,status,time:new Date().toISOString()};const items=readActivity();items.unshift({id:Date.now()+"-"+Math.random().toString(36).slice(2,7),...event});localStorage.setItem("oc_activity_history",JSON.stringify(items.slice(0,1000)));try{window.dispatchEvent(new CustomEvent("oc-user-activity",{detail:event}))}catch(e){}renderActivityHistory()}
@@ -2875,8 +2881,22 @@ $("saveAnnouncement").addEventListener("click",()=>{
  $("announcementSaveMessage").textContent="Saved on this device. To publish for all visitors, connect a secured backend.";
 });
 function renderTradeSelect(){const old=$("tradeAsset").value||selected,options=market.map(c=>'<option value="'+safe(c.symbol)+'">'+safe(c.symbol+' — '+c.name)+'</option>');if(!market.some(c=>String(c.symbol||"").toUpperCase()==="XAU"))options.push('<option value="XAU">XAU — Gold</option>');$("tradeAsset").innerHTML=options.join("");if(old==="XAU"||selected==="XAU")$("tradeAsset").value="XAU";else if(market.some(c=>c.symbol===old))$("tradeAsset").value=old;else if(market.some(c=>c.symbol===selected))$("tradeAsset").value=selected;updateTradePreview()}
-function updateTradePreview(){const sym=$("tradeAsset")?.value||selected;const c=priceFor(sym);const pair=(sym==="USDT"||sym==="USDC")?"BTC/USDT":sym+"/USDT";if($("tradePairTitle"))$("tradePairTitle").textContent=pair.replace("/"," / ");if($("timedPair"))$("timedPair").textContent=pair.replace("/"," / ");if($("tradeAssetName"))$("tradeAssetName").textContent=c?.name||sym;if($("tradeCurrentPrice"))$("tradeCurrentPrice").textContent=c?money(c.current_price):"—";if($("tradeCurrentChange")){$("tradeCurrentChange").textContent=c?pct(c.price_change_percentage_24h):"Waiting for market data";$("tradeCurrentChange").className=(c?.price_change_percentage_24h||0)>=0?"green":"red"}if($("tradeAvailable"))$("tradeAvailable").textContent=money(state.balance);}function doTrade(side){const sym=$("tradeAsset").value,c=priceFor(sym),amount=Number($("tradeUsd").value);const msg=$("tradeMessage");if(!c||!Number.isFinite(Number(c.current_price))||Number(c.current_price)<=0){msg.textContent="Market price unavailable. Refresh and try again.";msg.className="muted tiny red";return}if(!Number.isFinite(amount)||amount<1){msg.textContent="Enter an amount of at least $1.";msg.className="muted tiny red";return}const qty=amount/Number(c.current_price);state.holdings[sym]=Number(state.holdings[sym]||0);if(side==="buy"){if(amount>state.balance){msg.textContent="Insufficient USDT balance. Available: "+money(state.balance)+".";msg.className="muted tiny red";return}state.balance-=amount;state.holdings[sym]+=qty}else{if(qty>state.holdings[sym]+1e-10){msg.textContent="Insufficient "+sym+" balance. Available: "+state.holdings[sym].toFixed(8)+" "+sym+".";msg.className="muted tiny red";return}state.holdings[sym]=Math.max(0,state.holdings[sym]-qty);state.balance+=amount}const trade={side,symbol:sym,amount,qty,price:Number(c.current_price),time:new Date().toISOString(),demo:true};state.history.unshift(trade);recordActivity("trade",(side||"trade").toUpperCase()+" "+sym,money(amount)+" · "+Number(qty).toFixed(8)+" coins @ "+money(c.current_price),"Recorded · Paper trade");saveState();renderWallet();updateTradePreview();msg.className="muted tiny green";msg.textContent="TRADE RESULT RECORDED · "+side.toUpperCase()+" "+qty.toFixed(8)+" "+sym+" at "+money(c.current_price)+" per coin. Total: "+money(amount)+". Your OnChainSpro account result has been recorded.";renderTradeHistory();renderWalletCoinList();renderPnl();renderTradeOutcomes()}
-
+function updateTradePreview(){const sym=$("tradeAsset")?.value||selected;const c=priceFor(sym);const pair=(sym==="USDT"||sym==="USDC")?"BTC/USDT":sym+"/USDT";if($("tradePairTitle"))$("tradePairTitle").textContent=pair.replace("/"," / ");if($("timedPair"))$("timedPair").textContent=pair.replace("/"," / ");if($("tradeAssetName"))$("tradeAssetName").textContent=c?.name||sym;if($("tradeCurrentPrice"))$("tradeCurrentPrice").textContent=c?money(c.current_price):"—";if($("tradeCurrentChange")){$("tradeCurrentChange").textContent=c?pct(c.price_change_percentage_24h):"Waiting for market data";$("tradeCurrentChange").className=(c?.price_change_percentage_24h||0)>=0?"green":"red"}if($("tradeAvailable"))$("tradeAvailable").textContent=money(state.balance);}async function doTrade(side){
+ const sym=$("tradeAsset").value,coin=priceFor(sym),amount=Number($("tradeUsd").value),msg=$("tradeMessage");
+ if(!coin||!Number.isFinite(Number(coin.current_price))||Number(coin.current_price)<=0){msg.textContent="Market price unavailable. Refresh and try again.";msg.className="muted tiny red";return}
+ if(!Number.isFinite(amount)||amount<1){msg.textContent="Enter an amount of at least $1.";msg.className="muted tiny red";return}
+ const button=side==="buy"?$("tradeBuyBtn"):$("tradeSellBtn");if(button)button.disabled=true;
+ msg.className="muted tiny";msg.textContent="Submitting your order to the trusted wallet service…";
+ try{
+  const result=await window.ocWalletApiPost("/v1/wallet/order",{requestId:crypto.randomUUID().replace(/-/g,""),side,symbol:sym,amountUSDT:amount,kind:"trade"});
+  state={balance:Number(result.wallet.balance)||0,holdings:result.wallet.holdings||{},history:Array.isArray(result.wallet.history)?result.wallet.history:[]};
+  recordActivity("trade",(side||"trade").toUpperCase()+" "+sym,money(amount)+" · "+Number(result.order.qty).toFixed(8)+" coins @ "+money(result.order.price),"Recorded · trusted wallet ledger");
+  renderWallet();updateTradePreview();msg.className="muted tiny green";
+  msg.textContent="TRADE RESULT RECORDED · "+side.toUpperCase()+" "+Number(result.order.qty).toFixed(8)+" "+sym+" at "+money(result.order.price)+" per coin. Total: "+money(amount)+".";
+  renderTradeHistory();renderWalletCoinList();renderPnl();renderTradeOutcomes();
+ }catch(error){msg.className="muted tiny red";msg.textContent="Order not completed: "+(error.message||"Trusted wallet service unavailable.");}
+ finally{if(button)button.disabled=false;}
+}
 function renderBuyHoldOptions(){
  const select=$("buyHoldAsset");if(!select)return;
  const previous=select.value||selected||"BTC",query=String($("buyHoldSearch")?.value||"").trim().toLowerCase();
@@ -2897,30 +2917,20 @@ function updateBuyHoldPreview(){
 async function executeBuyHoldOrder(side){
  const message=$("buyHoldMessage"),user=window.onchaincryptoCurrentUser||null;
  const show=(text,ok=false)=>{if(message){message.textContent=text;message.className="muted tiny "+(ok?"green":"red")}};
- if(!user?.uid||window.ocTradeCloudReadyUid!==user.uid||typeof window.ocPersistTradeState!=="function"){show("Please sign in and wait until your cloud wallet has finished syncing before placing an order.");return}
+ if(!user?.uid||window.ocTradeCloudReadyUid!==user.uid){show("Please sign in and wait until your cloud wallet has finished syncing before placing an order.");return}
  const sym=String($("buyHoldAsset")?.value||"").toUpperCase(),coin=priceFor(sym),price=Number(coin?.current_price||0),amount=Number($("buyHoldAmount")?.value);
  if(!sym||!coin||!Number.isFinite(price)||price<=0){show("A current market price is not available. Refresh market prices and try again.");return}
  if(!Number.isFinite(amount)||amount<1){show("Minimum order: 1 USDT.");return}
- const qty=amount/price,owned=Number(state.holdings?.[sym]||0),balance=Number(state.balance||0);
- if(side==="buy"&&amount>balance){show("Insufficient available USDT. Available balance: "+usdtMoney(balance)+".");return}
- if(side==="sell"&&qty>owned+1e-10){show("Your holding is too small for this sell amount. Current holding: "+owned.toFixed(8)+" "+sym+".");return}
- const previous={balance:state.balance,holdings:{...state.holdings},history:[...state.history]};
- if(side==="buy"){state.balance=Math.round((balance-amount)*100000000)/100000000;state.holdings[sym]=owned+qty}
- else{state.holdings[sym]=Math.max(0,owned-qty);state.balance=Math.round((balance+amount)*100000000)/100000000}
- const entry={side,symbol:sym,amount,qty,price,time:new Date().toISOString(),demo:true,kind:"buy-hold",source:"onchain-portfolio"};
- state.history.unshift(entry);state.history=state.history.slice(0,300);
+ const button=side==="buy"?$("buyHoldBuy"):$("buyHoldSell");if(button)button.disabled=true;
+ show("Submitting your order to the trusted wallet service…");
  try{
-  await saveState();
- }catch(error){
-  state=previous;saveState(false);renderWallet();updateBuyHoldPreview();
-  show("The cloud ledger did not confirm this order, so the portfolio change was rolled back. Please refresh and try again.");
-  console.warn("Buy & Hold cloud save failed:",error?.code||error);
-  return;
- }
- renderWallet();renderTradeHistory();renderPnl();renderTradeOutcomes();updateTradePreview();updateBuyHoldPreview();
- show((side==="buy"?"Buy & Hold recorded: ":"Sell recorded: ")+qty.toFixed(8)+" "+sym+" at "+money(price)+" per coin · "+usdtMoney(amount)+". Your updated portfolio is saved to your account cloud ledger.",true);
- $("buyHoldAmount").value="";
- updateBuyHoldPreview();
+  const result=await window.ocWalletApiPost("/v1/wallet/order",{requestId:crypto.randomUUID().replace(/-/g,""),side,symbol:sym,amountUSDT:amount,kind:"buy-hold"});
+  state={balance:Number(result.wallet.balance)||0,holdings:result.wallet.holdings||{},history:Array.isArray(result.wallet.history)?result.wallet.history:[]};
+  renderWallet();renderTradeHistory();renderPnl();renderTradeOutcomes();updateTradePreview();updateBuyHoldPreview();
+  show((side==="buy"?"Buy & Hold recorded: ":"Sell recorded: ")+Number(result.order.qty).toFixed(8)+" "+sym+" at "+money(result.order.price)+" per coin · "+usdtMoney(amount)+". Your account wallet has been updated.",true);
+  $("buyHoldAmount").value="";updateBuyHoldPreview();
+ }catch(error){show("Order not completed: "+(error.message||"Trusted wallet service unavailable."));}
+ finally{if(button)button.disabled=false;}
 }
 $("buyHoldSearch")?.addEventListener("input",renderBuyHoldOptions);
 $("buyHoldAsset")?.addEventListener("change",updateBuyHoldPreview);
@@ -4106,12 +4116,7 @@ function watchCloudTradeState(ref,user){
   },error=>console.warn("Live account wallet sync unavailable:",error?.code||error));
 }
 window.ocPersistTradeState=function(){
-  const user=auth.currentUser;
-  if(!user?.uid||tradeCloudReadyUid!==user.uid||!walletLoaded||walletOwnerUid!==user.uid)return Promise.reject(new Error("Firestore account wallet is still loading. Please wait and try again."));
-  const payload={uid:user.uid,balance:Math.max(0,Number(state.balance)||0),holdings:state.holdings&&typeof state.holdings==="object"?{...state.holdings}:{},history:Array.isArray(state.history)?state.history.slice(0,300):[],updatedAt:serverTimestamp()};
-  const write=tradeCloudWriteChain.catch(()=>{}).then(()=>setDoc(doc(db,"userTradeState",user.uid),payload,{merge:true}));
-  tradeCloudWriteChain=write;
-  return write;
+ return Promise.reject(new Error("Direct browser wallet writes are disabled. Use the trusted wallet API."));
 };
 async function restoreCloudTradeState(user){
   if(!user?.uid){
