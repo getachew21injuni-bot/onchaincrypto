@@ -262,6 +262,16 @@ function loadAdminData(){try{return JSON.parse(localStorage.getItem(moduleKey)||
 function saveAdminData(data){localStorage.setItem(moduleKey,JSON.stringify(data));}
 function esc(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function getRecords(view){const data=loadAdminData();return Array.isArray(data[view])?data[view]:[];}
+async function ocAdminWalletPost(path,payload,current){
+ const base=String(window.ONCHAINSPRO_WALLET_API_URL||"").replace(/\/+$/,"");
+ if(!base)throw new Error("The trusted Cloudflare Wallet API URL has not been configured yet.");
+ if(!current)throw new Error("Verified administrator sign-in required.");
+ const token=await current.getIdToken(true);
+ const response=await fetch(base+path,{method:"POST",headers:{authorization:"Bearer "+token,"content-type":"application/json"},body:JSON.stringify(payload)});
+ const result=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(result.error||"The trusted wallet service could not process this request.");
+ return result;
+}
 function renderLiveCollection(view){if(window.adminGetLiveCollection)window.adminGetLiveCollection(view);else document.getElementById('detailBody').textContent='Firebase admin data module is not ready. Refresh and sign in again.';}
 
 async function renderRequestQueue(view){
@@ -295,24 +305,7 @@ async function renderRequestQueue(view){
    if(!confirm(action==='approve'?'Approve this request as an internal account-balance adjustment? No blockchain payment or payout will occur.':'Reject this request?'))return;
    button.disabled=true;const msg=document.getElementById('ocRequestMessage');if(msg)msg.textContent='Processing request securely…';
    try{
-    const requestRef=doc(db,collectionName,id),userRef=doc(db,'users',req.uid),notificationRef=doc(collection(db,'userNotifications',req.uid,'items'));
-    const ledgerRef=doc(collection(db,'demoAssetTransactions')),usdtLedgerRef=doc(collection(db,'demoTransactions'));
-    await runTransaction(db,async tx=>{
-     const rs=await tx.get(requestRef);if(!rs.exists()||(rs.data().status||'pending')!=='pending')throw new Error('request-already-processed');
-     if(action==='reject'){tx.update(requestRef,{status:'rejected',reviewedAt:serverTimestamp(),reviewedBy:current.email});return;}
-     const us=await tx.get(userRef);if(!us.exists())throw new Error('user-profile-not-found');
-     const data=us.data(),asset=String(req.asset||'USDT').toUpperCase(),amount=Number(req.amount);
-     if(!Number.isFinite(amount)||amount<=0)throw new Error('invalid-request-amount');
-     const deposit=kind==='deposit',before=asset==='USDT'?Number(data.demoBalanceUSDT||0):Number((data.demoAssetBalances||{})[asset]||0);
-     const after=Number((before+(deposit?amount:-amount)).toFixed(asset==='USDT'?2:8));
-     if(after<0)throw new Error('insufficient-demo-balance');
-     if(asset==='USDT')tx.update(userRef,{demoBalanceUSDT:after,demoBalanceUpdatedAt:serverTimestamp()});
-     else tx.update(userRef,{demoAssetBalances:{...(data.demoAssetBalances||{}),[asset]:after},demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:current.email});
-     if(asset==='USDT')tx.set(usdtLedgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request account adjustment':'Withdrawal request account adjustment'),source:'admin-demo',status:'completed'});
-     else tx.set(ledgerRef,{uid:req.uid,type:deposit?'deposit':'withdrawal',asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:current.uid,note:(kind==='deposit'?'Deposit request account adjustment':'Withdrawal request account adjustment'),source:'admin-demo',status:'completed'});
-     tx.set(notificationRef,{kind:deposit?'deposit':'withdrawal_approved',title:deposit?'Successfully deposited '+amount.toLocaleString()+' '+asset:'Withdrawal successfully processed',message:deposit?'Successfully deposited '+amount.toLocaleString()+' '+asset+' to your account. Your account balance has been updated.':'Your withdrawal of '+amount.toLocaleString()+' '+asset+' was successfully processed as an account balance adjustment. This dashboard does not send an external blockchain payout.',createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:current.uid,source:'admin-demo'});
-     tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email});
-    });
+    await ocAdminWalletPost("/v1/admin/review-request",{kind,requestId:id,decision:action},current);
     if(msg)msg.textContent=action==='approve'?(kind==='deposit'?'Deposit approved and credited. The user was notified.':'Withdrawal approved and account balance adjusted. The user was notified; no external payout was sent.'):'Request rejected.';
     await renderRequestQueue(view);if(typeof window.adminRefreshDashboard==='function')await window.adminRefreshDashboard();
    }catch(error){button.disabled=false;if(msg)msg.textContent='Could not process request ('+(error.code||error.message||'error')+'). Check Firestore rules and user profile.';}
@@ -326,20 +319,23 @@ async function renderDemoFinance(view){
  try{
   const {collection,getDocs,query,limit,doc,setDoc,writeBatch,serverTimestamp,runTransaction}=window.__ocAdminFirebase;
   const db=window.__ocAdminFirebase.db;
-  const [us,usdtSnap,assetSnap]=await Promise.all([
+  const [us,ws,ledgerSnap]=await Promise.all([
    getDocs(query(collection(db,'users'),limit(200))),
-   getDocs(query(collection(db,'demoTransactions'),limit(200))),
-   getDocs(query(collection(db,'demoAssetTransactions'),limit(300)))
+   getDocs(query(collection(db,'userTradeState'),limit(500))),
+   getDocs(query(collection(db,'walletLedger'),limit(500)))
   ]);
   const users=us.docs.map(d=>({id:d.id,...d.data()}));
-  const allTx=[...usdtSnap.docs.map(d=>({id:d.id,...d.data(),asset:'USDT',amount:d.data().amountUSDT,balanceAfter:d.data().balanceAfterUSDT})),...assetSnap.docs.map(d=>({id:d.id,...d.data()}))];
-  const txs=allTx.filter(t=>!t.adminHiddenFromHistory&&(view==='Deposits'?t.type==='deposit':t.type==='withdrawal')).sort((a,b)=>String(b.createdAtText||'').localeCompare(String(a.createdAtText||''))).slice(0,100);
+  const walletMap=new Map(ws.docs.map(d=>[d.id,d.data()||{}]));
+  const allTx=ledgerSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const txs=allTx.filter(t=>view==='Deposits'?t.type==='deposit':t.type==='withdrawal').sort((a,b)=>String(b.createdAtText||'').localeCompare(String(a.createdAtText||''))).slice(0,100);
   if(!users.length){body.innerHTML='<div class="notice">No registered user profiles were found. A user must register before an account adjustment can be assigned.</div>';return;}
   const opts=users.map(u=>'<option value="'+esc(u.id)+'">'+esc((u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id)+' — '+(u.email||u.id))+'</option>').join('');
   const assetOptions=assets.map(a=>'<option value="'+a+'">'+a+'</option>').join('');
   const userRows=users.map(u=>{
-   const extra=Object.entries(u.demoAssetBalances||{}).filter(([a,n])=>a!=='USDT'&&Number(n)>0).map(([a,n])=>a+' '+Number(n).toLocaleString(undefined,{maximumFractionDigits:8})).join(' · ');
-   return '<tr><td>'+esc(u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||'—')+'</td><td>'+esc(u.email||'—')+'</td><td>'+Number(u.demoBalanceUSDT||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT</td><td>'+esc(extra||'—')+'</td><td>'+esc(u.accountStatus||'active')+'</td></tr>';
+   const wallet=walletMap.get(u.id),holdings=wallet?.holdings&&typeof wallet.holdings==='object'?wallet.holdings:{};
+   const extra=Object.entries(holdings).filter(([a,n])=>a!=='USDT'&&Number(n)>0).map(([a,n])=>a+' '+Number(n).toLocaleString(undefined,{maximumFractionDigits:8})).join(' · ');
+   const balance=wallet&&Number.isFinite(Number(wallet.balance))?Number(wallet.balance).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT':'Wallet record missing';
+   return '<tr><td>'+esc(u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||'—')+'</td><td>'+esc(u.email||'—')+'</td><td>'+balance+'</td><td>'+esc(extra||'—')+'</td><td>'+esc(u.accountStatus||'active')+'</td></tr>';
   }).join('');
   const txRows=txs.map(t=>'<tr><td>'+esc(t.createdAtText||'Recorded')+'</td><td>'+esc(t.uid||'—')+'</td><td>'+esc(t.type)+'</td><td>'+Number(t.amount??0).toLocaleString(undefined,{maximumFractionDigits:8})+' '+esc(t.asset||'USDT')+'</td><td>'+Number(t.balanceAfter??0).toLocaleString(undefined,{maximumFractionDigits:8})+' '+esc(t.asset||'USDT')+'</td><td>'+esc(t.note||'—')+'</td></tr>').join('');
   body.innerHTML='<div style="display:grid;gap:16px">'+
@@ -351,7 +347,7 @@ async function renderDemoFinance(view){
    '<label style="display:grid;gap:6px;font-weight:700">AMOUNT<input name="amount" type="number" min="0.00000001" max="1000000000" step="any" required placeholder="Enter quantity for selected coin(s)" style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label>'+
    '<label style="display:grid;gap:6px;font-weight:700">ADMIN NOTE (OPTIONAL)<input name="note" maxlength="200" placeholder="Reason for this account adjustment" style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label>'+
    '<button class="icon-btn" type="submit" style="background:'+(view==='Deposits'?'linear-gradient(90deg,#087b56,#12a879)':'linear-gradient(90deg,#813246,#bd4058)')+';border:0;padding:16px;font-size:16px;font-weight:850;box-shadow:0 8px 22px #0004">'+(view==='Deposits'?'＋ ADD TO USER WALLET':'− CONFIRM BALANCE DEDUCTION')+'</button><p id="demoFinanceMessage" class="muted" role="status" aria-live="polite" style="margin:0"></p></form>'+
-   '<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Registered user wallet balances</h3><span class="tag">'+users.length+' profiles</span></div><div style="display:grid;gap:10px;margin:12px 0 16px"><label style="display:grid;gap:6px;font-weight:700">Select user to reset all wallet balances<select id="resetWalletUser" style="width:100%;padding:12px;border-radius:10px;background:#102333;color:white;border:1px solid #526878">'+opts+'</select></label><button id="resetWalletBalanceBtn" class="icon-btn" type="button" style="background:#9a3048;border:0;padding:14px;font-weight:800">Reset selected user wallet to zero</button><p id="resetWalletMessage" class="muted" role="status" aria-live="polite" style="margin:0">Resets USDT and all recorded coin balances. The admin audit log is retained.</p></div><div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>USDT balance</th><th>Other coin balances</th><th>Status</th></tr></thead><tbody>'+userRows+'</tbody></table></div></div>'+
+   '<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Registered user wallet balances</h3><span class="tag">'+users.length+' profiles</span></div><div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>USDT balance</th><th>Other coin balances</th><th>Status</th></tr></thead><tbody>'+userRows+'</tbody></table></div></div>'+
    '<div class="content-panel" style="margin:0"><h3 style="margin-top:0">Recent account '+(view==='Deposits'?'credits':'deductions')+'</h3><div class="table-wrap"><table><thead><tr><th>Time</th><th>User UID</th><th>Type</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody>'+(txRows||'<tr><td colspan="6">No account adjustments recorded yet.</td></tr>')+'</tbody></table></div></div></div>';
   await renderRequestQueue(view);
   if(view==='Deposits'){
@@ -369,32 +365,11 @@ async function renderDemoFinance(view){
      const refs=[...q1.docs.filter(d=>(d.data().status||'pending')!=='pending'&&!d.data().adminHiddenFromHistory).map(d=>d.ref),...q2.docs.filter(d=>d.data().type==='deposit'&&!d.data().adminHiddenFromHistory).map(d=>d.ref),...q3.docs.filter(d=>d.data().type==='deposit'&&!d.data().adminHiddenFromHistory).map(d=>d.ref)];
      for(let i=0;i<refs.length;i+=450){const batch=writeBatch(db);for(const ref of refs.slice(i,i+450))batch.update(ref,{adminHiddenFromHistory:true,historyClearedAt:serverTimestamp(),historyClearedBy:current.email});await batch.commit();}
      await setDoc(doc(collection(db,'adminHistoryClearLogs')),{kind:'deposit-history',archivedRecords:refs.length,createdAt:serverTimestamp(),createdBy:current.uid,createdByEmail:current.email,source:'admin-dashboard'});
-     msg.textContent='Archived '+refs.length+' reviewed deposit records. Pending requests and balances are unchanged.';
+     msg.textContent='Archived '+refs.length+' legacy deposit records. The canonical walletLedger and balances are unchanged.';
      await renderDemoFinance('Deposits');
     }catch(err){msg.textContent='Archive failed: '+(err.code||err.message||'unknown error');btn.disabled=false;}
    });
   }
-  const resetButton=document.getElementById('resetWalletBalanceBtn');
-  if(resetButton)resetButton.addEventListener('click',async()=>{
-   const current=window.__ocAdminFirebase?.auth?.currentUser,select=document.getElementById('resetWalletUser'),msg=document.getElementById('resetWalletMessage');
-   if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){alert('Verified administrator sign-in required.');return;}
-   const target=users.find(u=>u.id===select.value);if(!target){msg.textContent='Select a registered user.';return;}
-   if(!confirm('Set '+(target.displayName||target.email||target.id)+' USDT and all coin balances to ZERO? This does not delete the account.'))return;
-   resetButton.disabled=true;msg.textContent='Resetting wallet…';
-   try{
-    await current.getIdToken(true);
-    const userRef=doc(db,'users',target.id),logRef=doc(collection(db,'adminWalletResetLogs'));
-    await runTransaction(db,async tx=>{
-     const snap=await tx.get(userRef);if(!snap.exists())throw Error('User profile not found');
-     const data=snap.data(),beforeAssets={...(data.demoAssetBalances||{})},zeroAssets={};
-     for(const sym of new Set([...Object.keys(beforeAssets),...assets]))zeroAssets[sym]=0;
-     tx.update(userRef,{demoBalanceUSDT:0,demoAssetBalances:zeroAssets,demoBalanceUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:current.email,demoWalletResetAt:serverTimestamp(),demoWalletResetBy:current.email,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:current.email});
-     tx.set(logRef,{uid:target.id,userEmail:target.email||'',beforeUSDT:Number(data.demoBalanceUSDT)||0,beforeAssetBalances:beforeAssets,afterUSDT:0,afterAssetBalances:zeroAssets,createdAt:serverTimestamp(),createdBy:current.uid,createdByEmail:current.email,source:'admin-dashboard'});
-    });
-    msg.textContent='Wallet reset confirmed by Firebase. USDT and all coin balances are zero; audit record saved.';
-    await renderDemoFinance(view);
-   }catch(err){msg.textContent='Wallet reset failed: '+(err.code||err.message||'unknown error');resetButton.disabled=false;}
-  });
   const form=document.getElementById('demoFinanceForm');
   form.addEventListener('submit',async e=>{
    e.preventDefault();
@@ -403,37 +378,16 @@ async function renderDemoFinance(view){
    const selected=users.find(u=>u.id===uid);if(!selected){msg.textContent='Selected user no longer exists. Refresh and try again.';return;}
    const targets=asset==='__ALL__'?assets:[asset];
    if(!targets.length||targets.some(a=>!assets.includes(a))){msg.textContent='Select a supported coin.';return;}
-   const isDeposit=view==='Deposits',oldMap={...(selected.demoAssetBalances||{})},nextMap={...oldMap};
-   let usdtBefore=Math.max(0,Number(selected.demoBalanceUSDT)||0),usdtAfter=usdtBefore;
-   const changes=[];
-   for(const symbol of targets){
-    const before=symbol==='USDT'?usdtBefore:Math.max(0,Number(oldMap[symbol])||0);
-    const after=Math.round((before+(isDeposit?amount:-amount))*100000000)/100000000;
-    if(after<0){msg.textContent='Insufficient '+symbol+' account balance. No changes were saved.';return;}
-    changes.push({symbol,before,after});
-    if(symbol==='USDT')usdtAfter=Math.round(after*100)/100;else nextMap[symbol]=after;
-   }
-   const btn=form.querySelector('button[type=submit]');btn.disabled=true;msg.textContent='Publishing wallet update to Firebase…';
+   const isDeposit=view==='Deposits';
+   const btn=form.querySelector('button[type=submit]');btn.disabled=true;msg.textContent='Updating the canonical Firestore wallet…';
    try{
-    const batch=writeBatch(db),userRef=doc(db,'users',uid),adminEmail=window.__ocAdminFirebase.auth.currentUser?.email||'';
-    const userUpdate={demoAssetBalances:nextMap,demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:adminEmail,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:adminEmail};
-    if(targets.includes('USDT')){userUpdate.demoBalanceUSDT=usdtAfter;userUpdate.demoBalanceUpdatedAt=serverTimestamp();}
-    batch.update(userRef,userUpdate);
-    const notificationRef=doc(collection(db,'userNotifications',uid,'items'));
     const adminUser=window.__ocAdminFirebase.auth.currentUser;
-    const activityRef=doc(collection(db,'userActivityEvents'));
-    batch.set(notificationRef,{kind:isDeposit?'deposit':'withdrawal_approved',title:isDeposit?'Successfully deposited '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset):'Withdrawal successfully processed',message:isDeposit?'Successfully deposited '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' to your account. Your account balance has been updated.':'Your withdrawal of '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' was successfully processed as an account balance adjustment. This dashboard does not send an external blockchain payout.'+(note?' Admin note: '+note:''),createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:adminUser.uid,source:'admin-demo'});
-    batch.set(activityRef,{uid,email:selected.email||selected.emailAddress||'Unknown',type:isDeposit?'deposit':'withdraw',title:isDeposit?'Admin deposit successful':'Admin withdrawal successful',details:'Admin '+(isDeposit?'credited ':'debited ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' · Internal account ledger adjustment'+(note?' · Note: '+note:''),status:'Successful',createdAt:serverTimestamp(),createdBy:adminUser.uid,source:'admin-wallet-adjustment'});
-    for(const c of changes){
-     const txRef=doc(collection(db,c.symbol==='USDT'?'demoTransactions':'demoAssetTransactions'));
-     if(c.symbol==='USDT'){
-      batch.set(txRef,{uid,type:isDeposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:c.before,balanceAfterUSDT:c.after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:window.__ocAdminFirebase.auth.currentUser.uid,note,source:'admin-demo',status:'completed'});
-     }else{
-      batch.set(txRef,{uid,type:isDeposit?'deposit':'withdrawal',asset:c.symbol,amount,balanceBefore:c.before,balanceAfter:c.after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:window.__ocAdminFirebase.auth.currentUser.uid,note,source:'admin-demo',status:'completed'});
-     }
-    }
-    await batch.commit();
-    msg.textContent=(isDeposit?'Deposit successful: ':'Withdrawal successful: ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'of every supported asset':asset)+'. Wallet, transaction ledger, user notification, and live User Activity event were saved together.';
+    const requestId=crypto.randomUUID().replace(/-/g,"");
+    await ocAdminWalletPost("/v1/admin/adjust-assets",{
+     uid,requestId,operation:isDeposit?"deposit":"withdrawal",assets:targets,amount,
+     reason:note||"Admin manual account balance adjustment"
+    },adminUser);
+    msg.textContent=(isDeposit?'Deposit successful: ':'Withdrawal successful: ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'of every supported asset':asset)+'. Canonical Firestore wallet, transaction ledger, notification, and activity record were saved together.';
     await renderDemoFinance(view);
    }catch(err){
     const failure='Could not publish wallet update ('+(err.code||err.message||'error')+').';
@@ -595,32 +549,7 @@ async function renderInternalTransfers(){
    if(!confirm(approved?'Approve '+Number(request.amount).toLocaleString()+' USDT from '+(request.senderName||'sender')+' to '+(request.recipientName||'recipient')+'? Both account balances update only after this approval.':'Reject this internal USDT transfer request?'))return;
    button.disabled=true;const msg=document.getElementById('ocInternalTransferAdminMessage');if(msg)msg.textContent=approved?'Checking balances and approving atomically…':'Rejecting request…';
    try{
-    await current.getIdToken(true);
-    const requestRef=doc(db,'internalTransferRequests',id);
-    if(!approved){
-     await runTransaction(db,async tx=>{
-      const rs=await tx.get(requestRef);if(!rs.exists()||rs.data().status!=='pending')throw new Error('This request has already been processed.');
-      tx.update(requestRef,{status:'rejected',reviewedAt:serverTimestamp(),reviewedBy:current.email});
-     });
-    }else{
-     const senderRef=doc(db,'users',request.senderUid),recipientRef=doc(db,'users',request.recipientUid),transferRef=doc(collection(db,'internalTransfers'));
-     await runTransaction(db,async tx=>{
-      const [rs,ss,rr]=await Promise.all([tx.get(requestRef),tx.get(senderRef),tx.get(recipientRef)]);
-      if(!rs.exists()||rs.data().status!=='pending')throw new Error('This request has already been processed.');
-      if(!ss.exists()||!rr.exists())throw new Error('Sender or recipient account could not be found.');
-      const req=rs.data(),sender=ss.data(),recipient=rr.data(),amount=Number(req.amount);
-      if(!Number.isFinite(amount)||amount<=0||req.asset!=='USDT')throw new Error('The request amount or asset is invalid.');
-      if(sender.accountStatus==='suspended'||recipient.accountStatus==='suspended')throw new Error('A suspended account cannot receive or send internal transfers.');
-      const senderBefore=Number(sender.demoBalanceUSDT||0),recipientBefore=Number(recipient.demoBalanceUSDT||0);
-      if(!Number.isFinite(senderBefore)||!Number.isFinite(recipientBefore)||senderBefore<amount)throw new Error('Insufficient sender USDT balance. No balance was changed.');
-      const senderAfter=Number((senderBefore-amount).toFixed(8)),recipientAfter=Number((recipientBefore+amount).toFixed(8));
-      if(recipientAfter>1000000000)throw new Error('Recipient balance limit would be exceeded.');
-      tx.update(senderRef,{demoBalanceUSDT:senderAfter,demoBalanceUpdatedAt:serverTimestamp(),demoBalanceLastTransferId:transferRef.id});
-      tx.update(recipientRef,{demoBalanceUSDT:recipientAfter,demoBalanceUpdatedAt:serverTimestamp(),demoBalanceLastTransferId:transferRef.id});
-      tx.set(transferRef,{senderUid:req.senderUid,recipientUid:req.recipientUid,asset:'USDT',amount,senderBefore,senderAfter,recipientBefore,recipientAfter,senderName:req.senderName||'OnChain member',recipientName:req.recipientName||'OnChain member',createdAt:serverTimestamp(),transferRequestId:id,approvedBy:current.email});
-      tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email,transferId:transferRef.id});
-     });
-    }
+    await ocAdminWalletPost("/v1/admin/review-transfer",{requestId:id,decision:action},current);
     if(msg)msg.textContent=approved?'Approved. Both account balances and the transfer ledger were updated once.':'Request rejected. No wallet balance changed.';
     await renderInternalTransfers();if(typeof window.adminRefreshDashboard==='function')await window.adminRefreshDashboard();
    }catch(error){button.disabled=false;if(msg)msg.textContent='Could not '+(approved?'approve':'reject')+' request ('+(error.code||error.message||'error')+'). No partial balance update was made.';}
@@ -856,8 +785,8 @@ window.adminRefreshDashboard=async function(){
  if(!users||!kyc||!status||!updated)return;
  status.textContent='Loading';updated.textContent='Connecting to Firestore…';
  try{
-  const results=await Promise.all([getDocs(query(collection(db,'users'),limit(1000))),getDocs(query(collection(db,'kycSubmissions'),limit(100))),getDocs(query(collection(db,'depositRequests'),limit(500))),getDocs(query(collection(db,'withdrawRequests'),limit(500)))]);
-  const u=results[0],k=results[1],d=results[2],w=results[3];
+  const results=await Promise.all([getDocs(query(collection(db,'users'),limit(1000))),getDocs(query(collection(db,'userTradeState'),limit(1000))),getDocs(query(collection(db,'kycSubmissions'),limit(100))),getDocs(query(collection(db,'depositRequests'),limit(500))),getDocs(query(collection(db,'withdrawRequests'),limit(500)))]);
+  const u=results[0],wallets=results[1],k=results[2],d=results[3],w=results[4];
   const dp=d.docs.filter(x=>(x.data().status||'pending')==='pending').length,wp=w.docs.filter(x=>(x.data().status||'pending')==='pending').length;
   if(depositCount)depositCount.textContent=String(dp);if(withdrawCount)withdrawCount.textContent=String(wp);
   if(byId('liveDepositStatus'))byId('liveDepositStatus').textContent='Firestore connected · '+d.size+' total request(s)';
@@ -867,9 +796,9 @@ window.adminRefreshDashboard=async function(){
   const pending=k.docs.filter(d=>(d.data().status||'pending')==='pending').length;
   kyc.textContent=k.size===100&&pending===k.size?'100+':String(pending);
   byId('liveKycStatus').textContent=k.size===100?'Pending count from first 100 KYC records':'Pending submissions from Firestore';
-  const demoTotal=u.docs.reduce((sum,d)=>{const data=d.data()||{};const n=Number(data.demoBalanceUSDT||0);return sum+(Number.isFinite(n)&&n>0?n:0);},0);
-  if(totalAssets)totalAssets.textContent=demoTotal.toLocaleString(undefined,{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
-  if(totalAssetsStatus)totalAssetsStatus.textContent='Sum of internal account balances; not proof of on-chain funds'+(u.size===1000?' (first 1000 profiles only)':'');
+  const walletTotal=wallets.docs.reduce((sum,d)=>{const n=Number(d.data()?.balance||0);return sum+(Number.isFinite(n)&&n>0?n:0);},0);
+  if(totalAssets)totalAssets.textContent=walletTotal.toLocaleString(undefined,{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
+  if(totalAssetsStatus)totalAssetsStatus.textContent='Sum of canonical Firestore wallet balances; not proof of on-chain funds'+(wallets.size===1000?' (first 1000 wallets only)':'');
   status.textContent='Connected';updated.textContent='Last updated '+new Date().toLocaleTimeString();
  }catch(error){
   users.textContent='—';kyc.textContent='—';status.textContent='Unavailable';updated.textContent='Firestore access failed: '+(error.code||'unknown error');
