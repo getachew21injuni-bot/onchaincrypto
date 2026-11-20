@@ -32,8 +32,10 @@ beforeEach(async () => {
   await testEnv.clearFirestore();
   await testEnv.withSecurityRulesDisabled(async (context) => {
     const db = context.firestore();
-    await setDoc(doc(db, "users/sender"), { uid: "sender", adminAssigned: true, demoBalanceUSDT: 100, accountStatus: "active" });
-    await setDoc(doc(db, "users/recipient"), { uid: "recipient", adminAssigned: true, demoBalanceUSDT: 20, accountStatus: "active" });
+    await setDoc(doc(db, "users/sender"), { uid: "sender", adminAssigned: true, accountStatus: "active" });
+    await setDoc(doc(db, "users/recipient"), { uid: "recipient", adminAssigned: true, accountStatus: "active" });
+    await setDoc(doc(db, "userTradeState/sender"), { uid: "sender", balance: 100, holdings: {}, history: [] });
+    await setDoc(doc(db, "userTradeState/recipient"), { uid: "recipient", balance: 20, holdings: {}, history: [] });
     await setDoc(doc(db, "userDirectory/sender"), { uid: "sender", displayName: "Sender" });
     await setDoc(doc(db, "userDirectory/recipient"), { uid: "recipient", displayName: "Recipient" });
   });
@@ -54,107 +56,70 @@ async function createRequest(amount = 12.5) {
   return requestRef.id;
 }
 
-async function approveRequest(requestId, amount = 12.5) {
-  const db = adminDb();
-  const requestRef = doc(db, "internalTransferRequests", requestId);
-  const senderRef = doc(db, "users/sender");
-  const recipientRef = doc(db, "users/recipient");
-  const transferRef = doc(collection(db, "internalTransfers"));
-  await runTransaction(db, async (tx) => {
-    const [requestSnap, senderSnap, recipientSnap] = await Promise.all([
-      tx.get(requestRef), tx.get(senderRef), tx.get(recipientRef)
-    ]);
-    assert.equal(requestSnap.data().status, "pending");
-    const senderBefore = senderSnap.data().demoBalanceUSDT;
-    const recipientBefore = recipientSnap.data().demoBalanceUSDT;
-    const senderAfter = senderBefore - amount;
-    const recipientAfter = recipientBefore + amount;
-    tx.update(senderRef, {
-      demoBalanceUSDT: senderAfter, demoBalanceUpdatedAt: serverTimestamp(),
-      demoBalanceLastTransferId: transferRef.id
-    });
-    tx.update(recipientRef, {
-      demoBalanceUSDT: recipientAfter, demoBalanceUpdatedAt: serverTimestamp(),
-      demoBalanceLastTransferId: transferRef.id
-    });
-    tx.set(transferRef, {
-      senderUid: "sender", recipientUid: "recipient", asset: "USDT", amount,
-      senderBefore, senderAfter, recipientBefore, recipientAfter,
-      senderName: "Sender", recipientName: "Recipient",
-      createdAt: serverTimestamp(), transferRequestId: requestId, approvedBy: adminEmail
-    });
-    tx.update(requestRef, {
-      status: "approved", reviewedAt: serverTimestamp(), reviewedBy: adminEmail,
-      transferId: transferRef.id
-    });
-  });
-  return transferRef.id;
-}
-
-describe("admin-approved internal USDT transfer security", () => {
+describe("trusted Worker-only internal USDT transfer security", () => {
   it("lets a customer submit a pending request without reading the recipient wallet", async () => {
     const requestId = await createRequest();
     const db = testEnv.authenticatedContext("sender").firestore();
     const request = await assertSucceeds(getDoc(doc(db, "internalTransferRequests", requestId)));
     assert.equal(request.data().status, "pending");
     await assertFails(getDoc(doc(db, "users/recipient")));
+    await assertFails(getDoc(doc(db, "userTradeState/recipient")));
     await assertFails(getDocs(collection(db, "userDirectory")));
   });
 
-  it("blocks customer approval and direct wallet balance changes", async () => {
+  it("blocks customers and browser-admins from approving requests or writing either wallet", async () => {
     const requestId = await createRequest();
-    const db = testEnv.authenticatedContext("sender").firestore();
-    await assertFails(updateDoc(doc(db, "internalTransferRequests", requestId), { status: "approved" }));
-    await assertFails(updateDoc(doc(db, "users/sender"), { demoBalanceUSDT: 999 }));
-  });
-
-  it("allows the admin to approve once with atomic balances and immutable ledger", async () => {
-    const requestId = await createRequest();
-    const transferId = await approveRequest(requestId);
-    const db = adminDb();
-    const [sender, recipient, request, ledger] = await Promise.all([
-      getDoc(doc(db, "users/sender")), getDoc(doc(db, "users/recipient")),
-      getDoc(doc(db, "internalTransferRequests", requestId)),
-      getDoc(doc(db, "internalTransfers", transferId))
-    ]);
-    assert.equal(sender.data().demoBalanceUSDT, 87.5);
-    assert.equal(recipient.data().demoBalanceUSDT, 32.5);
-    assert.equal(request.data().status, "approved");
-    assert.equal(request.data().transferId, transferId);
-    assert.equal(ledger.data().transferRequestId, requestId);
-    assert.equal(ledger.data().amount, 12.5);
-    await assertFails(updateDoc(doc(db, "internalTransfers", transferId), { amount: 999 }));
-    await assertFails(updateDoc(doc(db, "internalTransferRequests", requestId), { status: "rejected" }));
-  });
-
-  it("rejects approval when the sender balance is insufficient", async () => {
-    const requestId = await createRequest(101);
-    const db = adminDb();
-    const requestRef = doc(db, "internalTransferRequests", requestId);
-    const senderRef = doc(db, "users/sender");
-    const recipientRef = doc(db, "users/recipient");
-    const transferRef = doc(collection(db, "internalTransfers"));
-    await assertFails(runTransaction(db, async (tx) => {
-      const [request, sender, recipient] = await Promise.all([
-        tx.get(requestRef), tx.get(senderRef), tx.get(recipientRef)
-      ]);
-      const before = sender.data().demoBalanceUSDT;
-      const recipientBefore = recipient.data().demoBalanceUSDT;
-      tx.update(senderRef, { demoBalanceUSDT: before - 101, demoBalanceUpdatedAt: serverTimestamp(), demoBalanceLastTransferId: transferRef.id });
-      tx.update(recipientRef, { demoBalanceUSDT: recipientBefore + 101, demoBalanceUpdatedAt: serverTimestamp(), demoBalanceLastTransferId: transferRef.id });
-      tx.set(transferRef, {
-        senderUid: "sender", recipientUid: "recipient", asset: "USDT", amount: 101,
-        senderBefore: before, senderAfter: before - 101, recipientBefore,
-        recipientAfter: recipientBefore + 101, senderName: "Sender", recipientName: "Recipient",
-        createdAt: serverTimestamp(), transferRequestId: requestId, approvedBy: adminEmail
-      });
-      tx.update(requestRef, { status: "approved", reviewedAt: serverTimestamp(), reviewedBy: adminEmail, transferId: transferRef.id });
+    const customer = testEnv.authenticatedContext("sender").firestore();
+    const admin = adminDb();
+    await assertFails(updateDoc(doc(customer, "internalTransferRequests", requestId), { status: "approved" }));
+    await assertFails(updateDoc(doc(admin, "internalTransferRequests", requestId), { status: "approved", reviewedAt: serverTimestamp(), reviewedBy: adminEmail }));
+    await assertFails(updateDoc(doc(admin, "userTradeState/sender"), { balance: 999 }));
+    await assertFails(updateDoc(doc(admin, "userTradeState/recipient"), { balance: 999 }));
+    await assertFails(setDoc(doc(admin, "internalTransfers", "browser-forged-transfer"), {
+      senderUid: "sender", recipientUid: "recipient", asset: "USDT", amount: 10,
+      senderBefore: 100, senderAfter: 90, recipientBefore: 20, recipientAfter: 30,
+      senderName: "Sender", recipientName: "Recipient", transferRequestId: requestId
     }));
   });
 
-  it("rejects forged requests and prevents ledger-only transfers", async () => {
-    const db = testEnv.authenticatedContext("sender").firestore();
-    await assertFails(setDoc(doc(collection(db, "internalTransferRequests")), {
+  it("allows the trusted backend to atomically update canonical wallets and the transfer record", async () => {
+    const requestId = await createRequest();
+    const transferId = "transfer-" + requestId;
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const backend = context.firestore();
+      const requestRef = doc(backend, "internalTransferRequests", requestId);
+      const senderRef = doc(backend, "userTradeState/sender");
+      const recipientRef = doc(backend, "userTradeState/recipient");
+      const transferRef = doc(backend, "internalTransfers", transferId);
+      await runTransaction(backend, async (tx) => {
+        const [request, sender, recipient] = await Promise.all([tx.get(requestRef), tx.get(senderRef), tx.get(recipientRef)]);
+        const amount = Number(request.data().amount);
+        const senderBefore = Number(sender.data().balance), recipientBefore = Number(recipient.data().balance);
+        tx.update(senderRef, { balance: senderBefore - amount });
+        tx.update(recipientRef, { balance: recipientBefore + amount });
+        tx.set(transferRef, {
+          senderUid: "sender", recipientUid: "recipient", asset: "USDT", amount,
+          senderBefore, senderAfter: senderBefore - amount, recipientBefore, recipientAfter: recipientBefore + amount,
+          transferRequestId: requestId
+        });
+        tx.update(requestRef, { status: "approved", reviewedBy: adminEmail, transferId });
+      });
+    });
+    const admin = adminDb();
+    const [sender, recipient, request, transfer] = await Promise.all([
+      getDoc(doc(admin, "userTradeState/sender")), getDoc(doc(admin, "userTradeState/recipient")),
+      getDoc(doc(admin, "internalTransferRequests", requestId)), getDoc(doc(admin, "internalTransfers", transferId))
+    ]);
+    assert.equal(sender.data().balance, 87.5);
+    assert.equal(recipient.data().balance, 32.5);
+    assert.equal(request.data().status, "approved");
+    assert.equal(transfer.data().transferRequestId, requestId);
+    await assertFails(updateDoc(doc(admin, "internalTransfers", transferId), { amount: 999 }));
+  });
+
+  it("rejects forged customer requests and direct ledger-only transfer records", async () => {
+    const customer = testEnv.authenticatedContext("sender").firestore();
+    await assertFails(setDoc(doc(collection(customer, "internalTransferRequests")), {
       senderUid: "someone-else", recipientUid: "recipient", asset: "USDT", amount: 1,
       senderName: "Fake", recipientName: "Recipient", status: "pending", createdAt: serverTimestamp()
     }));
@@ -162,8 +127,7 @@ describe("admin-approved internal USDT transfer security", () => {
     await assertFails(setDoc(doc(collection(admin, "internalTransfers")), {
       senderUid: "sender", recipientUid: "recipient", asset: "USDT", amount: 10,
       senderBefore: 100, senderAfter: 90, recipientBefore: 20, recipientAfter: 30,
-      senderName: "Sender", recipientName: "Recipient", createdAt: serverTimestamp(),
-      transferRequestId: "missing-request", approvedBy: adminEmail
+      senderName: "Sender", recipientName: "Recipient", transferRequestId: "missing-request"
     }));
   });
 });
@@ -226,44 +190,45 @@ describe("administrator-initiated private support messages", () => {
   });
 });
 
-describe("per-account trade wallet persistence", () => {
-  it("allows a member to save and reload only their own trade balance, holdings and history", async () => {
-    const db = testEnv.authenticatedContext("wallet-owner").firestore();
-    const walletRef = doc(db, "userTradeState/wallet-owner");
-    const snapshot = {
-      uid: "wallet-owner",
-      balance: 20500,
-      holdings: { USDT: 20500, BTC: 0.01 },
-      history: [{ id: "trade-1", type: "quick-result", pnl: 125, status: "win" }],
-      updatedAt: serverTimestamp()
-    };
-    await assertSucceeds(setDoc(walletRef, snapshot));
-    await assertSucceeds(updateDoc(walletRef, {
-      balance: 20625,
-      history: [...snapshot.history, { id: "trade-2", type: "quick-result", pnl: 125, status: "win" }],
-      updatedAt: serverTimestamp()
-    }));
+describe("canonical wallet client access", () => {
+  it("allows members to read their own canonical wallet but not write it", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), "userTradeState/wallet-owner"), {
+        uid: "wallet-owner", balance: 20500, holdings: { BTC: 0.01 },
+        history: [{ id: "trade-1" }]
+      });
+    });
+    const owner = testEnv.authenticatedContext("wallet-owner").firestore();
+    const walletRef = doc(owner, "userTradeState/wallet-owner");
     const restored = await assertSucceeds(getDoc(walletRef));
-    assert.equal(restored.data().balance, 20625);
-    assert.equal(restored.data().history.length, 2);
+    assert.equal(restored.data().balance, 20500);
+    await assertFails(setDoc(walletRef, {
+      uid: "wallet-owner", balance: 20625, holdings: { BTC: 0.01 }, history: [], updatedAt: serverTimestamp()
+    }));
+    await assertFails(updateDoc(walletRef, { balance: 20625 }));
     await assertFails(getDoc(doc(testEnv.authenticatedContext("another-member").firestore(), "userTradeState/wallet-owner")));
   });
 
-  it("rejects another user's wallet writes, negative balances and oversized history", async () => {
-    const ownerDb = testEnv.authenticatedContext("wallet-owner").firestore();
-    const otherDb = testEnv.authenticatedContext("another-member").firestore();
-    const walletRef = doc(ownerDb, "userTradeState/wallet-owner");
-    await assertFails(setDoc(doc(otherDb, "userTradeState/wallet-owner"), {
-      uid: "wallet-owner", balance: 500, holdings: {}, history: [], updatedAt: serverTimestamp()
-    }));
-    await assertFails(setDoc(walletRef, {
-      uid: "wallet-owner", balance: -1, holdings: {}, history: [], updatedAt: serverTimestamp()
-    }));
-    await assertFails(setDoc(walletRef, {
-      uid: "wallet-owner", balance: 100, holdings: {},
-      history: Array.from({ length: 301 }, (_, i) => ({ id: String(i) })),
-      updatedAt: serverTimestamp()
-    }));
+  it("blocks all client wallet writes, including verified administrator writes", async () => {
+    const owner = testEnv.authenticatedContext("wallet-owner").firestore();
+    const admin = adminDb();
+    const wallet = doc(owner, "userTradeState/wallet-owner");
+    await assertFails(setDoc(wallet, { uid: "wallet-owner", balance: 500, holdings: {}, history: [] }));
+    await assertFails(setDoc(wallet, { uid: "wallet-owner", balance: -1, holdings: {}, history: [] }));
+    await assertFails(updateDoc(doc(admin, "userTradeState/wallet-owner"), { balance: 999 }));
+  });
+
+  it("allows owners and admins to read their permitted append-only wallet ledger rows", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), "walletLedger/ledger-sender"), { uid: "sender", type: "deposit", amount: 10 });
+    });
+    const sender = testEnv.authenticatedContext("sender").firestore();
+    const other = testEnv.authenticatedContext("recipient").firestore();
+    const admin = adminDb();
+    await assertSucceeds(getDoc(doc(sender, "walletLedger/ledger-sender")));
+    await assertFails(getDoc(doc(other, "walletLedger/ledger-sender")));
+    await assertSucceeds(getDoc(doc(admin, "walletLedger/ledger-sender")));
+    await assertFails(setDoc(doc(sender, "walletLedger/client-forged"), { uid: "sender", amount: 500 }));
   });
 });
 
