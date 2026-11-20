@@ -6081,58 +6081,18 @@ $("withdrawSubmit")?.addEventListener("click",async()=>{
  }
 });
 async function processDemoRequest(kind,requestId,decision){
- const requestRef=doc(db,kind==="deposit"?"depositRequests":"withdrawRequests",requestId);
- const ledgerRef=doc(collection(db,"demoAssetTransactions"));
- const usdtLedgerRef=doc(collection(db,"demoTransactions"));
- await runTransaction(db,async tx=>{
-  const requestSnap=await tx.get(requestRef);
-  if(!requestSnap.exists())throw Error("Request not found.");
-  const request=requestSnap.data()||{};
-  if(request.status!=="pending")throw Error("This request has already been reviewed.");
-  if(decision==="reject"){
-   tx.update(requestRef,{status:"rejected",reviewedAt:serverTimestamp(),reviewedBy:auth.currentUser.email});
-   return;
-  }
-  const uid=String(request.uid||"");
-  const asset=String(request.asset||"").toUpperCase();
-  const amount=Number(request.amount);
-  if(!uid||!asset||!(amount>0&&Number.isFinite(amount)))throw Error("Request details are incomplete.");
-  const userRef=doc(db,"users",uid);
-  const walletRef=doc(db,"userTradeState",uid);
-  const userSnap=await tx.get(userRef);
-  const walletSnap=await tx.get(walletRef);
-  if(!userSnap.exists())throw Error("User profile is missing. Ask the user to sign in before this approval.");
-  if(!walletSnap.exists())throw Error("Canonical Firestore wallet is missing. No legacy profile balance was copied or changed.");
-  const user=userSnap.data()||{};
-  if(user.accountStatus==="suspended")throw Error("This account is suspended.");
-  const wallet=walletSnap.data()||{};
-  const walletHoldings=wallet.holdings&&typeof wallet.holdings==="object"&&!Array.isArray(wallet.holdings)?{...wallet.holdings}:{};
-  const before=asset==="USDT"?Number(wallet.balance||0):Number(walletHoldings[asset]||0);
-  if(!Number.isFinite(before)||before<0)throw Error("Canonical Firestore wallet balance is invalid. No changes were made.");
-  const after=decision==="approve"?(kind==="deposit"?before+amount:before-amount):before;
-  if(kind==="withdraw"&&after<0)throw Error("Insufficient Firestore wallet balance for "+asset+". No changes were made.");
-  const nowText=new Date().toISOString();
-  let nextBalance=Math.max(0,Number(wallet.balance)||0);
-  let nextHoldings=walletHoldings;
-  if(asset==="USDT"){
-   nextBalance=after;
-   tx.set(usdtLedgerRef,{uid,type:kind==="deposit"?"deposit":"withdrawal",amountUSDT:amount,balanceBeforeUSDT:before,balanceAfterUSDT:after,createdAt:serverTimestamp(),createdAtText:nowText,createdBy:auth.currentUser.uid,note:"Admin-approved balance adjustment "+kind,source:"firestore-wallet",status:"completed"});
-  }else{
-   nextHoldings[asset]=after;
-   tx.set(ledgerRef,{uid,type:kind==="deposit"?"deposit":"withdrawal",asset,amount,balanceBefore:before,balanceAfter:after,createdAt:serverTimestamp(),createdAtText:nowText,createdBy:auth.currentUser.uid,note:"Admin-approved balance adjustment "+kind,source:"firestore-wallet",status:"completed"});
-  }
-  // Keep the cloud wallet itself in step with the approved balance change.
-  // The pending request never changes the wallet; this transaction runs only
-  // after admin approval and the pending-status guard prevents double deduction.
-  tx.set(walletRef,{
-   uid,
-   balance:nextBalance,
-   holdings:nextHoldings,
-   history:Array.isArray(wallet.history)?wallet.history.slice(0,300):[],
-   updatedAt:serverTimestamp()
-  },{merge:true});
-  tx.update(requestRef,{status:"approved",reviewedAt:serverTimestamp(),reviewedBy:auth.currentUser.email});
+ const current=auth.currentUser;
+ if(!current||!current.emailVerified)throw new Error("Verified administrator access is required.");
+ const base=String(window.ONCHAINSPRO_WALLET_API_URL||"").replace(/\\/+$/,"");
+ if(!base)throw new Error("The trusted Cloudflare Wallet API URL has not been configured yet.");
+ const token=await current.getIdToken(true);
+ const response=await fetch(base+"/v1/admin/review-request",{
+  method:"POST",headers:{authorization:"Bearer "+token,"content-type":"application/json"},
+  body:JSON.stringify({kind,requestId,decision})
  });
+ const result=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(result.error||"The trusted wallet service could not process this request.");
+ return result;
 }
 document.addEventListener("click",async e=>{
  const b=e.target.closest("[data-oc-review]");if(!b)return;
