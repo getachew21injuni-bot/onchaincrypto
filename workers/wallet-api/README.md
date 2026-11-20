@@ -1,30 +1,57 @@
-# Read-only wallet reconciliation helper
+# Read-only wallet reconciliation Worker
 
-This module is deliberately read-only. It accepts already-authorized Firestore records and creates a comparison report; it does not connect to Firestore, update documents, choose a canonical balance, or infer a deposit from a request.
+This Worker is for a separate staging deployment. It authenticates a Firebase administrator, reads selected Firestore records, and returns a compact reconciliation report. It does not call Firestore create, update, delete, or commit endpoints and does not return raw wallet history or transaction documents.
 
-## Data to collect for one UID
+## Required Cloudflare configuration
 
-Collect through an authenticated administrator-only backend read (not from the browser):
-- `users/{uid}` — `demoBalanceUSDT`, `demoBalanceUpdatedAt`, `demoAssetBalances`, `adminUpdatedAt`, `adminUpdatedBy`
-- `userTradeState/{uid}` — `balance`, `holdings`, `history`, `updatedAt`
+Set these on the staging Worker only:
+
+- `FIREBASE_PROJECT_ID`: `onchaincrypto-d976b` (plain-text variable; the source currently pins this project ID and verifies the service-account project).
+- `FIREBASE_SERVICE_ACCOUNT`: service-account JSON as a Worker secret. Never put this value in source control, browser code, or chat.
+- `ADMIN_EMAILS`: comma-separated, exact administrator email addresses. An email is accepted only when the Firebase ID token says `email_verified: true`. A Firebase custom claim `admin: true` is also accepted.
+- `ALLOWED_ORIGINS`: exact comma-separated staging origins only. Do not add the live website unless there is a deliberate, separately approved reason.
+
+The source currently uses the fixed project ID `onchaincrypto-d976b`; the `FIREBASE_PROJECT_ID` variable is informational until the source is deliberately changed to read it.
+
+## Service-account permissions
+
+Use a dedicated service account for this Worker. Grant the least privilege needed for reading Firestore (prefer the Firestore/Datastore Viewer role). Do not grant editor/owner permissions. If the account currently has broader permissions, reduce them before adding its key to the staging Worker. The source makes read requests only, but IAM read-only permissions provide an additional safeguard.
+
+## Routes
+
+- `GET /health`: returns only a small health/mode response; it does not test Google credentials or Firestore access.
+- `POST /admin/reconcile`: requires `Authorization: Bearer <Firebase ID token>` and JSON body `{"uid":"target-user-uid"}`. It returns balances, timestamps, ledger continuity checks, and evidence counts.
+
+The target UID can differ from the signed-in administrator UID only when the verified token is authorized as an administrator.
+
+## Data sources and limits
+
+Reads:
+- `users/{uid}`
+- `userTradeState/{uid}`
 - `demoTransactions` filtered by `uid`
 - `demoAssetTransactions` filtered by `uid`
-- `internalTransfers` where `senderUid == uid` OR `recipientUid == uid`
-- `internalTransferRequests` where sender or recipient matches (requests are context only)
-- `depositRequests` and `withdrawRequests` filtered by `uid` (requests are not completed ledger entries)
+- `internalTransfers` filtered by `senderUid` and `recipientUid`
+- `depositRequests` and `withdrawRequests` filtered by `uid`
+- `internalTransferRequests` filtered by sender and recipient UID
 
-Also inspect any separate admin adjustment records and any trade ledger collection that exists in the project. Do not assume a collection is complete merely because it exists.
+Each collection query is capped at 500 records. The response explicitly warns that older records may be omitted. Request documents and asset-ledger counts are context only; they are not treated as completed balance changes. A balance difference does not establish which balance is correct.
 
-## Report interpretation
+## Safety
 
-- `canonicalMinusProfileUSDT` is a comparison only; it does not declare the canonical wallet correct.
-- A continuity break means adjacent balance snapshots do not join. It may indicate missing entries, independent edits, or mixed balance sources.
-- Missing snapshots cannot be reconstructed safely from amounts alone.
-- Pending/approved request documents are not proof of chain settlement or external payout.
-- Never add the two balances together. Never automatically copy one into the other.
+- No balances are selected, merged, seeded, adjusted, or modified.
+- No client-supplied balance, PnL, trade result, or adjustment is accepted.
+- Do not publish restrictive Firestore rules or migrate frontend writes as part of this read-only audit.
+- Do not deploy this code to the existing `onchaincrypto-deposit-verifier` Worker.
+- Keep the staging Worker separate and verify code before adding credentials.
+- Never paste a Firebase ID token, service-account JSON, or private key into chat.
 
-## Run tests
+## Tests
 
-`npm test`
+Run:
 
-The unit tests use synthetic fixtures only. They do not read or write production Firestore data.
+```sh
+npm run test:reconciliation
+```
+
+The unit tests use synthetic fixtures only and do not read or write Firebase data.
