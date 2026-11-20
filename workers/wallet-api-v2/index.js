@@ -603,7 +603,8 @@ export default {
         return json({ active: true, trade: trade.data }, 200, cors);
       }
       if (request.method !== "POST") throw new HttpError("Method not allowed.", 405);
-      let body;\n      try { body = await request.json(); } catch { throw new HttpError("Request body must be valid JSON."); }
+      let body;
+      try { body = await request.json(); } catch { throw new HttpError("Request body must be valid JSON."); }
       let result;
       if (url.pathname === "/v1/wallet/order") result = await walletOrder(env, claims, body);
       else if (url.pathname === "/v1/wallet/convert") result = await walletConvert(env, claims, body);
