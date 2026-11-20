@@ -214,7 +214,16 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
         activeCount: Math.max(0, safeNumber(guardData.activeCount) - 1), updatedAt: completedAt
       };
       const completed = { ...trade.data, startedAt: new Date(trade.data.startedAt), expiresAt: new Date(trade.data.expiresAt), createdAt: new Date(trade.data.createdAt), status: "completed", exitPrice: exit, pnlUSDT: pnl, completedAt, updatedAt: completedAt };
-      const ledger = { ...result, uid, tradeId: item.id, balanceBefore: before, balanceAfter: after, completedAt, settlementSource: "server-cron" };
+      const ledger = {
+        ...result, uid, tradeId: item.id,
+        amountUSDT: Number(trade.data.amountUSDT),
+        amountFunding: Number(trade.data.amountFunding),
+        fundingAsset: trade.data.fundingAsset || "USDT",
+        durationSeconds: Number(trade.data.durationSeconds),
+        startedAt: new Date(trade.data.startedAt),
+        balanceBefore: before, balanceAfter: after, completedAt,
+        settlementSource: "server-cron"
+      };
       try {
         await commit(access, [
           writeDoc(enc("userTradeState", uid), { uid, balance: after, holdings: wallet.data.holdings || {}, history, updatedAt: completedAt }, { updateTime: wallet.updateTime }),
