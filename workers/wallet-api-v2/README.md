@@ -6,6 +6,7 @@ This Worker is a staged replacement candidate for OnChainSpro's wallet mutation 
 
 - `GET /health`: reports staged mode only.
 - `GET /v1/wallet`: verifies a Firebase ID token and reads only `userTradeState/{authenticated uid}`. A missing wallet returns 404; it is never seeded.
+- `GET /v1/wallet/ledger`: reads the authenticated user's append-only `walletLedger` rows for persistent activity history.
 - `GET /v1/quick-trade/active`: recovers the signed-in user's active server-side timed trade after refresh/reconnect.
 - `POST /v1/wallet/order`: server-priced Buy/Sell and Buy & Hold orders. The Worker computes quantity and price and updates the canonical wallet and ledger.
 - `POST /v1/wallet/convert`: server-priced asset conversion with the existing 0.1% fee. The Worker calculates output and updates the canonical wallet and ledger.
