@@ -22,7 +22,7 @@ function decode64(value) {
 const decodePart = part => JSON.parse(new TextDecoder().decode(decode64(part)));
 function pemDer(pem) {
   const body = String(pem || "").replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "");
-  const normalized = body.replace(/\+/g, "-").replace(/\//g, "_");
+  const normalized = body.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
   return decode64(normalized);
 }
 async function verifyUserToken(token) {
