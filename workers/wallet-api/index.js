@@ -28,37 +28,37 @@ function checkChain(rows, beforeKey, afterKey, timeKey = "createdAtText") {
     continuityBreaks: breaks
   };
 }
-function buildWalletReconciliationReport({ uid, profile, wallet, demoTransactions = [], tradeHistory = [], transfers = [], depositRequests = [], withdrawRequests = [] }) {
-  const profileBalance = profile && finite(profile.demoBalanceUSDT) ? profile.demoBalanceUSDT : null;
+function buildWalletReconciliationReport({ uid, wallet, walletLedger = [], tradeHistory = [], transfers = [], depositRequests = [], withdrawRequests = [] }) {
   const walletBalance = wallet && finite(wallet.balance) ? wallet.balance : null;
-  const difference = profileBalance === null || walletBalance === null ? null : Number((walletBalance - profileBalance).toFixed(8));
-  const usdtRows = demoTransactions.filter(row => row.uid === uid && row.type && finite(row.balanceBeforeUSDT) && finite(row.balanceAfterUSDT));
+  const rows = walletLedger.filter(row => row.uid === uid && row.asset && finite(row.balanceBefore) && finite(row.balanceAfter));
+  const assets = [...new Set(rows.map(row => String(row.asset)))].sort();
+  const ledgerChecksByAsset = Object.fromEntries(assets.map(asset => [
+    asset, checkChain(rows.filter(row => String(row.asset) === asset), "balanceBefore", "balanceAfter", "createdAtText")
+  ]));
   const tradeRows = tradeHistory.filter(row => finite(row.balanceBefore) && finite(row.balanceAfter));
   const sent = transfers.filter(row => row.senderUid === uid && finite(row.senderBefore) && finite(row.senderAfter));
   const received = transfers.filter(row => row.recipientUid === uid && finite(row.recipientBefore) && finite(row.recipientAfter));
   return {
-    uid,
-    readOnly: true,
-    balances: { profileDemoBalanceUSDT: profileBalance, canonicalWalletBalanceUSDT: walletBalance, canonicalMinusProfileUSDT: difference },
+    uid, readOnly: true,
+    balances: { canonicalWalletBalanceUSDT: walletBalance, source: "userTradeState/{uid}" },
     ledgerChecks: {
-      adminUSDT: checkChain(usdtRows, "balanceBeforeUSDT", "balanceAfterUSDT"),
+      canonicalWalletLedgerByAsset: ledgerChecksByAsset,
       tradeHistory: checkChain(tradeRows, "balanceBefore", "balanceAfter", "time"),
       outgoingTransfers: checkChain(sent, "senderBefore", "senderAfter"),
       incomingTransfers: checkChain(received, "recipientBefore", "recipientAfter")
     },
     evidenceCounts: {
-      adminUSDTLedgerEntries: usdtRows.length,
+      walletLedgerEntries: walletLedger.filter(row => row.uid === uid).length,
       tradeHistoryEntriesWithBalanceSnapshots: tradeRows.length,
-      outgoingTransfers: sent.length,
-      incomingTransfers: received.length,
+      outgoingTransfers: sent.length, incomingTransfers: received.length,
       pendingDepositRequests: depositRequests.filter(row => row.uid === uid && row.status === "pending").length,
       pendingWithdrawalRequests: withdrawRequests.filter(row => row.uid === uid && row.status === "pending").length
     },
     limitations: [
-      "A balance difference is not proof that either stored balance is correct.",
-      "Requests are not proof of a completed deposit or payout.",
+      "userTradeState/{uid} is the only wallet balance source.",
+      "Requests are not proof of a completed deposit or external payout.",
       "Ledger continuity does not prove completeness if records are missing.",
-      "No balance is selected, merged, seeded, or modified by this report."
+      "This report is read-only and never reconciles or changes balances."
     ]
   };
 }
@@ -198,11 +198,9 @@ async function firestoreQuery(accessToken, collection, field, value) {
 }
 async function reconcile(env, uid) {
   const accessToken = await serviceAccessToken(env);
-  const [profile, wallet, adminUSDT, adminAssets, sent, received, deposits, withdrawals, sentRequests, receivedRequests] = await Promise.all([
-    firestoreGet(accessToken, `users/${uid}`),
+  const [wallet, walletLedger, sent, received, deposits, withdrawals, sentRequests, receivedRequests] = await Promise.all([
     firestoreGet(accessToken, `userTradeState/${uid}`),
-    firestoreQuery(accessToken, "demoTransactions", "uid", uid),
-    firestoreQuery(accessToken, "demoAssetTransactions", "uid", uid),
+    firestoreQuery(accessToken, "walletLedger", "uid", uid),
     firestoreQuery(accessToken, "internalTransfers", "senderUid", uid),
     firestoreQuery(accessToken, "internalTransfers", "recipientUid", uid),
     firestoreQuery(accessToken, "depositRequests", "uid", uid),
@@ -210,27 +208,16 @@ async function reconcile(env, uid) {
     firestoreQuery(accessToken, "internalTransferRequests", "senderUid", uid),
     firestoreQuery(accessToken, "internalTransferRequests", "recipientUid", uid)
   ]);
-
   const transfers = [...sent, ...received];
   const report = buildWalletReconciliationReport({
-    uid,
-    profile,
-    wallet,
-    demoTransactions: adminUSDT,
-    tradeHistory: Array.isArray(wallet?.history) ? wallet.history : [],
-    transfers,
-    depositRequests: deposits,
-    withdrawRequests: withdrawals
+    uid, wallet, walletLedger, tradeHistory: Array.isArray(wallet?.history) ? wallet.history : [],
+    transfers, depositRequests: deposits, withdrawRequests: withdrawals
   });
   return {
     ...report,
-    timestamps: {
-      profileBalanceUpdatedAt: profile?.demoBalanceUpdatedAt || profile?.adminUpdatedAt || null,
-      walletUpdatedAt: wallet?.updatedAt || null
-    },
+    timestamps: { walletUpdatedAt: wallet?.updatedAt || null },
     evidenceCounts: {
       ...report.evidenceCounts,
-      adminAssetLedgerEntries: adminAssets.length,
       incomingTransferRequests: receivedRequests.length,
       outgoingTransferRequests: sentRequests.length,
       depositRequestsTotal: deposits.length,
@@ -239,8 +226,7 @@ async function reconcile(env, uid) {
     queryLimits: { maxRecordsPerCollection: 500, mayBeTruncated: true },
     warnings: [
       ...report.limitations,
-      "Queries are capped at 500 records per collection; older records may be omitted.",
-      "Asset-ledger and request records are counted but are not treated as completed balance changes."
+      "Queries are capped at 500 records per collection; older records may be omitted."
     ]
   };
 }
