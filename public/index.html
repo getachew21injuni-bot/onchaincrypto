@@ -1955,7 +1955,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
   <section id="page-deposit" class="hidden">
     <div class="page-title"><div><h1>↓ Deposit</h1><div class="muted">Choose an asset and network.</div></div><span class="tag">Address setup required</span></div>
     <section class="panel form-panel">
-      <div class="oc-crypto-quick-picks" aria-label="Popular deposit assets"><span class="muted tiny">Popular assets</span><button type="button" data-quick-coin="deposit" data-asset="BTC">₿ BTC</button><button type="button" data-quick-coin="deposit" data-asset="ETH">Ξ ETH</button><button type="button" data-quick-coin="deposit" data-asset="USDT">₮ USDT</button><button type="button" data-quick-coin="deposit" data-asset="USDC">USDC</button><button type="button" data-quick-coin="deposit" data-asset="SOL">◎ SOL</button></div><label for="depositCoinSearch">Search coins</label><input id="depositCoinSearch" class="field" placeholder="Search Bitcoin, Ethereum, XRP…" autocomplete="off">
+      <div class="oc-crypto-quick-picks" aria-label="Popular deposit assets"><span class="muted tiny">Popular assets</span><button type="button" data-quick-coin="deposit" data-asset="BTC"><span class="oc-asset-symbol" aria-hidden="true">₿</span><span>BTC</span></button><button type="button" data-quick-coin="deposit" data-asset="ETH"><span class="oc-asset-symbol" aria-hidden="true">Ξ</span><span>ETH</span></button><button type="button" data-quick-coin="deposit" data-asset="USDT"><span class="oc-asset-symbol" aria-hidden="true">₮</span><span>USDT</span></button><button type="button" data-quick-coin="deposit" data-asset="USDC"><span class="oc-asset-symbol" aria-hidden="true">$</span><span>USDC</span></button><button type="button" data-quick-coin="deposit" data-asset="SOL"><span class="oc-asset-symbol" aria-hidden="true">◎</span><span>SOL</span></button></div><label for="depositCoinSearch">Search coins</label><input id="depositCoinSearch" class="field" placeholder="Search Bitcoin, Ethereum, XRP…" autocomplete="off">
       <div class="coin-list-controls coin-picker-controls"><span class="muted tiny" id="depositCoinCount">Showing 4 coins</span><div><button class="secondary" type="button" id="depositCoinLess" disabled>Less</button> <button class="primary" type="button" id="depositCoinMore">More +4</button></div></div>
       <div id="depositCoinList" class="coin-picker" role="listbox" aria-label="Deposit coin list"></div>
       <div class="divider"></div>
@@ -1970,7 +1970,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
   <section id="page-withdraw" class="hidden">
     <div class="page-title"><div><h1>↑ Withdraw</h1><div class="muted">Choose an asset, network and address.</div></div><span class="tag">WITHDRAWAL</span></div>
     <section class="panel form-panel">
-      <div class="oc-crypto-quick-picks" aria-label="Popular withdrawal assets"><span class="muted tiny">Popular assets</span><button type="button" data-quick-coin="withdraw" data-asset="BTC">₿ BTC</button><button type="button" data-quick-coin="withdraw" data-asset="ETH">Ξ ETH</button><button type="button" data-quick-coin="withdraw" data-asset="USDT">₮ USDT</button><button type="button" data-quick-coin="withdraw" data-asset="USDC">USDC</button><button type="button" data-quick-coin="withdraw" data-asset="SOL">◎ SOL</button></div><label for="withdrawCoinSearch">Search coins</label><input id="withdrawCoinSearch" class="field" placeholder="Search Bitcoin, Ethereum, XRP…" autocomplete="off">
+      <div class="oc-crypto-quick-picks" aria-label="Popular withdrawal assets"><span class="muted tiny">Popular assets</span><button type="button" data-quick-coin="withdraw" data-asset="BTC"><span class="oc-asset-symbol" aria-hidden="true">₿</span><span>BTC</span></button><button type="button" data-quick-coin="withdraw" data-asset="ETH"><span class="oc-asset-symbol" aria-hidden="true">Ξ</span><span>ETH</span></button><button type="button" data-quick-coin="withdraw" data-asset="USDT"><span class="oc-asset-symbol" aria-hidden="true">₮</span><span>USDT</span></button><button type="button" data-quick-coin="withdraw" data-asset="USDC"><span class="oc-asset-symbol" aria-hidden="true">$</span><span>USDC</span></button><button type="button" data-quick-coin="withdraw" data-asset="SOL"><span class="oc-asset-symbol" aria-hidden="true">◎</span><span>SOL</span></button></div><label for="withdrawCoinSearch">Search coins</label><input id="withdrawCoinSearch" class="field" placeholder="Search Bitcoin, Ethereum, XRP…" autocomplete="off">
       <div class="coin-list-controls coin-picker-controls"><span class="muted tiny" id="withdrawCoinCount">Showing 4 coins</span><div><button class="secondary" type="button" id="withdrawCoinLess" disabled>Less</button> <button class="primary" type="button" id="withdrawCoinMore">More +4</button></div></div>
       <div id="withdrawCoinList" class="coin-picker" role="listbox" aria-label="Withdrawal coin list"></div>
       <div class="selected-coin"><span id="withdrawCoinIcon" class="coin-icon">₿</span><div><strong id="withdrawCoinName">Bitcoin (BTC)</strong><div class="muted tiny">Selected coin</div></div></div>
@@ -12466,5 +12466,42 @@ header .brand.oc-brand-header .oc-brand-verified{display:block!important;width:2
 html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#17202b!important}
 @media(max-width:720px){header .brand.oc-brand-header{font-size:19px!important;gap:6px!important}header .brand.oc-brand-header .oc-brand-verified{width:18px!important;height:18px!important;flex-basis:18px!important}}
 </style>
+
+<style id="oc-deposit-withdraw-asset-brand-colors">
+/* Match quick asset chips to the original coin symbols and brand colors. */
+#page-deposit .oc-crypto-quick-picks button,
+#page-withdraw .oc-crypto-quick-picks button{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:40px;padding:6px 12px;background:#0b1b30;color:#eaf6ff;
+  border:1px solid #294563;border-radius:999px;font-weight:800;
+  transition:transform .16s,border-color .16s,box-shadow .16s;
+}
+#page-deposit .oc-crypto-quick-picks button:hover,
+#page-withdraw .oc-crypto-quick-picks button:hover{
+  transform:translateY(-1px);border-color:currentColor;
+  box-shadow:0 0 14px color-mix(in srgb,currentColor 18%,transparent);
+}
+#page-deposit .oc-crypto-quick-picks .oc-asset-symbol,
+#page-withdraw .oc-crypto-quick-picks .oc-asset-symbol{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:25px;height:25px;flex:0 0 25px;border-radius:50%;
+  font-size:16px;line-height:1;font-weight:900;
+}
+#page-deposit [data-asset="BTC"],#page-withdraw [data-asset="BTC"]{color:#f7931a;border-color:#f7931a66}
+#page-deposit [data-asset="BTC"] .oc-asset-symbol,#page-withdraw [data-asset="BTC"] .oc-asset-symbol{background:#f7931a;color:#fff}
+#page-deposit [data-asset="ETH"],#page-withdraw [data-asset="ETH"]{color:#a8b7ff;border-color:#627eea77}
+#page-deposit [data-asset="ETH"] .oc-asset-symbol,#page-withdraw [data-asset="ETH"] .oc-asset-symbol{background:#627eea;color:#fff}
+#page-deposit [data-asset="USDT"],#page-withdraw [data-asset="USDT"]{color:#42c9a0;border-color:#26a17b77}
+#page-deposit [data-asset="USDT"] .oc-asset-symbol,#page-withdraw [data-asset="USDT"] .oc-asset-symbol{background:#26a17b;color:#fff}
+#page-deposit [data-asset="USDC"],#page-withdraw [data-asset="USDC"]{color:#78b7ff;border-color:#2775ca77}
+#page-deposit [data-asset="USDC"] .oc-asset-symbol,#page-withdraw [data-asset="USDC"] .oc-asset-symbol{background:#2775ca;color:#fff}
+#page-deposit [data-asset="SOL"],#page-withdraw [data-asset="SOL"]{color:#c8a5ff;border-color:#9945ff88}
+#page-deposit [data-asset="SOL"] .oc-asset-symbol,#page-withdraw [data-asset="SOL"] .oc-asset-symbol{background:linear-gradient(135deg,#9945ff,#14f195);color:#fff}
+@media(max-width:420px){
+  #page-deposit .oc-crypto-quick-picks,#page-withdraw .oc-crypto-quick-picks{gap:6px}
+  #page-deposit .oc-crypto-quick-picks button,#page-withdraw .oc-crypto-quick-picks button{padding:5px 9px;gap:5px;font-size:12px}
+}
+</style>
+
 </body>
 </html>
