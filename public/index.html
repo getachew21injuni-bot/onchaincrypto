@@ -2452,16 +2452,20 @@ const usdtMoney=n=>Number.isFinite(Number(n))?Number(n).toLocaleString("en-US",{
 const pct=n=>((Number(n)||0)>=0?"+":"")+(Number(n)||0).toFixed(2)+"%";
 const safe=(s)=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let market=[], filter="all", selected="BTC", watchlist=new Set(JSON.parse(localStorage.getItem("oc_watchlist")||"[]"));
-let state=JSON.parse(localStorage.getItem("oc_demo_state")||"null")||{balance:0,holdings:{},history:[]};
-// Expose a read-only balance accessor for separately scoped feature modules.
-window.ocGetDisplayedAssetBalance=function(symbol){const key=String(symbol||"USDT").toUpperCase();return key==="USDT"?Number(state.balance)||0:Number(state.holdings?.[key])||0;};
+let state={balance:0,holdings:{},history:[]};
+let walletLoaded=false,walletOwnerUid=null;
+// Customer wallet balances are read only from userTradeState/{uid} in Firestore.
+window.ocGetDisplayedAssetBalance=function(symbol){
+ if(!walletLoaded||walletOwnerUid!==auth.currentUser?.uid)return 0;
+ const key=String(symbol||"USDT").toUpperCase();
+ return key==="USDT"?Number(state.balance)||0:Number(state.holdings?.[key])||0;
+};
 let profile=JSON.parse(localStorage.getItem("oc_profile")||'{"name":"","currency":"USD"}');
-function saveState(persistCloud=true){localStorage.setItem("oc_demo_state",JSON.stringify(state));if(persistCloud&&typeof window.ocPersistTradeState==="function")return window.ocPersistTradeState();return Promise.resolve(false);}
-// Remove the earlier automatic $10,000 demo grant for browsers that already received it.
-if(localStorage.getItem("oc_demo_credit_10000_v1")==="granted"){
- state.balance=Math.max(0,(Number(state.balance)||0)-10000);saveState();
- try{const activity=JSON.parse(localStorage.getItem("oc_activity_history")||"[]");localStorage.setItem("oc_activity_history",JSON.stringify(activity.filter(a=>a.id&&!String(a.id).startsWith("demo-credit-10000-")&&a.title!=="$10,000 Demo Credit").slice(0,1000)))}catch(e){}
- localStorage.removeItem("oc_demo_credit_10000_v1");
+function saveState(persistCloud=true){
+ if(!persistCloud)return Promise.resolve(false);
+ if(!walletLoaded||walletOwnerUid!==auth.currentUser?.uid)return Promise.reject(new Error("Firestore wallet is not loaded."));
+ if(typeof window.ocPersistTradeState!=="function")return Promise.reject(new Error("Firestore wallet writer is unavailable."));
+ return window.ocPersistTradeState();
 }
 // Preserve existing wallet balances and activity. Automatic first-load resets can erase locally stored account data.
 function readActivity(){try{return JSON.parse(localStorage.getItem("oc_activity_history")||"[]")}catch(e){return []}}
@@ -2953,7 +2957,7 @@ function refreshProfileAccountInfo(){const badge=$("profileAccountStatusBadge"),
 function renderWalletMarket(){const el=$("walletMarketRows");if(!el)return;const q=String($("walletCoinSearch")?.value||"").trim().toLowerCase();const limitValue=String(window.walletCoinExpanded||4);const filter=document.querySelector("#walletCoinFilters [data-wallet-filter].active")?.dataset.walletFilter||"all";let rows=[...market].filter(c=>String(c.name||"").toLowerCase().includes(q)||String(c.symbol||"").toLowerCase().includes(q)).sort((a,b)=>(b.market_cap||0)-(a.market_cap||0));if(filter==="gainers")rows=rows.filter(c=>(c.price_change_percentage_24h||0)>0).sort((a,b)=>(b.price_change_percentage_24h||0)-(a.price_change_percentage_24h||0));if(filter==="losers")rows=rows.filter(c=>(c.price_change_percentage_24h||0)<0).sort((a,b)=>(a.price_change_percentage_24h||0)-(b.price_change_percentage_24h||0));const total=rows.length;rows=rows.slice(0,Number(limitValue)||4);el.innerHTML=rows.length?rows.map(c=>'<tr><td>'+coinAsset(c)+'</td><td>'+money(c.current_price)+'</td><td class="'+((c.price_change_percentage_24h||0)>=0?'green':'red')+'">'+pct(c.price_change_percentage_24h)+'</td><td><button class="secondary" type="button" data-wallet-market-trade="'+safe(c.symbol)+'">Trade</button></td></tr>').join(""):'<tr><td colspan="4" class="empty">No matching coins found. Try another search or filter.</td></tr>';const count=$("walletCoinCount");if(count)count.textContent="Showing "+rows.length+" of "+total+" matching coins";const less=$("walletCoinLess"),more=$("walletCoinMore");if(less)less.disabled=(window.walletCoinExpanded||4)<=4;if(more)more.disabled=rows.length>=total;el.querySelectorAll("[data-wallet-market-trade]").forEach(b=>b.addEventListener("click",()=>{const sel=$("tradeAsset");if(sel)sel.value=b.dataset.walletMarketTrade;showPage("trade");updateTradePreview()}))}
 window.ocApplyAdminDemoBalance=function(amount){const n=Number(amount);if(!Number.isFinite(n)||n<0)return;state.balance=Math.round(n*100)/100;saveState();renderWallet();const summary=document.getElementById("summaryBalance");if(summary)summary.textContent=usdtMoney(state.balance);};
 window.ocApplyAdminDemoAssets=function(balances){if(!balances||typeof balances!=="object"||Array.isArray(balances))return;let changed=false;for(const [rawSymbol,rawAmount] of Object.entries(balances)){const symbol=String(rawSymbol||"").toUpperCase();const amount=Number(rawAmount);if(!/^[A-Z0-9]{2,12}$/.test(symbol)||!Number.isFinite(amount)||amount<0)continue;state.holdings[symbol]=amount;changed=true;}if(changed){saveState();renderWallet();}};
-function renderWallet(){const pricedHoldings=Object.entries(state.holdings).reduce((out,[sym,qty])=>{const symbol=String(sym).toUpperCase(),amount=Number(qty)||0;if(amount<=0||symbol==="USDT")return out;const price=Number(priceFor(symbol)?.current_price||0);if(price>0){out.value+=amount*price;out.priced++;}else out.unpriced++;return out;},{value:0,priced:0,unpriced:0});const totalValue=(Number(state.balance)||0)+pricedHoldings.value;$("summaryBalance").textContent=usdtMoney(state.balance);$("walletBalance").textContent=usdtMoney(totalValue);$("walletBalanceNote").textContent="Estimated total value in USDT · "+pricedHoldings.priced+" priced coin holding"+(pricedHoldings.priced===1?"":"s")+(pricedHoldings.unpriced?"; "+pricedHoldings.unpriced+" asset price"+(pricedHoldings.unpriced===1?" is":"s are")+" unavailable and excluded":"")+" · estimated portfolio";$("holdingsValue").textContent=usdtMoney(pricedHoldings.value);const rows=Object.entries(state.holdings).filter(([sym,qty])=>String(sym).toUpperCase()!=="USDT"&&Number(qty)>0.0000000001&&(! $("hideSmallBalances")?.checked||Number(qty)*(priceFor(sym)?.current_price||0)>=1));$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym,current_price:0},price=Number(c.current_price||0);return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+' '+safe(sym.toUpperCase())+'</td><td>'+(price>0?usdtMoney(Number(qty)*price):"Price unavailable")+'</td></tr>'}).join(''):'<tr><td colspan="3" class="empty">No coin holdings yet. Your USDT balance is shown above.</td></tr>';renderActivityHistory();renderTradeHistory();renderPnl();renderWalletMarket();renderBuyHoldOptions()}
+function renderWallet(){if(!walletLoaded||walletOwnerUid!==auth.currentUser?.uid){const note=$("walletBalanceNote");if(note)note.textContent="Loading your Firestore wallet…";const balance=$("summaryBalance");if(balance)balance.textContent="—";const total=$("walletBalance");if(total)total.textContent="—";return;}const pricedHoldings=Object.entries(state.holdings).reduce((out,[sym,qty])=>{const symbol=String(sym).toUpperCase(),amount=Number(qty)||0;if(amount<=0||symbol==="USDT")return out;const price=Number(priceFor(symbol)?.current_price||0);if(price>0){out.value+=amount*price;out.priced++;}else out.unpriced++;return out;},{value:0,priced:0,unpriced:0});const totalValue=(Number(state.balance)||0)+pricedHoldings.value;$("summaryBalance").textContent=usdtMoney(state.balance);$("walletBalance").textContent=usdtMoney(totalValue);$("walletBalanceNote").textContent="Estimated total value in USDT · "+pricedHoldings.priced+" priced coin holding"+(pricedHoldings.priced===1?"":"s")+(pricedHoldings.unpriced?"; "+pricedHoldings.unpriced+" asset price"+(pricedHoldings.unpriced===1?" is":"s are")+" unavailable and excluded":"")+" · estimated portfolio";$("holdingsValue").textContent=usdtMoney(pricedHoldings.value);const rows=Object.entries(state.holdings).filter(([sym,qty])=>String(sym).toUpperCase()!=="USDT"&&Number(qty)>0.0000000001&&(! $("hideSmallBalances")?.checked||Number(qty)*(priceFor(sym)?.current_price||0)>=1));$("holdingsRows").innerHTML=rows.length?rows.map(([sym,qty])=>{const c=priceFor(sym)||{symbol:sym,name:sym,current_price:0},price=Number(c.current_price||0);return '<tr><td>'+coinAsset(c)+'</td><td>'+Number(qty).toFixed(8)+' '+safe(sym.toUpperCase())+'</td><td>'+(price>0?usdtMoney(Number(qty)*price):"Price unavailable")+'</td></tr>'}).join(''):'<tr><td colspan="3" class="empty">No coin holdings yet. Your USDT balance is shown above.</td></tr>';renderActivityHistory();renderTradeHistory();renderPnl();renderWalletMarket();renderBuyHoldOptions()}
 document.addEventListener("change",e=>{if(e.target&&e.target.id==="hideSmallBalances")renderWallet();if(e.target&&e.target.id==="homeHistoryFilter")renderActivityHistory()});
 function showPage(page){const guest=window.ocLoggedOut===true&&!auth.currentUser;if(guest&&page!=="register"&&page!=="public-market")page="public-market";document.body.classList.toggle("oc-visitor-mode",guest);document.body.classList.toggle("oc-auth-screen",guest&&page==="register");if(["deposit","withdraw","transfer","convert"].includes(page))recordActivity(["deposit","withdraw"].includes(page)?page:"activity","Opened "+page.charAt(0).toUpperCase()+page.slice(1)+" page","Page opened; no funds moved or transaction submitted.","Page viewed");if(page==="browser"){const input=$("browserSearchInput");if(input)input.focus()}document.querySelectorAll("main>section[id^=page-]").forEach(s=>s.classList.toggle("hidden",s.id!=="page-"+page));window.ocSyncHomeActions?.();document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page||(page==="markets"&&b.dataset.page==="home")));window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")refreshProfileAccountInfo();if(page==="notifications")window.ocRenderUserNotifications?.(window.onchaincryptoCurrentUser||null);if(page==="wallet")renderWallet();if(page==="markets"&&!marketRequestInProgress&&(!market.length||Date.now()-(window.ocMarketLastSuccess||0)>60000))loadMarket();if(page==="trade"){updateTradePreview();loadPriceHistory();renderPnl()}if(page==="admin")showAdminDashboard();if(page==="register")$("registerFirstName")?.focus()}
 window.showPage = showPage;
@@ -4079,16 +4083,17 @@ let tradeCloudReadyUid=null;
 window.ocTradeCloudReadyUid=null;
 let tradeCloudWriteChain=Promise.resolve();
 function applyRemoteTradeState(snap,user){
-  if(auth.currentUser?.uid!==user.uid||!snap.exists())return;
-  // Ignore cached or locally pending snapshots; only another server-confirmed
-  // account update may replace this device's wallet view.
+  if(auth.currentUser?.uid!==user.uid)return;
+  if(!snap.exists()){walletLoaded=false;walletOwnerUid=null;tradeCloudReadyUid=null;window.ocTradeCloudReadyUid=null;return;}
+  // Ignore cached or locally pending snapshots; only server-confirmed Firestore
+  // wallet data may replace this device's wallet view.
   if(snap.metadata?.fromCache||snap.metadata?.hasPendingWrites)return;
   const saved=snap.data()||{},balance=Number(saved.balance);
   if(!Number.isFinite(balance)||balance<0){console.warn("Remote account wallet data is invalid.");return;}
   const holdings=saved.holdings&&typeof saved.holdings==="object"&&!Array.isArray(saved.holdings)?saved.holdings:{};
   const history=Array.isArray(saved.history)?saved.history.slice(0,300):[];
   state={balance:Math.round(balance*100)/100,holdings,history};
-  saveState(false);
+  walletLoaded=true;walletOwnerUid=user.uid;
   renderWallet();renderTradeHistory();renderWalletCoinList();renderPnl();renderTradeOutcomes();updateTradePreview();
   tradeCloudReadyUid=user.uid;
   window.ocTradeCloudReadyUid=user.uid;
@@ -4103,59 +4108,40 @@ function watchCloudTradeState(ref,user){
 }
 window.ocPersistTradeState=function(){
   const user=auth.currentUser;
-  if(!user?.uid||tradeCloudReadyUid!==user.uid)return Promise.reject(new Error("Account wallet is still loading. Please wait and try again."));
+  if(!user?.uid||tradeCloudReadyUid!==user.uid||!walletLoaded||walletOwnerUid!==user.uid)return Promise.reject(new Error("Firestore account wallet is still loading. Please wait and try again."));
   const payload={uid:user.uid,balance:Math.max(0,Number(state.balance)||0),holdings:state.holdings&&typeof state.holdings==="object"?{...state.holdings}:{},history:Array.isArray(state.history)?state.history.slice(0,300):[],updatedAt:serverTimestamp()};
   const write=tradeCloudWriteChain.catch(()=>{}).then(()=>setDoc(doc(db,"userTradeState",user.uid),payload,{merge:true}));
   tradeCloudWriteChain=write;
   return write;
 };
 async function restoreCloudTradeState(user){
-  if(!user?.uid)return;
-  tradeCloudReadyUid=null;
-  window.ocTradeCloudReadyUid=null;
+  if(!user?.uid){
+    walletLoaded=false;walletOwnerUid=null;state={balance:0,holdings:{},history:[]};
+    tradeCloudReadyUid=null;window.ocTradeCloudReadyUid=null;return false;
+  }
+  walletLoaded=false;walletOwnerUid=null;
+  tradeCloudReadyUid=null;window.ocTradeCloudReadyUid=null;
+  state={balance:0,holdings:{},history:[]};
   try{
     const ref=doc(db,"userTradeState",user.uid);
     const snap=await getDoc(ref);
-    if(auth.currentUser?.uid!==user.uid)return;
+    if(auth.currentUser?.uid!==user.uid)return false;
+    if(!snap.exists())throw new Error("Firestore wallet record not found. No local, demo, or profile balance was imported.");
+    if(snap.metadata?.fromCache||snap.metadata?.hasPendingWrites)throw new Error("Firestore wallet is not yet confirmed by the server.");
     watchCloudTradeState(ref,user);
-    if(snap.exists()){
-      const saved=snap.data()||{};
-      const balance=Number(saved.balance);
-      const holdings=saved.holdings&&typeof saved.holdings==="object"&&!Array.isArray(saved.holdings)?saved.holdings:{};
-      const history=Array.isArray(saved.history)?saved.history.slice(0,300):[];
-      if(!Number.isFinite(balance)||balance<0)throw new Error("Saved account wallet data is invalid.");
-      state={balance:Math.round(balance*100)/100,holdings,history};
-      saveState(false);
-      renderWallet();renderTradeHistory();renderWalletCoinList();renderPnl();renderTradeOutcomes();updateTradePreview();
-      tradeCloudReadyUid=user.uid;
-      window.ocTradeCloudReadyUid=user.uid;
-      window.ocValidateQuickTradeForm?.();
-      syncAdminDemoBalance(user,true);
-    }else{
-      const localHasTradeData=(Number(state.balance)||0)>0
-        || (state.history||[]).length>0
-        || Object.values(state.holdings||{}).some(value=>Number(value)>0);
-      tradeCloudReadyUid=user.uid;
-      window.ocTradeCloudReadyUid=user.uid;
-      window.ocValidateQuickTradeForm?.();
-      // First sign-in after this upgrade: preserve the current device's account
-      // state and upload it. Only seed from the admin balance when no local
-      // trading state exists, so an old local profit is not overwritten.
-      syncAdminDemoBalance(user,localHasTradeData);
-      if(localHasTradeData)window.ocPersistTradeState();
-    }
+    applyRemoteTradeState(snap,user);
+    if(!walletLoaded)throw new Error("Firestore wallet data could not be confirmed.");
+    window.ocValidateQuickTradeForm?.();
+    return true;
   }catch(error){
-    console.warn("Account trade restore failed:",error?.code||error);
-    // Fail closed: never allow a trade to overwrite cloud balances until the
-    // signed-in account wallet has been read successfully.
-    tradeCloudReadyUid=null;
-    window.ocTradeCloudReadyUid=null;
+    console.warn("Firestore wallet restore failed:",error?.code||error);
+    walletLoaded=false;walletOwnerUid=null;tradeCloudReadyUid=null;window.ocTradeCloudReadyUid=null;
     window.ocValidateQuickTradeForm?.();
     const result=document.getElementById("timedResult");
-    if(result)result.textContent="Your account wallet could not sync. Refresh and try again before trading.";
+    if(result)result.textContent="Your Firestore wallet could not be loaded. No other balance source was used.";
+    return false;
   }
 }
-function syncAdminDemoBalance(user,skipInitial=false){if(stopAdminWalletSync){stopAdminWalletSync();stopAdminWalletSync=null;}if(!user?.uid)return;try{let first=true,lastAdminBalance,lastAdminAssets;stopAdminWalletSync=onSnapshot(doc(db,"users",user.uid),snap=>{if(!snap.exists())return;const data=snap.data()||{};if(first){first=false;if(skipInitial){lastAdminBalance=typeof data.demoBalanceUSDT==="number"?data.demoBalanceUSDT:undefined;lastAdminAssets=data.demoAssetBalances?JSON.stringify(data.demoAssetBalances):undefined;return;}}const hasBalance=typeof data.demoBalanceUSDT==="number";const nextAssets=data.demoAssetBalances&&typeof data.demoAssetBalances==="object"&&!Array.isArray(data.demoAssetBalances)?JSON.stringify(data.demoAssetBalances):undefined;const balanceChanged=hasBalance&&data.demoBalanceUSDT!==lastAdminBalance;const assetsChanged=nextAssets!==undefined&&nextAssets!==lastAdminAssets;if(hasBalance)lastAdminBalance=data.demoBalanceUSDT;if(nextAssets!==undefined)lastAdminAssets=nextAssets;if(balanceChanged&&typeof window.ocApplyAdminDemoBalance==="function")window.ocApplyAdminDemoBalance(data.demoBalanceUSDT);if(assetsChanged&&typeof window.ocApplyAdminDemoAssets==="function")window.ocApplyAdminDemoAssets(JSON.parse(nextAssets));},error=>console.warn("Live account wallet sync unavailable:",error?.code||error));}catch(error){console.warn("Account wallet sync unavailable:",error?.code||error);}}
 onAuthStateChanged(auth, (user) => {
   // Firebase has now resolved the persisted session; remove the startup gate.
   document.documentElement.classList.remove("oc-auth-pending");
@@ -4165,8 +4151,8 @@ onAuthStateChanged(auth, (user) => {
     const firstName = savedName.trim().split(/\s+/)[0];
     homeGreeting.textContent = user ? "Hi " + firstName : "Onchain";
   }
-  if(stopAdminWalletSync){stopAdminWalletSync();stopAdminWalletSync=null;}
   if(stopTradeStateSync){stopTradeStateSync();stopTradeStateSync=null;}
+  walletLoaded=false;walletOwnerUid=null;state={balance:0,holdings:{},history:[]};
   tradeCloudReadyUid=null;
   window.ocTradeCloudReadyUid=null;
   const previousUser = window.onchaincryptoCurrentUser || null;
