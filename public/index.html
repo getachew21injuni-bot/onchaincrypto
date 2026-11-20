@@ -1957,6 +1957,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
        if(copy){const value=copy.dataset.walletCopy||"";let copied=false;try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(value);copied=true}}catch(_){}if(!copied){const field=document.createElement("textarea");field.value=value;field.setAttribute("readonly","");field.style.position="fixed";field.style.opacity="0";document.body.appendChild(field);field.select();try{copied=document.execCommand("copy")}catch(_){}field.remove()}copy.textContent=copied?"Copied":"Copy address manually";setTimeout(()=>{copy.textContent="Copy"},1600)}
       });
       window.ocRenderWalletActivity();
+      if(window.onchaincryptoCurrentUser?.uid)void window.ocLoadWalletLedger();
     })();
     </script>
   </section>
