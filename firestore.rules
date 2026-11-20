@@ -114,40 +114,29 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Members may submit/read their own KYC details. They cannot set an
-    // approved/rejected status themselves. Review status changes require
-    // a trusted Admin SDK backend or an admin custom claim.
-    // KYC details and private Storage object paths. Users can submit only
-    // their own pending record; only the verified admin can make a decision.
+    // Private KYC metadata. ID images are stored in two protected Firestore
+    // subdocuments so the workflow stays compatible with the free Firebase plan.
     match /kycSubmissions/{uid} {
       allow read: if owns(uid) || isAdmin();
       allow create: if owns(uid)
         && request.resource.data.uid == uid
         && request.resource.data.status == 'pending'
-        && request.resource.data.frontImagePath == 'kycDocuments/' + uid + '/front'
-        && request.resource.data.backImagePath == 'kycDocuments/' + uid + '/back'
+        && request.resource.data.documentStorage == 'firestore'
         && request.resource.data.keys().hasOnly([
           'uid','email','legalName','country','documentType','documentNumber',
-          'frontImagePath','backImagePath','frontFileName','backFileName',
-          'frontContentType','backContentType','status','submittedAt','updatedAt'
+          'documentStorage','frontFileName','backFileName','frontContentType',
+          'backContentType','status','submittedAt','updatedAt'
         ]);
       allow update: if (
         owns(uid)
         && resource.data.status in ['pending','rejected']
         && request.resource.data.uid == uid
         && request.resource.data.status == 'pending'
-        && request.resource.data.frontImagePath == 'kycDocuments/' + uid + '/front'
-        && request.resource.data.backImagePath == 'kycDocuments/' + uid + '/back'
-        && request.resource.data.keys().hasOnly([
-          'uid','email','legalName','country','documentType','documentNumber',
-          'frontImagePath','backImagePath','frontFileName','backFileName',
-          'frontContentType','backContentType','status','submittedAt','updatedAt',
-          'reviewedAt','reviewedBy'
-        ])
+        && request.resource.data.documentStorage == 'firestore'
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'email','legalName','country','documentType','documentNumber',
-          'frontImagePath','backImagePath','frontFileName','backFileName',
-          'frontContentType','backContentType','status','submittedAt','updatedAt'
+          'documentStorage','frontFileName','backFileName','frontContentType',
+          'backContentType','status','submittedAt','updatedAt'
         ])
       ) || (
         isAdmin()
@@ -158,6 +147,25 @@ service cloud.firestore {
         && request.resource.data.reviewedBy == request.auth.token.email
       );
       allow delete: if false;
+
+      // Only the account owner may upload/replace the two compressed images.
+      // Only the verified administrator may read them in the review dialog.
+      match /documents/{side} {
+        allow read: if isAdmin();
+        allow create, update: if owns(uid)
+          && side in ['front','back']
+          && request.resource.data.uid == uid
+          && request.resource.data.side == side
+          && request.resource.data.contentType == 'image/jpeg'
+          && request.resource.data.dataUrl is string
+          && request.resource.data.dataUrl.size() <= 440000
+          && request.resource.data.fileName is string
+          && request.resource.data.fileName.size() <= 120
+          && request.resource.data.keys().hasOnly([
+            'uid','side','contentType','dataUrl','fileName','updatedAt'
+          ]);
+        allow delete: if false;
+      }
     }
 
     // Private in-app notifications; only verified admins can issue notifications.
