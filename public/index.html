@@ -1925,20 +1925,28 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
       const explorer=(network,address)=>{const base=explorers[networkKey(network)];return base&&address&&address!=="Not provided"?base+encodeURIComponent(address):""};
       let filter="all";
       window.ocWalletWithdrawals=[];
+      window.ocWalletLedgerRows=window.ocWalletLedgerRows||[];
+      window.ocLoadWalletLedger=async function(){
+       try{
+        const result=await window.ocWalletApiGet("/v1/wallet/ledger");
+        window.ocWalletLedgerRows=Array.isArray(result.rows)?result.rows:[];
+       }catch(error){console.warn("Wallet ledger refresh unavailable:",error?.message||error);}
+       window.ocRenderWalletActivity();
+      };
       window.ocRenderWalletActivity=function(){
        const host=document.getElementById("ocWalletActivityRows");if(!host)return;
        const withdrawals=(window.ocWalletWithdrawals||[]).map(x=>({kind:"withdraw",time:x.createdAt?.toDate?.()?.toISOString?.()||x.createdAtText||"",data:x}));
-       let conversions=[];try{conversions=JSON.parse(localStorage.getItem("oc_convert_history")||"[]")}catch(_){}
+       const conversions=(window.ocWalletLedgerRows||[]).filter(x=>x.type==="conversion").map(x=>({kind:"convert",time:x.createdAtText||"",data:x}));
        const items=[
         ...withdrawals.map(x=>({kind:"withdraw",time:x.time,data:x.data})),
-        ...conversions.map(x=>({kind:"convert",time:x.time,data:x.data||x}))
+        ...conversions
        ].sort((a,b)=>new Date(b.time||0)-new Date(a.time||0)).filter(x=>filter==="all"||x.kind===filter);
-       host.innerHTML=items.length?items.map((item,index)=>{
+       host.innerHTML=items.length?items.map(item=>{
         if(item.kind==="convert"){
          const x=item.data;
-         return '<details class="panel" style="padding:12px 14px;margin:8px 0"><summary style="cursor:pointer;display:flex;justify-content:space-between;gap:12px"><span><strong>Convert · '+esc(x.from||"")+" → "+esc(x.to||"")+'</strong><span class="muted tiny" style="display:block">'+esc(new Date(item.time).toLocaleString())+'</span></span><span class="tag">CONVERT</span></summary><div class="muted tiny" style="padding-top:10px;line-height:1.7">Sent: <strong>'+esc(x.fromQty)+' '+esc(x.from)+'</strong><br>Received: <strong>'+esc(x.toQty)+' '+esc(x.to)+'</strong><br>Fee: '+esc(x.feeUsdt||0)+' USDT<br>Status: '+esc(x.status||"Recorded")+'</div></details>';
+         return '<details class="panel" style="padding:12px 14px;margin:8px 0"><summary style="cursor:pointer;display:flex;justify-content:space-between;gap:12px"><span><strong>Convert · '+esc(x.from||"")+" → "+esc(x.to||"")+'</strong><span class="muted tiny" style="display:block">'+esc(new Date(item.time).toLocaleString())+'</span></span><span class="tag">CONVERT</span></summary><div class="muted tiny" style="padding-top:10px;line-height:1.7">Sent: <strong>'+esc(x.fromQty??x.amount)+' '+esc(x.from||"")+'</strong><br>Received: <strong>'+esc(x.toQty??x.received)+' '+esc(x.to||"")+'</strong><br>Fee: '+esc(x.feeUsdt??x.feeUSDT??0)+' USDT<br>Status: '+esc(x.status||"Completed")+'</div></details>';
         }
-        const x=item.data,status=String(x.status||"pending").toLowerCase(),label=status==="approved"?"Successful":status==="rejected"?"Rejected":"Pending",amount=Number(x.amount)||0,asset=String(x.asset||"").toUpperCase(),network=String(x.network||"Not provided"),address=String(x.destinationAddress||"Not provided"),url=explorer(network,address),color=label==="Successful"?"#16a36a":label==="Rejected"?"#e5484d":"#b78103";
+        const x=item.data,status=String(x.status||"pending").toLowerCase(),label=status==="approved"||status==="completed"?"Successful":status==="rejected"?"Rejected":"Pending",amount=Number(x.amount)||0,asset=String(x.asset||"").toUpperCase(),network=String(x.network||"Not provided"),address=String(x.destinationAddress||"Not provided"),url=explorer(network,address),color=label==="Successful"?"#16a36a":label==="Rejected"?"#e5484d":"#b78103";
         return '<details class="panel" style="padding:12px 14px;margin:8px 0"><summary style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px"><span><strong>Withdrawal · '+esc(label)+'</strong><span class="muted tiny" style="display:block">'+esc(new Date(item.time||Date.now()).toLocaleString())+'</span></span><strong style="color:'+color+'">'+esc(amount)+' '+esc(asset)+'</strong></summary><div class="muted tiny" style="padding-top:10px;line-height:1.8"><div>Network: <strong>'+esc(network)+'</strong></div><div>Destination address: <span style="overflow-wrap:anywhere">'+esc(address)+'</span> <button type="button" class="secondary" data-wallet-copy="'+esc(address)+'" style="padding:4px 9px;margin-left:5px">Copy</button></div>'+(url?'<div><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">View address on '+esc(network)+' explorer ↗</a></div>':'<div>Explorer link unavailable for this network.</div>')+(status==="pending"?'<div style="margin-top:6px">Estimated time: Usually within 30 minutes · Maximum 24 hours.</div>':'<div style="margin-top:6px">Status: <strong style="color:'+color+'">'+esc(label)+'</strong></div>')+'</div></details>';
        }).join(""):'<div class="empty">No '+(filter==="all"?"wallet activity":filter==="withdraw"?"withdrawals":"conversions")+' recorded yet.</div>';
       };
