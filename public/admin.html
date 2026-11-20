@@ -319,16 +319,15 @@ async function renderDemoFinance(view){
  try{
   const {collection,getDocs,query,limit,doc,setDoc,writeBatch,serverTimestamp,runTransaction}=window.__ocAdminFirebase;
   const db=window.__ocAdminFirebase.db;
-  const [us,ws,usdtSnap,assetSnap]=await Promise.all([
+  const [us,ws,ledgerSnap]=await Promise.all([
    getDocs(query(collection(db,'users'),limit(200))),
    getDocs(query(collection(db,'userTradeState'),limit(500))),
-   getDocs(query(collection(db,'demoTransactions'),limit(200))),
-   getDocs(query(collection(db,'demoAssetTransactions'),limit(300)))
+   getDocs(query(collection(db,'walletLedger'),limit(500)))
   ]);
   const users=us.docs.map(d=>({id:d.id,...d.data()}));
   const walletMap=new Map(ws.docs.map(d=>[d.id,d.data()||{}]));
-  const allTx=[...usdtSnap.docs.map(d=>({id:d.id,...d.data(),asset:'USDT',amount:d.data().amountUSDT,balanceAfter:d.data().balanceAfterUSDT})),...assetSnap.docs.map(d=>({id:d.id,...d.data()}))];
-  const txs=allTx.filter(t=>!t.adminHiddenFromHistory&&(view==='Deposits'?t.type==='deposit':t.type==='withdrawal')).sort((a,b)=>String(b.createdAtText||'').localeCompare(String(a.createdAtText||''))).slice(0,100);
+  const allTx=ledgerSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const txs=allTx.filter(t=>view==='Deposits'?t.type==='deposit':t.type==='withdrawal').sort((a,b)=>String(b.createdAtText||'').localeCompare(String(a.createdAtText||''))).slice(0,100);
   if(!users.length){body.innerHTML='<div class="notice">No registered user profiles were found. A user must register before an account adjustment can be assigned.</div>';return;}
   const opts=users.map(u=>'<option value="'+esc(u.id)+'">'+esc((u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||u.email||u.id)+' — '+(u.email||u.id))+'</option>').join('');
   const assetOptions=assets.map(a=>'<option value="'+a+'">'+a+'</option>').join('');
@@ -382,34 +381,12 @@ async function renderDemoFinance(view){
    const isDeposit=view==='Deposits';
    const btn=form.querySelector('button[type=submit]');btn.disabled=true;msg.textContent='Updating the canonical Firestore wallet…';
    try{
-    const walletRef=doc(db,'userTradeState',uid),adminUser=window.__ocAdminFirebase.auth.currentUser;
-    const notificationRef=doc(collection(db,'userNotifications',uid,'items'));
-    const activityRef=doc(collection(db,'userActivityEvents'));
-    const ledgerRefs=targets.map(symbol=>({symbol,ref:doc(collection(db,symbol==='USDT'?'demoTransactions':'demoAssetTransactions'))}));
-    await runTransaction(db,async tx=>{
-     const walletSnap=await tx.get(walletRef);
-     if(!walletSnap.exists())throw new Error('canonical-firestore-wallet-not-found-no-legacy-balance-was-used');
-     const wallet=walletSnap.data()||{},holdings=wallet.holdings&&typeof wallet.holdings==='object'&&!Array.isArray(wallet.holdings)?{...wallet.holdings}:{};
-     let balance=Number(wallet.balance||0);
-     if(!Number.isFinite(balance)||balance<0)throw new Error('invalid-canonical-wallet-balance');
-     const changes=[];
-     for(const symbol of targets){
-      const before=symbol==='USDT'?balance:Number(holdings[symbol]||0);
-      if(!Number.isFinite(before)||before<0)throw new Error('invalid-wallet-asset-balance-'+symbol);
-      const after=Number((before+(isDeposit?amount:-amount)).toFixed(symbol==='USDT'?2:8));
-      if(after<0)throw new Error('insufficient-firestore-wallet-balance-'+symbol);
-      changes.push({symbol,before,after});
-      if(symbol==='USDT')balance=after;else holdings[symbol]=after;
-     }
-     tx.set(walletRef,{uid,balance,holdings,history:Array.isArray(wallet.history)?wallet.history.slice(0,300):[],updatedAt:serverTimestamp()},{merge:true});
-     for(const change of changes){
-      const ledgerRef=ledgerRefs.find(item=>item.symbol===change.symbol).ref;
-      if(change.symbol==='USDT')tx.set(ledgerRef,{uid,type:isDeposit?'deposit':'withdrawal',amountUSDT:amount,balanceBeforeUSDT:change.before,balanceAfterUSDT:change.after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:adminUser.uid,note,source:'firestore-wallet',status:'completed'});
-      else tx.set(ledgerRef,{uid,type:isDeposit?'deposit':'withdrawal',asset:change.symbol,amount,balanceBefore:change.before,balanceAfter:change.after,createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),createdBy:adminUser.uid,note,source:'firestore-wallet',status:'completed'});
-     }
-     tx.set(notificationRef,{kind:isDeposit?'deposit':'withdrawal_approved',title:isDeposit?'Successfully deposited '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset):'Withdrawal successfully processed',message:isDeposit?'Successfully deposited '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' to your account. Your Firestore wallet has been updated.':'Your withdrawal of '+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' was approved as an account balance adjustment. No external blockchain payout was sent.'+(note?' Admin note: '+note:''),createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:adminUser.uid,source:'firestore-wallet'});
-     tx.set(activityRef,{uid,email:selected.email||selected.emailAddress||'Unknown',type:isDeposit?'deposit':'withdraw',title:isDeposit?'Admin deposit successful':'Admin withdrawal successful',details:'Admin '+(isDeposit?'credited ':'debited ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'supported assets':asset)+' · Firestore wallet adjustment'+(note?' · Note: '+note:''),status:'Successful',createdAt:serverTimestamp(),createdBy:adminUser.uid,source:'firestore-wallet'});
-    });
+    const adminUser=window.__ocAdminFirebase.auth.currentUser;
+    const requestId=crypto.randomUUID().replace(/-/g,"");
+    await ocAdminWalletPost("/v1/admin/adjust-assets",{
+     uid,requestId,operation:isDeposit?"deposit":"withdrawal",assets:targets,amount,
+     reason:note||"Admin manual account balance adjustment"
+    },adminUser);
     msg.textContent=(isDeposit?'Deposit successful: ':'Withdrawal successful: ')+amount.toLocaleString()+' '+(asset==='__ALL__'?'of every supported asset':asset)+'. Canonical Firestore wallet, transaction ledger, notification, and activity record were saved together.';
     await renderDemoFinance(view);
    }catch(err){
