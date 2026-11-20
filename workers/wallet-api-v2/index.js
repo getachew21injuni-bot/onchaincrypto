@@ -183,7 +183,7 @@ async function reviewDepositWithdrawal(env, claims, body) {
   const ledgerId = `admin-${kind}-${requestId}`;
   const ledger = createLedgerWrite(ledgerId, {
     uid, type: kind, asset, amount, balanceBefore: before, balanceAfter: after,
-    source: "admin-request-review", requestId, actorUid: claims.sub, actorEmail: reviewedBy,
+    source: "admin-request-review", requestId, actorUid: claims.sub, actorEmail: reviewedBy, createdAtText: reviewedAt,
     createdAt: { timestampValue: reviewedAt }
   });
   await commitWrites(access, [
@@ -228,7 +228,7 @@ async function adminAdjustAssets(env, claims, body) {
     walletWrite(uid, wallet.data, wallet.updateTime, nextBalance, holdings, Array.isArray(wallet.data.history) ? wallet.data.history.slice(0, 300) : []),
     ...changes.map(change => createLedgerWrite("admin-" + requestId + "-" + change.asset, {
       uid, type: operation, asset: change.asset, amount, balanceBefore: change.before, balanceAfter: change.after,
-      reason, requestId, actorUid: claims.sub, actorEmail, source: "admin-finance-adjustment",
+      reason, requestId, actorUid: claims.sub, actorEmail, source: "admin-finance-adjustment", createdAtText: createdAt,
       createdAt: { timestampValue: createdAt }
     })),
     { update: { name: docPath("userNotifications/" + uid + "/items", requestId), fields: {
