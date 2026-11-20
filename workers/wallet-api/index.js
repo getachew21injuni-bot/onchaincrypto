@@ -56,7 +56,7 @@ async function verifyFirebaseIdToken(token, env) {
   const email = typeof claims.email === "string" ? claims.email.toLowerCase() : "";
   const isAllowlistedAdmin = claims.email_verified === true && email !== "" && configuredAdmins.includes(email);
   if (claims.admin !== true && !isAllowlistedAdmin) throw new Error("Administrator access is required.");
-  return claims;
+  return { ...claims, __isAdmin: claims.admin === true || isAllowlistedAdmin };
 }
 async function serviceAccessToken(env) {
   if (!env.FIREBASE_SERVICE_ACCOUNT) throw new Error("Worker service-account secret is missing.");
@@ -208,7 +208,7 @@ export default {
       const claims = await verifyFirebaseIdToken(authorization.slice(7), env);
       const body = await request.json();
       const uid = typeof body.uid === "string" ? body.uid.trim() : "";
-      if (!uid || uid.length > 128 || uid.includes("/") || uid !== claims.sub && claims.admin !== true) {
+      if (!uid || uid.length > 128 || uid.includes("/") || uid !== claims.sub && claims.__isAdmin !== true) {
         throw new Error("A valid target user UID is required.");
       }
       const report = await reconcile(env, uid);
