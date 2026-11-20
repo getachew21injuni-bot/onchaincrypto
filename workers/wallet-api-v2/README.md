@@ -1,30 +1,44 @@
 # Wallet API v2 — isolated staging implementation
 
-This directory is a separate Worker implementation. It does not replace `workers/wallet-api/index.js` (the existing read-only reconciliation Worker), and it is not wired into the customer website.
+This Worker is a staged replacement candidate for OnChainSpro's wallet mutation backend. It is deliberately isolated from production: it has its own Wrangler name and is not wired to the live customer or admin pages. It does not overwrite `onchaincrypto-deposit-verifier` or `workers/wallet-api/index.js`.
 
-## Current routes
+## Implemented routes
 
-- `GET /health`: static mode response only.
-- `GET /v1/wallet`: verifies a Firebase ID token and reads only `userTradeState/{authenticated uid}` using the Worker service account.
-- `POST /v1/admin/adjust-usdt`: requires a verified Firebase ID token with custom claim `admin: true`, or a verified email in `ADMIN_EMAILS`. Applies a non-zero USDT adjustment to an existing canonical wallet and creates `walletLedger/{requestId}` in one Firestore commit. Uses the wallet document updateTime precondition and ledger create-only precondition. It never creates a missing wallet.
+- `GET /health`: reports staged mode only.
+- `GET /v1/wallet`: verifies a Firebase ID token and reads only `userTradeState/{authenticated uid}`. A missing wallet returns 404; it is never seeded.
+- `POST /v1/admin/adjust-usdt`: verified admin adjustment against an existing canonical wallet. Uses a wallet update-time precondition and create-only `walletLedger/{requestId}`.
+- `POST /v1/admin/review-request`: admin approves/rejects a pending deposit or withdrawal request. Approval changes the canonical wallet, request status, and append-only `walletLedger` record in one Firestore commit. It records an internal account adjustment only; it does not verify an on-chain deposit or pay an external withdrawal.
+- `POST /v1/admin/review-transfer`: admin approves/rejects an internal USDT transfer. Approval atomically debits and credits the two canonical wallets, updates the pending request, creates the `internalTransfers` business record, and creates sender/recipient entries in `walletLedger`.
 
-## Important implementation boundary
+All admin routes require a Firebase ID token with `admin: true`, or a verified email included in the Worker's `ADMIN_EMAILS` variable. All wallet updates use Firestore update-time preconditions. Ledger writes are create-only, so duplicate request IDs cannot silently apply a second credit/debit.
 
-This is a staged foundation, NOT the completed wallet migration. Buy/sell, timed-trade settlement, conversions, internal transfers, deposit crediting, withdrawal reservation/payout, and their idempotency rules are not implemented here. The customer app still contains browser-side Firestore wallet writes in the migration branch. Do not connect this Worker to the live app, deploy it as the production API, or tighten Firestore rules until every balance-changing path is migrated and tested.
+## Not yet implemented — do not connect to production
 
-The admin adjustment route is included as a narrowly scoped first write path. Before enabling it, verify that the admin identity and adjustment workflow match the platform's actual authorization policy. A Firebase custom claim is preferred. Email allowlisting is a fallback and requires verified email.
+Customer balance-changing paths are not yet migrated. The following still need trusted backend implementations and customer/admin frontend integration:
+
+- Buy/sell and Buy & Hold orders.
+- Timed Quick Trade start/settlement. The browser currently computes outcome and P/L; the server must instead own the trade record, trusted market quote, control settings, expiry and settlement.
+- Asset conversion and fees.
+- Customer deposit/withdrawal request submission and payout verification.
+- Customer internal-transfer request creation.
+- All remaining admin finance adjustments and request queue UI integration.
+- Removal of every browser-side write to `userTradeState/{uid}`.
+- Final Firestore rules that allow client reads but deny client wallet writes.
+
+Do not tighten wallet rules before all direct customer/admin write paths have been migrated. Doing so would break existing flows. Do not merge or deploy this branch as a production cutover.
 
 ## Cloudflare staging configuration
 
-A separate Wrangler configuration is included at `wrangler.toml`. It names this Worker `onchainspro-wallet-api-v2` and does not bind it to the production domain. Create/configure it as a NEW staging Worker; do not overwrite `onchaincrypto-deposit-verifier` or the existing reconciliation Worker.
+The isolated Wrangler config names this Worker `onchainspro-wallet-api-v2` and uses `workers_dev = true`. It has no production route or custom-domain binding.
 
-From this directory, the syntax-only check is run from the repository root with:
+For a later staging deployment, configure:
+- `ALLOWED_ORIGINS`: only the exact staging website origin(s).
+- `ADMIN_EMAILS`: exact verified admin email(s), if custom Firebase admin claims are not used.
+- Secret `FIREBASE_SERVICE_ACCOUNT`: a dedicated service-account JSON for project `onchaincrypto-d976b`.
 
-```sh
-npm run check:wallet-api-v2
-```
+Never commit or paste the service-account JSON into GitHub or chat. Grant the service account only the Firestore data permissions required by the Worker. Do not grant Project Editor or Owner. Do not reuse a broad production secret without reviewing its IAM permissions.
 
-The following commands are examples for a later, separately approved staging deployment only; they have NOT been run:
+Staging deployment commands, to be run only after the backend and frontends are complete and tested:
 
 ```sh
 cd workers/wallet-api-v2
@@ -32,53 +46,40 @@ npx wrangler secret put FIREBASE_SERVICE_ACCOUNT
 npx wrangler deploy
 ```
 
-Set `ALLOWED_ORIGINS` and `ADMIN_EMAILS` as Worker variables in the Cloudflare dashboard before any staging test. Keep the allowed origin limited to a dedicated staging site. Do not add the live OnChainSpro domain until the complete migration has passed review.
+These commands have not been run. No Cloudflare Worker has been deployed by this change.
 
-Variables:
-- `ALLOWED_ORIGINS`: exact staging origin(s), comma-separated. Do not add the production domain during staging.
-- `ADMIN_EMAILS`: exact verified admin email(s), comma-separated; use custom admin claims where possible.
-
-Secret:
-- `FIREBASE_SERVICE_ACCOUNT`: JSON for a dedicated service account in project `onchaincrypto-d976b`. Never commit this JSON or paste it into chat.
-
-IAM:
-- This implementation reads and writes Firestore, so the service identity needs the minimum Firestore data read/write permissions required by the Firestore REST API. Do not reuse a broadly privileged key without reviewing its IAM roles first. Prefer a dedicated service account and a narrowly scoped custom role. Do not grant Project Editor or Owner.
-
-## Data contract
+## Canonical wallet and ledger contract
 
 Canonical wallet: `userTradeState/{uid}`
 - `uid`: string
 - `balance`: numeric USDT balance
-- `holdings`: map of asset symbols to numeric quantities
-- `history`: array (currently retained as stored; no client-supplied history is accepted by the adjustment route)
+- `holdings`: map of asset symbols to quantities
+- `history`: retained snapshot history (legacy display contract)
 - `updatedAt`: timestamp
 
-Adjustment ledger: `walletLedger/{requestId}`
-- request ID is unique and create-only
-- records UID, type, asset, amount, before/after USDT balances, reason, actor UID/email, and timestamp
+Append-only wallet ledger: `walletLedger/{transactionId}`
+- Records UID, operation type, asset, amount, before/after balances, actor, request ID and timestamp.
+- IDs are deterministic for admin request reviews and transfer legs; writes are create-only.
 
-Do not assume a missing wallet means zero. The API returns 404 and does not seed it. Do not reconcile profile/demo balances automatically. Existing conflicting records require a separately reviewed migration.
+The Worker never reads `users/{uid}.demoBalanceUSDT` or local storage as a wallet source. It never creates a missing wallet and never reconciles conflicting balances automatically. Existing conflicting wallet/profile values and legacy history collections must be preserved until separately reviewed.
 
-## Trade and wallet behavior that must be enforced by the trusted backend
+## Quick Trade rules to enforce when implemented
 
-The previously specified Quick Trade behavior is a server-side rule, not a client authority:
+- Quick Trade is demo USDT only; simulated profit must not be withdrawable.
+- The browser must never submit an authoritative outcome or P/L.
+- Admin-configured trade controls must be evaluated server-side.
+- The previously specified inactivity behavior (10 minutes inactive: 25% win / 75% loss) must only be implemented if confirmed as part of the current product logic; it must not be guessed.
+- Every result must be auditable with the applied control, stake, trusted quote/reference, result and before/after balances.
+- Holdings remain per-asset quantities. USDT-equivalent valuations must use a trusted quote source, not browser prices.
 
-- The existing Quick Trade balance/outcome model is demo USDT only. A simulated profit must never become withdrawable funds or be credited by the deposit/withdrawal system.
-- Administrator outcome controls include market-based behavior and configured win/loss percentages, with the configured win probability capped at 100%.
-- The previously specified inactivity behavior (10 minutes inactive: 25% win / 75% loss) must be applied by the backend only if the existing product logic still defines that inactivity condition; the browser must not submit its own win/loss outcome or P/L.
-- Every result must be recorded in an append-only audit ledger with the applied control, stake, asset, quote/reference, result, and before/after balances.
-- Holdings and portfolio valuation must preserve per-asset quantities; USDT-equivalent display values must use a trusted current price source. A browser-provided price or P/L is not authoritative.
+## Validation status
 
-These rules are documented as migration requirements, not as implemented routes in this staged Worker. The current code intentionally does not expose Quick Trade settlement, conversion, or withdrawal endpoints.
+Unit tests have been added for Firestore value encoding/decoding, document ID validation, admin authorization decisions, wallet update preconditions and create-only ledger writes.
 
-## Validation still required before any deployment
+Run from the repository root:
 
-1. Run syntax and unit tests against this file in a Worker-compatible runtime.
-2. Add tests for expired/forged tokens, non-admin access, missing wallet, negative resulting balance, duplicate request ID, concurrent wallet update, and atomic failure.
-3. Confirm Firestore REST commit precondition behavior in a staging Firebase project/database.
-4. Confirm Firestore field types and all existing wallet document shapes.
-5. Implement server-side operation handlers for every balance-changing workflow.
-6. Replace every customer and admin browser-side balance write with API calls.
-7. Only after all paths are migrated, change Firestore rules to deny direct client writes to `userTradeState`.
-8. Reconcile existing balances and ledgers with human review; never auto-select or overwrite a disputed balance.
-9. Obtain explicit deployment approval before deploying anything.
+```sh
+npm run test:wallet-api-v2
+```
+
+The tests have been added but have not yet been executed in this environment. They are unit tests for primitives, not end-to-end Firestore or Cloudflare integration tests. Before deployment, still test forged/expired tokens, role enforcement, duplicate requests, missing wallet documents, concurrent wallet writes, Firestore REST preconditions, atomic failure behavior, and real staging data shapes.
