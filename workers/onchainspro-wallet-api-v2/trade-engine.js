@@ -5,7 +5,7 @@ const ASSETS = new Set(["BTC","ETH","BNB","XRP","SOL","ADA","DOGE","LTC","TRX","
 const round2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
 const safeNumber = n => Number.isFinite(Number(n)) ? Number(n) : 0;
 
-export function createTradeEngine({ ROOT, serviceToken, fromFirestore, toFirestore, fieldsFromFirestore }) {
+export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromFirestore }) {
   const docUrl = (collection, id) => `${ROOT}/${collection}/${encodeURIComponent(id)}`;
   async function readDoc(access, collection, id) {
     const response = await fetch(docUrl(collection, id), { headers: { authorization: "Bearer " + access } });
@@ -178,7 +178,7 @@ export function createTradeEngine({ ROOT, serviceToken, fromFirestore, toFiresto
         uid, reservedUSDT: round2(Math.max(0, safeNumber(guardData.reservedUSDT) - Number(trade.data.amountUSDT))),
         activeCount: Math.max(0, safeNumber(guardData.activeCount) - 1), updatedAt: completedAt
       };
-      const completed = { ...trade.data, status: "completed", exitPrice: exit, pnlUSDT: pnl, completedAt, updatedAt: completedAt };
+      const completed = { ...trade.data, startedAt: new Date(trade.data.startedAt), expiresAt: new Date(trade.data.expiresAt), createdAt: new Date(trade.data.createdAt), status: "completed", exitPrice: exit, pnlUSDT: pnl, completedAt, updatedAt: completedAt };
       const ledger = { ...result, uid, tradeId: item.id, balanceBefore: before, balanceAfter: after, completedAt, settlementSource: "server-cron" };
       try {
         await commit(access, [
