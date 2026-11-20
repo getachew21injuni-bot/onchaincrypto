@@ -18,7 +18,7 @@ This Worker is a staged replacement candidate for OnChainSpro's wallet mutation 
 
 All admin routes require a Firebase ID token with `admin: true`, or a verified email included in the Worker's `ADMIN_EMAILS` variable. All wallet updates use Firestore update-time preconditions. Ledger writes are create-only, so duplicate request IDs cannot silently apply a second credit/debit.
 
-## Not yet implemented — do not connect to production
+## Cutover prerequisites — do not connect to production
 
 Customer and admin wallet mutation paths in the current branch have been switched to the trusted Worker, and `userTradeState/{uid}` is client-read-only in the branch's Firestore rules. Customer deposit/withdrawal request submission and internal-transfer request creation remain client writes to request documents only; they do not change balances. External deposit verification and actual blockchain withdrawal payout are not implemented by these account-adjustment routes.
 
@@ -62,7 +62,7 @@ The Worker never reads `users/{uid}.demoBalanceUSDT` or local storage as a walle
 
 ## Quick Trade rules to enforce when implemented
 
-- Quick Trade is demo USDT only; simulated profit must not be withdrawable.
+- Quick Trade settles internal account P/L in USDT; it does not place external exchange orders or send blockchain funds.
 - The browser must never submit an authoritative outcome or P/L.
 - Admin-configured trade controls must be evaluated server-side.
 - The previously specified inactivity behavior (10 minutes inactive: 25% win / 75% loss) must only be implemented if confirmed as part of the current product logic; it must not be guessed.
