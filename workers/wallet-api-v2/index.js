@@ -146,6 +146,52 @@ function walletWrite(uid, wallet, updateTime, balance, holdings, history) {
 function createLedgerWrite(id, fields) {
   return { update: { name: docPath("walletLedger", id), fields: Object.fromEntries(Object.entries(fields).map(([k,v]) => [k, v && v.timestampValue ? v : toFirestore(v)])) }, currentDocument: { exists: false } };
 }
+const COIN_IDS = {
+  BTC:"bitcoin", ETH:"ethereum", BNB:"binancecoin", XRP:"ripple", SOL:"solana", DOGE:"dogecoin",
+  TRX:"tron", TON:"the-open-network", ADA:"cardano", AVAX:"avalanche-2", SHIB:"shiba-inu",
+  LINK:"chainlink", BCH:"bitcoin-cash", SUI:"sui", XLM:"stellar", DOT:"polkadot", LTC:"litecoin",
+  NEAR:"near", UNI:"uniswap", ETC:"ethereum-classic", ICP:"internet-computer", APT:"aptos",
+  FIL:"filecoin", HBAR:"hedera-hashgraph", ARB:"arbitrum", OP:"optimism", RENDER:"render-token",
+  ATOM:"cosmos", VET:"vechain", INJ:"injective-protocol", MKR:"maker", AAVE:"aave",
+  GRT:"the-graph", ALGO:"algorand", THETA:"theta-token", MANA:"decentraland", SAND:"the-sandbox",
+  AXS:"axie-infinity", EOS:"eos", ZEC:"zcash", XMR:"monero", DASH:"dash", QNT:"quant-network",
+  CAKE:"pancakeswap-token", FLOKI:"floki", PEPE:"pepe", BONK:"bonk", FET:"fetch-ai",
+  TAO:"bittensor", JUP:"jupiter-exchange-solana", ONDO:"ondo-finance", SEI:"sei-network",
+  KAS:"kaspa", STX:"stacks", IMX:"immutable-x", WLD:"worldcoin-wld", DAI:"dai",
+  FDUSD:"first-digital-usd", PAXG:"pax-gold", XAUT:"tether-gold"
+};
+async function trustedPrices(symbols) {
+  const requested = [...new Set(symbols.map(x => String(x || "").toUpperCase()))];
+  const prices = {};
+  const stable = new Set(["USDT", "USDC", "DAI", "FDUSD"]);
+  for (const symbol of requested) if (stable.has(symbol)) prices[symbol] = 1;
+  if (requested.includes("XAU")) {
+    const response = await fetch("https://fapi.binance.com/fapi/v1/ticker/price?symbol=XAUUSDT", { cf: { cacheTtl: 5 } });
+    if (!response.ok) throw new HttpError("Trusted gold price is temporarily unavailable.", 503);
+    const row = await response.json(), price = Number(row.price);
+    if (!(price > 0) || !Number.isFinite(price)) throw new HttpError("Trusted gold price is invalid.", 503);
+    prices.XAU = price;
+  }
+  const ids = [...new Set(requested.filter(s => !stable.has(s) && s !== "XAU").map(s => COIN_IDS[s]).filter(Boolean))];
+  const unsupported = requested.filter(s => !(s in prices) && !COIN_IDS[s]);
+  if (unsupported.length) throw new HttpError("Trusted price is not available for: " + unsupported.join(", "), 422);
+  if (ids.length) {
+    const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=" + encodeURIComponent(ids.join(",")) + "&vs_currencies=usd", { cf: { cacheTtl: 15 } });
+    if (!response.ok) throw new HttpError("Trusted crypto prices are temporarily unavailable. Try again shortly.", 503);
+    const data = await response.json();
+    for (const symbol of requested) {
+      const id = COIN_IDS[symbol];
+      if (id && Number(data?.[id]?.usd) > 0) prices[symbol] = Number(data[id].usd);
+    }
+  }
+  for (const symbol of requested) if (!(prices[symbol] > 0)) throw new HttpError("A trusted price is not available for " + symbol + ".", 503);
+  return prices;
+}
+function requireRequestId(value) {
+  const id = String(value || "").trim();
+  if (!/^[A-Za-z0-9_-]{16,100}$/.test(id)) throw new HttpError("A unique request ID is required.");
+  return id;
+}
 async function reviewDepositWithdrawal(env, claims, body) {
   if (!isAdmin(env, claims)) throw new HttpError("Administrator access is required.", 403);
   const kind = body.kind === "deposit" ? "deposit" : body.kind === "withdraw" ? "withdraw" : "";
