@@ -8,6 +8,7 @@ This Worker is a staged replacement candidate for OnChainSpro's wallet mutation 
 - `GET /v1/wallet`: verifies a Firebase ID token and reads only `userTradeState/{authenticated uid}`. A missing wallet returns 404; it is never seeded.
 - `POST /v1/admin/adjust-usdt`: verified admin adjustment against an existing canonical wallet. Uses a wallet update-time precondition and create-only `walletLedger/{requestId}`.
 - `POST /v1/admin/review-request`: admin approves/rejects a pending deposit or withdrawal request. Approval changes the canonical wallet, request status, and append-only `walletLedger` record in one Firestore commit. It records an internal account adjustment only; it does not verify an on-chain deposit or pay an external withdrawal.
+- `POST /v1/admin/adjust-assets`: atomically applies an admin deposit/withdrawal adjustment across one or more assets, creates one append-only ledger row per asset, and writes a user notification.
 - `POST /v1/admin/review-transfer`: admin approves/rejects an internal USDT transfer. Approval atomically debits and credits the two canonical wallets, updates the pending request, creates the `internalTransfers` business record, and creates sender/recipient entries in `walletLedger`.
 
 All admin routes require a Firebase ID token with `admin: true`, or a verified email included in the Worker's `ADMIN_EMAILS` variable. All wallet updates use Firestore update-time preconditions. Ledger writes are create-only, so duplicate request IDs cannot silently apply a second credit/debit.
