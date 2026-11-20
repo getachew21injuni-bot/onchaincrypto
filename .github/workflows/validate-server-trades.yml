@@ -18,5 +18,7 @@ jobs:
           node-version: 20
       - name: Check Worker module syntax
         run: node --check workers/onchainspro-wallet-api-v2/trade-engine.js
+      - name: Check browser adapter syntax
+        run: node --check public/server-trades.js
       - name: Validate Firestore index JSON
         run: node -e "JSON.parse(require('fs').readFileSync('firestore.indexes.json', 'utf8'))"
