@@ -30,10 +30,10 @@ The create request body is `{ symbol, direction, amount, fundingAsset }`; the se
 the USDT-equivalent stake, entry quote, tier, duration, expiry, and outcome settings.
 
 The module keeps the existing Quick Trade plan tiers, 30/60/90/120/180/360 second
-durations, global/user market-win-loss controls, and USDT P/L accounting. For non-USDT
-funding assets, the server obtains the funding asset's USDT quote and validates the
-user's recorded holding. The existing product's accounting model credits/debits P/L
-in USDT; this module does not sell or consume the funding coin.
+durations, global/user market-win-loss controls, and USDT P/L accounting. Quick Trade
+is restricted to USDT funding. Non-USDT funding is rejected server-side until coin
+reservations and deductions can be committed atomically. This prevents the same coin
+holdings from being reused to back multiple active trades.
 
 ## Worker integration included in this branch
 
