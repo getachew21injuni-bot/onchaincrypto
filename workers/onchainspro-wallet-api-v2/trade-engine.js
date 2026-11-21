@@ -64,6 +64,18 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
         }
       } catch (_) { /* Continue to the next public price source. */ }
     }
+    // Coinbase is an independent BTC spot-price fallback. Keep it server-side;
+    // the browser market feed and this trade-entry feed are separate services.
+    if (symbol === "BTC") {
+      try {
+        const coinbase = await fetch("https://api.coinbase.com/v2/prices/BTC-USD/spot", { signal: AbortSignal.timeout(5000) });
+        if (coinbase.ok) {
+          const result = await coinbase.json();
+          const price = Number(result?.data?.amount);
+          if (price > 0 && Number.isFinite(price)) return price;
+        }
+      } catch (_) { /* Continue to CoinGecko if Coinbase is unavailable. */ }
+    }
     const id = PRICE_IDS[symbol];
     if (!id) throw new Error("No trusted server price source is configured for " + symbol + ".");
     const fallback = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=" + encodeURIComponent(id) + "&vs_currencies=usd", { signal: AbortSignal.timeout(5000) });
