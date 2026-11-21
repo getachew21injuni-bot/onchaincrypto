@@ -238,6 +238,13 @@ test("server adapter restores active trades across devices and displays server r
   assert.ok(serverTrades.includes("SETTLED BY SERVER"), "The result view must identify server settlement");
 });
 
+test("Quick Trade completion display is concise and hides internal plan metadata", () => {
+  assert.ok(publicHtml.includes("Live trades · Automatic wallet updates."), "Use a short Quick Trade description");
+  assert.ok(serverTrades.includes('textContent = "Your trade is complete."'), "Show a simple completion message without server timestamps or duration");
+  assert.ok(!publicHtml.includes("ocBoardPlanValue"), "Do not inject investment plan details into the completed-trade result");
+  assert.ok(serverTrades.includes('won ? "Trade Won" : lost ? "Trade Lost" : "Trade Complete"'), "Use a clean result title");
+});
+
 test("Quick Trade countdown begins immediately and reconciles to the server start time", () => {
   assert.ok(serverTrades.includes("function plannedDuration(amount, symbol)"), "The immediate countdown must use the same amount tiers as the server");
   assert.ok(serverTrades.includes("const provisionalExpiry = Date.now() + provisionalDuration * 1000"), "Show the countdown immediately on Confirm");
