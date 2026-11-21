@@ -238,6 +238,16 @@ test("server adapter restores active trades across devices and displays server r
   assert.ok(serverTrades.includes("SETTLED BY SERVER"), "The result view must identify server settlement");
 });
 
+test("Quick Trade countdown begins immediately and reconciles to the server start time", () => {
+  assert.ok(serverTrades.includes("function plannedDuration(amount, symbol)"), "The immediate countdown must use the same amount tiers as the server");
+  assert.ok(serverTrades.includes("const provisionalExpiry = Date.now() + provisionalDuration * 1000"), "Show the countdown immediately on Confirm");
+  assert.ok(serverTrades.includes('showMessage("Starting your trade securely…")'), "Keep the user informed while the server confirms");
+  assert.ok(serverTrades.includes('if (countdownTimer) clearInterval(countdownTimer);'), "The provisional timer must be replaced by the server-authoritative timer");
+  assert.ok(serverTrades.includes('if ($("timedCountdown")) $("timedCountdown").textContent = "—";'), "A rejected trade must clear its provisional countdown");
+  assert.ok(tradeEngine.includes("const requestStartedAt = Date.now();"), "The server duration must begin when the authenticated create request reaches the engine");
+  assert.ok(tradeEngine.includes("const now = requestStartedAt, id = crypto.randomUUID()"), "The persisted expiry must use the request start timestamp");
+});
+
 test("server trade engine atomically creates and reserves trades in Firestore", () => {
   assert.ok(tradeEngine.includes('readDoc(access, "userTradeState", uid)'), "Trade creation must read the cloud wallet");
   assert.ok(tradeEngine.includes('fundingAsset !== "USDT"'), "Trade creation must reject non-USDT funding until coin holdings can be reserved and deducted");
