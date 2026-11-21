@@ -7,7 +7,10 @@
   let countdownTimer = null;
   let pollTimer = null;
   let polling = false;
+  let creatingTrade = false;
   let restoredUid = null;
+  let lastCompletedTradeId = null;
+  const tradeSamples = new Map();
 
   function showMessage(message, error = false) {
     const node = $("timedResult");
@@ -37,14 +40,38 @@
   }
   function renderRunning(trade, activeCount = 1) {
     activeTrade = trade;
+    lastCompletedTradeId = null;
     const form = $("timedPaperTrade");
     form?.classList.remove("oc-stage-config", "oc-stage-complete", "oc-stage-error");
     form?.classList.add("oc-stage-running");
+    const board = $("timedResultBoard");
+    if (board) board.style.display = "none";
     for (const id of ["timedUpBtn", "timedDownBtn"]) if ($(id)) $(id).disabled = true;
     if ($("timedConfirmBtn")) $("timedConfirmBtn").disabled = true;
     const started = parseTime(trade.startedAt), expires = parseTime(trade.expiresAt);
     const symbol = trade.symbol, direction = trade.direction;
     const entry = Number(trade.entryPrice);
+    const tradeId = trade.tradeId || trade.id;
+    if (!tradeSamples.has(tradeId)) tradeSamples.set(tradeId, [{ time: started, price: entry }]);
+    const samples = tradeSamples.get(tradeId);
+    const latest = Number(trade.latestPrice);
+    if (Number.isFinite(latest) && latest > 0) {
+      const sampledAt = parseTime(trade.priceSampledAt) || Date.now();
+      const previous = samples[samples.length - 1];
+      if (!previous || sampledAt > previous.time) samples.push({ time: sampledAt, price: latest });
+      const move = (latest - entry) / entry;
+      const estimated = Number(trade.amountUSDT) * (direction === "up" ? move : -move);
+      if ($("timedEndPriceDetail")) $("timedEndPriceDetail").textContent = money(latest);
+      if ($("timedMoveDetail")) $("timedMoveDetail").textContent = (move >= 0 ? "+" : "") + (move * 100).toFixed(5) + "%";
+      if ($("timedPnl")) {
+        $("timedPnl").textContent = (estimated > 0 ? "+" : estimated < 0 ? "−" : "") + money(Math.abs(estimated)) + " USDT";
+        $("timedPnl").className = "big " + (estimated > 0 ? "green" : estimated < 0 ? "red" : "");
+      }
+      if ($("timedGraphStatus")) $("timedGraphStatus").textContent = "LIVE SERVER PRICE";
+    } else {
+      if ($("timedEndPriceDetail")) $("timedEndPriceDetail").textContent = "Price feed reconnecting…";
+      if ($("timedGraphStatus")) $("timedGraphStatus").textContent = "PRICE FEED RECONNECTING";
+    }
     if ($("timedPair")) $("timedPair").textContent = symbol + " / USDT";
     if ($("timedEntryPrice")) $("timedEntryPrice").textContent = money(entry);
     if ($("timedStartTime")) $("timedStartTime").textContent = new Date(started).toLocaleString();
@@ -52,13 +79,8 @@
     if ($("timedDirection")) $("timedDirection").textContent = direction === "up" ? "BUY" : "SELL";
     if ($("timedAmountDetail")) $("timedAmountDetail").textContent = money(trade.amountFunding) + " " + (trade.fundingAsset || "USDT");
     if ($("timedEntryDetail")) $("timedEntryDetail").textContent = money(entry);
-    if ($("timedEndPriceDetail")) $("timedEndPriceDetail").textContent = "Waiting for server settlement";
-    if ($("timedMoveDetail")) $("timedMoveDetail").textContent = "—";
-    if ($("timedPnl")) { $("timedPnl").textContent = "—"; $("timedPnl").className = "big"; }
     if ($("timedStatusDetail")) $("timedStatusDetail").textContent = "RUNNING";
-    if ($("timedGraphStatus")) $("timedGraphStatus").textContent = "SERVER MANAGED";
-    if ($("timedResult")) $("timedResult").textContent = "Trade running on the secure server" + (activeCount > 1 ? " · " + activeCount + " active trades" : "") + ". It will continue if you close this page.";
-    const samples = [{ time: started, price: entry }];
+    if ($("timedResult")) $("timedResult").textContent = "Trade running on the secure server" + (activeCount > 1 ? " · " + activeCount + " active trades" : "") + ". Live price samples and estimated P/L refresh automatically.";
     if (typeof window.drawTimedTradeGraph === "function") window.drawTimedTradeGraph(samples, entry);
     if (countdownTimer) clearInterval(countdownTimer);
     countdownTimer = setInterval(() => {
@@ -123,9 +145,15 @@
         active.sort((a,b) => parseTime(a.expiresAt) - parseTime(b.expiresAt));
         const current = active.find(x => x.id === activeTrade?.tradeId) || active[0];
         renderRunning({ ...current, tradeId: current.id }, active.length);
-      } else if (activeTrade?.tradeId) {
-        const completed = recent.find(x => x.id === activeTrade.tradeId || x.tradeId === activeTrade.tradeId);
-        if (completed) renderCompleted(completed);
+      } else {
+        const completed = activeTrade?.tradeId
+          ? recent.find(x => x.id === activeTrade.tradeId || x.tradeId === activeTrade.tradeId)
+          : recent[0];
+        const completedId = completed?.id || completed?.tradeId;
+        if (completed && completedId && completedId !== lastCompletedTradeId) {
+          lastCompletedTradeId = completedId;
+          renderCompleted(completed);
+        }
       }
     } catch (error) {
       if (showErrors) showMessage(error.message || "Could not load server trades.", true);
@@ -147,6 +175,8 @@
       $("timedDownBtn")?.getAttribute("aria-pressed") === "true" ? "down" : "";
     if (!direction) { showMessage("Choose Buy or Sell before confirming.", true); return; }
     const confirm = $("timedConfirmBtn");
+    if (creatingTrade) return;
+    creatingTrade = true;
     if (confirm) confirm.disabled = true;
     for (const id of ["timedUpBtn","timedDownBtn"]) if ($(id)) $(id).disabled = true;
     showMessage("Confirming your trade securely…");
@@ -159,6 +189,8 @@
       for (const id of ["timedUpBtn","timedDownBtn"]) if ($(id)) $(id).disabled = false;
       if (confirm) confirm.disabled = false;
       showMessage(error.message || "The server could not start this trade.", true);
+    } finally {
+      creatingTrade = false;
     }
   }
 
@@ -166,7 +198,7 @@
   // navigating away from the browser.
   document.addEventListener("click", event => {
     const cancel = event.target?.closest?.("#timedCancelBtn");
-    if (cancel && activeTrade) {
+    if (cancel && (activeTrade || creatingTrade)) {
       event.preventDefault();
       event.stopImmediatePropagation();
       showMessage("This confirmed trade continues on the server until its expiry.");
