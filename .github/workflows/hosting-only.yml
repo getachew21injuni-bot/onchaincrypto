@@ -1,4 +1,4 @@
-name: Deploy Firebase Hosting and Firestore rules
+name: Deploy OnChainSpro wallet Worker, Firebase Hosting, and Firestore
 
 on:
   push:
@@ -6,16 +6,16 @@ on:
       - main
   workflow_dispatch:
 
-# Only one Hosting deployment may run at a time. Newer commits replace older pending runs.
+# One ordered release: deploy the wallet API before publishing the frontend that calls it.
 concurrency:
   group: onchaincrypto-firebase-hosting
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
-  deploy-hosting:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -28,6 +28,37 @@ jobs:
 
       - name: Test website HTML and JavaScript
         run: node --test tests/public-html-smoke.test.mjs
+
+      - name: Install Cloudflare Wrangler
+        run: npm install --global wrangler@4
+
+      - name: Configure the staged wallet Worker service-account secret
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ONCHAINCRYPTO }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "Missing Cloudflare deployment credentials."
+            exit 1
+          fi
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "Missing GitHub secret FIREBASE_SERVICE_ACCOUNT_ONCHAINCRYPTO."
+            exit 1
+          fi
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" | wrangler secret put FIREBASE_SERVICE_ACCOUNT --config workers/onchainspro-wallet-api-v2/wrangler.toml
+
+      - name: Deploy the staged OnChainSpro wallet API v2 Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: wrangler deploy --config workers/onchainspro-wallet-api-v2/wrangler.toml
+
+      - name: Verify the deployed wallet Worker version
+        run: |
+          response="$(curl --fail --silent --show-error https://onchainspro-wallet-api-v2.getachew21-inj-uni.workers.dev/health)"
+          echo "$response"
+          echo "$response" | grep -q '"mode":"wallet-api-v2-server-trades"'
 
       - name: Install Firebase CLI
         run: npm install --global firebase-tools
@@ -43,5 +74,5 @@ jobs:
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
 
-      - name: Deploy Hosting and Firestore security rules (no Cloud Functions or Storage changes)
-        run: firebase deploy --project onchaincrypto-d976b --only hosting,firestore:rules --non-interactive
+      - name: Deploy Firebase Hosting, Firestore rules, and indexes
+        run: firebase deploy --project onchaincrypto-d976b --only hosting,firestore:rules,firestore:indexes --non-interactive
