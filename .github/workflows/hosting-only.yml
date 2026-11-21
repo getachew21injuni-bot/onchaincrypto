@@ -52,7 +52,18 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: wrangler deploy --config workers/onchainspro-wallet-api-v2/wrangler.toml
+        run: |
+          for attempt in 1 2 3; do
+            if wrangler deploy --config workers/onchainspro-wallet-api-v2/wrangler.toml; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "Cloudflare deploy did not complete (attempt $attempt). Retrying in 15 seconds."
+              sleep 15
+            fi
+          done
+          echo "Cloudflare Worker deploy failed after 3 attempts. Firebase Hosting was not deployed."
+          exit 1
 
       - name: Verify the deployed wallet Worker version
         run: |
