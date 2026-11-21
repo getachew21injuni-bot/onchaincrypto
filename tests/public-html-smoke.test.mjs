@@ -249,7 +249,7 @@ test("Worker exposes authenticated trade routes and scheduled settlement", () =>
   assert.ok(tradeWorker.includes('url.pathname === "/v1/trades" && request.method === "POST"'), "The Worker must expose trade creation");
   assert.ok(tradeWorker.includes('url.pathname === "/v1/trades" && request.method === "GET"'), "The Worker must expose trade restoration");
   assert.ok(tradeWorker.includes("trades.settleDue()"), "The scheduled Worker must settle expired trades");
-  assert.ok(tradeWorker.includes("verifyFirebaseIdToken"), "Trade routes must verify Firebase authentication");
+  assert.ok(tradeWorker.includes("verifyUserToken"), "Trade routes must verify Firebase authentication");
 });
 
 test("server trade adapter and engine JavaScript parse", async () => {
