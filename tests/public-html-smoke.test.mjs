@@ -220,6 +220,7 @@ test("server adapter restores active trades across devices and displays server r
 
 test("server trade engine atomically creates and reserves trades in Firestore", () => {
   assert.ok(tradeEngine.includes('readDoc(access, "userTradeState", uid)'), "Trade creation must read the cloud wallet");
+  assert.ok(tradeEngine.includes('fundingAsset !== "USDT"'), "Trade creation must reject non-USDT funding until coin holdings can be reserved and deducted");
   assert.ok(tradeEngine.includes('readDoc(access, "activeTradeGuards", uid)'), "Trade creation must account for existing active reservations");
   assert.ok(tradeEngine.includes('writeDoc(enc("activeTrades", id)'), "The server must create an active trade record");
   assert.ok(tradeEngine.includes('writeDoc(enc("activeTradeGuards", uid), nextGuard'), "The server must reserve the trade amount");
