@@ -12461,5 +12461,25 @@ html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#1720
 </style>
 
 <script src="/server-trades.js"></script>
+
+<style id="oc-quick-trade-overlay-hit-target-fix">
+/* Keep the Quick Trade dialog above its backdrop and make only the dialog interactive. */
+body.oc-trade-overlay-open #page-trade{
+  position:relative!important;
+  z-index:10041!important;
+  pointer-events:none!important;
+}
+body.oc-trade-overlay-open #page-trade #timedPaperTrade{
+  position:fixed!important;
+  z-index:10050!important;
+  pointer-events:auto!important;
+}
+body.oc-trade-overlay-open #page-trade #timedPaperTrade *{
+  pointer-events:auto!important;
+}
+body.oc-trade-overlay-open:after{
+  pointer-events:none!important;
+}
+</style>
 </body>
 </html>
