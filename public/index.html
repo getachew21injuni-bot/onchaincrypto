@@ -8069,15 +8069,6 @@ td,th{overflow-wrap:anywhere}
  },true);
  // Do not replace specific Firebase/form errors with a generic banner.
  // Registration and sign-in handlers display the actionable message in their own status area.
- document.addEventListener('click',e=>{
-   const btn=e.target.closest('#timedUpBtn,#timedDownBtn,#timedConfirmBtn');
-   if(!btn)return;
-   const amount=$('timedStake');
-   if(amount&&(!amount.value||Number(amount.value)<100)){
-     const m=!amount.value?'Enter a trade amount.':'Minimum trade amount is 100 USDT.';
-     errorFor(amount,m);announce(m);amount.focus();e.preventDefault();e.stopImmediatePropagation();
-   }
- },true);
 })();
 </script>
 
