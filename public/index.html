@@ -68,6 +68,13 @@
 @keyframes ocVisitorPhoneFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 @keyframes ocVisitorSignalDraw{to{stroke-dashoffset:0}}
 @media(prefers-reduced-motion:reduce){#page-public-market .oc-visitor-visual,#page-public-market .oc-visitor-phone-chart polyline{animation:none!important}}
+
+/* Hide Entry and Expiry price labels/values from the user-facing Quick Trade UI only. */
+.cards:has(#timedEntryPrice) > .card:has(#timedEntryPrice),
+.list-row:has(#timedEntryDetail),
+.list-row:has(#timedEndPriceDetail),
+.oc-trade-result-board div:has(> #timedBoardEntry),
+.oc-trade-result-board div:has(> #timedBoardExit){display:none!important;}
 </style>
 <style>
 :root{--bg:#06101f;--panel:#0b1b30;--panel2:#102641;--line:#1b4263;--text:#eaf6ff;--muted:#91abc5;--yellow:#20d9ff;--green:#16d9a0;--red:#ff5573;--blue:#438dff}
