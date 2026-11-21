@@ -187,14 +187,57 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
 
   async function list(uid) {
     const access = await serviceToken();
-    const [active, recent] = await Promise.all([
-      query(access, { from: [{ collectionId: "activeTrades" }], where: { compositeFilter: { op: "AND", filters: [
+    const activeQuery = () => query(access, {
+      from: [{ collectionId: "activeTrades" }],
+      where: { compositeFilter: { op: "AND", filters: [
         { fieldFilter: { field: { fieldPath: "uid" }, op: "EQUAL", value: { stringValue: uid } } },
         { fieldFilter: { field: { fieldPath: "status" }, op: "EQUAL", value: { stringValue: "active" } } }
-      ] } }, orderBy: [{ field: { fieldPath: "expiresAt" }, direction: "ASCENDING" }], limit: 100 }),
-      query(access, { from: [{ collectionId: "tradeLedger" }], where: { fieldFilter: { field: { fieldPath: "uid" }, op: "EQUAL", value: { stringValue: uid } } }, orderBy: [{ field: { fieldPath: "completedAt" }, direction: "DESCENDING" }], limit: 30 })
+      ] } },
+      orderBy: [{ field: { fieldPath: "expiresAt" }, direction: "ASCENDING" }],
+      limit: 100
+    });
+
+    // Retry this account's expired trades on refresh; the scheduled trigger
+    // remains the background safety net for closed browsers and other accounts.
+    const beforeSettlement = await activeQuery();
+    for (const item of beforeSettlement) {
+      if (Date.parse(item.data.expiresAt) <= Date.now()) {
+        try { await settleOne(access, item); }
+        catch (error) { console.error("On-demand trade settlement failed", item.id, error?.message || error); }
+      }
+    }
+
+    const [active, recent] = await Promise.all([
+      activeQuery(),
+      query(access, {
+        from: [{ collectionId: "tradeLedger" }],
+        where: { fieldFilter: { field: { fieldPath: "uid" }, op: "EQUAL", value: { stringValue: uid } } },
+        orderBy: [{ field: { fieldPath: "completedAt" }, direction: "DESCENDING" }],
+        limit: 30
+      })
     ]);
-    return { activeTrades: active.map(x => ({ id: x.id, ...x.data })), recentTrades: recent.map(x => ({ id: x.id, ...x.data })) };
+
+    // Mark prices are server-quoted on every authenticated refresh. Settlement
+    // still obtains its own independent authoritative expiry quote.
+    const prices = new Map();
+    for (const item of active) {
+      const symbol = item.data.symbol;
+      if (!prices.has(symbol)) {
+        prices.set(symbol, quote(symbol).then(price => ({ price, sampledAt: new Date().toISOString() }))
+          .catch(error => ({ price: null, sampledAt: null, error: error?.message || "Price feed unavailable." })));
+      }
+    }
+    const activeTrades = await Promise.all(active.map(async item => {
+      const sample = await prices.get(item.data.symbol);
+      return {
+        id: item.id,
+        ...item.data,
+        ...(sample.price !== null
+          ? { latestPrice: sample.price, priceSampledAt: sample.sampledAt }
+          : { latestPrice: null, priceFeedError: true })
+      };
+    }));
+    return { activeTrades, recentTrades: recent.map(x => ({ id: x.id, ...x.data })) };
   }
 
   async function settleOne(access, item) {
