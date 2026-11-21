@@ -248,6 +248,15 @@ test("server trade engine atomically creates and reserves trades in Firestore", 
   assert.ok(tradeEngine.includes('writeDoc(enc("userTradeState", uid)'), "The server must serialize trade creation against wallet updates");
 });
 
+test("Firestore trade commit exposes the HTTP failure class and logs sanitized diagnostics", () => {
+  assert.ok(tradeEngine.includes("const responseText = await response.text();"), "Read the Firestore response body once for diagnostics");
+  assert.ok(tradeEngine.includes('console.error("Firestore trade commit rejected"'), "Log Firestore's safe status and message for diagnosis");
+  assert.ok(tradeEngine.includes('httpStatus: response.status'), "Preserve the HTTP status in Worker logs");
+  assert.ok(tradeEngine.includes("firestoreStatus"), "Preserve Google's structured error status in Worker logs");
+  assert.ok(tradeEngine.includes('"Firestore trade commit failed (HTTP "'), "Return a useful HTTP failure class without exposing internal error details");
+  assert.ok(tradeEngine.includes('if (response.status === 409 || response.status === 412) throw new Error("TRADE_CONFLICT");'), "Keep concurrency conflicts distinct");
+});
+
 test("server settlement atomically updates wallet, active trade, reservation and ledger", () => {
   assert.ok(tradeEngine.includes("async function settleOne(access, item)"), "The server must own the settlement routine");
   assert.ok(tradeEngine.includes('writeDoc(enc("userTradeState", uid), { uid, balance: after'), "Settlement must commit the updated cloud balance");

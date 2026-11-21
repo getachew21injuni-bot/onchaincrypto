@@ -130,9 +130,21 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
       headers: { authorization: "Bearer " + access, "content-type": "application/json" },
       body: JSON.stringify({ writes })
     });
-    if (response.status === 409 || response.status === 412) throw new Error("TRADE_CONFLICT");
-    if (!response.ok) throw new Error("Atomic Firestore trade write failed.");
-    return response.json();
+    const responseText = await response.text();
+    if (!response.ok) {
+      let firestoreError = {};
+      try { firestoreError = JSON.parse(responseText)?.error || {}; } catch (_) { /* Keep the HTTP status if the response is not JSON. */ }
+      const firestoreStatus = typeof firestoreError.status === "string" ? firestoreError.status : "";
+      const firestoreMessage = typeof firestoreError.message === "string" ? firestoreError.message.slice(0, 500) : "";
+      console.error("Firestore trade commit rejected", {
+        httpStatus: response.status,
+        firestoreStatus,
+        firestoreMessage
+      });
+      if (response.status === 409 || response.status === 412) throw new Error("TRADE_CONFLICT");
+      throw new Error("Firestore trade commit failed (HTTP " + response.status + (firestoreStatus ? ", " + firestoreStatus : "") + ").");
+    }
+    return responseText ? JSON.parse(responseText) : {};
   }
   const enc = (collection, id) => docUrl(collection, id);
   const writeDoc = (name, data, currentDocument) => ({
