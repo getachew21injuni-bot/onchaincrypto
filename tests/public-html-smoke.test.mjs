@@ -265,14 +265,13 @@ test("server trade adapter and engine JavaScript parse", async () => {
   }
 });
 
-test("Trade Gold keeps XAU selectable, loads a fresh quote, and uses the Gold chart", () => {
-  assert.ok(html.includes("async function refreshGoldMarketPrice()"), "Gold must load a current quote before confirmation");
-  assert.ok(html.includes('if(sym==="XAU")return goldMarketAsset;'), "Gold must resolve through its dedicated quote object");
+test("Trade Gold is quoted and settled by the server", () => {
   assert.ok(html.includes('<option value="XAU">XAU — Gold</option>'), "Gold must remain selectable even when absent from the crypto market feed");
-  assert.ok(html.includes('if(sym==="XAU"){try{await refreshGoldMarketPrice()}'), "Gold confirmation must refresh its quote before starting");
-  assert.ok(html.includes('const tickerUrl=tickerSymbol==="XAU"?"https://fapi.binance.com/fapi/v1/ticker/price?symbol=XAUUSDT"'), "Gold expiry must request a fresh XAU quote");
-  assert.ok(html.includes('const response=await fetch(tickerUrl,{signal:AbortSignal.timeout(4000)});if(response.ok){const ticker=await response.json(),expiryQuote=Number(ticker.price);if(Number.isFinite(expiryQuote)&&expiryQuote>0)finalPrice=expiryQuote;}'), "Gold expiry must apply the refreshed quote");
   assert.ok(html.includes("BINANCE:XAUUSDT.P"), "Gold selection must update the chart to the Gold market");
+  assert.ok(tradeEngine.includes('if (symbol === "XAU")'), "The server must use its dedicated Gold quote path");
+  assert.ok(tradeEngine.includes('symbol=XAUUSDT'), "The server must request the Gold/USDT market quote");
+  assert.ok(tradeEngine.includes('ASSETS = new Set([...Object.keys(PRICE_IDS), "XAU"])'), "Gold must be allowed by server-side trade validation");
+  assert.ok(serverTrades.includes('request("/v1/trades", { method: "POST"'), "Gold trades must use the same authenticated server endpoint");
   assert.ok(supportChat.includes("Choose Trade Gold on Home"), "The assistant must explain the Gold shortcut");
   assert.ok(supportChat.includes("Onchain market tools focus on cryptocurrency and Gold"), "The assistant must answer the Stocks topic accurately");
 });
