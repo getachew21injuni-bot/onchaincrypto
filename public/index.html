@@ -1818,7 +1818,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
       <div class="oc-orderbook-actions" aria-label="Trade direction"><button type="button" class="buy" data-oc-book-direction="buy">↗ Buy</button><button type="button" class="sell" data-oc-book-direction="sell">↘ Sell</button></div>
       <p class="muted tiny"></p>
     </section>
-    <section class="panel" id="timedPaperTrade"><div class="section-head"><div><h2>Quick Trade</h2><div class="muted tiny">Market-linked Quick Trades with clear results and automatic Onchain wallet updates.</div></div><span class="tag">MARKET-LINKED</span></div>
+    <section class="panel" id="timedPaperTrade"><div class="section-head"><div><h2>Quick Trade</h2><div class="muted tiny">Live trades · Automatic wallet updates.</div></div><span class="tag">MARKET-LINKED</span></div>
       <div class="form-panel">
         <label for="tradeAsset">Trading pair</label><select id="tradeAsset" class="field"></select><label for="ocTradeFundingCoin">Wallet coin to use</label><select id="ocTradeFundingCoin" class="field"></select>
         <div class="content-grid"><div><label id="quickBalanceLabel">Available trade balance</label><div class="card"><div class="big" id="quickAvailableBalance">0.00 USDT</div><div class="muted tiny"></div></div><div id="quickMinimumAccess" class="muted tiny" aria-live="polite" style="margin:8px 0 12px"></div><label for="timedStake" id="timedStakeLabel">Trade amount (USDT)</label><div class="oc-trade-amount-row"><input id="timedStake" class="field" type="number" min="100" step="0.01" placeholder="Enter amount"><button type="button" id="timedStakeAll" class="secondary" hidden>All</button></div>
@@ -4523,7 +4523,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #timedUpBtn[aria-pressed="false"],#timedDownBtn[aria-pressed="false"]{transition:box-shadow .12s ease,filter .12s ease,transform .12s ease}
 #timedResultBoard[style*="display: block"]{position:fixed!important;z-index:10050!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;width:min(720px,calc(100vw - 24px))!important;max-height:calc(100dvh - 28px)!important;overflow-y:auto!important;margin:0!important;box-shadow:0 0 0 100vmax rgba(5,12,24,.66),0 20px 70px rgba(0,0,0,.38)!important;border-radius:16px!important}
 #ocCloseTradeBoard{position:sticky;top:0;float:right;z-index:2;border:0;border-radius:9px;background:#172033;color:#fff;font-weight:700;padding:9px 13px;cursor:pointer;margin:0 0 8px 10px}
-#ocBoardPlan{clear:both;background:#edf6ff;border:1px solid #cfe3fb;border-radius:10px;padding:11px 12px;margin:8px 0 12px;color:#172033}
 #ocTradePlanGate{font-size:12px;margin-top:7px;color:#bd3333;display:none}
 @media(max-width:560px){#timedResultBoard[style*="display: block"]{padding:14px!important;width:calc(100vw - 18px)!important;max-height:calc(100dvh - 18px)!important}#ocCloseTradeBoard{padding:8px 11px}}
 </style>
@@ -4571,16 +4570,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  window.ocValidateQuickTradeForm=validatePlan;
  function enhanceBoard(){
   const board=$("timedResultBoard");if(!board)return;
-  // Prevent the old result handler from scrolling the page to the board.
+  // Keep the completed-trade summary in place without injecting plan metadata.
   try{board.scrollIntoView=function(){};}catch(e){}
-  if(!$("ocBoardPlan")){
-   const plan=document.createElement("div");plan.id="ocBoardPlan";plan.innerHTML='<strong>Investment plan</strong><div id="ocBoardPlanValue">—</div>';
-   const summary=$("timedBoardSummary");if(summary)summary.insertAdjacentElement("beforebegin",plan);else board.insertBefore(plan,board.children[1]||null);
-  }
-  const amount=Number(String($("timedBoardAmount")?.textContent||"").replace(/[^0-9.\-]/g,""));
-  const p=planFor(amount);
-  const value=$("ocBoardPlanValue");
-  if(value){const next=p?p.label+" · "+p.min.toLocaleString()+"–"+p.max.toLocaleString()+" USDT · "+p.rate+"% estimated outcome · "+p.duration+" sec expiry":"Investment plan unavailable";if(value.textContent!==next)value.textContent=next;}
  }
  const stake=$("timedStake");
  if(stake){
@@ -4611,7 +4602,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #timedDownBtn.oc-direction-selected{filter:brightness(1.12);box-shadow:0 0 0 3px rgba(255,85,115,.22),inset 0 0 0 2px rgba(255,255,255,.65);outline-color:#ff5573;transform:translateY(-1px)}
 #timedUpBtn[aria-pressed="true"],#timedDownBtn[aria-pressed="true"]{font-weight:850}
 #timedResultBoard[style*="display: block"]{position:fixed!important;z-index:10050!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important;width:min(720px,calc(100vw - 24px))!important;max-height:calc(100dvh - 28px)!important;overflow-y:auto!important;margin:0!important;box-shadow:0 0 0 100vmax rgba(5,12,24,.68),0 20px 70px rgba(0,0,0,.42)!important;border-radius:16px!important}
-#ocBoardPlan{display:block!important}
 #ocCloseTradeBoard{position:sticky;top:0;float:right;z-index:3}
 @media(max-width:560px){#timedResultBoard[style*="display: block"]{width:calc(100vw - 18px)!important;max-height:calc(100dvh - 18px)!important}}
 </style>
@@ -4633,8 +4623,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
    if(!board)return;
    const close=$('ocCloseTradeBoard');
    if(close){if(close.textContent!=='Close trade ✕')close.textContent='Close trade ✕';if(close.getAttribute('aria-label')!=='Close trade')close.setAttribute('aria-label','Close trade');}
-   const plan=$('ocBoardPlan');
-   if(plan&&plan.style.display!=='block')plan.style.display='block';
  }
  const board=$('timedResultBoard');
  if(board){

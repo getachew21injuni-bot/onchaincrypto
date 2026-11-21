@@ -186,7 +186,7 @@ test("one Home-only assistant has agent contact and no direct email link", () =>
 
 
 test("Quick Trade uses concise positive copy and its result Close button restores the trade form", () => {
-  assert.ok(html.includes("Market-linked Quick Trades with clear results and automatic Onchain wallet updates."));
+  assert.ok(html.includes("Live trades · Automatic wallet updates."));
   assert.ok(html.includes('form.classList.remove("oc-stage-complete","oc-stage-running");form.classList.add("oc-stage-config");'));
   assert.ok(html.includes('document.getElementById("timedBoardClose")?.addEventListener("click"'));
   assert.ok(html.includes('if(board)board.style.display="none";'));
@@ -238,14 +238,23 @@ test("server adapter restores active trades across devices and displays server r
   assert.ok(serverTrades.includes("SETTLED BY SERVER"), "The result view must identify server settlement");
 });
 
+test("Quick Trade completion display is concise and hides internal plan metadata", () => {
+  assert.ok(html.includes("Live trades · Automatic wallet updates."), "Use a short Quick Trade description");
+  assert.ok(serverTrades.includes('textContent = "Your trade is complete."'), "Show a simple completion message without server timestamps or duration");
+  assert.ok(!html.includes("ocBoardPlanValue"), "Do not inject investment plan details into the completed-trade result");
+  assert.ok(serverTrades.includes('won ? "Trade Won" : lost ? "Trade Lost" : "Trade Complete"'), "Use a clean result title");
+});
+
 test("Quick Trade countdown begins immediately and reconciles to the server start time", () => {
-  assert.ok(serverTrades.includes("function plannedDuration(amount, symbol)"), "The immediate countdown must use the same amount tiers as the server");
-  assert.ok(serverTrades.includes("const provisionalExpiry = Date.now() + provisionalDuration * 1000"), "Show the countdown immediately on Confirm");
+  assert.ok(!serverTrades.includes("provisionalExpiry"), "Do not consume trade duration while server confirmation is pending");
+  assert.ok(serverTrades.includes('if ($("timedCountdown")) $("timedCountdown").textContent = "—";'), "Keep the countdown paused until the server confirms the trade");
   assert.ok(serverTrades.includes('showMessage("Starting your trade securely…")'), "Keep the user informed while the server confirms");
   assert.ok(serverTrades.includes('if (countdownTimer) clearInterval(countdownTimer);'), "The provisional timer must be replaced by the server-authoritative timer");
   assert.ok(serverTrades.includes('if ($("timedCountdown")) $("timedCountdown").textContent = "—";'), "A rejected trade must clear its provisional countdown");
-  assert.ok(tradeEngine.includes("const requestStartedAt = Date.now();"), "The server duration must begin when the authenticated create request reaches the engine");
-  assert.ok(tradeEngine.includes("const now = requestStartedAt, id = crypto.randomUUID()"), "The persisted expiry must use the request start timestamp");
+  assert.ok(tradeEngine.includes("const committedAt = Date.parse(reservation?.commitTime) || Date.now();"), "The full duration must start from Firestore's successful reservation commit time");
+  assert.ok(tradeEngine.includes("trade.expiresAt = new Date(committedAt + p.duration * 1000);"), "The server must set expiry to the full duration after the reservation commits");
+  assert.ok(tradeEngine.includes("for (let attempt = 0; attempt < 3 && !finalized; attempt++)"), "Expiry finalization must retry transient Firestore failures");
+  assert.ok(tradeEngine.includes("const entry = await quote(symbol);") && tradeEngine.includes("const guard = await readDoc(access, \"activeTradeGuards\", uid);"), "Entry pricing and reservation checks must finish before the countdown starts");
 });
 
 test("server trade engine atomically creates and reserves trades in Firestore", () => {

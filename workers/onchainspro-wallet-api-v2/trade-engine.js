@@ -155,8 +155,7 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
 
   async function create(uid, body) {
     if (!uid) throw new Error("Sign in before starting a trade.");
-    // Start the server-owned duration as soon as the authenticated create request reaches the engine.
-    const requestStartedAt = Date.now();
+    // Validate and fetch the entry quote before starting the user's full trade duration.
     const symbol = String(body?.symbol || "").toUpperCase();
     const direction = String(body?.direction || "");
     const fundingAsset = String(body?.fundingAsset || "USDT").toUpperCase();
@@ -181,10 +180,13 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
     const guard = await readDoc(access, "activeTradeGuards", uid);
     const reserved = safeNumber(guard?.data?.reservedUSDT);
     if (balance - reserved + 1e-8 < stake) throw new Error("Insufficient available USDT after accounting for your other active trades.");
-    const now = requestStartedAt, id = crypto.randomUUID(), expiresAt = now + p.duration * 1000;
+    // The countdown starts only after all preflight work is complete, immediately before the atomic Firestore reservation.
+    const now = Date.now(), id = crypto.randomUUID();
+    // Keep the first reservation safely ahead of the settlement scheduler. The
+    // exact duration is finalized from Firestore's successful commitTime below.
     const trade = {
       uid, symbol, direction, amountUSDT: stake, amountFunding: fundingAmount, fundingAsset, fundingPriceAtStart: fundingPrice, entryPrice: entry, exitPrice: null,
-      startedAt: new Date(now), expiresAt: new Date(expiresAt),
+      startedAt: new Date(now), expiresAt: new Date(now + (p.duration + 60) * 1000),
       durationSeconds: p.duration, planLevel: p.label, payoutRate: p.rate,
       outcomeMode: setting.mode, winPercent: setting.winPercent, lossPercent: setting.lossPercent,
       status: "active", pnlUSDT: null, createdAt: new Date(now), updatedAt: new Date(now)
@@ -196,7 +198,7 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
     try {
       // A no-balance-change wallet write with updateTime precondition serializes
       // trade creation against concurrent wallet changes and other trade starts.
-      await commit(access, [
+      const reservation = await commit(access, [
         writeDoc(enc("userTradeState", uid), {
           uid, balance, holdings: wallet.data.holdings || {},
           history: Array.isArray(wallet.data.history) ? wallet.data.history : [],
@@ -205,6 +207,29 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
         guardWrite,
         writeDoc(enc("activeTrades", id), { ...trade, tradeId: id }, { exists: false })
       ]);
+      // Firestore's commitTime is when the wallet reservation and active trade
+      // became durable. Start the customer's full duration from that moment,
+      // not from before the network round-trip for the atomic commit.
+      const committedAt = Date.parse(reservation?.commitTime) || Date.now();
+      trade.startedAt = new Date(committedAt);
+      trade.expiresAt = new Date(committedAt + p.duration * 1000);
+      trade.createdAt = new Date(committedAt);
+      trade.updatedAt = new Date(committedAt);
+      // The initial +60s expiry prevents settlement racing this finalization.
+      let finalized = false;
+      let finalizeError;
+      for (let attempt = 0; attempt < 3 && !finalized; attempt++) {
+        try {
+          await commit(access, [writeDoc(enc("activeTrades", id), { ...trade, tradeId: id })]);
+          finalized = true;
+        } catch (error) {
+          finalizeError = error;
+        }
+      }
+      if (!finalized) {
+        console.error("Trade reservation succeeded but expiry finalization needs retry", id, finalizeError?.message || finalizeError);
+        throw new Error("Your trade was reserved, but its timer is still syncing. Refresh your trades before placing another order.");
+      }
     } catch (error) {
       if (error.message === "TRADE_CONFLICT") throw new Error("Your wallet or active trades changed. Please try confirming again.");
       throw error;
