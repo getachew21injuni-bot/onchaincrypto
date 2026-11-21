@@ -117,10 +117,9 @@ Required composite indexes were added to the branch's `firestore.indexes.json`.
    have been migrated to trusted server endpoints, or Buy & Hold and existing wallet
    behavior will break. The final rule must allow the owner to read their wallet but
    deny client create/update/delete; server Admin/REST writes bypass these rules.
-3. **Funding accounting needs end-to-end UI verification.** The current UI selects a
-   funding coin, but the historical Quick Trade settlement adjusts USDT. This module
-   preserves that behavior and reserves the USDT-equivalent exposure. Do not silently
-   change it to consume coin holdings without a separately reviewed accounting migration.
+3. **Funding UI needs alignment.** The server now rejects non-USDT Quick Trade funding until
+   coin reservations and deductions are implemented atomically. The UI should clearly limit
+   funding to USDT or display a clear explanation; do not enable coin funding prematurely.
 4. **Price-source validation is required.** Confirm the Binance spot symbols and XAU
    futures symbol are available for every selectable market asset before enabling live
    trading. A missing quote intentionally leaves a trade unsettled and retries on the
