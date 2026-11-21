@@ -85,5 +85,10 @@ jobs:
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
 
+      # Print identity metadata only. Never print the JSON credential or private key.
+      - name: Diagnose Firebase service-account identity
+        run: |
+          node -e 'const fs = require("node:fs"); const p = process.env.GOOGLE_APPLICATION_CREDENTIALS; const c = JSON.parse(fs.readFileSync(p, "utf8")); if (!c.client_email) { console.error("Credential JSON has no client_email."); process.exit(1); } console.log("Firebase credential client_email: " + c.client_email); console.log("Firebase credential project_id: " + (c.project_id || "(not set)"));'
+
       - name: Deploy Firebase Hosting, Firestore rules, and indexes
         run: firebase deploy --project onchaincrypto-d976b --only hosting,firestore:rules,firestore:indexes --non-interactive
