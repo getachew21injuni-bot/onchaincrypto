@@ -128,8 +128,12 @@
       if ($("timedBoardAfter")) $("timedBoardAfter").textContent = money(trade.balanceAfter);
       if ($("timedBoardTitle")) $("timedBoardTitle").textContent = won ? "🎉 Congratulations! You Won!" : lost ? "Trade Complete — Loss" : "Trade Complete";
     }
-    const samples = [{ time: parseTime(trade.startedAt), price: entry }, { time: completed, price: exit }];
+    const tradeKey = trade.tradeId || trade.id;
+    const samples = [...(tradeSamples.get(tradeKey) || [{ time: parseTime(trade.startedAt), price: entry }])];
+    const lastSample = samples[samples.length - 1];
+    if (!lastSample || completed > lastSample.time) samples.push({ time: completed, price: exit });
     if (typeof window.drawTimedTradeGraph === "function") window.drawTimedTradeGraph(samples, entry);
+    tradeSamples.delete(tradeKey);
     if (typeof window.drawTimedPnlGraph === "function") window.drawTimedPnlGraph(samples, entry, amountUsd, direction, "timedBoardPnlChart", pnl);
   }
   async function refreshTrades(showErrors = false) {
