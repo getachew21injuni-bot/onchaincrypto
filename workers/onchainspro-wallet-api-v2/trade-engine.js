@@ -155,8 +155,7 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
 
   async function create(uid, body) {
     if (!uid) throw new Error("Sign in before starting a trade.");
-    // Start the server-owned duration as soon as the authenticated create request reaches the engine.
-    const requestStartedAt = Date.now();
+    // Validate and fetch the entry quote before starting the user's full trade duration.
     const symbol = String(body?.symbol || "").toUpperCase();
     const direction = String(body?.direction || "");
     const fundingAsset = String(body?.fundingAsset || "USDT").toUpperCase();
@@ -181,7 +180,8 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
     const guard = await readDoc(access, "activeTradeGuards", uid);
     const reserved = safeNumber(guard?.data?.reservedUSDT);
     if (balance - reserved + 1e-8 < stake) throw new Error("Insufficient available USDT after accounting for your other active trades.");
-    const now = requestStartedAt, id = crypto.randomUUID(), expiresAt = now + p.duration * 1000;
+    // The countdown starts only after all preflight work is complete, immediately before the atomic Firestore reservation.
+    const now = Date.now(), id = crypto.randomUUID(), expiresAt = now + p.duration * 1000;
     const trade = {
       uid, symbol, direction, amountUSDT: stake, amountFunding: fundingAmount, fundingAsset, fundingPriceAtStart: fundingPrice, entryPrice: entry, exitPrice: null,
       startedAt: new Date(now), expiresAt: new Date(expiresAt),
