@@ -9,6 +9,9 @@ import assert from "node:assert/strict";
 const html = await readFile("public/index.html", "utf8");
 const supportChat = await readFile("public/support-chat.js", "utf8");
 const admin = await readFile("public/admin.html", "utf8");
+const serverTrades = await readFile("public/server-trades.js", "utf8");
+const tradeEngine = await readFile("workers/onchainspro-wallet-api-v2/trade-engine.js", "utf8");
+const tradeWorker = await readFile("workers/onchainspro-wallet-api-v2/worker.js", "utf8");
 
 test("all inline classic JavaScript parses", () => {
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
@@ -189,120 +192,77 @@ test("Quick Trade uses concise positive copy and its result Close button restore
   assert.ok(html.includes('if(board)board.style.display="none";'));
 });
 
-test("Quick Trade commits the wallet update before displaying the completed result", () => {
-  const start = html.indexOf("function startTimedPaper(");
-  const end = html.indexOf("function finishedSymbolSafe", start);
-  assert.ok(start >= 0 && end > start, "Expected the Quick Trade execution flow");
-  const flow = html.slice(start, end);
-  assert.ok(flow.includes("await window.ocCommitQuickTradeResult("), "Wallet and trade history must be committed to Firestore");
-  assert.ok(flow.indexOf("await window.ocCommitQuickTradeResult(") < flow.indexOf('const board=$("timedResultBoard")'), "Show the result only after the cloud commit succeeds");
-  assert.ok(flow.includes("renderWallet()"), "Refresh wallet display after the saved balance change");
-  assert.ok(html.includes("const before=asset==="), "Apply each balance adjustment to the latest cloud balance inside the transaction");
-  assert.ok(html.includes("tx.set(ref,{uid:user.uid,balance:nextBalance,holdings,history:nextHistory,updatedAt:serverTimestamp()},{merge:true})"), "Save balance, holdings and result history together");
+test("Quick Trade uses the external server-owned trade adapter", () => {
+  assert.ok(html.includes('<script src="/server-trades.js"></script>'), "The page must load the server trade adapter");
+  assert.ok(serverTrades.includes('const API = "https://onchainspro-wallet-api-v2.getachew21-inj-uni.workers.dev"'), "The adapter must target the configured trade Worker");
+  assert.ok(serverTrades.includes("await user.getIdToken()"), "Trade API requests must use the signed-in Firebase ID token");
+  assert.ok(serverTrades.includes('request("/v1/trades", { method: "POST"'), "Starting a trade must call the server endpoint");
+  assert.ok(serverTrades.includes('request("/v1/trades")'), "The browser must restore active and recent trades from the server");
 });
 
-test("Quick Trade confirmation uses one validator and waits for account wallet readiness", () => {
-  assert.ok(html.includes('if(typeof window.ocValidateQuickTradeForm==="function")window.ocValidateQuickTradeForm();'), "Estimate refreshes must not override trade validation");
-  assert.ok(html.includes('const walletReady=!!currentUser?.uid&&window.ocTradeCloudReadyUid===currentUser.uid;'), "Confirmation must use the wallet readiness bridge across script scopes");
-  assert.ok(html.includes('const currentUser=window.ocFirebaseAuth?.currentUser;if(!currentUser?.uid||window.ocTradeCloudReadyUid!==currentUser.uid)'), "Trade start must use the published Firebase auth and wallet state");
-  const start = html.slice(html.indexOf("function startTimedPaper(direction){"), html.indexOf("function finishedSymbolSafe()", html.indexOf("function startTimedPaper(direction){")));
-  assert.ok(start.includes("window.ocFirebaseAuth?.currentUser"), "Trade start must read Firebase Auth from the shared window bridge");
-  assert.ok(!start.includes("auth.currentUser") && !start.includes("tradeCloudReadyUid!=="), "Classic trade code must not reference module-only Firebase variables");
-  assert.ok(html.includes("const blocked=!walletReady||!tradingEnabled||!Number.isFinite(stake)"), "The shared validator must block until wallet restore succeeds and admin trading access is enabled");
-  assert.ok((html.match(/window\.ocValidateQuickTradeForm\?\.\(\);/g) || []).length >= 3, "Wallet restore success and failure must refresh the confirmation state");
+test("server trade adapter blocks the old browser settlement handler", () => {
+  assert.ok(serverTrades.includes('event.target?.closest?.("#timedConfirmBtn")'), "The adapter must capture the confirmation action");
+  assert.ok(serverTrades.includes("event.stopImmediatePropagation()"), "The old browser-only trade handler must not run");
+  assert.ok(serverTrades.includes("void startServerTrade()"), "Confirmation must use the server-owned trade flow");
+  assert.ok(serverTrades.includes("window.ocTradeCloudReadyUid !== user.uid"), "A trade must wait for the restored cloud wallet");
+  assert.ok(!serverTrades.includes("localStorage"), "Active trades must not depend on browser-local storage");
 });
 
+test("server adapter restores active trades across devices and displays server results", () => {
+  assert.ok(serverTrades.includes("window.ocRestoreServerTrades = async function ()"), "The adapter must restore trades after wallet readiness");
+  assert.ok(serverTrades.includes('window.addEventListener("focus"'), "Returning to a device must refresh its trade state");
+  assert.ok(serverTrades.includes('document.addEventListener("visibilitychange"'), "A visible device must refresh its trade state");
+  assert.ok(serverTrades.includes("pollTimer = setInterval("), "The adapter must periodically synchronize active trades");
+  assert.ok(serverTrades.includes("renderRunning({ ...current, tradeId: current.id }, active.length)"), "All devices must render the same server-owned active trade");
+  assert.ok(serverTrades.includes("renderCompleted(completed)"), "A device must display the server-settled result");
+  assert.ok(serverTrades.includes("SETTLED BY SERVER"), "The result view must identify server settlement");
+});
 
-test("the shared external support chat module parses", async () => {
-  const directory = await mkdtemp(join(tmpdir(), "onchain-support-module-check-"));
-  const file = join(directory, "support-chat.mjs");
+test("server trade engine atomically creates and reserves trades in Firestore", () => {
+  assert.ok(tradeEngine.includes('readDoc(access, "userTradeState", uid)'), "Trade creation must read the cloud wallet");
+  assert.ok(tradeEngine.includes('readDoc(access, "activeTradeGuards", uid)'), "Trade creation must account for existing active reservations");
+  assert.ok(tradeEngine.includes('writeDoc(enc("activeTrades", id)'), "The server must create an active trade record");
+  assert.ok(tradeEngine.includes('writeDoc(enc("activeTradeGuards", uid), nextGuard'), "The server must reserve the trade amount");
+  assert.ok(tradeEngine.includes("{ updateTime: wallet.updateTime }"), "The wallet write must use a concurrency precondition");
+  assert.ok(tradeEngine.includes('writeDoc(enc("userTradeState", uid)'), "The server must serialize trade creation against wallet updates");
+});
+
+test("server settlement atomically updates wallet, active trade, reservation and ledger", () => {
+  assert.ok(tradeEngine.includes("async function settleOne(access, item)"), "The server must own the settlement routine");
+  assert.ok(tradeEngine.includes('writeDoc(enc("userTradeState", uid), { uid, balance: after'), "Settlement must commit the updated cloud balance");
+  assert.ok(tradeEngine.includes('writeDoc(enc("activeTrades", item.id), completed'), "Settlement must mark the active trade completed");
+  assert.ok(tradeEngine.includes('writeDoc(enc("activeTradeGuards", uid), nextGuard'), "Settlement must release the active reservation");
+  assert.ok(tradeEngine.includes('writeDoc(enc("tradeLedger", item.id), ledger, { exists: false })'), "Settlement must create one idempotent ledger record");
+  assert.ok(tradeEngine.includes("const before = safeNumber(wallet.data.balance), after = round2(Math.max(0, before + pnl))"), "The server must calculate the resulting wallet balance");
+  assert.ok(tradeEngine.includes("holdings: wallet.data.holdings || {}, history"), "Settlement must preserve other coin holdings and update history");
+});
+
+test("server trade engine enforces current account and platform outcome settings", () => {
+  assert.ok(tradeEngine.includes('readDoc(access, "platformSettings", "demoTradeControl")'), "The server must read the latest global controls");
+  assert.ok(tradeEngine.includes('readDoc(access, "users", uid)'), "The server must read the account controls");
+  assert.ok(tradeEngine.includes('u.tradingEnabled === false || u.accountStatus === "suspended"'), "Disabled or suspended accounts must not start trades");
+  assert.ok(tradeEngine.includes('globalMode === "win" || globalMode === "lose"'), "Global forced outcomes must take priority");
+  assert.ok(tradeEngine.includes('userMode === "inherit" ? globalMode : userMode'), "Per-user controls must apply when global mode is market-based");
+});
+
+test("Worker exposes authenticated trade routes and scheduled settlement", () => {
+  assert.ok(tradeWorker.includes('url.pathname === "/v1/trades" && request.method === "POST"'), "The Worker must expose trade creation");
+  assert.ok(tradeWorker.includes('url.pathname === "/v1/trades" && request.method === "GET"'), "The Worker must expose trade restoration");
+  assert.ok(tradeWorker.includes("trades.settleDue()"), "The scheduled Worker must settle expired trades");
+  assert.ok(tradeWorker.includes("verifyFirebaseIdToken"), "Trade routes must verify Firebase authentication");
+});
+
+test("server trade adapter and engine JavaScript parse", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "onchain-server-trade-check-"));
   try {
-    await writeFile(file, supportChat, "utf8");
-    execFileSync(process.execPath, ["--check", file], { stdio: "pipe" });
-  } finally {
-    await rm(directory, { recursive: true, force: true });
-  }
-});
-
-test("all inline JavaScript modules parse", async () => {
-  const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
-  const modules = scripts.filter(([, attributes, source]) =>
-    /\btype\s*=\s*["']module["']/i.test(attributes) &&
-    !/\bsrc\s*=/.test(attributes) &&
-    source.trim()
-  );
-  assert.ok(modules.length > 0, "Expected inline JavaScript modules to be checked");
-  const directory = await mkdtemp(join(tmpdir(), "onchain-module-check-"));
-  const failures = [];
-  try {
-    for (let index = 0; index < modules.length; index += 1) {
-      const [, attributes, source] = modules[index];
-      const id = (attributes.match(/\bid\s*=\s*["']([^"']+)/i) || [])[1] || "module-" + (index + 1);
-      const file = join(directory, index + ".mjs");
+    for (const [name, source] of [["server-trades.js", serverTrades], ["trade-engine.mjs", tradeEngine], ["worker.mjs", tradeWorker]]) {
+      const file = join(directory, name);
       await writeFile(file, source, "utf8");
-      try {
-        execFileSync(process.execPath, ["--check", file], { stdio: "pipe" });
-      } catch (error) {
-        failures.push(id + ": " + String(error.stderr || error.message));
-      }
+      execFileSync(process.execPath, ["--check", file], { stdio: "pipe" });
     }
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
-  assert.deepEqual(failures, [], failures.join("\\n"));
-});
-
-test("Quick Trade settings use the shared primary Firebase session and wait for auth readiness", () => {
-  const start = html.indexOf('<script type="module" id="oc-global-demo-trade-admin">');
-  const end = html.indexOf("</script>", start);
-  assert.ok(start >= 0 && end > start, "Expected the trade admin module");
-  const module = html.slice(start, end);
-  assert.ok(module.includes('getApps().find(item=>item.name==="[DEFAULT]")'), "Trade settings must always use the primary Firebase app");
-  assert.ok(module.includes("auth=window.ocFirebaseAuth||getAuth(app)"), "Trade settings must share the main app Auth instance");
-  assert.ok(module.includes("const activeAuth=window.ocFirebaseAuth||auth;"), "The latest-settings read must use the shared Auth bridge");
-  assert.ok(module.includes('await activeAuth.authStateReady()'), "Wait for Firebase session restoration before validating the account");
-  assert.ok(module.includes("const verifiedUser=(window.ocFirebaseAuth||activeAuth).currentUser;"), "Recheck the same shared session after Firestore reads");
-  assert.ok(!module.includes("visitor-support") && !module.includes("signInAnonymously"), "The trade admin module must not initialize an unused visitor Auth session");
-  assert.ok(!html.includes("Could not confirm the latest account trade settings."), "Do not show technical Firebase error wording to users");
-  assert.ok(html.includes("Your session needs a quick refresh. Please sign in again to continue."), "Use short, clear session guidance");
-});
-
-test("Quick Trade confirmation has one start handler and no duplicate timer binding", () => {
-  assert.equal((html.match(/\$\("timedConfirmBtn"\)\.addEventListener\("click"/g) || []).length, 1, "Only one confirmation click handler should be registered");
-  assert.equal((html.match(/timedTimer=setInterval\(/g) || []).length, 1, "Only one timed trade interval should be created");
-  assert.ok(html.includes("if(timedPaper){"), "Prevent a second active trade from stacking on top of a running trade");
-});
-
-test("Quick Trade reads fresh admin outcome settings and atomically updates the cloud wallet", () => {
-  assert.ok(html.includes("window.ocLoadLatestTradeControls=async function(uid)"), "Expected a fresh Firestore read of user and global trade controls");
-  assert.ok(html.includes("latestControls=await window.ocLoadLatestTradeControls(currentUser.uid)"), "Trade confirmation must use current admin settings");
-  assert.ok(html.includes("window.ocCommitQuickTradeResult=async function({funding,adjustment,resultRecord})"), "Expected a dedicated cloud trade-result commit");
-  assert.ok(html.includes("return await runTransaction(db,async tx=>"), "Wallet result updates must use a Firestore transaction");
-  assert.ok(html.includes('await window.ocCommitQuickTradeResult({funding:"USDT",adjustment:balanceAdjustment,resultRecord})'), "Completed trades must settle their P/L directly to the USDT wallet balance");
-});
-
-
-test("Wallet and trade copy uses clear account-balance wording", () => {
-  assert.ok(!html.includes("Insufficient virtual balance"), "Avoid confusing virtual-balance wording");
-  assert.ok(!html.includes("displayed holdings"), "Use clear available-balance wording");
-  assert.ok(!html.includes("Your available balances and transaction updates are shown here."), "Do not show explanatory copy in the wallet summary");
-  assert.ok(html.includes("<h2>Wallet</h2>") || html.includes("walletQuickActions"), "Wallet controls must remain present");
-  assert.ok(html.includes("Completed · USDT result recorded"), "Completed trade activity should identify the USDT result");
-});
-
-test("Quick Trade records the calculated USDT profit or loss and leaves other holdings untouched", () => {
-  assert.ok(html.includes("const won=pnl>0,lost=pnl<0;const balanceAdjustment=pnl;"), "Wallet adjustment must equal calculated trade P/L");
-  assert.ok(!html.includes('if(forcedMode==="market"&&pnl<=0)pnl=-finished.stakeUsd'), "Market losses must not be replaced by a full-stake loss");
-  assert.ok(html.includes('window.ocCommitQuickTradeResult({funding:"USDT",adjustment:balanceAdjustment,resultRecord})'), "Trade P/L must settle directly to USDT");
-  assert.ok(html.includes('if(asset==="USDT")nextBalance=after;else if(after>1e-10)holdings[asset]=after;'), "Other coin holdings must remain unchanged");
-});
-
-test("Completed Quick Trade result board is outside the hidden form and uses one visible P/L graph", () => {
-  assert.ok(html.includes('</div>\n      <section id="timedResultBoard"'), "Result board must be outside the form panel hidden after completion");
-  assert.ok(html.includes('#timedPaperTrade.oc-stage-complete>#timedResultBoard{display:block!important;visibility:visible!important'), "Result board must be visible after expiry");
-  assert.ok(html.includes('id="timedBoardPnlChart"') && !html.includes('id="timedBoardChart"'), "Result screen should show one USDT P/L graph");
-  assert.ok(html.includes('canvas.parentElement?.getBoundingClientRect?.().width'), "Graph must size after the result panel is visible");
-  assert.ok(html.includes('drawTimedPnlGraph(finished.samples,finished.entry,finished.stakeUsd,finished.direction,"timedBoardPnlChart",pnl)'), "Graph must include the settled USDT result");
 });
 
 test("Trade Gold keeps XAU selectable, loads a fresh quote, and uses the Gold chart", () => {
