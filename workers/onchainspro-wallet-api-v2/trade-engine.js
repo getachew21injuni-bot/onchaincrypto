@@ -142,7 +142,7 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
         firestoreMessage
       });
       if (response.status === 409 || response.status === 412) throw new Error("TRADE_CONFLICT");
-      throw new Error("Firestore trade commit failed (HTTP " + response.status + (firestoreStatus ? ", " + firestoreStatus : "") + ").");
+      throw new Error("Firestore trade commit failed (HTTP " + response.status + (firestoreStatus ? ", " + firestoreStatus : "") + ")" + (firestoreMessage ? ": " + firestoreMessage : ".") );
     }
     return responseText ? JSON.parse(responseText) : {};
   }

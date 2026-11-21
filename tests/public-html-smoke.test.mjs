@@ -253,7 +253,8 @@ test("Firestore trade commit exposes the HTTP failure class and logs sanitized d
   assert.ok(tradeEngine.includes('console.error("Firestore trade commit rejected"'), "Log Firestore's safe status and message for diagnosis");
   assert.ok(tradeEngine.includes('httpStatus: response.status'), "Preserve the HTTP status in Worker logs");
   assert.ok(tradeEngine.includes("firestoreStatus"), "Preserve Google's structured error status in Worker logs");
-  assert.ok(tradeEngine.includes('"Firestore trade commit failed (HTTP "'), "Return a useful HTTP failure class without exposing internal error details");
+  assert.ok(tradeEngine.includes('"Firestore trade commit failed (HTTP "'), "Return the Firestore HTTP failure class");
+  assert.ok(tradeEngine.includes('(firestoreMessage ? ": " + firestoreMessage : ".")'), "Expose the bounded Google error message so invalid writes can be diagnosed");
   assert.ok(tradeEngine.includes('if (response.status === 409 || response.status === 412) throw new Error("TRADE_CONFLICT");'), "Keep concurrency conflicts distinct");
 });
 
