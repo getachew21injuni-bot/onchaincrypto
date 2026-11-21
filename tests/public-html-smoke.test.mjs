@@ -244,7 +244,9 @@ test("Quick Trade countdown begins immediately and reconciles to the server star
   assert.ok(serverTrades.includes('showMessage("Starting your trade securely…")'), "Keep the user informed while the server confirms");
   assert.ok(serverTrades.includes('if (countdownTimer) clearInterval(countdownTimer);'), "The provisional timer must be replaced by the server-authoritative timer");
   assert.ok(serverTrades.includes('if ($("timedCountdown")) $("timedCountdown").textContent = "—";'), "A rejected trade must clear its provisional countdown");
-  assert.ok(tradeEngine.includes("const now = Date.now(), id = crypto.randomUUID(), expiresAt = now + p.duration * 1000;"), "The full duration must start after preflight and immediately before the atomic Firestore reservation");
+  assert.ok(tradeEngine.includes("const committedAt = Date.parse(reservation?.commitTime) || Date.now();"), "The full duration must start from Firestore's successful reservation commit time");
+  assert.ok(tradeEngine.includes("trade.expiresAt = new Date(committedAt + p.duration * 1000);"), "The server must set expiry to the full duration after the reservation commits");
+  assert.ok(tradeEngine.includes("for (let attempt = 0; attempt < 3 && !finalized; attempt++)"), "Expiry finalization must retry transient Firestore failures");
   assert.ok(tradeEngine.includes("const entry = await quote(symbol);") && tradeEngine.includes("const guard = await readDoc(access, \"activeTradeGuards\", uid);"), "Entry pricing and reservation checks must finish before the countdown starts");
 });
 
