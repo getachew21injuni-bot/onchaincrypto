@@ -131,7 +131,21 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
       body: JSON.stringify({ writes })
     });
     if (response.status === 409 || response.status === 412) throw new Error("TRADE_CONFLICT");
-    if (!response.ok) throw new Error("Atomic Firestore trade write failed.");
+
+    // Preserve Firestore's useful failure classification without returning its
+    // full response body (which may contain internal document details) to clients.
+    if (!response.ok) {
+      let detail = {};
+      try { detail = await response.json(); } catch (_) { /* Non-JSON proxy response. */ }
+      const status = String(detail?.error?.status || "UNKNOWN").slice(0, 48);
+      const message = String(detail?.error?.message || "").replace(/\s+/g, " ").slice(0, 240);
+      console.error("Firestore trade commit rejected", {
+        httpStatus: response.status,
+        firestoreStatus: status,
+        message
+      });
+      throw new Error("Firestore trade commit failed (HTTP " + response.status + ", " + status + ").");
+    }
     return response.json();
   }
   const enc = (collection, id) => docUrl(collection, id);
