@@ -53,13 +53,17 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
       return price;
     }
     const pair = symbol + "USDT";
-    try {
-      const response = await fetch("https://data-api.binance.vision/api/v3/ticker/price?symbol=" + pair, { signal: AbortSignal.timeout(4000) });
-      if (response.ok) {
-        const result = await response.json(), price = Number(result.price);
-        if (price > 0 && Number.isFinite(price)) return price;
-      }
-    } catch (_) { /* Use the public CoinGecko spot fallback below. */ }
+    // Try Binance's public market-data host first, then its primary API host.
+    // Either provider may be unavailable from a particular network/region.
+    for (const host of ["https://data-api.binance.vision", "https://api.binance.com"]) {
+      try {
+        const response = await fetch(host + "/api/v3/ticker/price?symbol=" + pair, { signal: AbortSignal.timeout(4000) });
+        if (response.ok) {
+          const result = await response.json(), price = Number(result.price);
+          if (price > 0 && Number.isFinite(price)) return price;
+        }
+      } catch (_) { /* Continue to the next public price source. */ }
+    }
     const id = PRICE_IDS[symbol];
     if (!id) throw new Error("No trusted server price source is configured for " + symbol + ".");
     const fallback = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=" + encodeURIComponent(id) + "&vs_currencies=usd", { signal: AbortSignal.timeout(5000) });
