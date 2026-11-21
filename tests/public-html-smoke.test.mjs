@@ -246,8 +246,8 @@ test("Quick Trade completion display is concise and hides internal plan metadata
 });
 
 test("Quick Trade countdown begins immediately and reconciles to the server start time", () => {
-  assert.ok(serverTrades.includes("function plannedDuration(amount, symbol)"), "The immediate countdown must use the same amount tiers as the server");
-  assert.ok(serverTrades.includes("const provisionalExpiry = Date.now() + provisionalDuration * 1000"), "Show the countdown immediately on Confirm");
+  assert.ok(!serverTrades.includes("provisionalExpiry"), "Do not consume trade duration while server confirmation is pending");
+  assert.ok(serverTrades.includes('if ($("timedCountdown")) $("timedCountdown").textContent = "—";'), "Keep the countdown paused until the server confirms the trade");
   assert.ok(serverTrades.includes('showMessage("Starting your trade securely…")'), "Keep the user informed while the server confirms");
   assert.ok(serverTrades.includes('if (countdownTimer) clearInterval(countdownTimer);'), "The provisional timer must be replaced by the server-authoritative timer");
   assert.ok(serverTrades.includes('if ($("timedCountdown")) $("timedCountdown").textContent = "—";'), "A rejected trade must clear its provisional countdown");
