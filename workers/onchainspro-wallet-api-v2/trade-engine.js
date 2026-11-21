@@ -138,7 +138,7 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
       let detail = {};
       try { detail = await response.json(); } catch (_) { /* Non-JSON proxy response. */ }
       const status = String(detail?.error?.status || "UNKNOWN").slice(0, 48);
-      const message = String(detail?.error?.message || "").replace(/\\s+/g, " ").slice(0, 240);
+      const message = String(detail?.error?.message || "").replace(/\s+/g, " ").slice(0, 240);
       console.error("Firestore trade commit rejected", {
         httpStatus: response.status,
         firestoreStatus: status,
