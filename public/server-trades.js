@@ -38,6 +38,16 @@
     const n = typeof value === "number" ? value : Date.parse(value);
     return Number.isFinite(n) ? n : 0;
   }
+  function plannedDuration(amount, symbol) {
+    const minimum = symbol === "XAU" ? 500 : 100;
+    if (amount < minimum) return 0;
+    if (amount < 5000) return 30;
+    if (amount < 10000) return 60;
+    if (amount < 25000) return 90;
+    if (amount < 50000) return 120;
+    if (amount < 100000) return 180;
+    return 360;
+  }
   function renderRunning(trade, activeCount = 1) {
     activeTrade = trade;
     lastCompletedTradeId = null;
@@ -183,13 +193,27 @@
     creatingTrade = true;
     if (confirm) confirm.disabled = true;
     for (const id of ["timedUpBtn","timedDownBtn"]) if ($(id)) $(id).disabled = true;
-    showMessage("Confirming your trade securely…");
+    const provisionalDuration = plannedDuration(amount, symbol);
+    if (provisionalDuration > 0) {
+      const provisionalExpiry = Date.now() + provisionalDuration * 1000;
+      const updateProvisionalCountdown = () => {
+        const remaining = Math.max(0, Math.ceil((provisionalExpiry - Date.now()) / 1000));
+        if ($("timedCountdown")) $("timedCountdown").textContent = timedFormat(remaining);
+      };
+      updateProvisionalCountdown();
+      if (countdownTimer) clearInterval(countdownTimer);
+      countdownTimer = setInterval(updateProvisionalCountdown, 200);
+    }
+    showMessage("Starting your trade securely…");
     try {
       const result = await request("/v1/trades", { method: "POST", body: { symbol, direction, amount, fundingAsset } });
       if (!result.trade || !result.tradeId) throw new Error("The server did not return a confirmed trade.");
       renderRunning({ ...result.trade, tradeId: result.tradeId }, 1);
       await refreshTrades();
     } catch (error) {
+      if (countdownTimer) clearInterval(countdownTimer);
+      countdownTimer = null;
+      if ($("timedCountdown")) $("timedCountdown").textContent = "—";
       for (const id of ["timedUpBtn","timedDownBtn"]) if ($(id)) $(id).disabled = false;
       if (confirm) confirm.disabled = false;
       showMessage(error.message || "The server could not start this trade.", true);
