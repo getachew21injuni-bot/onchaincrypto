@@ -239,9 +239,9 @@ test("server adapter restores active trades across devices and displays server r
 });
 
 test("Quick Trade completion display is concise and hides internal plan metadata", () => {
-  assert.ok(publicHtml.includes("Live trades · Automatic wallet updates."), "Use a short Quick Trade description");
+  assert.ok(html.includes("Live trades · Automatic wallet updates."), "Use a short Quick Trade description");
   assert.ok(serverTrades.includes('textContent = "Your trade is complete."'), "Show a simple completion message without server timestamps or duration");
-  assert.ok(!publicHtml.includes("ocBoardPlanValue"), "Do not inject investment plan details into the completed-trade result");
+  assert.ok(!html.includes("ocBoardPlanValue"), "Do not inject investment plan details into the completed-trade result");
   assert.ok(serverTrades.includes('won ? "Trade Won" : lost ? "Trade Lost" : "Trade Complete"'), "Use a clean result title");
 });
 
