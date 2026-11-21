@@ -340,3 +340,13 @@ test("KYC documents use private Firestore storage without Firebase Storage", () 
   assert.ok(admin.includes("getDoc(doc(db,'kycSubmissions',record.id,'documents',spec.side))"), "Admin review must fetch each ID image only when details are opened");
   assert.ok(!admin.includes("firebase-storage.js") && !admin.includes("getBytes("), "The admin review must not depend on Firebase Storage");
 });
+
+
+test("deposit address copy feedback and QR image download are available", () => {
+  assert.ok(html.includes('id="saveDepositQr"'), "Expected a Save QR control beside the deposit address");
+  assert.ok(html.includes('$("saveDepositQr").disabled=!address;'), "Saving must be disabled when no active deposit address exists");
+  assert.ok(html.includes('async function saveDepositQr()'), "Expected the selected deposit QR to be downloadable");
+  assert.ok(html.includes('link.download="onchainspro-deposit-"+selectedDepositCoin+"-"+network.replace'), "The saved QR filename must identify its asset and network");
+  assert.ok(html.includes('copyButton.textContent="✓ Address copied"'), "Copy success must be visible on the Copy button");
+  assert.ok(html.includes('$("saveDepositQr")?.addEventListener("click",saveDepositQr)'), "The Save QR control must be connected");
+});
