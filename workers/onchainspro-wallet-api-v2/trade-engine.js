@@ -146,7 +146,8 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
     }
     return responseText ? JSON.parse(responseText) : {};
   }
-  const enc = (collection, id) => docUrl(collection, id);
+  // Firestore commit writes require a resource name, not the HTTPS REST URL used by reads.
+  const enc = (collection, id) => `${ROOT.replace(/^https:\/\/firestore.googleapis.com\/v1\//, "")}/${collection}/${encodeURIComponent(id)}`;
   const writeDoc = (name, data, currentDocument) => ({
     update: { name, fields: Object.fromEntries(Object.entries(data).map(([k,v]) => [k, v instanceof Date ? { timestampValue: v.toISOString() } : toFirestore(v)])) },
     currentDocument
