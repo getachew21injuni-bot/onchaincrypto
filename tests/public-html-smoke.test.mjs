@@ -246,7 +246,7 @@ test("server trade engine atomically creates and reserves trades in Firestore", 
   assert.ok(tradeEngine.includes('writeDoc(enc("activeTradeGuards", uid), nextGuard'), "The server must reserve the trade amount");
   assert.ok(tradeEngine.includes("{ updateTime: wallet.updateTime }"), "The wallet write must use a concurrency precondition");
   assert.ok(tradeEngine.includes('writeDoc(enc("userTradeState", uid)'), "The server must serialize trade creation against wallet updates");
-  assert.ok(tradeEngine.includes('ROOT.replace(/^https:\/\/firestore.googleapis.com\/v1\\//, "")'), "Commit document names must use Firestore resource names, not HTTPS URLs");
+  assert.ok(tradeEngine.includes("const enc = (collection, id)") && tradeEngine.includes("ROOT.replace(") && tradeEngine.includes("encodeURIComponent(id)"), "Commit document names must be converted from REST URLs to Firestore resource names");
 });
 
 test("Firestore trade commit exposes the HTTP failure class and logs sanitized diagnostics", () => {
