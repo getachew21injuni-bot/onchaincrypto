@@ -186,7 +186,7 @@ test("one Home-only assistant has agent contact and no direct email link", () =>
 
 
 test("Quick Trade uses concise positive copy and its result Close button restores the trade form", () => {
-  assert.ok(html.includes("Market-linked Quick Trades with clear results and automatic Onchain wallet updates."));
+  assert.ok(html.includes("Live trades · Automatic wallet updates."));
   assert.ok(html.includes('form.classList.remove("oc-stage-complete","oc-stage-running");form.classList.add("oc-stage-config");'));
   assert.ok(html.includes('document.getElementById("timedBoardClose")?.addEventListener("click"'));
   assert.ok(html.includes('if(board)board.style.display="none";'));
