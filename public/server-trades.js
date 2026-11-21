@@ -127,7 +127,7 @@
     if (board) {
       board.style.display = "block";
       if ($("timedBoardOutcome")) { $("timedBoardOutcome").textContent = outcome; $("timedBoardOutcome").style.color = won ? "#07804b" : lost ? "#c53232" : "#586579"; }
-      if ($("timedBoardSummary")) $("timedBoardSummary").textContent = "Server settled " + new Date(completed).toLocaleString() + " · Duration " + (trade.durationSeconds || "—") + " sec";
+      if ($("timedBoardSummary")) $("timedBoardSummary").textContent = "Your trade is complete.";
       if ($("timedBoardPair")) $("timedBoardPair").textContent = trade.symbol + " / USDT · " + (direction === "up" ? "BUY" : "SELL");
       if ($("timedBoardAmount")) $("timedBoardAmount").textContent = money(trade.amount || trade.amountFunding) + " " + (trade.funding || trade.fundingAsset || "USDT");
       if ($("timedBoardEntry")) $("timedBoardEntry").textContent = money(entry);
@@ -136,7 +136,7 @@
       if ($("timedBoardProfitLoss")) { $("timedBoardProfitLoss").textContent = (pnl > 0 ? "+" : "-") + money(Math.abs(pnl)) + " USDT"; $("timedBoardProfitLoss").style.color = won ? "#07804b" : lost ? "#c53232" : "#586579"; }
       if ($("timedBoardBefore")) $("timedBoardBefore").textContent = money(trade.balanceBefore);
       if ($("timedBoardAfter")) $("timedBoardAfter").textContent = money(trade.balanceAfter);
-      if ($("timedBoardTitle")) $("timedBoardTitle").textContent = won ? "🎉 Congratulations! You Won!" : lost ? "Trade Complete — Loss" : "Trade Complete";
+      if ($("timedBoardTitle")) $("timedBoardTitle").textContent = won ? "Trade Won" : lost ? "Trade Lost" : "Trade Complete";
     }
     const tradeKey = trade.tradeId || trade.id;
     const samples = [...(tradeSamples.get(tradeKey) || [{ time: parseTime(trade.startedAt), price: entry }])];
