@@ -46,11 +46,23 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
   async function quote(symbol) {
     if (symbol === "USDT" || symbol === "USDC" || symbol === "DAI" || symbol === "FDUSD") return 1;
     if (symbol === "XAU") {
-      const response = await fetch("https://fapi.binance.com/fapi/v1/ticker/price?symbol=XAUUSDT", { signal: AbortSignal.timeout(5000) });
-      if (!response.ok) throw new Error("The server gold price feed is temporarily unavailable.");
-      const result = await response.json(), price = Number(result.price);
-      if (!(price > 0) || !Number.isFinite(price)) throw new Error("The server returned an invalid gold price.");
-      return price;
+      try {
+        const response = await fetch("https://fapi.binance.com/fapi/v1/ticker/price?symbol=XAUUSDT", { signal: AbortSignal.timeout(5000) });
+        if (response.ok) {
+          const result = await response.json(), price = Number(result.price);
+          if (price > 0 && Number.isFinite(price)) return price;
+        }
+      } catch (_) { /* Continue to the independent gold-backed fallback. */ }
+      // One PAX Gold token represents one troy ounce of gold and provides an
+      // independent server-side reference if the XAUUSDT futures feed is down.
+      try {
+        const fallback = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=pax-gold&vs_currencies=usd", { signal: AbortSignal.timeout(5000) });
+        if (fallback.ok) {
+          const data = await fallback.json(), price = Number(data?.["pax-gold"]?.usd);
+          if (price > 0 && Number.isFinite(price)) return price;
+        }
+      } catch (_) { /* Report a clear error below. */ }
+      throw new Error("The server gold price feed is temporarily unavailable.");
     }
     const pair = symbol + "USDT";
     // Try Binance's public market-data host first, then its primary API host.
@@ -63,6 +75,18 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
           if (price > 0 && Number.isFinite(price)) return price;
         }
       } catch (_) { /* Continue to the next public price source. */ }
+    }
+    // Coinbase is an independent BTC spot-price fallback. Keep it server-side;
+    // the browser market feed and this trade-entry feed are separate services.
+    if (symbol === "BTC") {
+      try {
+        const coinbase = await fetch("https://api.coinbase.com/v2/prices/BTC-USD/spot", { signal: AbortSignal.timeout(5000) });
+        if (coinbase.ok) {
+          const result = await coinbase.json();
+          const price = Number(result?.data?.amount);
+          if (price > 0 && Number.isFinite(price)) return price;
+        }
+      } catch (_) { /* Continue to CoinGecko if Coinbase is unavailable. */ }
     }
     const id = PRICE_IDS[symbol];
     if (!id) throw new Error("No trusted server price source is configured for " + symbol + ".");
@@ -175,14 +199,57 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
 
   async function list(uid) {
     const access = await serviceToken();
-    const [active, recent] = await Promise.all([
-      query(access, { from: [{ collectionId: "activeTrades" }], where: { compositeFilter: { op: "AND", filters: [
+    const activeQuery = () => query(access, {
+      from: [{ collectionId: "activeTrades" }],
+      where: { compositeFilter: { op: "AND", filters: [
         { fieldFilter: { field: { fieldPath: "uid" }, op: "EQUAL", value: { stringValue: uid } } },
         { fieldFilter: { field: { fieldPath: "status" }, op: "EQUAL", value: { stringValue: "active" } } }
-      ] } }, orderBy: [{ field: { fieldPath: "expiresAt" }, direction: "ASCENDING" }], limit: 100 }),
-      query(access, { from: [{ collectionId: "tradeLedger" }], where: { fieldFilter: { field: { fieldPath: "uid" }, op: "EQUAL", value: { stringValue: uid } } }, orderBy: [{ field: { fieldPath: "completedAt" }, direction: "DESCENDING" }], limit: 30 })
+      ] } },
+      orderBy: [{ field: { fieldPath: "expiresAt" }, direction: "ASCENDING" }],
+      limit: 100
+    });
+
+    // Retry this account's expired trades on refresh; the scheduled trigger
+    // remains the background safety net for closed browsers and other accounts.
+    const beforeSettlement = await activeQuery();
+    for (const item of beforeSettlement) {
+      if (Date.parse(item.data.expiresAt) <= Date.now()) {
+        try { await settleOne(access, item); }
+        catch (error) { console.error("On-demand trade settlement failed", item.id, error?.message || error); }
+      }
+    }
+
+    const [active, recent] = await Promise.all([
+      activeQuery(),
+      query(access, {
+        from: [{ collectionId: "tradeLedger" }],
+        where: { fieldFilter: { field: { fieldPath: "uid" }, op: "EQUAL", value: { stringValue: uid } } },
+        orderBy: [{ field: { fieldPath: "completedAt" }, direction: "DESCENDING" }],
+        limit: 30
+      })
     ]);
-    return { activeTrades: active.map(x => ({ id: x.id, ...x.data })), recentTrades: recent.map(x => ({ id: x.id, ...x.data })) };
+
+    // Mark prices are server-quoted on every authenticated refresh. Settlement
+    // still obtains its own independent authoritative expiry quote.
+    const prices = new Map();
+    for (const item of active) {
+      const symbol = item.data.symbol;
+      if (!prices.has(symbol)) {
+        prices.set(symbol, quote(symbol).then(price => ({ price, sampledAt: new Date().toISOString() }))
+          .catch(error => ({ price: null, sampledAt: null, error: error?.message || "Price feed unavailable." })));
+      }
+    }
+    const activeTrades = await Promise.all(active.map(async item => {
+      const sample = await prices.get(item.data.symbol);
+      return {
+        id: item.id,
+        ...item.data,
+        ...(sample.price !== null
+          ? { latestPrice: sample.price, priceSampledAt: sample.sampledAt }
+          : { latestPrice: null, priceFeedError: true })
+      };
+    }));
+    return { activeTrades, recentTrades: recent.map(x => ({ id: x.id, ...x.data })) };
   }
 
   async function settleOne(access, item) {

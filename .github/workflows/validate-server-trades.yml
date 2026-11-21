@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/firestore-server-trades
+      - fix/quick-trade-btc-price-feed
   pull_request:
     branches:
       - main

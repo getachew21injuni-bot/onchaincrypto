@@ -208,6 +208,26 @@ test("server trade adapter blocks the old browser settlement handler", () => {
   assert.ok(!serverTrades.includes("localStorage"), "Active trades must not depend on browser-local storage");
 });
 
+test("server trade refresh returns live price samples and retries due settlement for the signed-in account", () => {
+  assert.ok(tradeEngine.includes("const beforeSettlement = await activeQuery();"), "The account refresh must inspect its own active trades");
+  assert.ok(tradeEngine.includes("await settleOne(access, item);"), "The account refresh must retry expired settlement without waiting for the cron minute");
+  assert.ok(tradeEngine.includes("latestPrice:"), "Active trades must expose a server-quoted current price");
+  assert.ok(tradeEngine.includes("priceSampledAt:"), "Active trade price samples must include server timestamps");
+  assert.ok(tradeEngine.includes("const prices = new Map();"), "Active trades on the same pair should share one quote per refresh");
+});
+
+test("running Quick Trade graph and estimated P/L update from server samples", () => {
+  assert.ok(serverTrades.includes("const tradeSamples = new Map();"), "The browser must retain graph samples for each active server trade");
+  assert.ok(serverTrades.includes("trade.latestPrice"), "The graph must consume the server mark price");
+  assert.ok(serverTrades.includes("drawTimedTradeGraph(samples, entry)"), "The running graph must redraw as server samples arrive");
+  assert.ok(serverTrades.includes("const estimated = Number(trade.amountUSDT)"), "Running estimated P/L must be derived from the current server price");
+});
+
+test("latest completed server trade restores after a page reload", () => {
+  assert.ok(serverTrades.includes(": recent[0];"), "A reload without an active trade must restore the newest completed ledger result");
+  assert.ok(serverTrades.includes("completedId !== lastCompletedTradeId"), "The same completed result must not reopen on every polling cycle");
+});
+
 test("server adapter restores active trades across devices and displays server results", () => {
   assert.ok(serverTrades.includes("window.ocRestoreServerTrades = async function ()"), "The adapter must restore trades after wallet readiness");
   assert.ok(serverTrades.includes('window.addEventListener("focus"'), "Returning to a device must refresh its trade state");
