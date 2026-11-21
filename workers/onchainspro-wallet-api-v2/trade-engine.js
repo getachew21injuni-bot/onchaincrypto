@@ -46,11 +46,23 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
   async function quote(symbol) {
     if (symbol === "USDT" || symbol === "USDC" || symbol === "DAI" || symbol === "FDUSD") return 1;
     if (symbol === "XAU") {
-      const response = await fetch("https://fapi.binance.com/fapi/v1/ticker/price?symbol=XAUUSDT", { signal: AbortSignal.timeout(5000) });
-      if (!response.ok) throw new Error("The server gold price feed is temporarily unavailable.");
-      const result = await response.json(), price = Number(result.price);
-      if (!(price > 0) || !Number.isFinite(price)) throw new Error("The server returned an invalid gold price.");
-      return price;
+      try {
+        const response = await fetch("https://fapi.binance.com/fapi/v1/ticker/price?symbol=XAUUSDT", { signal: AbortSignal.timeout(5000) });
+        if (response.ok) {
+          const result = await response.json(), price = Number(result.price);
+          if (price > 0 && Number.isFinite(price)) return price;
+        }
+      } catch (_) { /* Continue to the independent gold-backed fallback. */ }
+      // One PAX Gold token represents one troy ounce of gold and provides an
+      // independent server-side reference if the XAUUSDT futures feed is down.
+      try {
+        const fallback = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=pax-gold&vs_currencies=usd", { signal: AbortSignal.timeout(5000) });
+        if (fallback.ok) {
+          const data = await fallback.json(), price = Number(data?.["pax-gold"]?.usd);
+          if (price > 0 && Number.isFinite(price)) return price;
+        }
+      } catch (_) { /* Report a clear error below. */ }
+      throw new Error("The server gold price feed is temporarily unavailable.");
     }
     const pair = symbol + "USDT";
     // Try Binance's public market-data host first, then its primary API host.
