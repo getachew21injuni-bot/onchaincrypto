@@ -9003,8 +9003,8 @@ if(profile){
  }
 }
 const notificationHost=byId("notificationsPageContent");
-let stopUserNotifications=null,stopMarketAlerts=null,accountNotificationRows=[],marketAlertRows=[];
-let marketAlertsInitialized=false,accountNotificationsInitialized=false;
+let stopUserNotifications=null,stopMarketAlerts=null,stopMarketAlertReads=null,accountNotificationRows=[],marketAlertRows=[],marketAlertReadRows=[];
+let marketAlertsInitialized=false,accountNotificationsInitialized=false,openedNotificationKey=null;
 async function openUserNotifications(){
  const user=auth.currentUser;if(!user)return;
  if(typeof window.showPage==="function")window.showPage("notifications");
@@ -9026,26 +9026,44 @@ function showAccountNotificationToast(notification){
 }
 function paintNotifications(){
  if(!notificationHost)return;
- const rows=accountNotificationRows.concat(marketAlertRows).sort((a,b)=>{const t=x=>x.createdAt&&typeof x.createdAt.toMillis==="function"?x.createdAt.toMillis():Date.parse(x.createdAtText||"")||0;return t(b)-t(a);});
- const unread=accountNotificationRows.filter(x=>!x.readAt).length;
+ const marketReadById=new Set(marketAlertReadRows.map(x=>x.id));
+ const rows=accountNotificationRows.map(n=>({...n,notificationType:"account",notificationKey:"account:"+n.id})).concat(
+  marketAlertRows.map(n=>({...n,notificationType:"market",notificationKey:"market:"+n.id,readAt:marketReadById.has(n.id)?(marketAlertReadRows.find(x=>x.id===n.id)?.readAt||true):null}))
+ ).sort((a,b)=>{const t=x=>x.createdAt&&typeof x.createdAt.toMillis==="function"?x.createdAt.toMillis():Date.parse(x.createdAtText||"")||0;return t(b)-t(a);});
+ const unread=rows.filter(x=>!x.readAt).length;
  const bell=byId("ocNotificationBell"),badge=byId("ocNotificationCount");if(badge){badge.textContent=unread>99?"99+":String(unread);badge.hidden=unread===0;}if(bell)bell.setAttribute("aria-label",unread?"Notifications, "+unread+" unread":"Notifications");
  if(!rows.length){notificationHost.innerHTML="<div class=\"panel\"><strong>No notifications yet</strong><p class=\"muted tiny\">Market updates and account notifications will appear here.</p></div>";return;}
- notificationHost.innerHTML="<div class=\"panel\"><strong>"+unread+" unread account updates · "+rows.length+" total notifications</strong></div>"+rows.slice(0,40).map(n=>{
-  const k=String(n.kind||"").toLowerCase(),good=k==="kyc_approved"||k==="deposit"||k==="withdrawal_approved"||k==="bullish",bad=k==="kyc_rejected"||k==="withdrawal"||k==="bearish",color=good?"#0ecb81":bad?"#f6465d":"#d6a84b",symbol=good?"↗":bad?"↘":"•",when=n.createdAt&&typeof n.createdAt.toDate==="function"?n.createdAt.toDate().toLocaleString():String(n.createdAtText||""),source=(k==="bullish"||k==="bearish")?(n.source==="market-auto"?"Automatic market alert":"Market alert"):"Account update",isUnread=!!(n.id&&!n.readAt);
-  return "<article class=\"panel oc-notification-item\" data-notification-id=\""+esc(n.id||"")+"\" role=\"button\" tabindex=\"0\" aria-label=\""+(isUnread?"Unread notification. ":"Read notification. ")+esc(n.title||"Account update")+"\" style=\"position:relative;padding:14px;margin:10px 0;border:1px solid "+(isUnread?"#f6465d":"#34465a")+";border-left:4px solid "+(isUnread?"#f6465d":color)+";background:"+(isUnread?"rgba(246,70,93,.07)":"transparent")+";cursor:pointer\"><span aria-hidden=\"true\" style=\"position:absolute;right:14px;top:14px;width:9px;height:9px;border-radius:50%;background:#f6465d;display:"+(isUnread?"block":"none")+"\"></span><strong style=\"color:"+color+";padding-right:18px\">"+symbol+" "+esc(n.title||"Account update")+"</strong><p class=\"muted tiny\">"+esc(n.message||"Your account has an update.")+"</p><small class=\"muted\">"+esc(source)+(when?" · "+when:"")+(isUnread?" · Unread":" · Read")+"</small></article>";
+ notificationHost.innerHTML="<div class=\"panel\"><strong>"+unread+" unread notifications · "+rows.length+" total notifications</strong></div>"+rows.slice(0,40).map(n=>{
+  const k=String(n.kind||"").toLowerCase(),good=k==="kyc_approved"||k==="deposit"||k==="withdrawal_approved"||k==="bullish",bad=k==="kyc_rejected"||k==="withdrawal"||k==="bearish",color=good?"#0ecb81":bad?"#f6465d":"#d6a84b",symbol=good?"↗":bad?"↘":"•",when=n.createdAt&&typeof n.createdAt.toDate==="function"?n.createdAt.toDate().toLocaleString():String(n.createdAtText||""),source=n.notificationType==="market"?(n.source==="market-auto"?"Automatic market alert":"Market alert"):"Account update",isUnread=!n.readAt,isOpen=openedNotificationKey===n.notificationKey;
+  return "<article class=\"panel oc-notification-item\" data-notification-id=\""+esc(n.id||"")+"\" data-notification-type=\""+n.notificationType+"\" role=\"button\" tabindex=\"0\" aria-expanded=\""+(isOpen?"true":"false")+"\" aria-label=\""+(isUnread?"Unread notification. ":"Read notification. ")+esc(n.title||"Account update")+"\" style=\"position:relative;padding:14px;margin:10px 0;border:1px solid "+(isUnread?"#f6465d":"#34465a")+";border-left:4px solid "+(isUnread?"#f6465d":color)+";background:"+(isUnread?"rgba(246,70,93,.07)":"transparent")+";cursor:pointer\"><span aria-hidden=\"true\" style=\"position:absolute;right:14px;top:14px;width:9px;height:9px;border-radius:50%;background:#f6465d;display:"+(isUnread?"block":"none")+"\"></span><strong style=\"color:"+color+";padding-right:18px\">"+symbol+" "+esc(n.title||"Account update")+"</strong><small class=\"muted\" style=\"display:block;margin-top:5px\">"+esc(source)+(when?" · "+when:"")+(isUnread?" · Unread":" · Read")+"</small>"+(isOpen?"<div class=\"oc-notification-details\" style=\"margin-top:12px;padding-top:10px;border-top:1px solid #34465a\"><p class=\"muted tiny\" style=\"margin:0\">"+esc(n.message||"Your account has an update.")+"</p></div>":"")+"</article>";
  }).join("");
  notificationHost.querySelectorAll("[data-notification-id]").forEach(card=>{
-  const markRead=async()=>{const id=card.dataset.notificationId,item=accountNotificationRows.find(row=>row.id===id);if(!id||!item||item.readAt)return;card.setAttribute("aria-busy","true");try{await updateDoc(doc(db,"userNotifications",auth.currentUser.uid,"items",id),{readAt:serverTimestamp()});}catch(error){console.warn("Could not mark notification as read:",error?.code||error);card.removeAttribute("aria-busy");}};
-  card.addEventListener("click",markRead);card.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();markRead();}});
+  const activate=async()=>{const id=card.dataset.notificationId,type=card.dataset.notificationType,user=auth.currentUser;if(!id||!user)return;
+   const key=type+":"+id;openedNotificationKey=openedNotificationKey===key?null:key;
+   if(openedNotificationKey===key){
+    const item=type==="market"?marketAlertRows.find(row=>row.id===id):accountNotificationRows.find(row=>row.id===id);
+    const read=type==="market"?marketAlertReadRows.some(row=>row.id===id):!!item?.readAt;
+    if(!read){
+     if(type==="market")marketAlertReadRows.push({id,readAt:true});else if(item)item.readAt=true;
+     paintNotifications();
+     try{if(type==="market")await setDoc(doc(db,"userNotificationReads",user.uid,"items",id),{readAt:serverTimestamp()},{merge:true});else await updateDoc(doc(db,"userNotifications",user.uid,"items",id),{readAt:serverTimestamp()});}
+     catch(error){console.warn("Could not mark notification as read:",error?.code||error);if(type==="market")marketAlertReadRows=marketAlertReadRows.filter(row=>row.id!==id);else if(item)item.readAt=null;paintNotifications();}
+     return;
+    }
+   }
+   paintNotifications();
+  };
+  card.addEventListener("click",()=>{void activate();});card.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();void activate();}});
  });
 }
 function renderUserNotifications(user){
- if(stopUserNotifications){stopUserNotifications();stopUserNotifications=null;}if(stopMarketAlerts){stopMarketAlerts();stopMarketAlerts=null;}
- accountNotificationRows=[];marketAlertRows=[];marketAlertsInitialized=false;accountNotificationsInitialized=false;const badge=byId("ocNotificationCount");if(badge){badge.textContent="0";badge.hidden=true;}if(!notificationHost)return;
+ if(stopUserNotifications){stopUserNotifications();stopUserNotifications=null;}if(stopMarketAlerts){stopMarketAlerts();stopMarketAlerts=null;}if(stopMarketAlertReads){stopMarketAlertReads();stopMarketAlertReads=null;}
+ accountNotificationRows=[];marketAlertRows=[];marketAlertReadRows=[];openedNotificationKey=null;marketAlertsInitialized=false;accountNotificationsInitialized=false;const badge=byId("ocNotificationCount");if(badge){badge.textContent="0";badge.hidden=true;}if(!notificationHost)return;
  if(!user){notificationHost.innerHTML="<div class=\"notice\">Sign in to receive market and account notifications.</div>";return;}
  notificationHost.innerHTML="<div class=\"panel\">Loading your notifications…</div>";
  stopUserNotifications=onSnapshot(collection(db,"userNotifications",user.uid,"items"),snap=>{if(accountNotificationsInitialized)snap.docChanges().filter(change=>change.type==="added").forEach(change=>showAccountNotificationToast(change.doc.data()||{}));accountNotificationsInitialized=true;accountNotificationRows=snap.docs.map(d=>({id:d.id,...d.data()}));paintNotifications();},error=>{notificationHost.innerHTML="<div class=\"notice\">Could not load account notifications ("+esc(error.code||"connection error")+").</div>";});
  stopMarketAlerts=onSnapshot(collection(db,"marketAlerts"),snap=>{if(marketAlertsInitialized)snap.docChanges().filter(change=>change.type==="added").forEach(change=>{const alert=change.doc.data()||{};if(["bullish","bearish"].includes(alert.kind))showMarketAlertToast(alert);});marketAlertsInitialized=true;marketAlertRows=snap.docs.map(d=>({id:d.id,...d.data()}));paintNotifications();},error=>{console.warn("Market alerts could not be loaded:",error.code||error);if(!accountNotificationRows.length)notificationHost.innerHTML="<div class=\"notice\">Market notifications are temporarily unavailable.</div>";});
+ stopMarketAlertReads=onSnapshot(collection(db,"userNotificationReads",user.uid,"items"),snap=>{marketAlertReadRows=snap.docs.map(d=>({id:d.id,...d.data()}));paintNotifications();},error=>console.warn("Market notification read states could not be loaded:",error?.code||error));
 }
 window.ocRenderUserNotifications=renderUserNotifications;
 onAuthStateChanged(auth,user=>{byId("ocNotificationBell")?.classList.toggle("hidden",!user);renderUserNotifications(user||null);});
