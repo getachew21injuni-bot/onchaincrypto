@@ -9027,8 +9027,8 @@ function showAccountNotificationToast(notification){
 }
 function paintNotifications(){
  if(!notificationHost)return;
- const marketReadById=new Set(marketAlertReadRows.map(x=>x.id));
- const rows=accountNotificationRows.map(n=>({...n,notificationType:"account",notificationKey:"account:"+n.id,readAt:n.readAt||(n.read===true||n.isRead===true?true:null)||(pendingNotificationReadKeys.has("account:"+n.id)?true:null)})).concat(
+ const marketReadById=new Set(marketAlertReadRows.map(x=>x.id)),accountReadById=new Set(marketAlertReadRows.map(x=>x.id));
+ const rows=accountNotificationRows.map(n=>({...n,notificationType:"account",notificationKey:"account:"+n.id,readAt:n.readAt||(n.read===true||n.isRead===true?true:null)||(accountReadById.has("account_"+n.id)?true:null)||(pendingNotificationReadKeys.has("account:"+n.id)?true:null)})).concat(
   marketAlertRows.map(n=>({...n,notificationType:"market",notificationKey:"market:"+n.id,readAt:(marketReadById.has(n.id)||pendingNotificationReadKeys.has("market:"+n.id))?(marketAlertReadRows.find(x=>x.id===n.id)?.readAt||true):null}))
  ).sort((a,b)=>{const t=x=>x.createdAt&&typeof x.createdAt.toMillis==="function"?x.createdAt.toMillis():Date.parse(x.createdAtText||"")||0;return t(b)-t(a);});
  const unread=rows.filter(x=>!x.readAt).length;
@@ -9043,11 +9043,11 @@ function paintNotifications(){
    const key=type+":"+id;openedNotificationKey=openedNotificationKey===key?null:key;
    if(openedNotificationKey===key){
     const item=type==="market"?marketAlertRows.find(row=>row.id===id):accountNotificationRows.find(row=>row.id===id);
-    const read=pendingNotificationReadKeys.has(key)||(type==="market"?marketAlertReadRows.some(row=>row.id===id):!!(item?.readAt||item?.read===true||item?.isRead===true));
+    const read=pendingNotificationReadKeys.has(key)||(type==="market"?marketAlertReadRows.some(row=>row.id===id):!!(item?.readAt||item?.read===true||item?.isRead===true||marketAlertReadRows.some(row=>row.id==="account_"+id)));
     if(!read){
      notificationReadError="";pendingNotificationReadKeys.add(key);
      paintNotifications();
-     try{if(type==="market")await setDoc(doc(db,"userNotificationReads",user.uid,"items",id),{readAt:serverTimestamp()},{merge:true});else await updateDoc(doc(db,"userNotifications",user.uid,"items",id),{readAt:serverTimestamp()});}
+     try{await setDoc(doc(db,"userNotificationReads",user.uid,"items",type==="market"?id:"account_"+id),{readAt:serverTimestamp()},{merge:true});}
      catch(error){console.warn("Could not mark notification as read:",error?.code||error);pendingNotificationReadKeys.delete(key);notificationReadError="This notification could not be marked as read. Please try again.";paintNotifications();}
      return;
     }
@@ -9062,9 +9062,9 @@ function renderUserNotifications(user){
  accountNotificationRows=[];marketAlertRows=[];marketAlertReadRows=[];pendingNotificationReadKeys.clear();notificationReadError="";openedNotificationKey=null;marketAlertsInitialized=false;accountNotificationsInitialized=false;const badge=byId("ocNotificationCount");if(badge){badge.textContent="0";badge.hidden=true;}if(!notificationHost)return;
  if(!user){notificationHost.innerHTML="<div class=\"notice\">Sign in to receive market and account notifications.</div>";return;}
  notificationHost.innerHTML="<div class=\"panel\">Loading your notifications…</div>";
- stopUserNotifications=onSnapshot(collection(db,"userNotifications",user.uid,"items"),snap=>{if(accountNotificationsInitialized)snap.docChanges().filter(change=>change.type==="added").forEach(change=>showAccountNotificationToast(change.doc.data()||{}));accountNotificationsInitialized=true;accountNotificationRows=snap.docs.map(d=>({id:d.id,...d.data()}));accountNotificationRows.forEach(row=>{if(row.readAt||row.read===true||row.isRead===true)pendingNotificationReadKeys.delete("account:"+row.id);});paintNotifications();},error=>{notificationHost.innerHTML="<div class=\"notice\">Could not load account notifications ("+esc(error.code||"connection error")+").</div>";});
+ stopUserNotifications=onSnapshot(collection(db,"userNotifications",user.uid,"items"),snap=>{if(accountNotificationsInitialized)snap.docChanges().filter(change=>change.type==="added").forEach(change=>showAccountNotificationToast(change.doc.data()||{}));accountNotificationsInitialized=true;accountNotificationRows=snap.docs.map(d=>({id:d.id,...d.data()}));paintNotifications();},error=>{notificationHost.innerHTML="<div class=\"notice\">Could not load account notifications ("+esc(error.code||"connection error")+").</div>";});
  stopMarketAlerts=onSnapshot(collection(db,"marketAlerts"),snap=>{if(marketAlertsInitialized)snap.docChanges().filter(change=>change.type==="added").forEach(change=>{const alert=change.doc.data()||{};if(["bullish","bearish"].includes(alert.kind))showMarketAlertToast(alert);});marketAlertsInitialized=true;marketAlertRows=snap.docs.map(d=>({id:d.id,...d.data()}));paintNotifications();},error=>{console.warn("Market alerts could not be loaded:",error.code||error);if(!accountNotificationRows.length)notificationHost.innerHTML="<div class=\"notice\">Market notifications are temporarily unavailable.</div>";});
- stopMarketAlertReads=onSnapshot(collection(db,"userNotificationReads",user.uid,"items"),snap=>{marketAlertReadRows=snap.docs.map(d=>({id:d.id,...d.data()}));marketAlertReadRows.forEach(row=>{if(row.readAt)pendingNotificationReadKeys.delete("market:"+row.id);});paintNotifications();},error=>console.warn("Market notification read states could not be loaded:",error?.code||error));
+ stopMarketAlertReads=onSnapshot(collection(db,"userNotificationReads",user.uid,"items"),snap=>{marketAlertReadRows=snap.docs.map(d=>({id:d.id,...d.data()}));marketAlertReadRows.forEach(row=>{if(row.readAt)pendingNotificationReadKeys.delete((row.id.startsWith("account_")?"account:":"market:")+(row.id.startsWith("account_")?row.id.slice(8):row.id));});paintNotifications();},error=>console.warn("Market notification read states could not be loaded:",error?.code||error));
 }
 window.ocRenderUserNotifications=renderUserNotifications;
 onAuthStateChanged(auth,user=>{byId("ocNotificationBell")?.classList.toggle("hidden",!user);renderUserNotifications(user||null);});
