@@ -273,6 +273,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Per-user read state for shared market alerts.
+    match /userNotificationReads/{uid}/items/{alertId} {
+      allow read: if owns(uid);
+      allow create, update: if owns(uid)
+        && request.resource.data.keys().hasOnly(['readAt'])
+        && request.resource.data.readAt != null;
+      allow delete: if false;
+    }
+
     // Shared market alerts are visible to signed-in members and published only
     // by the verified administrator. Alerts are append-only.
     match /marketAlerts/{alertId} {
