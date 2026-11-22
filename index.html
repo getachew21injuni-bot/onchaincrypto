@@ -1555,27 +1555,7 @@ $("browserSearchForm")?.addEventListener("submit",e=>{e.preventDefault();const q
   <button data-topic="register">Create account / Sign in</button><button data-topic="deposit">Deposits</button><button data-topic="withdraw">Withdrawals</button><button data-topic="trade">Trading</button><button data-topic="coins">Coins & prices</button><button data-topic="wallet">Wallet & balance</button><button data-topic="kyc">Profile verification</button><button data-topic="agent" class="oc-sp-agent">Talk to platform team ↗</button>
  </div>
 </section>
-<script id="oc-live-support-widget-script">
-(function(){
- const launcher=document.getElementById("ocLiveSupport"),panel=document.getElementById("ocSupportPanel"),messages=document.getElementById("ocSpMessages"),options=document.getElementById("ocSpOptions");
- if(!launcher||!panel||!messages||!options)return;
- const answers={
- register:"To register, open the Register page and enter the requested details. To sign in, use the email or sign-in method enabled for your account. If you see an error, note the exact message and contact the platform team. Never share your password or verification codes.",
- deposit:"Open Wallet and look for Deposit. Follow only the payment instructions shown inside the official platform. A deposit is not confirmed until the platform shows a confirmed transaction. Never send funds to an address provided by an unknown person. Deposit processing is not connected unless an official payment method is displayed.",
- withdraw:"Open Wallet and choose Withdraw if this feature is enabled for your account. Check the asset, network, destination address and any fee carefully before confirming. Never share your password, recovery phrase or one-time codes. If Withdraw is unavailable or a transaction is pending, contact the platform team with the transaction reference—never send private keys.",
- trade:"Open Trade, select a coin and review the price and order details before submitting. The current practice-trading balance and simulated orders are paper-trading features; they are not real funds or guaranteed profits. Do not trade with money you cannot afford to lose.",
- coins:"Open Markets to view available coins and price changes. Prices come from public market-data providers and may be delayed or temporarily unavailable. Always verify a price and network before making any real transaction.",
- wallet:"Open Wallet to review the balances displayed for your account. Paper trading balances may be simulated and are not proof of a real deposit. If a confirmed transaction is missing, keep its transaction ID and contact the platform team.",
- kyc:"Open your profile from the three-dot menu and select KYC verification if available. Submit identity documents only through the official secure platform flow. Do not send passport photos or identity numbers through public chat.",
-};
- function add(text,who){const d=document.createElement("div");d.className="oc-sp-msg"+(who==="user"?" user":"");d.textContent=text;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;}
- function toggle(open){panel.classList.toggle("open",open);launcher.setAttribute("aria-expanded",String(open));if(open)messages.scrollTop=messages.scrollHeight;}
- launcher.addEventListener("click",()=>toggle(!panel.classList.contains("open")));
- panel.querySelector(".oc-sp-close").addEventListener("click",()=>toggle(false));
- options.addEventListener("click",e=>{const b=e.target.closest("button[data-topic]");if(!b)return;const topic=b.dataset.topic;add(b.textContent.trim(),"user");if(topic==="agent"){add("I’ll open the Onchain platform team contact in Telegram. This opens an external service; a human reply depends on the team being online.","bot");window.open("https://t.me/Onchainspro_OfficialBot","_blank","noopener,noreferrer");return;}add(answers[topic]||"Choose a topic and I’ll guide you through the platform.");});
- document.addEventListener("keydown",e=>{if(e.key==="Escape")toggle(false);});
-})();
-</script>
+<!-- Support behavior is handled by public/support-chat.js to keep one launcher and one panel. -->
 
 <script type="module" src="./public/support-chat.js"></script>
 <script id="home-performance-and-orderbook-script">
