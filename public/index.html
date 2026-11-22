@@ -1374,6 +1374,7 @@ body.oc-logged-out .oc-home-avatar-picker,body.oc-auth-screen .oc-home-avatar-pi
 .oc-home-avatar-picker img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
 @media(max-width:600px){.oc-home-avatar-picker{flex-basis:42px;width:42px;height:42px}}
 </style>
+<style id="oc-user-notification-alert-style">.oc-notification-bell{position:relative;min-width:42px;min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:5px;color:#c4b5fd!important}.oc-notification-count{display:inline-flex;min-width:18px;height:18px;align-items:center;justify-content:center;padding:0 5px;border-radius:10px;background:#f6465d;color:#fff;font-size:10px;font-weight:800}.oc-notification-count[hidden]{display:none!important}.oc-notification-bell.hidden{display:none!important}@media(max-width:700px){.oc-notification-bell{min-width:36px;min-height:38px;padding:6px 8px!important}}</style>
 </head>
 <body>
 <header>
@@ -1386,7 +1387,7 @@ body.oc-logged-out .oc-home-avatar-picker,body.oc-auth-screen .oc-home-avatar-pi
     <button data-page="wallet">Wallet</button>
     
   </nav>
-  <div class="header-right"><button class="secondary oc-theme-toggle" id="ocThemeToggle" type="button" aria-label="Switch to light mode" title="Switch display mode"><span aria-hidden="true">☼</span><small>Light</small></button><div class="oc-visitor-actions" id="ocVisitorActions"><button class="primary" type="button" id="ocVisitorSignup">Sign Up</button><button class="secondary" type="button" id="ocVisitorLogin">Log In</button></div><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button></div></div></div>
+  <div class="header-right"><button class="secondary oc-theme-toggle" id="ocThemeToggle" type="button" aria-label="Switch to light mode" title="Switch display mode"><span aria-hidden="true">☼</span><small>Light</small></button><div class="oc-visitor-actions" id="ocVisitorActions"><button class="primary" type="button" id="ocVisitorSignup">Sign Up</button><button class="secondary" type="button" id="ocVisitorLogin">Log In</button></div><button class="secondary" id="refreshBtn" aria-label="Refresh market prices" title="Refresh market prices">↻</button><button class="secondary oc-notification-bell hidden" id="ocNotificationBell" type="button" aria-label="Open notifications" title="Notifications">♢ <span id="ocNotificationCount" class="oc-notification-count" hidden>0</span></button><button class="secondary oc-nav-control" id="ocBackBtn" type="button" aria-label="Go back to previous page" title="Back">← <span>Back</span></button><div class="more-menu-wrap"><button class="secondary more-menu-trigger" id="moreMenuBtn" aria-label="Open account menu" aria-expanded="false" aria-controls="moreMenu">⋮</button><div class="more-menu hidden" id="moreMenu" role="menu"><button type="button" data-menu-page="profile" role="menuitem"><span class="menu-symbol profile-symbol">♙</span><span><strong>Profile</strong><small>Account details and personal preferences</small></span></button><button type="button" data-menu-page="financial" role="menuitem"><span class="menu-symbol" style="color:#00d7a0">⇵</span><span><strong>Financial</strong><small>Deposits, withdrawals, transfers and history</small></span></button><button type="button" data-menu-page="settings" role="menuitem"><span class="menu-symbol settings-symbol">⚙</span><span><strong>Settings</strong><small>Security and preferences</small></span></button><button type="button" data-menu-page="notifications" role="menuitem"><span class="menu-symbol notification-symbol">♢</span><span><strong>Notifications</strong><small>Notification preferences and updates</small></span></button><button type="button" data-menu-page="kyc" role="menuitem"><span class="menu-symbol kyc-symbol">✓</span><span><strong>Identity verification</strong><small>Verification status and requirements</small></span></button></div></div></div>
 </header>
 <main>
   
@@ -3302,7 +3303,7 @@ const [firebaseAppSdk, firebaseFirestoreSdk, firebaseAuthSdk] = await Promise.al
   loadFirebaseModule("https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js", "https://esm.sh/firebase@11.10.0/auth", "https://cdn.jsdelivr.net/npm/firebase@11.10.0/auth/+esm")
 ]);
 const { initializeApp, getApps } = firebaseAppSdk;
-const { getFirestore, collection, doc, getDoc, setDoc, addDoc, onSnapshot, serverTimestamp } = firebaseFirestoreSdk;
+const { getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, onSnapshot, serverTimestamp } = firebaseFirestoreSdk;
 const {
   getAuth, initializeAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider,
@@ -9016,17 +9017,33 @@ if(profile){
 }
 const notificationHost=byId("notificationsPageContent");
 let stopUserNotifications=null,stopMarketAlerts=null,accountNotificationRows=[],marketAlertRows=[];
-let marketAlertsInitialized=false;
+let marketAlertsInitialized=false,accountNotificationsInitialized=false;
+async function openUserNotifications(){
+ const user=auth.currentUser;if(!user)return;
+ if(typeof window.showPage==="function")window.showPage("notifications");
+ const unread=accountNotificationRows.filter(item=>!item.readAt);
+ await Promise.allSettled(unread.map(item=>updateDoc(doc(db,"userNotifications",user.uid,"items",item.id),{readAt:serverTimestamp()})));
+}
+byId("ocNotificationBell")?.addEventListener("click",()=>{void openUserNotifications();});
+document.querySelectorAll("[data-menu-page=notifications]").forEach(button=>button.addEventListener("click",()=>{void openUserNotifications();}));
 function showMarketAlertToast(alert){
  const old=byId("ocMarketAlertToast");if(old)old.remove();
- const good=alert.kind==="bullish",color=good?"#0ecb81":"#f6465d",host=document.createElement("div");host.id="ocMarketAlertToast";host.setAttribute("role","status");host.style.cssText="position:fixed;z-index:100000;top:84px;left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 24px));padding:14px 16px;border:1px solid "+color+";border-left:5px solid "+color+";border-radius:13px;background:#08182bf5;color:#eaf6ff;box-shadow:0 16px 42px #0009";
+ const good=alert.kind==="bullish",color=good?"#0ecb81":"#f6465d",host=document.createElement("div");host.id="ocMarketAlertToast";host.setAttribute("role","status");host.style.cssText="position:fixed;z-index:100000;top:84px;right:18px;left:auto;transform:none;width:min(420px,calc(100vw - 24px));padding:14px 16px;border:1px solid "+color+";border-left:5px solid "+color+";border-radius:13px;background:#08182bf5;color:#eaf6ff;box-shadow:0 16px 42px #0009";
  host.innerHTML="<div style=\"display:flex;gap:12px;align-items:flex-start\"><div style=\"flex:1;min-width:0\"><strong style=\"color:"+color+"\">"+(good?"↗ ":"↘ ")+esc(alert.title||"Market Alert")+"</strong><p style=\"margin:5px 0 0;font-size:13px\">"+esc(alert.message||"A new market update is available.")+"</p></div><button type=\"button\" aria-label=\"Close market alert\" style=\"background:transparent;color:#eaf6ff;padding:0 4px;font-size:20px\">×</button></div>";
  host.querySelector("button")?.addEventListener("click",()=>host.remove());document.body.appendChild(host);setTimeout(()=>host.remove(),10000);
+}
+function showAccountNotificationToast(notification){
+ const old=byId("ocAccountNotificationToast");if(old)old.remove();
+ const host=document.createElement("div");host.id="ocAccountNotificationToast";host.setAttribute("role","status");
+ host.style.cssText="position:fixed;z-index:100001;top:84px;right:18px;left:auto;transform:none;width:min(420px,calc(100vw - 24px));padding:14px 16px;border:1px solid #438dff;border-left:5px solid #20d9ff;border-radius:13px;background:#08182bf5;color:#eaf6ff;box-shadow:0 16px 42px #0009";
+ host.innerHTML="<div style=\"display:flex;gap:12px;align-items:flex-start\"><div style=\"flex:1;min-width:0\"><strong style=\"color:#20d9ff\">♢ "+esc(notification.title||"Account update")+"</strong><p style=\"margin:5px 0 10px;font-size:13px\">"+esc(notification.message||"Your account has an update.")+"</p><button type=\"button\" data-view-notifications style=\"background:#12385a;color:#eaf6ff;padding:7px 10px\">View notifications</button></div><button type=\"button\" aria-label=\"Close notification alert\" data-close-alert style=\"background:transparent;color:#eaf6ff;padding:0 4px;font-size:20px\">×</button></div>";
+ host.querySelector("[data-close-alert]")?.addEventListener("click",()=>host.remove());host.querySelector("[data-view-notifications]")?.addEventListener("click",()=>{host.remove();void openUserNotifications();});document.body.appendChild(host);setTimeout(()=>host.remove(),10000);
 }
 function paintNotifications(){
  if(!notificationHost)return;
  const rows=accountNotificationRows.concat(marketAlertRows).sort((a,b)=>{const t=x=>x.createdAt&&typeof x.createdAt.toMillis==="function"?x.createdAt.toMillis():Date.parse(x.createdAtText||"")||0;return t(b)-t(a);});
  const unread=accountNotificationRows.filter(x=>!x.readAt).length;
+ const bell=byId("ocNotificationBell"),badge=byId("ocNotificationCount");if(badge){badge.textContent=unread>99?"99+":String(unread);badge.hidden=unread===0;}if(bell)bell.setAttribute("aria-label",unread?"Notifications, "+unread+" unread":"Notifications");
  if(!rows.length){notificationHost.innerHTML="<div class=\"panel\"><strong>No notifications yet</strong><p class=\"muted tiny\">Market updates and account notifications will appear here.</p></div>";return;}
  notificationHost.innerHTML="<div class=\"panel\"><strong>"+unread+" unread account updates · "+rows.length+" total notifications</strong></div>"+rows.slice(0,40).map(n=>{
   const k=String(n.kind||"").toLowerCase(),good=k==="kyc_approved"||k==="deposit"||k==="withdrawal_approved"||k==="bullish",bad=k==="kyc_rejected"||k==="withdrawal"||k==="bearish",color=good?"#0ecb81":bad?"#f6465d":"#d6a84b",symbol=good?"↗":bad?"↘":"•",when=n.createdAt&&typeof n.createdAt.toDate==="function"?n.createdAt.toDate().toLocaleString():String(n.createdAtText||""),source=(k==="bullish"||k==="bearish")?(n.source==="market-auto"?"Automatic market alert":"Market alert"):"Account update";
@@ -9035,14 +9052,14 @@ function paintNotifications(){
 }
 function renderUserNotifications(user){
  if(stopUserNotifications){stopUserNotifications();stopUserNotifications=null;}if(stopMarketAlerts){stopMarketAlerts();stopMarketAlerts=null;}
- accountNotificationRows=[];marketAlertRows=[];marketAlertsInitialized=false;if(!notificationHost)return;
+ accountNotificationRows=[];marketAlertRows=[];marketAlertsInitialized=false;accountNotificationsInitialized=false;const badge=byId("ocNotificationCount");if(badge){badge.textContent="0";badge.hidden=true;}if(!notificationHost)return;
  if(!user){notificationHost.innerHTML="<div class=\"notice\">Sign in to receive market and account notifications.</div>";return;}
  notificationHost.innerHTML="<div class=\"panel\">Loading your notifications…</div>";
- stopUserNotifications=onSnapshot(collection(db,"userNotifications",user.uid,"items"),snap=>{accountNotificationRows=snap.docs.map(d=>({id:d.id,...d.data()}));paintNotifications();},error=>{notificationHost.innerHTML="<div class=\"notice\">Could not load account notifications ("+esc(error.code||"connection error")+").</div>";});
+ stopUserNotifications=onSnapshot(collection(db,"userNotifications",user.uid,"items"),snap=>{if(accountNotificationsInitialized)snap.docChanges().filter(change=>change.type==="added").forEach(change=>showAccountNotificationToast(change.doc.data()||{}));accountNotificationsInitialized=true;accountNotificationRows=snap.docs.map(d=>({id:d.id,...d.data()}));paintNotifications();},error=>{notificationHost.innerHTML="<div class=\"notice\">Could not load account notifications ("+esc(error.code||"connection error")+").</div>";});
  stopMarketAlerts=onSnapshot(collection(db,"marketAlerts"),snap=>{if(marketAlertsInitialized)snap.docChanges().filter(change=>change.type==="added").forEach(change=>{const alert=change.doc.data()||{};if(["bullish","bearish"].includes(alert.kind))showMarketAlertToast(alert);});marketAlertsInitialized=true;marketAlertRows=snap.docs.map(d=>({id:d.id,...d.data()}));paintNotifications();},error=>{console.warn("Market alerts could not be loaded:",error.code||error);if(!accountNotificationRows.length)notificationHost.innerHTML="<div class=\"notice\">Market notifications are temporarily unavailable.</div>";});
 }
 window.ocRenderUserNotifications=renderUserNotifications;
-onAuthStateChanged(auth,user=>renderUserNotifications(user||null));
+onAuthStateChanged(auth,user=>{byId("ocNotificationBell")?.classList.toggle("hidden",!user);renderUserNotifications(user||null);});
 const kyc=byId("page-kyc");
 if(kyc){
  const panel=kyc.querySelector(".oc-standalone-account-page")||kyc;
