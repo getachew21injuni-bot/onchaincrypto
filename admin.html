@@ -159,9 +159,35 @@ function esc(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt
 function getRecords(view){const data=loadAdminData();return Array.isArray(data[view])?data[view]:(seedRecords[view]||[]).map((x,i)=>({...x,id:view.toLowerCase().replace(/[^a-z]/g,'')+'-'+i,createdAt:new Date().toISOString()}));}
 function renderLiveCollection(view){if(window.adminGetLiveCollection)window.adminGetLiveCollection(view);else document.getElementById('detailBody').textContent='Firebase admin data module is not ready. Refresh and sign in again.';}
 
+function renderAdminEmail(){
+ const body=document.getElementById('detailBody');
+ body.innerHTML='<div class="content-panel" style="padding:20px"><h3>Send email from Onchain Support</h3><p class="muted">Choose a registered user. Email is sent through the Onchain Support mail service—not your personal email application.</p><div class="notice"><strong>From:</strong> Onchain Support &lt;support@onchainspro.com&gt;</div><label>Recipient</label><select id="supportEmailRecipient"><option value="">Loading users…</option></select><label>Subject</label><input id="supportEmailSubject" maxlength="160" placeholder="Email subject"><label>Message</label><textarea id="supportEmailMessage" maxlength="10000" rows="8" placeholder="Write your email to the user…"></textarea><button id="supportEmailSend" class="primary" type="button" disabled>Send email to user</button><p id="supportEmailStatus" class="muted" role="status" aria-live="polite"></p></div>';
+ const recipient=byId('supportEmailRecipient'),sendButton=byId('supportEmailSend'),status=byId('supportEmailStatus');
+ getDocs(query(collection(db,'users'),limit(200))).then(snapshot=>{
+  const users=snapshot.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>String(u.email||'').trim());
+  recipient.innerHTML='<option value="">Choose a registered user</option>'+users.map(u=>{const name=u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||'User';return '<option value="'+safeText(u.email)+'">'+safeText(name)+' · '+safeText(u.email)+'</option>';}).join('');
+  sendButton.disabled=!users.length;
+ }).catch(error=>{recipient.innerHTML='<option value="">Could not load users</option>';status.textContent='User list failed: '+error.message;});
+ sendButton.addEventListener('click',async()=>{
+  const to=recipient.value.trim(),subject=byId('supportEmailSubject').value.trim(),message=byId('supportEmailMessage').value.trim();
+  if(!to||!subject||!message){status.textContent='Select a recipient and enter both subject and message.';return;}
+  sendButton.disabled=true;status.textContent='Sending from Onchain Support…';
+  try{
+   const user=auth.currentUser;if(!user)throw new Error('Admin sign-in required.');
+   const token=await user.getIdToken();
+   const response=await fetch('https://onchain-support-email.getachew21-inj-uni.workers.dev/send',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({to,subject,message})});
+   const result=await response.json().catch(()=>({}));
+   if(!response.ok||!result.success)throw new Error(result.error||'Email service rejected the request.');
+   byId('supportEmailMessage').value='';
+   status.textContent='Email accepted by the Onchain Support mail service for '+to+'.';
+  }catch(error){status.textContent='Email failed: '+(error.message||'Mail service unavailable.');}
+  finally{sendButton.disabled=false;}
+ });
+}
 function renderModule(view){
  const body=document.getElementById('detailBody');
  if(view==='Support'&&window.renderSupportInbox){window.renderSupportInbox();return;}
+ if(view==='Email'){renderAdminEmail();return;}
  if(view==='Users'||view==='KYC'){renderLiveCollection(view);return;}
  if(view==='Analytics'){
   const data=loadAdminData();const counts=moduleNames.reduce((o,n)=>(o[n]=getRecords(n).length,o),{});
