@@ -363,6 +363,13 @@ test("signed-in users receive live right-side account notifications by default",
   assert.ok(html.includes('onAuthStateChanged(auth,user=>{byId("ocNotificationBell")?.classList.toggle("hidden",!user);renderUserNotifications(user||null);});'), "Every signed-in account must automatically subscribe to notifications");
 });
 
+test("in-app notifications are always enabled rather than device-local opt-in settings", () => {
+  assert.ok(html.includes("Automatically enabled for every registered account"), "Every registered account must receive in-app notifications by default");
+  assert.ok(html.includes("Live in-app notifications are automatically enabled for every registered account."), "The notification settings page must explain the always-on behavior");
+  assert.ok(!html.includes('id="prefNotifications"') && !html.includes('id="prefAllNotifications"'), "Users must not be able to disable required in-app account notifications");
+  assert.ok(!html.includes('localStorage.setItem("oc_notification_preferences"'), "In-app notification delivery must not depend on a per-device preference");
+});
+
 test("KYC documents use private Firestore storage without Firebase Storage", () => {
   assert.ok(html.includes("async function compressKycImage(file)"), "KYC images must be compressed before saving");
   assert.ok(html.includes('doc(db,"kycSubmissions",user.uid,"documents","front")'), "Front ID must use a private Firestore subdocument");
