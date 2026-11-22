@@ -326,3 +326,44 @@ describe("per-account profile avatar storage", () => {
     }));
   });
 });
+
+
+describe("notification read-state persistence", () => {
+  it("allows a member to mark their own account and market notifications as read", async () => {
+    const db = testEnv.authenticatedContext("sender").firestore();
+    const accountRef = doc(db, "userNotifications/sender/items/deposit-1");
+    const marketReadRef = doc(db, "userNotificationReads/sender/items/market-1");
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), "userNotifications/sender/items/deposit-1"), {
+        kind: "deposit", title: "Deposit received", message: "Your deposit was credited.",
+        createdAt: new Date(), createdAtText: new Date().toLocaleString(),
+        readAt: null, createdBy: "admin", source: "admin-demo"
+      });
+      await setDoc(doc(context.firestore(), "marketAlerts/market-1"), {
+        kind: "bullish", title: "Market update", message: "A market update is available.",
+        createdAt: new Date(), createdAtText: new Date().toLocaleString(),
+        createdBy: "admin", source: "admin-manual"
+      });
+    });
+    await assertSucceeds(updateDoc(accountRef, { readAt: serverTimestamp() }));
+    await assertSucceeds(setDoc(marketReadRef, { readAt: serverTimestamp() }));
+    const savedAccount = await assertSucceeds(getDoc(accountRef));
+    const savedMarketRead = await assertSucceeds(getDoc(marketReadRef));
+    assert.ok(savedAccount.data().readAt);
+    assert.ok(savedMarketRead.data().readAt);
+    const otherDb = testEnv.authenticatedContext("recipient").firestore();
+    await assertFails(updateDoc(doc(otherDb, "userNotifications/sender/items/deposit-1"), { readAt: serverTimestamp() }));
+    await assertFails(setDoc(doc(otherDb, "userNotificationReads/sender/items/market-1"), { readAt: serverTimestamp() }));
+  });
+
+  it("keeps optimistic read state through older snapshots and recognizes legacy read flags", async () => {
+    const source = await readFile("public/index.html", "utf8");
+    assert.match(source, /const pendingNotificationReadKeys=new Set\(\)/);
+    assert.match(source, /pendingNotificationReadKeys\.has\("account:"\+n\.id\)/);
+    assert.match(source, /pendingNotificationReadKeys\.has\("market:"\+n\.id\)/);
+    assert.match(source, /n\.read===true\|\|n\.isRead===true/);
+    assert.match(source, /pendingNotificationReadKeys\.delete\("account:"\+row\.id\)/);
+    assert.match(source, /pendingNotificationReadKeys\.delete\("market:"\+row\.id\)/);
+    assert.match(source, /This notification could not be marked as read/);
+  });
+});
