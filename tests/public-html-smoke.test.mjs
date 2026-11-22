@@ -363,9 +363,13 @@ test("signed-in users receive live right-side account notifications by default",
   assert.ok(html.includes('onAuthStateChanged(auth,user=>{byId("ocNotificationBell")?.classList.toggle("hidden",!user);renderUserNotifications(user||null);});'), "Every signed-in account must automatically subscribe to notifications");
 });
 
-test("in-app notifications are always enabled rather than device-local opt-in settings", () => {
-  assert.ok(html.includes("Automatically enabled for every registered account"), "Every registered account must receive in-app notifications by default");
-  assert.ok(html.includes("Live in-app notifications are automatically enabled for every registered account."), "The notification settings page must explain the always-on behavior");
+test("account notifications use live event alerts without explanatory preference copy", () => {
+  assert.ok(!html.includes("Automatically enabled for every registered account"), "Remove the explanatory always-on copy from the user profile");
+  assert.ok(!html.includes("Live in-app notifications are automatically enabled for every registered account."), "Do not show notification preference explanations");
+  assert.ok(!html.includes('id="profileNotificationsSection"'), "The empty notification preference panel should not remain in the profile");
+  assert.ok(html.includes('kind:"kyc_submitted"'), "A successful KYC submission must create a user alert");
+  assert.ok(admin.includes("kind:'account_status'"), "Admin account activation and suspension must create user alerts");
+  assert.ok(admin.includes("kind:action==='approve'?'kyc_approved':'kyc_rejected'"), "KYC approval and rejection must create user alerts");
   assert.ok(!html.includes('id="prefNotifications"') && !html.includes('id="prefAllNotifications"'), "Users must not be able to disable required in-app account notifications");
   assert.ok(!html.includes('localStorage.setItem("oc_notification_preferences"'), "In-app notification delivery must not depend on a per-device preference");
 });

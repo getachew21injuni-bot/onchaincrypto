@@ -790,7 +790,8 @@ window.adminGetLiveCollection=async function(view){
      const current=auth.currentUser;
      if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('admin-session-not-authorized');
      await setDoc(doc(db,'users',uid),{accountStatus:nextStatus,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:current.email},{merge:true});
-     if(msg)msg.textContent='Account status saved as '+nextStatus.toUpperCase()+'.';
+     await setDoc(doc(collection(db,'userNotifications',uid,'items')),{kind:'account_status',title:nextStatus==='suspended'?'Account suspended':'Account activated',message:nextStatus==='suspended'?'An administrator has suspended your account. Contact support if you believe this is an error.':'An administrator has activated your account. You can continue using your account.',createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:current.uid,source:'admin-account-status'});
+     if(msg)msg.textContent='Account status saved as '+nextStatus.toUpperCase()+'. User notification sent.';
      await window.adminGetLiveCollection('Users');await window.adminRefreshDashboard();
     }catch(error){button.disabled=false;if(msg)msg.textContent='Could not save account status ('+(error.code||error.message||'unknown error')+'). Check Firestore rules and administrator verification.';}
    }));

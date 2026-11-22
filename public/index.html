@@ -2096,13 +2096,6 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
           <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#f6465d" aria-hidden="true">⊗</span>Delete account</strong><p class="muted tiny">Verify your email before sending a deletion request for admin review.</p></div><button class="secondary" id="settingsDeleteAccountBtn">Request deletion</button></div><p id="ocDeleteRequestStatus" class="muted tiny" aria-live="polite"></p><div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#a78bfa" aria-hidden="true">↓</span>Export account data</strong><p class="muted tiny">Download available data saved in this browser.</p></div><button class="secondary" id="exportUserDataBtn" type="button">Export data</button></div><p id="privacyMessage" class="muted tiny" aria-live="polite"></p>
         </div>
       </details>
-      <details class="panel profile-menu-section" id="profileNotificationsSection">
-        <summary><span class="profile-menu-icon notification-symbol">♢</span><span class="profile-menu-copy"><strong>Notifications</strong><small>Notification and email preferences</small></span><span class="profile-menu-chevron">⌄</span></summary>
-        <div class="profile-menu-content">
-          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#c4b5fd" aria-hidden="true">♢</span>In-app notifications</strong><p class="muted tiny">Automatically enabled for every registered account. New account and platform alerts appear live while you are signed in.</p></div><span class="tag">Always on</span></div>
-          <p id="notificationPrefsMessage" class="muted tiny" aria-live="polite">Live notifications are enabled for this account.</p>
-        </div>
-      </details>
       <details class="panel profile-menu-section" id="profileKycSection">
         <summary><span class="profile-menu-icon kyc-symbol">✓</span><span class="profile-menu-copy"><strong>KYC Verification</strong><small>Identity verification status</small></span><span class="profile-menu-chevron">⌄</span></summary>
         <div class="profile-menu-content">
@@ -3143,8 +3136,6 @@ updateQuickEstimate();
 $("historyFilter")?.addEventListener("change",renderActivityHistory);
 $("exportCsv")?.addEventListener("click",()=>{const rows=[["time","category","title","details","status"],...state.history.map(t=>[t.time,"trade",(t.side||"").toUpperCase()+" "+t.symbol,money(t.amount)+" · "+t.qty+" coins @ "+t.price,"Quick Trade result · internal account ledger"]),...readActivity().map(x=>[x.time,x.type,x.title,x.details,x.status])];const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="onchaincrypto-activity-history.csv";a.click();URL.revokeObjectURL(a.href)});
 if($("displayName"))$("displayName").value=profile.name||"";if($("displayCurrency"))$("displayCurrency").value=profile.currency||"USD";$("saveProfile")?.addEventListener("click",()=>{profile={name:$("displayName")?.value.trim()||"",currency:$("displayCurrency")?.value||"USD"};localStorage.setItem("oc_profile",JSON.stringify(profile));if($("profileMessage"))$("profileMessage").textContent="Profile preferences saved on this device."});
-const notificationPrefsMessage=$("notificationPrefsMessage");
-if(notificationPrefsMessage)notificationPrefsMessage.textContent="Live in-app notifications are automatically enabled for every registered account.";
 
   // Customer support opens directly from the three-dot menu.
   
@@ -8979,6 +8970,7 @@ async function submitKycDetails(data){
   frontContentType:"image/jpeg",backContentType:"image/jpeg",
   status:"pending",submittedAt:serverTimestamp(),updatedAt:serverTimestamp()
  },{merge:true});
+ await setDoc(doc(collection(db,"userNotifications",user.uid,"items")),{kind:"kyc_submitted",title:"Identity verification submitted",message:"Your identity documents were submitted successfully and are waiting for review.",createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:user.uid,source:"kyc-submission"});
  return {ok:true,status:"pending"};
 }
 const settings=byId("page-settings");

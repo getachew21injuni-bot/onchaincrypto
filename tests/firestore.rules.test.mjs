@@ -169,6 +169,47 @@ describe("admin-approved internal USDT transfer security", () => {
 });
 
 
+describe("private account notification rules", () => {
+  it("allows a member to create only their own KYC-submitted alert while KYC is pending", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), "kycSubmissions/sender"), { uid: "sender", status: "pending" });
+    });
+    const db = testEnv.authenticatedContext("sender").firestore();
+    await assertSucceeds(setDoc(doc(db, "userNotifications/sender/items/kyc-submitted"), {
+      kind: "kyc_submitted", title: "Identity verification submitted",
+      message: "Your identity documents are waiting for review.",
+      createdAt: serverTimestamp(), createdAtText: new Date().toLocaleString(),
+      readAt: null, createdBy: "sender", source: "kyc-submission"
+    }));
+    await assertFails(setDoc(doc(db, "userNotifications/sender/items/forged-status"), {
+      kind: "account_status", title: "Account suspended", message: "Your account was suspended.",
+      createdAt: serverTimestamp(), createdAtText: new Date().toLocaleString(),
+      readAt: null, createdBy: "sender", source: "kyc-submission"
+    }));
+    await assertFails(setDoc(doc(db, "userNotifications/recipient/items/forged-kyc"), {
+      kind: "kyc_submitted", title: "Identity verification submitted",
+      message: "Your identity documents are waiting for review.",
+      createdAt: serverTimestamp(), createdAtText: new Date().toLocaleString(),
+      readAt: null, createdBy: "sender", source: "kyc-submission"
+    }));
+  });
+
+  it("allows the verified admin to create account-status alerts and blocks customer forgery", async () => {
+    const admin = adminDb();
+    await assertSucceeds(setDoc(doc(admin, "userNotifications/recipient/items/account-status"), {
+      kind: "account_status", title: "Account activated", message: "An administrator has activated your account.",
+      createdAt: serverTimestamp(), createdAtText: new Date().toLocaleString(),
+      readAt: null, createdBy: "admin", source: "admin-account-status"
+    }));
+    const customer = testEnv.authenticatedContext("recipient").firestore();
+    await assertFails(setDoc(doc(customer, "userNotifications/recipient/items/forged-admin-status"), {
+      kind: "account_status", title: "Account suspended", message: "An administrator suspended your account.",
+      createdAt: serverTimestamp(), createdAtText: new Date().toLocaleString(),
+      readAt: null, createdBy: "recipient", source: "admin-account-status"
+    }));
+  });
+});
+
 describe("administrator-initiated private support messages", () => {
   it("lets the verified admin message one registered user and lets only that user reply", async () => {
     const admin = adminDb();
