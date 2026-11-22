@@ -359,7 +359,9 @@ test("signed-in users receive live right-side account notifications by default",
   assert.ok(html.includes('host.id="ocAccountNotificationToast"'), "New account updates must display a visible alert");
   assert.ok(html.includes('right:18px;left:auto;transform:none'), "Account alerts must be positioned on the right side");
   assert.ok(html.includes('badge.hidden=unread===0'), "The unread badge must update from the live notification feed");
-  assert.ok(html.includes('updateDoc(doc(db,"userNotifications",user.uid,"items",item.id),{readAt:serverTimestamp()})'), "Opening notifications must mark unread account alerts as read");
+  assert.ok(html.includes('const markRead=async()=>{const id=card.dataset.notificationId') && html.includes('updateDoc(doc(db,"userNotifications",auth.currentUser.uid,"items",id),{readAt:serverTimestamp()})'), "Opening an individual notification must mark only that alert as read");
+  assert.ok(html.includes('card.addEventListener("click",markRead)'), "Tapping an individual notification must mark it as read");
+  assert.ok(html.includes('if(!id||!item||item.readAt)return'), "Already-read notifications must not be written again");
   assert.ok(html.includes('onAuthStateChanged(auth,user=>{byId("ocNotificationBell")?.classList.toggle("hidden",!user);renderUserNotifications(user||null);});'), "Every signed-in account must automatically subscribe to notifications");
 });
 
