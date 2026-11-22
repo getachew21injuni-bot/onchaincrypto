@@ -2099,10 +2099,8 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
       <details class="panel profile-menu-section" id="profileNotificationsSection">
         <summary><span class="profile-menu-icon notification-symbol">♢</span><span class="profile-menu-copy"><strong>Notifications</strong><small>Notification and email preferences</small></span><span class="profile-menu-chevron">⌄</span></summary>
         <div class="profile-menu-content">
-          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#c4b5fd" aria-hidden="true">♢</span>Notifications</strong><p class="muted tiny">Manage in-app notification preferences on this device.</p></div><label class="switch-label"><input type="checkbox" id="prefNotifications" checked><span>On</span></label></div>
-          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#a78bfa" aria-hidden="true">✉</span>Email alerts</strong><p class="muted tiny">Manage your email alert preference on this device.</p></div><label class="switch-label"><input type="checkbox" id="prefEmailAlerts"><span>Off</span></label></div>
-          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#c4b5fd" aria-hidden="true">♢</span>All notifications</strong><p class="muted tiny">Main notification setting for this device.</p></div><label class="switch-label"><input type="checkbox" id="prefAllNotifications" checked><span>On</span></label></div>
-          <p id="notificationPrefsMessage" class="muted tiny"></p>
+          <div class="settings-item"><div><strong class="feature-label"><span class="feature-symbol" style="--feature-color:#c4b5fd" aria-hidden="true">♢</span>In-app notifications</strong><p class="muted tiny">Automatically enabled for every registered account. New account and platform alerts appear live while you are signed in.</p></div><span class="tag">Always on</span></div>
+          <p id="notificationPrefsMessage" class="muted tiny" aria-live="polite">Live notifications are enabled for this account.</p>
         </div>
       </details>
       <details class="panel profile-menu-section" id="profileKycSection">
@@ -3145,11 +3143,8 @@ updateQuickEstimate();
 $("historyFilter")?.addEventListener("change",renderActivityHistory);
 $("exportCsv")?.addEventListener("click",()=>{const rows=[["time","category","title","details","status"],...state.history.map(t=>[t.time,"trade",(t.side||"").toUpperCase()+" "+t.symbol,money(t.amount)+" · "+t.qty+" coins @ "+t.price,"Quick Trade result · internal account ledger"]),...readActivity().map(x=>[x.time,x.type,x.title,x.details,x.status])];const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="onchaincrypto-activity-history.csv";a.click();URL.revokeObjectURL(a.href)});
 if($("displayName"))$("displayName").value=profile.name||"";if($("displayCurrency"))$("displayCurrency").value=profile.currency||"USD";$("saveProfile")?.addEventListener("click",()=>{profile={name:$("displayName")?.value.trim()||"",currency:$("displayCurrency")?.value||"USD"};localStorage.setItem("oc_profile",JSON.stringify(profile));if($("profileMessage"))$("profileMessage").textContent="Profile preferences saved on this device."});
-const preferenceIds=["prefNotifications","prefEmailAlerts","prefAllNotifications"];
-let notificationPrefs={notifications:true,emailAlerts:false,allNotifications:true};
-try{notificationPrefs={...notificationPrefs,...JSON.parse(localStorage.getItem("oc_notification_preferences")||"{}")}}catch(_){}
-const prefMap={prefNotifications:"notifications",prefEmailAlerts:"emailAlerts",prefAllNotifications:"allNotifications"};
-preferenceIds.forEach(id=>{const input=$(id);input.checked=!!notificationPrefs[prefMap[id]];const label=input.closest(".switch-label")?.querySelector("span");if(label)label.textContent=input.checked?"On":"Off";input.addEventListener("change",()=>{notificationPrefs[prefMap[id]]=input.checked;if(id==="prefAllNotifications"&&!input.checked){$("prefNotifications").checked=false;$("prefEmailAlerts").checked=false;notificationPrefs.notifications=false;notificationPrefs.emailAlerts=false}else if(id==="prefAllNotifications"&&input.checked){notificationPrefs.allNotifications=true}if(id!=="prefAllNotifications"&&input.checked){$("prefAllNotifications").checked=true;notificationPrefs.allNotifications=true}preferenceIds.forEach(otherId=>{const other=$(otherId);const otherLabel=other.closest(".switch-label")?.querySelector("span");if(otherLabel)otherLabel.textContent=other.checked?"On":"Off"});localStorage.setItem("oc_notification_preferences",JSON.stringify(notificationPrefs));$("notificationPrefsMessage").textContent="Preference saved on this device only. Email and push delivery are not configured."})});
+const notificationPrefsMessage=$("notificationPrefsMessage");
+if(notificationPrefsMessage)notificationPrefsMessage.textContent="Live in-app notifications are automatically enabled for every registered account.";
 
   // Customer support opens directly from the three-dot menu.
   
