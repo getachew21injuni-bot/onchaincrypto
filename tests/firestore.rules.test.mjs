@@ -333,6 +333,7 @@ describe("notification read-state persistence", () => {
     const db = testEnv.authenticatedContext("sender").firestore();
     const accountRef = doc(db, "userNotifications/sender/items/deposit-1");
     const marketReadRef = doc(db, "userNotificationReads/sender/items/market-1");
+    const accountReadRef = doc(db, "userNotificationReads/sender/items/account_deposit-1");
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await setDoc(doc(context.firestore(), "userNotifications/sender/items/deposit-1"), {
         kind: "deposit", title: "Deposit received", message: "Your deposit was credited.",
@@ -347,23 +348,29 @@ describe("notification read-state persistence", () => {
     });
     await assertSucceeds(updateDoc(accountRef, { readAt: serverTimestamp() }));
     await assertSucceeds(setDoc(marketReadRef, { readAt: serverTimestamp() }));
+    await assertSucceeds(setDoc(accountReadRef, { readAt: serverTimestamp() }));
     const savedAccount = await assertSucceeds(getDoc(accountRef));
     const savedMarketRead = await assertSucceeds(getDoc(marketReadRef));
+    const savedAccountRead = await assertSucceeds(getDoc(accountReadRef));
     assert.ok(savedAccount.data().readAt);
     assert.ok(savedMarketRead.data().readAt);
+    assert.ok(savedAccountRead.data().readAt);
     const otherDb = testEnv.authenticatedContext("recipient").firestore();
     await assertFails(updateDoc(doc(otherDb, "userNotifications/sender/items/deposit-1"), { readAt: serverTimestamp() }));
     await assertFails(setDoc(doc(otherDb, "userNotificationReads/sender/items/market-1"), { readAt: serverTimestamp() }));
+    await assertFails(setDoc(doc(otherDb, "userNotificationReads/sender/items/account_deposit-1"), { readAt: serverTimestamp() }));
   });
 
   it("keeps optimistic read state through older snapshots and recognizes legacy read flags", async () => {
     const source = await readFile("public/index.html", "utf8");
     assert.match(source, /const pendingNotificationReadKeys=new Set\(\)/);
     assert.match(source, /pendingNotificationReadKeys\.has\("account:"\+n\.id\)/);
+    assert.match(source, /accountReadById\.has\("account_"\+n\.id\)/);
+    assert.match(source, /type==="market"\?id:"account_"\+id/);
     assert.match(source, /pendingNotificationReadKeys\.has\("market:"\+n\.id\)/);
     assert.match(source, /n\.read===true\|\|n\.isRead===true/);
-    assert.match(source, /pendingNotificationReadKeys\.delete\("account:"\+row\.id\)/);
-    assert.match(source, /pendingNotificationReadKeys\.delete\("market:"\+row\.id\)/);
+    assert.match(source, /row\.id\.startsWith\("account_"\).*row\.id\.slice\(8\).*row\.id/);
+    assert.match(source, /pendingNotificationReadKeys\.delete\(\(row\.id\.startsWith\("account_"\)/);
     assert.match(source, /This notification could not be marked as read/);
   });
 });

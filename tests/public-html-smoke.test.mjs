@@ -361,8 +361,8 @@ test("signed-in users receive live right-side account notifications by default",
   assert.ok(html.includes('badge.hidden=unread===0'), "The unread badge must update from the live notification feed");
   assert.ok(html.includes('data-notification-type=\\""+n.notificationType+"\\"'), "Account and market alerts must share one clickable list");
   assert.ok(html.includes('openedNotificationKey=openedNotificationKey===key?null:key'), "Only one notification detail may be open at a time");
-  assert.ok(html.includes('setDoc(doc(db,"userNotificationReads",user.uid,"items",id),{readAt:serverTimestamp()},{merge:true})'), "Market alert read state must be stored privately per user");
-  assert.ok(html.includes('updateDoc(doc(db,"userNotifications",user.uid,"items",id),{readAt:serverTimestamp()})'), "Account notifications must be marked read individually");
+  assert.ok(html.includes('setDoc(doc(db,"userNotificationReads",user.uid,"items",type==="market"?id:"account_"+id),{readAt:serverTimestamp()},{merge:true})'), "Market and account read receipts must be stored privately per user");
+  assert.ok(html.includes('accountReadById.has("account_"+n.id)'), "Account notification read receipts must persist independently of notification snapshots");
   assert.ok(html.includes('stopMarketAlertReads=onSnapshot(collection(db,"userNotificationReads",user.uid,"items")'), "Market alert read states must synchronize live");
   assert.ok(html.includes('card.addEventListener("click",()=>{void activate();})'), "Tapping a notification must open its details and mark it read");
   assert.ok(html.includes('onAuthStateChanged(auth,user=>{byId("ocNotificationBell")?.classList.toggle("hidden",!user);renderUserNotifications(user||null);});'), "Every signed-in account must automatically subscribe to notifications");
