@@ -351,6 +351,18 @@ test("long listings start with four items and keep More/Less controls", () => {
   assert.ok(html.includes('id="homeActivePairsToggle"'), "Active Coin Pairs keeps its More/Less toggle");
 });
 
+test("signed-in users receive live right-side account notifications by default", () => {
+  assert.ok(html.includes('id="ocNotificationBell"'), "Expected a notification bell in the right-side header");
+  assert.ok(html.includes('id="ocNotificationCount"'), "Expected an unread notification badge");
+  assert.ok(html.includes("accountNotificationsInitialized"), "Existing notifications must not be replayed as new alerts on initial load");
+  assert.ok(html.includes('snap.docChanges().filter(change=>change.type==="added")'), "New account notifications must trigger automatically from Firestore snapshots");
+  assert.ok(html.includes('host.id="ocAccountNotificationToast"'), "New account updates must display a visible alert");
+  assert.ok(html.includes('right:18px;left:auto;transform:none'), "Account alerts must be positioned on the right side");
+  assert.ok(html.includes('badge.hidden=unread===0'), "The unread badge must update from the live notification feed");
+  assert.ok(html.includes('updateDoc(doc(db,"userNotifications",user.uid,"items",item.id),{readAt:serverTimestamp()})'), "Opening notifications must mark unread account alerts as read");
+  assert.ok(html.includes('onAuthStateChanged(auth,user=>{byId("ocNotificationBell")?.classList.toggle("hidden",!user);renderUserNotifications(user||null);});'), "Every signed-in account must automatically subscribe to notifications");
+});
+
 test("KYC documents use private Firestore storage without Firebase Storage", () => {
   assert.ok(html.includes("async function compressKycImage(file)"), "KYC images must be compressed before saving");
   assert.ok(html.includes('doc(db,"kycSubmissions",user.uid,"documents","front")'), "Front ID must use a private Firestore subdocument");
