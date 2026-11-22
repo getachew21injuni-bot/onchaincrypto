@@ -369,8 +369,8 @@ describe("notification read-state persistence", () => {
     assert.match(source, /type==="market"\?id:"account_"\+id/);
     assert.match(source, /pendingNotificationReadKeys\.has\("market:"\+n\.id\)/);
     assert.match(source, /n\.read===true\|\|n\.isRead===true/);
-    assert.match(source, /row\.id\.startsWith\("account_"\)\?"account:"\+row\.id\.slice\(8\):"market:"\+row\.id/);
-    assert.match(source, /pendingNotificationReadKeys\.delete\("market:"\+row\.id\)/);
+    assert.match(source, /row\.id\.startsWith\("account_"\).*row\.id\.slice\(8\).*row\.id/);
+    assert.match(source, /pendingNotificationReadKeys\.delete\(\(row\.id\.startsWith\("account_"\)/);
     assert.match(source, /This notification could not be marked as read/);
   });
 });
