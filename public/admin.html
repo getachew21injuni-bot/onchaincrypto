@@ -264,6 +264,47 @@ function esc(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt
 function getRecords(view){const data=loadAdminData();return Array.isArray(data[view])?data[view]:[];}
 function renderLiveCollection(view){if(window.adminGetLiveCollection)window.adminGetLiveCollection(view);else document.getElementById('detailBody').textContent='Firebase admin data module is not ready. Refresh and sign in again.';}
 
+async function sendOnchainCustomerEmail(to,subject,message){
+ const api=window.__ocAdminFirebase,current=api?.auth?.currentUser;
+ if(!api||!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('Verified administrator sign-in required.');
+ const idToken=await current.getIdToken();
+ const response=await fetch('https://onchain-support-email.getachew21-inj-uni.workers.dev/send',{method:'POST',headers:{'Authorization':'Bearer '+idToken,'Content-Type':'application/json'},body:JSON.stringify({to,subject,message})});
+ const result=await response.json().catch(()=>({}));
+ if(!response.ok||!result.success)throw new Error(result.error||'Email service rejected the request.');
+ return result;
+}
+async function renderAdminEmailCenter(){
+ const body=document.getElementById('detailBody'),api=window.__ocAdminFirebase;
+ if(!api){body.textContent='Secure email service is not ready. Refresh and sign in again.';return;}
+ const {db,collection,getDocs,query,limit}=api;
+ body.innerHTML='<div class="content-panel" style="margin:0"><h3>Send email from Onchain Support</h3><p class="muted">Send an email to one registered user or all registered users. Private support messages remain in the Support section.</p><p class="muted">Support mailbox: <a href="mailto:support@onchainspro.com" style="color:#68aaff">support@onchainspro.com</a></p><label style="display:block;margin:12px 0 6px">Recipient</label><select id="ocAdminEmailRecipient" style="width:100%;padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><option value="all">All registered users</option></select><label style="display:block;margin:12px 0 6px">Subject</label><input id="ocAdminEmailSubject" maxlength="160" placeholder="Email subject" style="width:100%;padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><label style="display:block;margin:12px 0 6px">Message</label><textarea id="ocAdminEmailMessage" maxlength="10000" rows="8" placeholder="Write your message…" style="width:100%;padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white;resize:vertical"></textarea><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px"><button id="ocAdminEmailSend" class="icon-btn" style="background:#176b73;border:0">Send email</button><span id="ocAdminEmailStatus" class="muted" role="status" aria-live="polite">Loading registered users…</span></div></div>';
+ const select=document.getElementById('ocAdminEmailRecipient'),button=document.getElementById('ocAdminEmailSend'),status=document.getElementById('ocAdminEmailStatus');
+ let recipients=[];
+ try{
+  const snap=await getDocs(query(collection(db,'users'),limit(500)));
+  recipients=snap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>String(u.email||'').trim());
+  select.innerHTML='<option value="all">All registered users ('+recipients.length+')</option>'+recipients.map(u=>'<option value="'+esc(u.uid)+'">'+esc((u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||'User')+' · '+u.email)+'</option>').join('');
+  status.textContent=recipients.length+' registered user email address(es) available.';
+ }catch(error){status.textContent='Could not load users ('+(error.code||error.message||'error')+').';button.disabled=true;return;}
+ button.addEventListener('click',async()=>{
+  const target=select.value,subject=document.getElementById('ocAdminEmailSubject').value.trim(),message=document.getElementById('ocAdminEmailMessage').value.trim();
+  if(!subject||!message){status.textContent='Enter both a subject and a message.';return;}
+  const chosen=target==='all'?recipients:recipients.filter(u=>u.uid===target);
+  if(!chosen.length){status.textContent='No recipient with a registered email address was found.';return;}
+  if(!confirm('Send this email to '+chosen.length+' registered user'+(chosen.length===1?'':'s')+'?'))return;
+  button.disabled=true;status.textContent='Sending 0 of '+chosen.length+'…';
+  let sent=0,failed=0;
+  for(const user of chosen){
+   try{await sendOnchainCustomerEmail(String(user.email).trim(),subject,message);sent++;}
+   catch(error){failed++;console.error('Customer email failed for '+user.uid,error);}
+   status.textContent='Sent '+sent+' of '+chosen.length+' · Failed '+failed+'.';
+  }
+  status.textContent='Finished: '+sent+' sent, '+failed+' failed.'+(failed?' Check the browser console for failed recipient details.':'');
+  if(!failed)document.getElementById('ocAdminEmailMessage').value='';
+  button.disabled=false;
+ });
+}
+
 async function renderRequestQueue(view){
  const body=document.getElementById('detailBody'),kind=view==='Deposits'?'deposit':'withdraw',collectionName=kind==='deposit'?'depositRequests':'withdrawRequests';
  const api=window.__ocAdminFirebase;if(!api)return;
@@ -313,7 +354,15 @@ async function renderRequestQueue(view){
      tx.set(notificationRef,{kind:deposit?'deposit':'withdrawal_approved',title:deposit?'Successfully deposited '+amount.toLocaleString()+' '+asset:'Withdrawal successfully processed',message:deposit?'Successfully deposited '+amount.toLocaleString()+' '+asset+' to your account. Your account balance has been updated.':'Your withdrawal of '+amount.toLocaleString()+' '+asset+' was successfully processed as an account balance adjustment. This dashboard does not send an external blockchain payout.',createdAt:serverTimestamp(),createdAtText:new Date().toLocaleString(),readAt:null,createdBy:current.uid,source:'admin-demo'});
      tx.update(requestRef,{status:'approved',reviewedAt:serverTimestamp(),reviewedBy:current.email});
     });
-    if(msg)msg.textContent=action==='approve'?(kind==='deposit'?'Deposit approved and credited. The user was notified.':'Withdrawal approved and account balance adjusted. The user was notified; no external payout was sent.'):'Request rejected.';
+    let depositEmailStatus='';
+    if(action==='approve'&&kind==='deposit'){
+     const targetEmail=String(req.email||users.get(req.uid)?.email||'').trim();
+     if(targetEmail){
+      try{await sendOnchainCustomerEmail(targetEmail,'Your OnchainSpro deposit was credited','Your deposit of '+amount.toLocaleString()+' '+asset+' has been approved and credited to your OnchainSpro account. Your updated account balance is available in your account.');depositEmailStatus=' Email sent to '+targetEmail+'.';}
+      catch(emailError){console.error('Deposit confirmation email failed:',emailError);depositEmailStatus=' In-app notification was saved, but the email could not be sent: '+(emailError.message||'email service unavailable')+'.';}
+     }else depositEmailStatus=' In-app notification was saved, but no email address is registered for this user.';
+    }
+    if(msg)msg.textContent=action==='approve'?(kind==='deposit'?'Deposit approved and credited. The user received an in-app notification.'+depositEmailStatus:'Withdrawal approved and account balance adjusted. The user was notified; no external payout was sent.'):'Request rejected.';
     await renderRequestQueue(view);if(typeof window.adminRefreshDashboard==='function')await window.adminRefreshDashboard();
    }catch(error){button.disabled=false;if(msg)msg.textContent='Could not process request ('+(error.code||error.message||'error')+'). Check Firestore rules and user profile.';}
   }));
@@ -644,7 +693,7 @@ function renderModule(view){
  }
  if(!moduleNames.includes(view)){body.textContent=descriptions[view]||'Choose a section from the menu.';return;}
  const rows=getRecords(view);
- if(view==='Email'){body.innerHTML='<div class="content-panel" style="margin:0"><h3>Direct email support</h3><p class="muted">Use the official Onchain support mailbox for administrator correspondence.</p><p style="margin:16px 0"><a href="mailto:support@onchainspro.com?subject=Onchain%20Admin%20Support" style="display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:10px;background:#176b73;color:white;text-decoration:none;font-weight:800">✉ support@onchainspro.com</a></p><p class="muted">This opens your configured email application. Customer in-app conversations remain available in the Support Inbox.</p></div>';return;}
+ if(view==='Email'){renderAdminEmailCenter();return;}
  const actionsAllowed=!['Login History','History','Analytics'].includes(view);
  body.innerHTML='<div style="display:grid;gap:16px">'+
  (actionsAllowed?'<form id="moduleAddForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;padding:16px;border:1px solid #ffffff20;border-radius:14px"><input name="title" required maxlength="100" placeholder="'+(view==='Email'?'Email subject':view==='Notifications'?'Notification title':'Record title')+'" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><input name="owner" maxlength="100" placeholder="User / recipient / category" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><input name="amount" maxlength="40" placeholder="Amount (optional)" style="padding:12px;border-radius:9px;border:1px solid #526878;background:#102333;color:white"><button class="icon-btn" type="submit" style="background:#176b73;color:white">＋ Add admin note</button></form>':'')+
