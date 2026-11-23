@@ -12,6 +12,34 @@
   let lastCompletedTradeId = null;
   const tradeSamples = new Map();
 
+  function showWinNotification(trade) {
+    const amount = Math.abs(Number(trade?.pnl));
+    const symbol = String(trade?.symbol || "your asset").replace(/[^A-Za-z0-9._-]/g, "").slice(0, 20);
+    let toast = document.getElementById("oc-trade-win-notification");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "oc-trade-win-notification";
+      toast.setAttribute("role", "status");
+      toast.setAttribute("aria-live", "polite");
+      Object.assign(toast.style, {
+        position: "fixed", left: "50%", bottom: "calc(24px + env(safe-area-inset-bottom))",
+        transform: "translateX(-50%)", zIndex: "100000", width: "min(92vw, 390px)",
+        padding: "14px 18px", borderRadius: "14px", background: "#123b2b",
+        color: "#ffffff", border: "1px solid #25bd78", boxShadow: "0 10px 32px rgba(0,0,0,.28)",
+        font: "600 14px/1.45 Inter, Arial, sans-serif", textAlign: "center",
+        opacity: "0", transition: "opacity .2s ease"
+      });
+      document.body.appendChild(toast);
+    }
+    toast.textContent = "🎉 Congratulations! You won " + money(amount) + " USDT on " + symbol + ".";
+    toast.style.display = "block";
+    requestAnimationFrame(() => { toast.style.opacity = "1"; });
+    clearTimeout(toast._ocHideTimer);
+    toast._ocHideTimer = setTimeout(() => {
+      toast.style.opacity = "0";
+      setTimeout(() => { if (toast.isConnected && toast.style.opacity === "0") toast.style.display = "none"; }, 250);
+    }, 6000);
+  }
   function showMessage(message, error = false) {
     const node = $("timedResult");
     if (node) {
@@ -92,6 +120,7 @@
     if (!trade) return;
     if (countdownTimer) clearInterval(countdownTimer);
     countdownTimer = null;
+    const completedActiveTrade = activeTrade;
     activeTrade = null;
     const form = $("timedPaperTrade");
     form?.classList.remove("oc-stage-config", "oc-stage-running", "oc-stage-error");
@@ -101,6 +130,8 @@
     const entry = Number(trade.entry), exit = Number(trade.price), pnl = Number(trade.pnl);
     const amountUsd = Number(trade.amountUSDT || trade.amount || 0);
     const direction = trade.side === "buy" ? "up" : "down";
+    const tradeKeyForNotice = trade.tradeId || trade.id;
+    const notifyThisWin = pnl > 0 && Boolean(completedActiveTrade && (completedActiveTrade.tradeId === tradeKeyForNotice || completedActiveTrade.id === tradeKeyForNotice));
     const won = pnl > 0, lost = pnl < 0;
     const outcome = won ? "WIN +" + money(Math.abs(pnl)) + " USDT" : lost ? "LOSS -" + money(Math.abs(pnl)) + " USDT" : "EVEN · 0.00 USDT";
     const completed = parseTime(trade.completedAt || trade.time);
@@ -113,6 +144,7 @@
     if ($("timedStatusDetail")) $("timedStatusDetail").textContent = outcome;
     if ($("timedGraphStatus")) $("timedGraphStatus").textContent = "SETTLED BY SERVER";
     showMessage(outcome + " · " + trade.symbol + " · Result confirmed and saved by the server.");
+    if (notifyThisWin) showWinNotification(trade);
     const board = $("timedResultBoard");
     if (board) {
       board.style.display = "block";
