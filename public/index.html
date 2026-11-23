@@ -12606,44 +12606,77 @@ html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#1720
 
 
 <style id="oc-trade-result-white-graph">
-/* Clean completed-trade presentation: white chart surface, platform page surface elsewhere. */
+/* Completed Buy/Sell results stay white and readable in both platform themes. */
 #page-trade #timedPaperTrade #timedResultBoard{
-  background:transparent!important;color:inherit!important;border:0!important;
-  border-radius:0!important;box-shadow:none!important;padding:16px 0!important
+  display:block;background:#fff!important;color:#172033!important;
+  border:1px solid #e5eaf0!important;border-radius:14px!important;
+  box-shadow:none!important;padding:16px!important
 }
 #page-trade #timedPaperTrade #timedResultBoard h3,
-#page-trade #timedPaperTrade #timedResultBoard #timedBoardSummary{color:inherit!important}
-#page-trade #timedPaperTrade #timedBoardOutcome{
-  padding:0!important;border:0!important;border-radius:0!important;
-  background:transparent!important;font-size:20px!important;font-weight:900!important;
-  letter-spacing:.02em
+#page-trade #timedPaperTrade #timedResultBoard p,
+#page-trade #timedPaperTrade #timedResultBoard strong,
+#page-trade #timedPaperTrade #timedResultBoard span,
+#page-trade #timedPaperTrade #timedResultBoard div{color:#172033!important}
+#page-trade #timedPaperTrade #timedResultBoard #timedBoardSummary,
+#page-trade #timedPaperTrade #timedResultBoard .oc-result-chip span,
+#page-trade #timedPaperTrade #timedResultBoard .oc-result-balance>span{
+  color:#667085!important;font-weight:400!important
+}
+#page-trade #timedPaperTrade #timedResultBoard #timedBoardOutcome{
+  color:#172033!important;background:transparent!important;border:0!important;
+  border-radius:0!important;padding:0!important;font-size:18px!important;
+  font-weight:600!important;letter-spacing:0
 }
 #page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardProfitLoss){
-  background:transparent!important;border:0!important;border-radius:0!important;
-  box-shadow:none!important;padding:12px 0!important
+  background:#fff!important;color:#172033!important;border:1px solid #e5eaf0!important;
+  border-radius:10px!important;box-shadow:none!important;padding:13px!important
 }
 #page-trade #timedPaperTrade #timedBoardProfitLoss{
-  font-size:clamp(28px,6vw,38px)!important;font-weight:900!important;
+  color:#172033!important;font-size:28px!important;font-weight:700!important;
   font-variant-numeric:tabular-nums
 }
 #page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardPnlChart){
   background:#fff!important;color:#172033!important;border:1px solid #e5eaf0!important;
-  border-radius:12px!important;padding:14px!important;box-shadow:none!important
+  border-radius:10px!important;padding:12px!important;box-shadow:none!important
 }
 #page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardPnlChart)>div{
-  color:#344054!important
+  color:#344054!important;font-weight:500!important
 }
 #page-trade #timedPaperTrade #timedBoardPnlChart{
   display:block!important;width:100%!important;height:160px!important;
   min-height:160px!important;background:#fff!important
 }
-#page-trade #timedPaperTrade .oc-result-chip,
-#page-trade #timedPaperTrade .oc-result-balance{
-  background:transparent!important;border-radius:0!important;box-shadow:none!important
+#page-trade #timedPaperTrade #timedResultBoard .oc-result-details{
+  display:flex;flex-wrap:wrap;gap:0;margin-top:10px;background:#fff!important
+}
+#page-trade #timedPaperTrade #timedResultBoard .oc-result-chip{
+  flex:1 1 135px;min-width:0;padding:10px 12px!important;
+  background:#fff!important;border:0!important;
+  border-bottom:1px solid #edf0f4!important;border-radius:0!important;
+  box-shadow:none!important;display:flex;flex-direction:column;gap:5px
+}
+#page-trade #timedPaperTrade #timedResultBoard .oc-result-chip strong,
+#page-trade #timedPaperTrade #timedResultBoard .oc-result-balance strong{
+  color:#172033!important;font-size:14px!important;font-weight:600!important;
+  overflow-wrap:anywhere;font-variant-numeric:tabular-nums
+}
+#page-trade #timedPaperTrade #timedResultBoard .oc-result-balance{
+  display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;
+  margin-top:10px;padding:12px!important;background:#fff!important;
+  border:1px solid #edf0f4!important;border-radius:10px!important;box-shadow:none!important
+}
+#page-trade #timedPaperTrade #timedResultBoard.oc-result-win #timedBoardOutcome,
+#page-trade #timedPaperTrade #timedResultBoard.oc-result-win #timedBoardProfitLoss{color:#16834b!important}
+#page-trade #timedPaperTrade #timedResultBoard.oc-result-loss #timedBoardOutcome,
+#page-trade #timedPaperTrade #timedResultBoard.oc-result-loss #timedBoardProfitLoss{color:#d04444!important}
+#page-trade #timedPaperTrade #timedResultBoard #timedBoardClose{
+  background:#f4f6f8!important;color:#172033!important;border:1px solid #d7dde5!important;
+  font-weight:500!important
 }
 @media(max-width:600px){
-  #page-trade #timedPaperTrade #timedResultBoard{padding:12px 0!important}
+  #page-trade #timedPaperTrade #timedResultBoard{padding:12px!important}
   #page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardPnlChart){padding:10px!important}
+  #page-trade #timedPaperTrade #timedResultBoard .oc-result-chip{flex-basis:50%;padding:9px 8px!important}
 }
 </style>
 <script id="oc-trade-result-duration-seconds">
@@ -12664,3 +12697,19 @@ html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#1720
 })();
 </script>
 
+<script id="oc-trade-result-status-colors">
+(()=>{
+ const board=document.getElementById("timedResultBoard");
+ if(!board)return;
+ const sync=()=>{
+  const outcome=(document.getElementById("timedBoardOutcome")?.textContent||"").trim().toUpperCase();
+  const profit=(document.getElementById("timedBoardProfitLoss")?.textContent||"").trim();
+  board.classList.remove("oc-result-win","oc-result-loss");
+  if(outcome.includes("WIN")) board.classList.add("oc-result-win");
+  else if(outcome.includes("LOSS")||outcome.includes("NOT COMPLETED")) board.classList.add("oc-result-loss");
+  else if(/^[-−]/.test(profit)) board.classList.add("oc-result-loss");
+ };
+ new MutationObserver(sync).observe(board,{subtree:true,childList:true,characterData:true});
+ sync();
+})();
+</script>
