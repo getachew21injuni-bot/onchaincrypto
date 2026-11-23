@@ -6975,10 +6975,8 @@ byId("sendSupportEmail")?.addEventListener("click",async()=>{
  if(!details){setText("supportMessage","Please describe the issue before sending.");byId("supportDetails")?.focus();return;}
  const finalSubject=(topic+": "+subject).slice(0,100),button=byId("sendSupportEmail");button.disabled=true;setText("supportMessage","Sending your request securely…");
  try{
-  const ticketRef=doc(collection(db,"supportTickets")),messageRef=doc(collection(db,"supportTickets",ticketRef.id,"messages")),batch=writeBatch(db);
-  batch.set(ticketRef,{ownerUid:currentUser.uid,customerEmail:currentUser.email||"",customerName:currentUser.displayName||"",subject:finalSubject,status:"open",createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:details,source:"in-app"});
-  batch.set(messageRef,{senderUid:currentUser.uid,senderRole:"customer",senderName:currentUser.displayName||currentUser.email||"Customer",text:details,createdAt:serverTimestamp()});
-  await batch.commit();byId("supportSubject").value="";byId("supportDetails").value="";setText("supportMessage","Your support request is saved. You can read replies in My support conversations below.");
+  const ticketRef=await addDoc(collection(db,"supportTickets"),{ownerUid:currentUser.uid,customerEmail:currentUser.email||"",customerName:currentUser.displayName||"",subject:finalSubject,status:"open",createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:details,source:"in-app"});
+  await addDoc(collection(db,"supportTickets",ticketRef.id,"messages"),{senderUid:currentUser.uid,senderRole:"customer",senderName:currentUser.displayName||currentUser.email||"Customer",text:details,createdAt:serverTimestamp()});byId("supportSubject").value="";byId("supportDetails").value="";setText("supportMessage","Your support request is saved. You can read replies in My support conversations below.");
  }catch(error){console.error("In-app support ticket submission failed:",error);setText("supportMessage","Could not send your request ("+(error.code||"connection error")+"). Please try again.");}
  finally{button.disabled=false;}
 });
