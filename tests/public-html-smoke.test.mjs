@@ -191,7 +191,7 @@ test("Quick Trade uses concise positive copy and its result Close button restore
   assert.ok(html.includes("Live trades · Automatic wallet updates."));
   assert.ok(html.includes('form.classList.remove("oc-stage-complete","oc-stage-running","oc-stage-error");form.classList.add("oc-stage-config");'));
   assert.ok(html.includes('document.getElementById("timedBoardClose")?.addEventListener("click"'));
-  assert.ok(html.includes("board.dataset.dismissed='true'"));
+  assert.ok(html.includes("resultBoard.dataset.dismissed='true'"));
   assert.ok(html.includes("board.hidden=true;board.style.display='none'"));
 });
 
