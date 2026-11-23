@@ -4515,10 +4515,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #timedUpBtn[aria-pressed="true"]{background:#16834a!important;color:#fff!important;box-shadow:inset 0 0 0 2px rgba(255,255,255,.9),0 0 0 3px rgba(22,131,74,.22)!important;filter:brightness(.94);transform:translateY(1px)}
 #timedDownBtn[aria-pressed="true"]{background:#c93636!important;color:#fff!important;box-shadow:inset 0 0 0 2px rgba(255,255,255,.9),0 0 0 3px rgba(201,54,54,.22)!important;filter:brightness(.94);transform:translateY(1px)}
 #timedUpBtn[aria-pressed="false"],#timedDownBtn[aria-pressed="false"]{transition:box-shadow .12s ease,filter .12s ease,transform .12s ease}
-#timedResultBoard[style*="display: block"]{position:fixed!important;z-index:10050!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;width:min(720px,calc(100vw - 24px))!important;max-height:calc(100dvh - 28px)!important;overflow-y:auto!important;margin:0!important;box-shadow:0 0 0 100vmax rgba(5,12,24,.66),0 20px 70px rgba(0,0,0,.38)!important;border-radius:16px!important}
-#ocCloseTradeBoard{position:sticky;top:0;float:right;z-index:2;border:0;border-radius:9px;background:#172033;color:#fff;font-weight:700;padding:9px 13px;cursor:pointer;margin:0 0 8px 10px}
 #ocTradePlanGate{font-size:12px;margin-top:7px;color:#bd3333;display:none}
-@media(max-width:560px){#timedResultBoard[style*="display: block"]{padding:14px!important;width:calc(100vw - 18px)!important;max-height:calc(100dvh - 18px)!important}#ocCloseTradeBoard{padding:8px 11px}}
 </style>
 <script id="oc-trade-usability-update-script">
 (function(){
@@ -4575,14 +4572,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  }
  ["timedUpBtn","timedDownBtn"].forEach(id=>$(id)?.addEventListener("click",()=>setTimeout(validatePlan,0)));
  $("timedCancelBtn")?.addEventListener("click",()=>setTimeout(validatePlan,0));
- const board=$("timedResultBoard");
- if(board){
-  enhanceBoard();
-  const observer=new MutationObserver(()=>{if(board.style.display!=="none"){enhanceBoard();validatePlan();}});
-  observer.observe(board,{attributes:true,attributeFilter:["style"]});
-  const resultObserver=new MutationObserver(()=>{if(board.style.display!=="none")enhanceBoard()});
-  resultObserver.observe(board,{childList:true,subtree:true,characterData:true});
- }
+ enhanceBoard();
  // Also validate immediately and after state/balance refreshes.
  validatePlan();
  document.addEventListener("visibilitychange",()=>{if(!document.hidden)validatePlan()});
@@ -4595,14 +4585,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #timedUpBtn.oc-direction-selected{filter:brightness(1.12);box-shadow:0 0 0 3px rgba(22,217,160,.24),inset 0 0 0 2px rgba(255,255,255,.65);outline-color:#16d9a0;transform:translateY(-1px)}
 #timedDownBtn.oc-direction-selected{filter:brightness(1.12);box-shadow:0 0 0 3px rgba(255,85,115,.22),inset 0 0 0 2px rgba(255,255,255,.65);outline-color:#ff5573;transform:translateY(-1px)}
 #timedUpBtn[aria-pressed="true"],#timedDownBtn[aria-pressed="true"]{font-weight:850}
-#timedResultBoard[style*="display: block"]{position:fixed!important;z-index:10050!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important;width:min(720px,calc(100vw - 24px))!important;max-height:calc(100dvh - 28px)!important;overflow-y:auto!important;margin:0!important;box-shadow:0 0 0 100vmax rgba(5,12,24,.68),0 20px 70px rgba(0,0,0,.42)!important;border-radius:16px!important}
-#ocCloseTradeBoard{position:sticky;top:0;float:right;z-index:3}
-@media(max-width:560px){#timedResultBoard[style*="display: block"]{width:calc(100vw - 18px)!important;max-height:calc(100dvh - 18px)!important}}
 </style>
 <script id="oc-trade-choice-modal-fix-script">
 (function(){
- const $=id=>document.getElementById(id);
- const up=$('timedUpBtn'),down=$('timedDownBtn');
+ const up=document.getElementById('timedUpBtn'),down=document.getElementById('timedDownBtn');
  function syncDirection(){
    const upSelected=!!up&&up.getAttribute('aria-pressed')==='true';
    const downSelected=!!down&&down.getAttribute('aria-pressed')==='true';
@@ -4612,27 +4598,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  up?.addEventListener('click',()=>setTimeout(syncDirection,0));
  down?.addEventListener('click',()=>setTimeout(syncDirection,0));
  syncDirection();
- function refreshBoard(){
-   const board=$('timedResultBoard');
-   if(!board)return;
-   const close=$('ocCloseTradeBoard');
-   if(close){if(close.textContent!=='Close trade ✕')close.textContent='Close trade ✕';if(close.getAttribute('aria-label')!=='Close trade')close.setAttribute('aria-label','Close trade');}
- }
- const board=$('timedResultBoard');
- if(board){
-   refreshBoard();
-   new MutationObserver(refreshBoard).observe(board,{subtree:true,childList:true,attributes:true,attributeFilter:['style','aria-pressed']});
- }
- const stake=$('timedStake');
- function validateTier(){
-   if(typeof window.ocValidateQuickTradeForm==="function")window.ocValidateQuickTradeForm();
- }
- stake?.addEventListener('input',()=>setTimeout(validateTier,0));
- up?.addEventListener('click',()=>setTimeout(validateTier,0));
- down?.addEventListener('click',()=>setTimeout(validateTier,0));
- window.addEventListener('focus',validateTier);
- document.addEventListener('visibilitychange',()=>{if(!document.hidden)validateTier()});
- validateTier();
 })();
 </script>
 
