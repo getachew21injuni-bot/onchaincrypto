@@ -46,9 +46,10 @@ test("HTML element IDs are unique", () => {
 });
 
 test("market, trade summary, and withdrawal validation elements are present", () => {
-  for (const id of ["marketRows", "priceChart", "timedTradeChart", "timedBoardPnlChart", "timedResultBoard", "timedBoardClose", "withdrawNetwork", "withdrawAddressCheck"]) {
+  for (const id of ["marketRows", "priceChart", "timedTradeChart", "timedResultBoard", "timedBoardClose", "withdrawNetwork", "withdrawAddressCheck"]) {
     assert.ok(html.includes('id="' + id + '"') || html.includes("id='" + id + "'"), "Missing required element: " + id);
   }
+  assert.ok(!html.includes('id="timedBoardPnlChart"'), "The completed-trade profit graph must remain removed");
   assert.ok(html.includes("data-api.binance.vision/api/v3/klines"), "Expected an independent chart-history fallback");
   assert.ok(html.includes("networksByAsset"), "Expected asset-specific withdrawal network rules");
 });
@@ -187,9 +188,9 @@ test("one Home-only assistant has agent contact and no direct email link", () =>
 
 test("Quick Trade uses concise positive copy and its result Close button restores the trade form", () => {
   assert.ok(html.includes("Live trades · Automatic wallet updates."));
-  assert.ok(html.includes('form.classList.remove("oc-stage-complete","oc-stage-running");form.classList.add("oc-stage-config");'));
+  assert.ok(html.includes('form.classList.remove("oc-stage-complete","oc-stage-running","oc-stage-error");form.classList.add("oc-stage-config");'));
   assert.ok(html.includes('document.getElementById("timedBoardClose")?.addEventListener("click"'));
-  assert.ok(html.includes('if(board)board.style.display="none";'));
+  assert.ok(html.includes('if(board){board.hidden=true;board.style.display="none";}'));
 });
 
 test("Quick Trade uses the external server-owned trade adapter", () => {
