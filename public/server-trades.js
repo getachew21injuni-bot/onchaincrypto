@@ -201,8 +201,8 @@
   }
   async function startServerTrade() {
     const user = window.ocFirebaseAuth?.currentUser;
-    if (!user?.uid || window.ocTradeCloudReadyUid !== user.uid) {
-      showMessage("Your account wallet is still syncing. Please wait and try again.", true);
+    if (!user?.uid) {
+      showMessage("Please sign in before using Quick Trade.", true);
       return;
     }
     const symbol = String($("tradeAsset")?.value || "").toUpperCase();
