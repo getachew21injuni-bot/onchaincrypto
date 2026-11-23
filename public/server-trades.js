@@ -123,6 +123,7 @@
       if ($("timedBoardEntry")) $("timedBoardEntry").textContent = money(entry);
       if ($("timedBoardExit")) $("timedBoardExit").textContent = money(exit);
       if ($("timedBoardMove")) $("timedBoardMove").textContent = entry > 0 ? (((exit - entry) / entry) * 100).toFixed(5) + "%" : "—";
+      if ($("timedBoardDuration")) { const seconds = Math.max(0, Math.round((completed - parseTime(trade.startedAt)) / 1000)); $("timedBoardDuration").textContent = seconds + " seconds"; }
       if ($("timedBoardProfitLoss")) { $("timedBoardProfitLoss").textContent = (pnl > 0 ? "+" : "-") + money(Math.abs(pnl)) + " USDT"; $("timedBoardProfitLoss").style.color = won ? "#07804b" : lost ? "#c53232" : "#586579"; }
       if ($("timedBoardBefore")) $("timedBoardBefore").textContent = money(trade.balanceBefore);
       if ($("timedBoardAfter")) $("timedBoardAfter").textContent = money(trade.balanceAfter);
