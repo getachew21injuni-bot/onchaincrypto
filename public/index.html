@@ -3021,8 +3021,7 @@ function drawTimedPnlGraph(samples,entry,stakeUsd,direction,canvasId="timedBoard
  ctx.font="11px Arial";ctx.fillStyle="#64748b";ctx.textAlign="left";ctx.fillText(min.toFixed(2),3,h-bottom);ctx.fillText("P/L (USDT)",left,12);
  ctx.textAlign="right";ctx.fillText(max>0?"+"+max.toFixed(2):"0.00",left-5,top+4);
  const last=points[points.length-1],value=Number(finalPnl??last.pnl),won=value>0,lost=value<0;
- ctx.fillStyle=won?"#07804b":lost?"#c53232":"#586579";
- ctx.fillText((won?"WIN +":lost?"LOSS -":"EVEN ")+Math.abs(value).toFixed(2)+" USDT",w-right,12);
+ // Keep the WIN/LOSS amount in the result summary, not highlighted over the graph.
  ctx.beginPath();points.forEach((p,i)=>{if(i===0)ctx.moveTo(x(i),y(p.pnl));else ctx.lineTo(x(i),y(p.pnl));});
  ctx.strokeStyle=won?"#0b9b68":lost?"#dc465b":"#64748b";ctx.lineWidth=2.5;ctx.stroke();
  ctx.fillStyle=ctx.strokeStyle;ctx.beginPath();ctx.arc(x(points.length-1),y(last.pnl),4,0,Math.PI*2);ctx.fill();
@@ -12642,6 +12641,22 @@ html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#1720
     grid-template-columns:repeat(2,minmax(0,1fr));gap:0 10px!important;
   }
   #page-trade #timedPaperTrade #timedResultBoard{padding:10px 0!important}
+}
+
+/* Remove the oversized WIN/LOSS amount from the graph header; keep the result status and P/L value in the summary. */
+/* Profit and graph areas use the normal Trade page surface, not a black/colored highlight panel. */
+#page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardProfitLoss),
+#page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardPnlChart),
+#page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardProfitLoss)>div,
+#page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardPnlChart)>div{
+  background:transparent!important;
+  background-image:none!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+}
+#page-trade #timedPaperTrade #timedResultBoard #timedBoardProfitLoss{
+  background:transparent!important;
+  color:var(--text,#eaf6ff)!important;
 }
 </style>
 </body>
