@@ -73,8 +73,7 @@
 .cards:has(#timedEntryPrice) > .card:has(#timedEntryPrice),
 .list-row:has(#timedEntryDetail),
 .list-row:has(#timedEndPriceDetail),
-.oc-trade-result-board div:has(> #timedBoardEntry),
-.oc-trade-result-board div:has(> #timedBoardExit){display:none!important;}
+{display:none!important;}
 /* User-facing cleanup: hide sample/demo label and alerts only. */
 .oc-visitor-demo-tag{display:none!important}
 </style>
@@ -12567,149 +12566,83 @@ html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#1720
 }
 </style>
 
-</body>
-</html>
 
-
-<style id="oc-clean-white-trade-board">
-/* Integrated Trade display: use the same page surface, with clean typographic hierarchy instead of nested panels. */
-#page-trade #timedPaperTrade{background:transparent!important;color:inherit!important;border:0!important;box-shadow:none!important}
-#page-trade #timedPaperTrade .form-panel{background:transparent!important;color:inherit!important}
-#page-trade #timedPaperTrade label{color:inherit!important;font-weight:650!important}
-#page-trade #timedPaperTrade input,#page-trade #timedPaperTrade select,#page-trade #timedPaperTrade .field{background:var(--panel,#0b1b30)!important;color:var(--text,#eaf6ff)!important;border:1px solid var(--line,#1b4263)!important;border-radius:10px!important}
-#page-trade #timedPaperTrade .card,#page-trade #timedPaperTrade .mini-card{background:transparent!important;color:var(--text,#eaf6ff)!important;border:1px solid var(--line,#1b4263)!important}
-#page-trade #timedPaperTrade .label,#page-trade #timedPaperTrade .muted{color:var(--muted,#91abc5)!important}
-#page-trade #timedPaperTrade #timedCountdown{color:#ffd166!important;font-weight:850}
-#page-trade #timedPaperTrade #quickEstimatedProfit,#page-trade #timedPaperTrade #timedPnl{font-weight:850}
-#page-trade #timedPaperTrade .list-row:has(#timedEntryDetail),#page-trade #timedPaperTrade .list-row:has(#timedEndPriceDetail){display:flex!important}
-#page-trade #timedPaperTrade .chart-wrap,#page-trade #timedPaperTrade #timedTradeChart{display:none!important}
-#page-trade #timedPaperTrade .oc-trade-result-board,
-#page-trade #timedPaperTrade #timedResultBoard{background:transparent!important;color:var(--text,#eaf6ff)!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:16px 0!important}
-#page-trade #timedPaperTrade #timedResultBoard h3,#page-trade #timedPaperTrade #timedResultBoard strong{color:inherit}
-#page-trade #timedPaperTrade #timedBoardSummary{color:var(--muted,#91abc5)!important}
-#page-trade #timedPaperTrade #timedBoardOutcome{padding:6px 11px;border-radius:999px;background:rgba(22,217,160,.12);border:1px solid rgba(22,217,160,.28)}
-#page-trade #timedPaperTrade #timedBoardProfitLoss{font-size:clamp(27px,6vw,36px)!important;font-weight:900;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
-#page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardProfitLoss){background:transparent!important;border:0!important;border-bottom:1px solid var(--line,#1b4263)!important;border-radius:0!important;padding:12px 0!important}
-#page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardPnlChart){background:transparent!important;border:0!important;border-top:1px solid var(--line,#1b4263)!important;border-bottom:1px solid var(--line,#1b4263)!important;border-radius:0!important;padding:12px 0!important}
-#page-trade #timedPaperTrade #timedBoardPnlChart{display:block!important;width:100%!important;height:150px!important;min-height:150px!important;background:transparent!important}
-#page-trade #timedPaperTrade .oc-result-details{display:flex;flex-wrap:wrap;gap:0;margin-top:12px}
-#page-trade #timedPaperTrade .oc-result-chip{flex:1 1 135px;min-width:0;padding:11px 12px;border:0;border-bottom:1px solid var(--line,#1b4263);border-radius:0;background:transparent!important;display:flex;flex-direction:column;gap:5px}
-#page-trade #timedPaperTrade .oc-result-chip span{font-size:11px;color:var(--muted,#91abc5)}
-#page-trade #timedPaperTrade .oc-result-chip strong{font-size:14px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
-#page-trade #timedPaperTrade .oc-result-balance{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:10px;padding:12px 0;border:0;border-top:1px solid var(--line,#1b4263);border-bottom:1px solid var(--line,#1b4263);border-radius:0;background:transparent!important}
-#page-trade #timedPaperTrade .oc-result-balance span{display:flex;flex-direction:column;gap:4px;color:var(--muted,#91abc5);font-size:11px}
-#page-trade #timedPaperTrade .oc-result-balance strong{font-size:14px;color:var(--text,#eaf6ff)!important}
-#page-trade #timedPaperTrade #timedUpBtn{background:#0b9b68!important;color:#fff!important}
-#page-trade #timedPaperTrade #timedDownBtn{background:#dc465b!important;color:#fff!important}
-@media(max-width:600px){#page-trade #timedPaperTrade .form-panel{padding:10px!important}#page-trade #timedPaperTrade .oc-trade-result-board{padding:12px 0!important}#page-trade #timedPaperTrade .oc-result-chip{flex-basis:50%;padding:10px 8px}}
-</style>
-
-
-<style id="oc-trade-result-white-graph">
-/* Completed Buy/Sell results stay white and readable in both platform themes. */
+<style id="oc-simple-trade-result">
+/* One lightweight completed-trade layout; keep the surrounding platform theme. */
 #page-trade #timedPaperTrade #timedResultBoard{
-  display:block;background:#fff!important;color:#172033!important;
-  border:1px solid #e5eaf0!important;border-radius:14px!important;
-  box-shadow:none!important;padding:16px!important
+  display:block!important;visibility:visible!important;
+  background:transparent!important;color:var(--text,#eaf6ff)!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  padding:14px 0!important;margin-top:12px!important;max-width:100%;
 }
 #page-trade #timedPaperTrade #timedResultBoard h3,
 #page-trade #timedPaperTrade #timedResultBoard p,
-#page-trade #timedPaperTrade #timedResultBoard strong,
 #page-trade #timedPaperTrade #timedResultBoard span,
-#page-trade #timedPaperTrade #timedResultBoard div{color:#172033!important}
-#page-trade #timedPaperTrade #timedResultBoard #timedBoardSummary,
+#page-trade #timedPaperTrade #timedResultBoard div,
+#page-trade #timedPaperTrade #timedResultBoard strong{
+  color:inherit;font-weight:400;
+}
+#page-trade #timedPaperTrade #timedResultBoard h3{
+  font-size:17px!important;font-weight:650!important;margin:0;
+}
+#page-trade #timedPaperTrade #timedBoardSummary,
 #page-trade #timedPaperTrade #timedResultBoard .oc-result-chip span,
 #page-trade #timedPaperTrade #timedResultBoard .oc-result-balance>span{
-  color:#667085!important;font-weight:400!important
+  color:var(--muted,#91abc5)!important;font-size:12px!important;
 }
-#page-trade #timedPaperTrade #timedResultBoard #timedBoardOutcome{
-  color:#172033!important;background:transparent!important;border:0!important;
-  border-radius:0!important;padding:0!important;font-size:18px!important;
-  font-weight:600!important;letter-spacing:0
+#page-trade #timedPaperTrade #timedBoardOutcome{
+  font-size:15px!important;font-weight:650!important;
+}
+#page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardProfitLoss),
+#page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardPnlChart){
+  background:transparent!important;border:0!important;border-radius:0!important;
+  box-shadow:none!important;padding:10px 0!important;margin:0!important;
 }
 #page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardProfitLoss){
-  background:#fff!important;color:#172033!important;border:1px solid #e5eaf0!important;
-  border-radius:10px!important;box-shadow:none!important;padding:13px!important
+  border-top:1px solid var(--line,#29445f)!important;
+  border-bottom:1px solid var(--line,#29445f)!important;
 }
 #page-trade #timedPaperTrade #timedBoardProfitLoss{
-  color:#172033!important;font-size:28px!important;font-weight:700!important;
-  font-variant-numeric:tabular-nums
-}
-#page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardPnlChart){
-  background:#fff!important;color:#172033!important;border:1px solid #e5eaf0!important;
-  border-radius:10px!important;padding:12px!important;box-shadow:none!important
-}
-#page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardPnlChart)>div{
-  color:#344054!important;font-weight:500!important
+  font-size:clamp(24px,5vw,32px)!important;font-weight:650!important;
+  font-variant-numeric:tabular-nums;overflow-wrap:anywhere;
 }
 #page-trade #timedPaperTrade #timedBoardPnlChart{
-  display:block!important;width:100%!important;height:160px!important;
-  min-height:160px!important;background:#fff!important
+  display:block!important;width:100%!important;height:150px!important;
+  min-height:150px!important;max-width:100%;background:transparent!important;
 }
 #page-trade #timedPaperTrade #timedResultBoard .oc-result-details{
-  display:flex;flex-wrap:wrap;gap:0;margin-top:10px;background:#fff!important
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0 18px!important;margin-top:8px;background:transparent!important;
 }
 #page-trade #timedPaperTrade #timedResultBoard .oc-result-chip{
-  flex:1 1 135px;min-width:0;padding:10px 12px!important;
-  background:#fff!important;border:0!important;
-  border-bottom:1px solid #edf0f4!important;border-radius:0!important;
-  box-shadow:none!important;display:flex;flex-direction:column;gap:5px
+  display:flex!important;flex-direction:column;gap:4px;min-width:0;
+  padding:9px 0!important;background:transparent!important;
+  border:0!important;border-bottom:1px solid var(--line,#29445f)!important;
+  border-radius:0!important;box-shadow:none!important;
 }
 #page-trade #timedPaperTrade #timedResultBoard .oc-result-chip strong,
 #page-trade #timedPaperTrade #timedResultBoard .oc-result-balance strong{
-  color:#172033!important;font-size:14px!important;font-weight:600!important;
-  overflow-wrap:anywhere;font-variant-numeric:tabular-nums
+  color:var(--text,#eaf6ff)!important;font-size:13px!important;
+  font-weight:550!important;overflow-wrap:anywhere;
+  font-variant-numeric:tabular-nums;
 }
 #page-trade #timedPaperTrade #timedResultBoard .oc-result-balance{
-  display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;
-  margin-top:10px;padding:12px!important;background:#fff!important;
-  border:1px solid #edf0f4!important;border-radius:10px!important;box-shadow:none!important
+  display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 22px;
+  margin-top:10px;padding:10px 0!important;background:transparent!important;
+  border:0!important;border-top:1px solid var(--line,#29445f)!important;
+  border-bottom:1px solid var(--line,#29445f)!important;
+  border-radius:0!important;box-shadow:none!important;
 }
-#page-trade #timedPaperTrade #timedResultBoard.oc-result-win #timedBoardOutcome,
-#page-trade #timedPaperTrade #timedResultBoard.oc-result-win #timedBoardProfitLoss{color:#16834b!important}
-#page-trade #timedPaperTrade #timedResultBoard.oc-result-loss #timedBoardOutcome,
-#page-trade #timedPaperTrade #timedResultBoard.oc-result-loss #timedBoardProfitLoss{color:#d04444!important}
 #page-trade #timedPaperTrade #timedResultBoard #timedBoardClose{
-  background:#f4f6f8!important;color:#172033!important;border:1px solid #d7dde5!important;
-  font-weight:500!important
+  background:var(--panel2,#102641)!important;color:var(--text,#eaf6ff)!important;
+  border:1px solid var(--line,#29445f)!important;font-weight:500!important;
 }
-@media(max-width:600px){
-  #page-trade #timedPaperTrade #timedResultBoard{padding:12px!important}
-  #page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardPnlChart){padding:10px!important}
-  #page-trade #timedPaperTrade #timedResultBoard .oc-result-chip{flex-basis:50%;padding:9px 8px!important}
+@media(max-width:520px){
+  #page-trade #timedPaperTrade #timedResultBoard .oc-result-details{
+    grid-template-columns:repeat(2,minmax(0,1fr));gap:0 10px!important;
+  }
+  #page-trade #timedPaperTrade #timedResultBoard{padding:10px 0!important}
 }
 </style>
-<script id="oc-trade-result-duration-seconds">
-(()=>{
- const board=document.getElementById("timedResultBoard");
- const duration=document.getElementById("timedBoardDuration");
- const selector=document.getElementById("timedDuration");
- if(!board||!duration||!selector)return;
- const syncDuration=()=>{
-   if(board.style.display!=="none"&&board.offsetParent!==null){
-     const seconds=Number(selector.value);
-     if(Number.isFinite(seconds)&&seconds>0)duration.textContent=String(seconds);
-   }
- };
- new MutationObserver(syncDuration).observe(board,{attributes:true,attributeFilter:["style","class"]});
- selector.addEventListener("change",syncDuration);
- syncDuration();
-})();
-</script>
-
-<script id="oc-trade-result-status-colors">
-(()=>{
- const board=document.getElementById("timedResultBoard");
- if(!board)return;
- const sync=()=>{
-  const outcome=(document.getElementById("timedBoardOutcome")?.textContent||"").trim().toUpperCase();
-  const profit=(document.getElementById("timedBoardProfitLoss")?.textContent||"").trim();
-  board.classList.remove("oc-result-win","oc-result-loss");
-  if(outcome.includes("WIN")) board.classList.add("oc-result-win");
-  else if(outcome.includes("LOSS")||outcome.includes("NOT COMPLETED")) board.classList.add("oc-result-loss");
-  else if(/^[-−]/.test(profit)) board.classList.add("oc-result-loss");
- };
- new MutationObserver(sync).observe(board,{subtree:true,childList:true,characterData:true});
- sync();
-})();
-</script>
+</body>
+</html>
