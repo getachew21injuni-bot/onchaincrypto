@@ -12474,5 +12474,98 @@ html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#1720
 </style>
 
 <script src="/server-trades.js"></script>
+
+<style id="oc-neon-trade-display">
+/* Onchain Trade display refresh — scoped to Trade only. No trading logic or other pages changed. */
+#page-trade #timedPaperTrade,
+#page-trade #liveOrderBookPanel {
+  background:linear-gradient(145deg,rgba(7,24,43,.98),rgba(5,15,29,.98))!important;
+  border:1px solid rgba(32,217,255,.32)!important;
+  border-radius:18px!important;
+  box-shadow:0 0 0 1px rgba(32,217,255,.06),0 14px 38px rgba(0,0,0,.28),0 0 24px rgba(32,217,255,.07)!important;
+}
+#page-trade #timedPaperTrade>.section-head,
+#page-trade #liveOrderBookPanel>.section-head {padding:16px 18px 12px!important}
+#page-trade #timedPaperTrade .form-panel {padding:16px!important}
+#page-trade #timedPaperTrade label {color:#b9d5eb!important;font-weight:750;letter-spacing:.02em}
+#page-trade #timedPaperTrade .field,
+#page-trade #timedPaperTrade input,
+#page-trade #timedPaperTrade select {
+  background:#071a2b!important;color:#f2f8ff!important;
+  border:1px solid rgba(32,217,255,.34)!important;border-radius:11px!important;
+  min-height:44px;box-shadow:inset 0 0 12px rgba(32,217,255,.035)!important;
+}
+#page-trade #timedPaperTrade .field:focus,
+#page-trade #timedPaperTrade input:focus,
+#page-trade #timedPaperTrade select:focus {
+  outline:2px solid rgba(32,217,255,.38)!important;border-color:#20d9ff!important;
+}
+#page-trade #timedPaperTrade .cards {gap:10px!important}
+#page-trade #timedPaperTrade .card,
+#page-trade #timedPaperTrade .mini-card {
+  background:linear-gradient(145deg,#0c2238,#081727)!important;
+  color:#eaf5ff!important;border:1px solid rgba(71,139,190,.28)!important;
+  border-radius:13px!important;box-shadow:inset 0 1px rgba(255,255,255,.025)!important;
+}
+#page-trade #timedPaperTrade .label,
+#page-trade #timedPaperTrade .muted {color:#9bb5cc!important}
+#page-trade #timedPaperTrade #timedCountdown {color:#ffd166!important;text-shadow:0 0 14px rgba(255,209,102,.35)}
+#page-trade #timedPaperTrade #quickEstimatedProfit,
+#page-trade #timedPaperTrade #timedPnl {color:#20df9a!important;text-shadow:0 0 14px rgba(32,223,154,.22)}
+#page-trade #timedPaperTrade .buy,
+#page-trade #liveOrderBookPanel .buy,
+#page-trade #timedPaperTrade #timedUpBtn {
+  background:linear-gradient(135deg,#0bbd83,#087c61)!important;color:#fff!important;
+  border:1px solid rgba(75,255,190,.6)!important;border-radius:11px!important;
+  box-shadow:0 0 18px rgba(11,189,131,.17)!important;font-weight:850;
+}
+#page-trade #timedPaperTrade .sell,
+#page-trade #liveOrderBookPanel .sell,
+#page-trade #timedPaperTrade #timedDownBtn {
+  background:linear-gradient(135deg,#ed5367,#a82e49)!important;color:#fff!important;
+  border:1px solid rgba(255,125,143,.55)!important;border-radius:11px!important;
+  box-shadow:0 0 18px rgba(237,83,103,.15)!important;font-weight:850;
+}
+#page-trade #timedPaperTrade #timedConfirmBtn {
+  background:linear-gradient(135deg,#20d9ff,#147bd1)!important;color:#031523!important;
+  border:1px solid #58e5ff!important;border-radius:11px!important;font-weight:900;
+  box-shadow:0 0 20px rgba(32,217,255,.2)!important;
+}
+#page-trade #timedPaperTrade #timedConfirmBtn:disabled {opacity:.42;box-shadow:none!important}
+#page-trade #timedPaperTrade .secondary,
+#page-trade #liveOrderBookPanel .secondary {
+  background:#10283e!important;color:#d9edff!important;border:1px solid #31516d!important;border-radius:11px!important;
+}
+#page-trade #timedPaperTrade .oc-trade-result-board,
+#page-trade #timedPaperTrade #timedResultBoard {
+  background:linear-gradient(145deg,#0b2035,#071525)!important;color:#eff8ff!important;
+  border:1px solid rgba(32,217,255,.5)!important;border-radius:16px!important;
+  box-shadow:0 0 28px rgba(32,217,255,.12)!important;
+}
+#page-trade #timedPaperTrade #timedResultBoard h3,
+#page-trade #timedPaperTrade #timedResultBoard strong {color:#eff8ff!important}
+#page-trade #timedPaperTrade #timedResultBoard [style*="background:#f4f7fb"],
+#page-trade #timedPaperTrade #timedResultBoard [style*="border:1px solid #dbe3ee"] {
+  background:#10283e!important;border-color:#31516d!important;color:#eff8ff!important;
+}
+#page-trade #timedPaperTrade #timedResultBoard [style*="color:#5c6678"],
+#page-trade #timedPaperTrade #timedResultBoard [style*="color:#526071"],
+#page-trade #timedPaperTrade #timedResultBoard [style*="color:#657184"] {color:#a9c1d7!important}
+#page-trade #timedPaperTrade .chart-wrap,
+#page-trade #liveOrderBookPanel .table-wrap {
+  border:1px solid rgba(32,217,255,.22)!important;border-radius:13px!important;overflow:hidden;
+}
+#page-trade #timedPaperTrade #timedGraphStatus {color:#20d9ff!important}
+#page-trade #liveOrderBookPanel .mini-card {background:#091b2d!important;color:#eaf5ff!important}
+@media(max-width:600px){
+  #page-trade #timedPaperTrade>.section-head,
+  #page-trade #liveOrderBookPanel>.section-head {padding:13px 13px 9px!important}
+  #page-trade #timedPaperTrade .form-panel {padding:12px!important}
+  #page-trade #timedPaperTrade .cards {grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #page-trade #timedPaperTrade .cards .card {min-width:0}
+  #page-trade #timedPaperTrade .big {overflow-wrap:anywhere}
+}
+</style>
+
 </body>
 </html>
