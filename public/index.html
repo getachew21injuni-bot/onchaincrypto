@@ -12627,6 +12627,53 @@ html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#1720
 #page-trade #timedPaperTrade #timedResultBoard #timedBoardProfitLoss{background:transparent!important;color:#263238!important}
 </style>
 
+
+<style id="oc-trade-summary-bold-plain">
+/* Trade result: bold readable text on a plain white surface, with no shaded cards or highlights. */
+#page-trade #timedPaperTrade #timedResultBoard,
+#page-trade #timedPaperTrade #timedResultBoard > div,
+#page-trade #timedPaperTrade #timedResultBoard .oc-result-details,
+#page-trade #timedPaperTrade #timedResultBoard .oc-result-chip,
+#page-trade #timedPaperTrade #timedResultBoard .oc-result-balance,
+#page-trade #timedPaperTrade #timedResultBoard > div:has(>#timedBoardProfitLoss),
+#page-trade #timedPaperTrade #timedResultBoard > div:has(>#timedBoardProfitLoss) > div {
+  background:#fff!important;background-image:none!important;
+  box-shadow:none!important;border:0!important;border-radius:0!important;
+}
+#page-trade #timedPaperTrade #timedResultBoard,
+#page-trade #timedPaperTrade #timedResultBoard h3,
+#page-trade #timedPaperTrade #timedResultBoard p,
+#page-trade #timedPaperTrade #timedResultBoard span,
+#page-trade #timedPaperTrade #timedResultBoard strong,
+#page-trade #timedPaperTrade #timedResultBoard button {
+  text-shadow:none!important;
+}
+#page-trade #timedPaperTrade #timedResultBoard h3,
+#page-trade #timedPaperTrade #timedResultBoard p,
+#page-trade #timedPaperTrade #timedResultBoard .oc-result-chip span,
+#page-trade #timedPaperTrade #timedResultBoard .oc-result-balance > span {
+  color:#263238!important;font-weight:800!important;
+}
+#page-trade #timedPaperTrade #timedResultBoard strong,
+#page-trade #timedPaperTrade #timedResultBoard #timedBoardOutcome,
+#page-trade #timedPaperTrade #timedResultBoard #timedBoardProfitLoss {
+  font-weight:900!important;
+}
+#page-trade #timedPaperTrade #timedResultBoard #timedBoardOutcome {
+  padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;
+}
+#page-trade #timedPaperTrade #timedResultBoard #timedBoardProfitLoss {
+  color:#263238!important;background:transparent!important;
+}
+#page-trade #timedPaperTrade #timedResultBoard #timedBoardClose {
+  color:#263238!important;background:transparent!important;border:0!important;
+  border-radius:0!important;box-shadow:none!important;font-weight:900!important;
+}
+#page-trade #timedPaperTrade #timedResultBoard .oc-result-chip,
+#page-trade #timedPaperTrade #timedResultBoard .oc-result-balance {
+  border:0!important;padding:7px 0!important;
+}
+</style>
 <style id="oc-trade-summary-dismissal-guard">#page-trade #timedPaperTrade #timedResultBoard[data-dismissed="true"]{display:none!important;visibility:hidden!important;max-height:0!important;overflow:hidden!important;}</style>
 </body>
 </html>
