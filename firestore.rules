@@ -175,11 +175,11 @@ service cloud.firestore {
       allow create: if (
         isAdmin()
         && request.resource.data.keys().hasOnly(['kind','title','message','createdAt','createdAtText','readAt','createdBy','source'])
-        && request.resource.data.kind in ['kyc_approved','kyc_rejected','deposit','withdrawal','withdrawal_approved','account_status']
+        && request.resource.data.kind in ['kyc_approved','kyc_rejected','deposit','withdrawal','withdrawal_approved','account_status','support_reply']
         && request.resource.data.title is string && request.resource.data.title.size() <= 120
         && request.resource.data.message is string && request.resource.data.message.size() <= 500
         && request.resource.data.createdBy == request.auth.uid
-        && (!('source' in request.resource.data) || request.resource.data.source in ['admin-demo','admin-account-status'])
+        && (!('source' in request.resource.data) || request.resource.data.source in ['admin-demo','admin-account-status','admin-support'])
       ) || (
         // A user may create only the one alert confirming their own pending KYC submission.
         owns(uid)

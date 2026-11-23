@@ -194,6 +194,23 @@ describe("private account notification rules", () => {
     }));
   });
 
+  it("allows verified admins to notify a user about a support reply and blocks customer forgery", async () => {
+    const admin = adminDb();
+    await assertSucceeds(setDoc(doc(admin, "userNotifications/recipient/items/support-reply"), {
+      kind: "support_reply", title: "New reply from Onchain Support",
+      message: "Our team has replied to your conversation.",
+      createdAt: serverTimestamp(), createdAtText: new Date().toLocaleString(),
+      readAt: null, createdBy: "admin", source: "admin-support"
+    }));
+    const customer = testEnv.authenticatedContext("recipient").firestore();
+    await assertFails(setDoc(doc(customer, "userNotifications/recipient/items/forged-support-reply"), {
+      kind: "support_reply", title: "New reply from Onchain Support",
+      message: "Forged support message.",
+      createdAt: serverTimestamp(), createdAtText: new Date().toLocaleString(),
+      readAt: null, createdBy: "recipient", source: "admin-support"
+    }));
+  });
+
   it("allows the verified admin to create account-status alerts and blocks customer forgery", async () => {
     const admin = adminDb();
     await assertSucceeds(setDoc(doc(admin, "userNotifications/recipient/items/account-status"), {
