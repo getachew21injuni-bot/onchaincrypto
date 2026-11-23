@@ -207,7 +207,9 @@ test("server trade adapter blocks the old browser settlement handler", () => {
   assert.ok(serverTrades.includes('event.target?.closest?.("#timedConfirmBtn")'), "The adapter must capture the confirmation action");
   assert.ok(serverTrades.includes("event.stopImmediatePropagation()"), "The old browser-only trade handler must not run");
   assert.ok(serverTrades.includes("void startServerTrade()"), "Confirmation must use the server-owned trade flow");
-  assert.ok(serverTrades.includes("window.ocTradeCloudReadyUid !== user.uid"), "A trade must wait for the restored cloud wallet");
+  assert.ok(!serverTrades.includes("window.ocTradeCloudReadyUid !== user.uid"), "Confirmation must not wait on the browser-side wallet-sync flag");
+  assert.ok(serverTrades.includes('if (!user?.uid)'), "The adapter must still require an authenticated user");
+  assert.ok(serverTrades.includes('request("/v1/trades"'), "The server must validate and reserve the trade before it starts");
   assert.ok(!serverTrades.includes("localStorage"), "Active trades must not depend on browser-local storage");
 });
 
