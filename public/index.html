@@ -4432,10 +4432,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  function validatePlan(){
   const stake=Number($("timedStake")?.value||0);
   const funding=window.__ocTradeFundingCoin||"USDT";
-  const fundingPrice=Number(priceFor(funding)?.current_price||1);
+  const fundingPrice=Number(priceFor(funding)?.current_price||0);
   const fundingBalance=funding==="USDT"?Number(state.balance||0):Number(state.holdings?.[funding]||0);
   const amount=stake*fundingPrice;
-  const balanceUsd=fundingBalance*fundingPrice;
   const symbol=$("tradeAsset")?.value||"";
   const minimum=symbol==="XAU"?500:100;
   const plan=planFor(amount);
@@ -4447,14 +4446,17 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   if(!currentUser?.uid)message="Sign in to confirm a trade.";
   else if(!walletReady)message="Your account wallet is syncing. Confirmation will be available when it is ready.";
   else if(!tradingEnabled)message="Trading is currently disabled for this account. Please contact support.";
-  else if(stake>0&&amount<minimum)message="Minimum trade: $"+minimum.toLocaleString()+" equivalent.";
-  else if(stake>0&&stake>fundingBalance+1e-10)message="Your available "+funding+" balance is too low for this amount.";
-  else if(stake>0&&!plan)message="Choose an amount within the available investment levels.";
-  else if(stake>0&&plan&&amount>plan.max)message="This amount is above the selected investment level.";
+  else if(!(fundingBalance>0))message="Your available "+funding+" balance is 0.00. Deposit funds before placing a trade.";
+  else if(!Number.isFinite(stake)||stake<=0)message="Enter a trade amount to continue.";
+  else if(!Number.isFinite(fundingPrice)||fundingPrice<=0)message="Live pricing for "+funding+" is unavailable. Please wait for the market price to load.";
+  else if(amount<minimum)message="Minimum trade: $"+minimum.toLocaleString()+" equivalent.";
+  else if(stake>fundingBalance+1e-10)message="Your available "+funding+" balance is too low for this amount.";
+  else if(!plan)message="Choose an amount within the available investment levels.";
+  else if(amount>plan.max)message="This amount is above the selected investment level.";
   if(gate){gate.textContent=message;gate.style.display=message?"block":"none";}
   const confirm=$("timedConfirmBtn");
   if(confirm){
-   const blocked=!walletReady||!tradingEnabled||!Number.isFinite(stake)||stake<=0||!Number.isFinite(fundingPrice)||fundingPrice<=0||!plan||amount<minimum||amount<plan.min||amount>plan.max||stake>fundingBalance+1e-10;
+   const blocked=!walletReady||!tradingEnabled||!(fundingBalance>0)||!Number.isFinite(stake)||stake<=0||!Number.isFinite(fundingPrice)||fundingPrice<=0||!plan||amount<minimum||amount<plan.min||amount>plan.max||stake>fundingBalance+1e-10;
    confirm.disabled=blocked||(typeof pendingTimedDirection==="undefined"||!pendingTimedDirection)||(typeof timedPaper!=="undefined"&&!!timedPaper);
   }
  }
