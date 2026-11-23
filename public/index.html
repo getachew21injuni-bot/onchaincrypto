@@ -1848,8 +1848,8 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
         <p id="timedBoardSummary" style="color:#526071;margin:8px 0 14px">Completed trade summary</p>
         <div style="background:#edf8f2;border:1px solid #cdebd9;border-radius:12px;padding:14px;margin:0 0 12px"><div style="font-size:12px;color:#426b55;margin-bottom:5px;font-weight:700">FINAL PROFIT / LOSS · USDT</div><strong id="timedBoardProfitLoss" style="font-size:28px;color:#172033;font-variant-numeric:tabular-nums">—</strong></div>
         <div style="background:#f4f7fb;border:1px solid #dbe3ee;border-radius:10px;padding:12px;margin:0 0 12px"><div style="font-size:13px;color:#26384c;margin-bottom:8px;font-weight:700">Trade profit / loss · USDT</div><canvas id="timedBoardPnlChart" height="160" aria-label="Completed trade profit and loss graph in USDT" style="width:100%;height:160px;display:block"></canvas></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px"><div style="background:#f4f7fb;border-radius:10px;padding:12px"><div style="font-size:12px;color:#5c6678">Trading pair / direction</div><strong id="timedBoardPair">—</strong></div><div style="background:#f4f7fb;border-radius:10px;padding:12px"><div style="font-size:12px;color:#5c6678">Trade amount</div><strong id="timedBoardAmount">—</strong></div><div style="background:#f4f7fb;border-radius:10px;padding:12px"><div style="font-size:12px;color:#5c6678">Entry price</div><strong id="timedBoardEntry">—</strong></div><div style="background:#f4f7fb;border-radius:10px;padding:12px"><div style="font-size:12px;color:#5c6678">Expiry price</div><strong id="timedBoardExit">—</strong></div><div style="background:#f4f7fb;border-radius:10px;padding:12px"><div style="font-size:12px;color:#5c6678">Price movement</div><strong id="timedBoardMove">—</strong></div></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-top:10px"><div style="border:1px solid #dbe3ee;border-radius:10px;padding:12px"><div style="font-size:12px;color:#5c6678">USDT balance before</div><strong id="timedBoardBefore">—</strong></div><div style="border:1px solid #dbe3ee;border-radius:10px;padding:12px"><div style="font-size:12px;color:#5c6678">USDT balance after</div><strong id="timedBoardAfter">—</strong></div></div>
+        <div class="oc-result-details"><div class="oc-result-chip"><span>Trading pair · Direction</span><strong id="timedBoardPair">—</strong></div><div class="oc-result-chip"><span>Trade amount</span><strong id="timedBoardAmount">—</strong></div><div class="oc-result-chip"><span>Entry price</span><strong id="timedBoardEntry">—</strong></div><div class="oc-result-chip"><span>Expiry price</span><strong id="timedBoardExit">—</strong></div><div class="oc-result-chip"><span>Price movement</span><strong id="timedBoardMove">—</strong></div><div class="oc-result-chip"><span>Duration</span><strong id="timedBoardDuration">—</strong></div></div><div style="background:#f4f7fb;border-radius:10px;padding:12px"><div style="font-size:12px;color:#5c6678">Trade amount</div><strong id="timedBoardAmount">—</strong></div><div style="background:#f4f7fb;border-radius:10px;padding:12px"><div style="font-size:12px;color:#5c6678">Entry price</div><strong id="timedBoardEntry">—</strong></div><div style="background:#f4f7fb;border-radius:10px;padding:12px"><div style="font-size:12px;color:#5c6678">Expiry price</div><strong id="timedBoardExit">—</strong></div><div style="background:#f4f7fb;border-radius:10px;padding:12px"><div style="font-size:12px;color:#5c6678">Price movement</div><strong id="timedBoardMove">—</strong></div></div>
+        <div class="oc-result-balance"><span>Balance before <strong id="timedBoardBefore">—</strong></span><span>Balance after <strong id="timedBoardAfter">—</strong></span></div>
       </section>
     </section>
     
@@ -12572,38 +12572,33 @@ html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#1720
 
 
 <style id="oc-clean-white-trade-board">
-/* Clean, readable Trade information board. Scoped to Trade; trading logic unchanged. */
-#page-trade #timedPaperTrade{background:transparent!important;color:inherit!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+/* Smart trade result display: platform-matched surface, compact details, no table layout. */
+#page-trade #timedPaperTrade{background:transparent!important;color:inherit!important;border:0!important;box-shadow:none!important}
 #page-trade #timedPaperTrade .form-panel{background:transparent!important;color:inherit!important}
-#page-trade #timedPaperTrade .oc-trade-result-board{background:#fff!important;color:#172033!important}
-#page-trade #timedPaperTrade .section-head h2,
-#page-trade #timedPaperTrade h3{color:#172033!important}
-#page-trade #timedPaperTrade .form-panel{background:#fff!important;color:#172033!important}
-#page-trade #timedPaperTrade label{display:block!important;color:#334155!important;font-weight:650!important;margin:12px 0 6px!important}
-#page-trade #timedPaperTrade input,
-#page-trade #timedPaperTrade select,
-#page-trade #timedPaperTrade .field{display:block!important;background:#fff!important;color:#172033!important;border:1px solid #cbd5e1!important;border-radius:9px!important;min-height:44px;box-shadow:none!important}
-#page-trade #timedPaperTrade input:focus,
-#page-trade #timedPaperTrade select:focus{outline:2px solid #93c5fd!important;border-color:#2563eb!important}
-#page-trade #timedPaperTrade .card,
-#page-trade #timedPaperTrade .mini-card{background:#f8fafc!important;color:#172033!important;border:1px solid #e2e8f0!important;border-radius:11px!important;box-shadow:none!important}
-#page-trade #timedPaperTrade .label,
-#page-trade #timedPaperTrade .muted{color:#64748b!important}
-#page-trade #timedPaperTrade .big{color:#172033!important}
-#page-trade #timedPaperTrade #timedCountdown{color:#b45309!important;font-weight:800}
-#page-trade #timedPaperTrade #quickEstimatedProfit,
-#page-trade #timedPaperTrade #timedPnl{color:#15803d!important;font-weight:800}
-#page-trade #timedPaperTrade .list-row:has(#timedEntryDetail),
-#page-trade #timedPaperTrade .list-row:has(#timedEndPriceDetail){display:flex!important}
-#page-trade #timedPaperTrade .chart-wrap,
-#page-trade #timedPaperTrade #timedTradeChart,
-#page-trade #timedPaperTrade canvas{display:none!important}
-#page-trade #timedPaperTrade .oc-trade-result-board{background:#fff!important;color:#172033!important;border:1px solid #dbe3ee!important;box-shadow:0 5px 20px rgba(15,23,42,.07)!important}
-#page-trade #timedPaperTrade .oc-trade-result-board div:has(> #timedBoardEntry),
-#page-trade #timedPaperTrade .oc-trade-result-board div:has(> #timedBoardExit){display:block!important}
-#page-trade #timedPaperTrade #timedBoardPnlChart{display:none!important}
-#page-trade #timedPaperTrade #timedBoardProfitLoss{font-size:30px!important;color:#15803d!important}
-#page-trade #timedPaperTrade #timedUpBtn{background:#15803d!important;color:#fff!important}
-#page-trade #timedPaperTrade #timedDownBtn{background:#dc2626!important;color:#fff!important}
-@media(max-width:600px){#page-trade #timedPaperTrade .cards{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}#page-trade #timedPaperTrade .card{padding:11px!important}}
+#page-trade #timedPaperTrade label{color:inherit!important;font-weight:650!important}
+#page-trade #timedPaperTrade input,#page-trade #timedPaperTrade select,#page-trade #timedPaperTrade .field{background:var(--panel,#0b1b30)!important;color:var(--text,#eaf6ff)!important;border:1px solid var(--line,#1b4263)!important;border-radius:10px!important}
+#page-trade #timedPaperTrade .card,#page-trade #timedPaperTrade .mini-card{background:var(--panel,#0b1b30)!important;color:var(--text,#eaf6ff)!important;border:1px solid var(--line,#1b4263)!important}
+#page-trade #timedPaperTrade .label,#page-trade #timedPaperTrade .muted{color:var(--muted,#91abc5)!important}
+#page-trade #timedPaperTrade #timedCountdown{color:#ffd166!important;font-weight:850}
+#page-trade #timedPaperTrade #quickEstimatedProfit,#page-trade #timedPaperTrade #timedPnl{font-weight:850}
+#page-trade #timedPaperTrade .list-row:has(#timedEntryDetail),#page-trade #timedPaperTrade .list-row:has(#timedEndPriceDetail){display:flex!important}
+#page-trade #timedPaperTrade .chart-wrap,#page-trade #timedPaperTrade #timedTradeChart{display:none!important}
+#page-trade #timedPaperTrade .oc-trade-result-board{background:linear-gradient(145deg,#0b1b30,#071426)!important;color:var(--text,#eaf6ff)!important;border:1px solid var(--line,#1b4263)!important;border-radius:16px!important;box-shadow:0 12px 32px rgba(0,0,0,.22)!important;padding:16px!important}
+#page-trade #timedPaperTrade #timedResultBoard h3,#page-trade #timedPaperTrade #timedResultBoard strong{color:inherit}
+#page-trade #timedPaperTrade #timedBoardSummary{color:var(--muted,#91abc5)!important}
+#page-trade #timedPaperTrade #timedBoardOutcome{padding:6px 11px;border-radius:999px;background:rgba(22,217,160,.12);border:1px solid rgba(22,217,160,.28)}
+#page-trade #timedPaperTrade #timedBoardProfitLoss{font-size:clamp(27px,6vw,36px)!important;font-weight:900;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+#page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardProfitLoss){background:rgba(22,217,160,.09)!important;border:1px solid rgba(22,217,160,.24)!important;border-radius:13px!important}
+#page-trade #timedPaperTrade #timedResultBoard>div:has(>#timedBoardPnlChart){background:rgba(255,255,255,.035)!important;border:1px solid var(--line,#1b4263)!important;border-radius:12px!important}
+#page-trade #timedPaperTrade #timedBoardPnlChart{display:block!important;width:100%!important;height:150px!important;min-height:150px!important}
+#page-trade #timedPaperTrade .oc-result-details{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+#page-trade #timedPaperTrade .oc-result-chip{flex:1 1 135px;min-width:0;padding:11px 12px;border:1px solid var(--line,#1b4263);border-radius:11px;background:rgba(255,255,255,.035);display:flex;flex-direction:column;gap:5px}
+#page-trade #timedPaperTrade .oc-result-chip span{font-size:11px;color:var(--muted,#91abc5)}
+#page-trade #timedPaperTrade .oc-result-chip strong{font-size:14px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#page-trade #timedPaperTrade .oc-result-balance{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:10px;padding:12px 13px;border:1px solid var(--line,#1b4263);border-radius:11px;background:rgba(255,255,255,.025)}
+#page-trade #timedPaperTrade .oc-result-balance span{display:flex;flex-direction:column;gap:4px;color:var(--muted,#91abc5);font-size:11px}
+#page-trade #timedPaperTrade .oc-result-balance strong{font-size:14px;color:var(--text,#eaf6ff)!important}
+#page-trade #timedPaperTrade #timedUpBtn{background:#0b9b68!important;color:#fff!important}
+#page-trade #timedPaperTrade #timedDownBtn{background:#dc465b!important;color:#fff!important}
+@media(max-width:600px){#page-trade #timedPaperTrade .form-panel{padding:10px!important}#page-trade #timedPaperTrade .oc-trade-result-board{padding:13px!important}#page-trade #timedPaperTrade .oc-result-chip{flex-basis:calc(50% - 6px)}}
 </style>
