@@ -2314,109 +2314,8 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
   </section>
 
   <section id="page-support" class="hidden">
-    <div class="page-title"><div><h1>Support</h1><div class="muted">Contact our support team.</div></div><span class="tag">SUPPORT</span></div><section class="panel" style="margin-bottom:16px;padding:16px"><h2>Chat with support</h2><p class="muted tiny">Send a private message to support.</p><button class="primary" type="button" data-oc-open-support>Open support chat</button></section>
-    <section class="panel form-panel" id="ocDirectAdminMessageSection" style="margin-bottom:16px">
-      <div class="section-head"><h2>✉ Message Admin Directly</h2><span class="tag">DIRECT SUPPORT</span></div>
-      <p class="muted tiny">Send a message straight to the OnChainsPro support team. No account is required; include an email address so the team can reply.</p>
-      <form id="ocDirectAdminMessageForm">
-        <label for="ocDirectAdminEmail">Your email</label>
-        <input id="ocDirectAdminEmail" class="field" type="email" maxlength="160" required autocomplete="email" placeholder="you@example.com">
-        <label for="ocDirectAdminText">Your message</label>
-        <textarea id="ocDirectAdminText" class="field" rows="4" maxlength="3000" required placeholder="How can our team help? Do not include passwords, verification codes or wallet recovery phrases."></textarea>
-        <button class="primary full" id="ocDirectAdminSend" type="submit">Send message to Admin</button>
-        <p id="ocDirectAdminStatus" class="muted tiny" aria-live="polite">Your message will appear in the administrator support inbox.</p>
-      </form>
-    </section>
-    <div class="notice"><strong>Private in-app support</strong><br><span class="tiny">Your support messages stay in Onchain.</span></div>
-    <div class="content-grid">
-      <section class="panel form-panel" id="support-ticket-section">
-        <h2>✉ New support request</h2>
-        <p class="muted">Send a private support request to the Onchain team. Replies stay in your Onchain account.</p>
-        <label for="supportTopic">What do you need help with?</label>
-        <select id="supportTopic" class="field">
-          <option>Account registration</option><option>Sign-in problem</option><option>Verification problem</option><option>Password reset</option><option>Deposit or withdrawal</option><option>Trade or market issue</option><option>Website issue</option><option>Other question</option>
-        </select>
-        <label for="supportSubject">Subject</label>
-        <input id="supportSubject" class="field" maxlength="120" placeholder="Briefly describe the problem">
-        <label for="supportDetails">Message</label>
-        <textarea id="supportDetails" class="field" rows="5" maxlength="3000" placeholder="Describe what happened. Do not include your password, verification code, private key or recovery phrase."></textarea>
-        <button class="primary full" id="sendSupportEmail" type="button">Send support request</button>
-        <p id="supportMessage" class="muted tiny" aria-live="polite">Sign in to submit a request and view replies. Your support conversation is stored securely in Onchain.</p>
-        <div id="ocMySupportTickets" style="margin-top:18px;border-top:1px solid var(--line);padding-top:16px">
-      <div class="section-head"><h2>My support conversations</h2><span class="muted tiny">Private inbox</span></div>
-      <div id="ocMySupportTicketList" class="muted tiny">Sign in to view your support conversations.</div>
-      <div id="ocMySupportConversation" class="panel" style="padding:12px;margin-top:12px">
-        <p class="muted tiny">Select a conversation to read replies.</p>
-      </div>
-      <label for="ocSupportReplyText">Reply to support</label>
-      <textarea id="ocSupportReplyText" class="field" rows="3" maxlength="3000" placeholder="Write a reply. Never include passwords, codes or wallet recovery phrases."></textarea>
-      <button id="ocSupportReplySend" class="secondary full" type="button">Send reply</button>
-      <p id="ocSupportReplyStatus" class="muted tiny" aria-live="polite"></p>
-    </div>
-    
-    <section class="panel" style="margin-bottom:16px">
-      <div class="section-head"><h2>🤝 Help &amp; Resources</h2><span class="muted tiny">Guides, safety and platform information</span></div>
-      <p class="muted tiny">Choose a resource. Some live services need setup.</p>
-      <div class="content-grid">
-        <button type="button" class="secondary resource-card" data-resource="trading"><span class="resource-icon">📈</span><strong>Trading tutorials</strong><span class="muted tiny">Learn how to trade like a pro</span></button>
-        <button type="button" class="secondary resource-card" data-resource="security"><span class="resource-icon">🛡️</span><strong>Security center</strong><span class="muted tiny">Keep your account safe</span></button>
-        <button type="button" class="secondary resource-card" data-resource="fees"><span class="resource-icon">🧾</span><strong>Fees and limits</strong><span class="muted tiny">Transparent fee structure</span></button>
-        <button type="button" class="secondary resource-card" data-resource="status"><span class="resource-icon">🟢</span><strong>System status</strong><span class="muted tiny">Check platform availability</span></button>
-        <button type="button" class="secondary resource-card" data-resource="api"><span class="resource-icon">⌘</span><strong>API documentation</strong><span class="muted tiny">Build on our platform</span></button>
-        <button type="button" class="secondary resource-card" data-resource="community"><span class="resource-icon">👥</span><strong>Community forum</strong><span class="muted tiny">Connect with other traders</span></button>
-      </div>
-    </section>
-    <section class="panel" style="margin-bottom:16px">
-      <div class="section-head"><h2>💱 Exchange and wallet services</h2><span class="muted tiny">Account and asset guides</span></div>
-      <div class="content-grid">
-        <button type="button" class="secondary resource-card" data-resource="deposit"><span class="resource-icon">📥</span><strong>Deposit guide</strong><span class="muted tiny">How to find your account deposit options</span></button>
-        <button type="button" class="secondary resource-card" data-resource="withdraw"><span class="resource-icon">📤</span><strong>Withdraw guide</strong><span class="muted tiny">Withdraw funds securely</span></button>
-        <button type="button" class="secondary resource-card" data-resource="transfer"><span class="resource-icon">🔁</span><strong>Transfer funds</strong><span class="muted tiny">Move between wallets</span></button>
-        <button type="button" class="secondary resource-card" data-resource="wallet"><span class="resource-icon">👛</span><strong>Wallet management</strong><span class="muted tiny">Manage your assets</span></button>
-      </div>
-    </section>
-    <section class="panel hidden" id="resource-detail" style="margin-bottom:16px">
-      <div class="section-head"><h2 id="resource-detail-title">Resource</h2><button type="button" class="secondary" id="resource-detail-close">Close</button></div>
-      <div id="resource-detail-body" class="muted"></div>
-      <div id="resource-detail-actions" class="content-grid" style="margin-top:14px"></div>
-    </section>
-  </section>
-      <section class="panel form-panel" id="support-faq-section">
-        <h2>❔ Frequently Asked Questions</h2>
-        <p class="muted tiny">Search a topic or question.</p>
-        <input type="search" id="faqSearch" class="search" style="width:100%;margin:14px 0" placeholder="🔎 Search FAQs..." aria-label="Search frequently asked questions">
-        <div class="tabs faq-tabs" role="group" aria-label="FAQ categories">
-          <button type="button" class="active" data-faq-category="all">All</button><button type="button" data-faq-category="general">General</button><button type="button" data-faq-category="trading">Trading</button><button type="button" data-faq-category="account">Account &amp; Security</button><button type="button" data-faq-category="funds">Deposits &amp; Withdrawals</button><button type="button" data-faq-category="technical">Technical Support</button>
-        </div>
-        <div class="faq-category" data-faq-group="general"><h3>🌐 General</h3>
-          <details class="faq-item"><summary><strong>What is Onchain?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Onchain brings crypto and Gold market information, interactive charts, asset conversion tools and account features together. Explore supported markets, compare prices and review your portfolio activity in one place. Displayed trade results and conversions update account figures only; no live exchange orders or blockchain transfers are made.</div></details>
-          <details class="faq-item"><summary><strong>Is Onchain safe to use?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Use a unique password and review the security options available in your account. Keep passwords, verification codes, private keys and recovery phrases private. Additional security services will be described here as they become available.</div></details>
-          <details class="faq-item"><summary><strong>How do I get started?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Create your account, explore Markets and charts, compare supported assets with Convert, and explore the platform tools.</div></details>
-        </div>
-        <div class="faq-category" data-faq-group="trading"><h3>📈 Trading</h3>
-          <details class="faq-item"><summary><strong>Which trading pairs are available?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Markets presents selected public crypto-market information. Asset coverage and price availability depend on the connected data providers.</div></details>
-          <details class="faq-item"><summary><strong>How do I place a trade?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Open Trade, choose a supported asset, review the market information, and select Buy or Sell. Quick Trade calculates outcomes from public market prices and adjusts the internal account balance; it does not place external exchange orders.</div></details>
-          <details class="faq-item"><summary><strong>What are the trading fees?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Quick Trade does not submit external exchange orders, so external exchange trading fees do not apply to these results. Fees for connected services are shown before a transaction is confirmed.</div></details>
-        </div>
-        <div class="faq-category" data-faq-group="account"><h3>🔐 Account &amp; Security</h3>
-          <details class="faq-item"><summary><strong>How do I enable two-factor authentication (2FA)?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Visit Settings to review the security options currently available for your account. Further verification options will be announced when ready.</div></details>
-          <details class="faq-item"><summary><strong>What if I forget my password?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Choose password reset on the Register/Login page. Check spam if no email arrives.</div></details>
-          <details class="faq-item"><summary><strong>How do I verify my account?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Open Identity Verification to review the requested details and the current review status. Document images are not uploaded in this version; use the in-platform form for the available text details.</div></details>
-        </div>
-        <div class="faq-category" data-faq-group="funds"><h3>💱 Deposits &amp; Withdrawals</h3>
-          <details class="faq-item"><summary><strong>How long do deposits take?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">The Wallet displays deposit guidance and any configured destination details. Only send cryptocurrency when an active, verified address is displayed for the exact asset and network.</div></details>
-          <details class="faq-item"><summary><strong>What is the minimum withdrawal?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Review the withdrawal details shown in Wallet before submitting a request. An approved request still requires verified payout processing before cryptocurrency is sent.</div></details>
-          <details class="faq-item"><summary><strong>How can I deposit or withdraw funds?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Open Wallet and choose Deposit or Withdraw to review the available account workflow. Only send funds to an active, verified deposit address; withdrawal requests require separate payout processing.</div></details>
-        </div>
-        <div class="faq-category" data-faq-group="technical"><h3>🧰 Technical Support</h3>
-          <details class="faq-item"><summary><strong>I cannot register or sign in. What should I do?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Check your internet connection and sign-in details, then use password reset if needed. If you contact support, share the error message and page name, while keeping passwords and verification codes private.</div></details>
-          <details class="faq-item"><summary><strong>Market prices or charts are not loading. Why?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Refresh the Markets page and check your connection. Price updates depend on public data providers, so a short delay may occur. Contact support if the chart remains unavailable.</div></details>
-          <details class="faq-item"><summary><strong>How do I contact technical support?</strong><span class="faq-chevron" aria-hidden="true">⌄</span></summary><div class="muted tiny faq-answer">Open Support and start a private chat with the Onchain team.</div></details>
-        </div>
-        <p id="faqNoResults" class="muted tiny hidden">No FAQs match your search. Try another keyword or select All.</p>
-      </section>
-    </div>
-      <section class="panel form-panel" id="support-guide-section" style="margin-top:16px"><h2>☷ Quick Guide</h2><div class="list-row"><div><strong>1. Create or access your account</strong><div class="muted tiny">Choose Register, enter your name and email, and follow the on-screen steps to create your personal account.</div></div></div><div class="list-row"><div><strong>2. Explore markets and charts</strong><div class="muted tiny">Explore Markets for public price information, then review market-linked Quick Trade outcomes.</div></div></div><div class="list-row"><div><strong>3. Review your wallet carefully</strong><div class="muted tiny">Use Wallet to review your account balances and available asset screens. External transfers and exchange orders require their respective verified services.</div></div></div><div class="list-row"><div><strong>4. Get help safely</strong><div class="muted tiny">Tell our support team which page you were using and describe the message you saw. Keep passwords, verification codes, private keys and recovery phrases private.</div></div></div></section>
+    <div class="page-title"><div><h1>Support</h1><div class="muted">Help and private support conversations.</div></div><span class="tag">SUPPORT</span></div>
+    <section class="panel" style="padding:16px"><h2>Onchain Assistant</h2><p class="muted">Open the Onchain Assistant from the Home page for platform guidance and private support conversations.</p></section>
   </section>
 </main>
 <footer class="oc-trust-footer" style="padding:30px 20px 100px;color:#c5d3e3;border-top:1px solid #17334e;background:linear-gradient(145deg,#071426,#040b17)">
@@ -8378,6 +8277,7 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
  if(!closeBtn){
   closeBtn=document.createElement('button');closeBtn.type='button';closeBtn.className='primary oc-close-trade';closeBtn.textContent='Close trade';
   closeBtn.addEventListener('click',function(){
+   const resultBoard=$('timedResultBoard');if(resultBoard){resultBoard.dataset.dismissed='true';resultBoard.hidden=true;resultBoard.style.display='none';}
    document.body.classList.remove('oc-trade-overlay-open');
    form.classList.remove('oc-stage-config','oc-stage-running','oc-stage-complete','oc-orderbook-confirm-step','hidden');
    const directionSummary=$('timedDirectionSummary');if(directionSummary)directionSummary.hidden=true;
