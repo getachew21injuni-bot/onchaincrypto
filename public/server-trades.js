@@ -210,6 +210,12 @@
     const amount = Number($("timedStake")?.value || 0);
     const direction = $("timedUpBtn")?.getAttribute("aria-pressed") === "true" ? "up" :
       $("timedDownBtn")?.getAttribute("aria-pressed") === "true" ? "down" : "";
+    if (!symbol) { showMessage("Choose a trading pair before confirming.", true); return; }
+    if (!Number.isFinite(amount) || amount <= 0) {
+      showMessage("Enter a valid trade amount before confirming.", true);
+      window.ocValidateQuickTradeForm?.();
+      return;
+    }
     if (!direction) { showMessage("Choose Buy or Sell before confirming.", true); return; }
     const confirm = $("timedConfirmBtn");
     if (creatingTrade) return;
@@ -231,7 +237,8 @@
       countdownTimer = null;
       if ($("timedCountdown")) $("timedCountdown").textContent = "—";
       for (const id of ["timedUpBtn","timedDownBtn"]) if ($(id)) $(id).disabled = false;
-      if (confirm) confirm.disabled = false;
+      if (typeof window.ocValidateQuickTradeForm === "function") window.ocValidateQuickTradeForm();
+      else if (confirm) confirm.disabled = false;
       showMessage(error.message || "The server could not start this trade.", true);
     } finally {
       creatingTrade = false;
