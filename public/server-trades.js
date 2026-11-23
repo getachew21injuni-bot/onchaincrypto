@@ -120,6 +120,7 @@
     if (!trade) return;
     if (countdownTimer) clearInterval(countdownTimer);
     countdownTimer = null;
+    const completedActiveTrade = activeTrade;
     activeTrade = null;
     const form = $("timedPaperTrade");
     form?.classList.remove("oc-stage-config", "oc-stage-running", "oc-stage-error");
@@ -130,7 +131,7 @@
     const amountUsd = Number(trade.amountUSDT || trade.amount || 0);
     const direction = trade.side === "buy" ? "up" : "down";
     const tradeKeyForNotice = trade.tradeId || trade.id;
-    const notifyThisWin = pnl > 0 && Boolean(activeTrade && (activeTrade.tradeId === tradeKeyForNotice || activeTrade.id === tradeKeyForNotice));
+    const notifyThisWin = pnl > 0 && Boolean(completedActiveTrade && (completedActiveTrade.tradeId === tradeKeyForNotice || completedActiveTrade.id === tradeKeyForNotice));
     const won = pnl > 0, lost = pnl < 0;
     const outcome = won ? "WIN +" + money(Math.abs(pnl)) + " USDT" : lost ? "LOSS -" + money(Math.abs(pnl)) + " USDT" : "EVEN · 0.00 USDT";
     const completed = parseTime(trade.completedAt || trade.time);
