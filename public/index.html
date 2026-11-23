@@ -1834,7 +1834,7 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
         <div class="content-grid"><div><label id="quickBalanceLabel">Available trade balance</label><div class="card"><div class="big" id="quickAvailableBalance">0.00 USDT</div><div class="muted tiny"></div></div><div id="quickMinimumAccess" class="muted tiny" aria-live="polite" style="margin:8px 0 12px"></div><label for="timedStake" id="timedStakeLabel">Trade amount (USDT)</label><div class="oc-trade-amount-row"><input id="timedStake" class="field" type="number" min="100" step="0.01" placeholder="Enter amount"><button type="button" id="timedStakeAll" class="secondary" hidden>All</button></div>
         <!-- Internal plan/expiry are calculated silently; no level list or auto-selection labels are shown to customers. --><select id="timedPlan" class="field" style="display:none" aria-hidden="true" tabindex="-1"><option value="12" data-min="100" data-max="5000">Level 1</option><option value="15" data-min="5000" data-max="10000">Level 2</option><option value="18" data-min="10000" data-max="25000">Level 3</option><option value="21" data-min="25000" data-max="50000">Level 4</option><option value="24" data-min="50000" data-max="100000">Level 5</option><option value="27" data-min="100000" data-max="unlimited">Level 6</option></select>
         <div class="card" style="margin:10px 0"><div class="label">Estimated profit (USDT)</div><div class="big green" id="quickEstimatedProfit">0.00 USDT</div><div class="muted tiny" id="quickPlanNote"></div></div>
-        <select id="timedDuration" class="field" style="display:none" aria-hidden="true" tabindex="-1"><option value="30">30 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="120">120 seconds</option><option value="180">180 seconds</option><option value="270">270 seconds</option><option value="360">360 seconds</option></select>
+        <label for="timedDuration">Trade duration</label><select id="timedDuration" class="field"><option value="30">30 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="120">2 minutes</option><option value="180">3 minutes</option><option value="270">4 minutes 30 seconds</option><option value="360">6 minutes</option></select>
         <label>Trade direction</label><div class="two-buttons" id="timedDirectionButtons"><button type="button" class="buy" id="timedUpBtn" aria-pressed="false">↗ Buy</button><button type="button" class="sell" id="timedDownBtn" aria-pressed="false">↘ Sell</button></div><div id="timedDirectionSummary" hidden style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0;padding:12px 14px;border:1px solid #167c58;border-radius:10px;background:#0c2a25;color:#d7fff0"><span class="muted tiny">Selected direction</span><strong id="timedDirectionLabel">—</strong></div><div class="two-buttons" style="margin-top:10px"><button type="button" class="primary" id="timedConfirmBtn" disabled>Confirm Trade</button><button type="button" class="secondary" id="timedCancelBtn">Cancel</button></div>
         <p class="muted tiny"></p></div>
         <div class="cards"><div class="card"><div class="label">Trading pair</div><div class="big" id="timedPair">BTC / USDT</div></div><div class="card"><div class="label">Entry price</div><div class="big" id="timedEntryPrice">—</div></div><div class="card"><div class="label">Time remaining</div><div class="big yellow" id="timedCountdown">00:30</div></div></div></div>
@@ -12569,3 +12569,40 @@ html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#1720
 
 </body>
 </html>
+
+
+<style id="oc-clean-white-trade-board">
+/* Clean, readable Trade information board. Scoped to Trade; trading logic unchanged. */
+#page-trade #timedPaperTrade,
+#page-trade #liveOrderBookPanel{background:#fff!important;color:#172033!important;border:1px solid #e2e8f0!important;border-radius:14px!important;box-shadow:0 5px 20px rgba(15,23,42,.06)!important}
+#page-trade #timedPaperTrade .section-head h2,
+#page-trade #timedPaperTrade h3{color:#172033!important}
+#page-trade #timedPaperTrade .form-panel{background:#fff!important;color:#172033!important}
+#page-trade #timedPaperTrade label{display:block!important;color:#334155!important;font-weight:650!important;margin:12px 0 6px!important}
+#page-trade #timedPaperTrade input,
+#page-trade #timedPaperTrade select,
+#page-trade #timedPaperTrade .field{display:block!important;background:#fff!important;color:#172033!important;border:1px solid #cbd5e1!important;border-radius:9px!important;min-height:44px;box-shadow:none!important}
+#page-trade #timedPaperTrade input:focus,
+#page-trade #timedPaperTrade select:focus{outline:2px solid #93c5fd!important;border-color:#2563eb!important}
+#page-trade #timedPaperTrade .card,
+#page-trade #timedPaperTrade .mini-card{background:#f8fafc!important;color:#172033!important;border:1px solid #e2e8f0!important;border-radius:11px!important;box-shadow:none!important}
+#page-trade #timedPaperTrade .label,
+#page-trade #timedPaperTrade .muted{color:#64748b!important}
+#page-trade #timedPaperTrade .big{color:#172033!important}
+#page-trade #timedPaperTrade #timedCountdown{color:#b45309!important;font-weight:800}
+#page-trade #timedPaperTrade #quickEstimatedProfit,
+#page-trade #timedPaperTrade #timedPnl{color:#15803d!important;font-weight:800}
+#page-trade #timedPaperTrade .list-row:has(#timedEntryDetail),
+#page-trade #timedPaperTrade .list-row:has(#timedEndPriceDetail){display:flex!important}
+#page-trade #timedPaperTrade .chart-wrap,
+#page-trade #timedPaperTrade #timedTradeChart,
+#page-trade #timedPaperTrade canvas{display:none!important}
+#page-trade #timedPaperTrade .oc-trade-result-board{background:#fff!important;color:#172033!important;border:1px solid #dbe3ee!important;box-shadow:0 5px 20px rgba(15,23,42,.07)!important}
+#page-trade #timedPaperTrade .oc-trade-result-board div:has(> #timedBoardEntry),
+#page-trade #timedPaperTrade .oc-trade-result-board div:has(> #timedBoardExit){display:block!important}
+#page-trade #timedPaperTrade #timedBoardPnlChart{display:none!important}
+#page-trade #timedPaperTrade #timedBoardProfitLoss{font-size:30px!important;color:#15803d!important}
+#page-trade #timedPaperTrade #timedUpBtn{background:#15803d!important;color:#fff!important}
+#page-trade #timedPaperTrade #timedDownBtn{background:#dc2626!important;color:#fff!important}
+@media(max-width:600px){#page-trade #timedPaperTrade .cards{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}#page-trade #timedPaperTrade .card{padding:11px!important}}
+</style>
