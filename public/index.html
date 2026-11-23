@@ -3118,7 +3118,7 @@ $("exportUserDataBtn").addEventListener("click",()=>{const data={exportedAt:new 
 
 // Profile saving is handled once by the Firebase module below.
 
- document.getElementById("timedBoardClose")?.addEventListener("click",()=>{const form=document.getElementById("timedPaperTrade"),board=document.getElementById("timedResultBoard");if(board){board.hidden=true;board.style.display="none";}if(form){form.classList.remove("oc-stage-complete","oc-stage-running","oc-stage-error");form.classList.add("oc-stage-config");}pendingTimedDirection=null;for(const id of ["timedUpBtn","timedDownBtn"]){const button=document.getElementById(id);if(button){button.disabled=false;button.setAttribute("aria-pressed","false");}}const confirm=document.getElementById("timedConfirmBtn");if(confirm)confirm.disabled=true;const result=document.getElementById("timedResult");if(result){result.className="muted tiny";result.textContent="Trade completed · Your Onchain wallet has been updated.";}});
+ document.getElementById("timedBoardClose")?.addEventListener("click",()=>{const form=document.getElementById("timedPaperTrade"),board=document.getElementById("timedResultBoard");if(board){board.dataset.dismissed="true";board.hidden=true;board.style.display="none";}if(form){form.classList.remove("oc-stage-complete","oc-stage-running","oc-stage-error");form.classList.add("oc-stage-config");}pendingTimedDirection=null;for(const id of ["timedUpBtn","timedDownBtn"]){const button=document.getElementById(id);if(button){button.disabled=false;button.setAttribute("aria-pressed","false");}}const confirm=document.getElementById("timedConfirmBtn");if(confirm)confirm.disabled=true;const result=document.getElementById("timedResult");if(result){result.className="muted tiny";result.textContent="Trade completed · Your Onchain wallet has been updated.";}});
 
  renderWallet();loadMarket();setInterval(loadMarket,120000);
  document.addEventListener("visibilitychange",()=>{if(!document.hidden&&(!window.ocMarketLastSuccess||Date.now()-window.ocMarketLastSuccess>60000))loadMarket()});
@@ -8349,7 +8349,7 @@ body.oc-trade-overlay-open #timedPaperTrade{z-index:10050!important}
   if(typeof window.showPage==='function')window.showPage('trade');
   form.classList.remove('hidden','oc-stage-running','oc-stage-complete');
   form.classList.add('oc-stage-config');document.body.classList.add('oc-trade-overlay-open');
-  const board=$('timedResultBoard');if(board)board.style.display='none';
+  const board=$('timedResultBoard');if(board){delete board.dataset.dismissed;board.hidden=false;board.style.display='none';}
   setAssetFromActivePair();
   form.classList.add('oc-orderbook-confirm-step');
   const directionLabel=$('timedDirectionLabel'),directionSummary=$('timedDirectionSummary');
@@ -12627,5 +12627,6 @@ html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#1720
 #page-trade #timedPaperTrade #timedResultBoard #timedBoardProfitLoss{background:transparent!important;color:#263238!important}
 </style>
 
+<style id="oc-trade-summary-dismissal-guard">#page-trade #timedPaperTrade #timedResultBoard[data-dismissed="true"]{display:none!important;visibility:hidden!important;max-height:0!important;overflow:hidden!important;}</style>
 </body>
 </html>
