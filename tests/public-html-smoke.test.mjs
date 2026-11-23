@@ -98,7 +98,8 @@ test("public copy uses neutral Quick Trade wording and keeps transaction disclos
   }
   assert.ok(html.includes("Quick Trade calculates outcomes from public market prices"));
   assert.ok(html.includes("it does not place external exchange orders"));
-  assert.ok(html.includes("active, verified address is displayed for the exact asset and network"));
+  assert.ok(html.includes("Deposit address not configured"));
+  assert.ok(html.includes("Deposit address setup is required for this asset."));
 });
 
 test("authentication navigation controls have one click handler each", () => {
@@ -190,7 +191,8 @@ test("Quick Trade uses concise positive copy and its result Close button restore
   assert.ok(html.includes("Live trades · Automatic wallet updates."));
   assert.ok(html.includes('form.classList.remove("oc-stage-complete","oc-stage-running","oc-stage-error");form.classList.add("oc-stage-config");'));
   assert.ok(html.includes('document.getElementById("timedBoardClose")?.addEventListener("click"'));
-  assert.ok(html.includes('if(board){board.hidden=true;board.style.display="none";}'));
+  assert.ok(html.includes("board.dataset.dismissed='true'"));
+  assert.ok(html.includes("board.hidden=true;board.style.display='none'"));
 });
 
 test("Quick Trade uses the external server-owned trade adapter", () => {
