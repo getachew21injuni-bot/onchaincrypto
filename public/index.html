@@ -2314,10 +2314,39 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
   </section>
 
   <section id="page-support" class="hidden">
-    <div class="page-title"><div><h1>Support</h1><div class="muted">Contact our support team and follow replies in Notifications.</div></div><span class="tag">SUPPORT</span></div>
-    <section class="panel" style="padding:16px"><h2>Talk to an agent</h2><p class="muted">Send a private message to the Onchain support team. Continue the conversation here and receive an in-app notification when Admin replies.</p><button id="oc-support-agent-entry" class="primary" type="button">Talk to an agent</button></section>
+    <div class="page-title"><div><h1>Support</h1><div class="muted">Send a support request or talk privately with an Onchain agent. Follow replies in your conversations and Notifications.</div></div><span class="tag">SUPPORT</span></div>
+    <section class="panel" style="padding:16px;margin-bottom:16px">
+      <h2>Talk to an agent</h2>
+      <p class="muted">Open the Onchain Assistant, choose Talk to an agent, and send a private message to our support team. You can continue the conversation and receive notifications when Admin replies.</p>
+      <button id="oc-support-agent-entry" class="primary" type="button">Talk to an agent</button>
+    </section>
+    <section class="panel form-panel" id="support-ticket-section">
+      <h2>Send a support request</h2>
+      <p class="muted">Send a private message to the Onchain team. Replies stay in your account.</p>
+      <label for="supportTopic">What do you need help with?</label>
+      <select id="supportTopic" class="field">
+        <option>Account registration</option><option>Sign-in problem</option><option>Verification problem</option><option>Password reset</option><option>Deposit or withdrawal</option><option>Trade or market issue</option><option>Website issue</option><option>Other question</option>
+      </select>
+      <label for="supportSubject">Subject</label>
+      <input id="supportSubject" class="field" maxlength="120" placeholder="Briefly describe the problem">
+      <label for="supportDetails">Message</label>
+      <textarea id="supportDetails" class="field" rows="5" maxlength="3000" placeholder="Describe what happened. Do not include your password, verification code, private key or recovery phrase."></textarea>
+      <button class="primary full" id="sendSupportEmail" type="button">Send message</button>
+      <p id="supportMessage" class="muted tiny" aria-live="polite">Sign in to send a private support request and view replies.</p>
+      <div id="ocMySupportTickets" style="margin-top:18px;border-top:1px solid var(--line);padding-top:16px">
+        <div class="section-head"><h2>My support conversations</h2><span class="muted tiny">Private inbox</span></div>
+        <div id="ocMySupportTicketList" class="muted tiny">Sign in to view your support conversations.</div>
+        <div id="ocMySupportConversation" class="panel" style="padding:12px;margin-top:12px">
+          <p class="muted tiny">Select a conversation to read replies.</p>
+        </div>
+        <label for="ocSupportReplyText">Reply to support</label>
+        <textarea id="ocSupportReplyText" class="field" rows="3" maxlength="3000" placeholder="Write a reply. Never include passwords, codes or wallet recovery phrases."></textarea>
+        <button id="ocSupportReplySend" class="secondary full" type="button">Send reply</button>
+        <p id="ocSupportReplyStatus" class="muted tiny" aria-live="polite"></p>
+      </div>
+    </section>
   </section>
-</main>
+  </main>
 <footer class="oc-trust-footer" style="padding:30px 20px 100px;color:#c5d3e3;border-top:1px solid #17334e;background:linear-gradient(145deg,#071426,#040b17)">
   <div style="max-width:1120px;margin:0 auto">
     <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:26px 38px">
@@ -6946,10 +6975,8 @@ byId("sendSupportEmail")?.addEventListener("click",async()=>{
  if(!details){setText("supportMessage","Please describe the issue before sending.");byId("supportDetails")?.focus();return;}
  const finalSubject=(topic+": "+subject).slice(0,100),button=byId("sendSupportEmail");button.disabled=true;setText("supportMessage","Sending your request securely…");
  try{
-  const ticketRef=doc(collection(db,"supportTickets")),messageRef=doc(collection(db,"supportTickets",ticketRef.id,"messages")),batch=writeBatch(db);
-  batch.set(ticketRef,{ownerUid:currentUser.uid,customerEmail:currentUser.email||"",customerName:currentUser.displayName||"",subject:finalSubject,status:"open",createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:details,source:"in-app"});
-  batch.set(messageRef,{senderUid:currentUser.uid,senderRole:"customer",senderName:currentUser.displayName||currentUser.email||"Customer",text:details,createdAt:serverTimestamp()});
-  await batch.commit();byId("supportSubject").value="";byId("supportDetails").value="";setText("supportMessage","Your support request is saved. You can read replies in My support conversations below.");
+  const ticketRef=await addDoc(collection(db,"supportTickets"),{ownerUid:currentUser.uid,customerEmail:currentUser.email||"",customerName:currentUser.displayName||"",subject:finalSubject,status:"open",createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:details,source:"in-app"});
+  await addDoc(collection(db,"supportTickets",ticketRef.id,"messages"),{senderUid:currentUser.uid,senderRole:"customer",senderName:currentUser.displayName||currentUser.email||"Customer",text:details,createdAt:serverTimestamp()});byId("supportSubject").value="";byId("supportDetails").value="";setText("supportMessage","Your support request is saved. You can read replies in My support conversations below.");
  }catch(error){console.error("In-app support ticket submission failed:",error);setText("supportMessage","Could not send your request ("+(error.code||"connection error")+"). Please try again.");}
  finally{button.disabled=false;}
 });
