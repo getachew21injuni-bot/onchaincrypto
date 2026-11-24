@@ -24,6 +24,16 @@ test("Admin activity records signed-in page views, button clicks, and every rest
   assert.ok(serverTrades.includes('"quick-trade-completed-" + completedActivityId'), "Trade completion events must use a stable event key to avoid duplicate records across reloads");
 });
 
+
+test("Admin Trades view uses the secure administrator-only Worker endpoint and shows live status and P/L", () => {
+  assert.ok(tradeWorker.includes("async function adminTradeMonitor(env, claims)"), "Worker must expose an administrator-only trade monitor");
+  assert.ok(tradeWorker.includes('url.pathname === "/v1/admin/trades"'), "Worker must expose the Admin trade read route");
+  assert.ok(tradeWorker.includes('admins.includes(email)'), "Worker must independently authorize the configured admin email");
+  assert.ok(admin.includes("window.adminGetTrades=async function"), "Admin Trades view must load live server trade data");
+  assert.ok(admin.includes("NOT TRADING") && admin.includes("TRADING"), "Admin must see whether each registered user has an active trade");
+  assert.ok(admin.includes("Profit / Loss") && admin.includes("Active trades now"), "Admin must see active trades and completed profit/loss results");
+});
+
 test("all inline classic JavaScript parses", () => {
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
   const failures = [];
