@@ -132,11 +132,12 @@
     const amountUsd = Number(trade.amountUSDT || trade.amount || 0);
     const completedActivityId = String(trade.tradeId || trade.id || "");
     const activeTradeId = String(completedActiveTrade?.tradeId || completedActiveTrade?.id || "");
-    if (completedActivityId && completedActivityId === activeTradeId && !activityCompletedTradeIds.has(completedActivityId)) {
+    if (completedActivityId && !activityCompletedTradeIds.has(completedActivityId)) {
       activityCompletedTradeIds.add(completedActivityId);
       window.ocRecordActivity?.("trade", "Quick Trade completed · " + String(trade.symbol || "").toUpperCase(),
         money(Number(trade.amount || trade.amountFunding || 0)) + " · " + (pnl >= 0 ? "+" : "-") + money(Math.abs(pnl)) + " USDT P/L",
-        pnl > 0 ? "Completed · Win" : pnl < 0 ? "Completed · Loss" : "Completed · Even");
+        pnl > 0 ? "Completed · Win" : pnl < 0 ? "Completed · Loss" : "Completed · Even",
+        "quick-trade-completed-" + completedActivityId);
     }
     const direction = trade.side === "buy" ? "up" : "down";
     const tradeKeyForNotice = trade.tradeId || trade.id;
