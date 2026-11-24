@@ -2404,13 +2404,13 @@ if(localStorage.getItem("oc_demo_credit_10000_v1")==="granted"){
 // Preserve existing wallet balances and activity. Automatic first-load resets can erase locally stored account data.
 function readActivity(){try{return JSON.parse(localStorage.getItem("oc_activity_history")||"[]")}catch(e){return []}}
 window.__ocPendingUserActivityEvents=window.__ocPendingUserActivityEvents||[];
-function recordActivity(type,title,details,status="Recorded"){
+function recordActivity(type,title,details,status="Recorded",eventKey=""){
  const user=window.ocFirebaseAuth?.currentUser||window.onchaincryptoCurrentUser||null;
  const event={type,title,details,status,time:new Date().toISOString()};
  const items=readActivity();items.unshift({id:Date.now()+"-"+Math.random().toString(36).slice(2,7),...event});
  localStorage.setItem("oc_activity_history",JSON.stringify(items.slice(0,1000)));
  if(user?.uid){
-  window.__ocPendingUserActivityEvents.push({uid:user.uid,email:String(user.email||"").slice(0,180),...event});
+  window.__ocPendingUserActivityEvents.push({uid:user.uid,email:String(user.email||"").slice(0,180),...event,eventKey:String(eventKey||"").slice(0,140)});
   try{window.dispatchEvent(new CustomEvent("oc-user-activity"))}catch(e){}
  }
  renderActivityHistory();
@@ -12271,7 +12271,7 @@ body:not(.oc-visitor-mode):not(.oc-auth-screen):not(.oc-logged-out):has(#page-ho
 import { getApps } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const app=getApps()[0];
 if(app){
  const auth=getAuth(app),db=getFirestore(app);
@@ -12284,16 +12284,21 @@ if(app){
    while(queue.length&&auth.currentUser){
     const item=queue[0],user=auth.currentUser;
     if(!item?.uid||item.uid!==user.uid){queue.shift();continue;}
-    const allowed=["trade","deposit","withdraw","convert","transfer","page_view","watchlist","profile_update","kyc","support","activity"];
+    const allowed=["trade","deposit","withdraw","convert","transfer","page_view","button_click","watchlist","profile_update","kyc","support","activity"];
     try{
-     await addDoc(collection(db,"userActivityEvents"),{
+     const payload={
       uid:item.uid,email:String(item.email||user.email||"").slice(0,180),
       type:allowed.includes(item.type)?item.type:"activity",
       title:String(item.title||"User activity").slice(0,180),
       details:String(item.details||"").slice(0,1000),
       status:String(item.status||"Recorded").slice(0,80),
       createdAt:serverTimestamp()
-     });
+     };
+     if(item.eventKey){
+      const key=String(item.eventKey).replace(/[^A-Za-z0-9_-]/g,"").slice(0,140);
+      if(key)await setDoc(doc(db,"userActivityEvents",key),payload,{merge:true});
+      else await addDoc(collection(db,"userActivityEvents"),payload);
+     }else await addDoc(collection(db,"userActivityEvents"),payload);
      queue.shift();
     }catch(error){
      console.warn("User activity sync unavailable:",error.code||error);
@@ -12303,7 +12308,7 @@ if(app){
   }finally{flushing=false;}
  }
  window.addEventListener("oc-user-activity",()=>{void flushUserActivity()});
- onAuthStateChanged(auth,user=>{if(user)void flushUserActivity()});
+ onAuthStateChanged(auth,user=>{if(user){void flushUserActivity();try{window.dispatchEvent(new CustomEvent("oc-user-auth-ready"));}catch(_){}}});
 }
 </script>
 
@@ -12641,5 +12646,43 @@ html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#1720
 }
 </style>
 <style id="oc-trade-summary-dismissal-guard">#page-trade #timedPaperTrade #timedResultBoard[data-dismissed="true"]{display:none!important;visibility:hidden!important;max-height:0!important;overflow:hidden!important;}</style>
+<script id="oc-complete-user-activity-tracking">
+(function(){
+ "use strict";
+ if(window.__ocCompleteActivityTracking)return;
+ window.__ocCompleteActivityTracking=true;
+ function activeUser(){return window.ocFirebaseAuth?.currentUser||window.onchaincryptoCurrentUser||null;}
+ function activePage(){
+  const section=[...document.querySelectorAll("main>section[id^='page-']")].find(el=>!el.classList.contains("hidden"));
+  return section?section.id.replace(/^page-/,""):"";
+ }
+ function safeLabel(el){
+  const raw=el.getAttribute("aria-label")||el.getAttribute("title")||el.innerText||el.textContent||el.id||el.getAttribute("data-page")||el.getAttribute("data-menu-page")||"Unnamed control";
+  return String(raw).replace(/\s+/g," ").trim().slice(0,120)||"Unnamed control";
+ }
+ function recordPage(page){
+  if(!page||page==="public-market"||page==="register"||!activeUser())return;
+  if(page===recordPage.last)return;
+  recordPage.last=page;
+  window.ocRecordActivity?.("page_view","Opened "+page.replace(/-/g," ").replace(/\b\w/g,c=>c.toUpperCase())+" page","Page opened by the signed-in user.","Page viewed");
+ }
+ const main=document.querySelector("main");
+ if(main&&typeof MutationObserver==="function"){
+  const observer=new MutationObserver(()=>recordPage(activePage()));
+  observer.observe(main,{subtree:true,attributes:true,attributeFilter:["class","hidden"]});
+  recordPage(activePage());
+ }
+ window.addEventListener("oc-user-auth-ready",()=>recordPage(activePage()));
+ window.addEventListener("click",event=>{
+  const control=event.target?.closest?.("button,a,[role='button']");
+  if(!control||!activeUser())return;
+  if(control.closest("#page-public-market")||control.closest("#page-register"))return;
+  const page=activePage();
+  const label=safeLabel(control);
+  const id=String(control.id||control.getAttribute("data-page")||control.getAttribute("data-menu-page")||"").slice(0,80);
+  window.ocRecordActivity?.("button_click","Clicked "+label,"Control: "+(id||"unnamed")+" · Page: "+(page||"unknown")+" · Click recorded; completion is tracked separately.","Clicked · outcome not verified");
+ },true);
+})();
+</script>
 </body>
 </html>
