@@ -75,6 +75,13 @@
 .list-row:has(#timedEndPriceDetail),
 {display:none!important;}
 /* User-facing cleanup: hide sample/demo label and alerts only. */
+.oc-visitor-demo-tag,
+[id*="demo-alert" i],[class*="demo-alert" i],
+[id*="demo-notice" i],[class*="demo-notice" i],
+[data-demo-alert],[data-demo-notice],
+[id*="practice-alert" i],[class*="practice-alert" i],
+[id*="simulated-alert" i],[class*="simulated-alert" i],
+[id*="paper-alert" i],[class*="paper-alert" i]{display:none!important;visibility:hidden!important}
 .oc-visitor-demo-tag{display:none!important}
 </style>
 <style>
