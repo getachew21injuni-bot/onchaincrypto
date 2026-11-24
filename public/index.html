@@ -12308,7 +12308,7 @@ if(app){
   }finally{flushing=false;}
  }
  window.addEventListener("oc-user-activity",()=>{void flushUserActivity()});
- onAuthStateChanged(auth,user=>{if(user)void flushUserActivity()});
+ onAuthStateChanged(auth,user=>{if(user){void flushUserActivity();try{window.dispatchEvent(new CustomEvent("oc-user-auth-ready"));}catch(_){}}});
 }
 </script>
 
@@ -12672,6 +12672,7 @@ html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#1720
   observer.observe(main,{subtree:true,attributes:true,attributeFilter:["class","hidden"]});
   recordPage(activePage());
  }
+ window.addEventListener("oc-user-auth-ready",()=>recordPage(activePage()));
  window.addEventListener("click",event=>{
   const control=event.target?.closest?.("button,a,[role='button']");
   if(!control||!activeUser())return;
