@@ -120,7 +120,7 @@
     if ($("timedAmountDetail")) $("timedAmountDetail").textContent = money(trade.amountFunding) + " " + (trade.fundingAsset || "USDT");
     if ($("timedEntryDetail")) $("timedEntryDetail").textContent = money(entry);
     if ($("timedStatusDetail")) $("timedStatusDetail").textContent = "RUNNING";
-    if ($("timedResult")) $("timedResult").textContent = "Trade running on the secure server" + (activeCount > 1 ? " · " + activeCount + " active trades" : "") + ". Live price samples and estimated P/L refresh automatically.";
+    if ($("timedResult")) $("timedResult").textContent = "Trade is active" + (activeCount > 1 ? " · " + activeCount + " active trades" : "") + ".";
     if (typeof window.drawTimedTradeGraph === "function") window.drawTimedTradeGraph(samples, entry);
     if (countdownTimer) clearInterval(countdownTimer);
     countdownTimer = setInterval(() => {
