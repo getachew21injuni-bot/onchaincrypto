@@ -124,6 +124,7 @@ test("unguarded event listeners only target elements present in the HTML", () =>
 test("Quick Trade confirmation validates the selected funding asset", () => {
   assert.ok(html.includes('window.ocValidateQuickTradeForm=validatePlan;'), "Expected one shared Quick Trade validator");
   assert.ok(html.includes('const funding=window.__ocTradeFundingCoin||"USDT";'), "Expected the selected funding asset");
+  assert.ok(html.includes('const fundingPrice=funding==="USDT"?1:Number(priceFor(funding)?.current_price||0);'), "USDT funding must use its fixed 1:1 quote and not depend on the market ticker list");
   assert.ok(html.includes("stake>fundingBalance+1e-10"), "Expected validation against the selected asset balance");
   assert.ok(html.includes('if(typeof window.ocValidateQuickTradeForm==="function")window.ocValidateQuickTradeForm();'), "Expected the secondary control to reuse the shared validator");
 });
