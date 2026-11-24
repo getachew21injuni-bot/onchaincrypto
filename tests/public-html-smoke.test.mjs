@@ -49,7 +49,10 @@ test("market, trade summary, and withdrawal validation elements are present", ()
   for (const id of ["marketRows", "priceChart", "timedTradeChart", "timedResultBoard", "timedBoardClose", "withdrawNetwork", "withdrawAddressCheck"]) {
     assert.ok(html.includes('id="' + id + '"') || html.includes("id='" + id + "'"), "Missing required element: " + id);
   }
-  assert.ok(!html.includes('id="timedBoardPnlChart"'), "The completed-trade profit graph must remain removed");
+  assert.ok(html.includes('id="timedBoardPnlChart"'), "The completed-trade profit graph must be present");
+  assert.ok(html.includes("function drawTimedPnlGraph("), "The completed-trade profit graph renderer must exist");
+  assert.ok(serverTrades.includes('"timedBoardPnlChart"'), "Server-confirmed settlement must draw the completed-trade graph");
+  assert.ok(serverTrades.includes("ocDismissedTradeResult"), "Closing a result must keep it dismissed after refresh");
   assert.ok(html.includes("data-api.binance.vision/api/v3/klines"), "Expected an independent chart-history fallback");
   assert.ok(html.includes("networksByAsset"), "Expected asset-specific withdrawal network rules");
 });
