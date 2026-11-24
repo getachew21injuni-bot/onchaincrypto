@@ -83,7 +83,7 @@ test("home quick actions remain visible without an auto-hide controller", () => 
   const end = html.indexOf('id="page-markets"', start);
   assert.ok(start >= 0 && end > start, "Expected home and market page sections");
   const home = html.slice(start, end);
-  const actions = [...home.matchAll(/class="quick-action(?:\\s+[^"]*)?"/g)];
+  const actions = [...home.matchAll(/class="quick-action(?:\s+[^"]*)?"/g)];
   assert.equal(actions.length, 9, "Expected nine Home actions");
   assert.ok(html.includes('#page-home > .panel:has(> .quick-action-grid) .quick-action:not(.oc-copy-trading-auth-only){display:flex!important;visibility:visible!important;opacity:1!important}'), "Home shortcuts must remain visible while preserving the Copy Trading sign-in restriction");
   assert.ok(!html.includes('id="oc-quick-actions-more-script"'), "The automatic Home shortcut hiding script must be removed");
