@@ -23,10 +23,26 @@ const safeNumber = n => Number.isFinite(Number(n)) ? Number(n) : 0;
 
 export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromFirestore }) {
   const docUrl = (collection, id) => `${ROOT}/${collection}/${encodeURIComponent(id)}`;
+  async function firestoreFailure(response, operation) {
+    const responseText = await response.text();
+    let firestoreError = {};
+    try { firestoreError = JSON.parse(responseText)?.error || {}; } catch (_) { /* Keep the HTTP status if Google returns non-JSON. */ }
+    const firestoreStatus = typeof firestoreError.status === "string" ? firestoreError.status : "";
+    const firestoreMessage = typeof firestoreError.message === "string" ? firestoreError.message.slice(0, 400) : "";
+    console.error("Firestore request rejected", {
+      operation,
+      httpStatus: response.status,
+      firestoreStatus,
+      firestoreMessage
+    });
+    return new Error(operation + " failed (HTTP " + response.status +
+      (firestoreStatus ? ", " + firestoreStatus : "") + ")" +
+      (firestoreMessage ? ": " + firestoreMessage : "."));
+  }
   async function readDoc(access, collection, id) {
     const response = await fetch(docUrl(collection, id), { headers: { authorization: "Bearer " + access } });
     if (response.status === 404) return null;
-    if (!response.ok) throw new Error("Firestore read failed for " + collection + ".");
+    if (!response.ok) throw await firestoreFailure(response, "Firestore read for " + collection);
     const raw = await response.json();
     return { data: fieldsFromFirestore(raw.fields), updateTime: raw.updateTime, name: raw.name };
   }
@@ -36,7 +52,7 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
       headers: { authorization: "Bearer " + access, "content-type": "application/json" },
       body: JSON.stringify({ structuredQuery })
     });
-    if (!response.ok) throw new Error("Firestore trade query failed.");
+    if (!response.ok) throw await firestoreFailure(response, "Firestore trade query");
     const rows = await response.json();
     return (Array.isArray(rows) ? rows : []).filter(x => x.document).map(x => {
       const d = x.document;
