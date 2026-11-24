@@ -13,6 +13,17 @@ const serverTrades = await readFile("public/server-trades.js", "utf8");
 const tradeEngine = await readFile("workers/onchainspro-wallet-api-v2/trade-engine.js", "utf8");
 const tradeWorker = await readFile("workers/onchainspro-wallet-api-v2/worker.js", "utf8");
 
+
+test("Admin activity records signed-in page views, button clicks, and every restored Quick Trade result once", () => {
+  assert.ok(html.includes('id="oc-complete-user-activity-tracking"'), "Expected one delegated user activity tracker");
+  assert.ok(html.includes('window.ocRecordActivity?.("page_view"'), "Authenticated page navigation must be recorded");
+  assert.ok(html.includes('window.ocRecordActivity?.("button_click"'), "Authenticated button clicks must be recorded");
+  assert.ok(html.includes('"button_click"'), "Firestore activity sync must accept button-click events");
+  assert.ok(admin.includes('<option value="button_click">Button clicks</option>'), "Admin must be able to filter button clicks");
+  assert.ok(serverTrades.includes('if (completedActivityId && !activityCompletedTradeIds.has(completedActivityId))'), "Restored completed trades must be logged even if this browser did not observe the running state");
+  assert.ok(serverTrades.includes('"quick-trade-completed-" + completedActivityId'), "Trade completion events must use a stable event key to avoid duplicate records across reloads");
+});
+
 test("all inline classic JavaScript parses", () => {
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
   const failures = [];
