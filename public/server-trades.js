@@ -146,11 +146,11 @@
     showMessage(outcome + " · " + trade.symbol + " · Result confirmed and saved by the server.");
     if (notifyThisWin) showWinNotification(trade);
     const board = $("timedResultBoard");
-    const tradeKey = trade.tradeId || trade.id;
+    const resultTradeKey = trade.tradeId || trade.id;
     let dismissed = false;
-    try { dismissed = Boolean(tradeKey && sessionStorage.getItem("ocDismissedTradeResult") === String(tradeKey)); } catch (_) {}
+    try { dismissed = Boolean(resultTradeKey && sessionStorage.getItem("ocDismissedTradeResult") === String(resultTradeKey)); } catch (_) {}
     if (board) {
-      board.dataset.tradeId = String(tradeKey || "");
+      board.dataset.tradeId = String(resultTradeKey || "");
       board.hidden = dismissed;
       board.style.display = dismissed ? "none" : "block";
       if ($("timedBoardOutcome")) { $("timedBoardOutcome").textContent = outcome; $("timedBoardOutcome").style.color = won ? "#07804b" : lost ? "#c53232" : "#586579"; }
