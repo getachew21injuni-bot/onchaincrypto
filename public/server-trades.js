@@ -12,6 +12,18 @@
   let lastCompletedTradeId = null;
   const tradeSamples = new Map();
 
+  function dismissedKey(tradeId) {
+    const uid = window.ocFirebaseAuth?.currentUser?.uid || "unknown";
+    return "oc-trade-result-dismissed:" + uid + ":" + String(tradeId || "");
+  }
+  function isResultDismissed(tradeId) {
+    if (!tradeId) return false;
+    try { return localStorage.getItem(dismissedKey(tradeId)) === "1"; } catch (_) { return false; }
+  }
+  function markResultDismissed(tradeId) {
+    if (!tradeId) return;
+    try { localStorage.setItem(dismissedKey(tradeId), "1"); } catch (_) {}
+  }
   function showWinNotification(trade) {
     const amount = Math.abs(Number(trade?.pnl));
     const symbol = String(trade?.symbol || "your asset").replace(/[^A-Za-z0-9._-]/g, "").slice(0, 20);
@@ -118,6 +130,15 @@
   }
   function renderCompleted(trade) {
     if (!trade) return;
+    const dismissedTradeId = trade.tradeId || trade.id;
+    if (isResultDismissed(dismissedTradeId)) {
+      lastCompletedTradeId = dismissedTradeId;
+      const board = $("timedResultBoard");
+      if (board) { board.dataset.dismissed = "true"; board.hidden = true; board.style.display = "none"; }
+      const form = $("timedPaperTrade");
+      if (form) { form.classList.remove("oc-stage-running", "oc-stage-complete", "oc-stage-error"); form.classList.add("oc-stage-config"); }
+      return;
+    }
     if (countdownTimer) clearInterval(countdownTimer);
     countdownTimer = null;
     const completedActiveTrade = activeTrade;
@@ -147,6 +168,9 @@
     if (notifyThisWin) showWinNotification(trade);
     const board = $("timedResultBoard");
     if (board) {
+      board.dataset.tradeId = trade.tradeId || trade.id || "";
+      board.dataset.dismissed = "false";
+      board.hidden = false;
       board.style.display = "block";
       if ($("timedBoardOutcome")) { $("timedBoardOutcome").textContent = outcome; $("timedBoardOutcome").style.color = won ? "#07804b" : lost ? "#c53232" : "#586579"; }
       if ($("timedBoardSummary")) $("timedBoardSummary").textContent = "Your trade is complete.";
@@ -244,6 +268,11 @@
       creatingTrade = false;
     }
   }
+
+  document.addEventListener("click", event => {
+    const close = event.target?.closest?.("#timedBoardClose");
+    if (close) { const board = $("timedResultBoard"); markResultDismissed(board?.dataset.tradeId || lastCompletedTradeId); }
+  }, true);
 
   // A running trade belongs to the server and cannot be cancelled by closing or
   // navigating away from the browser.
