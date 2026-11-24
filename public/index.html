@@ -1375,38 +1375,6 @@ body.oc-logged-out .oc-home-avatar-picker,body.oc-auth-screen .oc-home-avatar-pi
 </style>
 <style id="oc-user-notification-alert-style">.oc-notification-bell{position:relative;min-width:40px;min-height:40px;width:40px;display:inline-flex;align-items:center;justify-content:center;color:#eaf6ff!important;border:1px solid #438dff!important;background:rgba(35,136,237,.16)!important;box-shadow:0 0 12px rgba(35,136,237,.2)}.oc-notification-bell>span:first-child{font-size:19px;line-height:1}.oc-notification-count{position:absolute;top:3px;right:3px;display:block;width:9px;height:9px;min-width:9px;padding:0;border:2px solid #10243b;border-radius:50%;background:#f6465d;color:transparent;font-size:0;line-height:0}.oc-notification-count[hidden]{display:none!important}.oc-notification-bell.hidden{display:none!important}@media(max-width:700px){.oc-notification-bell{min-width:38px;min-height:38px;width:38px;padding:6px!important}}</style>
 
-<style id="oc-platform-button-colors">
-/* OnChainSpro semantic button colors: button surfaces only; layout and behavior remain unchanged. */
-button.primary:not(.oc-theme-toggle){background:#2563eb!important;color:#fff!important;border-color:#2563eb!important;box-shadow:0 5px 18px rgba(37,99,235,.22)}
-button.primary:not(.oc-theme-toggle):hover{background:#1d4ed8!important;border-color:#1d4ed8!important}
-button.secondary:not(.oc-theme-toggle):not(.oc-nav-control):not(.more-menu-trigger):not(.oc-notification-bell){background:#64748b!important;color:#fff!important;border-color:#64748b!important}
-button.secondary:not(.oc-theme-toggle):not(.oc-nav-control):not(.more-menu-trigger):not(.oc-notification-bell):hover{background:#475569!important;border-color:#475569!important}
-button.buy,[data-oc-market-alert="bullish"],[data-oc-review="approve"]{background:#16a34a!important;color:#fff!important;border-color:#16a34a!important}
-button.buy:hover,[data-oc-market-alert="bullish"]:hover,[data-oc-review="approve"]:hover{background:#15803d!important;border-color:#15803d!important}
-button.sell,[data-oc-market-alert="bearish"]{background:#e11d48!important;color:#fff!important;border-color:#e11d48!important}
-button.sell:hover,[data-oc-market-alert="bearish"]:hover{background:#be123c!important;border-color:#be123c!important}
-button.quick-action{color:#fff!important;border:1px solid transparent!important;box-shadow:0 5px 16px rgba(0,0,0,.16)}
-button.quick-action strong,button.quick-action small{color:#fff!important}
-button.quick-action .action-icon{background:rgba(255,255,255,.16)!important;color:#fff!important}
-button.quick-action[data-go="deposit"],button.wallet-action[data-wallet-action="deposit"]{background:#15803d!important;border-color:#15803d!important}
-button.quick-action[data-go="withdraw"],button.wallet-action[data-wallet-action="withdraw"]{background:#dc2626!important;border-color:#dc2626!important}
-button.quick-action[data-go="convert"],button.wallet-action[data-go="convert"]{background:#2563eb!important;border-color:#2563eb!important}
-button.quick-action[data-go="transfer"],button.wallet-action[data-wallet-action="transfer"]{background:#0891b2!important;border-color:#0891b2!important}
-button.quick-action[data-go="trade"]{background:#2563eb!important;border-color:#2563eb!important}
-button.quick-action[data-gold-trade="true"]{background:#d97706!important;border-color:#d97706!important}
-button.quick-action[data-go="copytrading"],button.secondary[data-go="copytrading"]{background:#7c3aed!important;border-color:#7c3aed!important;color:#fff!important}
-button.quick-action[data-go="markets"]{background:#0f766e!important;border-color:#0f766e!important}
-button.quick-action[data-go="history"],button.quick-action[data-go="profile"],button.quick-action[data-go="wallet"]{background:#64748b!important;border-color:#64748b!important}
-button.quick-action:hover{filter:brightness(.94)}
-#ocVisitorSignup,#ocHomeCreateAccount{background:#2563eb!important;color:#fff!important;border-color:#2563eb!important}
-#ocVisitorLogin,#ocHomeLogin{background:#475569!important;color:#fff!important;border-color:#475569!important}
-#settingsLogoutBtn{background:#b91c1c!important;color:#fff!important;border-color:#b91c1c!important}
-#ocOpenKycPage{background:#d97706!important;color:#fff!important;border-color:#d97706!important}
-#ocOpenKycPage:hover{background:#b45309!important;border-color:#b45309!important}
-#ocVisitorBuyButton{background:#16a34a!important;color:#fff!important;border-color:#16a34a!important}
-button:focus-visible{outline:2px solid #93c5fd!important;outline-offset:2px}
-</style>
-
 </head>
 <body>
 <header>
@@ -12727,67 +12695,94 @@ html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#1720
 })();
 </script>
 
-<style id="oc-platform-button-colors-final">
-/* Final semantic action colors. Keep these rules after page-specific styles so they win the cascade. */
-#page-home button.quick-action[data-go="deposit"],
-#page-markets button.quick-action[data-go="deposit"],
-#page-wallet button.wallet-action[data-wallet-action="deposit"]{
+
+<style id="oc-platform-button-colors-replacement">
+/* Semantic action colors — one final, high-specificity layer. CSS only; no layout or behavior changes. */
+html body #page-home .quick-action-grid button.quick-action[data-go="deposit"],
+html body #page-wallet button.wallet-action[data-wallet-action="deposit"]{
   background:#15803d!important;background-image:none!important;border:1px solid #15803d!important;color:#fff!important;
 }
-#page-home button.quick-action[data-go="withdraw"],
-#page-markets button.quick-action[data-go="withdraw"],
-#page-wallet button.wallet-action[data-wallet-action="withdraw"]{
+html body #page-home .quick-action-grid button.quick-action[data-go="withdraw"],
+html body #page-wallet button.wallet-action[data-wallet-action="withdraw"]{
   background:#dc2626!important;background-image:none!important;border:1px solid #dc2626!important;color:#fff!important;
 }
-#page-home button.quick-action[data-go="convert"],
-#page-markets button.quick-action[data-go="convert"],
-#page-wallet button.wallet-action[data-go="convert"]{
+html body #page-home .quick-action-grid button.quick-action[data-go="convert"],
+html body #page-wallet button.wallet-action[data-go="convert"]{
   background:#2563eb!important;background-image:none!important;border:1px solid #2563eb!important;color:#fff!important;
 }
-#page-home button.quick-action[data-go="transfer"],
-#page-markets button.quick-action[data-go="transfer"],
-#page-wallet button.wallet-action[data-wallet-action="transfer"]{
+html body #page-home .quick-action-grid button.quick-action[data-go="transfer"],
+html body #page-wallet button.wallet-action[data-wallet-action="transfer"]{
   background:#0891b2!important;background-image:none!important;border:1px solid #0891b2!important;color:#fff!important;
 }
-#page-home button.quick-action[data-go="deposit"] *,
-#page-home button.quick-action[data-go="withdraw"] *,
-#page-home button.quick-action[data-go="convert"] *,
-#page-home button.quick-action[data-go="transfer"] *,
-#page-markets button.quick-action[data-go="deposit"] *,
-#page-markets button.quick-action[data-go="withdraw"] *,
-#page-markets button.quick-action[data-go="convert"] *,
-#page-markets button.quick-action[data-go="transfer"] *,
-#page-wallet button.wallet-action[data-wallet-action="deposit"] *,
-#page-wallet button.wallet-action[data-wallet-action="withdraw"] *,
-#page-wallet button.wallet-action[data-go="convert"] *,
-#page-wallet button.wallet-action[data-wallet-action="transfer"]{color:#fff!important}
-#page-home button.quick-action[data-go="trade"]:not([data-gold-trade="true"]),
-#page-markets button.quick-action[data-go="trade"]:not([data-gold-trade="true"]){
-  background:#2563eb!important;background-image:none!important;border-color:#2563eb!important;color:#fff!important;
+html body #page-home .quick-action-grid button.quick-action[data-go="deposit"] *,
+html body #page-home .quick-action-grid button.quick-action[data-go="withdraw"] *,
+html body #page-home .quick-action-grid button.quick-action[data-go="convert"] *,
+html body #page-home .quick-action-grid button.quick-action[data-go="transfer"] *,
+html body #page-wallet button.wallet-action[data-wallet-action="deposit"] *,
+html body #page-wallet button.wallet-action[data-wallet-action="withdraw"] *,
+html body #page-wallet button.wallet-action[data-go="convert"] *,
+html body #page-wallet button.wallet-action[data-wallet-action="transfer"]{color:#fff!important}
+
+html body #page-home .quick-action-grid button.quick-action[data-go="trade"]:not([data-gold-trade="true"]){
+  background:#2563eb!important;background-image:none!important;border:1px solid #2563eb!important;color:#fff!important;
 }
-#page-home button.quick-action[data-gold-trade="true"]{
-  background:#d97706!important;background-image:none!important;border-color:#d97706!important;color:#fff!important;
+html body #page-home .quick-action-grid button.quick-action[data-gold-trade="true"]{
+  background:#d97706!important;background-image:none!important;border:1px solid #d97706!important;color:#fff!important;
 }
-#page-home button.quick-action[data-go="copytrading"],
-#page-home button.secondary[data-go="copytrading"]{
-  background:#7c3aed!important;background-image:none!important;border-color:#7c3aed!important;color:#fff!important;
+html body #page-home .quick-action-grid button.quick-action[data-go="copytrading"],
+html body #page-home .quick-action-grid button.quick-action[data-go="copy-trading"]{
+  background:#7c3aed!important;background-image:none!important;border:1px solid #7c3aed!important;color:#fff!important;
 }
-#page-home button.quick-action[data-go="markets"]{
-  background:#0f766e!important;background-image:none!important;border-color:#0f766e!important;color:#fff!important;
+html body #page-home .quick-action-grid button.quick-action[data-go="markets"]{
+  background:#0f766e!important;background-image:none!important;border:1px solid #0f766e!important;color:#fff!important;
 }
-#page-home button.quick-action[data-go="history"],
-#page-home button.quick-action[data-go="wallet"],
-#page-home button.quick-action[data-go="profile"]{
-  background:#64748b!important;background-image:none!important;border-color:#64748b!important;color:#fff!important;
+html body #page-home .quick-action-grid button.quick-action[data-go="history"],
+html body #page-home .quick-action-grid button.quick-action[data-home-history="true"],
+html body #page-home .quick-action-grid button.quick-action[data-go="wallet"],
+html body #page-home .quick-action-grid button.quick-action[data-go="profile"]{
+  background:#64748b!important;background-image:none!important;border:1px solid #64748b!important;color:#fff!important;
 }
-#ocVisitorSignup,#ocHomeCreateAccount{background:#2563eb!important;background-image:none!important;border-color:#2563eb!important;color:#fff!important}
-#ocVisitorLogin,#ocHomeLogin{background:#475569!important;background-image:none!important;border-color:#475569!important;color:#fff!important}
-#settingsLogoutBtn{background:#b91c1c!important;background-image:none!important;border-color:#b91c1c!important;color:#fff!important}
-#ocOpenKycPage{background:#d97706!important;background-image:none!important;border-color:#d97706!important;color:#fff!important}
-#ocVisitorBuyButton{background:#16a34a!important;background-image:none!important;border-color:#16a34a!important;color:#fff!important}
-#page-trade button.buy,#page-trade button[data-oc-book-direction="buy"]{background:#16a34a!important;background-image:none!important;border-color:#16a34a!important;color:#fff!important}
-#page-trade button.sell,#page-trade button[data-oc-book-direction="sell"]{background:#e11d48!important;background-image:none!important;border-color:#e11d48!important;color:#fff!important}
-#page-home button.quick-action:hover,#page-markets button.quick-action:hover,#page-wallet button.wallet-action:hover{filter:brightness(.94)}
+
+html body #ocVisitorSignup,html body #ocHomeCreateAccount{
+  background:#2563eb!important;background-image:none!important;border:1px solid #2563eb!important;color:#fff!important;
+}
+html body #ocVisitorLogin,html body #ocHomeLogin{
+  background:#475569!important;background-image:none!important;border:1px solid #475569!important;color:#fff!important;
+}
+html body #settingsLogoutBtn,html body #ocMenuLogoutBtn,html body #signOutBtn,html body #profileLogoutBtn{
+  background:#b91c1c!important;background-image:none!important;border:1px solid #b91c1c!important;color:#fff!important;
+}
+html body #ocOpenKycPage{
+  background:#d97706!important;background-image:none!important;border:1px solid #d97706!important;color:#fff!important;
+}
+html body #ocVisitorBuyButton{
+  background:#16a34a!important;background-image:none!important;border:1px solid #16a34a!important;color:#fff!important;
+}
+
+/* Trade direction buttons: outrank the older Trade-panel and order-book theme rules. */
+html body #page-trade #timedPaperTrade button.buy,
+html body #page-trade #timedPaperTrade #timedUpBtn,
+html body #page-trade #liveOrderBookPanel button.buy,
+html body #page-trade button[data-oc-book-direction="buy"]{
+  background:#16a34a!important;background-image:none!important;border:1px solid #16a34a!important;color:#fff!important;
+}
+html body #page-trade #timedPaperTrade button.sell,
+html body #page-trade #timedPaperTrade #timedDownBtn,
+html body #page-trade #liveOrderBookPanel button.sell,
+html body #page-trade button[data-oc-book-direction="sell"]{
+  background:#e11d48!important;background-image:none!important;border:1px solid #e11d48!important;color:#fff!important;
+}
+html body #page-trade #timedPaperTrade button.buy *,
+html body #page-trade #timedPaperTrade #timedUpBtn *,
+html body #page-trade #liveOrderBookPanel button.buy *,
+html body #page-trade button[data-oc-book-direction="buy"] *,
+html body #page-trade #timedPaperTrade button.sell *,
+html body #page-trade #timedPaperTrade #timedDownBtn *,
+html body #page-trade #liveOrderBookPanel button.sell *,
+html body #page-trade button[data-oc-book-direction="sell"] *{color:#fff!important}
+
+html body #page-home .quick-action-grid button.quick-action:hover,
+html body #page-wallet button.wallet-action:hover{filter:brightness(.94)}
 </style>
 
 </body>
