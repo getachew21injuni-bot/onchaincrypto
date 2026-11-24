@@ -12713,37 +12713,6 @@ html body #page-wallet #walletQuickActions > button.wallet-action:hover {
 
 
 <style id="oc-home-quick-actions-final-colors">
-/* Home Quick Actions: change button background and border only. Preserve all original text, icons, sizing, spacing and behavior. Trade Crypto remains unchanged. */
-html body #page-home .quick-action-grid > button.quick-action[data-go="deposit"]{
-  background:#d1fae5!important;background-image:none!important;border-color:#15803d!important;
-}
-html body #page-home .quick-action-grid > button.quick-action[data-go="withdraw"]{
-  background:#fee2e2!important;background-image:none!important;border-color:#dc2626!important;
-}
-html body #page-home .quick-action-grid > button.quick-action[data-go="convert"]{
-  background:#dbeafe!important;background-image:none!important;border-color:#2563eb!important;
-}
-html body #page-home .quick-action-grid > button.quick-action[data-gold-trade="true"]{
-  background:#fef3c7!important;background-image:none!important;border-color:#b7791f!important;
-}
-html body #page-home .quick-action-grid > button.quick-action[data-go="markets"]{
-  background:#ccfbf1!important;background-image:none!important;border-color:#0f766e!important;
-}
-html body #page-home .quick-action-grid > button.quick-action[data-home-history="true"]{
-  background:#e2e8f0!important;background-image:none!important;border-color:#64748b!important;
-}
-html body #page-home .quick-action-grid > button.quick-action[data-go="wallet"]{
-  background:#cffafe!important;background-image:none!important;border-color:#0891b2!important;
-}
-html body #page-home .quick-action-grid > button.quick-action[data-go="copytrading"]{
-  background:#ede9fe!important;background-image:none!important;border-color:#7c3aed!important;
-}
-</style>
-
-</body>
-</html>
-
-<style id="oc-home-quick-actions-final-colors">
 /* Home Quick Actions: one authoritative solid-color style. Preserve labels, symbols, sizing, spacing and behavior. Trade Crypto remains unchanged. */
 html body #page-home .quick-action-grid > button.quick-action[data-go="deposit"]{--action-color:#15803d!important;background:#15803d!important;background-image:none!important;border-color:#15803d!important;color:#fff!important}
 html body #page-home .quick-action-grid > button.quick-action[data-go="withdraw"]{--action-color:#dc2626!important;background:#dc2626!important;background-image:none!important;border-color:#dc2626!important;color:#fff!important}
@@ -12753,68 +12722,11 @@ html body #page-home .quick-action-grid > button.quick-action[data-go="markets"]
 html body #page-home .quick-action-grid > button.quick-action[data-home-history="true"]{--action-color:#64748b!important;background:#64748b!important;background-image:none!important;border-color:#64748b!important;color:#fff!important}
 html body #page-home .quick-action-grid > button.quick-action[data-go="wallet"]{--action-color:#0891b2!important;background:#0891b2!important;background-image:none!important;border-color:#0891b2!important;color:#fff!important}
 html body #page-home .quick-action-grid > button.quick-action[data-go="copytrading"]{--action-color:#7c3aed!important;background:#7c3aed!important;background-image:none!important;border-color:#7c3aed!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-go="deposit"] .action-icon,
-html body #page-home .quick-action-grid > button.quick-action[data-go="withdraw"] .action-icon,
-html body #page-home .quick-action-grid > button.quick-action[data-go="convert"] .action-icon,
-html body #page-home .quick-action-grid > button.quick-action[data-gold-trade="true"] .action-icon,
-html body #page-home .quick-action-grid > button.quick-action[data-go="markets"] .action-icon,
-html body #page-home .quick-action-grid > button.quick-action[data-home-history="true"] .action-icon,
-html body #page-home .quick-action-grid > button.quick-action[data-go="wallet"] .action-icon,
-html body #page-home .quick-action-grid > button.quick-action[data-go="copytrading"] .action-icon{color:#fff!important;background:rgba(255,255,255,.16)!important}
-html body #page-home .quick-action-grid > button.quick-action[data-go="deposit"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-go="deposit"] small,
-html body #page-home .quick-action-grid > button.quick-action[data-go="withdraw"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-go="withdraw"] small,
-html body #page-home .quick-action-grid > button.quick-action[data-go="convert"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-go="convert"] small,
-html body #page-home .quick-action-grid > button.quick-action[data-gold-trade="true"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-gold-trade="true"] small,
-html body #page-home .quick-action-grid > button.quick-action[data-go="markets"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-go="markets"] small,
-html body #page-home .quick-action-grid > button.quick-action[data-home-history="true"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-home-history="true"] small,
-html body #page-home .quick-action-grid > button.quick-action[data-go="wallet"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-go="wallet"] small,
-html body #page-home .quick-action-grid > button.quick-action[data-go="copytrading"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-go="copytrading"] small{color:#fff!important}
+html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]) .action-icon{color:#fff!important;background:rgba(255,255,255,.16)!important}
+html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]) strong,
+html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]) small{color:#fff!important}
 html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]):hover{filter:brightness(.94)}
 </style>
 
 </body>
 </html>
-<style id="oc-home-quick-actions-final-colors">
-/* Home Quick Actions: one authoritative solid-color style. Preserve labels, symbols, sizing, spacing and behavior. Trade Crypto remains unchanged. */
-html body #page-home .quick-action-grid > button.quick-action[data-go="deposit"]{--action-color:#15803d!important;background:#15803d!important;background-image:none!important;border-color:#15803d!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-go="withdraw"]{--action-color:#dc2626!important;background:#dc2626!important;background-image:none!important;border-color:#dc2626!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-go="convert"]{--action-color:#2563eb!important;background:#2563eb!important;background-image:none!important;border-color:#2563eb!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-gold-trade="true"]{--action-color:#b7791f!important;background:#b7791f!important;background-image:none!important;border-color:#b7791f!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-go="markets"]{--action-color:#0f766e!important;background:#0f766e!important;background-image:none!important;border-color:#0f766e!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-home-history="true"]{--action-color:#64748b!important;background:#64748b!important;background-image:none!important;border-color:#64748b!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-go="wallet"]{--action-color:#0891b2!important;background:#0891b2!important;background-image:none!important;border-color:#0891b2!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-go="copytrading"]{--action-color:#7c3aed!important;background:#7c3aed!important;background-image:none!important;border-color:#7c3aed!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-go="deposit"] .action-icon,
-html body #page-home .quick-action-grid > button.quick-action[data-go="withdraw"] .action-icon,
-html body #page-home .quick-action-grid > button.quick-action[data-go="convert"] .action-icon,
-html body #page-home .quick-action-grid > button.quick-action[data-gold-trade="true"] .action-icon,
-html body #page-home .quick-action-grid > button.quick-action[data-go="markets"] .action-icon,
-html body #page-home .quick-action-grid > button.quick-action[data-home-history="true"] .action-icon,
-html body #page-home .quick-action-grid > button.quick-action[data-go="wallet"] .action-icon,
-html body #page-home .quick-action-grid > button.quick-action[data-go="copytrading"] .action-icon{color:#fff!important;background:rgba(255,255,255,.16)!important}
-html body #page-home .quick-action-grid > button.quick-action[data-go="deposit"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-go="deposit"] small,
-html body #page-home .quick-action-grid > button.quick-action[data-go="withdraw"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-go="withdraw"] small,
-html body #page-home .quick-action-grid > button.quick-action[data-go="convert"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-go="convert"] small,
-html body #page-home .quick-action-grid > button.quick-action[data-gold-trade="true"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-gold-trade="true"] small,
-html body #page-home .quick-action-grid > button.quick-action[data-go="markets"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-go="markets"] small,
-html body #page-home .quick-action-grid > button.quick-action[data-home-history="true"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-home-history="true"] small,
-html body #page-home .quick-action-grid > button.quick-action[data-go="wallet"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-go="wallet"] small,
-html body #page-home .quick-action-grid > button.quick-action[data-go="copytrading"] strong,
-html body #page-home .quick-action-grid > button.quick-action[data-go="copytrading"] small{color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]):hover{filter:brightness(.94)}
-</style>
