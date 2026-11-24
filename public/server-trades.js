@@ -73,7 +73,7 @@
     form?.classList.remove("oc-stage-config", "oc-stage-complete", "oc-stage-error");
     form?.classList.add("oc-stage-running");
     const board = $("timedResultBoard");
-    if (board) board.style.display = "none";
+    if (board) { board.style.display = "none"; board.hidden = true; board.removeAttribute("data-dismissed"); }
     for (const id of ["timedUpBtn", "timedDownBtn"]) if ($(id)) $(id).disabled = true;
     if ($("timedConfirmBtn")) $("timedConfirmBtn").disabled = true;
     const started = parseTime(trade.startedAt), expires = parseTime(trade.expiresAt);
@@ -146,8 +146,13 @@
     showMessage(outcome + " · " + trade.symbol + " · Result confirmed and saved by the server.");
     if (notifyThisWin) showWinNotification(trade);
     const board = $("timedResultBoard");
+    const tradeKey = trade.tradeId || trade.id;
+    let dismissed = false;
+    try { dismissed = Boolean(tradeKey && sessionStorage.getItem("ocDismissedTradeResult") === String(tradeKey)); } catch (_) {}
     if (board) {
-      board.style.display = "block";
+      board.dataset.tradeId = String(tradeKey || "");
+      board.hidden = dismissed;
+      board.style.display = dismissed ? "none" : "block";
       if ($("timedBoardOutcome")) { $("timedBoardOutcome").textContent = outcome; $("timedBoardOutcome").style.color = won ? "#07804b" : lost ? "#c53232" : "#586579"; }
       if ($("timedBoardSummary")) $("timedBoardSummary").textContent = "Your trade is complete.";
       if ($("timedBoardPair")) $("timedBoardPair").textContent = trade.symbol + " / USDT · " + (direction === "up" ? "BUY" : "SELL");
@@ -167,7 +172,7 @@
     if (!lastSample || completed > lastSample.time) samples.push({ time: completed, price: exit });
     if (typeof window.drawTimedTradeGraph === "function") window.drawTimedTradeGraph(samples, entry);
     tradeSamples.delete(tradeKey);
-    if (typeof window.drawTimedPnlGraph === "function") window.drawTimedPnlGraph(samples, entry, amountUsd, direction, "timedBoardPnlChart", pnl);
+    if (!dismissed && typeof window.drawTimedPnlGraph === "function") window.drawTimedPnlGraph(samples, entry, amountUsd, direction, "timedBoardPnlChart", pnl);
   }
   async function refreshTrades(showErrors = false) {
     if (polling) return;
