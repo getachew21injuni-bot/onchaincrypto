@@ -129,6 +129,19 @@
     if ($("timedConfirmBtn")) $("timedConfirmBtn").disabled = true;
     const entry = Number(trade.entry), exit = Number(trade.price), pnl = Number(trade.pnl);
     const amountUsd = Number(trade.amountUSDT || trade.amount || 0);
+    const completedActivityId = String(trade.tradeId || trade.id || "");
+    if (completedActivityId) {
+      const userId = window.ocFirebaseAuth?.currentUser?.uid || "";
+      const marker = "oc_activity_trade_completed_" + userId + "_" + completedActivityId;
+      let alreadyLogged = false;
+      try { alreadyLogged = localStorage.getItem(marker) === "1"; } catch (_) {}
+      if (!alreadyLogged && userId) {
+        try { localStorage.setItem(marker, "1"); } catch (_) {}
+        window.ocRecordActivity?.("trade", "Quick Trade completed · " + String(trade.symbol || "").toUpperCase(),
+          money(Number(trade.amount || trade.amountFunding || 0)) + " · " + (pnl >= 0 ? "+" : "-") + money(Math.abs(pnl)) + " USDT P/L",
+          pnl > 0 ? "Completed · Win" : pnl < 0 ? "Completed · Loss" : "Completed · Even");
+      }
+    }
     const direction = trade.side === "buy" ? "up" : "down";
     const tradeKeyForNotice = trade.tradeId || trade.id;
     const notifyThisWin = pnl > 0 && Boolean(completedActiveTrade && (completedActiveTrade.tradeId === tradeKeyForNotice || completedActiveTrade.id === tradeKeyForNotice));
@@ -235,6 +248,9 @@
     try {
       const result = await request("/v1/trades", { method: "POST", body: { symbol, direction, amount, fundingAsset } });
       if (!result.trade || !result.tradeId) throw new Error("The server did not return a confirmed trade.");
+      window.ocRecordActivity?.("trade", "Quick Trade started · " + symbol + "/USDT",
+        money(amount) + " " + fundingAsset + " · " + direction.toUpperCase() + " · Trade " + result.tradeId,
+        "Running · Confirmed");
       renderRunning({ ...result.trade, tradeId: result.tradeId }, 1);
       await refreshTrades();
     } catch (error) {
