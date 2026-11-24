@@ -11,6 +11,7 @@
   let restoredUid = null;
   let lastCompletedTradeId = null;
   const tradeSamples = new Map();
+  const activityCompletedTradeIds = new Set();
 
   function showWinNotification(trade) {
     const amount = Math.abs(Number(trade?.pnl));
@@ -129,6 +130,14 @@
     if ($("timedConfirmBtn")) $("timedConfirmBtn").disabled = true;
     const entry = Number(trade.entry), exit = Number(trade.price), pnl = Number(trade.pnl);
     const amountUsd = Number(trade.amountUSDT || trade.amount || 0);
+    const completedActivityId = String(trade.tradeId || trade.id || "");
+    const activeTradeId = String(completedActiveTrade?.tradeId || completedActiveTrade?.id || "");
+    if (completedActivityId && completedActivityId === activeTradeId && !activityCompletedTradeIds.has(completedActivityId)) {
+      activityCompletedTradeIds.add(completedActivityId);
+      window.ocRecordActivity?.("trade", "Quick Trade completed · " + String(trade.symbol || "").toUpperCase(),
+        money(Number(trade.amount || trade.amountFunding || 0)) + " · " + (pnl >= 0 ? "+" : "-") + money(Math.abs(pnl)) + " USDT P/L",
+        pnl > 0 ? "Completed · Win" : pnl < 0 ? "Completed · Loss" : "Completed · Even");
+    }
     const direction = trade.side === "buy" ? "up" : "down";
     const tradeKeyForNotice = trade.tradeId || trade.id;
     const notifyThisWin = pnl > 0 && Boolean(completedActiveTrade && (completedActiveTrade.tradeId === tradeKeyForNotice || completedActiveTrade.id === tradeKeyForNotice));
@@ -235,6 +244,9 @@
     try {
       const result = await request("/v1/trades", { method: "POST", body: { symbol, direction, amount, fundingAsset } });
       if (!result.trade || !result.tradeId) throw new Error("The server did not return a confirmed trade.");
+      window.ocRecordActivity?.("trade", "Quick Trade started · " + symbol + "/USDT",
+        money(amount) + " " + fundingAsset + " · " + direction.toUpperCase() + " · Trade " + result.tradeId,
+        "Running · Confirmed");
       renderRunning({ ...result.trade, tradeId: result.tradeId }, 1);
       await refreshTrades();
     } catch (error) {
