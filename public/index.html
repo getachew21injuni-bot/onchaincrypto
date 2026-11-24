@@ -4442,7 +4442,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  function validatePlan(){
   const stake=Number($("timedStake")?.value||0);
   const funding=window.__ocTradeFundingCoin||"USDT";
-  const fundingPrice=Number(priceFor(funding)?.current_price||0);
+  const fundingPrice=funding==="USDT"?1:Number(priceFor(funding)?.current_price||0);
   const fundingBalance=funding==="USDT"?Number(state.balance||0):Number(state.holdings?.[funding]||0);
   const amount=stake*fundingPrice;
   const symbol=$("tradeAsset")?.value||"";
