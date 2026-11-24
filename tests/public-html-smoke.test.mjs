@@ -172,7 +172,9 @@ test("the floating assistant is restricted to signed-in Home", () => {
   assert.ok(supportChat.includes('btn.id="oc-support-button"'), "The assistant must create one launcher");
   assert.ok(supportChat.includes('box.id="oc-chat"'), "The assistant must create one chat panel");
   assert.ok(supportChat.includes("function botAnswer(q)"), "One shared knowledge engine must answer signed-in questions");
-  assert.ok(supportChat.includes("Welcome to Onchain! Ask about Markets"), "The assistant must show one welcome message");
+  assert.ok(supportChat.includes("Welcome to Onchain! 👋 Need help with deposits, withdrawals, KYC, trading or your wallet? Choose a topic or ask me a question."), "The assistant must show the short welcome message");
+  for (const label of ["Deposit","Withdraw","KYC","Wallet","Trading","Account help"]) assert.ok(supportChat.includes(">"+label+"</button>"), "Missing support shortcut: "+label);
+  assert.ok(supportChat.includes("font-size:30px;line-height:1"), "The existing assistant symbol style must remain unchanged");
   assert.ok(supportChat.includes('if(!activeUser||activeUser.isAnonymous)return false;'), "Visitors must not see the assistant launcher");
   assert.ok(supportChat.includes('const page=document.getElementById("page-home")'), "The assistant must be limited to signed-in Home, not visitor Home");
   assert.ok(supportChat.includes('addBubble(botAnswer(q),"bot")'), "Questions must use the powered information answers");
