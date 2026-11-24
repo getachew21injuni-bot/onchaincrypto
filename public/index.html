@@ -12696,127 +12696,25 @@ html.oc-light-theme header .brand.oc-brand-header .oc-brand-wordmark{color:#1720
 </script>
 
 
-<style id="oc-platform-button-colors-replacement">
-/* Onchain platform-wide semantic button palette. Presentation only; preserves labels, icons, layout and behavior. */
-html body #page-home button.quick-action[data-go="deposit"],
-html body #page-wallet button.wallet-action[data-wallet-action="deposit"],
-html body #page-deposit #withdrawAllBtn[data-action="deposit"],
-html body #page-deposit #depositSubmit,
-html body #page-deposit #depositContinue,
-html body #page-deposit #depositConfirm,
-html body #page-deposit #depositRequestSubmit {
+<style id="oc-wallet-only-action-colors">
+/* Wallet page only: color the four wallet shortcuts without changing other pages or behavior. */
+html body #page-wallet #walletQuickActions > button.wallet-action[data-wallet-action="deposit"] {
   background:#15803d!important;background-image:none!important;border:1px solid #15803d!important;color:#fff!important;
 }
-html body #page-home button.quick-action[data-go="withdraw"],
-html body #page-wallet button.wallet-action[data-wallet-action="withdraw"],
-html body #page-withdraw #withdrawSubmit,
-html body #page-withdraw #withdrawAllBtn {
+html body #page-wallet #walletQuickActions > button.wallet-action[data-wallet-action="withdraw"] {
   background:#dc2626!important;background-image:none!important;border:1px solid #dc2626!important;color:#fff!important;
 }
-html body #page-home button.quick-action[data-go="convert"],
-html body #page-wallet button.wallet-action[data-go="convert"],
-html body #page-convert #convertConfirm,
-html body #page-convert #convertMax,
-html body #page-convert #convertSwapDirection {
+html body #page-wallet #walletQuickActions > button.wallet-action[data-go="convert"] {
   background:#2563eb!important;background-image:none!important;border:1px solid #2563eb!important;color:#fff!important;
 }
-html body #page-home button.quick-action[data-go="transfer"],
-html body #page-wallet button.wallet-action[data-wallet-action="transfer"],
-html body #page-transfer #transferSubmit,
-html body #page-transfer #transferCheckRecipient,
-html body #page-transfer #copyTransferMyId {
+html body #page-wallet #walletQuickActions > button.wallet-action[data-wallet-action="transfer"] {
   background:#0891b2!important;background-image:none!important;border:1px solid #0891b2!important;color:#fff!important;
 }
-html body #page-home button.quick-action[data-go="trade"]:not([data-gold-trade="true"]),
-html body #page-trade #timedConfirmBtn,
-html body #page-trade #buyHoldBuy,
-html body #page-trade #ocVisitorBuyButton {
-  background:#2563eb!important;background-image:none!important;border:1px solid #2563eb!important;color:#fff!important;
-}
-html body #page-home button.quick-action[data-gold-trade="true"] {
-  background:#d97706!important;background-image:none!important;border:1px solid #d97706!important;color:#fff!important;
-}
-html body #page-home button.quick-action[data-go="copytrading"],
-html body #page-home button.quick-action[data-go="copy-trading"],
-html body #page-copytrading button[data-copy-follow] {
-  background:#7c3aed!important;background-image:none!important;border:1px solid #7c3aed!important;color:#fff!important;
-}
-html body #page-home button.quick-action[data-go="markets"],
-html body #page-markets #marketShowMore,
-html body #page-markets button[data-filter="all"],
-html body #page-markets button[data-filter="gainers"],
-html body #page-markets button[data-filter="losers"],
-html body #page-markets button[data-filter="hot"],
-html body #page-markets button[data-filter="watchlist"] {
-  background:#0f766e!important;background-image:none!important;border:1px solid #0f766e!important;color:#fff!important;
-}
-html body #page-home button.quick-action[data-go="history"],
-html body #page-home button.quick-action[data-home-history="true"],
-html body #page-wallet button[data-wallet-activity-filter],
-html body #page-history button[data-history-filter] {
-  background:#64748b!important;background-image:none!important;border:1px solid #64748b!important;color:#fff!important;
-}
-html body #page-home button.quick-action[data-go="wallet"] {
-  background:#4f46e5!important;background-image:none!important;border:1px solid #4f46e5!important;color:#fff!important;
-}
-html body #page-home button.quick-action[data-go="profile"] {
-  background:#0891b2!important;background-image:none!important;border:1px solid #0891b2!important;color:#fff!important;
-}
-html body #ocVisitorSignup,html body #ocHomeCreateAccount,html body #authChoiceRegister,
-html body #page-register button[type="submit"] {
-  background:#2563eb!important;background-image:none!important;border:1px solid #2563eb!important;color:#fff!important;
-}
-html body #ocVisitorLogin,html body #ocHomeLogin,html body #authChoiceLogin,
-html body #page-login button[type="submit"] {
-  background:#475569!important;background-image:none!important;border:1px solid #475569!important;color:#fff!important;
-}
-html body #settingsLogoutBtn,html body #ocMenuLogoutBtn,html body #signOutBtn,html body #profileLogoutBtn {
-  background:#b91c1c!important;background-image:none!important;border:1px solid #b91c1c!important;color:#fff!important;
-}
-html body #ocOpenKycPage,html body #page-kyc button[type="submit"] {
-  background:#d97706!important;background-image:none!important;border:1px solid #d97706!important;color:#fff!important;
-}
-html body #page-trade button.buy,html body #page-trade #timedUpBtn,
-html body #page-trade button[data-oc-book-direction="buy"],
-html body #page-trade #buyHoldBuy,html body #page-markets button[data-stock-side="buy"] {
-  background:#16a34a!important;background-image:none!important;border:1px solid #16a34a!important;color:#fff!important;
-}
-html body #page-trade button.sell,html body #page-trade #timedDownBtn,
-html body #page-trade button[data-oc-book-direction="sell"],
-html body #page-trade #buyHoldSell,html body #page-markets button[data-stock-side="sell"] {
-  background:#e11d48!important;background-image:none!important;border:1px solid #e11d48!important;color:#fff!important;
-}
-/* Global defaults for ordinary primary and secondary controls; semantic actions above take priority. */
-html body button.primary,html body button.btn-primary,html body .oc-primary-btn {
-  background:#2563eb!important;background-image:none!important;border-color:#2563eb!important;color:#fff!important;
-}
-html body button.secondary,html body .oc-theme-toggle {
-  background:#475569!important;background-image:none!important;border-color:#64748b!important;color:#fff!important;
-}
-/* Keep all existing symbols/icons visible while action buttons use readable contrast. */
-html body #page-home button.quick-action[data-go="deposit"] *,
-html body #page-home button.quick-action[data-go="withdraw"] *,
-html body #page-home button.quick-action[data-go="convert"] *,
-html body #page-home button.quick-action[data-go="transfer"] *,
-html body #page-home button.quick-action[data-go="trade"] *,
-html body #page-home button.quick-action[data-go="markets"] *,
-html body #page-home button.quick-action[data-go="wallet"] *,
-html body #page-home button.quick-action[data-go="history"] *,
-html body #page-home button.quick-action[data-go="profile"] *,
-html body #page-home button.quick-action[data-go="copytrading"] *,
-html body #page-home button.quick-action[data-gold-trade="true"] *,
-html body #page-wallet button.wallet-action *,
-html body #page-deposit #depositSubmit *,
-html body #page-withdraw #withdrawSubmit *,
-html body #page-convert #convertConfirm *,
-html body #page-transfer #transferSubmit *,
-html body #page-trade button.buy *,html body #page-trade button.sell * {
+html body #page-wallet #walletQuickActions > button.wallet-action,
+html body #page-wallet #walletQuickActions > button.wallet-action span {
   color:#fff!important;
 }
-html body #page-home button.quick-action:hover,
-html body #page-wallet button.wallet-action:hover,
-html body #page-deposit button:hover,html body #page-withdraw button:hover,
-html body #page-convert button:hover,html body #page-transfer button:hover {
+html body #page-wallet #walletQuickActions > button.wallet-action:hover {
   filter:brightness(.94);
 }
 </style>
