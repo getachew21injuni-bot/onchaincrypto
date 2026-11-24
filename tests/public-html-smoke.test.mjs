@@ -78,21 +78,18 @@ test("market, trade summary, and withdrawal validation elements are present", ()
   assert.ok(html.includes("networksByAsset"), "Expected asset-specific withdrawal network rules");
 });
 
-test("home quick actions use one More/Less controller", () => {
+test("home quick actions remain visible without an auto-hide controller", () => {
   const start = html.indexOf('id="page-home"');
   const end = html.indexOf('id="page-markets"', start);
   assert.ok(start >= 0 && end > start, "Expected home and market page sections");
   const home = html.slice(start, end);
-  const actions = [...home.matchAll(/class="quick-action(?:\s+[^"]*)?"/g)];
+  const actions = [...home.matchAll(/class="quick-action(?:\\s+[^"]*)?"/g)];
   assert.equal(actions.length, 9, "Expected nine Home actions");
-  assert.ok(html.includes('wrap.id="homeQuickActionsMoreWrap"'), "Expected the shared More/Less wrapper to be created once");
-  assert.ok(html.includes('id="homeQuickActionsMore"'), "Expected the shared More/Less button");
-  assert.equal((html.match(/wrap\.id="homeQuickActionsMoreWrap"/g) || []).length, 1, "Only one More/Less wrapper should be created");
-  assert.equal((html.match(/id="homeQuickActionMore"/g) || []).length, 0, "Legacy duplicate control should be removed");
-  assert.equal((html.match(/home-quick-action-extra/g) || []).length, 0, "Legacy competing visibility classes should be removed");
-  assert.ok(html.includes('actions.forEach((item,index)=>item.classList.toggle("oc-quick-action-hidden",!expanded&&index>=4))'));
+  assert.ok(html.includes('#page-home > .panel:has(> .quick-action-grid) .quick-action:not(.oc-copy-trading-auth-only){display:flex!important;visibility:visible!important;opacity:1!important}'), "Home shortcuts must remain visible while preserving the Copy Trading sign-in restriction");
+  assert.ok(!html.includes('id="oc-quick-actions-more-script"'), "The automatic Home shortcut hiding script must be removed");
+  assert.ok(!html.includes('id="oc-quick-actions-more-style"'), "The automatic Home shortcut hiding style must be removed");
+  assert.ok(!html.includes('oc-quick-action-hidden'), "Home shortcuts must not receive the hidden state");
 });
-
 test("install-button observer cannot loop across the login page", () => {
   assert.ok(html.includes("if(button.hidden!==shouldHide)button.hidden=shouldHide;"), "Install button visibility must only change when needed");
   assert.ok(html.includes("observer.observe(homePage,{attributes:true,attributeFilter:['class']})"), "Observe only Home visibility changes");
