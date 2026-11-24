@@ -12678,23 +12678,9 @@ html body #page-wallet #walletQuickActions > button.wallet-action:hover {
 </style>
 
 
-<style id="oc-home-quick-actions-final-colors">
-/* Home Quick Actions: one authoritative solid-color style. Preserve labels, symbols, sizing, spacing and behavior. Trade Crypto remains unchanged. */
-html body #page-home .quick-action-grid > button.quick-action[data-go="deposit"]{--action-color:#15803d!important;background:#15803d!important;background-image:none!important;border-color:#15803d!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-go="withdraw"]{--action-color:#dc2626!important;background:#dc2626!important;background-image:none!important;border-color:#dc2626!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-go="convert"]{--action-color:#2563eb!important;background:#2563eb!important;background-image:none!important;border-color:#2563eb!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-gold-trade="true"]{--action-color:#b7791f!important;background:#b7791f!important;background-image:none!important;border-color:#b7791f!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-go="markets"]{--action-color:#0f766e!important;background:#0f766e!important;background-image:none!important;border-color:#0f766e!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-home-history="true"]{--action-color:#64748b!important;background:#64748b!important;background-image:none!important;border-color:#64748b!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-go="wallet"]{--action-color:#0891b2!important;background:#0891b2!important;background-image:none!important;border-color:#0891b2!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action[data-go="copytrading"]{--action-color:#7c3aed!important;background:#7c3aed!important;background-image:none!important;border-color:#7c3aed!important;color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]) .action-icon{color:#fff!important;background:rgba(255,255,255,.16)!important}
-html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]) strong,
-html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]) small{color:#fff!important}
-html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]):hover{filter:brightness(.94)}
-/* Keep every Home shortcut visible, even if an older collapse class remains on the grid.
-   Use a descendant selector so this works regardless of Home panel wrappers.
-   Preserve the existing signed-out Copy Trading restriction. */
+<style id="oc-home-quick-actions-visibility">
+/* Restore the platform's standard Quick Action card appearance.
+   Keep the visibility correction so every permitted Home shortcut remains available. */
 html body #page-home .quick-action-grid > button.quick-action:not(.oc-copy-trading-auth-only){display:flex!important;visibility:visible!important;opacity:1!important}
 html body #page-home .quick-action-grid.oc-collapsed > button.quick-action:nth-child(n+5):not(.oc-copy-trading-auth-only){display:flex!important;visibility:visible!important;opacity:1!important}
 </style>
