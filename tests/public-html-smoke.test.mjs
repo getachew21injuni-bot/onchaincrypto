@@ -85,7 +85,8 @@ test("home quick actions remain visible without an auto-hide controller", () => 
   const home = html.slice(start, end);
   const actions = [...home.matchAll(/class="quick-action(?:\s+[^"]*)?"/g)];
   assert.equal(actions.length, 9, "Expected nine Home actions");
-  assert.ok(html.includes('#page-home > .panel:has(> .quick-action-grid) .quick-action:not(.oc-copy-trading-auth-only){display:flex!important;visibility:visible!important;opacity:1!important}'), "Home shortcuts must remain visible while preserving the Copy Trading sign-in restriction");
+  assert.ok(html.includes('html body #page-home .quick-action-grid > button.quick-action:not(.oc-copy-trading-auth-only){display:flex!important;visibility:visible!important;opacity:1!important}'), "Home shortcuts must remain visible regardless of Home panel wrappers");
+  assert.ok(html.includes('html body #page-home .quick-action-grid.oc-collapsed > button.quick-action:nth-child(n+5):not(.oc-copy-trading-auth-only){display:flex!important;visibility:visible!important;opacity:1!important}'), "Home shortcuts must remain visible even if the legacy collapsed class remains, while preserving the Copy Trading sign-in restriction");
   assert.ok(!html.includes('id="oc-quick-actions-more-script"'), "The automatic Home shortcut hiding script must be removed");
   assert.ok(!html.includes('id="oc-quick-actions-more-style"'), "The automatic Home shortcut hiding style must be removed");
   assert.ok(!html.includes('oc-quick-action-hidden'), "Home shortcuts must not receive the hidden state");
