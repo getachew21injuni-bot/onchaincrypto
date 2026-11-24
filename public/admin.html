@@ -678,6 +678,7 @@ async function renderInternalTransfers(){
 }
 function renderModule(view){
  const body=document.getElementById('detailBody');
+ if(view==='Trades'){if(window.adminGetTrades)window.adminGetTrades();else body.textContent='Trade monitor is not ready. Refresh and sign in again.';return;}
  if(view==='Login History'||view==='Notifications'){renderAdminActivity(view);return;}
  if(view==='User Activity'){if(window.adminGetUserActivity)window.adminGetUserActivity();else body.textContent='Activity service is not ready. Refresh and sign in again.';return;}
  if(view==='Transfers'){renderInternalTransfers();return;}
@@ -754,6 +755,37 @@ const functions=getFunctions(app,'us-central1');
 const adminDeleteUserCall=httpsCallable(functions,'adminDeleteUser');
 window.__ocAdminFirebase={auth,db,collection,getDocs,query,limit,orderBy,doc,setDoc,deleteDoc,writeBatch,serverTimestamp,runTransaction,onSnapshot};
 const safeText=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const tradeApi="https://onchainspro-wallet-api-v2.getachew21-inj-uni.workers.dev";
+window.adminGetTrades=async function(){
+ const body=byId('detailBody');
+ const esc=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const time=v=>{if(!v)return '—';const d=v.toDate?v.toDate():new Date(v);return Number.isNaN(d.getTime())?'—':d.toLocaleString();};
+ const amount=v=>Number.isFinite(Number(v))?Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT':'—';
+ body.innerHTML='<div class="content-panel"><p class="muted">Loading current user trade status and completed results…</p></div>';
+ try{
+  const current=auth.currentUser;
+  if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com')throw new Error('Verified administrator sign-in required.');
+  const token=await current.getIdToken(true);
+  const response=await fetch(tradeApi+'/v1/admin/trades',{method:'GET',cache:'no-store',headers:{Authorization:'Bearer '+token}});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||'The secure trade monitor is not available.');
+  const [usersSnap]=await Promise.all([getDocs(query(collection(db,'users'),limit(1000)))]);
+  const users=new Map(usersSnap.docs.map(d=>{const u=d.data()||{};return [d.id,{name:u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||'Member',email:u.email||'—'}]}));
+  const active=data.activeTrades||[],recent=data.recentTrades||[];
+  const activeByUid=new Map();
+  for(const t of active){const list=activeByUid.get(t.uid)||[];list.push(t);activeByUid.set(t.uid,list);}
+  const usersHtml=usersSnap.docs.map(d=>{
+   const u=users.get(d.id)||{},list=activeByUid.get(d.id)||[];
+   const latest=recent.find(t=>t.uid===d.id);
+   return '<tr><td>'+esc(u.name)+'</td><td>'+esc(u.email)+'</td><td>'+esc(d.id)+'</td><td><strong style="color:'+(list.length?'#6ee7b7':'#aab6c4')+'">'+(list.length?'TRADING':'NOT TRADING')+'</strong></td><td>'+list.length+'</td><td>'+esc(latest?time(latest.completedAt):'No completed trade recorded')+'</td></tr>';
+  }).join('');
+  const activeHtml=active.map(t=>{const u=users.get(t.uid)||{};return '<tr><td>'+esc(u.name||t.uid)+'</td><td>'+esc(u.email||t.uid)+'</td><td>'+esc(t.symbol)+'</td><td>'+esc(String(t.direction||'').toUpperCase())+'</td><td>'+amount(t.amountUSDT)+'</td><td>'+esc(time(t.startedAt))+'</td><td>'+esc(time(t.expiresAt))+'</td><td>ACTIVE</td></tr>';}).join('');
+  const recentHtml=recent.map(t=>{const u=users.get(t.uid)||{};const pnl=Number(t.pnl??t.pnlUSDT);const status=pnl>0?'PROFIT':pnl<0?'LOSS':'BREAK-EVEN';return '<tr><td>'+esc(u.name||t.uid)+'</td><td>'+esc(u.email||t.uid)+'</td><td>'+esc(t.symbol)+'</td><td>'+esc(String(t.direction||t.side||'').toUpperCase())+'</td><td>'+amount(t.amountUSDT??t.amount)+'</td><td style="color:'+(pnl>0?'#6ee7b7':pnl<0?'#fda4af':'inherit')+'">'+(Number.isFinite(pnl)?(pnl>0?'+':'')+pnl.toFixed(2)+' USDT':'—')+'</td><td>'+status+'</td><td>'+esc(time(t.completedAt))+'</td></tr>';}).join('');
+  body.innerHTML='<div class="content-panel" style="margin:0"><h3>Live trade monitoring</h3><p class="muted">Server records · refreshed on demand · '+esc(time(data.asOf))+'</p><div style="display:flex;gap:18px;flex-wrap:wrap;margin:12px 0 20px"><strong>Currently trading: '+active.length+'</strong><strong>Users monitored: '+usersSnap.size+'</strong><strong>Completed records loaded: '+recent.length+'</strong></div><h3>Every registered user</h3><div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>UID</th><th>Trade status</th><th>Active trades</th><th>Last completed trade</th></tr></thead><tbody>'+(usersHtml||'<tr><td colspan="6">No registered users found.</td></tr>')+'</tbody></table></div><h3 style="margin-top:24px">Active trades now</h3><div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>Asset</th><th>Direction</th><th>Amount</th><th>Started</th><th>Expiry</th><th>Status</th></tr></thead><tbody>'+(activeHtml||'<tr><td colspan="8">No active trades found.</td></tr>')+'</tbody></table></div><h3 style="margin-top:24px">Completed trade results (latest 500)</h3><div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>Asset</th><th>Direction</th><th>Amount</th><th>Profit / Loss</th><th>Result</th><th>Completed</th></tr></thead><tbody>'+(recentHtml||'<tr><td colspan="8">No completed trade records found.</td></tr>')+'</tbody></table></div><p id="ocAdminTradesMessage" class="muted" role="status" aria-live="polite"></p></div>';
+ }catch(error){body.innerHTML='<div class="content-panel"><h3>Trade monitor unavailable</h3><p class="muted">'+esc(error.message||error)+'</p><p class="muted">The Admin trade monitor requires the updated secure Worker endpoint to be deployed. No wallet or trade data was changed.</p></div>';}
+};
+
 window.adminGetLiveCollection=async function(view){
  const body=byId('detailBody'),isUsers=view==='Users',collectionName=isUsers?'users':'kycSubmissions';
  body.innerHTML='<div class="content-panel"><p class="muted">Loading live Firebase data…</p></div>';

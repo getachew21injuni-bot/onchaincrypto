@@ -970,6 +970,44 @@ async function adminAdjustment(env, token, claims, body) {
 
 
 
+
+async function adminTradeMonitor(env, claims) {
+  const admins = String(env.ADMIN_EMAILS || "").split(",").map(x => x.trim().toLowerCase()).filter(Boolean);
+  const email = String(claims.email || "").toLowerCase();
+  if (!(claims.admin === true || (claims.email_verified === true && email && admins.includes(email)))) {
+    return json({ error: "Administrator access is required." }, 403);
+  }
+  const access = await serviceToken(env);
+  async function list(collectionId, field, limitCount) {
+    const response = await fetch(ROOT + ":runQuery", {
+      method: "POST",
+      headers: { authorization: "Bearer " + access, "content-type": "application/json" },
+      body: JSON.stringify({ structuredQuery: {
+        from: [{ collectionId }],
+        orderBy: [{ field: { fieldPath: field }, direction: "DESCENDING" }],
+        limit: limitCount
+      } })
+    });
+    if (!response.ok) throw new Error("Administrator trade records could not be read from Firestore (" + collectionId + ").");
+    const rows = await response.json();
+    return (Array.isArray(rows) ? rows : []).filter(x => x.document).map(x => ({
+      id: x.document.name.split("/").pop(),
+      ...(fieldsFromFirestore(x.document.fields) || {})
+    }));
+  }
+  const [activeTrades, recentTrades] = await Promise.all([
+    list("activeTrades", "startedAt", 500),
+    list("tradeLedger", "completedAt", 500)
+  ]);
+  return json({
+    activeTrades: activeTrades.filter(x => x.status === "active"),
+    recentTrades,
+    activeCount: activeTrades.filter(x => x.status === "active").length,
+    completedCount: recentTrades.length,
+    asOf: new Date().toISOString()
+  }, 200);
+}
+
 export default {
 
    async fetch(request, env) {
@@ -1094,6 +1132,14 @@ export default {
         toFirestore,
         fieldsFromFirestore
       });
+
+
+      if (url.pathname === "/v1/admin/trades" && request.method === "GET") {
+        const result = await adminTradeMonitor(env, claims);
+        const headers = new Headers(result.headers);
+        for (const [k, v] of Object.entries(cors)) headers.set(k, v);
+        return new Response(result.body, { status: result.status, headers });
+      }
 
       if (url.pathname === "/v1/trades" && request.method === "POST") {
         const result = await trades.create(claims.sub, await request.json());
