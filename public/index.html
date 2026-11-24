@@ -12744,5 +12744,44 @@ html body #page-wallet #walletQuickActions > button.wallet-action:hover {
 }
 </style>
 
+
+<style id="oc-home-quick-actions-final-colors">
+/* Final Home Quick Actions override: placed after the platform styles so later generic button rules cannot mask these colors. Trade Crypto is intentionally unchanged. */
+html body #page-home .quick-action-grid > button.quick-action[data-go="deposit"]{
+  background:#15803d!important;background-image:none!important;border:1px solid #15803d!important;color:#fff!important;
+}
+html body #page-home .quick-action-grid > button.quick-action[data-go="withdraw"]{
+  background:#dc2626!important;background-image:none!important;border:1px solid #dc2626!important;color:#fff!important;
+}
+html body #page-home .quick-action-grid > button.quick-action[data-go="convert"]{
+  background:#2563eb!important;background-image:none!important;border:1px solid #2563eb!important;color:#fff!important;
+}
+html body #page-home .quick-action-grid > button.quick-action[data-gold-trade="true"]{
+  background:#b7791f!important;background-image:none!important;border:1px solid #b7791f!important;color:#fff!important;
+}
+html body #page-home .quick-action-grid > button.quick-action[data-go="markets"]{
+  background:#0f766e!important;background-image:none!important;border:1px solid #0f766e!important;color:#fff!important;
+}
+html body #page-home .quick-action-grid > button.quick-action[data-home-history="true"]{
+  background:#64748b!important;background-image:none!important;border:1px solid #64748b!important;color:#fff!important;
+}
+html body #page-home .quick-action-grid > button.quick-action[data-go="wallet"]{
+  background:#0891b2!important;background-image:none!important;border:1px solid #0891b2!important;color:#fff!important;
+}
+html body #page-home .quick-action-grid > button.quick-action[data-go="copytrading"]{
+  background:#7c3aed!important;background-image:none!important;border:1px solid #7c3aed!important;color:#fff!important;
+}
+html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]):not([data-gold-trade="true"]) .action-icon,
+html body #page-home .quick-action-grid > button.quick-action[data-gold-trade="true"] .action-icon{
+  color:#fff!important;background:rgba(255,255,255,.16)!important;
+}
+html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]):not([data-gold-trade="true"]) strong,
+html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]):not([data-gold-trade="true"]) small,
+html body #page-home .quick-action-grid > button.quick-action[data-gold-trade="true"] strong,
+html body #page-home .quick-action-grid > button.quick-action[data-gold-trade="true"] small{
+  color:#fff!important;
+}
+</style>
+
 </body>
 </html>
