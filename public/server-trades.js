@@ -131,7 +131,6 @@
     const entry = Number(trade.entry), exit = Number(trade.price), pnl = Number(trade.pnl);
     const amountUsd = Number(trade.amountUSDT || trade.amount || 0);
     const completedActivityId = String(trade.tradeId || trade.id || "");
-    const activeTradeId = String(completedActiveTrade?.tradeId || completedActiveTrade?.id || "");
     if (completedActivityId && !activityCompletedTradeIds.has(completedActivityId)) {
       activityCompletedTradeIds.add(completedActivityId);
       window.ocRecordActivity?.("trade", "Quick Trade completed · " + String(trade.symbol || "").toUpperCase(),
