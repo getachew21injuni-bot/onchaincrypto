@@ -12692,8 +12692,11 @@ html body #page-home .quick-action-grid > button.quick-action:not([data-go="trad
 html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]) strong,
 html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]) small{color:#fff!important}
 html body #page-home .quick-action-grid > button.quick-action:not([data-go="trade"]):hover{filter:brightness(.94)}
-/* Keep every Home shortcut visible; only the existing signed-out Copy Trading restriction remains in force. */
-#page-home > .panel:has(> .quick-action-grid) .quick-action:not(.oc-copy-trading-auth-only){display:flex!important;visibility:visible!important;opacity:1!important}
+/* Keep every Home shortcut visible, even if an older collapse class remains on the grid.
+   Use a descendant selector so this works regardless of Home panel wrappers.
+   Preserve the existing signed-out Copy Trading restriction. */
+html body #page-home .quick-action-grid > button.quick-action:not(.oc-copy-trading-auth-only){display:flex!important;visibility:visible!important;opacity:1!important}
+html body #page-home .quick-action-grid.oc-collapsed > button.quick-action:nth-child(n+5):not(.oc-copy-trading-auth-only){display:flex!important;visibility:visible!important;opacity:1!important}
 </style>
 
 </body>
