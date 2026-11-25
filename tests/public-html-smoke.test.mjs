@@ -177,6 +177,7 @@ test("the floating assistant is available on public Home and signed-in Home", ()
   assert.ok(supportChat.includes('const page=document.getElementById("page-home")'), "The assistant must be limited to signed-in Home, not visitor Home");
   assert.ok(supportChat.includes('fetch(AI_SUPPORT_ENDPOINT,{method:"POST"'), "Questions must be sent to the OnChainSpro AI Worker");
   assert.ok(supportChat.includes('history:aiHistory.slice(-10)'), "Recent conversation context must be sent with each AI request");
+  assert.ok(supportChat.includes('platform:"onchainspro"'), "AI requests must identify the OnChainSpro platform");
   assert.ok(supportChat.includes('data.reply||data.answer'), "The chat must display the Worker AI response");
   assert.ok(!supportChat.includes("mailto:")&&!supportChat.includes("support@onchainspro.com"), "The floating assistant must not expose direct email contact");
   assert.ok(!supportChat.includes("signInAnonymously"), "Opening the assistant must not create a login session");
