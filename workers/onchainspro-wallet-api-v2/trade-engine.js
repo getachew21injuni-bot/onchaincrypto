@@ -120,6 +120,7 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
     const mode = globalMode === "win" || globalMode === "lose" ? globalMode : (userMode === "inherit" ? globalMode : userMode);
     return {
       mode,
+      maxTradeAmountUSDT: safeNumber(u.maxTradeAmountUSDT),
       winPercent: Math.min(100, Math.max(1, safeNumber(globalMode === "win" ? g.winPercent : u.demoWinPercent) || 15)),
       lossPercent: Math.min(100, Math.max(1, safeNumber(globalMode === "lose" ? g.lossPercent : u.demoLossPercent) || 50))
     };
@@ -173,8 +174,9 @@ export function createTradeEngine({ ROOT, serviceToken, toFirestore, fieldsFromF
     if (fundingAmount > availableFunding + 1e-8) throw new Error("Insufficient " + fundingAsset + " balance.");
     const p = plan(stake, symbol);
     if (!p) throw new Error("The amount does not fit an available investment level.");
-    const user = await readDoc(access, "users", uid);
-    const max = safeNumber(user?.data?.maxTradeAmountUSDT);
+    // The users/{uid} document was already read by controls(); reuse that
+    // snapshot instead of issuing a second Firestore read for every trade.
+    const max = setting.maxTradeAmountUSDT;
     if (max > 0 && stake > max) throw new Error("This trade exceeds your account's maximum trade amount.");
     const entry = await quote(symbol);
     const guard = await readDoc(access, "activeTradeGuards", uid);
