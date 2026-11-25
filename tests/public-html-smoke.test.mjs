@@ -164,7 +164,7 @@ test("wallet state subscribes to Firestore for live cross-device balance and his
   assert.ok(html.includes("state={balance:Math.round(balance*100)/100,holdings,history};"), "Remote balance, holdings and trade history must replace the stale device view together");
 });
 
-test("the floating assistant is restricted to signed-in Home", () => {
+test("the floating assistant is available on public Home and signed-in Home", () => {
   assert.ok(!html.includes("ocVisitorSupportBot"), "The duplicate visitor-only bot shell must be removed");
   assert.ok(!html.includes("oc-visitor-support-bot-script"), "The duplicate visitor-only answer script must be removed");
   assert.ok(supportChat.includes('btn.id="oc-support-button"'), "The assistant must create one launcher");
@@ -173,9 +173,11 @@ test("the floating assistant is restricted to signed-in Home", () => {
   assert.ok(supportChat.includes("Welcome to Onchain! 👋 Need help with deposits, withdrawals, KYC, trading or your wallet? Choose a topic or ask me a question."), "The assistant must show the short welcome message");
   for (const label of ["Deposit","Withdraw","KYC","Wallet","Trading","Account help"]) assert.ok(supportChat.includes(">"+label+"</button>"), "Missing support shortcut: "+label);
   assert.ok(supportChat.includes("font-size:30px;line-height:1"), "The existing assistant symbol style must remain unchanged");
-  assert.ok(supportChat.includes('if(!activeUser||activeUser.isAnonymous)return false;'), "Visitors must not see the assistant launcher");
+  assert.ok(supportChat.includes('const publicPage=document.getElementById("page-public-market")'), "Visitors should see the assistant on the public market home");
   assert.ok(supportChat.includes('const page=document.getElementById("page-home")'), "The assistant must be limited to signed-in Home, not visitor Home");
-  assert.ok(supportChat.includes('addBubble(botAnswer(q),"bot")'), "Questions must use the powered information answers");
+  assert.ok(supportChat.includes('fetch(AI_SUPPORT_ENDPOINT,{method:"POST"'), "Questions must be sent to the OnChainSpro AI Worker");
+  assert.ok(supportChat.includes('history:aiHistory.slice(-10)'), "Recent conversation context must be sent with each AI request");
+  assert.ok(supportChat.includes('data.reply||data.answer'), "The chat must display the Worker AI response");
   assert.ok(!supportChat.includes("mailto:")&&!supportChat.includes("support@onchainspro.com"), "The floating assistant must not expose direct email contact");
   assert.ok(!supportChat.includes("signInAnonymously"), "Opening the assistant must not create a login session");
   assert.ok(!supportChat.includes("if(!user||user.isAnonymous)newTicket()"), "Visitors must not be routed into agent ticket creation");
