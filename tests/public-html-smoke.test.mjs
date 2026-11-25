@@ -164,7 +164,7 @@ test("wallet state subscribes to Firestore for live cross-device balance and his
   assert.ok(html.includes("state={balance:Math.round(balance*100)/100,holdings,history};"), "Remote balance, holdings and trade history must replace the stale device view together");
 });
 
-test("the floating assistant is restricted to signed-in Home", () => {
+test("the floating assistant is available on public Home and signed-in Home", () => {
   assert.ok(!html.includes("ocVisitorSupportBot"), "The duplicate visitor-only bot shell must be removed");
   assert.ok(!html.includes("oc-visitor-support-bot-script"), "The duplicate visitor-only answer script must be removed");
   assert.ok(supportChat.includes('btn.id="oc-support-button"'), "The assistant must create one launcher");
