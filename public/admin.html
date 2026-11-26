@@ -31,6 +31,91 @@ body{background-image:radial-gradient(ellipse at 12% 0%,rgba(247,147,26,.075),tr
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--oc-admin-gold);outline-offset:2px}
 </style>
 
+
+<style id="oc-admin-horizontal-design-2026">
+/* Visual-only Admin refresh. Existing navigation IDs, data-view hooks and JS are unchanged. */
+:root{
+ --bg:#0b1424;--panel:#14243a;--panel2:#1b304b;--line:#2b4563;--text:#f4f8ff;
+ --muted:#a9bad0;--blue:#2878ee;--cyan:#48baff;--purple:#8b72f6;
+ --red:#ef5364;--green:#16b981;--gold:#f3ad36;
+}
+body{background:radial-gradient(ellipse at 8% 0%,#173b62 0%,transparent 34%),radial-gradient(ellipse at 94% 10%,#25214c 0%,transparent 30%),linear-gradient(180deg,#0b1424,#0a1220 72%,#080f1b);color:var(--text)}
+.topbar{height:72px;padding:0 clamp(14px,2.5vw,34px);background:rgba(8,19,35,.96);border-bottom:1px solid #294765;box-shadow:0 8px 28px #02081755}
+.brand{font-size:17px}.brand small{color:#9cb5d2}.logo,.avatar{background:linear-gradient(135deg,#45c4ff,#2869ed 65%,#7259e8);box-shadow:0 0 24px #2878ee55;color:white}
+.layout{display:block;min-height:calc(100vh - 72px)}
+.layout.locked{display:none!important}
+aside{position:sticky;top:72px;z-index:4;width:100%;padding:10px clamp(12px,2.5vw,34px);background:rgba(13,29,49,.97);border:0;border-bottom:1px solid #294765;box-shadow:0 8px 22px #02081755}
+.admin-profile{display:none}
+.nav{display:flex;align-items:center;gap:7px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#45678f transparent;padding:1px 0 5px}
+.nav button{width:auto;min-width:max-content;flex:0 0 auto;padding:10px 13px;border:1px solid transparent;border-radius:11px;background:transparent;color:#c1d1e5;font-size:13px;font-weight:650;white-space:nowrap;transition:background .18s,border-color .18s,transform .18s;box-shadow:none}
+.nav button .ico{width:auto;font-size:16px;color:#8fcaff}
+.nav button:hover{background:#1b3553;border-color:#365a80;color:#fff;transform:translateY(-1px)}
+.nav button.active{background:linear-gradient(135deg,#2878ee,#2459c8);border-color:#5ca5ff;color:#fff;box-shadow:0 5px 16px #1769e544}
+.pill{background:#347fe9;color:#fff;font-weight:750}
+.nav button[data-view="Deposits"] .pill,.nav button[data-view="KYC"] .pill{background:#d58b22}
+.nav button[data-view="Withdrawals"] .pill{background:#b84b5c}
+.main{max-width:1680px;padding:clamp(18px,2.6vw,34px);margin:0 auto}
+.heading{align-items:center;margin-bottom:24px}
+.heading h1{font-size:clamp(23px,2vw,30px);letter-spacing:-.45px}
+.heading p{color:#a9bad0}
+.status{color:#62e4b4;border-color:#236b59;background:#10372f}
+.quick-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:13px}
+.quick{min-height:132px;border:1px solid #2c4563;border-radius:17px;background:linear-gradient(145deg,#192e48,#122238);color:#f4f8ff;box-shadow:0 8px 22px #02081735}
+.quick:hover{transform:translateY(-3px);border-color:#4b91e9;box-shadow:0 12px 26px #061a355c}
+.quick .qicon{width:54px;height:54px;border-radius:16px;background:#1d4e83;color:#8fd1ff;font-size:25px}
+.quick:nth-child(1) .qicon,.quick:nth-child(2) .qicon{background:#183f70;color:#79baff}
+.quick:nth-child(3) .qicon{background:#124b40;color:#5ee2b3}
+.quick:nth-child(4) .qicon{background:#453518;color:#ffd16a}
+.quick:nth-child(5) .qicon{background:#4a2430;color:#ff9aa8}
+.quick:nth-child(6) .qicon{background:#30265c;color:#c2b4ff}
+.quick:nth-child(7) .qicon{background:#263a52;color:#b9d5f5}
+.quick span:last-child{font-size:15px;font-weight:700}
+.stats{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:13px}
+.stat,.content-panel{border:1px solid #2b4563;border-radius:17px;background:linear-gradient(145deg,#172b44,#112137);box-shadow:0 8px 24px #02081730}
+.stat{min-height:142px;padding:20px}
+.stat .label{color:#b5c7dd;font-size:13px;font-weight:650}
+.stat .value{font-size:clamp(25px,2.2vw,34px);color:#fff}
+.stat .sicon{color:#69b9ff}
+.content-panel{padding:20px}
+.panel-head h2,.section-title{color:#f4f8ff}
+.table-wrap{border:1px solid #2b4563;border-radius:12px}
+table{min-width:650px}
+th{background:#1b304a;color:#b8cbe1;font-size:12px;text-transform:uppercase;letter-spacing:.045em}
+td{color:#e6eef9}
+tr:hover td{background:#1a3049}
+.tag{background:#124b3c;color:#70e5bd;font-weight:750}
+.notice{background:#142943;border-color:#355577;color:#c8d8ec}
+.icon-btn{background:#2469d8;border:1px solid #4b91ef;color:#fff;border-radius:10px;padding:9px 13px;font-weight:700;transition:.18s}
+.icon-btn:hover{background:#347ff0;border-color:#80b8ff;transform:translateY(-1px)}
+#refreshBtn{background:#176c9b;border-color:#2e9dcc}
+#adminSignOut{background:#33445a;border-color:#60758e}
+#notifyBtn{background:#5543a8;border-color:#8573df}
+#moreBtn{background:#263a52;border-color:#45617f}
+#adminSignIn{background:linear-gradient(135deg,#2878ee,#2459c8)!important;border-color:#65a8ff!important}
+#adminResetPassword{background:#263a52;border-color:#45617f}
+input,select,textarea{accent-color:#2878ee}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #72bdff;outline-offset:2px}
+.oc-kyc-view-action{background:#2469d8;border:1px solid #5a9cf0;color:#fff;font-weight:700}
+.oc-kyc-view-action:hover{background:#347ff0}
+.bottomnav{display:none!important}
+@media(min-width:1100px){.quick-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){
+ .topbar{height:62px;padding:0 12px}.layout{display:block}
+ aside{position:sticky;top:62px;padding:8px 10px}
+ .nav{gap:6px}.nav button{padding:9px 11px;font-size:12px}
+ .main{padding:17px 12px 30px}
+ .heading{align-items:flex-start}.heading h1{font-size:22px}
+ .quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .quick{min-height:118px;border-radius:15px}.quick .qicon{width:46px;height:46px}
+ .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .stat{min-height:125px;padding:15px}.stat .value{font-size:24px}
+ .content-panel{padding:13px}
+ .top-actions{gap:5px}.top-actions .icon-btn{padding:8px 9px}
+ .mobile-menu{display:none!important}
+}
+@media(max-width:390px){.stats{grid-template-columns:1fr}.quick span:last-child{font-size:13px}}
+</style>
+
 </head>
 <body>
 <header class="topbar">
