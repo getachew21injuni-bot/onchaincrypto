@@ -544,11 +544,12 @@ async function renderDemoFinance(view){
    resetButton.disabled=true;msg.textContent='Securely resetting '+selected.length+' selected wallet(s)…';
    try{
     const token=await current.getIdToken(true);
-    const response=await fetch(tradeApi+'/v1/admin/reset-wallets',{method:'POST',cache:'no-store',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({uids:selected.map(user=>user.id),reason,batchId:crypto.randomUUID()})});
+    const response=await fetch('https://onchainspro-wallet-api-v2.getachew21-inj-uni.workers.dev/v1/admin/reset-wallets',{method:'POST',cache:'no-store',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({uids:selected.map(user=>user.id),reason,batchId:crypto.randomUUID()})});
     const result=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(result.error||'Secure wallet reset failed.');
-    msg.textContent='Successfully reset '+result.resetCount+' selected wallet(s) to zero. Secure audit entries were saved. Refresh the Users and Trades sections to see updated balances.';
     await renderDemoFinance(view);
+    const refreshedMessage=document.getElementById('resetWalletMessage');
+    if(refreshedMessage)refreshedMessage.textContent='Successfully reset '+result.resetCount+' selected wallet(s) to zero. Secure audit entries were saved.';
    }catch(err){msg.textContent='Wallet reset failed: '+(err.message||'unknown error')+'. No partial batch was applied.';resetButton.disabled=false;}
   });
   const form=document.getElementById('demoFinanceForm');
