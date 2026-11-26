@@ -998,10 +998,9 @@ async function adminResetWallets(env, claims, body) {
     const ledgerId = "reset_" + batchId + "_" + uid;
     writes.push({
       update: { name: `${ROOT}/userTradeState/${encodeURIComponent(uid)}`, fields: {
-        uid: toFirestore(uid), balance: toFirestore(0), holdings: toFirestore(afterHoldings),
-        history: toFirestore(Array.isArray(data.history) ? data.history : []), updatedAt: { timestampValue: now }
+        uid: toFirestore(uid), balance: toFirestore(0), holdings: toFirestore(afterHoldings), updatedAt: { timestampValue: now }
       }},
-      updateMask: { fieldPaths: ["uid", "balance", "holdings", "history", "updatedAt"] },
+      updateMask: { fieldPaths: ["uid", "balance", "holdings", "updatedAt"] },
       currentDocument: { updateTime: wallet.updateTime }
     });
     writes.push({
