@@ -12697,22 +12697,22 @@ html body #page-home .quick-action-grid > button.quick-action:not(.oc-copy-tradi
 html body #page-home .quick-action-grid.oc-collapsed > button.quick-action:nth-child(n+5):not(.oc-copy-trading-auth-only){display:flex!important;visibility:visible!important;opacity:1!important}
 </style>
 <style id="oc-home-quick-action-color-fix-20261126">
-/* Home Quick Actions only: consistent, distinct colors; no layout or behavior changes. */
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action[data-go="deposit"] { background:#15803d!important;background-image:none!important;border-color:#15803d!important;color:#fff!important; }
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action[data-go="withdraw"] { background:#dc2626!important;background-image:none!important;border-color:#dc2626!important;color:#fff!important; }
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action[data-go="convert"] { background:#7c3aed!important;background-image:none!important;border-color:#7c3aed!important;color:#fff!important; }
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action[data-go="trade"]:not([data-gold-trade="true"]) { background:#2563eb!important;background-image:none!important;border-color:#2563eb!important;color:#fff!important; }
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action[data-gold-trade="true"] { background:#b45309!important;background-image:none!important;border-color:#b45309!important;color:#fff!important; }
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action[data-go="markets"] { background:#c2410c!important;background-image:none!important;border-color:#c2410c!important;color:#fff!important; }
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action[data-home-history="true"] { background:#6b4fc3!important;background-image:none!important;border-color:#6b4fc3!important;color:#fff!important; }
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action[data-go="wallet"] { background:#6d28d9!important;background-image:none!important;border-color:#6d28d9!important;color:#fff!important; }
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action[data-go="copytrading"] { background:#0e7490!important;background-image:none!important;border-color:#0e7490!important;color:#fff!important; }
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action .action-icon,
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action strong,
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action small { color:#fff!important; }
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action .action-icon { background:#ffffff24!important;border:1px solid #ffffff55!important;box-shadow:none!important; }
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action:hover { filter:brightness(1.08);transform:translateY(-2px); }
-html body #page-home > .panel:has(> .quick-action-grid) .quick-action:focus-visible { outline:2px solid currentColor;outline-offset:3px; }
+/* Permanent Home-only action colors. Avoid :has() so older mobile browsers apply the palette reliably. */
+html body #page-home .quick-action-grid .quick-action[data-go="deposit"] { background:#15803d!important;background-image:none!important;border:1px solid #15803d!important;color:#fff!important; }
+html body #page-home .quick-action-grid .quick-action[data-go="withdraw"] { background:#dc2626!important;background-image:none!important;border:1px solid #dc2626!important;color:#fff!important; }
+html body #page-home .quick-action-grid .quick-action[data-go="convert"] { background:#7c3aed!important;background-image:none!important;border:1px solid #7c3aed!important;color:#fff!important; }
+html body #page-home .quick-action-grid .quick-action[data-go="trade"]:not([data-gold-trade="true"]) { background:#2563eb!important;background-image:none!important;border:1px solid #2563eb!important;color:#fff!important; }
+html body #page-home .quick-action-grid .quick-action[data-gold-trade="true"] { background:#b45309!important;background-image:none!important;border:1px solid #b45309!important;color:#fff!important; }
+html body #page-home .quick-action-grid .quick-action[data-go="markets"] { background:#c2410c!important;background-image:none!important;border:1px solid #c2410c!important;color:#fff!important; }
+html body #page-home .quick-action-grid .quick-action[data-home-history="true"] { background:#6b4fc3!important;background-image:none!important;border:1px solid #6b4fc3!important;color:#fff!important; }
+html body #page-home .quick-action-grid .quick-action[data-go="wallet"] { background:#6d28d9!important;background-image:none!important;border:1px solid #6d28d9!important;color:#fff!important; }
+html body #page-home .quick-action-grid .quick-action[data-go="copytrading"] { background:#0e7490!important;background-image:none!important;border:1px solid #0e7490!important;color:#fff!important; }
+html body #page-home .quick-action-grid .quick-action .action-icon,
+html body #page-home .quick-action-grid .quick-action strong,
+html body #page-home .quick-action-grid .quick-action small { color:#fff!important; }
+html body #page-home .quick-action-grid .quick-action .action-icon { background:#ffffff24!important;border:1px solid #ffffff55!important;box-shadow:none!important; }
+html body #page-home .quick-action-grid .quick-action:hover { filter:brightness(1.08);transform:translateY(-2px); }
+html body #page-home .quick-action-grid .quick-action:focus-visible { outline:2px solid currentColor;outline-offset:3px; }
 </style>
 
 </body>
