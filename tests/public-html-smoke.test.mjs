@@ -32,6 +32,9 @@ test("Admin Trades view uses the secure administrator-only Worker endpoint and s
   assert.ok(admin.includes("window.adminGetTrades=async function"), "Admin Trades view must load live server trade data");
   assert.ok(admin.includes("NOT TRADING") && admin.includes("TRADING"), "Admin must see whether each registered user has an active trade");
   assert.ok(admin.includes("Profit / Loss") && admin.includes("Active trades now"), "Admin must see active trades and completed profit/loss results");
+  assert.ok(tradeWorker.includes('list("userTradeState", "updatedAt", 500)'), "Admin Worker must read canonical wallet snapshots for Buy & Hold visibility");
+  assert.ok(tradeWorker.includes('item.kind === "buy-hold"'), "Admin Worker must identify Buy & Hold history entries");
+  assert.ok(admin.includes("Buy & Hold order history") && admin.includes("Current coin holdings"), "Admin must display Buy & Hold orders and current holdings");
 });
 
 test("all inline classic JavaScript parses", () => {
