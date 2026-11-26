@@ -803,16 +803,39 @@ window.adminGetLiveCollection=async function(view){
     walletReadError=true;
     console.warn('Admin Users wallet balances could not be read:',walletError);
    }
-   const heads=['Name','Email','Country','Firebase UID','Account status','Wallet balance','Admin action'];
+   // One public market-price snapshot values only assets actually held in the wallet.
+   const heldSymbols=[...new Set([...walletMap.values()].flatMap(w=>Object.entries(w?.holdings||{}).filter(([asset,qty])=>String(asset).toUpperCase()!=='USDT'&&Number.isFinite(Number(qty))&&Number(qty)>0).map(([asset])=>String(asset).toUpperCase())))];
+   const adminPrices={USDT:1};
+   try{
+    if(heldSymbols.some(symbol=>symbol!=='XAU')){
+     const priceResponse=await fetch('https://api.binance.com/api/v3/ticker/price',{headers:{accept:'application/json'},cache:'no-store',signal:AbortSignal.timeout(8000)});
+     if(!priceResponse.ok)throw new Error('Market price service unavailable');
+     const tickerRows=await priceResponse.json();
+     if(!Array.isArray(tickerRows))throw new Error('Invalid market price response');
+     const needed=new Set(heldSymbols.filter(symbol=>symbol!=='XAU').map(symbol=>symbol+'USDT'));
+     tickerRows.forEach(ticker=>{if(needed.has(String(ticker.symbol||''))&&Number(ticker.price)>0)adminPrices[String(ticker.symbol).slice(0,-4)]=Number(ticker.price)});
+    }
+   }catch(priceError){console.warn('Admin portfolio market prices unavailable:',priceError)}
+   if(heldSymbols.includes('XAU')){
+    try{
+     const goldResponse=await fetch('https://fapi.binance.com/fapi/v1/ticker/price?symbol=XAUUSDT',{headers:{accept:'application/json'},cache:'no-store',signal:AbortSignal.timeout(6000)});
+     if(goldResponse.ok){const goldTicker=await goldResponse.json();if(Number(goldTicker.price)>0)adminPrices.XAU=Number(goldTicker.price)}
+    }catch(goldError){console.warn('Admin gold price unavailable:',goldError)}
+   }
+   const heads=['Name','Email','Country','Firebase UID','Account status','Total portfolio value','Admin action'];
    const html=rows.map(r=>{
     const accountStatus=String(r.accountStatus||'active').toLowerCase()==='suspended'?'suspended':'active';
     const actionLabel=accountStatus==='active'?'Suspend account':'Activate account';
     const actionColor=accountStatus==='active'?'#8a3343':'#087b56';
     const wallet=walletMap.get(r.id);
     const balance=wallet&&typeof wallet.balance==='number'?wallet.balance:null;
-    const holdings=wallet?.holdings&&typeof wallet.holdings==='object'?Object.entries(wallet.holdings).filter(([asset,value])=>asset!=='USDT'&&Number.isFinite(Number(value))&&Number(value)!==0).map(([asset,value])=>safeText(asset.toUpperCase())+': '+safeText(Number(value).toLocaleString(undefined,{maximumFractionDigits:8}))).join(' · '):'';
+    const holdingEntries=wallet?.holdings&&typeof wallet.holdings==='object'?Object.entries(wallet.holdings).filter(([asset,value])=>String(asset).toUpperCase()!=='USDT'&&Number.isFinite(Number(value))&&Number(value)>0):[];
+    const holdings=holdingEntries.map(([asset,value])=>safeText(asset.toUpperCase())+': '+safeText(Number(value).toLocaleString(undefined,{maximumFractionDigits:8}))).join(' · ');
+    let coinValue=0,pricedCount=0,unpricedAssets=[];
+    holdingEntries.forEach(([asset,quantity])=>{const symbol=String(asset).toUpperCase(),price=Number(adminPrices[symbol]||0);if(price>0){coinValue+=Number(quantity)*price;pricedCount++}else unpricedAssets.push(symbol)});
+    const portfolioTotal=Math.max(0,Number(balance)||0)+coinValue;
     const walletUpdated=wallet?.updatedAt&&typeof wallet.updatedAt.toDate==='function'?wallet.updatedAt.toDate().toLocaleString():'';
-    const walletCell=walletReadError?'<span class="muted">Unavailable · check permissions</span>':balance===null?'<strong>—</strong><br><small class="muted">No wallet ledger record</small>':(holdings?'<small class="muted">'+holdings+'</small><br>':'')+(walletUpdated?'<small class="muted">Updated '+safeText(walletUpdated)+'</small><br>':'')+'<strong>Total: '+safeText(balance.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}))+' USDT</strong>';
+    const walletCell=walletReadError?'<span class="muted">Unavailable · check permissions</span>':balance===null?'<strong>—</strong><br><small class="muted">No wallet ledger record</small>':(holdings?'<small class="muted">'+holdings+'</small><br>':'')+(walletUpdated?'<small class="muted">Updated '+safeText(walletUpdated)+'</small><br>':'')+'<strong>'+(unpricedAssets.length?'Partial portfolio value: ':'Total portfolio value: ')+safeText(portfolioTotal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}))+' USDT</strong><br><small class="muted">USDT cash + '+pricedCount+' priced coin holding'+(pricedCount===1?'':'s')+(unpricedAssets.length?' · Price unavailable: '+safeText(unpricedAssets.join(', ')):'')+'</small>';
     return '<tr><td>'+safeText(r.displayName||[r.firstName,r.lastName].filter(Boolean).join(' ')||'—')+'</td><td>'+safeText(r.email||'—')+'</td><td>'+safeText(r.country||'—')+'</td><td>'+safeText(r.uid||r.id)+'</td><td><span style="display:inline-block;padding:4px 9px;border-radius:20px;background:'+(accountStatus==='active'?'#12372e':'#40242b')+';color:'+(accountStatus==='active'?'#6ee7b7':'#fda4af')+'">'+safeText(accountStatus.toUpperCase())+'</span></td><td>'+walletCell+'</td><td><button type="button" class="oc-user-status-action icon-btn" data-uid="'+safeText(r.id)+'" data-status="'+accountStatus+'" style="background:'+actionColor+';border:0">'+actionLabel+'</button><button type="button" class="oc-user-delete-action icon-btn" data-uid="'+safeText(r.id)+'" data-email="'+safeText(r.email||'')+'" style="background:#8b1e32;border:0;margin-left:6px">Delete Account</button></td></tr>';
    }).join('');
    body.innerHTML='<div class="content-panel" style="margin:0"><h3>Live registered profiles</h3><p class="muted">Profiles read from Firestore; maximum 100 shown. Wallet balances are read-only and sourced from each account\'s userTradeState ledger. New accounts default to ACTIVE until an admin changes their status.</p><strong>'+rows.length+' account(s) loaded</strong><div class="table-wrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(html||'<tr><td colspan="7">No registered accounts found.</td></tr>')+'</tbody></table></div><p id="ocUserAdminMessage" class="muted" role="status" aria-live="polite"></p></div>';
