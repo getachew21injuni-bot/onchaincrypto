@@ -504,7 +504,7 @@ async function renderDemoFinance(view){
    '<label style="display:grid;gap:6px;font-weight:700">AMOUNT<input name="amount" type="number" min="0.00000001" max="1000000000" step="any" required placeholder="Enter quantity for selected coin(s)" style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label>'+
    '<label style="display:grid;gap:6px;font-weight:700">ADMIN NOTE (OPTIONAL)<input name="note" maxlength="200" placeholder="Reason for this account adjustment" style="width:100%;padding:13px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label>'+
    '<button class="icon-btn" type="submit" style="background:'+(view==='Deposits'?'linear-gradient(90deg,#087b56,#12a879)':'linear-gradient(90deg,#813246,#bd4058)')+';border:0;padding:16px;font-size:16px;font-weight:850;box-shadow:0 8px 22px #0004">'+(view==='Deposits'?'＋ ADD TO USER WALLET':'− CONFIRM BALANCE DEDUCTION')+'</button><p id="demoFinanceMessage" class="muted" role="status" aria-live="polite" style="margin:0"></p></form>'+
-   '<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Registered user wallet balances</h3><span class="tag">'+users.length+' profiles</span></div><div style="display:grid;gap:10px;margin:12px 0 16px"><label style="display:grid;gap:6px;font-weight:700">Select user to reset all wallet balances<select id="resetWalletUser" style="width:100%;padding:12px;border-radius:10px;background:#102333;color:white;border:1px solid #526878">'+opts+'</select></label><button id="resetWalletBalanceBtn" class="icon-btn" type="button" style="background:#9a3048;border:0;padding:14px;font-weight:800">Reset selected user wallet to zero</button><p id="resetWalletMessage" class="muted" role="status" aria-live="polite" style="margin:0">Resets USDT and all recorded coin balances. The admin audit log is retained.</p></div><div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>USDT balance</th><th>Other coin balances</th><th>Status</th></tr></thead><tbody>'+userRows+'</tbody></table></div></div>'+
+   '<div class="content-panel" style="margin:0"><div class="panel-head"><h3>Registered user wallet balances</h3><span class="tag">'+users.length+' profiles</span></div><div style="display:grid;gap:10px;margin:12px 0 16px"><label style="display:grid;gap:6px;font-weight:700">Select one or more users to reset<select id="resetWalletUsers" multiple size="6" style="width:100%;padding:12px;border-radius:10px;background:#102333;color:white;border:1px solid #526878;min-height:150px">'+opts+'</select><span class="muted" style="font-size:12px">On a computer, hold Ctrl (Windows) or Command (Mac) to select multiple users. On a phone, tap each user to select or deselect.</span></label><label style="display:grid;gap:6px;font-weight:700">Reset reason (required)<input id="resetWalletReason" maxlength="240" placeholder="e.g. Correcting an account balance" style="width:100%;padding:12px;border-radius:10px;background:#102333;color:white;border:1px solid #526878"></label><button id="resetWalletBalanceBtn" class="icon-btn" type="button" style="background:#9a3048;border:0;padding:14px;font-weight:800">Reset selected wallets to zero</button><p id="resetWalletMessage" class="muted" role="status" aria-live="polite" style="margin:0">Only selected users are reset. Wallet history and user accounts are preserved. Each reset is recorded in the secure wallet ledger.</p></div><div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>USDT balance</th><th>Other coin balances</th><th>Status</th></tr></thead><tbody>'+userRows+'</tbody></table></div></div>'+
    '<div class="content-panel" style="margin:0"><h3 style="margin-top:0">Recent account '+(view==='Deposits'?'credits':'deductions')+'</h3><div class="table-wrap"><table><thead><tr><th>Time</th><th>User UID</th><th>Type</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody>'+(txRows||'<tr><td colspan="6">No account adjustments recorded yet.</td></tr>')+'</tbody></table></div></div></div>';
   await renderRequestQueue(view);
   if(view==='Deposits'){
@@ -529,24 +529,28 @@ async function renderDemoFinance(view){
   }
   const resetButton=document.getElementById('resetWalletBalanceBtn');
   if(resetButton)resetButton.addEventListener('click',async()=>{
-   const current=window.__ocAdminFirebase?.auth?.currentUser,select=document.getElementById('resetWalletUser'),msg=document.getElementById('resetWalletMessage');
-   if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){alert('Verified administrator sign-in required.');return;}
-   const target=users.find(u=>u.id===select.value);if(!target){msg.textContent='Select a registered user.';return;}
-   if(!confirm('Set '+(target.displayName||target.email||target.id)+' USDT and all coin balances to ZERO? This does not delete the account.'))return;
-   resetButton.disabled=true;msg.textContent='Resetting wallet…';
+   const current=window.__ocAdminFirebase?.auth?.currentUser;
+   const select=document.getElementById('resetWalletUsers');
+   const reasonInput=document.getElementById('resetWalletReason');
+   const msg=document.getElementById('resetWalletMessage');
+   if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){msg.textContent='Verified administrator sign-in required.';return;}
+   const selected=Array.from(select?.selectedOptions||[]).map(option=>users.find(user=>user.id===option.value)).filter(Boolean);
+   const reason=String(reasonInput?.value||'').trim();
+   if(!selected.length){msg.textContent='Select at least one user. No wallets were changed.';return;}
+   if(!reason){msg.textContent='Enter a reason for the wallet reset. No wallets were changed.';return;}
+   const names=selected.map(user=>(user.displayName||user.email||user.id)+' ('+(user.email||user.id)+')');
+   const confirmation='You are about to reset '+selected.length+' selected wallet'+(selected.length===1?'':'s')+' to ZERO:\n\n'+names.join('\n')+'\n\nThis clears each selected wallet’s USDT balance and coin holdings only. Account access, profile, trade history, deposit/withdrawal records and all unselected wallets remain unchanged.\n\nReason: '+reason+'\n\nContinue?';
+   if(!confirm(confirmation))return;
+   resetButton.disabled=true;msg.textContent='Securely resetting '+selected.length+' selected wallet(s)…';
    try{
-    await current.getIdToken(true);
-    const userRef=doc(db,'users',target.id),logRef=doc(collection(db,'adminWalletResetLogs'));
-    await runTransaction(db,async tx=>{
-     const snap=await tx.get(userRef);if(!snap.exists())throw Error('User profile not found');
-     const data=snap.data(),beforeAssets={...(data.demoAssetBalances||{})},zeroAssets={};
-     for(const sym of new Set([...Object.keys(beforeAssets),...assets]))zeroAssets[sym]=0;
-     tx.update(userRef,{demoBalanceUSDT:0,demoAssetBalances:zeroAssets,demoBalanceUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedAt:serverTimestamp(),demoAssetBalancesUpdatedBy:current.email,demoWalletResetAt:serverTimestamp(),demoWalletResetBy:current.email,adminUpdatedAt:serverTimestamp(),adminUpdatedBy:current.email});
-     tx.set(logRef,{uid:target.id,userEmail:target.email||'',beforeUSDT:Number(data.demoBalanceUSDT)||0,beforeAssetBalances:beforeAssets,afterUSDT:0,afterAssetBalances:zeroAssets,createdAt:serverTimestamp(),createdBy:current.uid,createdByEmail:current.email,source:'admin-dashboard'});
-    });
-    msg.textContent='Wallet reset confirmed by Firebase. USDT and all coin balances are zero; audit record saved.';
+    const token=await current.getIdToken(true);
+    const response=await fetch('https://onchainspro-wallet-api-v2.getachew21-inj-uni.workers.dev/v1/admin/reset-wallets',{method:'POST',cache:'no-store',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({uids:selected.map(user=>user.id),reason,batchId:crypto.randomUUID()})});
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(result.error||'Secure wallet reset failed.');
     await renderDemoFinance(view);
-   }catch(err){msg.textContent='Wallet reset failed: '+(err.code||err.message||'unknown error');resetButton.disabled=false;}
+    const refreshedMessage=document.getElementById('resetWalletMessage');
+    if(refreshedMessage)refreshedMessage.textContent='Successfully reset '+result.resetCount+' selected wallet(s) to zero. Secure audit entries were saved.';
+   }catch(err){msg.textContent='Wallet reset failed: '+(err.message||'unknown error')+'. No partial batch was applied.';resetButton.disabled=false;}
   });
   const form=document.getElementById('demoFinanceForm');
   form.addEventListener('submit',async e=>{
