@@ -116,6 +116,25 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 @media(max-width:390px){.stats{grid-template-columns:1fr}.quick span:last-child{font-size:13px}}
 </style>
 
+
+<style id="oc-admin-responsive-navigation-2026">
+/* Responsive Admin navigation: full menu on desktop, collapsible section drawer on phones. */
+@media (min-width:701px){
+ #sidebar{position:sticky;top:72px}
+ #sideNav{display:flex;flex-wrap:wrap;overflow:visible;white-space:normal;gap:7px}
+ #sideNav button{flex:0 0 auto}
+ #menuToggle{display:none!important}
+}
+@media (max-width:700px){
+ #menuToggle{display:inline-flex!important;align-items:center;justify-content:center;min-width:40px;min-height:40px}
+ #sidebar{position:sticky;top:62px;z-index:20;padding:8px 10px}
+ #sideNav{display:none;flex-wrap:wrap;overflow:visible;white-space:normal;max-height: min(62vh,480px);overflow-y:auto;overscroll-behavior:contain;padding:4px 2px 8px}
+ #sidebar.open #sideNav{display:flex}
+ #sideNav button{flex:1 1 calc(50% - 8px);min-width:135px;justify-content:flex-start}
+ #sidebar.open{box-shadow:0 12px 28px #02081799}
+}
+</style>
+
 </head>
 <body>
 <header class="topbar">
@@ -823,7 +842,16 @@ async function renderBrokerageRequests(){
 }
 function showView(view){if(adminActivityUnsubscribe){adminActivityUnsubscribe();adminActivityUnsubscribe=null;}const isHome=view==='Dashboard';dashboard.classList.toggle('hidden',!isHome);detail.classList.toggle('hidden',isHome);document.getElementById('pageTitle').textContent=isHome?'Dashboard Overview':view;document.getElementById('pageSubtitle').textContent=isHome?'Welcome to your Onchain administration panel.':(descriptions[view]||'Administration workspace.');document.getElementById('detailTitle').textContent=view;const body=document.getElementById('detailBody');body.textContent='';if(view==='Trade Controls')renderTradeControls();else if(view==='Brokerage')renderBrokerageRequests();else if(!isHome)renderModule(view);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));sidebar.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
-document.getElementById('menuToggle').addEventListener('click',()=>sidebar.classList.toggle('open'));
+const menuToggle=document.getElementById('menuToggle');
+menuToggle.setAttribute('aria-controls','sideNav');
+menuToggle.setAttribute('aria-expanded','false');
+menuToggle.setAttribute('aria-label','Open Admin sections');
+menuToggle.addEventListener('click',()=>{
+ const opened=sidebar.classList.toggle('open');
+ menuToggle.setAttribute('aria-expanded',String(opened));
+ menuToggle.setAttribute('aria-label',opened?'Close Admin sections':'Open Admin sections');
+ menuToggle.textContent=opened?'✕':'☰';
+});
 document.getElementById('refreshBtn').addEventListener('click',()=>{const active=document.querySelector('[data-view].active')?.dataset.view||'Dashboard';showView(active);const b=document.getElementById('refreshBtn');b.textContent='✓ Refreshed';setTimeout(()=>b.textContent='↻ Refresh',1200);});
 document.getElementById('notifyBtn').addEventListener('click',()=>showView('Notifications'));
 document.getElementById('moreBtn').addEventListener('click',()=>showView('Settings'));
