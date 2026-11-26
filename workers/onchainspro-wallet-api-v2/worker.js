@@ -995,15 +995,26 @@ async function adminTradeMonitor(env, claims) {
       ...(fieldsFromFirestore(x.document.fields) || {})
     }));
   }
-  const [activeTrades, recentTrades] = await Promise.all([
+  const [activeTrades, recentTrades, walletStates] = await Promise.all([
     list("activeTrades", "startedAt", 500),
-    list("tradeLedger", "completedAt", 500)
+    list("tradeLedger", "completedAt", 500),
+    list("userTradeState", "updatedAt", 500)
   ]);
+  // Buy & Hold orders are recorded in each account wallet history.
+  const walletHistory = walletStates.flatMap(wallet => (Array.isArray(wallet.history) ? wallet.history : []).map(item => ({ ...item, uid: wallet.id })));
+  const holdTrades = walletHistory.filter(item => item.kind === "buy-hold" || item.source === "onchain-portfolio").sort((a,b) => Date.parse(b.time || 0) - Date.parse(a.time || 0)).slice(0,1000);
+  const conversionTrades = walletHistory.filter(item => item.kind === "conversion" || item.type === "convert").sort((a,b) => Date.parse(b.time || 0) - Date.parse(a.time || 0)).slice(0,1000);
+  const holdingsByUser = walletStates.flatMap(wallet => Object.entries(wallet.holdings && typeof wallet.holdings === "object" ? wallet.holdings : {}).filter(([asset,quantity]) => asset !== "USDT" && Number.isFinite(Number(quantity)) && Number(quantity) > 0).map(([asset,quantity]) => ({ uid: wallet.id, asset, quantity: Number(quantity), updatedAt: wallet.updatedAt || null })));
   return json({
     activeTrades: activeTrades.filter(x => x.status === "active"),
     recentTrades,
+    holdTrades,
+    conversionTrades,
+    holdingsByUser,
     activeCount: activeTrades.filter(x => x.status === "active").length,
     completedCount: recentTrades.length,
+    holdTradeCount: holdTrades.length,
+    holdingCount: holdingsByUser.length,
     asOf: new Date().toISOString()
   }, 200);
 }
