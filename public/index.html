@@ -12697,22 +12697,31 @@ html body #page-home .quick-action-grid > button.quick-action:not(.oc-copy-tradi
 html body #page-home .quick-action-grid.oc-collapsed > button.quick-action:nth-child(n+5):not(.oc-copy-trading-auth-only){display:flex!important;visibility:visible!important;opacity:1!important}
 </style>
 <style id="oc-home-quick-action-color-fix-20261126">
-/* Permanent Home-only action colors. Avoid :has() so older mobile browsers apply the palette reliably. */
-html body #page-home .quick-action-grid .quick-action[data-go="deposit"] { background:#15803d!important;background-image:none!important;border:1px solid #15803d!important;color:#fff!important; }
-html body #page-home .quick-action-grid .quick-action[data-go="withdraw"] { background:#dc2626!important;background-image:none!important;border:1px solid #dc2626!important;color:#fff!important; }
-html body #page-home .quick-action-grid .quick-action[data-go="convert"] { background:#7c3aed!important;background-image:none!important;border:1px solid #7c3aed!important;color:#fff!important; }
-html body #page-home .quick-action-grid .quick-action[data-go="trade"]:not([data-gold-trade="true"]) { background:#2563eb!important;background-image:none!important;border:1px solid #2563eb!important;color:#fff!important; }
-html body #page-home .quick-action-grid .quick-action[data-gold-trade="true"] { background:#b45309!important;background-image:none!important;border:1px solid #b45309!important;color:#fff!important; }
-html body #page-home .quick-action-grid .quick-action[data-go="markets"] { background:#c2410c!important;background-image:none!important;border:1px solid #c2410c!important;color:#fff!important; }
-html body #page-home .quick-action-grid .quick-action[data-home-history="true"] { background:#6b4fc3!important;background-image:none!important;border:1px solid #6b4fc3!important;color:#fff!important; }
-html body #page-home .quick-action-grid .quick-action[data-go="wallet"] { background:#6d28d9!important;background-image:none!important;border:1px solid #6d28d9!important;color:#fff!important; }
-html body #page-home .quick-action-grid .quick-action[data-go="copytrading"] { background:#0e7490!important;background-image:none!important;border:1px solid #0e7490!important;color:#fff!important; }
-html body #page-home .quick-action-grid .quick-action .action-icon,
-html body #page-home .quick-action-grid .quick-action strong,
-html body #page-home .quick-action-grid .quick-action small { color:#fff!important; }
-html body #page-home .quick-action-grid .quick-action .action-icon { background:#ffffff24!important;border:1px solid #ffffff55!important;box-shadow:none!important; }
-html body #page-home .quick-action-grid .quick-action:hover { filter:brightness(1.08);transform:translateY(-2px); }
-html body #page-home .quick-action-grid .quick-action:focus-visible { outline:2px solid currentColor;outline-offset:3px; }
+/* Apply a solid, distinct color to every Quick Actions card on every app page.
+   Keep a slate fallback for any future action added without a specific mapping. */
+html body .quick-action-grid > button.quick-action {
+  background:#475569!important;background-image:none!important;
+  border:1px solid #475569!important;color:#fff!important;
+}
+html body .quick-action-grid > button.quick-action[data-go="deposit"] { background:#15803d!important;border-color:#15803d!important; }
+html body .quick-action-grid > button.quick-action[data-go="withdraw"] { background:#dc2626!important;border-color:#dc2626!important; }
+html body .quick-action-grid > button.quick-action[data-go="convert"] { background:#7c3aed!important;border-color:#7c3aed!important; }
+html body .quick-action-grid > button.quick-action[data-go="transfer"] { background:#0e7490!important;border-color:#0e7490!important; }
+html body .quick-action-grid > button.quick-action[data-go="trade"]:not([data-gold-trade="true"]) { background:#2563eb!important;border-color:#2563eb!important; }
+html body .quick-action-grid > button.quick-action[data-gold-trade="true"] { background:#b45309!important;border-color:#b45309!important; }
+html body .quick-action-grid > button.quick-action[data-go="markets"] { background:#c2410c!important;border-color:#c2410c!important; }
+html body .quick-action-grid > button.quick-action[data-go="history"] { background:#6b4fc3!important;border-color:#6b4fc3!important; }
+html body .quick-action-grid > button.quick-action[data-go="wallet"] { background:#6d28d9!important;border-color:#6d28d9!important; }
+html body .quick-action-grid > button.quick-action[data-go="copytrading"] { background:#0e7490!important;border-color:#0e7490!important; }
+html body .quick-action-grid > button.quick-action[data-go="profile"] { background:#be185d!important;border-color:#be185d!important; }
+html body .quick-action-grid > button.quick-action .action-icon,
+html body .quick-action-grid > button.quick-action strong,
+html body .quick-action-grid > button.quick-action small { color:#fff!important; }
+html body .quick-action-grid > button.quick-action .action-icon {
+  background:#ffffff24!important;border:1px solid #ffffff55!important;box-shadow:none!important;
+}
+html body .quick-action-grid > button.quick-action:hover { filter:brightness(1.08);transform:translateY(-2px); }
+html body .quick-action-grid > button.quick-action:focus-visible { outline:2px solid #fff;outline-offset:3px; }
 </style>
 
 </body>
