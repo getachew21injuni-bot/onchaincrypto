@@ -12684,6 +12684,35 @@ html body #page-wallet #walletQuickActions > button.wallet-action:hover {
 html body #page-home .quick-action-grid > button.quick-action:not(.oc-copy-trading-auth-only){display:flex!important;visibility:visible!important;opacity:1!important}
 html body #page-home .quick-action-grid.oc-collapsed > button.quick-action:nth-child(n+5):not(.oc-copy-trading-auth-only){display:flex!important;visibility:visible!important;opacity:1!important}
 </style>
+<style id="oc-home-quick-action-color-fix-20261126">
+/* Home Quick Actions only: distinct, high-contrast colors. Layout and actions remain unchanged. */
+html body #page-home > .panel:has(> .quick-action-grid) .quick-action[data-go="deposit"] {
+  background:#15803d!important;background-image:none!important;border:1px solid #15803d!important;color:#fff!important;
+}
+html body #page-home > .panel:has(> .quick-action-grid) .quick-action[data-go="withdraw"] {
+  background:#dc2626!important;background-image:none!important;border:1px solid #dc2626!important;color:#fff!important;
+}
+html body #page-home > .panel:has(> .quick-action-grid) .quick-action[data-go="convert"] {
+  background:#7c3aed!important;background-image:none!important;border:1px solid #7c3aed!important;color:#fff!important;
+}
+html body #page-home > .panel:has(> .quick-action-grid) .quick-action[data-go="trade"]:not([data-gold-trade="true"]) {
+  background:#2563eb!important;background-image:none!important;border:1px solid #2563eb!important;color:#fff!important;
+}
+html body #page-home > .panel:has(> .quick-action-grid) .quick-action:is([data-go="deposit"],[data-go="withdraw"],[data-go="convert"],[data-go="trade"]) .action-icon,
+html body #page-home > .panel:has(> .quick-action-grid) .quick-action:is([data-go="deposit"],[data-go="withdraw"],[data-go="convert"],[data-go="trade"]) strong,
+html body #page-home > .panel:has(> .quick-action-grid) .quick-action:is([data-go="deposit"],[data-go="withdraw"],[data-go="convert"],[data-go="trade"]) small {
+  color:#fff!important;
+}
+html body #page-home > .panel:has(> .quick-action-grid) .quick-action:is([data-go="deposit"],[data-go="withdraw"],[data-go="convert"],[data-go="trade"]) .action-icon {
+  background:#ffffff24!important;border:1px solid #ffffff55!important;box-shadow:none!important;
+}
+html body #page-home > .panel:has(> .quick-action-grid) .quick-action:is([data-go="deposit"],[data-go="withdraw"],[data-go="convert"],[data-go="trade"]):hover {
+  filter:brightness(1.08);transform:translateY(-2px);
+}
+html body #page-home > .panel:has(> .quick-action-grid) .quick-action:is([data-go="deposit"],[data-go="withdraw"],[data-go="convert"],[data-go="trade"]):focus-visible {
+  outline:2px solid currentColor;outline-offset:3px;
+}
+</style>
 
 </body>
 </html>
