@@ -971,6 +971,56 @@ async function adminAdjustment(env, token, claims, body) {
 
 
 
+
+async function adminResetWallets(env, claims, body) {
+  const admins = String(env.ADMIN_EMAILS || "").split(",").map(x => x.trim().toLowerCase()).filter(Boolean);
+  const email = String(claims.email || "").toLowerCase();
+  if (!(claims.admin === true || (claims.email_verified === true && email && admins.includes(email)))) return json({ error: "Administrator access is required." }, 403);
+  const uids = Array.isArray(body.uids) ? [...new Set(body.uids)] : [];
+  const reason = typeof body.reason === "string" ? body.reason.trim().slice(0, 240) : "";
+  const batchId = typeof body.batchId === "string" ? body.batchId.trim() : "";
+  if (!uids.length || uids.length > 100 || uids.some(uid => typeof uid !== "string" || !/^[A-Za-z0-9_-]{16,128}$/.test(uid)) || !reason || !/^[A-Za-z0-9_-]{16,80}$/.test(batchId)) {
+    return json({ error: "Select 1–100 valid users and provide a reason and unique batch ID." }, 400);
+  }
+  const access = await serviceToken(env);
+  const wallets = await Promise.all(uids.map(async uid => ({ uid, wallet: await readWallet(access, uid) })));
+  const missing = wallets.filter(x => !x.wallet || !x.wallet.updateTime).map(x => x.uid);
+  if (missing.length) return json({ error: "No wallet was changed. Canonical wallet records are missing for: " + missing.join(", ") }, 409);
+  const now = new Date().toISOString(), writes = [];
+  for (const { uid, wallet } of wallets) {
+    const data = wallet.data || {};
+    const beforeBalance = Number(data.balance);
+    const beforeHoldings = data.holdings && typeof data.holdings === "object" && !Array.isArray(data.holdings) ? data.holdings : {};
+    if (!Number.isFinite(beforeBalance) || beforeBalance < 0 || Object.values(beforeHoldings).some(value => !Number.isFinite(Number(value)) || Number(value) < 0)) {
+      return json({ error: "No wallet was changed. A selected wallet contains invalid balance data: " + uid }, 409);
+    }
+    const afterHoldings = Object.fromEntries(Object.keys(beforeHoldings).map(asset => [asset, 0]));
+    const ledgerId = "reset_" + batchId + "_" + uid;
+    writes.push({
+      update: { name: `${ROOT}/userTradeState/${encodeURIComponent(uid)}`, fields: {
+        uid: toFirestore(uid), balance: toFirestore(0), holdings: toFirestore(afterHoldings),
+        history: toFirestore(Array.isArray(data.history) ? data.history : []), updatedAt: { timestampValue: now }
+      }},
+      updateMask: { fieldPaths: ["uid", "balance", "holdings", "history", "updatedAt"] },
+      currentDocument: { updateTime: wallet.updateTime }
+    });
+    writes.push({
+      update: { name: `${ROOT}/walletLedger/${encodeURIComponent(ledgerId)}`, fields: {
+        uid: toFirestore(uid), type: toFirestore("admin_wallet_reset"), asset: toFirestore("ALL"),
+        amount: toFirestore(0), balanceBefore: toFirestore(beforeBalance), balanceAfter: toFirestore(0),
+        holdingsBefore: toFirestore(beforeHoldings), holdingsAfter: toFirestore(afterHoldings),
+        reason: toFirestore(reason), batchId: toFirestore(batchId), actorUid: toFirestore(claims.sub),
+        actorEmail: toFirestore(email), createdAt: { timestampValue: now }
+      }},
+      currentDocument: { exists: false }
+    });
+  }
+  const commit = await fetch(ROOT + ":commit", { method: "POST", headers: { authorization: "Bearer " + access, "content-type": "application/json" }, body: JSON.stringify({ writes }) });
+  if (commit.status === 409 || commit.status === 412) return json({ error: "A selected wallet changed during confirmation. No wallets were reset; refresh and try again." }, 409);
+  if (!commit.ok) throw new Error("Atomic multi-user wallet reset failed; Firestore did not confirm the batch.");
+  return json({ ok: true, resetCount: uids.length, uids, batchId, audit: "walletLedger" });
+}
+
 async function adminTradeMonitor(env, claims) {
   const admins = String(env.ADMIN_EMAILS || "").split(",").map(x => x.trim().toLowerCase()).filter(Boolean);
   const email = String(claims.email || "").toLowerCase();
@@ -1144,6 +1194,13 @@ export default {
         fieldsFromFirestore
       });
 
+
+      if (url.pathname === "/v1/admin/reset-wallets" && request.method === "POST") {
+        const result = await adminResetWallets(env, claims, await request.json());
+        const headers = new Headers(result.headers);
+        for (const [k, v] of Object.entries(cors)) headers.set(k, v);
+        return new Response(result.body, { status: result.status, headers });
+      }
 
       if (url.pathname === "/v1/admin/trades" && request.method === "GET") {
         const result = await adminTradeMonitor(env, claims);
