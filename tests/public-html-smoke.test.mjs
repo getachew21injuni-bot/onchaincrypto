@@ -35,6 +35,9 @@ test("Admin Trades view uses the secure administrator-only Worker endpoint and s
   assert.ok(tradeWorker.includes('list("userTradeState", "updatedAt", 500)'), "Admin Worker must read canonical wallet snapshots for Buy & Hold visibility");
   assert.ok(tradeWorker.includes('item.kind === "buy-hold"'), "Admin Worker must identify Buy & Hold history entries");
   assert.ok(admin.includes("Buy & Hold order history") && admin.includes("Current coin holdings"), "Admin must display Buy & Hold orders and current holdings");
+  assert.ok(tradeWorker.includes('item.kind === "conversion"'), "Admin Worker must identify conversion history entries");
+  assert.ok(admin.includes("Conversion history (latest 1,000)"), "Admin must display conversion history");
+  assert.ok(html.includes("kind:'conversion'") && html.includes("state.history.unshift(item)"), "Conversion history must be persisted with the cloud wallet state");
 });
 
 test("all inline classic JavaScript parses", () => {
