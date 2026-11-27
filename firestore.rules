@@ -223,7 +223,7 @@ service cloud.firestore {
         allow create: if (isAdmin() && request.resource.data.senderUid == request.auth.uid && request.resource.data.senderRole == 'admin')
           || (ticketOwner() && request.resource.data.senderUid == request.auth.uid && request.resource.data.senderRole == 'customer');
         allow update: if isAdmin() && resource.data.senderRole == 'admin'
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text','editedAt','editedBy'])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text','senderName','editedAt','editedBy'])
           && request.resource.data.text is string && request.resource.data.text.size() > 0
           && request.resource.data.text.size() <= 3000
           && request.resource.data.editedBy == request.auth.uid;
