@@ -426,7 +426,7 @@ async function renderWalletAddresses(){
  const options=assets.map(x=>'<option value="'+x+'">'+x+'</option>').join('');
  const networkOptions=networks.map(x=>'<option value="'+x+'">'+x+'</option>').join('');
  body.innerHTML='<div style="display:grid;gap:16px">'+
- '<div class="notice" style="border-color:#267b68;background:#0d332b;color:#c7f9e7"><strong style="color:#6ee7b7">PUBLISHED WALLET SETTINGS</strong><p style="margin:6px 0 0">Saved settings are shared with users through Firestore. Deposit addresses and QR images are public receiving instructions. Only publish addresses and QR codes that you have independently verified. This does not monitor blockchain payments or automatically credit balances.</p></div>'+
+ '<div class="notice" style="border-color:#267b68;background:#0d332b;color:#c7f9e7"><strong style="color:#6ee7b7">PUBLISHED WALLET SETTINGS</strong><p style="margin:6px 0 0">Saved settings are shared with users through Firestore. Deposit addresses and QR images are public receiving instructions. Only publish addresses and QR codes that you have independently verified. Publishing an address does not monitor transfers; customers submit TXIDs and an administrator must verify the transaction on the correct explorer before approving a wallet credit.</p></div>'+
  '<form id="walletAddressForm" class="content-panel" style="margin:0;display:grid;gap:12px;border-color:#267b68">'+
  '<div><h3 style="margin:0 0 4px">＋ Add / edit coin wallet details</h3><p class="muted" style="margin:0">Create one record for each coin and network combination.</p></div>'+
  '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">'+
