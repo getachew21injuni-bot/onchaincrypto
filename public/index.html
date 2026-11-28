@@ -1973,6 +1973,14 @@ html:not(.oc-light-theme) .oc-home-roadmap .oc-visitor-product-card button.secon
       <div class="address-box"><div class="muted tiny">Deposit address</div><div id="depositAddress" class="address-value">Deposit address not configured</div><div class="two-buttons"><button id="copyDepositAddress" class="secondary" type="button" disabled>▢ Copy address</button><button id="showDepositQr" class="secondary" type="button" disabled>▦ Show QR</button></div><div id="depositQr" class="qr-area"><span class="muted tiny">No deposit address available</span></div></div>
       <p id="depositHelp" class="muted tiny">Deposit address setup is required for this asset.</p>
       <div class="divider"></div>
+      <label for="depositAmount">Amount sent</label>
+      <input id="depositAmount" class="field" type="number" min="0.00000001" max="1000000000" step="any" inputmode="decimal" placeholder="Enter the amount you sent">
+      <label for="depositTransactionHash">Transaction hash (TXID)</label>
+      <input id="depositTransactionHash" class="field" type="text" maxlength="200" autocomplete="off" spellcheck="false" placeholder="Paste the transaction hash">
+      <button class="primary full" id="depositSubmit" type="button" disabled>Submit deposit for admin review</button>
+      <p id="depositSubmitNotice" class="muted tiny" role="status" aria-live="polite">After sending, submit the TXID. Your wallet is credited only after an administrator reviews and approves the request.</p>
+      <div class="divider"></div>
+      <div id="depositRequestHistory" class="muted tiny" aria-live="polite">Your deposit requests will appear here.</div>
       
     </section>
   </section>
@@ -6125,6 +6133,16 @@ function watch(u){
   window.ocWalletWithdrawals=rows.map(d=>({...d.data(),id:d.id}));
   window.ocRenderWalletActivity?.();
  },e=>console.warn("Could not refresh withdrawal history:",e.code)));
+ stops.push(onSnapshot(query(collection(db,"depositRequests"),where("uid","==",u.uid)),s=>{
+  const rows=s.docs.slice().sort((a,b)=>(b.data().createdAt?.seconds||0)-(a.data().createdAt?.seconds||0));
+  const host=$("depositRequestHistory");if(!host)return;
+  host.innerHTML=rows.length?'<strong>Deposit request history</strong>'+rows.map(row=>{
+   const data=row.data(),status=String(data.status||"pending").toLowerCase();
+   const color=status==="approved"?"#16d9a0":status==="rejected"?"#ff5573":"#f0b90b";
+   const created=data.createdAt?.toDate?data.createdAt.toDate().toLocaleString():"";
+   return '<div class="panel" style="padding:10px;margin:8px 0"><div style="display:flex;justify-content:space-between;gap:10px"><strong>'+esc(data.amount)+' '+esc(data.asset)+'</strong><strong style="color:'+color+'">'+esc(status.replace("_"," ").toUpperCase())+'</strong></div><div class="muted tiny">'+esc(data.network)+' · '+esc(created)+'</div><div class="muted tiny" style="overflow-wrap:anywhere">TXID: '+esc(data.transactionHash||"")+'</div></div>';
+  }).join(""):'<strong>Deposit request history</strong><p class="muted tiny">No deposit requests submitted yet.</p>';
+ },e=>console.warn("Could not refresh deposit history:",e.code)));
  if(admin){stops.push(onSnapshot(collection(db,"depositRequests"),s=>adminRows("ocAdminDeposits",s.docs,"deposit"),e=>{$("ocAdminDeposits").textContent="Could not load deposit requests ("+e.code+")."}));stops.push(onSnapshot(collection(db,"withdrawRequests"),s=>adminRows("ocAdminWithdrawals",s.docs,"withdraw"),e=>{$("ocAdminWithdrawals").textContent="Could not load withdrawal requests ("+e.code+")."}));}
 }
 document.addEventListener("click",event=>{
@@ -6135,6 +6153,38 @@ document.addEventListener("click",event=>{
  details.hidden=!details.hidden;button.setAttribute("aria-expanded",String(!details.hidden));
 });
 setup();
+
+function refreshDepositSubmitButton(){
+ const button=$("depositSubmit");if(!button)return;
+ const address=String($("depositAddress")?.textContent||"").trim();
+ const amount=Number($("depositAmount")?.value),tx=String($("depositTransactionHash")?.value||"").trim();
+ const hasAddress=!!address&&address!=="Deposit address not configured";
+ button.disabled=!(!!auth.currentUser&&hasAddress&&!!$("depositNetwork")?.value&&Number.isFinite(amount)&&amount>0&&amount<=1000000000&&/^[A-Za-z0-9_-]{8,200}$/.test(tx));
+}
+["depositAmount","depositTransactionHash"].forEach(id=>$(id)?.addEventListener("input",refreshDepositSubmitButton));
+$("depositNetwork")?.addEventListener("change",refreshDepositSubmitButton);
+window.addEventListener("oc-wallet-addresses-updated",refreshDepositSubmitButton);
+$("depositSubmit")?.addEventListener("click",async()=>{
+ const button=$("depositSubmit"),notice=$("depositSubmitNotice"),user=auth.currentUser;
+ if(!button||button.dataset.submitting==="true")return;
+ if(!user){notice.textContent="Please sign in before submitting a deposit.";return;}
+ const assetCode=asset("deposit"),network=String($("depositNetwork")?.value||"").trim();
+ const depositAddress=String($("depositAddress")?.textContent||"").trim();
+ const amount=Number($("depositAmount")?.value),transactionHash=String($("depositTransactionHash")?.value||"").trim();
+ if(!depositAddress||depositAddress==="Deposit address not configured"||!network){notice.textContent="No active administrator deposit address is available for this coin and network.";return;}
+ if(!(Number.isFinite(amount)&&amount>0&&amount<=1000000000)){notice.textContent="Enter a valid amount.";return;}
+ if(!/^[A-Za-z0-9_-]{8,200}$/.test(transactionHash)){notice.textContent="Enter a valid transaction hash (TXID).";return;}
+ button.dataset.submitting="true";button.disabled=true;button.textContent="Submitting…";notice.textContent="Sending your request securely…";
+ try{
+  if(typeof window.ocWalletApiPost!=="function")throw new Error("The trusted wallet service is not connected yet.");
+  const result=await window.ocWalletApiPost("/v1/wallet/deposit-request",{asset:assetCode,network,amount,transactionHash,depositAddress});
+  $("depositAmount").value="";$("depositTransactionHash").value="";
+  notice.textContent="Deposit request submitted. Status: Pending admin approval. Your wallet balance has not changed.";
+  if(typeof window.ocLogUserActivity==="function")void window.ocLogUserActivity("deposit_request",{asset:assetCode,network,amount,requestId:result.requestId});
+ }catch(error){notice.textContent="Deposit request was not submitted: "+(error.message||error.code||"Please try again.");}
+ finally{delete button.dataset.submitting;button.textContent="Submit deposit for admin review";refreshDepositSubmitButton();}
+});
+refreshDepositSubmitButton();
 
 document.getElementById("withdrawAllBtn")?.addEventListener("click",()=>{const symbol=String(asset("withdraw")||"BTC").toUpperCase();const amount=typeof window.ocGetDisplayedAssetBalance==="function"?window.ocGetDisplayedAssetBalance(symbol):NaN;if(!Number.isFinite(amount)){const note=document.getElementById("withdrawNotice");if(note)note.textContent="Wallet balance is still loading. Refresh and try again.";return;}const field=document.getElementById("withdrawAmount");if(!field)return;field.value=amount>0?String(Number(amount.toFixed(8))):"";field.dispatchEvent(new Event("input",{bubbles:true}));field.dispatchEvent(new Event("change",{bubbles:true}));});
 function refreshWithdrawRequestButton(){const b=$("withdrawSubmit");if(!b)return;const valid=Number($("withdrawAmount")?.value)>0&&!!$("withdrawAddress")?.value.trim()&&$("withdrawAddressCheck")?.dataset.state==="valid"&&!!$("withdrawNetwork")?.value;b.disabled=!valid&&b.dataset.submitting!=="true";if(b.dataset.submitting!=="true")b.textContent="Continue";}window.ocUpdateWithdrawRequestButton=refreshWithdrawRequestButton;["withdrawAmount","withdrawAddress","withdrawNetwork"].forEach(id=>$(id)?.addEventListener("input",refreshWithdrawRequestButton));["withdrawAmount","withdrawAddress","withdrawNetwork"].forEach(id=>$(id)?.addEventListener("change",refreshWithdrawRequestButton));refreshWithdrawRequestButton();
@@ -6207,7 +6257,7 @@ document.addEventListener("click",async e=>{
  try{await processDemoRequest(kind,b.dataset.id,decision);reportAdminRequest(decision==="approve"?"Request processed. The displayed balance and account ledger were updated.":"Request rejected.");b.textContent=decision==="approve"?"Approved":"Rejected";}
  catch(err){reportAdminRequest("Could not process request: "+(err.message||err.code));b.disabled=false}
 });
-onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(String(u.email||"").toLowerCase()));if(u)watch(u)});
+onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(String(u.email||"").toLowerCase()));if(u)watch(u);refreshDepositSubmitButton();});
 </script>
 <script id="oc-platform-atmosphere-prices">
 (function(){
