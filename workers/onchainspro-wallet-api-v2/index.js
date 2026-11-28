@@ -291,7 +291,7 @@ async function walletConvert(env, claims, body) {
 }
 async function depositRequestId(network, transactionHash) {
   const rawHash = String(transactionHash).trim();
-  const normalizedHash = /^[0-9a-f]+$/i.test(rawHash) ? rawHash.toLowerCase() : rawHash;
+  const normalizedHash = /^(?:0x)?[0-9a-f]+$/i.test(rawHash) ? rawHash.toLowerCase() : rawHash;
   const normalized = String(network).trim().toLowerCase() + ":" + normalizedHash;
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(normalized));
   return "dep_" + Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
