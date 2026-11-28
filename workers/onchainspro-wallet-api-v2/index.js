@@ -289,6 +289,57 @@ async function walletConvert(env, claims, body) {
   return { ok: true, wallet: { uid, balance: nextBalance, holdings, history: wallet.data.history || [] },
     conversion: { from, to, amount, received, feeUSDT, priceFrom: prices[from], priceTo: prices[to], time: createdAt } };
 }
+async function depositRequestId(network, transactionHash) {
+  const normalized = String(network).trim().toLowerCase() + ":" + String(transactionHash).trim().toLowerCase();
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(normalized));
+  return "dep_" + Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+}
+async function createDepositRequest(env, claims, body) {
+  const uid = String(claims.sub || "");
+  if (!validId(uid)) throw new HttpError("A valid signed-in account is required.", 401);
+  const asset = String(body.asset || "").trim().toUpperCase();
+  const network = String(body.network || "").trim();
+  const amount = Number(body.amount);
+  const transactionHash = String(body.transactionHash || body.txHash || "").trim();
+  const depositAddress = String(body.depositAddress || "").trim();
+  if (!/^[A-Z0-9]{2,20}$/.test(asset) || !network || network.length > 50 ||
+      !Number.isFinite(amount) || amount <= 0 || amount > 1000000000 ||
+      transactionHash.length < 8 || transactionHash.length > 200 || !/^[A-Za-z0-9_-]+$/.test(transactionHash) ||
+      !depositAddress || depositAddress.length > 500) {
+    throw new HttpError("Enter a valid asset, network, amount, transaction hash and deposit address.");
+  }
+  const access = await serviceToken(env);
+  const [profile, addresses] = await Promise.all([
+    readDocument(access, "users", uid),
+    queryDocuments(access, "walletAddresses", "asset", asset, 100)
+  ]);
+  if (!profile) throw new HttpError("Your account profile is not ready. Refresh and try again.", 409);
+  if (profile.data.accountStatus === "suspended") throw new HttpError("This account is suspended.", 403);
+  const configured = addresses.find(row =>
+    String(row.network || "") === network &&
+    row.depositEnabled === true &&
+    String(row.depositAddress || "").trim() === depositAddress
+  );
+  if (!configured) throw new HttpError("This deposit address is not an active administrator-published address for the selected asset and network.", 422);
+
+  const requestId = await depositRequestId(network, transactionHash);
+  const existing = await readDocument(access, "depositRequests", requestId);
+  if (existing) throw new HttpError("This transaction hash has already been submitted. Contact support if you believe this is an error.", 409);
+  const createdAt = new Date().toISOString();
+  const fields = {
+    uid, email: String(claims.email || ""), asset, network, amount, depositAddress,
+    transactionHash, status: "pending", source: "customer-wallet-deposit",
+    createdAt: { timestampValue: createdAt }
+  };
+  await commitWrites(access, [{
+    update: {
+      name: docPath("depositRequests", requestId),
+      fields: Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, value && value.timestampValue ? value : toFirestore(value)]))
+    },
+    currentDocument: { exists: false }
+  }]);
+  return { ok: true, requestId, status: "pending", balanceCredited: false };
+}
 async function reviewDepositWithdrawal(env, claims, body) {
   if (!isAdmin(env, claims)) throw new HttpError("Administrator access is required.", 403);
   const kind = body.kind === "deposit" ? "deposit" : body.kind === "withdraw" ? "withdraw" : "";
@@ -300,13 +351,37 @@ async function reviewDepositWithdrawal(env, claims, body) {
   if (!request) throw new HttpError("Request not found.", 404);
   if ((request.data.status || "pending") !== "pending") throw new HttpError("This request has already been reviewed.", 409);
   const reviewedAt = new Date().toISOString(), reviewedBy = String(claims.email || claims.sub);
+  const note = String(body.note || "").trim().slice(0, 500);
+  if (kind === "deposit" && decision === "approve" && note.length < 10) {
+    throw new HttpError("Add an admin verification note (at least 10 characters) before approving this deposit.", 422);
+  }
   if (decision === "reject") {
-    await commitWrites(access, [{
-      update: { name: docPath(collection, requestId), fields: { status: toFirestore("rejected"), reviewedAt: { timestampValue: reviewedAt }, reviewedBy: toFirestore(reviewedBy) } },
-      updateMask: { fieldPaths: ["status", "reviewedAt", "reviewedBy"] },
-      currentDocument: { updateTime: request.updateTime }
-    }]);
+    const auditId = "wallet-" + kind + "-" + requestId;
+    await commitWrites(access, [
+      {
+        update: { name: docPath(collection, requestId), fields: {
+          status: toFirestore("rejected"), reviewedAt: { timestampValue: reviewedAt },
+          reviewedBy: toFirestore(reviewedBy), reviewNote: toFirestore(note)
+        } },
+        updateMask: { fieldPaths: ["status", "reviewedAt", "reviewedBy", "reviewNote"] },
+        currentDocument: { updateTime: request.updateTime }
+      },
+      {
+        update: { name: docPath("adminAuditLogs", auditId), fields: Object.fromEntries(Object.entries({
+          action: "wallet_" + kind + "_request_rejected", targetId: requestId, decision: "rejected",
+          adminUid: claims.sub, adminEmail: reviewedBy, note, uid: request.data.uid || "",
+          asset: request.data.asset || "", amount: Number(request.data.amount || 0),
+          network: request.data.network || "", transactionHash: request.data.transactionHash || "",
+          depositAddress: request.data.depositAddress || "", createdAt: { timestampValue: reviewedAt }
+        }).map(([key, value]) => [key, value && value.timestampValue ? value : toFirestore(value)])) },
+        currentDocument: { exists: false }
+      }
+    ]);
     return { ok: true, status: "rejected", requestId };
+  }
+  if (kind === "deposit" && (!String(request.data.transactionHash || "").trim() ||
+      !String(request.data.depositAddress || "").trim() || !String(request.data.network || "").trim())) {
+    throw new HttpError("This deposit request is missing its transaction hash, destination address or network.", 409);
   }
   const uid = String(request.data.uid || ""), asset = String(request.data.asset || "USDT").toUpperCase(), amount = Number(request.data.amount);
   if (!validId(uid) || !/^[A-Z0-9]{2,12}$/.test(asset) || !Number.isFinite(amount) || amount <= 0 || amount > 1000000000) throw new HttpError("The request details are invalid.");
@@ -326,15 +401,27 @@ async function reviewDepositWithdrawal(env, claims, body) {
   const ledgerId = `admin-${kind}-${requestId}`, ledgerType = kind === "withdraw" ? "withdrawal" : "deposit";
   const ledger = createLedgerWrite(ledgerId, {
     uid, type: ledgerType, status: "approved", asset, amount, balanceBefore: before, balanceAfter: after,
-    source: "admin-request-review", requestId, actorUid: claims.sub, actorEmail: reviewedBy, createdAtText: reviewedAt,
-    createdAt: { timestampValue: reviewedAt }
+    source: "admin-request-review", requestId, actorUid: claims.sub, actorEmail: reviewedBy,
+    network: request.data.network || "", transactionHash: request.data.transactionHash || "",
+    depositAddress: request.data.depositAddress || "", reviewNote: note,
+    createdAtText: reviewedAt, createdAt: { timestampValue: reviewedAt }
   });
+  const auditId = "wallet-" + kind + "-" + requestId;
+  const auditWrite = {
+    update: { name: docPath("adminAuditLogs", auditId), fields: Object.fromEntries(Object.entries({
+      action: "wallet_" + kind + "_request_approved", targetId: requestId, decision: "approved",
+      adminUid: claims.sub, adminEmail: reviewedBy, note, uid, asset, amount,
+      network: request.data.network || "", transactionHash: request.data.transactionHash || "",
+      depositAddress: request.data.depositAddress || "", createdAt: { timestampValue: reviewedAt }
+    }).map(([key, value]) => [key, value && value.timestampValue ? value : toFirestore(value)])) },
+    currentDocument: { exists: false }
+  };
   await commitWrites(access, [
     walletWrite(uid, wallet.data, wallet.updateTime, nextBalance, holdings, Array.isArray(wallet.data.history) ? wallet.data.history.slice(0, 300) : []),
     { update: { name: docPath(collection, requestId), fields: {
       status: toFirestore("approved"), reviewedAt: { timestampValue: reviewedAt },
-      reviewedBy: toFirestore(reviewedBy), walletLedgerId: toFirestore(ledgerId)
-    } }, updateMask: { fieldPaths: ["status", "reviewedAt", "reviewedBy", "walletLedgerId"] }, currentDocument: { updateTime: request.updateTime } },
+      reviewedBy: toFirestore(reviewedBy), reviewNote: toFirestore(note), walletLedgerId: toFirestore(ledgerId)
+    } }, updateMask: { fieldPaths: ["status", "reviewedAt", "reviewedBy", "reviewNote", "walletLedgerId"] }, currentDocument: { updateTime: request.updateTime } },
     ledger,
     { update: { name: docPath("userNotifications/" + uid + "/items", ledgerId), fields: {
       kind: toFirestore(kind === "deposit" ? "deposit" : "withdrawal_approved"),
@@ -344,7 +431,8 @@ async function reviewDepositWithdrawal(env, claims, body) {
         : "Your " + amount + " " + asset + " withdrawal request was approved as an internal account adjustment. No external blockchain payout was sent."),
       createdAt: { timestampValue: reviewedAt }, readAt: { nullValue: null },
       createdBy: toFirestore(claims.sub), source: toFirestore("wallet-api-v2")
-    } }, currentDocument: { exists: false } }
+    } }, currentDocument: { exists: false } },
+    auditWrite
   ]);
   return { ok: true, status: "approved", uid, asset, amount, balanceAfter: after, ledgerId };
 }
@@ -486,7 +574,7 @@ async function adminAdjustment(env, claims, body) {
   await commitWrites(access, writes);
   return { ok: true, uid, balance: next, requestId, ledger: "walletLedger/" + requestId };
 }
-export const walletApiInternals = Object.freeze({ toFirestore, fieldsFromFirestore, validId, isAdmin, walletWrite, createLedgerWrite });
+export const walletApiInternals = Object.freeze({ toFirestore, fieldsFromFirestore, validId, isAdmin, walletWrite, createLedgerWrite, depositRequestId });
 
 export default {
   async fetch(request, env) {
@@ -520,6 +608,7 @@ export default {
       let result;
       if (url.pathname === "/v1/wallet/order") result = await walletOrder(env, claims, body);
       else if (url.pathname === "/v1/wallet/convert") result = await walletConvert(env, claims, body);
+      else if (url.pathname === "/v1/wallet/deposit-request") result = await createDepositRequest(env, claims, body);
       else if (url.pathname === "/v1/admin/adjust-usdt") result = await adminAdjustment(env, claims, body);
       else if (url.pathname === "/v1/admin/review-request") result = await reviewDepositWithdrawal(env, claims, body);
       else if (url.pathname === "/v1/admin/review-transfer") result = await reviewInternalTransfer(env, claims, body);
