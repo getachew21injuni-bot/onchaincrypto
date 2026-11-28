@@ -27,8 +27,8 @@ Set the non-secret variable:
 Add secret through Cloudflare Dashboard or Wrangler:
 - `FIREBASE_SERVICE_ACCOUNT`: service-account JSON for project `onchaincrypto-d976b`.
 
-Optional variable:
-- `ADMIN_EMAILS`: comma-separated exact, verified administrator email addresses, only if Firebase custom admin claims are not used.
+Administrator allowlist:
+- `ADMIN_EMAILS` is configured in `wrangler.toml` for the verified OnChainSpro administrator. Update it there if the authorized admin account changes. Firebase custom admin claims are also accepted.
 
 Never paste service-account JSON into GitHub, source code, or chat. Use a dedicated service account with only the Firestore data permissions required (normally the Firestore/Datastore user role); do not grant Project Editor or Owner.
 
@@ -66,4 +66,6 @@ Canonical wallet: `userTradeState/{uid}`. The Worker never creates a missing wal
 
 Ledger: `walletLedger/{transactionId}`, append-only and create-only.
 
-Before production connection, reconcile any duplicate or conflicting historical balance sources. Test token verification, admin permissions, duplicate request IDs, concurrent writes, Firestore permissions, and the live app's exact request/response contract. Withdrawal approval in this Worker is an internal account adjustment only; it does not send blockchain funds.
+Before production connection, reconcile any duplicate or conflicting historical balance sources. Test token verification, admin permissions, duplicate TXIDs, concurrent approvals, Firestore permissions, and the live app's exact request/response contract.
+
+After deploying the Worker, set `window.ONCHAINSPRO_WALLET_API_URL` in both customer and admin frontends to the exact deployed Worker URL. Deploy the Worker, frontend, and Firestore rules as one coordinated cutover; do not publish the read-only wallet rules before the Worker and both frontends are ready. Withdrawal approval in this Worker is an internal account adjustment only; it does not send blockchain funds.
