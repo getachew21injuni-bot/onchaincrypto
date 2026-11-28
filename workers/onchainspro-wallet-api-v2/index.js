@@ -290,7 +290,9 @@ async function walletConvert(env, claims, body) {
     conversion: { from, to, amount, received, feeUSDT, priceFrom: prices[from], priceTo: prices[to], time: createdAt } };
 }
 async function depositRequestId(network, transactionHash) {
-  const normalized = String(network).trim().toLowerCase() + ":" + String(transactionHash).trim().toLowerCase();
+  const rawHash = String(transactionHash).trim();
+  const normalizedHash = /^[0-9a-f]+$/i.test(rawHash) ? rawHash.toLowerCase() : rawHash;
+  const normalized = String(network).trim().toLowerCase() + ":" + normalizedHash;
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(normalized));
   return "dep_" + Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
 }
@@ -303,7 +305,7 @@ async function createDepositRequest(env, claims, body) {
   const transactionHash = String(body.transactionHash || body.txHash || "").trim();
   const depositAddress = String(body.depositAddress || "").trim();
   if (!/^[A-Z0-9]{2,20}$/.test(asset) || !network || network.length > 50 ||
-      !Number.isFinite(amount) || amount <= 0 || amount > 1000000000 ||
+      !Number.isFinite(amount) || amount <= 0 || amount > 1000000000 || Number(amount.toFixed(8)) !== amount ||
       transactionHash.length < 8 || transactionHash.length > 200 || !/^[A-Za-z0-9_-]+$/.test(transactionHash) ||
       !depositAddress || depositAddress.length > 500) {
     throw new HttpError("Enter a valid asset, network, amount, transaction hash and deposit address.");
@@ -384,7 +386,7 @@ async function reviewDepositWithdrawal(env, claims, body) {
     throw new HttpError("This deposit request is missing its transaction hash, destination address or network.", 409);
   }
   const uid = String(request.data.uid || ""), asset = String(request.data.asset || "USDT").toUpperCase(), amount = Number(request.data.amount);
-  if (!validId(uid) || !/^[A-Z0-9]{2,12}$/.test(asset) || !Number.isFinite(amount) || amount <= 0 || amount > 1000000000) throw new HttpError("The request details are invalid.");
+  if (!validId(uid) || !/^[A-Z0-9]{2,12}$/.test(asset) || !Number.isFinite(amount) || amount <= 0 || amount > 1000000000 || Number(amount.toFixed(8)) !== amount) throw new HttpError("The request details are invalid.");
   const [profile, wallet] = await Promise.all([readDocument(access, "users", uid), readDocument(access, "userTradeState", uid)]);
   if (!profile) throw new HttpError("User profile is missing.", 409);
   if (!wallet || !wallet.updateTime) throw new HttpError("Canonical wallet is missing. No balance was created.", 409);
@@ -394,8 +396,9 @@ async function reviewDepositWithdrawal(env, claims, body) {
   if (!Number.isFinite(balance) || balance < 0) throw new HttpError("Canonical wallet balance is invalid.", 409);
   const before = asset === "USDT" ? balance : Number(holdings[asset] || 0);
   if (!Number.isFinite(before) || before < 0) throw new HttpError("Canonical asset balance is invalid.", 409);
-  const after = Number((before + (kind === "deposit" ? amount : -amount)).toFixed(asset === "USDT" ? 2 : 8));
+  const after = Number((before + (kind === "deposit" ? amount : -amount)).toFixed(8));
   if (after < 0) throw new HttpError("Insufficient canonical wallet balance.", 409);
+  if (after > 1000000000) throw new HttpError("The resulting wallet balance exceeds the account limit.", 409);
   const nextBalance = asset === "USDT" ? after : balance;
   if (asset !== "USDT") holdings[asset] = after;
   const ledgerId = `admin-${kind}-${requestId}`, ledgerType = kind === "withdraw" ? "withdrawal" : "deposit";
