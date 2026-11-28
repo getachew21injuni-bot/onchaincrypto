@@ -264,21 +264,13 @@ service cloud.firestore {
     }
 
 
-    // Deposit request submission and review. Approval is not a balance credit.
+    // Deposit requests are created only by the authenticated wallet Worker.
+    // Clients may read their own requests; only administrators may read the queue.
+    // The Worker alone can create, approve, reject, and credit the canonical wallet.
     match /depositRequests/{requestId} {
-      allow create: if signedIn() && request.resource.data.uid == request.auth.uid
-        && request.resource.data.status == 'pending'
-        && request.resource.data.keys().hasOnly(['uid','email','asset','network','amount','depositAddress','transactionHash','receiptImage','receiptFileName','status','createdAt'])
-        && request.resource.data.asset is string && request.resource.data.network is string
-        && request.resource.data.amount is number && request.resource.data.amount > 0 && request.resource.data.amount <= 1000000000
-        && request.resource.data.depositAddress is string && request.resource.data.depositAddress.size() > 0
-        && request.resource.data.transactionHash is string && request.resource.data.transactionHash.size() >= 8 && request.resource.data.transactionHash.size() <= 180
-        && request.resource.data.receiptImage is string && request.resource.data.receiptImage.size() <= 760000
-        && request.resource.data.receiptImage.matches('^data:image/jpeg;base64,.*')
-        && request.resource.data.receiptFileName is string && request.resource.data.receiptFileName.size() <= 120;
       allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
-      // Approval/rejection is performed by the trusted Worker. Admins may
-      // only archive legacy history rows; this never changes wallet balances.
+      allow create: if false;
+      // Admins may archive legacy history rows without changing financial status.
       allow update: if isAdmin()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminHiddenFromHistory','historyClearedAt','historyClearedBy'])
         && request.resource.data.adminHiddenFromHistory == true
