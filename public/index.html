@@ -6109,7 +6109,7 @@ import {getFirestore,collection,doc,addDoc,updateDoc,onSnapshot,query,where,getD
 const cfg={apiKey:"AIzaSyD4Z3QwuXDmyxsuCLfBxLoISd1oIf0FR4M",authDomain:"onchaincrypto-d976b.firebaseapp.com",projectId:"onchaincrypto-d976b",storageBucket:"onchaincrypto-d976b.firebasestorage.app",messagingSenderId:"74771017244",appId:"1:74771017244:web:97e8b7d49d5b0e602d79d9"};
 const app=getApps()[0]||initializeApp(cfg),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id),esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const admins=["getachew21.inj.uni@gmail.com"];let admin=false,stops=[];
-function box(title,id){return '<section class="panel form-panel" style="margin:14px 0"><div class="section-head"><h2>'+title+'</h2></div><p class="muted tiny">Approvals update the internal account ledger only. They do not initiate an on-chain transfer.</p><div id="'+id+'" class="muted tiny" style="padding:14px">Loading…</div></section>'}
+function box(title,id){return '<section class="panel form-panel" style="margin:14px 0"><div class="section-head"><h2>'+title+'</h2></div><p class="muted tiny">For deposits, verify the TXID on the correct blockchain explorer: asset/token, network, destination address, amount and required confirmations. Approval credits the internal wallet once; automatic blockchain monitoring is not enabled.</p><div id="'+id+'" class="muted tiny" style="padding:14px">Loading…</div></section>'}
 function setup(){
  const dep=$("page-deposit"),wd=$("page-withdraw"),ad=$("page-admin");
 
@@ -6117,7 +6117,7 @@ function setup(){
 }
 function asset(k){const m=($ (k+"CoinName")?.textContent||"BTC").match(/\(([A-Z0-9]+)\)/);return m?m[1]:"BTC"}
 function tag(s){const c=s==="approved"?"#16d9a0":s==="rejected"?"#ff5573":"#f0b90b";const label=s==="approved"?"APPROVED":(s||"pending").toUpperCase();return '<span class="tag" style="color:'+c+'">'+esc(label)+'</span>'}
-function adminRows(id,docs,k){const host=$(id);if(!host)return;host.innerHTML=docs.length?docs.map(d=>{const x=d.data(),p=x.status==="pending";return '<article class="panel" style="padding:12px;margin:10px 0;background:#08182b"><div style="display:flex;justify-content:space-between"><strong>'+esc(x.amount)+' '+esc(x.asset)+'</strong>'+tag(x.status)+'</div><div class="muted tiny">User: '+esc(x.email||x.uid)+' · '+esc(x.network)+'</div><div class="muted tiny">'+(k==="deposit"?"TX: "+esc(x.transactionHash):"Destination: "+esc(x.destinationAddress))+'</div><div class="muted tiny">UID: '+esc(x.uid)+'</div>'+(p?'<div style="display:flex;gap:8px;margin-top:10px"><button class="buy" data-oc-review="approve" data-k="'+k+'" data-id="'+esc(d.id)+'">'+(k==="deposit"?"Approve Available balance adjustment":"Approve balance adjustment")+'</button><button class="sell" data-oc-review="reject" data-k="'+k+'" data-id="'+esc(d.id)+'">Reject</button></div>':'')+'</article>'}).join(""):"No "+k+" requests."}
+function adminRows(id,docs,k){const host=$(id);if(!host)return;host.innerHTML=docs.length?docs.map(d=>{const x=d.data(),p=x.status==="pending";return '<article class="panel" style="padding:12px;margin:10px 0;background:#08182b"><div style="display:flex;justify-content:space-between"><strong>'+esc(x.amount)+' '+esc(x.asset)+'</strong>'+tag(x.status)+'</div><div class="muted tiny">User: '+esc(x.email||x.uid)+' · '+esc(x.network)+'</div><div class="muted tiny">'+(k==="deposit"?"TX: "+esc(x.transactionHash):"Destination: "+esc(x.destinationAddress))+'</div><div class="muted tiny">UID: '+esc(x.uid)+'</div>'+(p?'<div style="display:flex;gap:8px;margin-top:10px"><button class="buy" data-oc-review="approve" data-k="'+k+'" data-id="'+esc(d.id)+'">'+(k==="deposit"?"Verify & approve deposit":"Approve balance adjustment")+'</button><button class="sell" data-oc-review="reject" data-k="'+k+'" data-id="'+esc(d.id)+'">Reject</button></div>':'')+'</article>'}).join(""):"No "+k+" requests."}
 async function withdraw(){const u=auth.currentUser,a=Number($("withdrawAmount")?.value),to=$("withdrawAddress")?.value.trim(),network=$("withdrawNetwork")?.value,coin=asset("withdraw");if(!u)throw Error("Sign in again.");if(!(a>0&&Number.isFinite(a)))throw Error("Enter a valid amount.");const available=typeof window.ocGetDisplayedAssetBalance==="function"?window.ocGetDisplayedAssetBalance(coin):NaN;if(!Number.isFinite(available))throw Error("Wallet balance is still loading. Refresh and try again.");const requests=await getDocs(query(collection(db,"withdrawRequests"),where("uid","==",u.uid)));const reserved=requests.docs.reduce((sum,d)=>{const x=d.data();return String(x.asset||"").toUpperCase()===coin&&String(x.status||"").toLowerCase()==="pending"?sum+Math.max(0,Number(x.amount)||0):sum;},0);const spendable=Math.max(0,available-reserved);if(a>spendable)throw Error("Insufficient available "+coin+" balance. Your wallet balance is "+available+" "+coin+", with "+reserved+" "+coin+" reserved for pending withdrawals. Available to withdraw: "+spendable+" "+coin+".");if(!to)throw Error("Enter a destination address.");if($("withdrawAddressCheck")?.dataset.state!=="valid")throw Error("Enter an address matching the selected network.");await addDoc(collection(db,"withdrawRequests"),{uid:u.uid,email:u.email||"",asset:coin,network,amount:a,destinationAddress:to,status:"pending",createdAt:serverTimestamp()});$("withdrawAmount").value="";$("withdrawAddress").value="";$("withdrawAddressCheck").textContent="";$("withdrawAddressCheck").dataset.state=""}
 function stop(){stops.forEach(f=>f());stops=[]}
 function withdrawalStatusMarkup(data){
@@ -6232,7 +6232,7 @@ $("withdrawSubmit")?.addEventListener("click",async()=>{
   if(m.dataset.state==="pending")b.textContent="Request sent";
  }
 });
-async function processDemoRequest(kind,requestId,decision){
+async function processDemoRequest(kind,requestId,decision,note=""){
  const current=auth.currentUser;
  if(!current||!current.emailVerified)throw new Error("Verified administrator access is required.");
  const base=String(window.ONCHAINSPRO_WALLET_API_URL||"").replace(/\/+$/,"");
@@ -6240,7 +6240,7 @@ async function processDemoRequest(kind,requestId,decision){
  const token=await current.getIdToken(true);
  const response=await fetch(base+"/v1/admin/review-request",{
   method:"POST",headers:{authorization:"Bearer "+token,"content-type":"application/json"},
-  body:JSON.stringify({kind,requestId,decision})
+  body:JSON.stringify({kind,requestId,decision,note})
  });
  const result=await response.json().catch(()=>({}));
  if(!response.ok)throw new Error(result.error||"The trusted wallet service could not process this request.");
@@ -6251,10 +6251,16 @@ document.addEventListener("click",async e=>{
  const reportAdminRequest=message=>{let status=document.getElementById("ocAdminRequestMessage");if(!status){status=document.createElement("p");status.id="ocAdminRequestMessage";status.className="muted tiny";status.setAttribute("role","status");status.setAttribute("aria-live","polite");document.getElementById("adminTradeControl")?.after(status);}if(status)status.textContent=message;};
  if(!admin||!auth.currentUser?.emailVerified){reportAdminRequest("Verified administrator access is required.");return}
  const kind=b.dataset.k,decision=b.dataset.ocReview;
- const confirmText=decision==="approve"?(kind==="deposit"?"This approval updates the internal account ledger only; it does not verify an on-chain deposit. Continue?":"This updates the internal account ledger only; it does not send cryptocurrency to an external wallet. Continue?"):"Reject this request?";
+ let reviewNote="";
+ if(kind==="deposit"&&decision==="approve"){
+  reviewNote=prompt("Before approving, verify the transaction on the correct blockchain explorer: asset/token, network, destination address, amount and required confirmations. Enter your verification note (at least 10 characters).");
+  if(reviewNote===null)return;
+  if(reviewNote.trim().length<10){reportAdminRequest("A verification note of at least 10 characters is required.");return;}
+ }
+ const confirmText=decision==="approve"?(kind==="deposit"?"I have independently verified the deposit TXID, correct asset/network, destination, amount and confirmations. Credit the user's internal wallet once?":"This updates the internal account ledger only; it does not send cryptocurrency to an external wallet. Continue?"):"Reject this request?";
  if(!confirm(confirmText))return;
  b.disabled=true;
- try{await processDemoRequest(kind,b.dataset.id,decision);reportAdminRequest(decision==="approve"?"Request processed. The displayed balance and account ledger were updated.":"Request rejected.");b.textContent=decision==="approve"?"Approved":"Rejected";}
+ try{await processDemoRequest(kind,b.dataset.id,decision,reviewNote);reportAdminRequest(decision==="approve"?(kind==="deposit"?"Deposit approved. The wallet and ledger were updated once, and an admin audit record was saved.":"Request processed. The displayed balance and account ledger were updated."):"Request rejected.");b.textContent=decision==="approve"?"Approved":"Rejected";}
  catch(err){reportAdminRequest("Could not process request: "+(err.message||err.code));b.disabled=false}
 });
 onAuthStateChanged(auth,u=>{stop();admin=!!(u&&u.emailVerified&&admins.includes(String(u.email||"").toLowerCase()));if(u)watch(u);refreshDepositSubmitButton();});
