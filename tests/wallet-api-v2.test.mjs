@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { walletApiInternals as api } from "../workers/wallet-api-v2/index.js";
+import { walletApiInternals as api } from "../workers/onchainspro-wallet-api-v2/index.js";
 
 test("Firestore value encoding preserves wallet numeric and nested types", () => {
   assert.deepEqual(api.toFirestore(12), { integerValue: "12" });
@@ -56,4 +56,14 @@ test("wallet ledger writes are create-only to prevent duplicate transaction IDs"
   assert.equal(write.currentDocument.exists, false);
   assert.equal(write.update.fields.amount.integerValue, "10");
   assert.equal(write.update.fields.createdAt.timestampValue, "2026-11-20T12:00:00Z");
+});
+
+
+test("deposit request IDs are deterministic across hash casing and unique by network", async () => {
+  const first = await api.depositRequestId("TRC20", "0xABCDEF1234567890");
+  const same = await api.depositRequestId("trc20", "0xabcdef1234567890");
+  const otherNetwork = await api.depositRequestId("ERC20", "0xabcdef1234567890");
+  assert.equal(first, same);
+  assert.notEqual(first, otherNetwork);
+  assert.match(first, /^dep_[a-f0-9]{64}$/);
 });
