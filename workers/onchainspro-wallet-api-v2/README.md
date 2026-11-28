@@ -15,7 +15,7 @@ This is a separate Cloudflare Worker. It does not replace or modify `onchaincryp
 
 This Worker has **no Quick Trade routes or Quick Trade settlement code**. Do not route existing Quick Trade start/settlement calls to this Worker. The user's established investment/settlement workflow remains separate and unchanged.
 
-This Worker does not verify on-chain deposits and does not broadcast/pay external blockchain withdrawals. Keep the existing `onchaincrypto-deposit-verifier` Worker unchanged.
+This Worker does not automatically monitor or independently verify on-chain deposits and does not broadcast/pay external blockchain withdrawals. For a customer deposit, an administrator must independently inspect the transaction on the correct blockchain explorer (asset/token, network, destination, amount and confirmations) before entering a review note and approving it. The approval credits the internal wallet once; it is not proof supplied by the Worker that the blockchain transfer is valid. Keep the existing `onchaincrypto-deposit-verifier` Worker unchanged.
 
 ## Cloudflare setup
 
@@ -39,7 +39,8 @@ Never paste service-account JSON into GitHub, source code, or chat. Use a dedica
 - `GET /v1/wallet/ledger`
 - `POST /v1/wallet/order`
 - `POST /v1/wallet/convert`
-- `POST /v1/admin/review-request`
+- `POST /v1/wallet/deposit-request` — authenticated customer submission; the Worker validates the admin-published asset/network/address, creates one pending request per network/TXID, and never credits the balance.
+- `POST /v1/admin/review-request` — verified admin approval/rejection; approval atomically updates the existing canonical wallet, request status, append-only wallet ledger, user notification and admin audit record. Deposit approval requires an admin verification note.
 - `POST /v1/admin/review-transfer`
 - `POST /v1/admin/adjust-assets`
 - `POST /v1/admin/adjust-usdt`
