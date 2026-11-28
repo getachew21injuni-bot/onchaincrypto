@@ -289,23 +289,29 @@ async function renderRequestQueue(view){
    const u=users.get(r.uid)||{},name=u.displayName||[u.firstName,u.lastName].filter(Boolean).join(' ')||r.email||r.uid||'Unknown';
    const amount=Number(r.amount||0),asset=String(r.asset||'USDT'),status=String(r.status||'pending');
    const when=r.createdAt&&typeof r.createdAt.toDate==='function'?r.createdAt.toDate().toLocaleString():'—';
-   const details=kind==='deposit'?'TX: '+(r.transactionHash||'—')+' · To: '+(r.depositAddress||'—'):'To: '+(r.destinationAddress||'—');
+   const details=kind==='deposit'?'TXID: '+(r.transactionHash||'—')+' · To: '+(r.depositAddress||'—'):'To: '+(r.destinationAddress||'—');
    const receipt=kind==='deposit'&&typeof r.receiptImage==='string'&&r.receiptImage.length<=760000&&r.receiptImage.startsWith('data:image/jpeg;base64,')?'<a href="'+r.receiptImage+'" target="_blank" rel="noopener noreferrer" title="Open full payment screenshot"><img src="'+r.receiptImage+'" alt="Customer payment receipt" style="display:block;width:88px;height:88px;object-fit:cover;border-radius:8px;border:1px solid #526878;margin-top:8px"><small>View receipt · '+esc(r.receiptFileName||'Screenshot')+'</small></a>':'';
-   const actions=status==='pending'?'<button class="icon-btn" data-request-action="approve" data-request-id="'+esc(r.id)+'" style="background:#087b56;border:0">Approve account adjustment</button> <button class="icon-btn" data-request-action="reject" data-request-id="'+esc(r.id)+'">Reject</button>':'<span class="tag">'+esc(status==='approved'?'APPROVED · ACCOUNT UPDATED':status.toUpperCase())+'</span>';
+   const actions=status==='pending'?'<button class="icon-btn" data-request-action="approve" data-request-id="'+esc(r.id)+'" style="background:#087b56;border:0">'+(kind==='deposit'?'Verify & approve deposit':'Approve account adjustment')+'</button> <button class="icon-btn" data-request-action="reject" data-request-id="'+esc(r.id)+'">Reject</button>':'<span class="tag">'+esc(status==='approved'?'APPROVED · ACCOUNT UPDATED':status.toUpperCase())+'</span>';
    return '<tr><td>'+esc(name)+'<br><small class="muted">'+esc(r.email||r.uid||'')+'</small></td><td>'+amount.toLocaleString(undefined,{maximumFractionDigits:8})+' '+esc(asset)+'</td><td>'+esc(r.network||'—')+'</td><td style="max-width:240px;overflow-wrap:anywhere">'+esc(details)+receipt+'</td><td>'+esc(when)+'</td><td>'+actions+'</td></tr>';
   }).join('');
   const panel=document.createElement('div');panel.id=queueId;panel.className='content-panel';panel.style.margin='0 0 16px';
-  panel.innerHTML='<div class="panel-head"><h3>Live '+(kind==='deposit'?'deposit':'withdrawal')+' requests</h3><span class="tag">'+pending+' pending · '+requests.length+' total</span></div><p class="muted">Firestore request queue · approvals update internal account records only. Deposits are not blockchain-verified and withdrawals are not paid out.</p><div class="table-wrap"><table style="min-width:900px"><thead><tr><th>User</th><th>Amount</th><th>Network</th><th>Payment / destination details</th><th>Submitted</th><th>Admin action</th></tr></thead><tbody>'+(rows||'<tr><td colspan="6" class="empty">No '+kind+' requests found.</td></tr>')+'</tbody></table></div><p id="ocRequestMessage" class="muted" role="status" aria-live="polite"></p>';
+  panel.innerHTML='<div class="panel-head"><h3>Live '+(kind==='deposit'?'deposit':'withdrawal')+' requests</h3><span class="tag">'+pending+' pending · '+requests.length+' total</span></div><p class="muted">Before approving a deposit, independently verify the TXID on the correct blockchain explorer: asset/token, network, receiving address, amount and required confirmations. Approval credits the internal wallet once. Automatic blockchain monitoring and external withdrawal payouts are not enabled.</p><div class="table-wrap"><table style="min-width:900px"><thead><tr><th>User</th><th>Amount</th><th>Network</th><th>Payment / destination details</th><th>Submitted</th><th>Admin action</th></tr></thead><tbody>'+(rows||'<tr><td colspan="6" class="empty">No '+kind+' requests found.</td></tr>')+'</tbody></table></div><p id="ocRequestMessage" class="muted" role="status" aria-live="polite"></p>';
   const old=document.getElementById(queueId);if(old)old.remove();body.prepend(panel);
   panel.querySelectorAll('[data-request-action]').forEach(button=>button.addEventListener('click',async()=>{
    const action=button.dataset.requestAction,id=button.dataset.requestId;
    if(!id||!['approve','reject'].includes(action))return;
    const current=window.__ocAdminFirebase?.auth?.currentUser;if(!current||!current.emailVerified||(current.email||'').toLowerCase()!=='getachew21.inj.uni@gmail.com'){alert('Verified administrator sign-in required.');return;}
    const req=requests.find(x=>x.id===id);if(!req)return;
-   if(!confirm(action==='approve'?'Approve this request as an internal account-balance adjustment? No blockchain payment or payout will occur.':'Reject this request?'))return;
+   let reviewNote='';
+   if(kind==='deposit'&&action==='approve'){
+    reviewNote=prompt('Before approving, verify the TXID on the correct blockchain explorer: asset/token, network, destination address, amount and required confirmations. Enter your verification note (at least 10 characters).');
+    if(reviewNote===null)return;
+    if(reviewNote.trim().length<10){const msg=document.getElementById('ocRequestMessage');if(msg)msg.textContent='A verification note of at least 10 characters is required.';return;}
+   }
+   if(!confirm(action==='approve'?(kind==='deposit'?'I have independently verified this deposit on the blockchain explorer. Credit the user wallet once?':'Approve this internal account adjustment? No external payout will be sent.'):'Reject this request?'))return;
    button.disabled=true;const msg=document.getElementById('ocRequestMessage');if(msg)msg.textContent='Processing request securely…';
    try{
-    await ocAdminWalletPost("/v1/admin/review-request",{kind,requestId:id,decision:action},current);
+    await ocAdminWalletPost("/v1/admin/review-request",{kind,requestId:id,decision:action,note:reviewNote},current);
     if(msg)msg.textContent=action==='approve'?(kind==='deposit'?'Deposit approved and credited. The user was notified.':'Withdrawal approved and account balance adjusted. The user was notified; no external payout was sent.'):'Request rejected.';
     await renderRequestQueue(view);if(typeof window.adminRefreshDashboard==='function')await window.adminRefreshDashboard();
    }catch(error){button.disabled=false;if(msg)msg.textContent='Could not process request ('+(error.code||error.message||'error')+'). Check Firestore rules and user profile.';}
