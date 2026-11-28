@@ -6159,7 +6159,10 @@ function refreshDepositSubmitButton(){
  const address=String($("depositAddress")?.textContent||"").trim();
  const amount=Number($("depositAmount")?.value),tx=String($("depositTransactionHash")?.value||"").trim();
  const hasAddress=!!address&&address!=="Deposit address not configured";
- button.disabled=!(!!auth.currentUser&&hasAddress&&!!$("depositNetwork")?.value&&Number.isFinite(amount)&&amount>0&&amount<=1000000000&&/^[A-Za-z0-9_-]{8,200}$/.test(tx));
+ const apiReady=!!String(window.ONCHAINSPRO_WALLET_API_URL||"").trim();
+ const notice=$("depositSubmitNotice");
+ if(notice&&!apiReady)notice.textContent="Deposit submission will be available after the secure wallet service is connected.";
+ button.disabled=!(apiReady&&!!auth.currentUser&&hasAddress&&!!$("depositNetwork")?.value&&Number.isFinite(amount)&&amount>0&&amount<=1000000000&&/^[A-Za-z0-9_-]{8,200}$/.test(tx));
 }
 ["depositAmount","depositTransactionHash"].forEach(id=>$(id)?.addEventListener("input",refreshDepositSubmitButton));
 $("depositNetwork")?.addEventListener("change",refreshDepositSubmitButton);
