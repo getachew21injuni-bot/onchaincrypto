@@ -8,3 +8,4 @@ enabled = true
 
 [vars]
 ALLOWED_ORIGINS = "https://www.onchainspro.com,https://onchainspro.com,https://onchaincrypto-d976b.web.app,https://onchaincrypto-d976b.firebaseapp.com"
+ADMIN_EMAILS = "getachew21.inj.uni@gmail.com"
