@@ -5,7 +5,7 @@ on:
     branches:
       - fix/canonical-wallet-worker-migration
     paths:
-      - "workers/wallet-api-v2/**"
+      - "workers/onchainspro-wallet-api-v2/**"
       - "workers/wallet-api/**"
       - "tests/wallet-api-v2.test.mjs"
       - "tests/wallet-reconciliation.test.mjs"
@@ -14,7 +14,7 @@ on:
       - ".github/workflows/wallet-api-v2.yml"
   pull_request:
     paths:
-      - "workers/wallet-api-v2/**"
+      - "workers/onchainspro-wallet-api-v2/**"
       - "tests/wallet-api-v2.test.mjs"
       - "package.json"
       - ".github/workflows/wallet-api-v2.yml"
