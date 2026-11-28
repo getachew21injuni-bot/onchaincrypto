@@ -65,5 +65,8 @@ test("deposit request IDs are deterministic across hash casing and unique by net
   const otherNetwork = await api.depositRequestId("ERC20", "0xabcdef1234567890");
   assert.equal(first, same);
   assert.notEqual(first, otherNetwork);
+  const base58Upper = await api.depositRequestId("Solana", "AbCdEfGh123456789");
+  const base58Lower = await api.depositRequestId("Solana", "abcdefGh123456789");
+  assert.notEqual(base58Upper, base58Lower);
   assert.match(first, /^dep_[a-f0-9]{64}$/);
 });
